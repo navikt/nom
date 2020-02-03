@@ -12,6 +12,7 @@
 
     <modules>
         <module>nom-ressurser</module>
+        <module>skjermede-personer</module>
     </modules>
 
     <artifactId>apps</artifactId>
