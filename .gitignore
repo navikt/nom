@@ -1,0 +1,9 @@
+.idea
+.class
+**/target/*
+/target/*
+*.iml
+**private.env.json
+**/*lock.json
+/docs/*.html
+*.DS_Store
