@@ -19,19 +19,19 @@ spec:
     initialDelay: 60
     periodSeconds: 5
     failureThreshold: 5
-    readiness:
-      path: internal/isReady
-      initialDelay: 60
-      periodSeconds: 5
-      timeout: 4
-      failureThreshold: 5
-    resources:
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 1000m
-        memory: 1024Mi
+  readiness:
+    path: internal/isReady
+    initialDelay: 60
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
   prometheus:
     enabled: true
     path: internal/prometheus
