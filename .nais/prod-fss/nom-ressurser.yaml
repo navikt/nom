@@ -6,6 +6,13 @@ metadata:
   labels:
     team: nom
 spec:
+  env:
+    - name: DB_HOST
+      value: A01DBVL009.adeo.no
+    - name: DB_NAME
+      value: nom-ressurser-prod
+    - name: DB_ENV
+      value: prod-fss
   image: {{image}}
   port: 8080
   ingresses:

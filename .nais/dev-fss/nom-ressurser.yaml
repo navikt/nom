@@ -6,6 +6,13 @@ metadata:
   labels:
     team: nom
 spec:
+  env:
+    - name: DB_HOST
+      value: b27dbvl009.preprod.local
+    - name: DB_NAME
+      value: nom-ressurser-dev
+    - name: DB_ENV
+      value: preprod-fss
   image: {{image}}
   port: 8080
   ingresses:
