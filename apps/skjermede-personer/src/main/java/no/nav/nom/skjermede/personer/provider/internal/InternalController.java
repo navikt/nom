@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.internal;
+package no.nav.nom.skjermede.personer.provider.internal;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

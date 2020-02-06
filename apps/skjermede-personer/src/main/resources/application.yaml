@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    schemas: public
+    table: schema_version
+
+postgres:
+  mountPath: postgresql/${DB_ENV}
+  jdbc:
+    url: jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
+  user:
+    role: ${DB_NAME}-admin

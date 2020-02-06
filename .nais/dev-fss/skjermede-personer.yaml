@@ -6,6 +6,13 @@ metadata:
   labels:
     team: nom
 spec:
+  env:
+    - name: DB_HOST
+      value: b27dbvl009.preprod.local
+    - name: DB_NAME
+      value: skjermede-personer-dev
+    - name: DB_ENV
+      value: preprod-fss
   image: {{image}}
   port: 8080
   ingresses:
@@ -32,6 +39,8 @@ spec:
     limits:
       cpu: 1000m
       memory: 1024Mi
+  vault:
+    enabled: true
   prometheus:
     enabled: true
     path: internal/prometheus
