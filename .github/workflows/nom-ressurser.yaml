@@ -1,4 +1,4 @@
-name: Build, Deploy nom-resources
+name: Build, Deploy nom-ressurser
 
 on:
   push:

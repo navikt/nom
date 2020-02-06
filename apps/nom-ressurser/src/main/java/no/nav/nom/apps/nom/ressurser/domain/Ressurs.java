@@ -28,8 +28,8 @@ public class Ressurs {
     private Long id;
 
     @NotNull
-    @Column(name = "PERSON_IDENT")
-    private String personIdent;
+    @Column(name = "PERSONIDENT")
+    private String personident;
 
     @Column(name = "RESSURS_TYPE")
     @Enumerated(EnumType.STRING)
