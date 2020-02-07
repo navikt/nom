@@ -31,13 +31,13 @@ public class Ressurs {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @Column(name = "RESSURS_TYPE")
+    @Column(name = "RESSURSTYPE")
     @Enumerated(EnumType.STRING)
-    private RessursType ressursType;
+    private Ressurstype ressurstype;
 
     @NotNull
     @Column(name = "STARTDATO")
-    private LocalDate startDato;
+    private LocalDate startdato;
 
     @Column(name = "SLUTTDATO")
     private LocalDate sluttdato;

@@ -1,6 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.domain;
 
-public enum RessursType {
+public enum Ressurstype {
     INTERN,
     EKSTERN
 }
