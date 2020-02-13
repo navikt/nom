@@ -27,6 +27,11 @@ public class Ressurs {
     @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
     private Long id;
 
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
+    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ")
+    @Column(name = "FUNKSJONELL_ID")
+    private Long funksjonellId;
+
     @NotNull
     @Column(name = "PERSONIDENT")
     private String personident;

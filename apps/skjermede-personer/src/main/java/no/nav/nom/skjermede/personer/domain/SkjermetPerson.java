@@ -1,11 +1,15 @@
 package no.nav.nom.skjermede.personer.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -13,6 +17,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "T_SKJERMET_PERSON")
 public class SkjermetPerson {
@@ -21,6 +26,11 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
+    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ")
+    @Column(name = "FUNKSJONELL_ID")
+    private Long funksjonellId;
+
     @NotNull
     @Column(name = "SKJERMET_FOM")
     private LocalDate skjermetFom;
@@ -28,7 +38,7 @@ public class SkjermetPerson {
     @Column(name = "SKJERMET_TOM")
     private LocalDate skjermetTom;
 
-    @Column(name = "TILKNYTTET_PERSON")
+    @Column(name = "TILKNYTTET_RESSURS")
     private String tilknyttetRessurs;
 
     @NotNull
