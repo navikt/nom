@@ -26,7 +26,12 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic topic1() {
-        return new NewTopic("aapen-nom-ressurs-v1", 3, (short) 1);
+    public NewTopic ressursTopic() {
+        Map<String, String> configs = new HashMap<>();
+        configs.put("cleanup.policy", "compact");
+        configs.put("retention.ms", "-1");
+        NewTopic ressursTopic = new NewTopic("aapen-nom-ressurs-v1", 3, (short) 1);
+        ressursTopic.configs(configs);
+        return ressursTopic;
     }
 }

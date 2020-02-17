@@ -15,8 +15,8 @@ public class RessursService {
     private final KafkaProducer kafkaProducer;
 
     public void opprettRessurs(Ressurs nyRessurs){
-        System.out.println("Ressurs opprettet");
         kafkaProducer.sendMelding("aapen-nom-ressurs-v1", "testBody");
+        System.out.println("Ressurs opprettet");
     }
 
 }
