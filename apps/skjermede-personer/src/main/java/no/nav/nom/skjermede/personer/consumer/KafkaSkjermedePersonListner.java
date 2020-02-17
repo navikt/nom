@@ -16,11 +16,11 @@ public class KafkaSkjermedePersonListner {
     private SkjermetPersonRepository repository;
 
     @KafkaListener(topics = "appen-nom-ressurs-v1", groupId = "skjermede-personer")
-    void onMessage(ConsumerRecord<String, String> record){
+    void listen(String record){
         if(record == null) return;
 
-        String personIdent = record.value();
-        System.out.println(personIdent);
+        String personIdent = record;
+        System.out.println("Received message : " + record);
 
         if(repository.existsById(personIdent)){
             // Update Skjermede person record just the endret_dato
