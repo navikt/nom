@@ -11,17 +11,15 @@ import java.time.LocalDateTime;
 
 @Component
 @AllArgsConstructor
-public class KafkaSkjermedePersonListner {
+public class KafkaSkjermedePersonListener {
 
     private SkjermetPersonRepository repository;
 
-    @KafkaListener(topics = "appen-nom-ressurs-v1", groupId = "skjermede-personer")
-    void listen(String record){
-        if(record == null) return;
+    @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
+    void onMessage(String record){
 
-        String personIdent = record;
         System.out.println("Received message : " + record);
-
+        String personIdent = record;
         if(repository.existsById(personIdent)){
             // Update Skjermede person record just the endret_dato
             updateSkjermetRecord(personIdent);
