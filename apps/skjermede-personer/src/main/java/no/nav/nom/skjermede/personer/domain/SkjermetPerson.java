@@ -26,9 +26,10 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
+    @NotNull
+    @Column(name = "FUNKSJONELL_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ")
-    @Column(name = "FUNKSJONELL_ID")
     private Long funksjonellId;
 
     @NotNull
@@ -38,6 +39,7 @@ public class SkjermetPerson {
     @Column(name = "SKJERMET_TOM")
     private LocalDate skjermetTom;
 
+    @NotNull
     @Column(name = "TILKNYTTET_RESSURS")
     private String tilknyttetRessurs;
 
@@ -45,6 +47,7 @@ public class SkjermetPerson {
     @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettetDato;
 
+    @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
 }

@@ -27,15 +27,17 @@ public class Ressurs {
     @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
     private Long id;
 
+    @NotNull
+    @Column(name = "FUNKSJONELL_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ")
-    @Column(name = "FUNKSJONELL_ID")
     private Long funksjonellId;
 
     @NotNull
     @Column(name = "PERSONIDENT")
     private String personident;
 
+    @NotNull
     @Column(name = "RESSURSTYPE")
     @Enumerated(EnumType.STRING)
     private Ressurstype ressurstype;
@@ -51,6 +53,7 @@ public class Ressurs {
     @Column(name = "OPPRETTET_DATO")
     private LocalDate opprettetDato;
 
+    @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDate endretDato;
 }
