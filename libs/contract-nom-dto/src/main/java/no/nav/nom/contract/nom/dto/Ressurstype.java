@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.domain;
+package no.nav.nom.contract.nom.dto;
 
 public enum Ressurstype {
     INTERN,

@@ -5,6 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>apps</module>
+        <module>libs</module>
     </modules>
 
     <parent>

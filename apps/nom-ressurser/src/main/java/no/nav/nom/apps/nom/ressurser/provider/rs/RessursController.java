@@ -1,9 +1,13 @@
 package no.nav.nom.apps.nom.ressurser.provider.rs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
+import no.nav.nom.apps.nom.ressurser.dto.NyRessursRequest;
 import no.nav.nom.apps.nom.ressurser.service.RessursService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.transaction.Transactional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -14,8 +18,9 @@ public class RessursController {
 
     private final RessursService ressursService;
 
+    @Transactional
     @PostMapping("/opprett")
-    public void opprettRessurs(@RequestBody Ressurs ressurs){
-        ressursService.opprettRessurs(ressurs);
+    public void opprettRessurs(@RequestBody NyRessursRequest ressurs){
+        ressursService.opprettRessurs(new Ressurs());
     }
 }

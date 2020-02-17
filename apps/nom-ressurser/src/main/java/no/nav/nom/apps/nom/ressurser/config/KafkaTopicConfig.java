@@ -1,8 +1,9 @@
-package no.nav.nom.apps.nom.ressurser.kafka.producer.config;
+package no.nav.nom.apps.nom.ressurser.config;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,15 +14,24 @@ import java.util.Map;
 
 @Configuration
 @Profile("local")
-@RequiredArgsConstructor
 public class KafkaTopicConfig {
 
-    //private final String bootstrapAddress;
+    @Value("${kafka.bootstrapAddress}")
+    private String bootstrapAddress;
+
+    @Value("${kafka.topic.ressurs.name}")
+    private String ressursTopicName;
+
+    @Value("${kafka.topic.ressurs.partitions}")
+    private int ressursNumPartitions;
+
+    @Value("${kafka.topic.ressurs.replicas}")
+    private short ressursNumReplicas;
 
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         return new KafkaAdmin(configs);
     }
 
@@ -30,7 +40,7 @@ public class KafkaTopicConfig {
         Map<String, String> configs = new HashMap<>();
         configs.put("cleanup.policy", "compact");
         configs.put("retention.ms", "-1");
-        NewTopic ressursTopic = new NewTopic("aapen-nom-ressurs-v1", 3, (short) 1);
+        NewTopic ressursTopic = new NewTopic(ressursTopicName, ressursNumPartitions, ressursNumReplicas);
         ressursTopic.configs(configs);
         return ressursTopic;
     }
