@@ -3,3 +3,10 @@ spring:
     username: postgres
     password: password
     url: jdbc:postgresql://127.0.0.1:5432/postgres
+
+kafka:
+  consumer:
+    groupid: skjermede-personer
+    brokers: localhost:9092
+
+bootstrap.servers: localhost:9092
