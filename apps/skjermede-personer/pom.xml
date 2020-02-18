@@ -41,7 +41,12 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-      </dependencies>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>contract-nom-dto</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>app</finalName>
