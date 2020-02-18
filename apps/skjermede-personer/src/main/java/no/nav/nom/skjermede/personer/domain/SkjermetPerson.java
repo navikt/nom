@@ -1,6 +1,7 @@
 package no.nav.nom.skjermede.personer.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -26,8 +28,7 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @NotNull
-    @Column(name = "FUNKSJONELL_ID")
+    @Column(name = "FUNKSJONELL_ID", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ")
     private Long funksjonellId;
@@ -39,7 +40,6 @@ public class SkjermetPerson {
     @Column(name = "SKJERMET_TOM")
     private LocalDate skjermetTom;
 
-    @NotNull
     @Column(name = "TILKNYTTET_RESSURS")
     private String tilknyttetRessurs;
 
