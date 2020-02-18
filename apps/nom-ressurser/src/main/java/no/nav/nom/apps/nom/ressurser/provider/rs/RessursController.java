@@ -1,7 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.provider.rs;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.nom.ressurser.dto.NyRessursRequest;
 import no.nav.nom.apps.nom.ressurser.service.RessursService;
 import no.nav.nom.apps.nom.ressurser.service.RessursMapper;
 import org.springframework.web.bind.annotation.*;

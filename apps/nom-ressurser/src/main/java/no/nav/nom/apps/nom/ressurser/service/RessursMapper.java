@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.ressurser.service;
 
 import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
-import no.nav.nom.apps.nom.ressurser.dto.NyRessursRequest;
+import no.nav.nom.apps.nom.ressurser.provider.rs.NyRessursRequest;
 import no.nav.nom.contract.nom.dto.RessursDto;
 
 public class RessursMapper {

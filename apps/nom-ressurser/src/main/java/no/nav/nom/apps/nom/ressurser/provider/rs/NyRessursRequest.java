@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.dto;
+package no.nav.nom.apps.nom.ressurser.provider.rs;
 
 import lombok.Getter;
 import no.nav.nom.contract.nom.dto.Ressurstype;
