@@ -30,7 +30,7 @@ public class SkjermetPerson {
 
     @Column(name = "FUNKSJONELL_ID", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
-    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ")
+    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ", allocationSize = 1)
     private Long funksjonellId;
 
     @NotNull

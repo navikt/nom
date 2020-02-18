@@ -34,7 +34,7 @@ public class Ressurs {
 
     @Column(name = "FUNKSJONELL_ID", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
-    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ")
+    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ", allocationSize = 1)
     private Long funksjonellId;
 
     @NotNull
