@@ -3,6 +3,7 @@ package no.nav.nom.contract.nom.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class RessursDto {
 
     private String personident;
@@ -20,9 +22,4 @@ public class RessursDto {
     private LocalDate startdato;
 
     private LocalDate sluttdato;
-
-    private LocalDate opprettetDato;
-
-    public RessursDto() {
-    }
 }
