@@ -3,6 +3,14 @@ spring:
     username: postgres
     password: password
     url: jdbc:postgresql://127.0.0.1:5432/postgres
+  kafka:
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: no.nav.nom.*
 
 kafka:
   consumer:

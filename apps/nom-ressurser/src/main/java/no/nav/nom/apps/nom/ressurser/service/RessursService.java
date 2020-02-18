@@ -6,8 +6,8 @@ import no.nav.nom.apps.nom.ressurser.kafka.producer.KafkaProducer;
 import no.nav.nom.apps.nom.ressurser.repository.RessursRepository;
 import no.nav.nom.apps.nom.ressurser.utils.mapping.RessursMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 
 @Service
 @AllArgsConstructor

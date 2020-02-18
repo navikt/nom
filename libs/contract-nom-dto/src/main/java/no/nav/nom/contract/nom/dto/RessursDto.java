@@ -23,4 +23,6 @@ public class RessursDto {
 
     private LocalDate opprettetDato;
 
+    public RessursDto() {
+    }
 }
