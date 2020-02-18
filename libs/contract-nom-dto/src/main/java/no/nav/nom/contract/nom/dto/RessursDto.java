@@ -22,4 +22,6 @@ public class RessursDto {
     private LocalDate startdato;
 
     private LocalDate sluttdato;
+
+    private Long funksjonellId;
 }

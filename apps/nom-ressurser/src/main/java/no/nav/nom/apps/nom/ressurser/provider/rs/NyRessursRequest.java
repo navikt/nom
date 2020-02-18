@@ -12,8 +12,8 @@ public class NyRessursRequest {
 
     private Ressurstype ressurstype;
 
-    private LocalDate startdato;
+    private String startdato;
 
-    private LocalDate sluttdato;
+    private String sluttdato;
 
 }
