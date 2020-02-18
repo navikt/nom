@@ -1,5 +1,7 @@
 package no.nav.nom.apps.nom.ressurser.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.nom.contract.nom.dto.Ressurstype;
@@ -16,8 +18,10 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
+@Builder
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "T_RESSURS")
 public class Ressurs {
