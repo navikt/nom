@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public class RessursMapper {
     public static RessursDto RessursToRessursDto(Ressurs ressurs){
         return RessursDto.builder()
+                .funksjonellId(ressurs.getFunksjonellId())
                 .personident(ressurs.getPersonident())
                 .ressurstype(ressurs.getRessurstype())
                 .startdato(ressurs.getStartdato())
