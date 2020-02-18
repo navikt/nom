@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.ressurser.config;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.TopicConfig;
