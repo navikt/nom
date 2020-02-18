@@ -18,11 +18,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-@Builder
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "T_RESSURS")
 public class Ressurs {
 
@@ -32,8 +32,7 @@ public class Ressurs {
     @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
     private Long id;
 
-    @NotNull
-    @Column(name = "FUNKSJONELL_ID")
+    @Column(name = "FUNKSJONELL_ID", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ")
     private Long funksjonellId;
