@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.utils.mapping;
+package no.nav.nom.apps.nom.ressurser.service;
 
 import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
 import no.nav.nom.apps.nom.ressurser.dto.NyRessursRequest;
