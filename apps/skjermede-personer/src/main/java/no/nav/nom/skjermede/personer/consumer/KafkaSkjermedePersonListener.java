@@ -1,5 +1,6 @@
 package no.nav.nom.skjermede.personer.consumer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import no.nav.nom.skjermede.personer.domain.SkjermetPerson;
 import no.nav.nom.skjermede.personer.repository.SkjermetPersonRepository;
@@ -13,28 +14,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class KafkaSkjermedePersonListener {
 
-    private SkjermetPersonRepository repository;
+    private SkjermedePersonConsumer consumer;
 
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
-    void onMessage(String record){
+    void onMessage(ConsumerRecord<String, JsonNode> record) {
 
-        System.out.println("Received message : " + record);
-        String personIdent = record;
-        if(repository.existsById(personIdent)){
-            // Update Skjermede person record just the endret_dato
-            updateSkjermetRecord(personIdent);
-        }else{
-            // Create new record with tilknyttet_ressurs = null
-            createSkjermetRecord(personIdent);
-        }
-    }
-
-    private void updateSkjermetRecord(String personIdent) {
-        SkjermetPerson skjermetPerson = repository.getOne(personIdent);
-        skjermetPerson.setEndretDato(LocalDateTime.now());
-    }
-
-    private void createSkjermetRecord(String personIdent){
-
+        System.out.println("Received message : " + record.value());
+        consumer.processRecord(record);
     }
 }
