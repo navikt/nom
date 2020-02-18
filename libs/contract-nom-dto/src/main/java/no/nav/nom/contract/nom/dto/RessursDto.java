@@ -21,6 +21,4 @@ public class RessursDto {
 
     private LocalDate sluttdato;
 
-    private LocalDate opprettetDato;
-
 }
