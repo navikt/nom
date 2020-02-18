@@ -17,11 +17,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Builder
 @Table(name = "T_SKJERMET_PERSON")
 public class SkjermetPerson {
 
