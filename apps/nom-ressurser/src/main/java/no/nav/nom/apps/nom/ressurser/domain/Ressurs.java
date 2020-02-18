@@ -2,6 +2,7 @@ package no.nav.nom.apps.nom.ressurser.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import no.nav.nom.contract.nom.dto.Ressurstype;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

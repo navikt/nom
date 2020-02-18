@@ -1,0 +1,25 @@
+package no.nav.nom.contract.nom.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+
+@Setter
+@Getter
+@AllArgsConstructor
+public class RessursDto {
+
+    private String personident;
+
+    private Ressurstype ressurstype;
+
+    private LocalDate startdato;
+
+    private LocalDate sluttdato;
+
+    private LocalDate opprettetDato;
+
+    private LocalDate endretDato;
+}
