@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
 import no.nav.nom.apps.nom.ressurser.kafka.producer.KafkaProducer;
 import no.nav.nom.apps.nom.ressurser.repository.RessursRepository;
-import no.nav.nom.contract.nom.dto.RessursDto;
-import no.nav.nom.contract.nom.dto.Ressurstype;
+import no.nav.nom.apps.nom.ressurser.utils.mapping.RessursMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 
 @Service
 @AllArgsConstructor
@@ -21,7 +19,7 @@ public class RessursService {
 
     @Transactional
     public void opprettRessurs(Ressurs nyRessurs){
-        kafkaProducer.sendRessursMelding(new RessursDto("Test", Ressurstype.INTERN, LocalDate.now(), LocalDate.now(), LocalDate.now(), LocalDate.now()));
+        kafkaProducer.sendRessursMelding(RessursMapper.RessursToRessursDto(nyRessurs));
         System.out.println("Ressurs opprettet");
     }
 
