@@ -11,7 +11,6 @@ public class RessursMapper {
                 .ressurstype(ressurs.getRessurstype())
                 .startdato(ressurs.getStartdato())
                 .sluttdato(ressurs.getSluttdato())
-                .opprettetDato(ressurs.getOpprettetDato())
                 .build();
     }
 
