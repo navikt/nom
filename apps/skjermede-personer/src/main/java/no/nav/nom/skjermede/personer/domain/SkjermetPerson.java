@@ -28,7 +28,7 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @Column(name = "FUNKSJONELL_ID", nullable = false)
+    @Column(name = "FUNKSJONELL_ID", columnDefinition = "BIGINT DEFAULT NEXTVAL('T_SKJERMET_PERSON_FUNK_SEQ')", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ", allocationSize = 1)
     private Long funksjonellId;
