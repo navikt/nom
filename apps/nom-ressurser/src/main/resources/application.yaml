@@ -18,4 +18,3 @@ management:
     enabled-by-default: false
     web:
       base-path: /internal
-  endpoint.prometheus.enabled: true

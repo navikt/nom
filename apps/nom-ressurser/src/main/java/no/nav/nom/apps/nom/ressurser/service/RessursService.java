@@ -22,7 +22,7 @@ public class RessursService {
 
     @Transactional
     public void behandleRessursHendelse(Ressurs nyRessursHendelse){
-        /*Ressurs eksisterendeRessurs = ressursRepository.findBypersonident(nyRessursHendelse.getPersonident());
+        Ressurs eksisterendeRessurs = ressursRepository.findBypersonident(nyRessursHendelse.getPersonident());
         if(eksisterendeRessurs != null){
             nyRessursHendelse.setId(eksisterendeRessurs.getId());
             nyRessursHendelse.setFunksjonellId(eksisterendeRessurs.getFunksjonellId());
@@ -32,11 +32,11 @@ public class RessursService {
             nyRessursHendelse.setOpprettetDato(LocalDate.now());
         }
         nyRessursHendelse.setEndretDato(LocalDate.now());
-        Ressurs lagretRessurs = ressursRepository.save(nyRessursHendelse);*/
-        Ressurs lagretRessurs = nyRessursHendelse; //TEMP
+        Ressurs lagretRessurs = ressursRepository.save(nyRessursHendelse);
 
         kafkaProducer.sendRessursMelding(RessursMapper.RessursToRessursDto(lagretRessurs));
-        log.info("Ny transaksjons hendelse for funksjonell ID: ", lagretRessurs.getFunksjonellId());
+        log.info("Ny transaksjons hendelse for funksjonell ID: {}", lagretRessurs.getFunksjonellId());  // Vil logge null ved første lagring pga at sekvensen er satt i database laget,
+                                                                                                        // og ikke i hibernate. Løsning avventes til vi vet om funksjonell id blir en ting.
     }
 }
 

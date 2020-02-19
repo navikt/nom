@@ -20,4 +20,4 @@ management:
     enabled-by-default: true
     web:
       base-path: /internal
-      exposure.include: prometheus, heapdump
+      exposure.include: prometheus
