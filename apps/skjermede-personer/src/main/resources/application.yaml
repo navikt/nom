@@ -18,3 +18,9 @@ kafka:
     groupid: skjermede-personer
     brokers: localhost:9092
 bootstrap.servers: localhost:9092
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /internal
