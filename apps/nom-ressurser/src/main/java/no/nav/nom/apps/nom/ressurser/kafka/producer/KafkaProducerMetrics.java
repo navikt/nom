@@ -1,7 +1,9 @@
 package no.nav.nom.apps.nom.ressurser.kafka.producer;
 
+import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,5 +14,10 @@ public class KafkaProducerMetrics {
 
     public void sendMeldingMetric(String topic){
         meterRegistry.counter("kafka.messages.produced", "topic", topic).increment();
+    }
+
+    @Bean
+    public TimedAspect timedAspect(){
+        return new TimedAspect(meterRegistry);
     }
 }
