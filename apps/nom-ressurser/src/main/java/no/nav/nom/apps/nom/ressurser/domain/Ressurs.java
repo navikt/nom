@@ -32,7 +32,7 @@ public class Ressurs {
     @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
     private Long id;
 
-    @Column(name = "FUNKSJONELL_ID", columnDefinition = "BIGINT DEFAULT NEXTVAL('T_RESSURS_FUNK_SEQ')", nullable = false)
+    @Column(name = "FUNKSJONELL_ID", insertable = false, nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
     @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_RESSURS_FUNK_SEQ", allocationSize = 1)
     private Long funksjonellId;
