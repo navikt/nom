@@ -12,8 +12,8 @@ kafka:
   topic:
     ressurs:
       name: aapen-nom-ressurs-v1
-      partitions: 3
-      replicas: 1
+      partitions: 1
+      replicas: 3
 
 management:
   endpoints:
