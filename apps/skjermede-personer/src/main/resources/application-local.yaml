@@ -2,7 +2,7 @@ spring:
   datasource:
     username: postgres
     password: password
-    url: jdbc:postgresql://127.0.0.1:5432/postgres
+    url: jdbc:postgresql://127.0.0.1:5432/postgres_skjermet
   flyway:
     enabled: true
   kafka:
