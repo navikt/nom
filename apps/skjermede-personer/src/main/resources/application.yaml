@@ -24,3 +24,4 @@ management:
     enabled-by-default: false
     web:
       base-path: /internal
+      exposure.include: prometheus
