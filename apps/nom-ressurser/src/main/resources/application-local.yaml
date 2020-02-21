@@ -5,12 +5,19 @@ spring:
     password: password
     url: jdbc:postgresql://127.0.0.1:5432/postgres
   flyway:
-    enabled: false
+    enabled: true
 
 kafka:
   bootstrapAddress: localhost:9092
   topic:
     ressurs:
       name: aapen-nom-ressurs-v1
-      partitions: 3
-      replicas: 1
+      partitions: 1
+      replicas: 3
+
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: /internal
+      exposure.include: prometheus
