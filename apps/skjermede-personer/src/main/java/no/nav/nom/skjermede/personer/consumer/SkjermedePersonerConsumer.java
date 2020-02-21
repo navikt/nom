@@ -21,7 +21,7 @@ public class SkjermedePersonerConsumer {
     @Transactional
     public void processRecord(ConsumerRecord<String, RessursDto> record){
 
-        RessursDto ressursDto = record.value();
+        /*RessursDto ressursDto = record.value();
         SkjermetPerson skjermetPerson = ConsumerRecordToSkjermetPersonMapper.consumerRecordToSkjermetPersonMapper(ressursDto);
 
         skjermetPerson.setEndretDato(LocalDateTime.now());
@@ -46,7 +46,7 @@ public class SkjermedePersonerConsumer {
                 skjermetPerson.setFunksjonellId(111111L);
                 lagSkjermetPerson(skjermetPerson);
             }
-        }
+        }*/
     }
 
     private void lagSkjermetPerson(SkjermetPerson skjermetPerson){
