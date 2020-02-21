@@ -25,6 +25,10 @@ import java.time.LocalDateTime;
 public class SkjermetPerson {
 
     @Id
+    @Column(name = "ID")
+    private Long id;
+
+    @NotNull
     @Column(name = "PERSONIDENT")
     private String personident;
 
