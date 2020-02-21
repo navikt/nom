@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaProducer {
 
-    @Value("${kafka.topic.ressurs.name}")
+    @Value("${spring.kafka.topic.ressurs.name}")
     private String ressursTopic;
 
     private final KafkaProducerMetrics kafkaProducerMetrics;

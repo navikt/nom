@@ -7,17 +7,8 @@ spring:
     enabled: true
   kafka:
     consumer:
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring:
-          json:
-            trusted:
-              packages: no.nav.nom.*
+      groupid: skjermede-personer
     bootstrap.servers: localhost:9092
-
-kafka:
-  consumer:
-    groupid: skjermede-personer
 
 server.port: 8081
 

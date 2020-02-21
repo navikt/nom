@@ -6,14 +6,9 @@ spring:
     url: jdbc:postgresql://127.0.0.1:5432/postgres-ressurs
   flyway:
     enabled: true
-  kafka.bootstrap.servers: localhost:9092
-
-kafka:
-  topic:
-    ressurs:
-      name: aapen-nom-ressurs-v1
-      partitions: 1
-      replicas: 1
+  kafka:
+    bootstrap.servers: localhost:9092
+    topic.ressurs.name: aapen-nom-ressurs-v1
 
 management:
   endpoints:
