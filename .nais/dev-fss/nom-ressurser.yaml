@@ -13,6 +13,8 @@ spec:
       value: nom-ressurser-dev
     - name: DB_ENV
       value: preprod-fss
+    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
   image: {{image}}
   port: 8080
   ingresses:
