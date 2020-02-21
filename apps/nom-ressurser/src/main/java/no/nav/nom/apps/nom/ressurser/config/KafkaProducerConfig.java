@@ -12,13 +12,14 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfig {
 
-    @Value("${kafka.bootstrapAddress}")
-    private String bootstrapAddress;
+    @Value("${spring.kafka.bootstrap.servers}")
+    private List<String> bootstrapAddress;
 
     @Bean
     public ProducerFactory<String, RessursDto> producerFactory() {

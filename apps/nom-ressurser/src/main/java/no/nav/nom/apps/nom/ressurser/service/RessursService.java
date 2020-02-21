@@ -32,7 +32,8 @@ public class RessursService {
             nyRessursHendelse.setOpprettetDato(LocalDate.now());
         }
         nyRessursHendelse.setEndretDato(LocalDate.now());
-        Ressurs lagretRessurs = ressursRepository.save(nyRessursHendelse);
+        ressursRepository.save(nyRessursHendelse);
+        Ressurs lagretRessurs = ressursRepository.findBypersonident(nyRessursHendelse.getPersonident());
 
         kafkaProducer.sendRessursMelding(RessursMapper.RessursToRessursDto(lagretRessurs));
         log.info("Ny transaksjons hendelse for funksjonell ID: {}", lagretRessurs.getFunksjonellId());  // Vil logge null ved første lagring pga at sekvensen er satt i database laget,

@@ -2,7 +2,7 @@ spring:
   datasource:
     username: postgres
     password: password
-    url: jdbc:postgresql://127.0.0.1:5432/postgres_skjermet
+    url: jdbc:postgresql://127.0.0.1:5433/postgres-skjermet
   flyway:
     enabled: true
   kafka:
@@ -13,13 +13,12 @@ spring:
           json:
             trusted:
               packages: no.nav.nom.*
+    bootstrap.servers: localhost:9092
 
 kafka:
   consumer:
     groupid: skjermede-personer
-    brokers: localhost:9092
 
-bootstrap.servers: localhost:9092
 server.port: 8081
 
 management:

@@ -3,17 +3,17 @@ spring:
   datasource:
     username: postgres
     password: password
-    url: jdbc:postgresql://127.0.0.1:5432/postgres
+    url: jdbc:postgresql://127.0.0.1:5432/postgres-ressurs
   flyway:
     enabled: true
+  kafka.bootstrap.servers: localhost:9092
 
 kafka:
-  bootstrapAddress: localhost:9092
   topic:
     ressurs:
       name: aapen-nom-ressurs-v1
       partitions: 1
-      replicas: 3
+      replicas: 1
 
 management:
   endpoints:
