@@ -42,7 +42,7 @@ public class RessursService {
         return ressurs;
     }
 
-    private static RessursDto converted(Ressurs ressurs){
+    private static RessursDto converted(Ressurs ressurs) {
         return RessursDto.builder()
                 .funksjonellId(ressurs.getFunksjonellId())
                 .personident(ressurs.getPersonident())
