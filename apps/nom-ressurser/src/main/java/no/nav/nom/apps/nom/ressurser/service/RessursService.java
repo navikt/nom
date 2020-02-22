@@ -2,42 +2,54 @@ package no.nav.nom.apps.nom.ressurser.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
-import no.nav.nom.apps.nom.ressurser.kafka.producer.KafkaProducer;
+import no.nav.nom.apps.nom.ressurser.producer.KafkaProducer;
 import no.nav.nom.apps.nom.ressurser.repository.RessursRepository;
+import no.nav.nom.contract.nom.dto.RessursDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class RessursService {
 
-    private final RessursRepository ressursRepository;
-
-    private final KafkaProducer kafkaProducer;
+    private final RessursRepository repository;
+    private final KafkaProducer kafka;
 
     @Transactional
-    public void behandleRessursHendelse(Ressurs nyRessursHendelse){
-        Ressurs eksisterendeRessurs = ressursRepository.findBypersonident(nyRessursHendelse.getPersonident());
-        if(eksisterendeRessurs != null){
-            nyRessursHendelse.setId(eksisterendeRessurs.getId());
-            nyRessursHendelse.setFunksjonellId(eksisterendeRessurs.getFunksjonellId());
-            nyRessursHendelse.setOpprettetDato(eksisterendeRessurs.getOpprettetDato());
+    public Ressurs saveAndSend(Ressurs nyRessurs) {
+        val ressurs = repository.findByPersonident(nyRessurs.getPersonident())
+                .map(eksisterende -> {
+                    nyRessurs.setId(eksisterende.getId());
+                    nyRessurs.setFunksjonellId(eksisterende.getFunksjonellId());
+                    nyRessurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                    nyRessurs.setEndretDato(LocalDate.now());
+                    return repository.save(nyRessurs);
+                })
+                .orElseGet(() -> {
+                    nyRessurs.setFunksjonellId(repository.nextFunctionalId());
+                    nyRessurs.setOpprettetDato(LocalDate.now());
+                    nyRessurs.setEndretDato(LocalDate.now());
+                    return repository.save(nyRessurs);
+                });
 
-        }else {
-            nyRessursHendelse.setOpprettetDato(LocalDate.now());
-        }
-        nyRessursHendelse.setEndretDato(LocalDate.now());
-        ressursRepository.save(nyRessursHendelse);
-        Ressurs lagretRessurs = ressursRepository.findBypersonident(nyRessursHendelse.getPersonident());
+        kafka.send(converted(ressurs));
+        log.info("Lagret og sendt ressurs med funksjonell ID: {}", ressurs.getFunksjonellId());
+        return ressurs;
+    }
 
-        kafkaProducer.sendRessursMelding(RessursMapper.RessursToRessursDto(lagretRessurs));
-        log.info("Ny transaksjons hendelse for funksjonell ID: {}", lagretRessurs.getFunksjonellId());  // Vil logge null ved første lagring pga at sekvensen er satt i database laget,
-                                                                                                        // og ikke i hibernate. Løsning avventes til vi vet om funksjonell id blir en ting.
+    private static RessursDto converted(Ressurs ressurs){
+        return RessursDto.builder()
+                .funksjonellId(ressurs.getFunksjonellId())
+                .personident(ressurs.getPersonident())
+                .ressurstype(ressurs.getRessurstype())
+                .startdato(ressurs.getStartdato())
+                .sluttdato(ressurs.getSluttdato())
+                .build();
     }
 }
 

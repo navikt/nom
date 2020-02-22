@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.provider.internal;
+package no.nav.nom.apps.nom.ressurser.provider;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

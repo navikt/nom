@@ -1,6 +1,7 @@
-package no.nav.nom.apps.nom.ressurser.kafka.producer;
+package no.nav.nom.apps.nom.ressurser.producer;
 
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.dto.RessursDto;
@@ -13,16 +14,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaProducer {
 
+    private final MeterRegistry meterRegistry;
+    private final KafkaTemplate<String, RessursDto> kafkaTemplate;
+
     @Value("${spring.kafka.topic.ressurs.name}")
     private String ressursTopic;
 
-    private final KafkaProducerMetrics kafkaProducerMetrics;
-
-    private final KafkaTemplate<String, RessursDto> kafkaTemplate;
-
     @Timed(value = "kafka.messages.produced.timed", description = "Time spent sending kafka messages", extraTags = {"topic", "aapen-nom-ressurs-v1"})
-    public void sendRessursMelding(RessursDto ressurs){
+    public void send(RessursDto ressurs) {
         kafkaTemplate.send(ressursTopic, ressurs.getPersonident(), ressurs);
-        kafkaProducerMetrics.sendMeldingMetric(ressursTopic);
+        meterRegistry.counter("kafka.messages.produced", "topic", ressursTopic).increment();
     }
 }
