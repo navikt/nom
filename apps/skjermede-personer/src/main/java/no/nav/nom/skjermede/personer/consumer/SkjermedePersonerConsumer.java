@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -21,15 +20,12 @@ public class SkjermedePersonerConsumer {
     @Transactional
     public void processRecord(ConsumerRecord<String, RessursDto> record){
 
-        /*RessursDto ressursDto = record.value();
+        RessursDto ressursDto = record.value();
         SkjermetPerson skjermetPerson = ConsumerRecordToSkjermetPersonMapper.consumerRecordToSkjermetPersonMapper(ressursDto);
 
         skjermetPerson.setEndretDato(LocalDateTime.now());
 
-        ArrayList<String> personIdenter = new ArrayList<String>();
-        personIdenter.add(skjermetPerson.getPersonident());
-
-        List<SkjermetPerson> lagretSkjermedePersoner = repository.findAllById(personIdenter);
+        Optional<SkjermetPerson> lagretSkjermedePersoner = repository.findByPersonident(skjermetPerson.getPersonident());
 
         if (lagretSkjermedePersoner.isEmpty()) {
             lagSkjermetPerson(skjermetPerson);
@@ -42,15 +38,14 @@ public class SkjermedePersonerConsumer {
                 lagret.setEndretDato(LocalDateTime.now());
                 repository.save(lagret);
             }else{
-                // Fjern bruk av denne koden når funksjonell_id problemet er løst
-                skjermetPerson.setFunksjonellId(111111L);
                 lagSkjermetPerson(skjermetPerson);
             }
-        }*/
+        }
     }
 
     private void lagSkjermetPerson(SkjermetPerson skjermetPerson){
         skjermetPerson.setOpprettetDato(LocalDateTime.now());
+        skjermetPerson.setFunksjonellId(repository.nextFunctionalId());
         repository.save(skjermetPerson);
     }
 }

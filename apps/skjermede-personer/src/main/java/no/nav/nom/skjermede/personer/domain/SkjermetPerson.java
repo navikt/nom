@@ -25,7 +25,9 @@ import java.time.LocalDateTime;
 public class SkjermetPerson {
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "ID", insertable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGenerator")
+    @SequenceGenerator(name = "idGenerator", sequenceName = "T_SKJERMET_PERSON_SEQ", allocationSize = 1)
     private Long id;
 
     @NotNull
