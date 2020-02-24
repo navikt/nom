@@ -8,5 +8,4 @@ import org.springframework.vault.annotation.VaultPropertySource;
 @Configuration(proxyBeanMethods = false)
 @VaultPropertySource(value = "${vault.user.secret.path}", propertyNamePrefix = "app.", ignoreSecretNotFound = false)
 public class VaultConfig {
-    
 }
