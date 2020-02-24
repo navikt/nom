@@ -38,7 +38,7 @@ spring.kafka:
   producer:
     acks: all
     retries: 2147483647
-    transaction-id-prefix: ${kafka-transaction-uuid}-
+    transaction-id-prefix: 1-
     properties:
       max.block.ms: 15000
       enable.idempotence: true
