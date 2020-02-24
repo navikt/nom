@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import no.nav.nom.skjermede.personer.provider.api.v1.SkjermetPersonRequestDTO;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +26,7 @@ import java.time.LocalDateTime;
 public class SkjermetPerson {
 
     @Id
-    @Column(name = "ID", insertable = false, nullable = false)
+    @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idGenerator")
     @SequenceGenerator(name = "idGenerator", sequenceName = "T_SKJERMET_PERSON_SEQ", allocationSize = 1)
     private Long id;
@@ -34,9 +35,8 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @Column(name = "FUNKSJONELL_ID", insertable = false, nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "funksjonellIdGenerator")
-    @SequenceGenerator(name = "funksjonellIdGenerator", sequenceName = "T_SKJERMET_PERSON_FUNK_SEQ", allocationSize = 1)
+    @NotNull
+    @Column(name = "FUNKSJONELL_ID")
     private Long funksjonellId;
 
     @NotNull
