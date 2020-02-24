@@ -26,7 +26,7 @@ app.kafka:
   password: ${app.password}
 
 spring.kafka:
-  client-id: ${app.username}
+  client-id: srvnom-ressurser
   properties:
     security.protocol: SASL_SSL
     sasl:
