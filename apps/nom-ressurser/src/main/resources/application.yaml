@@ -25,20 +25,18 @@ app.kafka:
   username: ${app.username}
   password: ${app.password}
 
-spring.kafka:
+spring.kafka.producer:
   client-id: srvnom-ressurser
   properties:
     security.protocol: SASL_SSL
     sasl:
       mechanism: PLAIN
       jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
-    ssl:
-      truststore.location: ${javax.net.ssl.trustStore:}
-      truststore.password: ${javax.net.ssl.trustStorePassword:}
-  producer:
-    acks: all
-    retries: 2147483647
-    properties:
       max.block.ms: 15000
       enable.idempotence: true
       max.in.flight.requests.per.connection: 5
+  ssl:
+    trust-store-location: ${javax.net.ssl.trustStore:}
+    trust-store-password: ${javax.net.ssl.trustStorePassword:}
+    acks: all
+    retries: 2147483647
