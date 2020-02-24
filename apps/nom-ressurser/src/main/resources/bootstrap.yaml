@@ -7,13 +7,13 @@ spring.cloud.vault:
   generic:
     enabled: true
     backend: kv/${stack}/fss
-    application-name: ${app.name}/${nais.namespace}
-    default-context: ${app.name}/${nais.namespace}
+    application-name: ${nais.app.name}/${nais.namespace}
+    default-context: ${nais.app.name}/${nais.namespace}
   authentication: KUBERNETES
   config:
     order: -10
     lifecycle.enabled: true
   kubernetes:
-    role: ${app.name}
+    role: ${nais.app.name}
     kubernetes-path: kubernetes/${stack}/fss
     service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
