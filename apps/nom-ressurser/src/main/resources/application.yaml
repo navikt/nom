@@ -19,3 +19,27 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+
+
+app.kafka:
+  username: ${app.username}
+  password: ${app.password}
+
+spring.kafka:
+  client-id: ${app.username}
+  properties:
+    security.protocol: SASL_SSL
+    sasl:
+      mechanism: PLAIN
+      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  producer:
+    acks: all
+    retries: 2147483647
+    transaction-id-prefix: ${kafka-transaction-uuid}-
+    properties:
+      max.block.ms: 15000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
