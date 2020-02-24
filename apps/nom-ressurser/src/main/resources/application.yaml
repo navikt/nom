@@ -20,23 +20,25 @@ management:
       base-path: /internal
       exposure.include: prometheus
 
-
-app.kafka:
-  username: ${app.username}
-  password: ${app.password}
-
-spring.kafka.producer:
+spring.kafka:
   client-id: srvnom-ressurser
   properties:
     security.protocol: SASL_SSL
     sasl:
       mechanism: PLAIN
       jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  listener:
+    concurrency: 1
+    poll-timeout: 1000
+    ack-mode: batch
+    type: batch
+  producer:
+    acks: all
+    retries: 2147483647
+    properties:
       max.block.ms: 15000
       enable.idempotence: true
       max.in.flight.requests.per.connection: 5
-  ssl:
-    trust-store-location: ${javax.net.ssl.trustStore:}
-    trust-store-password: ${javax.net.ssl.trustStorePassword:}
-    acks: all
-    retries: 2147483647
