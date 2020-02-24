@@ -7,5 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class NomRessurser {
     public static void main(String[] args) {
         SpringApplication.run(NomRessurser.class);
+        
     }
 }
