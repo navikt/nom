@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, Long> {
     List<SkjermetPerson> findAllByPersonident(String personident);
+    SkjermetPerson findDistinctByPersonidentAndSkjermetTomNull(String personident);
     List<SkjermetPerson> findAllByTilknyttetRessurs(String tilknyttetRessurs);
     SkjermetPerson findDistinctByFunksjonellId(Long funksjonellId);
     SkjermetPerson findDistinctByFunksjonellIdAndSkjermetTomNotNull(Long funksjonellId);

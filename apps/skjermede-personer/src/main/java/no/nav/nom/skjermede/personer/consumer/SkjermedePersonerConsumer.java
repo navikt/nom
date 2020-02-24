@@ -1,6 +1,6 @@
 package no.nav.nom.skjermede.personer.consumer;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.domain.SkjermetPerson;
 import no.nav.nom.skjermede.personer.repository.SkjermetPersonRepository;
@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SkjermedePersonerConsumer {
 
-    private SkjermetPersonRepository repository;
+    private final SkjermetPersonRepository repository;
 
     @Transactional
     public void processRecord(ConsumerRecord<String, RessursDto> record){
@@ -25,27 +25,15 @@ public class SkjermedePersonerConsumer {
 
         skjermetPerson.setEndretDato(LocalDateTime.now());
 
-        Optional<SkjermetPerson> lagretSkjermedePersoner = repository.findByPersonident(skjermetPerson.getPersonident());
+        skjermetPerson = Optional
+                .ofNullable(repository.findDistinctByPersonidentAndSkjermetTomNull(skjermetPerson.getPersonident()))
+                .orElse(skjermetPerson);
 
-        if (lagretSkjermedePersoner.isEmpty()) {
-            lagSkjermetPerson(skjermetPerson);
-        }else{
-            SkjermetPerson lagret = lagretSkjermedePersoner.stream().filter(e -> e.getSkjermetTom() == null).findFirst().orElse(null);
-            if(lagret != null)
-            {
-                lagret.setSkjermetFom(skjermetPerson.getSkjermetFom());
-                lagret.setSkjermetTom(skjermetPerson.getSkjermetTom());
-                lagret.setEndretDato(LocalDateTime.now());
-                repository.save(lagret);
-            }else{
-                lagSkjermetPerson(skjermetPerson);
-            }
-        }
-    }
-
-    private void lagSkjermetPerson(SkjermetPerson skjermetPerson){
-        skjermetPerson.setOpprettetDato(LocalDateTime.now());
         skjermetPerson.setFunksjonellId(repository.nextFunctionalId());
+        skjermetPerson.setOpprettetDato(skjermetPerson.getOpprettetDato() == null
+                ? LocalDateTime.now()
+                : skjermetPerson.getOpprettetDato());
+
         repository.save(skjermetPerson);
     }
 }
