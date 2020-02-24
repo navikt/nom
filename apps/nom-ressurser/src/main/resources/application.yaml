@@ -1,6 +1,7 @@
 app.kafka:
   username: ${app.username}
   password: ${app.password}
+  topic.ressurs.name: aapen-nom-ressurs-v1
 
 spring:
   jpa:
@@ -25,7 +26,7 @@ management:
       exposure.include: prometheus
 
 spring.kafka:
-  client-id: srvnom-ressurser
+  client-id: ${app.kafka.username}
   properties:
     security.protocol: SASL_SSL
     sasl:
@@ -42,9 +43,10 @@ spring.kafka:
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    transaction-id-prefix: ${kafka-transaction-uuid}-
     acks: all
-    retries: 2147483647
+    retries: 30
     properties:
       max.block.ms: 15000
       enable.idempotence: true
-      max.in.flight.requests.per.connection: 5
+      max.in.flight.requests.per.connection: 1

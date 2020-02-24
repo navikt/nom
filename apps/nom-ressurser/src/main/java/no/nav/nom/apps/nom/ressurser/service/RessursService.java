@@ -20,26 +20,29 @@ public class RessursService {
     private final RessursRepository repository;
     private final KafkaProducer kafka;
 
-    @Transactional
+    @Transactional("transactionManager")
     public Ressurs saveAndSend(Ressurs nyRessurs) {
-        val ressurs = repository.findByPersonident(nyRessurs.getPersonident())
-                .map(eksisterende -> {
-                    nyRessurs.setId(eksisterende.getId());
-                    nyRessurs.setFunksjonellId(eksisterende.getFunksjonellId());
-                    nyRessurs.setOpprettetDato(eksisterende.getOpprettetDato());
-                    nyRessurs.setEndretDato(LocalDate.now());
-                    return repository.save(nyRessurs);
-                })
-                .orElseGet(() -> {
-                    nyRessurs.setFunksjonellId(repository.nextFunctionalId());
-                    nyRessurs.setOpprettetDato(LocalDate.now());
-                    nyRessurs.setEndretDato(LocalDate.now());
-                    return repository.save(nyRessurs);
-                });
-
-        kafka.send(converted(ressurs));
-        log.info("Lagret og sendt ressurs med funksjonell ID: {}", ressurs.getFunksjonellId());
-        return ressurs;
+        try {
+            val ressurs = repository.findByPersonident(nyRessurs.getPersonident())
+                    .map(eksisterende -> {
+                        nyRessurs.setId(eksisterende.getId());
+                        nyRessurs.setFunksjonellId(eksisterende.getFunksjonellId());
+                        nyRessurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                        nyRessurs.setEndretDato(LocalDate.now());
+                        return repository.save(nyRessurs);
+                    })
+                    .orElseGet(() -> {
+                        nyRessurs.setFunksjonellId(repository.nextFunctionalId());
+                        nyRessurs.setOpprettetDato(LocalDate.now());
+                        nyRessurs.setEndretDato(LocalDate.now());
+                        return repository.save(nyRessurs);
+                    });
+            kafka.send(converted(ressurs));
+            log.info("Lagret og sendt ressurs med funksjonell ID: {}", ressurs.getFunksjonellId());
+            return ressurs;
+        } catch (RuntimeException e) {
+            throw e;
+        }
     }
 
     private static RessursDto converted(Ressurs ressurs) {

@@ -17,7 +17,7 @@ public class KafkaProducer {
     private final MeterRegistry meterRegistry;
     private final KafkaTemplate<String, RessursDto> kafkaTemplate;
 
-    @Value("${spring.kafka.topic.ressurs.name}")
+    @Value("${app.kafka.topic.ressurs.name}")
     private String ressursTopic;
 
     @Timed(value = "kafka.messages.produced.timed", description = "Time spent sending kafka messages", extraTags = {"topic", "aapen-nom-ressurs-v1"})

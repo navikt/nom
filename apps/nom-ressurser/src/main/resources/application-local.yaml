@@ -1,5 +1,9 @@
+app.kafka:
+  username: NO_VALUE
+  password: NO_VALUE
 
 spring:
+  cloud.vault.enabled: false
   datasource:
     username: postgres
     password: password
@@ -7,8 +11,15 @@ spring:
   flyway:
     enabled: true
   kafka:
-    bootstrap.servers: localhost:9092
-    topic.ressurs.name: aapen-nom-ressurs-v1
+    client-id: srvnav-ressurs
+    properties:
+      security.protocol: PLAINTEXT
+      sasl:
+        mechanism:
+        jaas.config:
+      ssl:
+        truststore.location: NO_VALUE
+        truststore.password: NO_VALUE
 
 management:
   endpoints:
