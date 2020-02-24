@@ -36,6 +36,8 @@ spring.kafka:
     ack-mode: batch
     type: batch
   producer:
+    key-serializer: org.springframework.kafka.support.serializer.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     acks: all
     retries: 2147483647
     properties:
