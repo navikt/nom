@@ -1,3 +1,7 @@
+app.kafka:
+  username: ${app.username}
+  password: ${app.password}
+
 spring:
   jpa:
     hibernate:
