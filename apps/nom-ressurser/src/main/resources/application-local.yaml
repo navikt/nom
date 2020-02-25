@@ -3,7 +3,6 @@ app.kafka:
   password: NO_VALUE
 
 spring:
-  cloud.vault.enabled: false
   datasource:
     username: postgres
     password: password
