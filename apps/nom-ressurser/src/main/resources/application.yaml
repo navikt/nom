@@ -24,6 +24,9 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+  endpoint:
+    prometheus:
+      enabled: true
 
 spring.kafka:
   client-id: ${app.kafka.username}
