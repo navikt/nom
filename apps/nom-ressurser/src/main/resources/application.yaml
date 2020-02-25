@@ -1,3 +1,8 @@
+app.kafka:
+  username: ${app.username}
+  password: ${app.password}
+  topic.ressurs.name: aapen-nom-ressurs-v1
+
 spring:
   jpa:
     hibernate:
@@ -19,3 +24,29 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+
+spring.kafka:
+  client-id: ${app.kafka.username}
+  properties:
+    security.protocol: SASL_SSL
+    sasl:
+      mechanism: PLAIN
+      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  listener:
+    concurrency: 1
+    poll-timeout: 1000
+    ack-mode: batch
+    type: batch
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    transaction-id-prefix: ${kafka-transaction-uuid}-
+    acks: all
+    retries: 30
+    properties:
+      max.block.ms: 15000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 1

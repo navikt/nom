@@ -15,6 +15,12 @@ spec:
       value: preprod-fss
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    - name: SPRING_KAFKA_TOPIC_RESSURS_NAME
+      value: aapen-nom-ressurs-v1
+    - name: VAULT_USER_SECRET_PATH
+      value: serviceuser/dev/srvnom-ressurser
+    - name: STACK
+      value: preprod
   image: {{image}}
   port: 8080
   ingresses:
@@ -37,10 +43,10 @@ spec:
   resources:
     requests:
       cpu: 500m
-      memory: 512Mi
+      memory: 2048Mi
     limits:
       cpu: 1000m
-      memory: 1024Mi
+      memory: 4096Mi
   vault:
     enabled: true
   prometheus:
