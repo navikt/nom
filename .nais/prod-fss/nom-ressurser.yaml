@@ -19,9 +19,10 @@ spec:
       value: aapen-nom-ressurs-v1
     - name: VAULT_USER_SECRET_PATH
       value: serviceuser/prod/srvnom-ressurser
+    - name: SPRING_PROFILES_ACTIVE
+      value: vault
     - name: STACK
       value: prod
-
   image: {{image}}
   port: 8080
   ingresses:
