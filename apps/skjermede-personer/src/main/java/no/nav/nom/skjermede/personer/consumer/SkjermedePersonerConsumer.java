@@ -18,10 +18,9 @@ public class SkjermedePersonerConsumer {
     private final SkjermetPersonRepository repository;
 
     @Transactional
-    public void processRecord(ConsumerRecord<String, RessursDto> record){
+    public void processRecord(RessursDto ressursHendelse){
 
-        RessursDto ressursDto = record.value();
-        SkjermetPerson skjermetPerson = ConsumerRecordToSkjermetPersonMapper.consumerRecordToSkjermetPersonMapper(ressursDto);
+        SkjermetPerson skjermetPerson = ConsumerRecordToSkjermetPersonMapper.consumerRecordToSkjermetPersonMapper(ressursHendelse);
 
         skjermetPerson.setEndretDato(LocalDateTime.now());
 

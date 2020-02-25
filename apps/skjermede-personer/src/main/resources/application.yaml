@@ -22,3 +22,38 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+
+app.kafka:
+  username: ${app.username}
+  password: ${app.password}
+  group-id-prefix: ${nais.app.name}-${nais.namespace}
+
+spring.kafka:
+  client-id: ${app.kafka.username}
+  properties:
+    security.protocol: SASL_SSL
+    sasl:
+      mechanism: PLAIN
+      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  listener:
+    concurrency: 1
+    poll-timeout: 1000
+    ack-mode: batch
+    type: batch
+  consumer:
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      isolation.level: read_committed
+      spring.json.trusted.packages: '*'
+    max-poll-records: 100
+    auto-offset-reset: earliest
+    enable-auto-commit: false
+  streams:
+    application-id: ${nais.app.name}-${nais.namespace}
+    properties:
+      poll.ms: 1000
+      processing.guarantee: exactly_once
