@@ -22,6 +22,9 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+  endpoint:
+    prometheus:
+      enabled: true
 
 app.kafka:
   username: ${app.username}
