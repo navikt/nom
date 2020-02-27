@@ -26,7 +26,7 @@ public class KafkaSkjermedePersonerListener {
                     eksisterende.setSkjermetTom(ressurs.getSluttdato());
                     eksisterende.setEndretDato(LocalDateTime.now());
                     log.info("Ny oppdatering fra aapen-nom-ressurs-v1 for funksjonell ID: {}", ressurs.getFunksjonellId());
-                    return repository.save(eksisterende);
+                    return eksisterende;
                 }).orElseGet(()->{
                     SkjermetPerson nySkjermetPerson = converted(ressurs);
                     nySkjermetPerson.setEndretDato(LocalDateTime.now());
@@ -40,6 +40,7 @@ public class KafkaSkjermedePersonerListener {
     public static SkjermetPerson converted(RessursDto record){
         return SkjermetPerson.builder()
                 .personident(record.getPersonident())
+                .funksjonellId(record.getFunksjonellId())
                 .skjermetFom(record.getStartdato())
                 .skjermetTom(record.getSluttdato())
                 .tilknyttetRessurs(null)
