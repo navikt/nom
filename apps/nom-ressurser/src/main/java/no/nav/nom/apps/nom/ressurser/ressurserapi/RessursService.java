@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -43,6 +44,10 @@ public class RessursService {
         } catch (RuntimeException e) {
             throw e;
         }
+    }
+
+    public List<Ressurs> hentAlleAnsattForholdForPerson(String fnr){
+        return repository.findAllByPersonident(fnr);
     }
 
     private static RessursDto converted(Ressurs ressurs) {

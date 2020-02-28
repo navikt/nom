@@ -3,6 +3,7 @@ package no.nav.nom.apps.nom.ressurser.ressurserapi;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
+import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -18,6 +19,14 @@ public class RessursController {
 
     private final RessursService service;
     private final RessursRepository repository;
+
+    @GetMapping("/isAnsatt")
+    public boolean isAnsatt(@RequestHeader String fnr, @RequestParam String ressursType){
+        return service.hentAlleAnsattForholdForPerson(fnr).stream()
+                .anyMatch(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
+                        && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
+                );
+    }
 
     @GetMapping
     public List<Ressurs> getAll() {
