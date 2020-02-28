@@ -21,8 +21,8 @@ public class RessursController {
     private final RessursRepository repository;
 
     @GetMapping("/isAnsatt")
-    public boolean isAnsatt(@RequestHeader String fnr, @RequestParam String ressursType){
-        return service.hentAlleAnsattForholdForPerson(fnr).stream()
+    public boolean isAnsatt(@RequestHeader String personIdent, @RequestParam String ressursType){
+        return service.hentAlleAnsattForholdForPerson(personIdent).stream()
                 .anyMatch(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
                         && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
                 );

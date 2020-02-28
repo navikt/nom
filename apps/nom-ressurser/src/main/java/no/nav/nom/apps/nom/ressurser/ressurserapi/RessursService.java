@@ -46,8 +46,8 @@ public class RessursService {
         }
     }
 
-    public List<Ressurs> hentAlleAnsattForholdForPerson(String fnr){
-        return repository.findAllByPersonident(fnr);
+    public List<Ressurs> hentAlleAnsattForholdForPerson(String personIdent){
+        return repository.findAllByPersonident(personIdent);
     }
 
     private static RessursDto converted(Ressurs ressurs) {
