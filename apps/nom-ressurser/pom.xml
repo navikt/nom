@@ -27,12 +27,10 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>${micrometer.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
-            <version>${spring-kafka-version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -53,7 +51,6 @@
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

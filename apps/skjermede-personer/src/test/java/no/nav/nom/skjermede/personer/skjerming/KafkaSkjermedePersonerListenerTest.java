@@ -1,8 +1,6 @@
-package no.nav.nom.skjermede.personer.listener;
+package no.nav.nom.skjermede.personer.skjerming;
 
 import no.nav.nom.contract.nom.dto.RessursDto;
-import no.nav.nom.skjermede.personer.domain.SkjermetPerson;
-import no.nav.nom.skjermede.personer.repository.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,7 +9,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class KafkaSkjermedePersonerListenerTest {

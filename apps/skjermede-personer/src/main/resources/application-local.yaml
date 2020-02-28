@@ -7,8 +7,6 @@ spring:
     username: postgres
     password: password
     url: jdbc:postgresql://127.0.0.1:5433/postgres-skjermet
-  flyway:
-    enabled: true
   kafka:
     consumer:
       groupid: skjermede-personer
@@ -31,5 +29,3 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
-
-

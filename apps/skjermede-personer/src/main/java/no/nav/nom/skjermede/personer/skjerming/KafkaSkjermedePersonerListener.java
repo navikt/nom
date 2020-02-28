@@ -1,10 +1,10 @@
-package no.nav.nom.skjermede.personer.listener;
+package no.nav.nom.skjermede.personer.skjerming;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.dto.RessursDto;
-import no.nav.nom.skjermede.personer.domain.SkjermetPerson;
-import no.nav.nom.skjermede.personer.repository.SkjermetPersonRepository;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 

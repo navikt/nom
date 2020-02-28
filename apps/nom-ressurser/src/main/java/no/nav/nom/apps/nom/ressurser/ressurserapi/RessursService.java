@@ -1,11 +1,11 @@
-package no.nav.nom.apps.nom.ressurser.service;
+package no.nav.nom.apps.nom.ressurser.ressurserapi;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
+import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.producer.KafkaProducer;
-import no.nav.nom.apps.nom.ressurser.repository.RessursRepository;
+import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
 import no.nav.nom.contract.nom.dto.RessursDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

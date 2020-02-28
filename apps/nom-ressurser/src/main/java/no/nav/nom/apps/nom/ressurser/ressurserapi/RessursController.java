@@ -1,10 +1,8 @@
-package no.nav.nom.apps.nom.ressurser.provider;
+package no.nav.nom.apps.nom.ressurser.ressurserapi;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
-import no.nav.nom.apps.nom.ressurser.provider.dto.RessursRequest;
-import no.nav.nom.apps.nom.ressurser.repository.RessursRepository;
-import no.nav.nom.apps.nom.ressurser.service.RessursService;
+import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
+import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -32,16 +30,16 @@ public class RessursController {
     }
 
     @PostMapping
-    public Ressurs createOrEdit(@RequestBody RessursRequest ressurs) {
+    public Ressurs createOrEdit(@RequestBody RessursRequestDTO ressurs) {
         return service.saveAndSend(converted(ressurs));
     }
 
-    private static Ressurs converted(RessursRequest ressursRequest){
+    private static Ressurs converted(RessursRequestDTO ressursRequestDTO){
         return Ressurs.builder()
-                .personident(ressursRequest.getPersonident())
-                .ressurstype(ressursRequest.getRessurstype())
-                .startdato(LocalDate.parse(ressursRequest.getStartdato()))
-                .sluttdato(ressursRequest.getSluttdato() == null ? null : LocalDate.parse(ressursRequest.getSluttdato()))
+                .personident(ressursRequestDTO.getPersonident())
+                .ressurstype(ressursRequestDTO.getRessurstype())
+                .startdato(LocalDate.parse(ressursRequestDTO.getStartdato()))
+                .sluttdato(ressursRequestDTO.getSluttdato() == null ? null : LocalDate.parse(ressursRequestDTO.getSluttdato()))
                 .build();
     }
 }

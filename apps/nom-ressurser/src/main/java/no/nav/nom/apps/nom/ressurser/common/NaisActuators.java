@@ -1,12 +1,12 @@
-package no.nav.nom.apps.nom.ressurser.provider;
+package no.nav.nom.apps.nom.ressurser.common;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(InternalController.BASE_URL)
-public class InternalController {
+@RequestMapping(NaisActuators.BASE_URL)
+public class NaisActuators {
 
     public static final String BASE_URL = "/internal";
 

@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.config;
+package no.nav.nom.apps.nom.ressurser.common;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

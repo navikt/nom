@@ -1,6 +1,6 @@
-package no.nav.nom.apps.nom.ressurser.repository;
+package no.nav.nom.apps.nom.ressurser.ressurser;
 
-import no.nav.nom.apps.nom.ressurser.domain.Ressurs;
+import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

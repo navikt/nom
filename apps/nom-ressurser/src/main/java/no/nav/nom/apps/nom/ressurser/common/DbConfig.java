@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.config;
+package no.nav.nom.apps.nom.ressurser.common;
 
 import com.zaxxer.hikari.HikariConfig;
 import lombok.SneakyThrows;
@@ -19,7 +19,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"no.nav.nom.skjermede.personer"})
+@EnableJpaRepositories(basePackages = {"no.nav.nom.apps.nom.ressurser"})
 @Profile("!local")
 public class DbConfig {
 
@@ -50,7 +50,7 @@ public class DbConfig {
 
         final LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
         entityManagerFactory.setDataSource(datasource());
-        entityManagerFactory.setPackagesToScan("no.nav.nom.skjermede.personer");
+        entityManagerFactory.setPackagesToScan("no.nav.nom.apps.nom.ressurser");
         entityManagerFactory.setJpaVendorAdapter(vendorAdapter);
 
         return entityManagerFactory;

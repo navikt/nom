@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.provider.dto;
+package no.nav.nom.apps.nom.ressurser.ressurserapi;
 
 import lombok.Getter;
 import no.nav.nom.contract.nom.dto.Ressurstype;
@@ -6,7 +6,7 @@ import no.nav.nom.contract.nom.dto.Ressurstype;
 import java.time.LocalDate;
 
 @Getter
-public class RessursRequest {
+public class RessursRequestDTO {
     private String personident;
     private Ressurstype ressurstype;
     private String startdato;

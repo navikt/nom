@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.domain;
+package no.nav.nom.apps.nom.ressurser.ressurser;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
