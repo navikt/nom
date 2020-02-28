@@ -3,10 +3,9 @@ package no.nav.nom.skjermede.personer.skjerming;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.dto.RessursDto;
-import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
-import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +16,7 @@ public class KafkaSkjermedePersonerListener {
 
     private final SkjermetPersonRepository repository;
 
+    @Transactional
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDto ressurs) {
         repository.save(

@@ -1,12 +1,18 @@
 package no.nav.nom.skjermede.personer.skjerming;
 
 import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.Ressurstype;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.mockito.Mockito.verify;
@@ -18,62 +24,78 @@ public class KafkaSkjermedePersonerListenerTest {
     @Mock
     private SkjermetPersonRepository skjermetPersonRepositoryMock;
 
-    @Mock
-    private RessursDto ressursDtoMock;
-
-    @Mock
-    private SkjermetPerson skjermetPersonMock;
-
     @InjectMocks
     private KafkaSkjermedePersonerListener kafkaSkjermedePersonerListener;
+
+    @Captor
+    private ArgumentCaptor<SkjermetPerson> skjermetPersonArgumentCaptor;
 
 
     @Test
     public void onMessageEksisterendePerson() {
-        Optional<SkjermetPerson> skjermetPersonOptional = Optional.of(skjermetPersonMock);
-        when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDtoMock.getPersonident())).thenReturn(skjermetPersonOptional);
+        LocalDate startDato = LocalDate.parse("2020-01-01");
+        LocalDate sluttDato = LocalDate.parse("2020-01-02");
+        LocalDateTime opprettetDato = LocalDateTime.parse("2020-01-01T00:00:00");
+        LocalDateTime oldEndretDato = LocalDateTime.parse("2020-01-01T00:00:00");
+        long id = 1L;
 
-        kafkaSkjermedePersonerListener.onMessage(ressursDtoMock);
-        verify(skjermetPersonRepositoryMock).save(skjermetPersonMock);
+        RessursDto ressursDto = RessursDto.builder()
+                .personident("TestIdent")
+                .ressurstype(Ressurstype.INTERN)
+                .startdato(startDato)
+                .sluttdato(sluttDato)
+                .funksjonellId(1L)
+                .build();
+        SkjermetPerson savedSkjermetPerson = SkjermetPerson.builder()
+                .id(id)
+                .personident("TestIdent")
+                .funksjonellId(1L)
+                .skjermetFom(startDato)
+                .opprettetDato(opprettetDato)
+                .endretDato(oldEndretDato)
+                .build();
+
+        when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDto.getPersonident())).thenReturn(Optional.of(savedSkjermetPerson));
+
+        kafkaSkjermedePersonerListener.onMessage(ressursDto);
+
+        verify(skjermetPersonRepositoryMock).save(savedSkjermetPerson);
+
+        Assertions.assertEquals(ressursDto.getPersonident(), savedSkjermetPerson.getPersonident());
+        Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFom());
+        Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjermetPerson.getSkjermetTom());
+        Assertions.assertEquals(ressursDto.getFunksjonellId(), savedSkjermetPerson.getFunksjonellId());
+
+        Assertions.assertEquals(id, savedSkjermetPerson.getId());
+        Assertions.assertEquals(opprettetDato, savedSkjermetPerson.getOpprettetDato());
+        Assertions.assertNotEquals(oldEndretDato, savedSkjermetPerson.getEndretDato());
+
+        Assertions.assertNull(savedSkjermetPerson.getTilknyttetRessurs());
     }
 
     @Test
     public void onMessageNyPerson(){
-        /*when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDtoMock.getPersonident())).thenReturn(Optional.empty());
-        //when(kafkaSkjermedePersonerListener.converted(any())).thenReturn(skjermetPersonMock);
-
-        kafkaSkjermedePersonerListener.onMessage(ressursDtoMock);
-        verify(skjermetPersonRepositoryMock).findAllByPersonident(ressursDtoMock.getPersonident());
-        //verify(kafkaSkjermedePersonerListener.converted(ressursDtoMock));
-        verify(skjermetPersonMock).setEndretDato(any());
-        verify(skjermetPersonMock).setOpprettetDato(any());
-        verify(skjermetPersonRepositoryMock).save(skjermetPersonMock);*/
-    }
-
-    @Test
-    public void converted() {
-        /*LocalDate startDato = LocalDate.parse("2020-01-01");
-        LocalDate sluttDato = LocalDate.parse("2020-01-02");
-
         RessursDto ressursDto = RessursDto.builder()
-                .funksjonellId(1L)
                 .personident("TestIdent")
-                .startdato(startDato)
+                .ressurstype(Ressurstype.INTERN)
+                .startdato(LocalDate.now())
+                .sluttdato(LocalDate.now())
+                .funksjonellId(1L)
                 .build();
 
-        SkjermetPerson skjermetPerson = KafkaSkjermedePersonerListener.converted(ressursDto);
+        when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
 
-        assert(skjermetPerson.getId() == null);
-        assertEquals("TestIdent", skjermetPerson.getPersonident());
-        assertEquals(1L, skjermetPerson.getFunksjonellId());
-        assertEquals(startDato, skjermetPerson.getSkjermetFom());
-        assert(skjermetPerson.getSkjermetTom() == null);
-        assert(skjermetPerson.getTilknyttetRessurs() == null);
-        assert(skjermetPerson.getOpprettetDato() == null);
-        assert(skjermetPerson.getEndretDato() == null);
+        kafkaSkjermedePersonerListener.onMessage(ressursDto);
+        verify(skjermetPersonRepositoryMock).save(skjermetPersonArgumentCaptor.capture());
 
-        ressursDto.setSluttdato(sluttDato);
-        skjermetPerson = KafkaSkjermedePersonerListener.converted(ressursDto);
-        assertEquals(sluttDato, skjermetPerson.getSkjermetTom());*/
+        SkjermetPerson savedSkjemetPerson = skjermetPersonArgumentCaptor.getValue();
+
+        Assertions.assertEquals(ressursDto.getPersonident(), savedSkjemetPerson.getPersonident());
+        Assertions.assertEquals(ressursDto.getStartdato(), savedSkjemetPerson.getSkjermetFom());
+        Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjemetPerson.getSkjermetTom());
+        Assertions.assertEquals(ressursDto.getFunksjonellId(), savedSkjemetPerson.getFunksjonellId());
+        Assertions.assertNull(savedSkjemetPerson.getTilknyttetRessurs());
+        Assertions.assertNotNull(savedSkjemetPerson.getOpprettetDato());
+        Assertions.assertNotNull(savedSkjemetPerson.getEndretDato());
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.nom.skjermede.personer.skjerming;
 
-import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
