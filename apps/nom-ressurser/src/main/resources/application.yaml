@@ -1,7 +1,10 @@
-app.kafka:
-  username: ${app.username}
-  password: ${app.password}
-  topic.ressurs.name: aapen-nom-ressurs-v1
+app:
+  kafka:
+    username: ${app.username}
+    password: ${app.password}
+    topic.ressurs.name: aapen-nom-ressurs-v1
+  scheduledTasks:
+    repositoryMetrics: 0 0 * ? * *  # Every hour
 
 spring:
   jpa:
