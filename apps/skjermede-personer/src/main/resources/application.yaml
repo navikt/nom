@@ -26,10 +26,13 @@ management:
     prometheus:
       enabled: true
 
-app.kafka:
-  username: ${app.username}
-  password: ${app.password}
-  group-id-prefix: ${nais.app.name}-${nais.namespace}
+app:
+  kafka:
+    username: ${app.username}
+    password: ${app.password}
+    group-id-prefix: ${nais.app.name}-${nais.namespace}
+  scheduledTasks:
+    repositoryMetrics: 0 0 * ? * * # Every hour
 
 spring.kafka:
   client-id: ${app.kafka.username}

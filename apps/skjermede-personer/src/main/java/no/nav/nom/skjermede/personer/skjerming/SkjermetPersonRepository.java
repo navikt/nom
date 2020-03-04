@@ -17,4 +17,14 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
 
     @Query(value = "SELECT nextval('T_SKJERMET_PERSON_FUNK_SEQ')", nativeQuery = true)
     Long nextFunctionalId();
+
+    @Query(value =  "SELECT COUNT(DISTINCT(funksjonell_id)) FROM T_SKJERMET_PERSON " +
+                    "WHERE (skjermet_tom IS NULL OR skjermet_tom <= CURRENT_DATE) " +
+                    "AND tilknyttet_ressurs IS NULL", nativeQuery = true)
+    long countDistinctSkjermetAnsatte();
+
+    @Query(value =  "SELECT COUNT(DISTINCT(funksjonell_id)) FROM T_SKJERMET_PERSON " +
+                    "WHERE (skjermet_tom IS NULL OR skjermet_tom <= CURRENT_DATE) " +
+                    "AND tilknyttet_ressurs IS NOT NULL", nativeQuery = true)
+    long countDistinctSkjermetFamilie();
 }
