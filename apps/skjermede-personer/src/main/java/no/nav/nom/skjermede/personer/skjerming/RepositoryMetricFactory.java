@@ -18,7 +18,6 @@ public class RepositoryMetricFactory {
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
-        System.out.println("exporting");
         meterRegistry.gauge("database.skjermet.count", Tags.of("count", "distinct", "type", "ansatt", "validation", "valid"), repository.countDistinctSkjermetAnsatte());
         meterRegistry.gauge("database.skjermet.count", Tags.of("count", "distinct", "type", "familie", "validation", "valid"), repository.countDistinctSkjermetFamilie());
     }
