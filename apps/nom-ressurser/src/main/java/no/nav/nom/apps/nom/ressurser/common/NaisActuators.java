@@ -1,11 +1,13 @@
 package no.nav.nom.apps.nom.ressurser.common;
 
+import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(NaisActuators.BASE_URL)
+@Unprotected
 public class NaisActuators {
 
     public static final String BASE_URL = "/internal";
