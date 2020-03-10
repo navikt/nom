@@ -16,10 +16,12 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     List<Ressurs> findAllByPersonident(String personIdent);
 
+    List<Ressurs> findAllByProduced(boolean produced);
+
     @Query(value = "SELECT nextval('T_RESSURS_FUNK_SEQ')", nativeQuery = true)
     Long nextFunctionalId();
 
-    @Query(value = "SELECT COUNT(DISTINCT funksjonell_id) FROM T_RESSURS WHERE (sluttdato <= CURRENT_DATE OR sluttdato IS NULL) AND ressurstype = :ressurstype", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT funksjonell_id) FROM T_RESSURS WHERE (sluttdato IS NULL OR sluttdato <= CURRENT_DATE) AND ressurstype = :ressurstype", nativeQuery = true)
     long countDistinctByFunksjonellIdAndValid(@Param("ressurstype") String ressurstype);
 }
 

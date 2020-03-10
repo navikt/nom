@@ -33,8 +33,8 @@ public class Ressurs {
     private Long id;
 
     @NotNull
-    @Column(name = "FUNKSJONELL_ID")
-    private Long funksjonellId;
+    @Column(name = "NAV_IDENT")
+    private String navIdent;
 
     @NotNull
     @Column(name = "PERSONIDENT")
@@ -59,4 +59,7 @@ public class Ressurs {
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDate endretDato;
+
+    @Column(name = "PRODUCED")
+    private boolean produced;
 }
