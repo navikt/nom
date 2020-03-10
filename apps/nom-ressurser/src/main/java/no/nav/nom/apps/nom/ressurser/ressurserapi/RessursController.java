@@ -23,8 +23,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RestController
+@Unprotected
 @RequestMapping(value = "/api/v1/ressurs", produces = APPLICATION_JSON_VALUE)
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 @RequiredArgsConstructor
 public class RessursController {
 
@@ -35,6 +35,7 @@ public class RessursController {
     private final TokenUtil tokenUtil;
 
     @GetMapping("/isAnsatt")
+    @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
     public boolean isAnsatt(@RequestParam String ressursType){
         final String personident = Optional
                 .ofNullable(tokenUtil.getSubject())
@@ -48,19 +49,16 @@ public class RessursController {
                 );
     }
 
-    @Unprotected
     @GetMapping
     public List<Ressurs> getAll() {
         return repository.findAll();
     }
 
-    @Unprotected
     @GetMapping("/{id}")
     public Ressurs get(@PathVariable Long id) {
         return repository.getOne(id);
     }
 
-    @Unprotected
     @PostMapping
     public Ressurs createOrEdit(@RequestBody RessursRequestDTO ressurs) {
         return service.saveAndSend(converted(ressurs));
