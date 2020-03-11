@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Profile("!local")
+@Profile("midlertidigDisabled")
 @Component
 @RequiredArgsConstructor
 @Slf4j
