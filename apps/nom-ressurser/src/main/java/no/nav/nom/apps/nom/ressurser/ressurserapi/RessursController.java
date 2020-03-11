@@ -2,7 +2,6 @@ package no.nav.nom.apps.nom.ressurser.ressurserapi;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
 import no.nav.nom.contract.nom.dto.Ressurstype;
@@ -46,25 +45,17 @@ public class RessursController {
     @Transactional(value = "transactionManager")
     public Ressurs createOrEdit(@RequestBody RessursRequestDTO ressurs) {
         Ressurs nyRessurs = converted(ressurs);
-            return repository.findByPersonident(nyRessurs.getPersonident())
-                    .map(eksisterende -> {
-                        nyRessurs.setId(eksisterende.getId());
-                        nyRessurs.setNavIdent(eksisterende.getNavIdent());
-                        nyRessurs.setOpprettetDato(eksisterende.getOpprettetDato());
-                        nyRessurs.setEndretDato(LocalDate.now());
-                        return repository.save(nyRessurs);
-                    })
-                    .orElseGet(() -> {
-                        nyRessurs.setOpprettetDato(LocalDate.now());
-                        nyRessurs.setEndretDato(LocalDate.now());
-                        return repository.save(nyRessurs);
-                    });
+        nyRessurs.setEndretDato(LocalDate.now());
+        return repository.save(nyRessurs);
     }
 
     private static Ressurs converted(RessursRequestDTO ressursRequestDTO){
         return Ressurs.builder()
                 .personident(ressursRequestDTO.getPersonident())
                 .navIdent(ressursRequestDTO.getNavIdent())
+                .epost(ressursRequestDTO.getEpost())
+                .fornavn(ressursRequestDTO.getFornavn())
+                .etternavn(ressursRequestDTO.getEtternavn())
                 .ressurstype(ressursRequestDTO.getRessurstype())
                 .startdato(LocalDate.parse(ressursRequestDTO.getStartdato()))
                 .sluttdato(ressursRequestDTO.getSluttdato() == null ? null : LocalDate.parse(ressursRequestDTO.getSluttdato()))

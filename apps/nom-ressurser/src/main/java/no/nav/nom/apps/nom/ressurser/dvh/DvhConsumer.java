@@ -4,17 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
+import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Profile("local")
+@Profile("!local")
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -22,32 +27,37 @@ public class DvhConsumer {
 
     @Value("${dvh.endpoint}")
     private String dvhEndpoint;
-    private String uriVariable = "in_sekvensnummer=";
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
 
-    @Scheduled(cron = "${app.scheduledTasks.dvhConsumer}")
+    @Scheduled(fixedDelay = 5000)
     @Transactional(value = "transactionManager")
     public void hentBulkOppdatering(){
+        Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
+        String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
+        List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
 
+        result.stream()
+                .map(DvhRessursDTO::getSekvensnr)
+                .max(Long::compare)
+                .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
+
+        ressursRepository.saveAll(result.stream().map(DvhConsumer::converted).collect(Collectors.toList()));
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
         return Ressurs.builder()
                 .navIdent(dvhRessursDTO.getNav_ident())
-                .personident(dvhRessursDTO.getPersonIdent())
-                .ressurstype(null)
-                .startdato(dvhRessursDTO.getStart_dato())
-                .sluttdato(null)
-                .opprettetDato(LocalDate.now())
+                .personident(dvhRessursDTO.getFnr())
+                .fornavn(dvhRessursDTO.getFornavn())
+                .etternavn(dvhRessursDTO.getEtternavn())
+                .epost(dvhRessursDTO.getEpost())
+                .ressurstype(Ressurstype.EKSTERN)
+                .startdato(dvhRessursDTO.getRemedy_start_dato())
+                .sluttdato(dvhRessursDTO.getAgresso_slutt_dato() == null ? dvhRessursDTO.getRemedy_slutt_dato() : dvhRessursDTO.getAgresso_slutt_dato())
                 .endretDato(LocalDate.now())
                 .build();
-    }
-
-    @Bean
-    private RestTemplate restTemplate(){
-        return new RestTemplate();
     }
 }

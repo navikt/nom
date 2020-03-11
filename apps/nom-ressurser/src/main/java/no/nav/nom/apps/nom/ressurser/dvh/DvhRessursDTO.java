@@ -11,7 +11,7 @@ public class DvhRessursDTO {
 
     private String nav_ident; // Nødvendig
 
-    private String personIdent; // Nødvendig
+    private String fnr; // Nødvendig
 
     private String fornavn; // ikke nødvendig?
 
@@ -19,9 +19,9 @@ public class DvhRessursDTO {
 
     private String epost; // nødvendig
 
-    private LocalDate start_dato; // nødvendig
+    private LocalDate remedy_start_dato; // nødvendig
 
-    private LocalDate slutt_dato; // nødvendig
+    private LocalDate remedy_slutt_dato; // nødvendig
 
     private LocalDate agresso_slutt_dato; // Ikke nødvendig?
 

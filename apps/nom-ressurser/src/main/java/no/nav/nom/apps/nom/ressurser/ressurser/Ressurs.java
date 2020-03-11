@@ -10,10 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -27,14 +24,19 @@ import java.time.LocalDate;
 public class Ressurs {
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ressursIdGenerator")
-    @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
-    private Long id;
-
-    @NotNull
     @Column(name = "NAV_IDENT")
     private String navIdent;
+
+    @Column(name = "EPOST")
+    private String epost;
+
+    @NotNull
+    @Column(name = "FORNAVN")
+    private String fornavn;
+
+    @NotNull
+    @Column(name = "ETTERNAVN")
+    private String etternavn;
 
     @NotNull
     @Column(name = "PERSONIDENT")
@@ -51,10 +53,6 @@ public class Ressurs {
 
     @Column(name = "SLUTTDATO")
     private LocalDate sluttdato;
-
-    @NotNull
-    @Column(name = "OPPRETTET_DATO")
-    private LocalDate opprettetDato;
 
     @NotNull
     @Column(name = "ENDRET_DATO")
