@@ -12,6 +12,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -30,20 +31,19 @@ public class RessursController {
 
     private static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
 
-    private final RessursService service;
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
 
     @GetMapping("/isAnsatt")
     @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
     public boolean isAnsatt(@RequestParam String ressursType){
-        final String personident = Optional
+        final String personIdent = Optional
                 .ofNullable(tokenUtil.getSubject())
                 .orElseThrow(() -> new UnauthorizedOperationException(UNAUTHORIZED_MESSAGE));
 
-        validerTilgang(personident);
+        validerTilgang(personIdent);
 
-        return service.hentAlleAnsattForholdForPerson(personident).stream()
+        return repository.findAllByPersonident(personIdent).stream()
                 .anyMatch(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
                         && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
                 );
@@ -59,14 +59,22 @@ public class RessursController {
         return repository.getOne(id);
     }
 
+    // Midlertidig rest-endepunkt for å manuelt opprette brukere.
     @PostMapping
+    @Transactional(value = "transactionManager")
     public Ressurs createOrEdit(@RequestBody RessursRequestDTO ressurs) {
-        return service.saveAndSend(converted(ressurs));
+        Ressurs nyRessurs = converted(ressurs);
+        nyRessurs.setEndretDato(LocalDate.now());
+        return repository.save(nyRessurs);
     }
 
     private static Ressurs converted(RessursRequestDTO ressursRequestDTO){
         return Ressurs.builder()
                 .personident(ressursRequestDTO.getPersonident())
+                .navIdent(ressursRequestDTO.getNavIdent())
+                .epost(ressursRequestDTO.getEpost())
+                .fornavn(ressursRequestDTO.getFornavn())
+                .etternavn(ressursRequestDTO.getEtternavn())
                 .ressurstype(ressursRequestDTO.getRessurstype())
                 .startdato(LocalDate.parse(ressursRequestDTO.getStartdato()))
                 .sluttdato(ressursRequestDTO.getSluttdato() == null ? null : LocalDate.parse(ressursRequestDTO.getSluttdato()))

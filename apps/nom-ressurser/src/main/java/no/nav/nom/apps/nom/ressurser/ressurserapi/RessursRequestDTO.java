@@ -8,6 +8,10 @@ import java.time.LocalDate;
 @Getter
 public class RessursRequestDTO {
     private String personident;
+    private String navIdent;
+    private String fornavn;
+    private String etternavn;
+    private String epost;
     private Ressurstype ressurstype;
     private String startdato;
     private String sluttdato;

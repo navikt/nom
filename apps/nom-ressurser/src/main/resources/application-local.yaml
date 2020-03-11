@@ -2,6 +2,8 @@ app.kafka:
   username: NO_VALUE
   password: NO_VALUE
 
+dvh.endpoint: dummyUrl
+
 spring:
   datasource:
     username: postgres
