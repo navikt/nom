@@ -38,7 +38,7 @@ public class DvhConsumer {
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
         //List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
-        if((result.getNom_ansatteResult()) != null) {
+        if(result.getNom_ansatteResult() != null) {
             result.getNom_ansatteResult().stream()
                     .map(DvhRessursDTO::getSekvensnr)
                     .max(Long::compare)
