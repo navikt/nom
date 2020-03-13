@@ -36,14 +36,15 @@ public class DvhConsumer {
     public void hentBulkOppdatering(){
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
-        List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
+        DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
+        //List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
 
-        result.stream()
+        result.getNom_ansatteResult().stream()
                 .map(DvhRessursDTO::getSekvensnr)
                 .max(Long::compare)
                 .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
 
-        ressursRepository.saveAll(result.stream().map(DvhConsumer::converted).collect(Collectors.toList()));
+        ressursRepository.saveAll(result.getNom_ansatteResult().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
