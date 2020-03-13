@@ -48,15 +48,18 @@ public class DvhConsumer {
             ressursRepository.saveAll(
                     result.getAnsatteResultList().stream().map(DvhConsumer::converted)
                     .map(ressurs -> {
-                        Ressurs temp = ressursRepository.findByPersonident(ressurs.getPersonident()).get();
-                        if(temp != null){
-                            ressurs.setId(temp.getId());
-                            ressurs.setOpprettetDato(temp.getOpprettetDato());
-                        }
-                        else{
-                            ressurs.setOpprettetDato(LocalDate.now());
-                        }
-                        ressurs.setEndretDato(LocalDate.now());
+                        ressursRepository.findByPersonident(ressurs.getPersonident())
+                                .map(eksisterende -> {
+                                    ressurs.setId(eksisterende.getId());
+                                    ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                                    ressurs.setEndretDato(LocalDate.now());
+                                    return ressurs;
+                                })
+                                .orElseGet(() -> {
+                                    ressurs.setOpprettetDato(LocalDate.now());
+                                    ressurs.setEndretDato(LocalDate.now());
+                                    return ressurs;
+                                });
                         return ressurs;
                     }).collect(Collectors.toList())
             );
