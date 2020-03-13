@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class DvhResultWrapper {
-    public List<DvhRessursDTO> nom_ansatteResult;
+    public List<DvhRessursDTO> NOM_ANSATTEResult;
 }

@@ -7,27 +7,27 @@ import java.time.LocalDate;
 @Data
 public class DvhRessursDTO {
 
-    public long sekvensnr;
+    public long SEKVENSNR;
 
-    public String nav_ident; // Nødvendig
+    public String NAV_IDENT; // Nødvendig
 
-    public String fnr; // Nødvendig
+    public String FNR; // Nødvendig
 
-    public String fornavn; // ikke nødvendig?
+    public String FORNAVN; // ikke nødvendig?
 
-    public String etternavn; // ikke nødvendig?
+    public String ETTERNAVN; // ikke nødvendig?
 
-    public String epost; // nødvendig
+    public String EPOST; // nødvendig
 
-    public LocalDate remedy_start_dato; // nødvendig
+    public LocalDate REMEDY_START_DATO; // nødvendig
 
-    public LocalDate remedy_slutt_dato; // nødvendig
+    public LocalDate REMEDY_SLUTT_DATO; // nødvendig
 
-    public LocalDate agresso_slutt_dato; // Ikke nødvendig?
+    public LocalDate AGRESSO_SLUTT_DATO; // Ikke nødvendig?
 
-    public boolean ansatt_per_idag; // ikke nødvendig
+    public boolean ANSATT_PER_IDAG; // ikke nødvendig
 
-    public String ansettelsestype_besk; // ikke nødvendig?
+    public String ANSETTELSESTYPE_BESK; // ikke nødvendig?
 
-    public String ansatt_type; // nødvendig
+    public String ANSATT_TYPE; // nødvendig
 }
