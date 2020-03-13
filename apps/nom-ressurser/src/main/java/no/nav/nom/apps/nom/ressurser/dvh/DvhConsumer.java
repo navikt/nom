@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Profile("!local")
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -44,7 +45,21 @@ public class DvhConsumer {
                     .max(Long::compare)
                     .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
 
-            ressursRepository.saveAll(result.getAnsatteResultList().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
+            ressursRepository.saveAll(
+                    result.getAnsatteResultList().stream().map(DvhConsumer::converted)
+                    .map(ressurs -> {
+                        Ressurs temp = ressursRepository.findByPersonident(ressurs.getPersonident()).get();
+                        if(temp != null){
+                            ressurs.setId(temp.getId());
+                            ressurs.setOpprettetDato(temp.getOpprettetDato());
+                        }
+                        else{
+                            ressurs.setOpprettetDato(LocalDate.now());
+                        }
+                        ressurs.setEndretDato(LocalDate.now());
+                        return ressurs;
+                    }).collect(Collectors.toList())
+            );
         }
     }
 
