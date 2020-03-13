@@ -1,8 +1,14 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 @Getter
@@ -36,11 +42,20 @@ public class DvhRessursDTO {
     private LocalDate agressoSluttDato; // Ikke nødvendig?
 
     @JsonProperty("ANSATT_PER_IDAG")
-    private boolean isAnsatt; // ikke nødvendig
+    @JsonDeserialize(using=NumericBooleanDeserializer.class) // denne kommer i format "0"/"1" som jackson ikke støtter.
+    private Boolean isAnsatt; // ikke nødvendig
 
     @JsonProperty("ANSETTELSESTYPE_BESK")
     private String ansettelsesTypeBeskrivelse; // ikke nødvendig?
 
     @JsonProperty("ANSATT_TYPE")
     private String ansattType; // nødvendig
+
+    public static class NumericBooleanDeserializer extends JsonDeserializer<Boolean> {
+
+        @Override
+        public Boolean deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException {
+            return !"0".equals(parser.getText());
+        }
+    }
 }
