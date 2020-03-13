@@ -1,10 +1,10 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Getter
+@Data
 public class DvhRessursDTO {
 
     private long sekvensnr;
