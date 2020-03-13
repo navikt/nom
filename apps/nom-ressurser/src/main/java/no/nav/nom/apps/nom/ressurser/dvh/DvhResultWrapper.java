@@ -1,10 +1,15 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
+@Getter
 public class DvhResultWrapper {
-    public List<DvhRessursDTO> NOM_ANSATTEResult;
+    @JsonProperty("NOM_ANSATTEResult")
+    private List<DvhRessursDTO> ansatteResultList;
 }
+
+
+

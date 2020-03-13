@@ -1,33 +1,46 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
 public class DvhRessursDTO {
 
-    public long SEKVENSNR;
+    @JsonProperty("SEKVENSNR")
+    private long offset;
 
-    public String NAV_IDENT; // Nødvendig
+    @JsonProperty("NAV_IDENT")
+    private String navIdent; // Nødvendig
 
-    public String FNR; // Nødvendig
+    @JsonProperty("FNR")
+    private String personIdent; // Nødvendig
 
-    public String FORNAVN; // ikke nødvendig?
+    @JsonProperty("FORNAVN")
+    private String fornavn; // ikke nødvendig?
 
-    public String ETTERNAVN; // ikke nødvendig?
+    @JsonProperty("ETTERNAVN")
+    private String etternavn; // ikke nødvendig?
 
-    public String EPOST; // nødvendig
+    @JsonProperty("EPOST")
+    private String epost; // nødvendig
 
-    public LocalDate REMEDY_START_DATO; // nødvendig
+    @JsonProperty("REMEDY_START_DATO")
+    private LocalDate remedyStartDato; // nødvendig
 
-    public LocalDate REMEDY_SLUTT_DATO; // nødvendig
+    @JsonProperty("REMEDY_SLUTT_DATO")
+    private LocalDate remedySluttDato; // nødvendig
 
-    public LocalDate AGRESSO_SLUTT_DATO; // Ikke nødvendig?
+    @JsonProperty("AGRESSO_SLUTT_DATO")
+    private LocalDate agressoSluttDato; // Ikke nødvendig?
 
-    public boolean ANSATT_PER_IDAG; // ikke nødvendig
+    @JsonProperty("ANSATT_PER_IDAG")
+    private boolean isAnsatt; // ikke nødvendig
 
-    public String ANSETTELSESTYPE_BESK; // ikke nødvendig?
+    @JsonProperty("ANSETTELSESTYPE_BESK")
+    private String ansettelsesTypeBeskrivelse; // ikke nødvendig?
 
-    public String ANSATT_TYPE; // nødvendig
+    @JsonProperty("ANSATT_TYPE")
+    private String ansattType; // nødvendig
 }

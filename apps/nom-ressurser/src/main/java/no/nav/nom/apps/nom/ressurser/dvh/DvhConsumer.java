@@ -38,26 +38,26 @@ public class DvhConsumer {
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
         //List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
-        if(result.getNom_ansatteResult() != null) {
-            result.getNom_ansatteResult().stream()
-                    .map(DvhRessursDTO::getSekvensnr)
+        if(result.getAnsatteResultList() != null) {
+            result.getAnsatteResultList().stream()
+                    .map(DvhRessursDTO::getOffset)
                     .max(Long::compare)
                     .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
 
-            ressursRepository.saveAll(result.getNom_ansatteResult().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
+            ressursRepository.saveAll(result.getAnsatteResultList().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
         }
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
         return Ressurs.builder()
-                .navIdent(dvhRessursDTO.getNav_ident())
-                .personident(dvhRessursDTO.getFnr())
+                .navIdent(dvhRessursDTO.getNavIdent())
+                .personident(dvhRessursDTO.getPersonIdent())
                 .fornavn(dvhRessursDTO.getFornavn())
                 .etternavn(dvhRessursDTO.getEtternavn())
                 .epost(dvhRessursDTO.getEpost())
                 .ressurstype(Ressurstype.EKSTERN)
-                .startdato(dvhRessursDTO.getRemedy_start_dato())
-                .sluttdato(dvhRessursDTO.getAgresso_slutt_dato() == null ? dvhRessursDTO.getRemedy_slutt_dato() : dvhRessursDTO.getAgresso_slutt_dato())
+                .startdato(dvhRessursDTO.getRemedyStartDato())
+                .sluttdato(dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato())
                 .endretDato(LocalDate.now())
                 .build();
     }
