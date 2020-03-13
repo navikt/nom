@@ -38,13 +38,14 @@ public class DvhConsumer {
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
         //List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
+        if((result.getNom_ansatteResult()) != null) {
+            result.getNom_ansatteResult().stream()
+                    .map(DvhRessursDTO::getSekvensnr)
+                    .max(Long::compare)
+                    .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
 
-        result.getNom_ansatteResult().stream()
-                .map(DvhRessursDTO::getSekvensnr)
-                .max(Long::compare)
-                .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
-
-        ressursRepository.saveAll(result.getNom_ansatteResult().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
+            ressursRepository.saveAll(result.getNom_ansatteResult().stream().map(DvhConsumer::converted).collect(Collectors.toList()));
+        }
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
