@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
+import no.nav.nom.apps.nom.ressurser.ressurserapi.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.nom.ressurser.ressurserapi.exceptions.UnauthorizedOperationException;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
@@ -30,6 +32,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class RessursController {
 
     private static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
+    private static final String NOT_FOUND_MESSAGE = "Ressurs med NAV-ident %s ikke funnet";
 
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
@@ -47,6 +50,22 @@ public class RessursController {
                 .anyMatch(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
                         && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
                 );
+    }
+
+    @GetMapping("/navn/{navIdent}")
+    @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
+    public NavnResponseDTO getNavn(@PathVariable String navIdent){
+        final String personIdent = Optional
+                .ofNullable(tokenUtil.getSubject())
+                .orElseThrow(() -> new UnauthorizedOperationException(UNAUTHORIZED_MESSAGE));
+
+        validerTilgang(personIdent);
+
+        Ressurs gyldigRessurs = repository.findByNavIdent(navIdent).stream()
+                .filter(ressurs -> ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(NOT_FOUND_MESSAGE, navIdent)));
+
+        return NavnResponseDTO.builder().fornavn(gyldigRessurs.getFornavn()).etternavn(gyldigRessurs.getEtternavn()).build();
     }
 
     @GetMapping
@@ -88,6 +107,12 @@ public class RessursController {
 
     @ExceptionHandler(UnauthorizedOperationException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizedOperationException(final UnauthorizedOperationException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+    }
+
+    @ExceptionHandler(RessursNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRessursNotFoundException(final RessursNotFoundException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
     }

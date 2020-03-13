@@ -1,7 +1,5 @@
 package no.nav.nom.apps.nom.ressurser.ressurser;
 
-import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
-import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +15,8 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
     List<Ressurs> findAllByPersonident(String personIdent);
 
     List<Ressurs> findAllByProduced(boolean produced);
+
+    List<Ressurs> findByNavIdent(String navIdent);
 
     @Query(value = "SELECT nextval('T_RESSURS_FUNK_SEQ')", nativeQuery = true)
     Long nextFunctionalId();
