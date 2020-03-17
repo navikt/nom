@@ -31,15 +31,15 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
+    private final long incrementValue = 1000L;
 
     @Scheduled(fixedDelay = 5000)
     @Transactional(value = "transactionManager")
     public void hentBulkOppdatering(){
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
-        String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" +dvhOffset.getIncrementedValue();
+        String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset()+incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
         
-
         if(result.getAnsatteResultList() != null) {
             result.getAnsatteResultList().stream()
                     .map(DvhRessursDTO::getOffset)
