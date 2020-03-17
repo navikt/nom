@@ -31,7 +31,7 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
-    private final long incrementValue = 1000L;
+    private final long incrementValue = 5000L;
 
     @Scheduled(fixedDelay = 5000)
     @Transactional(value = "transactionManager")
@@ -39,7 +39,7 @@ public class DvhConsumer {
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset()+incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
-        
+
         if(result.getAnsatteResultList() != null) {
             result.getAnsatteResultList().stream()
                     .map(DvhRessursDTO::getOffset)
@@ -72,10 +72,21 @@ public class DvhConsumer {
                 .fornavn(dvhRessursDTO.getFornavn())
                 .etternavn(dvhRessursDTO.getEtternavn())
                 .epost(dvhRessursDTO.getEpost())
-                .ressurstype(Ressurstype.EKSTERN)
+                .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode()))
                 .startdato(dvhRessursDTO.getRemedyStartDato())
                 .sluttdato(dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato())
                 .endretDato(LocalDate.now())
                 .build();
+    }
+
+    private static Ressurstype convertedRessursType(String ressurstypeKode){
+        switch (ressurstypeKode.toUpperCase()){
+            case "F": case "K": case "M": case "N":
+                return Ressurstype.INTERN;
+            case "E": case "I": case "L": case "O": case "P":
+            case "S": case "T": case "V": case "Y":
+                return Ressurstype.EKSTERN;
+            default: return null;
+        }
     }
 }

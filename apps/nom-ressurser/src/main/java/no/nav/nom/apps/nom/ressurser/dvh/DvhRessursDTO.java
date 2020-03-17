@@ -26,6 +26,9 @@ public class DvhRessursDTO {
     @JsonProperty("EPOST")
     private String epost;
 
+    @JsonProperty("ANSATT_RESSURS_KODE")
+    private String ressursTypeKode;
+
     @JsonProperty("REMEDY_START_DATO")
     private LocalDate remedyStartDato;
 
