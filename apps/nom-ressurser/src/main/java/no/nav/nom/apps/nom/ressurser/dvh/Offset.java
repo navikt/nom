@@ -22,8 +22,14 @@ public class Offset {
     @Column(name = "OFFSET_VALUE")
     private Long offset;
 
+    private final long incrementValue = 1000L;
+
     public Offset setOffset(long offset){
         this.offset = offset;
         return this;
+    }
+
+    public Long getIncrementedValue(){
+        return offset+incrementValue;
     }
 }

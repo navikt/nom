@@ -36,33 +36,31 @@ public class DvhConsumer {
     @Transactional(value = "transactionManager")
     public void hentBulkOppdatering(){
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
-        String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset();
+        String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" +dvhOffset.getIncrementedValue();
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
-        //List<DvhRessursDTO> result = Arrays.asList(restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, DvhRessursDTO[].class).getBody());
+
         if(result.getAnsatteResultList() != null) {
             result.getAnsatteResultList().stream()
                     .map(DvhRessursDTO::getOffset)
                     .max(Long::compare)
                     .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
 
-            ressursRepository.saveAll(
-                    result.getAnsatteResultList().stream().map(DvhConsumer::converted)
-                    .map(ressurs -> {
+            result.getAnsatteResultList().stream()
+                    .map(DvhConsumer::converted)
+                    .forEach(ressurs ->
                         ressursRepository.findByPersonident(ressurs.getPersonident())
                                 .map(eksisterende -> {
                                     ressurs.setId(eksisterende.getId());
                                     ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
                                     ressurs.setEndretDato(LocalDate.now());
-                                    return ressurs;
+                                    return ressursRepository.save(ressurs);
                                 })
                                 .orElseGet(() -> {
                                     ressurs.setOpprettetDato(LocalDate.now());
                                     ressurs.setEndretDato(LocalDate.now());
-                                    return ressurs;
-                                });
-                        return ressurs;
-                    }).collect(Collectors.toList())
-            );
+                                    return ressursRepository.save(ressurs);
+                                })
+                    );
         }
     }
 
