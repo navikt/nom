@@ -38,6 +38,7 @@ public class DvhConsumer {
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" +dvhOffset.getIncrementedValue();
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
+        
 
         if(result.getAnsatteResultList() != null) {
             result.getAnsatteResultList().stream()
