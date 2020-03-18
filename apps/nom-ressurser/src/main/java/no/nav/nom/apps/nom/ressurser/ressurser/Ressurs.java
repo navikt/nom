@@ -6,12 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -24,6 +19,11 @@ import java.time.LocalDate;
 public class Ressurs {
 
     @Id
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ressursIdGenerator")
+    @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
+    private Long id;
+
     @Column(name = "NAV_IDENT")
     private String navIdent;
 
@@ -57,6 +57,10 @@ public class Ressurs {
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDate endretDato;
+
+    @NotNull
+    @Column(name = "OPPRETTET_DATO")
+    private LocalDate opprettetDato;
 
     @Column(name = "PRODUCED")
     private boolean produced;

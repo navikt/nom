@@ -41,15 +41,19 @@ public class KafkaSkjermedePersonerListenerTest {
 
         RessursDto ressursDto = RessursDto.builder()
                 .personident("TestIdent")
+                .navIdent("TestNavIdent")
+                .fornavn("fornavn")
+                .etternavn("etternavn")
                 .ressurstype(Ressurstype.INTERN)
                 .startdato(startDato)
                 .sluttdato(sluttDato)
-                .funksjonellId(1L)
                 .build();
         SkjermetPerson savedSkjermetPerson = SkjermetPerson.builder()
                 .id(id)
                 .personident("TestIdent")
-                .funksjonellId(1L)
+                .navIdent("TestNavIdent")
+                .fornavn("fornavn")
+                .etternavn("etternavn")
                 .skjermetFom(startDato)
                 .opprettetDato(opprettetDato)
                 .endretDato(oldEndretDato)
@@ -64,7 +68,9 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjermetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjermetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getFunksjonellId(), savedSkjermetPerson.getFunksjonellId());
+        Assertions.assertEquals(ressursDto.getNavIdent(), savedSkjermetPerson.getNavIdent());
+        Assertions.assertEquals(ressursDto.getFornavn(), savedSkjermetPerson.getFornavn());
+        Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjermetPerson.getEtternavn());
 
         Assertions.assertEquals(id, savedSkjermetPerson.getId());
         Assertions.assertEquals(opprettetDato, savedSkjermetPerson.getOpprettetDato());
@@ -77,10 +83,12 @@ public class KafkaSkjermedePersonerListenerTest {
     public void onMessageNyPerson(){
         RessursDto ressursDto = RessursDto.builder()
                 .personident("TestIdent")
+                .navIdent("TestNavIdent")
+                .etternavn("etternavn")
+                .fornavn("fornavn")
                 .ressurstype(Ressurstype.INTERN)
                 .startdato(LocalDate.now())
                 .sluttdato(LocalDate.now())
-                .funksjonellId(1L)
                 .build();
 
         when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
@@ -93,7 +101,9 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjemetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjemetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjemetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getFunksjonellId(), savedSkjemetPerson.getFunksjonellId());
+        Assertions.assertEquals(ressursDto.getNavIdent(), savedSkjemetPerson.getNavIdent());
+        Assertions.assertEquals(ressursDto.getFornavn(), savedSkjemetPerson.getFornavn());
+        Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjemetPerson.getEtternavn());
         Assertions.assertNull(savedSkjemetPerson.getTilknyttetRessurs());
         Assertions.assertNotNull(savedSkjemetPerson.getOpprettetDato());
         Assertions.assertNotNull(savedSkjemetPerson.getEndretDato());

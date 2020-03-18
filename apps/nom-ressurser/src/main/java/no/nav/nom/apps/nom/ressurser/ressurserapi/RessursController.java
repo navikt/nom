@@ -83,8 +83,18 @@ public class RessursController {
     @Transactional(value = "transactionManager")
     public Ressurs createOrEdit(@RequestBody RessursRequestDTO ressurs) {
         Ressurs nyRessurs = converted(ressurs);
-        nyRessurs.setEndretDato(LocalDate.now());
-        return repository.save(nyRessurs);
+        return repository.findByPersonident(nyRessurs.getPersonident())
+                .map(eksisterende -> {
+                    nyRessurs.setId(eksisterende.getId());
+                    nyRessurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                    nyRessurs.setEndretDato(LocalDate.now());
+                    return repository.save(nyRessurs);
+                })
+                .orElseGet(() -> {
+                    nyRessurs.setOpprettetDato(LocalDate.now());
+                    nyRessurs.setEndretDato(LocalDate.now());
+                    return repository.save(nyRessurs);
+                });
     }
 
     private static Ressurs converted(RessursRequestDTO ressursRequestDTO){

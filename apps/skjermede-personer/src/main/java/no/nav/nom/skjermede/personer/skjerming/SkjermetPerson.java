@@ -35,8 +35,16 @@ public class SkjermetPerson {
     private String personident;
 
     @NotNull
-    @Column(name = "FUNKSJONELL_ID")
-    private Long funksjonellId;
+    @Column(name = "NAV_IDENT")
+    private String navIdent;
+
+    @NotNull
+    @Column(name = "FORNAVN")
+    private String fornavn;
+
+    @NotNull
+    @Column(name = "ETTERNAVN")
+    private String etternavn;
 
     @NotNull
     @Column(name = "SKJERMET_FOM")

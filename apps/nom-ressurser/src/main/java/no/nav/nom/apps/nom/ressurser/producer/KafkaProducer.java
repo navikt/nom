@@ -12,6 +12,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -26,17 +28,22 @@ public class KafkaProducer {
 
     @Transactional(value = "transactionManager")
     @Timed(value = "kafka.messages.produced.timed", description = "Time spent sending kafka messages", extraTags = {"topic", "aapen-nom-ressurs-v1"})
-    public void send(Ressurs ressurs) {
+    public void send(List<Ressurs> ressursList) {
+        ressursList.forEach(ressurs -> {
             kafkaTemplate.send(ressursTopic, ressurs.getPersonident(), converted(ressurs));
             ressurs.setProduced(true);
-            repository.save(ressurs);
             meterRegistry.counter("kafka.messages.produced", "topic", ressursTopic).increment();
             log.info("Sendt ressurs med navident: {}", ressurs.getNavIdent());
+        });
+
+        repository.saveAll(ressursList);
     }
 
     private static RessursDto converted(Ressurs ressurs) {
         return RessursDto.builder()
                 .personident(ressurs.getPersonident())
+                .fornavn(ressurs.getFornavn())
+                .etternavn(ressurs.getEtternavn())
                 .ressurstype(ressurs.getRessurstype())
                 .startdato(ressurs.getStartdato())
                 .sluttdato(ressurs.getSluttdato())

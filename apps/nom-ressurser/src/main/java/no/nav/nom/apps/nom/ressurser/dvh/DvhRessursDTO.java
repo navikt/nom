@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -7,27 +8,33 @@ import java.time.LocalDate;
 @Getter
 public class DvhRessursDTO {
 
-    private long sekvensnr;
+    @JsonProperty("SEKVENSNR")
+    private long offset;
 
-    private String nav_ident; // Nødvendig
+    @JsonProperty("NAV_IDENT")
+    private String navIdent;
 
-    private String fnr; // Nødvendig
+    @JsonProperty("FNR")
+    private String personIdent;
 
-    private String fornavn; // ikke nødvendig?
+    @JsonProperty("FORNAVN")
+    private String fornavn;
 
-    private String etternavn; // ikke nødvendig?
+    @JsonProperty("ETTERNAVN")
+    private String etternavn;
 
-    private String epost; // nødvendig
+    @JsonProperty("EPOST")
+    private String epost;
 
-    private LocalDate remedy_start_dato; // nødvendig
+    @JsonProperty("ANSATT_RESSURS_KODE")
+    private String ressursTypeKode;
 
-    private LocalDate remedy_slutt_dato; // nødvendig
+    @JsonProperty("REMEDY_START_DATO")
+    private LocalDate remedyStartDato;
 
-    private LocalDate agresso_slutt_dato; // Ikke nødvendig?
+    @JsonProperty("REMEDY_SLUTT_DATO")
+    private LocalDate remedySluttDato;
 
-    private boolean ansatt_per_idag; // ikke nødvendig
-
-    private String ansettelsestype_besk; // ikke nødvendig?
-
-    private String ansatt_type; // nødvendig
+    @JsonProperty("AGRESSO_SLUTT_DATO")
+    private LocalDate agressoSluttDato;
 }
