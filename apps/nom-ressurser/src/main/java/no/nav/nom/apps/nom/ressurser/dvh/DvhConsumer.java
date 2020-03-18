@@ -38,14 +38,10 @@ public class DvhConsumer {
     public void hentBulkOppdatering(){
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset()+incrementValue);
+        log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(),dvhOffset.getOffset()+incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
         if(result.getAnsatteResultList() != null) {
-            result.getAnsatteResultList().stream()
-                    .map(DvhRessursDTO::getOffset)
-                    .max(Long::compare)
-                    .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
-
             result.getAnsatteResultList().stream()
                     .map(DvhConsumer::converted)
                     .forEach(ressurs ->
@@ -62,6 +58,11 @@ public class DvhConsumer {
                                     return ressursRepository.save(ressurs);
                                 })
                     );
+
+            result.getAnsatteResultList().stream()
+                    .map(DvhRessursDTO::getOffset)
+                    .max(Long::compare)
+                    .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
         }
     }
 
