@@ -19,6 +19,9 @@ import java.time.LocalDate;
 public class SkjermetPersonRequestDTO {
 
     private String personident;
+    private String navIdent;
+    private String fornavn;
+    private String etternavn;
     private LocalDate skjermetFom;
     private LocalDate skjermetTom;
     private String tilknyttetRessurs;
@@ -26,6 +29,9 @@ public class SkjermetPersonRequestDTO {
     public SkjermetPerson toEntity() {
         return SkjermetPerson.builder()
                 .personident(personident)
+                .navIdent(navIdent)
+                .fornavn(fornavn)
+                .etternavn(etternavn)
                 .skjermetFom(skjermetFom)
                 .skjermetTom(skjermetTom)
                 .tilknyttetRessurs(tilknyttetRessurs)

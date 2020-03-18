@@ -17,11 +17,15 @@ public class RessursDto {
 
     private String personident;
 
+    private String navIdent;
+
     private Ressurstype ressurstype;
+
+    private String fornavn;
+
+    private String etternavn;
 
     private LocalDate startdato;
 
     private LocalDate sluttdato;
-
-    private Long funksjonellId;
 }

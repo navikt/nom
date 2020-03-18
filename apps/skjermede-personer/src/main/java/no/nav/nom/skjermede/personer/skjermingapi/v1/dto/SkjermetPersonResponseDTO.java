@@ -17,7 +17,13 @@ import java.time.LocalDateTime;
 public class SkjermetPersonResponseDTO implements Serializable {
 
     @JsonProperty
-    private Long funksjonellId;
+    private String navIdent;
+
+    @JsonProperty
+    private String fornavn;
+
+    @JsonProperty
+    private String etternavn;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate skjermetFom;
@@ -36,7 +42,9 @@ public class SkjermetPersonResponseDTO implements Serializable {
 
     public static SkjermetPersonResponseDTO fromEntity(final SkjermetPerson skjermetPerson) {
         return builder()
-                .funksjonellId(skjermetPerson.getFunksjonellId())
+                .navIdent(skjermetPerson.getNavIdent())
+                .fornavn(skjermetPerson.getFornavn())
+                .etternavn(skjermetPerson.getEtternavn())
                 .skjermetFom(skjermetPerson.getSkjermetFom())
                 .skjermetTom(skjermetPerson.getSkjermetTom())
                 .tilknyttetRessurs(skjermetPerson.getTilknyttetRessurs())
