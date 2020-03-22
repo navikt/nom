@@ -33,7 +33,7 @@ public class KafkaProducer {
             kafkaTemplate.send(ressursTopic, ressurs.getPersonident(), converted(ressurs));
             ressurs.setProduced(true);
             meterRegistry.counter("kafka.messages.produced", "topic", ressursTopic).increment();
-            log.info("Sendt ressurs med navident: {}", ressurs.getNavIdent());
+            log.info("Sendt ressurs med navident: {}", ressurs.getNavident());
         });
 
         repository.saveAll(ressursList);
@@ -42,6 +42,7 @@ public class KafkaProducer {
     private static RessursDto converted(Ressurs ressurs) {
         return RessursDto.builder()
                 .personident(ressurs.getPersonident())
+                .navident(ressurs.getNavident())
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
                 .ressurstype(ressurs.getRessurstype())

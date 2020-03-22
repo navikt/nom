@@ -30,7 +30,6 @@ public class KafkaSkjermedePersonerListenerTest {
     @Captor
     private ArgumentCaptor<SkjermetPerson> skjermetPersonArgumentCaptor;
 
-
     @Test
     public void onMessageEksisterendePerson() {
         LocalDate startDato = LocalDate.parse("2020-01-01");
@@ -41,7 +40,7 @@ public class KafkaSkjermedePersonerListenerTest {
 
         RessursDto ressursDto = RessursDto.builder()
                 .personident("TestIdent")
-                .navIdent("TestNavIdent")
+                .navident("TestNavIdent")
                 .fornavn("fornavn")
                 .etternavn("etternavn")
                 .ressurstype(Ressurstype.INTERN)
@@ -51,7 +50,7 @@ public class KafkaSkjermedePersonerListenerTest {
         SkjermetPerson savedSkjermetPerson = SkjermetPerson.builder()
                 .id(id)
                 .personident("TestIdent")
-                .navIdent("TestNavIdent")
+                .navident("TestNavIdent")
                 .fornavn("fornavn")
                 .etternavn("etternavn")
                 .skjermetFom(startDato)
@@ -68,7 +67,7 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjermetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjermetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getNavIdent(), savedSkjermetPerson.getNavIdent());
+        Assertions.assertEquals(ressursDto.getNavident(), savedSkjermetPerson.getNavident());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjermetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjermetPerson.getEtternavn());
 
@@ -83,7 +82,7 @@ public class KafkaSkjermedePersonerListenerTest {
     public void onMessageNyPerson(){
         RessursDto ressursDto = RessursDto.builder()
                 .personident("TestIdent")
-                .navIdent("TestNavIdent")
+                .navident("TestNavIdent")
                 .etternavn("etternavn")
                 .fornavn("fornavn")
                 .ressurstype(Ressurstype.INTERN)
@@ -101,7 +100,7 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjemetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjemetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjemetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getNavIdent(), savedSkjemetPerson.getNavIdent());
+        Assertions.assertEquals(ressursDto.getNavident(), savedSkjemetPerson.getNavident());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjemetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjemetPerson.getEtternavn());
         Assertions.assertNull(savedSkjemetPerson.getTilknyttetRessurs());

@@ -1,38 +1,32 @@
-package no.nav.nom.skjermede.personer.skjermingapi.v1.dto;
+package no.nav.nom.skjermede.personer.skjerming.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SkjermetPersonResponseDTO implements Serializable {
+public class SkjermetPersonResponseDTO {
 
-    @JsonProperty
-    private String navIdent;
-
-    @JsonProperty
+    private String navident;
     private String fornavn;
-
-    @JsonProperty
     private String etternavn;
+    private String tilknyttetRessurs;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate skjermetFom;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate skjermetTom;
-
-    @JsonProperty
-    private String tilknyttetRessurs;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime opprettetDato;
@@ -42,7 +36,7 @@ public class SkjermetPersonResponseDTO implements Serializable {
 
     public static SkjermetPersonResponseDTO fromEntity(final SkjermetPerson skjermetPerson) {
         return builder()
-                .navIdent(skjermetPerson.getNavIdent())
+                .navident(skjermetPerson.getNavident())
                 .fornavn(skjermetPerson.getFornavn())
                 .etternavn(skjermetPerson.getEtternavn())
                 .skjermetFom(skjermetPerson.getSkjermetFom())

@@ -52,18 +52,18 @@ public class RessursController {
                 );
     }
 
-    @GetMapping("/navn/{navIdent}")
+    @GetMapping("/navn/{navident}")
     @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
-    public NavnResponseDTO getNavn(@PathVariable String navIdent){
+    public NavnResponseDTO getNavn(@PathVariable String navident){
         final String personIdent = Optional
                 .ofNullable(tokenUtil.getSubject())
                 .orElseThrow(() -> new UnauthorizedOperationException(UNAUTHORIZED_MESSAGE));
 
         validerTilgang(personIdent);
 
-        Ressurs gyldigRessurs = repository.findByNavIdent(navIdent).stream()
+        Ressurs gyldigRessurs = repository.findByNavident(navident).stream()
                 .filter(ressurs -> ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
-                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(NOT_FOUND_MESSAGE, navIdent)));
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(NOT_FOUND_MESSAGE, navident)));
 
         return NavnResponseDTO.builder().fornavn(gyldigRessurs.getFornavn()).etternavn(gyldigRessurs.getEtternavn()).build();
     }
@@ -97,10 +97,19 @@ public class RessursController {
                 });
     }
 
+    @GetMapping("/epost/{navident}")
+    public String getEmailAdress(@PathVariable final String navident) {
+        final Ressurs ressurs = repository
+                .findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(navident)
+                .orElseThrow(() -> new RessursNotFoundException(String.format("Ressurs med navident %s ikke funnet", navident)));
+
+        return ressurs.getEpost();
+    }
+
     private static Ressurs converted(RessursRequestDTO ressursRequestDTO){
         return Ressurs.builder()
                 .personident(ressursRequestDTO.getPersonident())
-                .navIdent(ressursRequestDTO.getNavIdent())
+                .navident(ressursRequestDTO.getNavident())
                 .epost(ressursRequestDTO.getEpost())
                 .fornavn(ressursRequestDTO.getFornavn())
                 .etternavn(ressursRequestDTO.getEtternavn())
@@ -124,7 +133,7 @@ public class RessursController {
     @ExceptionHandler(RessursNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleRessursNotFoundException(final RessursNotFoundException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage(), HttpStatus.NOT_FOUND.value()));
     }
 
     @Data

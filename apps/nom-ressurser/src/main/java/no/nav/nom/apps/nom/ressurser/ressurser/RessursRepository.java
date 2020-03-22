@@ -16,12 +16,11 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     List<Ressurs> findAllByProduced(boolean produced);
 
-    List<Ressurs> findByNavIdent(String navIdent);
+    List<Ressurs> findByNavident(String navident);
 
-    @Query(value = "SELECT nextval('T_RESSURS_FUNK_SEQ')", nativeQuery = true)
-    Long nextFunctionalId();
+    Optional<Ressurs> findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(String navident);
 
-    @Query(value = "SELECT COUNT(DISTINCT funksjonell_id) FROM T_RESSURS WHERE (sluttdato IS NULL OR sluttdato <= CURRENT_DATE) AND ressurstype = :ressurstype", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT navident) FROM T_RESSURS WHERE (sluttdato IS NULL OR sluttdato <= CURRENT_DATE) AND ressurstype = :ressurstype", nativeQuery = true)
     long countDistinctByFunksjonellIdAndValid(@Param("ressurstype") String ressurstype);
 }
 

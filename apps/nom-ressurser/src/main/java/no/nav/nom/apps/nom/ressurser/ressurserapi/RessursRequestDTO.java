@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 public class RessursRequestDTO {
     private String personident;
-    private String navIdent;
+    private String navident;
     private String fornavn;
     private String etternavn;
     private String epost;

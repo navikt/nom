@@ -2,12 +2,18 @@ app.kafka:
   username: NO_VALUE
   password: NO_VALUE
 
+srv:
+  username: srvSkjermedep@nav.no
+  password: 620A2UjMpxPqjt
+
 spring:
   datasource:
     username: postgres
     password: password
     url: jdbc:postgresql://127.0.0.1:5433/postgres-skjermet
   kafka:
+    listener:
+      missing-topics-fatal: false
     consumer:
       groupid: skjermede-personer
     bootstrap.servers: localhost:9092
@@ -29,3 +35,15 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
+
+no.nav:
+  security:
+    jwt:
+      issuer:
+        selvbetjening:
+          discoveryurl: http://metadata
+          accepted_audience: aud-localhost
+
+aad:
+  client_id: 2d7bd936-3f44-4878-a3db-22fe2aa947ae
+  authority: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b

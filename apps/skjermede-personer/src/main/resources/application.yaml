@@ -71,3 +71,16 @@ no.nav:
         selvbetjening:
           discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
           accepted_audience: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
+
+azure:
+    client_id: 2d7bd936-3f44-4878-a3db-22fe2aa947ae
+    authority: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b
+    srvUser:
+      username: /var/run/secrets/nais.io/vault/aad.username
+      password: /var/run/secrets/nais.io/vault/aad.password
+
+ressurser:
+  api: ${NOM_RESSURSER_API:http://localhost:8080/api/v1/ressurs}
+
+foresporsel:
+  api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}

@@ -34,9 +34,8 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @NotNull
-    @Column(name = "NAV_IDENT")
-    private String navIdent;
+    @Column(name = "NAVIDENT")
+    private String navident;
 
     @NotNull
     @Column(name = "FORNAVN")
