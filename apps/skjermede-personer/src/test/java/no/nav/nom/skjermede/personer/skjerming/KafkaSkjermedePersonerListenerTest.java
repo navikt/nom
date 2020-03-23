@@ -100,10 +100,9 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjemetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjemetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjemetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getNavident(), savedSkjemetPerson.getNavident());
+        Assertions.assertEquals(ressursDto.getNavident(), savedSkjemetPerson.getTilknyttetRessurs());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjemetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjemetPerson.getEtternavn());
-        Assertions.assertNull(savedSkjemetPerson.getTilknyttetRessurs());
         Assertions.assertNotNull(savedSkjemetPerson.getOpprettetDato());
         Assertions.assertNotNull(savedSkjemetPerson.getEndretDato());
     }
