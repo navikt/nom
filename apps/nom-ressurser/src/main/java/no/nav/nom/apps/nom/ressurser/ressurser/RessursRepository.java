@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.ressurser;
 
+import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.Optional;
 public interface RessursRepository extends JpaRepository<Ressurs, Long> {
     Optional<Ressurs> findByPersonident(String personIdent);
 
-    List<Ressurs> findAllByPersonident(String personIdent);
+    List<Ressurs> findAllByPersonidentAndRessurstype(String personIdent, Ressurstype ressurstype);
 
     List<Ressurs> findAllByProduced(boolean produced);
 

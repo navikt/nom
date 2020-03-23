@@ -37,19 +37,28 @@ public class RessursController {
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
 
-    @GetMapping("/isAnsatt")
+    @GetMapping("/ansattStatus")
     @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
-    public boolean isAnsatt(@RequestParam String ressursType){
+    public AnsattStatusResponseDTO ansattStatus() {
         final String personIdent = Optional
                 .ofNullable(tokenUtil.getSubject())
                 .orElseThrow(() -> new UnauthorizedOperationException(UNAUTHORIZED_MESSAGE));
 
         validerTilgang(personIdent);
 
-        return repository.findAllByPersonident(personIdent).stream()
-                .anyMatch(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
-                        && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
-                );
+        List<Ressurs> ressurser = repository.findAllByPersonidentAndRessurstype(personIdent, Ressurstype.INTERN);
+
+        return ressurser.stream()
+                .filter(ressurs -> ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
+                .map(ressurs -> AnsattStatusResponseDTO.builder().ansattNaaEllerNylig(true).gyldig(true).build())
+                .findFirst()
+                .orElse(ressurser.stream()
+                        .filter(ressurs -> ressurs.getSluttdato() != null && ressurs.getSluttdato().isAfter(LocalDate.now().minusMonths(6)))
+                        .map(ressurs -> AnsattStatusResponseDTO.builder().ansattNaaEllerNylig(true).gyldig(false).build())
+                        .findFirst()
+                        .orElseGet(() ->
+                                AnsattStatusResponseDTO.builder().ansattNaaEllerNylig(false).build()));
+
     }
 
     @GetMapping("/navn/{navident}")
