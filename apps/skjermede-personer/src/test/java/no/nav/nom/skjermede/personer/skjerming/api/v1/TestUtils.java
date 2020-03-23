@@ -1,5 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
+import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonRequestDTO;
 
@@ -25,6 +26,14 @@ public class TestUtils {
         return SkjermetPersonRequestDTO.builder()
                 .navident(NAVIDENT)
                 .skjermetFom(LocalDate.now())
+                .build();
+    }
+
+    public static RessursDto ressurs() {
+        return RessursDto.builder()
+                .personident(PERSONIDENT)
+                .navident(NAVIDENT)
+                .sluttdato(LocalDate.now())
                 .build();
     }
 }

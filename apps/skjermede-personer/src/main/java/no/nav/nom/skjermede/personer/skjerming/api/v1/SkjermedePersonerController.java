@@ -36,6 +36,7 @@ public class SkjermedePersonerController {
     @Value("${ressurser.api}")
     private String ressursAPI;
 
+    private final RestTemplate restTemplate;
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final TokenUtil tokenUtil;
 
@@ -99,15 +100,14 @@ public class SkjermedePersonerController {
         validerTilgang(personident);
 
         if (skjermetPersonRepository.findAllByPersonident(personident).stream()
-                .anyMatch(skjermetPerson -> skjermetPerson.getSkjermetTom() != null
-                        && skjermetPerson.getSkjermetTom().isAfter(LocalDate.now()))) {
+                .anyMatch(skjermetPerson -> skjermetPerson.getSkjermetTom() == null
+                        || skjermetPerson.getSkjermetTom().isAfter(LocalDate.now()))) {
             throw new DuplicateSkjermingException(SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
         }
 
-        RessursDto ressurs = new RestTemplate().getForObject(
-                String.format("%s/personident/{personident}?ressursType=INTERN", ressursAPI),
-                RessursDto.class,
-                personident);
+        RessursDto ressurs = restTemplate.getForObject(
+                String.format("%s/personident/%s?ressursType=INTERN", ressursAPI, personident),
+                RessursDto.class);
 
         final SkjermetPerson skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
