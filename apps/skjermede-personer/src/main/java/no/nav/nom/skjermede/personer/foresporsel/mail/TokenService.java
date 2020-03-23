@@ -21,12 +21,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class TokenService {
 
-    @Value("${azure.srvuser.username}")
-    private String brukernavn;
-
-    @Value("${azure.srvuser.password}")
-    private String passord;
-
     private  final AADProperties aadProperties;
 
     private String accessToken;
@@ -47,8 +41,8 @@ public class TokenService {
                 .build();
         final UserNamePasswordParameters credentials = UserNamePasswordParameters.builder(
                 Collections.singleton("User.Read"),
-                get(brukernavn),
-                get(passord).toCharArray()).build();
+                aadProperties.getUsername(),
+                aadProperties.getPassword().toCharArray()).build();
         final IAuthenticationResult authResult = pca.acquireToken(credentials).get();
 
         System.out.println(authResult.accessToken());

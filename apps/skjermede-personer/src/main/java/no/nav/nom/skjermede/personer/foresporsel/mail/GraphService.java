@@ -22,12 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GraphService {
 
-    @Value("${srv.username}")
-    private String brukernavn;
-
-    @Value("${srv.password}")
-    private String passord;
-
     private static final String TITTEL = "Forespørsel om kjerming";
     private static final String AVSENDER = "noreply-skjerming@nav.no";
 
@@ -41,10 +35,7 @@ public class GraphService {
                         httpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
                     }).buildClient();
 
-            graphService.getLogger().setLoggingLevel(LoggerLevel.DEBUG);
-
-            System.out.println("Brukernavn: " + brukernavn);
-            System.out.println("Passord: " + passord);
+            graphService.getLogger().setLoggingLevel(LoggerLevel.ERROR);
 
             graphService.me()
                     .sendMail(message, null)
@@ -58,7 +49,7 @@ public class GraphService {
         body.content = content;
 
         final Message message = new Message();
-        message.subject = "TITTEL";
+        message.subject = TITTEL;
         message.body = body;
         message.toRecipients = Collections.singletonList(makeRecipient(recipient));
         message.from = makeRecipient(AVSENDER);

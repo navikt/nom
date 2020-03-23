@@ -13,4 +13,6 @@ public class AADProperties {
 
     private String clientId;
     private String authority;
+    private String username;
+    private String password;
 }

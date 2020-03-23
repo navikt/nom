@@ -12,8 +12,6 @@ import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.DuplicateSkjermi
 import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.SkjermingNotFoundException;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
-import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +34,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 @RequestMapping(SkjermingConstants.BASE_URL)
-@Import(TokenGeneratorConfiguration.class)
 public class SkjermedePersonerController {
 
     private final SkjermetPersonRepository skjermetPersonRepository;

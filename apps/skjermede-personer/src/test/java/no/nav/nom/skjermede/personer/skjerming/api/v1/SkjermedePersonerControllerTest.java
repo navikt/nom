@@ -3,6 +3,7 @@ package no.nav.nom.skjermede.personer.skjerming.api.v1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
-@WebMvcTest(controllers = {SkjermedePersonerController.class, TokenGeneratorController.class})
+@WebMvcTest(controllers = {SkjermedePersonerController.class, JWTTokenProviderConfig.class})
 public class SkjermedePersonerControllerTest {
 
     @Autowired
