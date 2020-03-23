@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.skjermingapi.v1;
+package no.nav.nom.skjermede.personer.common;
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder;
 import no.nav.security.token.support.core.jwt.JwtTokenClaims;

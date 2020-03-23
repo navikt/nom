@@ -68,7 +68,7 @@ public class DvhConsumer {
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
         return Ressurs.builder()
-                .navIdent(dvhRessursDTO.getNavIdent())
+                .navident(dvhRessursDTO.getNavident())
                 .personident(dvhRessursDTO.getPersonIdent())
                 .fornavn(dvhRessursDTO.getFornavn())
                 .etternavn(dvhRessursDTO.getEtternavn())

@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.skjermingapi.v1.dto;
+package no.nav.nom.skjermede.personer.skjerming.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -18,8 +18,7 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SkjermetPersonRequestDTO {
 
-    private String personident;
-    private String navIdent;
+    private String navident;
     private String fornavn;
     private String etternavn;
     private LocalDate skjermetFom;
@@ -28,8 +27,7 @@ public class SkjermetPersonRequestDTO {
 
     public SkjermetPerson toEntity() {
         return SkjermetPerson.builder()
-                .personident(personident)
-                .navIdent(navIdent)
+                .navident(navident)
                 .fornavn(fornavn)
                 .etternavn(etternavn)
                 .skjermetFom(skjermetFom)

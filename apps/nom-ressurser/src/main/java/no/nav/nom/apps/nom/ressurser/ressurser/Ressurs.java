@@ -24,8 +24,8 @@ public class Ressurs {
     @SequenceGenerator(name = "ressursIdGenerator", sequenceName = "T_RESSURS_SEQ", allocationSize = 1)
     private Long id;
 
-    @Column(name = "NAV_IDENT")
-    private String navIdent;
+    @Column(name = "NAVIDENT")
+    private String navident;
 
     @Column(name = "EPOST")
     private String epost;

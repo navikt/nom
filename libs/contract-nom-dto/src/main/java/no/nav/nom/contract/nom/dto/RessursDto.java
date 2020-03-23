@@ -17,7 +17,7 @@ public class RessursDto {
 
     private String personident;
 
-    private String navIdent;
+    private String navident;
 
     private Ressurstype ressurstype;
 
