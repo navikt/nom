@@ -22,7 +22,7 @@ public class KafkaSkjermedePersonerListener {
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             repository.save(
-                    repository.findAllByPersonident(ressurs.getNavident())
+                    repository.findAllByPersonident(ressurs.getPersonident())
                             .map(eksisterende -> {
                                 eksisterende.setSkjermetFom(ressurs.getStartdato());
                                 eksisterende.setSkjermetTom(ressurs.getSluttdato());
@@ -43,12 +43,11 @@ public class KafkaSkjermedePersonerListener {
     public static SkjermetPerson converted(RessursDto record){
         return SkjermetPerson.builder()
                 .personident(record.getPersonident())
-                .navident(record.getNavident())
                 .fornavn(record.getFornavn())
                 .etternavn(record.getEtternavn())
                 .skjermetFom(record.getStartdato())
                 .skjermetTom(record.getSluttdato())
-                .tilknyttetRessurs(null)
+                .tilknyttetRessurs(record.getNavident())
                 .build();
     }
 }
