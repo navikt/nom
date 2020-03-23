@@ -22,7 +22,7 @@ public class KafkaSkjermedePersonerListener {
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             repository.save(
-                    repository.findAllByPersonident(ressurs.getPersonident())
+                    repository.findAllByPersonident(ressurs.getNavident())
                             .map(eksisterende -> {
                                 eksisterende.setSkjermetFom(ressurs.getStartdato());
                                 eksisterende.setSkjermetTom(ressurs.getSluttdato());
