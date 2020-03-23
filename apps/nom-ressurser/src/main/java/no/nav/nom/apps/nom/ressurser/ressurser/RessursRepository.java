@@ -17,6 +17,8 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     List<Ressurs> findAllByProduced(boolean produced);
 
+    List<Ressurs> findAllByPersonident(String personident);
+
     List<Ressurs> findByNavident(String navident);
 
     Optional<Ressurs> findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(String navident);
