@@ -30,7 +30,7 @@ public class KafkaProducer {
     @Timed(value = "kafka.messages.produced.timed", description = "Time spent sending kafka messages", extraTags = {"topic", "aapen-nom-ressurs-v1"})
     public void send(List<Ressurs> ressursList) {
         ressursList.forEach(ressurs -> {
-            kafkaTemplate.send(ressursTopic, ressurs.getPersonident(), converted(ressurs));
+            kafkaTemplate.send(ressursTopic, ressurs.getNavIdent(), converted(ressurs));
             ressurs.setProduced(true);
             meterRegistry.counter("kafka.messages.produced", "topic", ressursTopic).increment();
             log.info("Sendt ressurs med navident: {}", ressurs.getNavIdent());
