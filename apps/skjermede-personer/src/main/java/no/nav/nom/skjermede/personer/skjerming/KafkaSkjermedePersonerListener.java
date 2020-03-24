@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.contract.nom.dto.Ressurstype;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Component
+@Profile("MidlertidigDisabled")
 @AllArgsConstructor
 @Slf4j
 public class KafkaSkjermedePersonerListener {
