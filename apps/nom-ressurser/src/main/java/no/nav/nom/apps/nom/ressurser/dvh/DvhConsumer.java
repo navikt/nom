@@ -31,7 +31,7 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
-    private final long incrementValue = 5000L;
+    private final long incrementValue = 1000L;
 
     @Scheduled(fixedDelay = 5000)
     @Transactional(value = "transactionManager")
@@ -42,21 +42,34 @@ public class DvhConsumer {
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
         if(result.getAnsatteResultList() != null) {
+
             result.getAnsatteResultList().stream()
+                    .filter(ressurs -> {
+                        if(ressurs.getNavident() != null){
+                            log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
+                            return true;
+                        }
+                        else {
+                            log.warn("Ugyldig hendelse fra dvh, navident mangler for sekvensnr: {}", ressurs.getOffset());
+                            return false;
+                        }
+                    })
                     .map(DvhConsumer::converted)
                     .forEach(ressurs ->
-                        ressursRepository.findByPersonident(ressurs.getPersonident())
-                                .map(eksisterende -> {
-                                    ressurs.setId(eksisterende.getId());
-                                    ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
-                                    ressurs.setEndretDato(LocalDate.now());
-                                    return ressursRepository.save(ressurs);
-                                })
-                                .orElseGet(() -> {
-                                    ressurs.setOpprettetDato(LocalDate.now());
-                                    ressurs.setEndretDato(LocalDate.now());
-                                    return ressursRepository.save(ressurs);
-                                })
+                            ressursRepository.findByPersonident(ressurs.getPersonident())
+                            .ifPresentOrElse(
+                                    (eksisterende) -> {
+                                        ressurs.setId(eksisterende.getId());
+                                        ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                                        ressurs.setEndretDato(LocalDate.now());
+                                        ressursRepository.save(ressurs);
+                                    },
+                                    () -> {
+                                            ressurs.setOpprettetDato(LocalDate.now());
+                                            ressurs.setEndretDato(LocalDate.now());
+                                            ressursRepository.save(ressurs);
+                                    }
+                            )
                     );
 
             result.getAnsatteResultList().stream()

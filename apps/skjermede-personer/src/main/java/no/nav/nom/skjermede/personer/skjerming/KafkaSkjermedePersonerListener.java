@@ -43,12 +43,11 @@ public class KafkaSkjermedePersonerListener {
     public static SkjermetPerson converted(RessursDto record){
         return SkjermetPerson.builder()
                 .personident(record.getPersonident())
-                .navident(record.getNavident())
                 .fornavn(record.getFornavn())
                 .etternavn(record.getEtternavn())
                 .skjermetFom(record.getStartdato())
                 .skjermetTom(record.getSluttdato())
-                .tilknyttetRessurs(null)
+                .tilknyttetRessurs(record.getNavident())
                 .build();
     }
 }

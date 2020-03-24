@@ -11,7 +11,7 @@ public class DvhRessursDTO {
     @JsonProperty("SEKVENSNR")
     private long offset;
 
-    @JsonProperty("NAVIDENT")
+    @JsonProperty("NAV_IDENT")
     private String navident;
 
     @JsonProperty("FNR")
