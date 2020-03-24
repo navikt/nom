@@ -19,13 +19,19 @@ public class RessursDto {
 
     private String navident;
 
-    private Ressurstype ressurstype;
-
     private String fornavn;
 
     private String etternavn;
 
+    private String epost;
+
+    private Ressurstype ressurstype;
+
     private LocalDate startdato;
 
     private LocalDate sluttdato;
+
+    private LocalDate opprettetdato;
+
+    private LocalDate endretdato;
 }

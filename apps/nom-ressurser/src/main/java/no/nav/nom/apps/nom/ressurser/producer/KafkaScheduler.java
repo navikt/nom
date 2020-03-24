@@ -16,6 +16,6 @@ public class KafkaScheduler {
 
     @Scheduled(fixedDelay = 5000)
     public void produce(){
-        kafkaProducer.send(ressursRepository.findAllByProducedAndNavidentNotNull(false));
+        kafkaProducer.send(ressursRepository.findAllByProduced(false));
     }
 }

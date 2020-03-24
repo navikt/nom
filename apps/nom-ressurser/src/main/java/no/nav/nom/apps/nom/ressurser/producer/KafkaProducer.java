@@ -45,9 +45,12 @@ public class KafkaProducer {
                 .navident(ressurs.getNavident())
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
+                .epost(ressurs.getEpost())
                 .ressurstype(ressurs.getRessurstype())
                 .startdato(ressurs.getStartdato())
                 .sluttdato(ressurs.getSluttdato())
+                .opprettetdato(ressurs.getOpprettetDato())
+                .endretdato(ressurs.getEndretDato())
                 .build();
     }
 }
