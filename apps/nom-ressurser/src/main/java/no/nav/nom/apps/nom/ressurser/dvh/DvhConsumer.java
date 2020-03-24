@@ -38,7 +38,7 @@ public class DvhConsumer {
     public void hentBulkOppdatering(){
         Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         String url = dvhEndpoint + "?in_sekvensnummer=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset()+incrementValue);
-        log.info("Url request er: {}", dvhEndpoint);
+        log.info("Url request er: {}", url);
         log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(),dvhOffset.getOffset()+incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
