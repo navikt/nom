@@ -124,6 +124,27 @@ public class SkjermedePersonerController {
     }
 
     @Transactional
+    @PutMapping()
+    public SkjermetPersonResponseDTO opphorSkjerming() {
+        final String personident = Optional
+                .ofNullable(tokenUtil.getSubject())
+                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
+
+        validerTilgang(personident);
+
+        final SkjermetPerson skjermetPerson = skjermetPersonRepository
+                .findAllByPersonident(personident).stream()
+                .filter(person -> person.getSkjermetTom() == null
+                        || person.getSkjermetTom().isAfter(LocalDate.now())).findFirst()
+                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE_PERSONIDENT, personident)));
+
+        skjermetPerson.setSkjermetTom(LocalDate.now());
+        skjermetPerson.setEndretDato(LocalDateTime.now());
+
+        return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
+    }
+
+    @Transactional
     @PutMapping(SkjermingConstants.BY_NAVIDENT)
     public SkjermetPersonResponseDTO oppdaterSkjerming(@PathVariable final String navident,
                                                        @RequestBody final SkjermetPersonRequestDTO skjermetPersonDTO) {
