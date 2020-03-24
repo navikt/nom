@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("MidlertidigDisabled")
 @AllArgsConstructor
 public class KafkaScheduler {
 
