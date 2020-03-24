@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,9 +42,11 @@ public class DvhConsumer {
         log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(),dvhOffset.getOffset()+incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
-        if(result.getAnsatteResultList() != null) {
+        if(result != null && result.getAnsatteResultList() != null && !result.getAnsatteResultList().isEmpty()) {
+            List<DvhRessursDTO> resultRessurs = result.getAnsatteResultList();
 
-            result.getAnsatteResultList().stream()
+            resultRessurs.sort(Comparator.comparingLong(DvhRessursDTO::getOffset));
+            resultRessurs.stream()
                     .filter(ressurs -> {
                         if(ressurs.getNavident() != null){
                             log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
@@ -65,17 +68,14 @@ public class DvhConsumer {
                                         ressursRepository.save(ressurs);
                                     },
                                     () -> {
-                                            ressurs.setOpprettetDato(LocalDate.now());
-                                            ressurs.setEndretDato(LocalDate.now());
-                                            ressursRepository.save(ressurs);
+                                        ressurs.setOpprettetDato(LocalDate.now());
+                                        ressurs.setEndretDato(LocalDate.now());
+                                        ressursRepository.save(ressurs);
                                     }
                             )
                     );
-
-            result.getAnsatteResultList().stream()
-                    .map(DvhRessursDTO::getOffset)
-                    .max(Long::compare)
-                    .ifPresent(offset -> offsetRepository.save(dvhOffset.setOffset(offset)));
+            dvhOffset.setOffset(resultRessurs.get(resultRessurs.size()-1).getOffset());
+            offsetRepository.save(dvhOffset);
         }
     }
 
