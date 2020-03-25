@@ -120,7 +120,7 @@ public class SkjermedePersonerControllerTest {
     public void testOpprettSkjermingDuplicate() throws Exception {
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized(TestUtils.PERSONIDENT)).thenReturn(Boolean.TRUE);
-        when(repository.findByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.of(TestUtils.skjermetPerson()));
+        when(repository.findAllByPersonident(TestUtils.PERSONIDENT)).thenReturn(TestUtils.skjermetPersonList(true));
 
         mockMvc.perform(requestBuilder(HttpMethod.POST))
                 .andExpect(status().isBadRequest());
@@ -139,7 +139,7 @@ public class SkjermedePersonerControllerTest {
     public void testOpprettSkjerming() throws Exception {
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized(TestUtils.PERSONIDENT)).thenReturn(Boolean.TRUE);
-        when(repository.findByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.empty());
+        when(repository.findAllByPersonident(TestUtils.PERSONIDENT)).thenReturn(TestUtils.skjermetPersonList(false));
         when(restTemplate.getForObject(anyString(), any(Class.class))).thenReturn(TestUtils.ressurs());
         when(repository.save(any(SkjermetPerson.class))).thenReturn(TestUtils.skjermetPerson());
 
