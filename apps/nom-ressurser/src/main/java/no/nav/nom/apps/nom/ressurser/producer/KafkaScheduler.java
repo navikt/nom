@@ -22,7 +22,6 @@ public class KafkaScheduler {
     @Scheduled(fixedDelay = 5000)
     public void produce(){
         if(leaderElection.isLeader()) {
-            System.out.println("test");
             kafkaProducer.send(ressursRepository.findAllByProduced(false));
         }
     }
