@@ -58,7 +58,7 @@ public class KafkaSkjermedePersonerListenerTest {
                 .endretDato(oldEndretDato)
                 .build();
 
-        when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDto.getPersonident())).thenReturn(Optional.of(savedSkjermetPerson));
+        when(skjermetPersonRepositoryMock.findByPersonident(ressursDto.getPersonident())).thenReturn(Optional.of(savedSkjermetPerson));
 
         kafkaSkjermedePersonerListener.onMessage(ressursDto);
 
@@ -90,7 +90,7 @@ public class KafkaSkjermedePersonerListenerTest {
                 .sluttdato(LocalDate.now())
                 .build();
 
-        when(skjermetPersonRepositoryMock.findAllByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
+        when(skjermetPersonRepositoryMock.findByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
 
         kafkaSkjermedePersonerListener.onMessage(ressursDto);
         verify(skjermetPersonRepositoryMock).save(skjermetPersonArgumentCaptor.capture());

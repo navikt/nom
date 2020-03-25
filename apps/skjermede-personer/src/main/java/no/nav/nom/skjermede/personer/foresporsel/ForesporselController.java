@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.foresporsel.exception.DuplicateForesporselException;
+import no.nav.nom.skjermede.personer.foresporsel.exception.ForesporselNotFoundException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
@@ -53,8 +54,22 @@ public class ForesporselController {
         return "Godkenning er registrert";
     }
 
+    @GetMapping
+    public ForesporselResponseDTO hentForesporsel() {
+        final String personident = Optional
+                .ofNullable(tokenUtil.getSubject())
+                .orElseThrow(() -> new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE));
+
+        validerTilgang(personident);
+
+        Foresporsel foresporsel = foresporselRepository.findByPersonidentAndBekreftetNull(personident)
+                .orElseThrow(() -> new ForesporselNotFoundException(String.format(ForesporselConstants.FORESPORSEL_NOT_FOUND, personident)));
+
+        return ForesporselResponseDTO.fromEntity(foresporsel);
+    }
+
     @PostMapping
-    public ResponseEntity<Void> opprettForesporsel(@RequestBody final ForesporselRequestDTO foresporselRequestDTO) {
+    public ResponseEntity<ForesporselResponseDTO> opprettForesporsel(@RequestBody final ForesporselRequestDTO foresporselRequestDTO) {
         final String personident = Optional
                 .ofNullable(tokenUtil.getSubject())
                 .orElseThrow(() -> new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE));
@@ -70,9 +85,8 @@ public class ForesporselController {
         foresporsel.setFunksjonellId(UUID.randomUUID());
         foresporsel.setOpprettetDato(LocalDateTime.now());
 
-        foresporselRepository.save(foresporsel);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));
     }
 
     private void validerTilgang(final String personident) {

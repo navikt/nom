@@ -15,4 +15,5 @@ public class AnsattStatusResponseDTO {
 
     @JsonProperty
     private boolean gyldig;
+
 }

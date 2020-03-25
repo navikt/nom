@@ -14,4 +14,5 @@ public interface ForesporselRepository extends JpaRepository<Foresporsel, Long> 
     Optional<Foresporsel> findByFunksjonellIdAndBekreftetNull(UUID funksjonellId);
     boolean existsByPersonident(String personident);
     void deleteAllByEpostSendtBeforeAndBekreftetFalseOrBekreftetNull(LocalDate before);
+    Optional<Foresporsel> findByPersonidentAndBekreftetNull(String personIdent);
 }

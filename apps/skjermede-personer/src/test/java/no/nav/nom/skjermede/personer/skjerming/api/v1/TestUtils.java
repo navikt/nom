@@ -1,10 +1,13 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
+import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonRequestDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestUtils {
 
@@ -26,5 +29,21 @@ public class TestUtils {
                 .navident(NAVIDENT)
                 .skjermetFom(LocalDate.now())
                 .build();
+    }
+
+    public static RessursDto ressurs() {
+        return RessursDto.builder()
+                .personident(PERSONIDENT)
+                .navident(NAVIDENT)
+                .sluttdato(LocalDate.now())
+                .build();
+    }
+
+    public static List<SkjermetPerson> skjermetPersonList(boolean filled) {
+        List<SkjermetPerson> list = new ArrayList<>();
+        if (filled) {
+            list.add(skjermetPerson());
+        }
+        return list;
     }
 }

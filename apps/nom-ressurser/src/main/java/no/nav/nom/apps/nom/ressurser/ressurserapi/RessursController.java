@@ -32,7 +32,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class RessursController {
 
     private static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
-    private static final String NOT_FOUND_MESSAGE = "Ressurs med NAV-ident %s ikke funnet";
+    private static final String RESSURS_MED_NAVIDENT_NOT_FOUND_MESSAGE = "Ressurs med NAV-ident %s ikke funnet";
+    private static final String RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE = "Ressurs med personident %s ikke funnet";
 
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
@@ -72,7 +73,7 @@ public class RessursController {
 
         Ressurs gyldigRessurs = repository.findByNavident(navident).stream()
                 .filter(ressurs -> ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now()))
-                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(NOT_FOUND_MESSAGE, navident)));
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(RESSURS_MED_NAVIDENT_NOT_FOUND_MESSAGE, navident)));
 
         return NavnResponseDTO.builder().fornavn(gyldigRessurs.getFornavn()).etternavn(gyldigRessurs.getEtternavn()).build();
     }
@@ -85,6 +86,14 @@ public class RessursController {
     @GetMapping("/{id}")
     public Ressurs get(@PathVariable Long id) {
         return repository.getOne(id);
+    }
+
+    @GetMapping("/personident/{personident}")
+    public Ressurs getByPersonident(@PathVariable String personident, @RequestParam String ressursType) {
+        return repository.findAllByPersonident(personident).stream()
+                .filter(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
+                        && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now())))
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE));
     }
 
     // Midlertidig rest-endepunkt for å manuelt opprette brukere.
