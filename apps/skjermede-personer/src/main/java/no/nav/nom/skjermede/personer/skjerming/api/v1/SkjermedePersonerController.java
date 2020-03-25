@@ -7,7 +7,6 @@ import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonRequestDTO;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.DuplicateSkjermingException;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.SkjermingNotFoundException;
@@ -90,7 +89,7 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/aktive")
+    @GetMapping(SkjermingConstants.AKTIVE)
     public List<SkjermetPersonResponseDTO> hentAktiveSkjerminger() {
         final String personident = Optional
                 .ofNullable(tokenUtil.getSubject())
@@ -127,7 +126,7 @@ public class SkjermedePersonerController {
 
         final SkjermetPerson skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
-                .navident(ressurs.getNavident())
+                .tilknyttetRessurs(ressurs.getNavident())
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
                 .skjermetFom(LocalDate.now())
@@ -140,8 +139,8 @@ public class SkjermedePersonerController {
     }
 
     @Transactional
-    @PutMapping()
-    public SkjermetPersonResponseDTO opphorSkjerming() {
+    @PutMapping(SkjermingConstants.BY_NAVIDENT)
+    public SkjermetPersonResponseDTO opphorSkjerming(@PathVariable final String navident) {
         final String personident = Optional
                 .ofNullable(tokenUtil.getSubject())
                 .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
@@ -149,28 +148,12 @@ public class SkjermedePersonerController {
         validerTilgang(personident);
 
         final SkjermetPerson skjermetPerson = skjermetPersonRepository
-                .findAllByPersonident(personident).stream()
+                .findAllByPersonidentAndTilknyttetRessurs(personident, navident).stream()
                 .filter(person -> person.getSkjermetTom() == null
                         || person.getSkjermetTom().isAfter(LocalDate.now())).findFirst()
                 .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE_PERSONIDENT, personident)));
 
         skjermetPerson.setSkjermetTom(LocalDate.now());
-        skjermetPerson.setEndretDato(LocalDateTime.now());
-
-        return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
-    }
-
-    @Transactional
-    @PutMapping(SkjermingConstants.BY_NAVIDENT)
-    public SkjermetPersonResponseDTO oppdaterSkjerming(@PathVariable final String navident,
-                                                       @RequestBody final SkjermetPersonRequestDTO skjermetPersonDTO) {
-        final SkjermetPerson skjermetPerson = skjermetPersonRepository
-                .findDistinctByNavidentAndSkjermetTomNull(navident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, navident)));
-
-        validerTilgang(skjermetPerson.getPersonident());
-
-        skjermetPerson.setSkjermetTom(skjermetPersonDTO.getSkjermetTom());
         skjermetPerson.setEndretDato(LocalDateTime.now());
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));

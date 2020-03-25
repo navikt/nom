@@ -6,6 +6,8 @@ import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonRequestD
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestUtils {
 
@@ -35,5 +37,13 @@ public class TestUtils {
                 .navident(NAVIDENT)
                 .sluttdato(LocalDate.now())
                 .build();
+    }
+
+    public static List<SkjermetPerson> skjermetPersonList(boolean filled) {
+        List<SkjermetPerson> list = new ArrayList<>();
+        if (filled) {
+            list.add(skjermetPerson());
+        }
+        return list;
     }
 }

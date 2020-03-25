@@ -12,6 +12,7 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
     Optional<SkjermetPerson> findAllByPersonident(String personident);
     Optional<SkjermetPerson> findDistinctByNavidentAndSkjermetTomNull(String navident);
 
+    List<SkjermetPerson> findAllByPersonidentAndTilknyttetRessurs(String personident, String tilknyttetRessurs);
     List<SkjermetPerson> findAllByTilknyttetRessurs(String personident);
     boolean existsByPersonidentAndSkjermetTomNull(String personident);
 
