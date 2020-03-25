@@ -37,6 +37,7 @@ spec:
     periodSeconds: 5
     failureThreshold: 5
   webproxy: true
+  leaderElection: true
   readiness:
     path: internal/isReady
     initialDelay: 60
