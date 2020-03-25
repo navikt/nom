@@ -21,9 +21,4 @@ public class Offset {
 
     @Column(name = "OFFSET_VALUE")
     private Long offset;
-
-    public Offset setOffset(long offset){
-        this.offset = offset;
-        return this;
-    }
 }
