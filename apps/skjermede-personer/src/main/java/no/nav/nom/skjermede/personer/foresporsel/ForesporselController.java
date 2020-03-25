@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -57,31 +56,27 @@ public class ForesporselController {
 
     @GetMapping
     public ForesporselResponseDTO hentForesporsel() {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE));
+        validerTilgang();
 
-        validerTilgang(personident);
-
-        Foresporsel foresporsel = foresporselRepository.findByPersonidentAndBekreftetNull(personident)
-                .orElseThrow(() -> new ForesporselNotFoundException(String.format(ForesporselConstants.FORESPORSEL_NOT_FOUND, personident)));
+        val personident = tokenUtil.getSubject();
+        val foresporsel = foresporselRepository
+                .findByPersonidentAndBekreftetNull(personident)
+                .orElseThrow(() -> new ForesporselNotFoundException(ForesporselConstants.FORESPORSEL_NOT_FOUND));
 
         return ForesporselResponseDTO.fromEntity(foresporsel);
     }
 
     @PostMapping
     public ResponseEntity<ForesporselResponseDTO> opprettForesporsel(@RequestBody final ForesporselRequestDTO foresporselRequestDTO) {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE));
+        validerTilgang();
 
-        validerTilgang(personident);
+        val personident = tokenUtil.getSubject();
 
         if (foresporselRepository.existsByPersonident(personident)) {
             throw new DuplicateForesporselException(ForesporselConstants.DUPLICATE_FORESPORSEL_MESSAGE);
         }
 
-        final Foresporsel foresporsel = foresporselRequestDTO.toEntity();
+        val foresporsel = foresporselRequestDTO.toEntity();
         foresporsel.setPersonident(personident);
         foresporsel.setFunksjonellId(UUID.randomUUID());
         foresporsel.setOpprettetDato(LocalDateTime.now());
@@ -90,7 +85,7 @@ public class ForesporselController {
                 .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));
     }
 
-    private void validerTilgang(final String personident) {
+    private void validerTilgang() {
         if (!tokenUtil.isAuthorized()) {
             throw new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE);
         }
