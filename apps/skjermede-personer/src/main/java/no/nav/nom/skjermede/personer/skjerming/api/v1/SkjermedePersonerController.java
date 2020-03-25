@@ -105,8 +105,7 @@ public class SkjermedePersonerController {
                 || person.getSkjermetTom().isAfter(LocalDate.now()))
                 .map(SkjermetPersonResponseDTO::fromEntity)
                 .collect(Collectors.toList());
-    }
-    */
+    }*/
 
     @PostMapping
     @Transactional
