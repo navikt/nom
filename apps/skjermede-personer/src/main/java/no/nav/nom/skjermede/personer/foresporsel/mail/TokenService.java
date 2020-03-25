@@ -6,7 +6,6 @@ import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.UserNamePasswordParameters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -44,9 +43,6 @@ public class TokenService {
                 aadProperties.getUsername(),
                 aadProperties.getPassword().toCharArray()).build();
         final IAuthenticationResult authResult = pca.acquireToken(credentials).get();
-
-        System.out.println(authResult.accessToken());
-        System.out.println(authResult.expiresOnDate());
 
         accessToken = authResult.accessToken();
         expiresOn = authResult.expiresOnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();

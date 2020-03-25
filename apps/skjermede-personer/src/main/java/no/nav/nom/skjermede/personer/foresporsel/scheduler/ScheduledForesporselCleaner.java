@@ -14,7 +14,7 @@ public class ScheduledForesporselCleaner {
 
     private final ForesporselRepository foresporselRepository;
 
-    //@Scheduled(cron = "0 30 0 * * *")
+    @Scheduled(cron = "0 30 0 * * *")
     public void scheduledCleaner() {
         foresporselRepository.deleteAllByEpostSendtBeforeAndBekreftetFalseOrBekreftetNull(LocalDate.now().minus(Period.ofDays(14)));
     }

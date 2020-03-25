@@ -19,13 +19,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class KafkaSkjermedePersonerListenerTest {
+public class NomRessurserListenerTest {
 
     @Mock
     private SkjermetPersonRepository skjermetPersonRepositoryMock;
 
     @InjectMocks
-    private KafkaSkjermedePersonerListener kafkaSkjermedePersonerListener;
+    private NomRessurserListener nomRessurserListener;
 
     @Captor
     private ArgumentCaptor<SkjermetPerson> skjermetPersonArgumentCaptor;
@@ -50,7 +50,6 @@ public class KafkaSkjermedePersonerListenerTest {
         SkjermetPerson savedSkjermetPerson = SkjermetPerson.builder()
                 .id(id)
                 .personident("TestIdent")
-                .navident("TestNavIdent")
                 .fornavn("fornavn")
                 .etternavn("etternavn")
                 .skjermetFom(startDato)
@@ -58,16 +57,15 @@ public class KafkaSkjermedePersonerListenerTest {
                 .endretDato(oldEndretDato)
                 .build();
 
-        when(skjermetPersonRepositoryMock.findByPersonident(ressursDto.getPersonident())).thenReturn(Optional.of(savedSkjermetPerson));
+        when(skjermetPersonRepositoryMock.getSkjermetPersonByPersonident(ressursDto.getPersonident())).thenReturn(Optional.of(savedSkjermetPerson));
 
-        kafkaSkjermedePersonerListener.onMessage(ressursDto);
+        nomRessurserListener.onMessage(ressursDto);
 
         verify(skjermetPersonRepositoryMock).save(savedSkjermetPerson);
 
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjermetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjermetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getNavident(), savedSkjermetPerson.getNavident());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjermetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjermetPerson.getEtternavn());
 
@@ -90,9 +88,9 @@ public class KafkaSkjermedePersonerListenerTest {
                 .sluttdato(LocalDate.now())
                 .build();
 
-        when(skjermetPersonRepositoryMock.findByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
+        when(skjermetPersonRepositoryMock.getSkjermetPersonByPersonident(ressursDto.getPersonident())).thenReturn(Optional.empty());
 
-        kafkaSkjermedePersonerListener.onMessage(ressursDto);
+        nomRessurserListener.onMessage(ressursDto);
         verify(skjermetPersonRepositoryMock).save(skjermetPersonArgumentCaptor.capture());
 
         SkjermetPerson savedSkjemetPerson = skjermetPersonArgumentCaptor.getValue();
@@ -100,9 +98,9 @@ public class KafkaSkjermedePersonerListenerTest {
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjemetPerson.getPersonident());
         Assertions.assertEquals(ressursDto.getStartdato(), savedSkjemetPerson.getSkjermetFom());
         Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjemetPerson.getSkjermetTom());
-        Assertions.assertEquals(ressursDto.getNavident(), savedSkjemetPerson.getTilknyttetRessurs());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjemetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjemetPerson.getEtternavn());
+        Assertions.assertNull(savedSkjemetPerson.getTilknyttetRessurs());
         Assertions.assertNotNull(savedSkjemetPerson.getOpprettetDato());
         Assertions.assertNotNull(savedSkjemetPerson.getEndretDato());
     }

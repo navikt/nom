@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SkjermetPersonResponseDTO {
 
-    private String navident;
     private String fornavn;
     private String etternavn;
     private String tilknyttetRessurs;
@@ -36,7 +35,6 @@ public class SkjermetPersonResponseDTO {
 
     public static SkjermetPersonResponseDTO fromEntity(final SkjermetPerson skjermetPerson) {
         return builder()
-                .navident(skjermetPerson.getNavident())
                 .fornavn(skjermetPerson.getFornavn())
                 .etternavn(skjermetPerson.getEtternavn())
                 .skjermetFom(skjermetPerson.getSkjermetFom())

@@ -18,7 +18,6 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SkjermetPersonRequestDTO {
 
-    private String navident;
     private String fornavn;
     private String etternavn;
     private LocalDate skjermetFom;
@@ -27,7 +26,6 @@ public class SkjermetPersonRequestDTO {
 
     public SkjermetPerson toEntity() {
         return SkjermetPerson.builder()
-                .navident(navident)
                 .fornavn(fornavn)
                 .etternavn(etternavn)
                 .skjermetFom(skjermetFom)

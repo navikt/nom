@@ -4,6 +4,8 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder;
 import no.nav.security.token.support.core.jwt.JwtTokenClaims;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 
 @Component
@@ -17,14 +19,15 @@ public class TokenUtil {
         this.contextHolder = contextHolder;
     }
 
-    public boolean isAuthenticated() {
+    public boolean isAuthorized() {
         return getSubject() != null;
     }
 
-    public boolean isAuthorized(final String fnr) {
-        return isAuthenticated() && fnr.equals(getSubject());
+    public Date getExpirationDate() {
+        return Optional.ofNullable(claimSet())
+                .map(JwtTokenClaims::getExpirationTime)
+                .orElse(null);
     }
-
     public String getSubject() {
         return Optional.ofNullable(claimSet())
                 .map(JwtTokenClaims::getSubject)

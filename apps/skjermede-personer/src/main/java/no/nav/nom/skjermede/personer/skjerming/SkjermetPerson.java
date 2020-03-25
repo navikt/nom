@@ -34,9 +34,6 @@ public class SkjermetPerson {
     @Column(name = "PERSONIDENT")
     private String personident;
 
-    @Column(name = "NAVIDENT")
-    private String navident;
-
     @NotNull
     @Column(name = "FORNAVN")
     private String fornavn;

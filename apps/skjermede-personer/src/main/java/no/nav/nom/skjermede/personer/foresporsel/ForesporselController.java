@@ -2,6 +2,7 @@ package no.nav.nom.skjermede.personer.foresporsel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.foresporsel.exception.DuplicateForesporselException;
@@ -38,7 +39,7 @@ public class ForesporselController {
     @Unprotected
     @GetMapping(ForesporselConstants.FORESPORSEL_GODKJENNING)
     public String godkjennForesporsel(@RequestParam("id") final UUID funksjonellId) {
-        final Foresporsel foresporsel = foresporselRepository
+        val foresporsel = foresporselRepository
                 .findByFunksjonellIdAndBekreftetNull(funksjonellId)
                 .orElse(null);
 
@@ -90,7 +91,7 @@ public class ForesporselController {
     }
 
     private void validerTilgang(final String personident) {
-        if (!tokenUtil.isAuthorized(personident)) {
+        if (!tokenUtil.isAuthorized()) {
             throw new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE);
         }
     }

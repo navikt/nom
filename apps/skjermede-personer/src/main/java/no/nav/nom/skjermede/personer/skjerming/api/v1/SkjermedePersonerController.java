@@ -2,6 +2,7 @@ package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
@@ -15,14 +16,18 @@ import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,9 +44,9 @@ public class SkjermedePersonerController {
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final TokenUtil tokenUtil;
 
-    @GetMapping
+    @GetMapping("all")
     @Unprotected
-    public List<SkjermetPersonResponseDTO> hentAlleSkjerminger() {
+    public List<SkjermetPersonResponseDTO> hentAlle() {
         return skjermetPersonRepository
                 .findAll()
                 .stream()
@@ -49,25 +54,23 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(SkjermingConstants.BY_NAVIDENT)
-    public SkjermetPersonResponseDTO hentSkjerming(@PathVariable final String navident) {
-        final SkjermetPerson skjermetPerson = skjermetPersonRepository
-                .findDistinctByNavidentAndSkjermetTomNull(navident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, navident)));
+    @GetMapping
+    public SkjermetPersonResponseDTO hentSkjerming() {
+        validerTilgang();
 
-
-        validerTilgang(skjermetPerson.getPersonident());
+        val personident = tokenUtil.getSubject();
+        val skjermetPerson = skjermetPersonRepository
+                .getSkjermetPersonByPersonident(personident)
+                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, personident)));
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPerson);
     }
 
     @GetMapping(SkjermingConstants.FAMILIEMEDLEMER)
     public List<SkjermetPersonResponseDTO> hentSkjermedeFamiliemedlemer() {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
+        validerTilgang();
 
-        validerTilgang(personident);
+        val personident = tokenUtil.getSubject();
 
         return skjermetPersonRepository.findAllByTilknyttetRessurs(personident)
                 .stream()
@@ -75,13 +78,11 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(SkjermingConstants.BY_ANSATT)
-    public List<SkjermetPersonResponseDTO> hentSkjermingerForAnsatt() {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
+    @GetMapping(SkjermingConstants.ALLE)
+    public List<SkjermetPersonResponseDTO> hentAlleSkjerminger() {
+        validerTilgang();
 
-        validerTilgang(personident);
+        val personident = tokenUtil.getSubject();
 
         return skjermetPersonRepository.findAllByPersonident(personident)
                 .stream()
@@ -89,6 +90,7 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
+    /*
     @GetMapping(SkjermingConstants.AKTIVE)
     public List<SkjermetPersonResponseDTO> hentAktiveSkjerminger() {
         final String personident = Optional
@@ -104,29 +106,25 @@ public class SkjermedePersonerController {
                 .map(SkjermetPersonResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
+    */
 
     @PostMapping
     @Transactional
     public ResponseEntity<SkjermetPersonResponseDTO> opprettSkjerming() {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
+        validerTilgang();
 
-        validerTilgang(personident);
+        val personident = tokenUtil.getSubject();
 
-        if (skjermetPersonRepository.findAllByPersonident(personident).stream()
-                .anyMatch(skjermetPerson -> skjermetPerson.getSkjermetTom() == null
-                        || skjermetPerson.getSkjermetTom().isAfter(LocalDate.now()))) {
+        if (skjermetPersonRepository.getSkjermetPersonByPersonident(personident).isPresent()) {
             throw new DuplicateSkjermingException(SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
         }
 
-        RessursDto ressurs = restTemplate.getForObject(
+        val ressurs = restTemplate.getForObject(
                 String.format("%s/personident/%s?ressursType=INTERN", ressursAPI, personident),
                 RessursDto.class);
 
-        final SkjermetPerson skjermetPerson = SkjermetPerson.builder()
+        val skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
-                .tilknyttetRessurs(ressurs.getNavident())
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
                 .skjermetFom(LocalDate.now())
@@ -139,19 +137,14 @@ public class SkjermedePersonerController {
     }
 
     @Transactional
-    @PutMapping(SkjermingConstants.BY_NAVIDENT)
-    public SkjermetPersonResponseDTO opphorSkjerming(@PathVariable final String navident) {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
+    @PutMapping
+    public SkjermetPersonResponseDTO opphorSkjerming() {
+        validerTilgang();
 
-        validerTilgang(personident);
-
-        final SkjermetPerson skjermetPerson = skjermetPersonRepository
-                .findAllByPersonidentAndTilknyttetRessurs(personident, navident).stream()
-                .filter(person -> person.getSkjermetTom() == null
-                        || person.getSkjermetTom().isAfter(LocalDate.now())).findFirst()
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE_PERSONIDENT, personident)));
+        val personident = tokenUtil.getSubject();
+        val skjermetPerson = skjermetPersonRepository
+                .getSkjermetPersonByPersonident(personident)
+                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE)));
 
         skjermetPerson.setSkjermetTom(LocalDate.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
@@ -160,19 +153,20 @@ public class SkjermedePersonerController {
     }
 
     @Transactional
-    @DeleteMapping(SkjermingConstants.BY_NAVIDENT)
-    public void slettSkjerming(@PathVariable final String navident) {
-        final SkjermetPerson skjermetPerson = skjermetPersonRepository
-                .findDistinctByNavidentAndSkjermetTomNull(navident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, navident)));
+    @DeleteMapping
+    public void slettSkjerming() {
+        validerTilgang();
 
-        validerTilgang(skjermetPerson.getPersonident());
+        val personident = tokenUtil.getSubject();
+        val skjermetPerson = skjermetPersonRepository
+                .getSkjermetPersonByPersonident(personident)
+                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, personident)));
 
         skjermetPersonRepository.deleteById(skjermetPerson.getId());
     }
 
-    private void validerTilgang(final String personident) {
-        if (!tokenUtil.isAuthorized(personident)) {
+    private void validerTilgang() {
+        if (!tokenUtil.isAuthorized()) {
             throw new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE);
         }
     }
