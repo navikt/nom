@@ -12,14 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Component
-@AllArgsConstructor
+//@AllArgsConstructor
 @Slf4j
 public class NomRessurserListener {
 
+    public NomRessurserListener(SkjermetPersonRepository repo){
+        repository = repo;
+    }
+
     private final SkjermetPersonRepository repository;
-    int internLestCounter = 0;
-    int elseCounter = 0;
-    int total = 0;
+    private int internLestCounter = 0;
+    private int elseCounter = 0;
+    private int total = 0;
 
     @Transactional
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
