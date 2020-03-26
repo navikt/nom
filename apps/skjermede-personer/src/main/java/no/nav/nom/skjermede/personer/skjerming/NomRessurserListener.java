@@ -23,7 +23,7 @@ public class NomRessurserListener {
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             repository.save(
-                    repository.getSkjermetPersonByPersonident(ressurs.getPersonident())
+                    repository.findByPersonident(ressurs.getPersonident())
                             .map(eksisterende -> {
                                 eksisterende.setSkjermetFom(ressurs.getStartdato());
                                 eksisterende.setSkjermetTom(ressurs.getSluttdato());

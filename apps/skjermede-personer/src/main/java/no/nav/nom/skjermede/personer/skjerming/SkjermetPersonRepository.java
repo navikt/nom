@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, Long> {
-    //Optional<SkjermetPerson> findByPersonident(String personident);
+    Optional<SkjermetPerson> findByPersonident(String personident);
 
     List<SkjermetPerson> findAllByPersonidentAndTilknyttetRessurs(String personident, String tilknyttetRessurs);
 
