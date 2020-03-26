@@ -17,11 +17,15 @@ import java.time.LocalDateTime;
 public class NomRessurserListener {
 
     private final SkjermetPersonRepository repository;
+    int internLestCounter = 0;
+    int elseCounter = 0;
+    int total = 0;
 
     @Transactional
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
+            log.info("Intern lest counter: {}", ++internLestCounter);
             repository.save(
                     repository.getSkjermetPersonByPersonident(ressurs.getPersonident())
                             .map(eksisterende -> {
@@ -39,6 +43,11 @@ public class NomRessurserListener {
                     })
             );
         }
+        else {
+            log.info("Ekstern lest counter: {}", ++elseCounter);
+        }
+        log.info("Total lest counter: {}", ++total);
+
     }
 
     public static SkjermetPerson converted(RessursDto record){
