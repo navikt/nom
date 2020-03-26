@@ -25,7 +25,6 @@ public class NomRessurserListener {
     private int elseCounter = 0;
     private int total = 0;
 
-    @Transactional
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
