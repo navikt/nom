@@ -12,24 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Component
-//@AllArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class NomRessurserListener {
 
-    public NomRessurserListener(SkjermetPersonRepository repo){
-        repository = repo;
-    }
-
     private final SkjermetPersonRepository repository;
-    private int internLestCounter = 0;
-    private int elseCounter = 0;
-    private int total = 0;
 
     @Transactional
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
-            log.info("Intern lest counter: {}", ++internLestCounter);
             repository.save(
                     repository.getSkjermetPersonByPersonident(ressurs.getPersonident())
                             .map(eksisterende -> {
@@ -47,11 +39,6 @@ public class NomRessurserListener {
                     })
             );
         }
-        else {
-            log.info("Ekstern lest counter: {}", ++elseCounter);
-        }
-        log.info("Total lest counter: {}", ++total);
-
     }
 
     public static SkjermetPerson converted(RessursDto record){
