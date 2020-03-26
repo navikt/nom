@@ -93,6 +93,7 @@ public class DvhConsumer {
                 .startdato(dvhRessursDTO.getRemedyStartDato())
                 .sluttdato(sluttDato)
                 .endretDato(LocalDate.now())
+                .produced(false)
                 .build();
     }
 
