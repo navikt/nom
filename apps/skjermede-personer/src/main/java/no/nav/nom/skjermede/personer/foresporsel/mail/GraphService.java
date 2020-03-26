@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GraphService {
 
-    private static final String TITTEL = "Forespørsel om kjerming";
+    private static final String TITTEL = "Forespørsel om skjerming";
     private static final String AVSENDER = "noreply-skjerming@nav.no";
 
     private final TokenService tokenService;
