@@ -84,6 +84,11 @@ public class DvhConsumer {
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
+        LocalDate sluttDato = dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato();
+        if(sluttDato != null && sluttDato.isEqual(LocalDate.parse("2099-12-31"))){
+            sluttDato = null;
+        }
+
         return Ressurs.builder()
                 .navident(dvhRessursDTO.getNavident())
                 .personident(dvhRessursDTO.getPersonIdent())
@@ -92,7 +97,7 @@ public class DvhConsumer {
                 .epost(dvhRessursDTO.getEpost())
                 .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode()))
                 .startdato(dvhRessursDTO.getRemedyStartDato())
-                .sluttdato(dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato())
+                .sluttdato(sluttDato)
                 .endretDato(LocalDate.now())
                 .build();
     }
