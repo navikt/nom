@@ -93,7 +93,7 @@ public class RessursController {
         return repository.findAllByPersonident(personident).stream()
                 .filter(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
                         && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now())))
-                .findFirst().orElseThrow(() -> new RessursNotFoundException(RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE));
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE, personident)));
     }
 
     // Midlertidig rest-endepunkt for å manuelt opprette brukere.

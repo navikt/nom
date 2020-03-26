@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.contract.nom.dto.Ressurstype;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ public class NomRessurserListener {
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             repository.save(
-                    repository.getSkjermetPersonByPersonident(ressurs.getPersonident())
+                    repository.findByPersonident(ressurs.getPersonident())
                             .map(eksisterende -> {
                                 eksisterende.setSkjermetFom(ressurs.getStartdato());
                                 eksisterende.setSkjermetTom(ressurs.getSluttdato());

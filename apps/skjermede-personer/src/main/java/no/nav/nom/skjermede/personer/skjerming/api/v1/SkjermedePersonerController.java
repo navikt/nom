@@ -90,23 +90,6 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
-    /*
-    @GetMapping(SkjermingConstants.AKTIVE)
-    public List<SkjermetPersonResponseDTO> hentAktiveSkjerminger() {
-        final String personident = Optional
-                .ofNullable(tokenUtil.getSubject())
-                .orElseThrow(() -> new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE));
-
-        validerTilgang(personident);
-
-        return skjermetPersonRepository.findAllByPersonident(personident)
-                .stream()
-                .filter(person -> person.getSkjermetTom() == null
-                || person.getSkjermetTom().isAfter(LocalDate.now()))
-                .map(SkjermetPersonResponseDTO::fromEntity)
-                .collect(Collectors.toList());
-    }*/
-
     @PostMapping
     @Transactional
     public ResponseEntity<SkjermetPersonResponseDTO> opprettSkjerming() {
