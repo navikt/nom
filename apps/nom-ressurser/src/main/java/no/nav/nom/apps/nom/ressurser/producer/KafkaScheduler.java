@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 @Component
-@Profile("MidlertidigDisabled")
 @AllArgsConstructor
 public class KafkaScheduler {
 
