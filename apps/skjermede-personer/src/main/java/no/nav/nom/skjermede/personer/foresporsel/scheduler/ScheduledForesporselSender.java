@@ -39,7 +39,7 @@ public class ScheduledForesporselSender {
                     .append("Hvis dette er riktig kan du bekrefte ved å klikke på knappen under. ")
                     .append(String.format("%s %s vil da bli skjermet i NAV sine fagsystemer. ", foresporsel.getFornavn(), foresporsel.getEtternavn()))
                     .append("Det innebærer at bare saksbehandlere med særlig tilgang kan se informasjon og behandle saker. ")
-                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/enhet-oslo/SitePages/Skjerming-av-ansatte.aspx\">her</a>")
+                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/intranett-personvern/SitePages/Alle-ansatte-skjermes-fra-01.01.2020.aspx\">her</a>")
                     .append(String.format("<br><a href=\"%s/godkjenn?id=%s\"><button>Godkjenn</button></a>", foresporselAPI, foresporsel.getFunksjonellId()))
                     .toString();
 
@@ -48,7 +48,7 @@ public class ScheduledForesporselSender {
                 foresporsel.setEpostSendt(LocalDate.now());
                 foresporselRepository.save(foresporsel);
             } catch (Exception e) {
-                log.error(String.format("Sending av skjerming forespørsel epost mislyktes: %s", e.getMessage()));
+                log.error(String.format("Sending av skjerming-forespørsel epost mislyktes: %s", e.getMessage()));
             }
         });
     }

@@ -85,16 +85,17 @@ public class SkjermedePersonerControllerTest {
     @Test
     public void testHentSkjermedeFamiliemedlemerUnauthorized() throws Exception {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMER)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(repository.findAllByTilknyttetRessurs(TestUtils.PERSONIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
+        when(restTemplate.getForObject(anyString(), any(Class.class))).thenReturn(TestUtils.ressurs());
+        when(repository.findAllByTilknyttetRessurs(TestUtils.NAVIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
 
-        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMER))
+        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
