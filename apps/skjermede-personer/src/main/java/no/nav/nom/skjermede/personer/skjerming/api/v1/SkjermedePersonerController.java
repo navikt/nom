@@ -66,13 +66,17 @@ public class SkjermedePersonerController {
         return SkjermetPersonResponseDTO.fromEntity(skjermetPerson);
     }
 
-    @GetMapping(SkjermingConstants.FAMILIEMEDLEMER)
+    @GetMapping(SkjermingConstants.FAMILIEMEDLEMMER)
     public List<SkjermetPersonResponseDTO> hentSkjermedeFamiliemedlemer() {
         validerTilgang();
 
         val personident = tokenUtil.getSubject();
 
-        return skjermetPersonRepository.findAllByTilknyttetRessurs(personident)
+        val ressurs = restTemplate.getForObject(
+                String.format("%s/personident/%s?ressursType=INTERN", ressursAPI, personident),
+                RessursDto.class);
+
+        return skjermetPersonRepository.findAllByTilknyttetRessurs(ressurs.getNavident())
                 .stream()
                 .map(SkjermetPersonResponseDTO::fromEntity)
                 .collect(Collectors.toList());

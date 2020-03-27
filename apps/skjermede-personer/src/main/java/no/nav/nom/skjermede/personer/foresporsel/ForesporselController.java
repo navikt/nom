@@ -51,7 +51,7 @@ public class ForesporselController {
         foresporsel.setBekreftetDato(LocalDate.now());
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel));
 
-        return "Godkenning er registrert";
+        return "Godkjenning er registrert";
     }
 
     @GetMapping
