@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
@@ -79,7 +79,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.ofNullable(null));
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isNotFound());
+        mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk()).andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test

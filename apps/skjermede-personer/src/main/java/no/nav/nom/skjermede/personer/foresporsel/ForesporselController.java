@@ -61,9 +61,9 @@ public class ForesporselController {
         val personident = tokenUtil.getSubject();
         val foresporsel = foresporselRepository
                 .findByPersonidentAndBekreftetNull(personident)
-                .orElseThrow(() -> new ForesporselNotFoundException(ForesporselConstants.FORESPORSEL_NOT_FOUND));
+                .orElse(null);
 
-        return ForesporselResponseDTO.fromEntity(foresporsel);
+        return foresporsel != null ? ForesporselResponseDTO.fromEntity(foresporsel) : null;
     }
 
     @PostMapping
