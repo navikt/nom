@@ -61,9 +61,9 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, personident)));
+                .orElse(null);
 
-        return SkjermetPersonResponseDTO.fromEntity(skjermetPerson);
+        return skjermetPerson != null ? SkjermetPersonResponseDTO.fromEntity(skjermetPerson) : null;
     }
 
     @GetMapping(SkjermingConstants.FAMILIEMEDLEMMER)
