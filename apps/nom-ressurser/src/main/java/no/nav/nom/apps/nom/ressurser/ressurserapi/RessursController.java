@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -37,6 +38,25 @@ public class RessursController {
 
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
+
+    @GetMapping("ansatt")
+    public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
+                                          @RequestHeader(required = false) String personident,
+                                          @RequestParam(defaultValue = "true") boolean gyldig){
+        if (navident == null && personident == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi enten header med navident eller header med personident.");
+        }
+
+        final Optional<Ressurs> ressurs;
+
+        if (navident != null) {
+            ressurs = gyldig ? repository.getGyldigRessursByNavident(navident) : repository.findByNavident(navident);
+        } else {
+            ressurs = gyldig ? repository.getGyldigRessursByPersonident(personident) : repository.findByPersonident(personident);
+        }
+
+        return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);
+    }
 
     @GetMapping("/ansattStatus")
     @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
