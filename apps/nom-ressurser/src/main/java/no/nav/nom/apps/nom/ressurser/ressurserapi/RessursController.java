@@ -42,17 +42,22 @@ public class RessursController {
     @GetMapping("ansatt")
     public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
                                           @RequestHeader(required = false) String personident,
+                                          @RequestParam(required = false) String ressursType,
                                           @RequestParam(defaultValue = "true") boolean gyldig){
         if (navident == null && personident == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi enten header med navident eller header med personident.");
         }
 
-        final Optional<Ressurs> ressurs;
+        Optional<Ressurs> ressurs;
 
         if (navident != null) {
             ressurs = gyldig ? repository.getGyldigRessursByNavident(navident) : repository.findByNavident(navident);
         } else {
             ressurs = gyldig ? repository.getGyldigRessursByPersonident(personident) : repository.findByPersonident(personident);
+        }
+
+        if (ressursType != null) {
+            ressurs = ressurs.filter(ressursen -> ressursen.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase())));
         }
 
         return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);
