@@ -60,7 +60,7 @@ public class ScheduledForesporselSender {
 
     private String hentEpost(final String navident) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("personident", navident);
+        headers.set("navident", navident);
         val ressurs = new RestTemplate().exchange(
                 String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
