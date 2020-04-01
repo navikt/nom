@@ -14,8 +14,7 @@ import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.SkjermingNotFoun
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,9 +71,13 @@ public class SkjermedePersonerController {
 
         val personident = tokenUtil.getSubject();
 
-        val ressurs = restTemplate.getForObject(
-                String.format("%s/personident/%s?ressursType=INTERN", ressursAPI, personident),
-                RessursDto.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("personident", personident);
+        val ressurs = restTemplate.exchange(
+                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                RessursDto.class).getBody();
 
         return skjermetPersonRepository.findAllByTilknyttetRessurs(ressurs.getNavident())
                 .stream()
@@ -105,9 +108,13 @@ public class SkjermedePersonerController {
             throw new DuplicateSkjermingException(SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
         }
 
-        val ressurs = restTemplate.getForObject(
-                String.format("%s/personident/%s?ressursType=INTERN", ressursAPI, personident),
-                RessursDto.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("personident", personident);
+        val ressurs = restTemplate.exchange(
+                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                RessursDto.class).getBody();
 
         val skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
