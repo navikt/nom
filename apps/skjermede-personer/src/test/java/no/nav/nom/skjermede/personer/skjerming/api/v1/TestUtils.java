@@ -24,7 +24,6 @@ public class TestUtils {
     }
 
     public static ResponseEntity<RessursDto> ressurs() {
-
         return new ResponseEntity<RessursDto>(RessursDto.builder()
                 .personident(PERSONIDENT)
                 .navident(NAVIDENT)
