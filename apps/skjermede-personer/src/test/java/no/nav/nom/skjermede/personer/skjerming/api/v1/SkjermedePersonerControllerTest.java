@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -90,7 +91,7 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(restTemplate.getForObject(anyString(), any(Class.class))).thenReturn(TestUtils.ressurs());
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
         when(repository.findAllByTilknyttetRessurs(TestUtils.NAVIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
@@ -142,7 +143,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.empty());
-        when(restTemplate.getForObject(anyString(), any(Class.class))).thenReturn(TestUtils.ressurs());
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
         when(repository.save(any(SkjermetPerson.class))).thenReturn(TestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isCreated());
