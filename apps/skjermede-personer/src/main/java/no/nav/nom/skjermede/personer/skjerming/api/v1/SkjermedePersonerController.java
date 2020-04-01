@@ -111,7 +111,7 @@ public class SkjermedePersonerController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("personident", personident);
         val ressurs = restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI, personident),
+                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 RessursDto.class).getBody();

@@ -2,10 +2,15 @@ package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.foresporsel.mail.GraphService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -54,9 +59,14 @@ public class ScheduledForesporselSender {
     }
 
     private String hentEpost(final String navident) {
-        return new RestTemplate().getForObject(
-                String.format("%s/epost/{navident}", ressursAPI),
-                String.class,
-                navident);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("personident", navident);
+        val ressurs = new RestTemplate().exchange(
+                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                RessursDto.class).getBody();
+
+        return ressurs.getEpost();
     }
 }
