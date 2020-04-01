@@ -11,9 +11,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 
@@ -61,12 +63,16 @@ public class ScheduledForesporselSender {
     private String hentEpost(final String navident) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("navident", navident);
+
         val ressurs = new RestTemplate().exchange(
                 String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 RessursDto.class).getBody();
 
+        if (ressurs == null || ressurs.getEpost() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ressurs med navident %s ikke funnet", navident));
+        }
         return ressurs.getEpost();
     }
 }

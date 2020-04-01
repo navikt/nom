@@ -39,13 +39,13 @@ public class RessursController {
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
 
-    @GetMapping("ansatt")
+    @GetMapping("ansatt") //todo: Skal denne være beskyttet med persontoken eller servicebruker?
     public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
                                           @RequestHeader(required = false) String personident,
                                           @RequestParam(required = false) String ressursType,
                                           @RequestParam(defaultValue = "true") boolean gyldig){
         if (navident == null && personident == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi enten header med navident eller header med personident.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi identifikator i header enten som navident eller  personident.");
         }
 
         Optional<Ressurs> ressurs;
