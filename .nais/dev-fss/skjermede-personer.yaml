@@ -16,7 +16,7 @@ spec:
     - name: NOM_RESSURSER_API
       value: https://nom-ressurser.nais.preprod.local/api/v1/ressurs
     - name: FORESPORSEL_API
-      value: https://skjermede-personer.nais.preprod.local/api/v1/foresporsel
+      value: https://www-q0.nav.no/person/personopplysninger/skjerming-proxy/v1/foresporsel
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: SPRING_KAFKA_TOPIC_RESSURS_NAME

@@ -6,7 +6,6 @@ import lombok.val;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.foresporsel.exception.DuplicateForesporselException;
-import no.nav.nom.skjermede.personer.foresporsel.exception.ForesporselNotFoundException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
@@ -36,14 +35,14 @@ public class ForesporselController {
     private final TokenUtil tokenUtil;
 
     @Unprotected
-    @GetMapping(ForesporselConstants.FORESPORSEL_GODKJENNING)
-    public String godkjennForesporsel(@RequestParam("id") final UUID funksjonellId) {
+    @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
+    public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository
                 .findByFunksjonellIdAndBekreftetNull(funksjonellId)
                 .orElse(null);
 
         if (foresporsel == null) {
-            log.error("Forsøk på godkjenning av skjerming med ugyldig funksjonell id: {}", funksjonellId);
+            log.error("Forsøk på bekreftelse av skjerming med ugyldig funksjonell id: {}", funksjonellId);
             return "Ugyldig operasjon";
         }
 
@@ -51,7 +50,7 @@ public class ForesporselController {
         foresporsel.setBekreftetDato(LocalDate.now());
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel));
 
-        return "Godkjenning er registrert";
+        return "Bekreftelse av skjerming registrert";
     }
 
     @GetMapping
