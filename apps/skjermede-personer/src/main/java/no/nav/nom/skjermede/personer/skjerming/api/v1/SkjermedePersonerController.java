@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 @RequestMapping(SkjermingConstants.BASE_URL)
+@ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class SkjermedePersonerController {
 
     @Value("${ressurser.api}")
@@ -74,7 +74,7 @@ public class SkjermedePersonerController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("personident", personident);
         val ressurs = restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
+                String.format("%s/ansatt?gyldig=false&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 RessursDto.class).getBody();
