@@ -14,7 +14,7 @@ import java.time.LocalDate;
 
 @Slf4j
 @Component
-@Profile("!local")
+@Profile("!local & !test")
 @RequiredArgsConstructor
 public class ScheduledForesporselSender {
 

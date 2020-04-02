@@ -9,6 +9,8 @@ spring:
     consumer:
       groupid: skjermede-personer
 
+maanderPlusSkjerming: 6
+
 postgres:
   mountPath: postgresql/${DB_ENV}
   jdbc:
