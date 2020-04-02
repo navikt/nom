@@ -4,8 +4,7 @@ app:
     password: ${app.password}
     topic.ressurs.name: aapen-nom-ressurs-v1
   scheduledTasks:
-    kafkaProducer: 0 0 * ? * *  # Every hour
-    dvhConsumer: 0 * * ? * *  # Every hour
+    dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 0 * ? * *  # Every hour
 
 spring:

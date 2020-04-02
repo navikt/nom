@@ -19,6 +19,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!local")
 @Slf4j
 public class DvhConsumer {
 
@@ -31,9 +32,15 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final long incrementValue = 1000L;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(cron = "${app.scheduledTasks.dvhConsumer}")
+    public void dvhScheduler(){
+        log.info("Oppdaterer fra datavarehus..");
+        while (hentBulkOppdatering() == incrementValue);
+        log.info("Oppdatering fra datavarehus ferdig.");
+    }
+
     @Transactional(value = "transactionManager")
-    public void hentBulkOppdatering(){
+    public int hentBulkOppdatering(){
         if(leaderElection.isLeader()) {
             Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
             String url = dvhEndpoint + "?in_sekvensnummer_fra=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset() + incrementValue);
@@ -73,8 +80,11 @@ public class DvhConsumer {
                         );
                 dvhOffset.setOffset(resultRessurs.get(resultRessurs.size() - 1).getOffset());
                 offsetRepository.save(dvhOffset);
+
+                return result.getAnsatteResultList().size();
             }
         }
+        return 0;
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
