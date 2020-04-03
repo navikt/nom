@@ -4,8 +4,7 @@ app:
     password: ${app.password}
     topic.ressurs.name: aapen-nom-ressurs-v1
   scheduledTasks:
-    kafkaProducer: 0 0 * ? * *  # Every hour
-    dvhConsumer: 0 * * ? * *  # Every hour
+    dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 0 * ? * *  # Every hour
 
 spring:
@@ -43,11 +42,6 @@ spring.kafka:
     ssl:
       truststore.location: ${javax.net.ssl.trustStore:}
       truststore.password: ${javax.net.ssl.trustStorePassword:}
-  listener:
-    concurrency: 1
-    poll-timeout: 1000
-    ack-mode: batch
-    type: batch
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

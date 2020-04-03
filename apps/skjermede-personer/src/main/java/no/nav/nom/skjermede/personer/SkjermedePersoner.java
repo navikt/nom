@@ -11,6 +11,5 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SkjermedePersoner {
     public static void main(String[] args) {
         SpringApplication.run(SkjermedePersoner.class);
-
     }
 }

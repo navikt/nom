@@ -2,13 +2,11 @@ package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
 import no.nav.nom.contract.nom.dto.RessursDto;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonRequestDTO;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TestUtils {
 
@@ -25,11 +23,11 @@ public class TestUtils {
                 .build();
     }
 
-    public static RessursDto ressurs() {
-        return RessursDto.builder()
+    public static ResponseEntity<RessursDto> ressurs() {
+        return new ResponseEntity<RessursDto>(RessursDto.builder()
                 .personident(PERSONIDENT)
                 .navident(NAVIDENT)
                 .sluttdato(LocalDate.now())
-                .build();
+                .build(), HttpStatus.OK);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -37,6 +38,30 @@ public class RessursController {
 
     private final RessursRepository repository;
     private final TokenUtil tokenUtil;
+
+    @GetMapping("ansatt") //todo: Skal denne være beskyttet med persontoken eller servicebruker?
+    public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
+                                          @RequestHeader(required = false) String personident,
+                                          @RequestParam(required = false) String ressursType,
+                                          @RequestParam(defaultValue = "true") boolean gyldig){
+        if (navident == null && personident == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi identifikator i header enten som navident eller  personident.");
+        }
+
+        Optional<Ressurs> ressurs;
+
+        if (navident != null) {
+            ressurs = gyldig ? repository.getGyldigRessursByNavident(navident) : repository.findByNavident(navident);
+        } else {
+            ressurs = gyldig ? repository.getGyldigRessursByPersonident(personident) : repository.findByPersonident(personident);
+        }
+
+        if (ressursType != null) {
+            ressurs = ressurs.filter(ressursen -> ressursen.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase())));
+        }
+
+        return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);
+    }
 
     @GetMapping("/ansattStatus")
     @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
@@ -93,7 +118,7 @@ public class RessursController {
         return repository.findAllByPersonident(personident).stream()
                 .filter(ressurs -> ressurs.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase()))
                         && (ressurs.getSluttdato() == null || ressurs.getSluttdato().isAfter(LocalDate.now())))
-                .findFirst().orElseThrow(() -> new RessursNotFoundException(RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE));
+                .findFirst().orElseThrow(() -> new RessursNotFoundException(String.format(RESSURS_MED_PERSONIDENT_NOT_FOUND_MESSAGE, personident)));
     }
 
     // Midlertidig rest-endepunkt for å manuelt opprette brukere.

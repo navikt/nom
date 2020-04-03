@@ -9,6 +9,8 @@ spring:
     consumer:
       groupid: skjermede-personer
 
+maanderPlusSkjerming: 6
+
 postgres:
   mountPath: postgresql/${DB_ENV}
   jdbc:
@@ -35,7 +37,6 @@ app:
     repositoryMetrics: 0 0 * ? * * # Every hour
 
 spring.kafka:
-  client-id: ${app.kafka.username}
   properties:
     security.protocol: SASL_SSL
     sasl:
@@ -44,25 +45,11 @@ spring.kafka:
     ssl:
       truststore.location: ${javax.net.ssl.trustStore:}
       truststore.password: ${javax.net.ssl.trustStorePassword:}
-  listener:
-    concurrency: 1
-    poll-timeout: 1000
-    ack-mode: batch
-    type: batch
   consumer:
     key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     properties:
-      isolation.level: read_committed
       spring.json.trusted.packages: '*'
-    max-poll-records: 100
-    auto-offset-reset: earliest
-    enable-auto-commit: false
-  streams:
-    application-id: ${nais.app.name}-${nais.namespace}
-    properties:
-      poll.ms: 1000
-      processing.guarantee: exactly_once
 
 no.nav:
   security:

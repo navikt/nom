@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = {"no.nav.nom.skjermede.personer"})
-@Profile("!local")
+@Profile("!local & !test")
 public class DbConfig {
 
     @Value("${postgres.jdbc.url}")

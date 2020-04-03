@@ -13,17 +13,23 @@ import java.util.Optional;
 public interface RessursRepository extends JpaRepository<Ressurs, Long> {
     Optional<Ressurs> findByPersonident(String personIdent);
 
+    Optional<Ressurs> findByNavident(String navident);
+
     List<Ressurs> findAllByPersonidentAndRessurstype(String personIdent, Ressurstype ressurstype);
 
     List<Ressurs> findAllByProduced(boolean produced);
 
     List<Ressurs> findAllByPersonident(String personident);
 
-    List<Ressurs> findByNavident(String navident);
-
     Optional<Ressurs> findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(String navident);
 
     @Query(value = "SELECT COUNT(DISTINCT navident) FROM T_RESSURS WHERE (sluttdato IS NULL OR sluttdato <= CURRENT_DATE) AND ressurstype = :ressurstype", nativeQuery = true)
     long countDistinctByFunksjonellIdAndValid(@Param("ressurstype") String ressurstype);
+
+    @Query(value = "SELECT * FROM T_RESSURS WHERE NAVIDENT = :navident AND (SLUTTDATO IS NULL OR SLUTTDATO > CURRENT_DATE)", nativeQuery = true)
+    Optional<Ressurs> getGyldigRessursByNavident(String navident);
+
+    @Query(value = "SELECT * FROM T_RESSURS WHERE PERSONIDENT = :personident AND (SLUTTDATO IS NULL OR SLUTTDATO > CURRENT_DATE)", nativeQuery = true)
+    Optional<Ressurs> getGyldigRessursByPersonident(String personident);
 }
 

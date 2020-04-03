@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
@@ -79,22 +80,23 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.ofNullable(null));
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isNotFound());
+        mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk()).andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
     public void testHentSkjermedeFamiliemedlemerUnauthorized() throws Exception {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMER)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
     }
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(repository.findAllByTilknyttetRessurs(TestUtils.PERSONIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
+        when(repository.findAllByTilknyttetRessurs(TestUtils.NAVIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
 
-        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMER))
+        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -141,7 +143,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.empty());
-        when(restTemplate.getForObject(anyString(), any(Class.class))).thenReturn(TestUtils.ressurs());
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
         when(repository.save(any(SkjermetPerson.class))).thenReturn(TestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isCreated());
