@@ -139,7 +139,7 @@ public class SkjermedePersonerController {
                 .getSkjermetPersonByPersonident(personident)
                 .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE)));
 
-        skjermetPerson.setSkjermetTom(LocalDate.now());
+        skjermetPerson.setSkjermetTom(LocalDate.now().minusDays(1));
         skjermetPerson.setEndretDato(LocalDateTime.now());
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
