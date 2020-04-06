@@ -12,6 +12,7 @@ import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ public class ForesporselController {
     private final TokenUtil tokenUtil;
 
     @Unprotected
+    @Transactional
     @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository
@@ -44,6 +46,15 @@ public class ForesporselController {
         if (foresporsel == null) {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig funksjonell id: {}", funksjonellId);
             return "Ugyldig operasjon";
+        }
+
+        val skjermet = skjermetPersonRepository
+                .getSkjermetPersonByPersonident(foresporsel.getPersonident())
+                .orElse(null);
+
+        if (skjermet != null) {
+            skjermet.setSkjermetTom(LocalDate.now().minusDays(1));
+            skjermetPersonRepository.save(skjermet);
         }
 
         foresporsel.setBekreftet(true);
