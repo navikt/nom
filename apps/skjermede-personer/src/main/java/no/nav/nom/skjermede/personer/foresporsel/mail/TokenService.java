@@ -26,7 +26,7 @@ public class TokenService {
     private LocalDateTime expiresOn;
 
     public synchronized String getAccessToken() throws Exception {
-        if (accessToken == null || expiresOn.isAfter(LocalDateTime.now().minusMinutes(5))) {
+        if (accessToken == null || expiresOn.isBefore(LocalDateTime.now().plusMinutes(2))) {
             refreshToken();
         }
 
