@@ -139,7 +139,7 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void tidligereAnsattStarterIgjenUtenforSeksMnder(){
-        LocalDate sluttdato = LocalDate.now().minusMonths(mnderPlusSkjerming).minusDays(1);
+        LocalDate sluttdato = LocalDate.now().minusMonths(mnderPlusSkjerming);
         ressursDto.setStartdato(sluttdato.minusMonths(1));
         ressursDto.setSluttdato(sluttdato);
         familieMedlem.setSkjermetFom(sluttdato.minusMonths(1));

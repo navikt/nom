@@ -1,11 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.contract.nom.dto.RessursDto;
-import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -70,7 +65,7 @@ public class SkjermingLogikkKafka {
                                     }
                                     // Personen har vært skjermet tidligere (muligens via familie):
                                     else{
-                                        eksisterende.setSkjermetTom(LocalDate.now());
+                                        eksisterende.setSkjermetTom(LocalDate.now().minusDays(1));
                                         eksisterende.setEndretDato(LocalDateTime.now());
                                         repository.save(eksisterende);
 
