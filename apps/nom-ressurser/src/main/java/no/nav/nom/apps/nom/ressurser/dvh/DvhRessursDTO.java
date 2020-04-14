@@ -37,4 +37,7 @@ public class DvhRessursDTO {
 
     @JsonProperty("AGRESSO_SLUTT_DATO")
     private LocalDate agressoSluttDato;
+
+    @JsonProperty("ANSATT_TYPE")
+    private String ansattType;
 }

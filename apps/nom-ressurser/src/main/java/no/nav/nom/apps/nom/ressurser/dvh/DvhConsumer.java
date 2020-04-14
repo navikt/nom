@@ -99,7 +99,7 @@ public class DvhConsumer {
                 .fornavn(dvhRessursDTO.getFornavn())
                 .etternavn(dvhRessursDTO.getEtternavn())
                 .epost(dvhRessursDTO.getEpost())
-                .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode()))
+                .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode(), dvhRessursDTO.getAnsattType()))
                 .startdato(dvhRessursDTO.getRemedyStartDato())
                 .sluttdato(sluttDato)
                 .endretDato(LocalDate.now())
@@ -107,14 +107,30 @@ public class DvhConsumer {
                 .build();
     }
 
-    private static Ressurstype convertedRessursType(String ressurstypeKode){
-        switch (ressurstypeKode.toUpperCase()){
-            case "F": case "K": case "M": case "N":
-                return Ressurstype.INTERN;
-            case "E": case "I": case "L": case "O": case "P":
-            case "S": case "T": case "V": case "Y":
-                return Ressurstype.EKSTERN;
-            default: return null;
+    private static Ressurstype convertedRessursType(String ressurstypeKode, String ansattType){
+        if(ressurstypeKode != null) {
+            switch (ressurstypeKode.toUpperCase()) {
+                case "F":
+                case "K":
+                case "M":
+                case "N":
+                    return Ressurstype.INTERN;
+                case "E":
+                case "I":
+                case "L":
+                case "O":
+                case "P":
+                case "S":
+                case "T":
+                case "V":
+                case "Y":
+                    return Ressurstype.EKSTERN;
+                default:
+                    return null;
+            }
+        }
+        else {
+            return ansattType.equals("NAV Kommunalt") || ansattType.equals("NAV Statlig") ? Ressurstype.INTERN : (ansattType.equals("Eksternt") ? Ressurstype.INTERN : null);
         }
     }
 }
