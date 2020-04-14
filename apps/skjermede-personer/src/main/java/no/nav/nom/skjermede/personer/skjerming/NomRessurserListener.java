@@ -19,7 +19,7 @@ public class NomRessurserListener {
     private final SkjermingLogikkKafka skjermingLogikkKafka;
 
     @Transactional
-    @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
+    //@KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDto ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident());

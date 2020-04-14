@@ -17,6 +17,14 @@ spec:
       value: https://nom-ressurser.nais.preprod.local/api/v1/ressurs
     - name: FORESPORSEL_API
       value: https://www-q0.nav.no/person/personopplysninger/skjerming-proxy/v1/foresporsel
+    - name: TPS_MQ_QUEUE_MANAGER_URL
+      value: mq://b27apvl170.preprod.local:1413/MQXLSC01
+    - name: TPS_MQ_QUEUE_CHANNEL
+      value: Q2_SKJERMET
+    - name: TPS_MQ_QUEUE_NAME
+      value: QA.Q2_412.SFE_ENDRINGSMELDING
+    - name: TPS_MQ_QUEUE_USERNAME
+      value: srvappserver
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: SPRING_KAFKA_TOPIC_RESSURS_NAME
