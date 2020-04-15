@@ -18,11 +18,11 @@ spec:
     - name: FORESPORSEL_API
       value: https://skjermede-personer.nais.adeo.no/api/v1/foresporsel
     - name: TPS_MQ_QUEUE_MANAGER_URL
-      value: mq://b27apvl170.preprod.local:1413/MQXLSC01
+      value: mq://a01apvl062.adeo.no:1414/MPLSC03
     - name: TPS_MQ_QUEUE_CHANNEL
-      value: Q2_SKJERMET
+      value: P_SKJERMET
     - name: TPS_MQ_QUEUE_NAME
-      value: QA.Q2_412.SFE_ENDRINGSMELDING
+      value: QA.P412.SFE_ENDRINGSMELDING
     - name: TPS_MQ_QUEUE_USERNAME
       value: srvappserver
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
