@@ -18,6 +18,6 @@ public class ScheduledTpsSender {
 
     @Scheduled(fixedDelay = 5000, initialDelay = 5000)
     private void sendTilTps() {
-        skjermetPersonRepository.findAllBySendtTilTpsNull().stream().forEach(tpsService::sendAndUpdate);
+        skjermetPersonRepository.getAllIkkeSendtTilTps().stream().forEach(tpsService::sendAndUpdate);
     }
 }
