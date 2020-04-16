@@ -130,7 +130,7 @@ public class DvhConsumer {
             }
         }
         else {
-            return ansattType.equals("NAV Kommunalt") || ansattType.equals("NAV Statlig") ? Ressurstype.INTERN : (ansattType.equals("Eksternt") ? Ressurstype.INTERN : null);
+            return ansattType.equals("NAV Kommunalt") || ansattType.equals("NAV Statlig") ? Ressurstype.INTERN : (ansattType.equals("Eksternt") ? Ressurstype.EKSTERN : null);
         }
     }
 }
