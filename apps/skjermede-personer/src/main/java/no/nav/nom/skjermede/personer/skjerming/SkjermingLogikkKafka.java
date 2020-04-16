@@ -73,7 +73,6 @@ public class SkjermingLogikkKafka {
                                     }
                                 },
                                 () -> {
-                                    System.out.println("Step 3");
                                     // Hvis en person har vært skjermet tidligere, men avskjermet seg via nav.no skal det ikke skjermes igjen.
                                     // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt skjermet tidligere.
                                     List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());

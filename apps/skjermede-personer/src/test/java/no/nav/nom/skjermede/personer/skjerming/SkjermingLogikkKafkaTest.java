@@ -61,7 +61,6 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void nyAnsatt(){
-        System.out.println("nyAnsatt" + skjermetPersonRepository.findAll().size());
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
@@ -79,7 +78,6 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void eksisterendeAnsattEndreInfo(){
-        System.out.println("eksisterendeAnsattEndreInfo" + skjermetPersonRepository.findAll().size());
         lagreSkjermetPerson(NomRessurserListener.converted(ressursDto));
         ressursDto.setFornavn("Fornavn");
         ressursDto.setEtternavn("Etternavn");
@@ -95,8 +93,6 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void eksisterendeAnsattSlutter(){
-        System.out.println("eksisterendeAnsattSlutter" + skjermetPersonRepository.findAll().size());
-
         lagreSkjermetPerson(NomRessurserListener.converted(ressursDto));
         lagreSkjermetPerson(familieMedlem);
 
@@ -118,8 +114,6 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void tidligereAnsattStarterIgjenInnenforSeksMnder(){
-        System.out.println("tidligereAnsattStarterIgjenInnenforSeksMnder " + skjermetPersonRepository.findAll().size());
-
         LocalDateTime sluttdato = LocalDateTime.now().plusDays(1).withNano(0);
         ressursDto.setSluttdato(sluttdato);
         familieMedlem.setSkjermetTil(sluttdato);
@@ -127,15 +121,10 @@ public class SkjermingLogikkKafkaTest {
         lagreSkjermetPerson(familieMedlem);
 
         ressursDto.setStartdato(sluttdato.plusMonths(5));
-        System.out.println("startdato: " + ressursDto.getStartdato());
         ressursDto.setSluttdato(null);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
-        System.out.println(ressursDto.toString());
-
-        System.out.println(".....");
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
-        savedSkjermetPersonList.forEach(System.out::println);
         Assertions.assertEquals(1, savedSkjermetPersonList.size());
 
         SkjermetPerson savedSkjermetPerson = savedSkjermetPersonList.get(0);
