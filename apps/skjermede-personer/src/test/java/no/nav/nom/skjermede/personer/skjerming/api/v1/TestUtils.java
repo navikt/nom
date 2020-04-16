@@ -5,7 +5,6 @@ import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class TestUtils {
