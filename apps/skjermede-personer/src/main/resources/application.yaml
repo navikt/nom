@@ -70,3 +70,10 @@ ressurser:
 
 foresporsel:
   api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}
+
+tps:
+  mq:
+    manager-url: ${TPS_MQ_QUEUE_MANAGER_URL:http://localhost:1414/QMTEST}
+    channel-name: ${TPS_MQ_QUEUE_CHANNEL:DEV.APP.SVRCONN}
+    queue-name: ${TPS_MQ_QUEUE_NAME:DEV.QUEUE.1}
+    username: ${TPS_MQ_QUEUE_USERNAME:app}

@@ -39,3 +39,10 @@ services:
       - KAFKA_CREATE_TOPICS=aapen-nom-ressurs-v1:1:1:compact
     depends_on:
       - zookeeper-server
+  ibm-mq:
+    image: 'ibmcom/mq:latest'
+    ports:
+      - '1414:1414'
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QMTEST
