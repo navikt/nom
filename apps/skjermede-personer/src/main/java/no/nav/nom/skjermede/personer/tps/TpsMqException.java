@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.tps.exception;
+package no.nav.nom.skjermede.personer.tps;
 
 
 public class TpsMqException extends RuntimeException {

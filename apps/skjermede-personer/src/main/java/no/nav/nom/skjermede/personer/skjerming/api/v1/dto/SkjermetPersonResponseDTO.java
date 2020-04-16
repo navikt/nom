@@ -1,14 +1,12 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,11 +19,11 @@ public class SkjermetPersonResponseDTO {
     private String etternavn;
     private String tilknyttetRessurs;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate skjermetFom;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime skjermetFra;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate skjermetTom;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime skjermetTil;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime opprettetDato;
@@ -37,8 +35,8 @@ public class SkjermetPersonResponseDTO {
         return builder()
                 .fornavn(skjermetPerson.getFornavn())
                 .etternavn(skjermetPerson.getEtternavn())
-                .skjermetFom(skjermetPerson.getSkjermetFom())
-                .skjermetTom(skjermetPerson.getSkjermetTom())
+                .skjermetFra(skjermetPerson.getSkjermetFra())
+                .skjermetTil(skjermetPerson.getSkjermetTil())
                 .tilknyttetRessurs(skjermetPerson.getTilknyttetRessurs())
                 .opprettetDato(skjermetPerson.getOpprettetDato())
                 .endretDato(skjermetPerson.getEndretDato())

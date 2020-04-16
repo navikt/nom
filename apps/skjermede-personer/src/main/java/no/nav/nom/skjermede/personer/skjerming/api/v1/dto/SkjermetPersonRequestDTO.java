@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,16 +20,16 @@ public class SkjermetPersonRequestDTO {
 
     private String fornavn;
     private String etternavn;
-    private LocalDate skjermetFom;
-    private LocalDate skjermetTom;
+    private LocalDateTime skjermetFra;
+    private LocalDateTime skjermetTil;
     private String tilknyttetRessurs;
 
     public SkjermetPerson toEntity() {
         return SkjermetPerson.builder()
                 .fornavn(fornavn)
                 .etternavn(etternavn)
-                .skjermetFom(skjermetFom)
-                .skjermetTom(skjermetTom)
+                .skjermetFra(skjermetFra)
+                .skjermetTil(skjermetTil)
                 .tilknyttetRessurs(tilknyttetRessurs)
                 .build();
     }

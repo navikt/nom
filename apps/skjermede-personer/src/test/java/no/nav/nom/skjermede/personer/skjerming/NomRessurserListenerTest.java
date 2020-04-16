@@ -1,6 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming;
 
-import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -22,11 +21,11 @@ class NomRessurserListenerTest {
     @Mock
     private SkjermingLogikkKafka skjermingLogikkKafka;
 
-    private RessursDto ressurs;
+    private RessursDTO ressurs;
 
     @BeforeEach
     void testDataSetup(){
-        ressurs = RessursDto.builder()
+        ressurs = RessursDTO.builder()
                 .navident("T123456")
                 .build();
     }

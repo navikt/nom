@@ -3,7 +3,7 @@ package no.nav.nom.skjermede.personer.skjerming.api.v1;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,9 +57,7 @@ public class SkjermedePersonerController {
         validerTilgang();
 
         val personident = tokenUtil.getSubject();
-        val skjermetPerson = skjermetPersonRepository
-                .getSkjermetPersonByPersonident(personident)
-                .orElse(null);
+        val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
         return skjermetPerson != null ? SkjermetPersonResponseDTO.fromEntity(skjermetPerson) : null;
     }
@@ -77,7 +74,7 @@ public class SkjermedePersonerController {
                 String.format("%s/ansatt?gyldig=false&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                RessursDto.class).getBody();
+                RessursDTO.class).getBody();
 
         return skjermetPersonRepository.findAllByTilknyttetRessurs(ressurs.getNavident())
                 .stream()
@@ -114,13 +111,13 @@ public class SkjermedePersonerController {
                 String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                RessursDto.class).getBody();
+                RessursDTO.class).getBody();
 
         val skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
-                .skjermetFom(LocalDate.now())
+                .skjermetFra(LocalDateTime.now())
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .build();
@@ -139,7 +136,7 @@ public class SkjermedePersonerController {
                 .getSkjermetPersonByPersonident(personident)
                 .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE)));
 
-        skjermetPerson.setSkjermetTom(LocalDate.now().minusDays(1));
+        skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));

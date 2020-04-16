@@ -15,26 +15,26 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
                    "WHERE PERSONIDENT = :personident AND " +
-                   "(SKJERMET_TOM IS NULL OR SKJERMET_TOM >= CURRENT_DATE)", nativeQuery = true)
+                   "(SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
     Optional<SkjermetPerson> getSkjermetPersonByPersonident(String personident);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
                    "WHERE SENDT_TIL_TPS IS NULL AND " +
-                   "(SKJERMET_TOM IS NULL OR SKJERMET_TOM <= CURRENT_DATE)", nativeQuery = true)
+                   "(SKJERMET_TIL IS NULL OR SKJERMET_TIL <= current_timestamp)", nativeQuery = true)
     List<SkjermetPerson> getAllIkkeSendtTilTps();
 
     @Query(value =  "SELECT * FROM T_SKJERMET_PERSON " +
                     "WHERE TILKNYTTET_RESSURS = :tilknyttetRessurs " +
-                    "AND (SKJERMET_TOM IS NULL OR CURRENT_DATE <= SKJERMET_TOM)", nativeQuery = true)
+                    "AND (SKJERMET_TIL IS NULL OR current_timestamp <= SKJERMET_TIL)", nativeQuery = true)
     List<SkjermetPerson> findAllByTilknyttetRessursAndValid(String tilknyttetRessurs);
 
     @Query(value =  "SELECT COUNT(DISTINCT(personident)) FROM T_SKJERMET_PERSON " +
-                    "WHERE (skjermet_tom IS NULL OR skjermet_tom >= CURRENT_DATE) " +
+                    "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp) " +
                     "AND tilknyttet_ressurs IS NULL", nativeQuery = true)
     long countDistinctSkjermetAnsatte();
 
     @Query(value =  "SELECT COUNT(DISTINCT(personident)) FROM T_SKJERMET_PERSON " +
-                    "WHERE (skjermet_tom IS NULL OR skjermet_tom >= CURRENT_DATE) " +
+                    "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp) " +
                     "AND tilknyttet_ressurs IS NOT NULL", nativeQuery = true)
     long countDistinctSkjermetFamilie();
 }

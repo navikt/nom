@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.ressurserapi;
+package no.nav.nom.apps.nom.ressurser.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.ressurserapi;
+package no.nav.nom.apps.nom.ressurser.api.v1;
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder;
 import no.nav.security.token.support.core.jwt.JwtTokenClaims;

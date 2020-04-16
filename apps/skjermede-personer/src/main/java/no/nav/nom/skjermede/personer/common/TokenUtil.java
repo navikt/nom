@@ -4,7 +4,6 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder;
 import no.nav.security.token.support.core.jwt.JwtTokenClaims;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 

@@ -5,7 +5,7 @@ import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 
 @Component
@@ -16,6 +16,6 @@ public class ScheduledForesporselCleaner {
 
     @Scheduled(cron = "0 30 0 * * *")
     public void scheduledCleaner() {
-        foresporselRepository.deleteAllByEpostSendtBeforeAndBekreftetFalseOrBekreftetNull(LocalDate.now().minus(Period.ofDays(14)));
+        foresporselRepository.deleteAllByEpostSendtBeforeAndBekreftetFalseOrBekreftetNull(LocalDateTime.now().minus(Period.ofDays(14)));
     }
 }

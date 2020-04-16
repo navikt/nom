@@ -1,9 +1,7 @@
-package no.nav.nom.apps.nom.ressurser.ressurserapi;
+package no.nav.nom.apps.nom.ressurser.api.v1.dto;
 
 import lombok.Getter;
 import no.nav.nom.contract.nom.dto.Ressurstype;
-
-import java.time.LocalDate;
 
 @Getter
 public class RessursRequestDTO {

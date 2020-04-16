@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
+import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
+import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
 import no.nav.nom.skjermede.personer.foresporsel.exception.DuplicateForesporselException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -53,12 +54,13 @@ public class ForesporselController {
                 .orElse(null);
 
         if (skjermet != null) {
-            skjermet.setSkjermetTom(LocalDate.now().minusDays(1));
+            skjermet.setSkjermetTil(LocalDateTime.now());
+            skjermet.setEndretDato(LocalDateTime.now());
             skjermetPersonRepository.save(skjermet);
         }
 
         foresporsel.setBekreftet(true);
-        foresporsel.setBekreftetDato(LocalDate.now());
+        foresporsel.setBekreftetDato(LocalDateTime.now());
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel));
 
         return "Bekreftelse av skjerming registrert";
@@ -107,7 +109,7 @@ public class ForesporselController {
                 .fornavn(foresporsel.getFornavn())
                 .etternavn(foresporsel.getEtternavn())
                 .tilknyttetRessurs(foresporsel.getTilknyttetRessurs())
-                .skjermetFom(LocalDate.now())
+                .skjermetFra(LocalDateTime.now())
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .build();

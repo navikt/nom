@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.util.List;
 public class KafkaProducer {
 
     private final MeterRegistry meterRegistry;
-    private final KafkaTemplate<String, RessursDto> kafkaTemplate;
+    private final KafkaTemplate<String, RessursDTO> kafkaTemplate;
     private final RessursRepository repository;
 
     @Value("${app.kafka.topic.ressurs.name}")
@@ -39,16 +39,16 @@ public class KafkaProducer {
         repository.saveAll(ressursList);
     }
 
-    private static RessursDto converted(Ressurs ressurs) {
-        return RessursDto.builder()
+    private static RessursDTO converted(Ressurs ressurs) {
+        return RessursDTO.builder()
                 .personident(ressurs.getPersonident())
                 .navident(ressurs.getNavident())
                 .fornavn(ressurs.getFornavn())
                 .etternavn(ressurs.getEtternavn())
                 .epost(ressurs.getEpost())
                 .ressurstype(ressurs.getRessurstype())
-                .startdato(ressurs.getStartdato())
-                .sluttdato(ressurs.getSluttdato())
+                .startdato(ressurs.getStartdato().atStartOfDay())
+                .sluttdato(ressurs.getSluttdato().atTime(23, 59))
                 .opprettetdato(ressurs.getOpprettetDato())
                 .endretdato(ressurs.getEndretDato())
                 .build();

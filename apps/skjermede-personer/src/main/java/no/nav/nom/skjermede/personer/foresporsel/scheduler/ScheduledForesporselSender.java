@@ -3,7 +3,7 @@ package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.foresporsel.mail.GraphService;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -52,7 +52,7 @@ public class ScheduledForesporselSender {
 
             try {
                 graphService.sendMail(content, hentEpost(foresporsel.getTilknyttetRessurs()));
-                foresporsel.setEpostSendt(LocalDate.now());
+                foresporsel.setEpostSendt(LocalDateTime.now());
                 foresporselRepository.save(foresporsel);
             } catch (Exception e) {
                 log.error(String.format("Sending av skjerming-forespørsel epost mislyktes: %s", e.getMessage()));
@@ -68,7 +68,7 @@ public class ScheduledForesporselSender {
                 String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                RessursDto.class).getBody();
+                RessursDTO.class).getBody();
 
         if (ressurs == null || ressurs.getEpost() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ressurs med navident %s ikke funnet", navident));

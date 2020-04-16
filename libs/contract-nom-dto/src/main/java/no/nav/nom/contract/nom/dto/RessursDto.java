@@ -5,15 +5,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Setter
 @Getter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class RessursDto {
+public class RessursDTO {
 
     private String personident;
 
@@ -27,9 +30,9 @@ public class RessursDto {
 
     private Ressurstype ressurstype;
 
-    private LocalDate startdato;
+    private LocalDateTime startdato;
 
-    private LocalDate sluttdato;
+    private LocalDateTime sluttdato;
 
     private LocalDate opprettetdato;
 

@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.tps;
+package no.nav.nom.skjermede.personer.tps.config;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

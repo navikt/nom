@@ -1,10 +1,11 @@
-package no.nav.nom.skjermede.personer.foresporsel;
+package no.nav.nom.skjermede.personer.foresporsel.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 
 import java.time.LocalDateTime;
 
@@ -18,8 +19,6 @@ public class ForesporselResponseDTO {
     private LocalDateTime opprettetDato;
 
     public static ForesporselResponseDTO fromEntity(final Foresporsel foresporsel) {
-        return builder()
-                .opprettetDato(foresporsel.getOpprettetDato())
-                .build();
+        return builder().opprettetDato(foresporsel.getOpprettetDato()).build();
     }
 }

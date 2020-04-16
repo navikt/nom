@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.ressurserapi;
+package no.nav.nom.apps.nom.ressurser.api.v1;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.nom.apps.nom.ressurser.ressurserapi.exceptions.RessursNotFoundException;
-import no.nav.nom.apps.nom.ressurser.ressurserapi.exceptions.UnauthorizedOperationException;
+import no.nav.nom.apps.nom.ressurser.api.v1.dto.AnsattStatusResponseDTO;
+import no.nav.nom.apps.nom.ressurser.api.v1.dto.NavnResponseDTO;
+import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursRequestDTO;
+import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
+import no.nav.nom.apps.nom.ressurser.api.v1.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.nom.ressurser.api.v1.exceptions.UnauthorizedOperationException;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;

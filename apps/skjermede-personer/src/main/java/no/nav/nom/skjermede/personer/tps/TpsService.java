@@ -7,12 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
+import no.nav.nom.skjermede.personer.tps.config.JmsConfigProperties;
 import no.nav.nom.skjermede.personer.tps.dto.EndreEgenAnsattDTO;
 import no.nav.nom.skjermede.personer.tps.dto.OpphorEgenAnsattDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SfeAjourforingDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SfePersonDataDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SystemInfoDTO;
-import no.nav.nom.skjermede.personer.tps.exception.TpsMqException;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Service;
@@ -93,10 +93,10 @@ public class TpsService {
         val systemInfo = SystemInfoDTO.builder().kildeSystem(KILDE_SYSTEM).brukerident(BRUKERIDENT).build();
         val endring = EndreEgenAnsattDTO.builder()
                 .personident(skjermetPerson.getPersonident())
-                .skjermetFom(skjermetPerson.getSkjermetFom())
+                .skjermetFom(skjermetPerson.getSkjermetFra().toLocalDate())
                 .build();
         val opphor =  new OpphorEgenAnsattDTO(skjermetPerson.getPersonident());
-        val sfeAjourforing = skjermetPerson.getSkjermetTom() == null
+        val sfeAjourforing = skjermetPerson.getSkjermetTil() == null
                 ? SfeAjourforingDTO.builder().systemInfo(systemInfo).endreEgenAnsatt(endring).build()
                 : SfeAjourforingDTO.builder().systemInfo(systemInfo).opphorEgenAnsatt(opphor).build();
 

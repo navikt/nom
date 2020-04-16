@@ -1,7 +1,8 @@
-package no.nav.nom.skjermede.personer.foresporsel;
+package no.nav.nom.skjermede.personer.foresporsel.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

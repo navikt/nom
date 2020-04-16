@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.ressurserapi.exceptions;
+package no.nav.nom.apps.nom.ressurser.api.v1.exceptions;
 
 public class UnauthorizedOperationException extends RuntimeException {
 

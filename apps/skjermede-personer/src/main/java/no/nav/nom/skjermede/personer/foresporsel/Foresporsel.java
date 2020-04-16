@@ -52,13 +52,13 @@ public class Foresporsel {
     private String tilknyttetRessurs;
 
     @Column(name = "EPOST_SENDT")
-    private LocalDate epostSendt;
+    private LocalDateTime epostSendt;
 
     @Column(name = "BEKREFTET")
     private Boolean bekreftet;
 
     @Column(name = "BEKREFTET_DATO")
-    private LocalDate bekreftetDato;
+    private LocalDateTime bekreftetDato;
 
     @NotNull
     @Column(name = "OPPRETTET_DATO")

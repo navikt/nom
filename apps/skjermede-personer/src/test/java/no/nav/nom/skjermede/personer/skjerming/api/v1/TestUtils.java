@@ -1,6 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
-import no.nav.nom.contract.nom.dto.RessursDto;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +17,17 @@ public class TestUtils {
     public static SkjermetPerson skjermetPerson() {
         return SkjermetPerson.builder()
                 .personident(PERSONIDENT)
-                .skjermetFom(LocalDate.now())
+                .skjermetFra(LocalDateTime.now())
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .build();
     }
 
-    public static ResponseEntity<RessursDto> ressurs() {
-        return new ResponseEntity<RessursDto>(RessursDto.builder()
+    public static ResponseEntity<RessursDTO> ressurs() {
+        return new ResponseEntity<>(RessursDTO.builder()
                 .personident(PERSONIDENT)
                 .navident(NAVIDENT)
-                .sluttdato(LocalDate.now())
+                .sluttdato(LocalDateTime.now())
                 .build(), HttpStatus.OK);
     }
 }

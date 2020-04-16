@@ -43,11 +43,11 @@ public class SkjermetPerson {
     private String etternavn;
 
     @NotNull
-    @Column(name = "SKJERMET_FOM")
-    private LocalDate skjermetFom;
+    @Column(name = "SKJERMET_FRA")
+    private LocalDateTime skjermetFra;
 
-    @Column(name = "SKJERMET_TOM")
-    private LocalDate skjermetTom;
+    @Column(name = "SKJERMET_TIL")
+    private LocalDateTime skjermetTil;
 
     @Column(name = "TILKNYTTET_RESSURS")
     private String tilknyttetRessurs;
