@@ -153,7 +153,7 @@ public class RessursController {
         return ressurs.getEpost();
     }
 
-    private static Ressurs converted(RessursRequestDTO ressursRequestDTO){
+    private static Ressurs converted(final RessursRequestDTO ressursRequestDTO){
         return Ressurs.builder()
                 .personident(ressursRequestDTO.getPersonident())
                 .navident(ressursRequestDTO.getNavident())
