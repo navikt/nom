@@ -1,5 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming;
 
+import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.nom.skjermede.personer.SkjermedePersoner;
@@ -45,13 +46,13 @@ public class SkjermingLogikkKafkaTest {
                 .etternavn("etternavn")
                 .fornavn("fornavn")
                 .ressurstype(Ressurstype.INTERN)
-                .startdato(LocalDateTime.now().withNano(0))
+                .startdato(LocalDate.now())
                 .build();
 
         familieMedlem = SkjermetPerson.builder()
                 .fornavn("Familie")
                 .etternavn("Familiesen")
-                .skjermetFra(ressursDto.getStartdato())
+                .skjermetFra(ressursDto.getStartdato().atStartOfDay())
                 .tilknyttetRessurs(ressursDto.getNavident())
                 .personident("09876543210")
                 .build();
@@ -68,7 +69,7 @@ public class SkjermingLogikkKafkaTest {
 
         SkjermetPerson savedSkjermetPerson = savedSkjermetPersonList.get(0);
         Assertions.assertEquals(ressursDto.getPersonident(), savedSkjermetPerson.getPersonident());
-        Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFra());
+        Assertions.assertEquals(ressursDto.getStartdato().atStartOfDay(), savedSkjermetPerson.getSkjermetFra());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjermetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjermetPerson.getEtternavn());
         Assertions.assertNull(savedSkjermetPerson.getTilknyttetRessurs());
@@ -96,27 +97,31 @@ public class SkjermingLogikkKafkaTest {
         lagreSkjermetPerson(NomRessurserListener.converted(ressursDto));
         lagreSkjermetPerson(familieMedlem);
 
-        ressursDto.setSluttdato(LocalDateTime.now().withNano(0));
+        ressursDto.setSluttdato(LocalDate.now());
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
         Assertions.assertEquals(1, savedSkjermetPersonList.size());
 
         SkjermetPerson savedSkjermetPerson = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming), savedSkjermetPerson.getSkjermetTil());
+        Assertions.assertEquals(
+                ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming).atTime(23, 59),
+                savedSkjermetPerson.getSkjermetTil());
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
         Assertions.assertEquals(1, familieList.size());
 
         SkjermetPerson familie = familieList.get(0);
-        Assertions.assertEquals(ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming), familie.getSkjermetTil());
+        Assertions.assertEquals(
+                ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming).atTime(23, 59),
+                familie.getSkjermetTil());
     }
 
     @Test
     public void tidligereAnsattStarterIgjenInnenforSeksMnder(){
-        LocalDateTime sluttdato = LocalDateTime.now().plusDays(1).withNano(0);
+        val sluttdato = LocalDate.now();
         ressursDto.setSluttdato(sluttdato);
-        familieMedlem.setSkjermetTil(sluttdato);
+        familieMedlem.setSkjermetTil(sluttdato.atTime(23, 59));
         lagreSkjermetPerson(NomRessurserListener.converted(ressursDto));
         lagreSkjermetPerson(familieMedlem);
 
@@ -139,15 +144,16 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void tidligereAnsattStarterIgjenUtenforSeksMnder(){
-        LocalDateTime sluttdato = LocalDateTime.now().minusMonths(mnderPlusSkjerming);
+        val  sluttdato = LocalDate.now().minusMonths(mnderPlusSkjerming);
+
         ressursDto.setStartdato(sluttdato.minusMonths(1));
         ressursDto.setSluttdato(sluttdato);
-        familieMedlem.setSkjermetFra(sluttdato.minusMonths(1));
-        familieMedlem.setSkjermetTil(sluttdato);
+        familieMedlem.setSkjermetFra(sluttdato.minusMonths(1).atStartOfDay());
+        familieMedlem.setSkjermetTil(sluttdato.atTime(23, 59));
         lagreSkjermetPerson(NomRessurserListener.converted(ressursDto));
         lagreSkjermetPerson(familieMedlem);
 
-        ressursDto.setStartdato(LocalDateTime.now());
+        ressursDto.setStartdato(sluttdato);
         ressursDto.setSluttdato(null);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
@@ -155,8 +161,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(2, savedSkjermetPersonList.size());
 
         SkjermetPerson savedSkjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(ressursDto.getPersonident()).get();
-        Assertions.assertEquals(ressursDto.getStartdato(), savedSkjermetPerson.getSkjermetFra());
-        Assertions.assertEquals(ressursDto.getSluttdato(), savedSkjermetPerson.getSkjermetTil());
+        Assertions.assertEquals(ressursDto.getStartdato().atStartOfDay(), savedSkjermetPerson.getSkjermetFra());
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
         Assertions.assertEquals(1, familieList.size());
@@ -197,7 +202,7 @@ public class SkjermingLogikkKafkaTest {
         lagreSkjermetPerson(skjermetAnsatt);
         lagreSkjermetPerson(familieMedlem);
 
-        ressursDto.setSluttdato(LocalDateTime.now());
+        ressursDto.setSluttdato(LocalDate.now());
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
@@ -213,7 +218,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(1, familieList.size());
 
         SkjermetPerson familie = familieList.get(0);
-        Assertions.assertEquals(ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming), familie.getSkjermetTil());
+        Assertions.assertEquals(ressursDto.getSluttdato().plusMonths(mnderPlusSkjerming).atTime(23, 59), familie.getSkjermetTil());
     }
 
     private void lagreSkjermetPerson(SkjermetPerson skjermetPerson){
