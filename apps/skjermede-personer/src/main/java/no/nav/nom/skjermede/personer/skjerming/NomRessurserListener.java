@@ -28,8 +28,8 @@ public class NomRessurserListener {
                 .personident(record.getPersonident())
                 .fornavn(record.getFornavn())
                 .etternavn(record.getEtternavn())
-                .skjermetFra(record.getStartdato())
-                .skjermetTil(record.getSluttdato())
+                .skjermetFra(record.getStartdato().atStartOfDay())
+                .skjermetTil(record.getSluttdato().atTime(23, 59))
                 .build();
     }
 }

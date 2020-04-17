@@ -47,8 +47,8 @@ public class KafkaProducer {
                 .etternavn(ressurs.getEtternavn())
                 .epost(ressurs.getEpost())
                 .ressurstype(ressurs.getRessurstype())
-                .startdato(ressurs.getStartdato().atStartOfDay())
-                .sluttdato(ressurs.getSluttdato().atTime(23, 59))
+                .startdato(ressurs.getStartdato())
+                .sluttdato(ressurs.getSluttdato())
                 .opprettetdato(ressurs.getOpprettetDato())
                 .endretdato(ressurs.getEndretDato())
                 .build();

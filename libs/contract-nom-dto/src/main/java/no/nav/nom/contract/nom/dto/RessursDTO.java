@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Builder
 @Setter
@@ -30,9 +29,9 @@ public class RessursDTO {
 
     private Ressurstype ressurstype;
 
-    private LocalDateTime startdato;
+    private LocalDate startdato;
 
-    private LocalDateTime sluttdato;
+    private LocalDate sluttdato;
 
     private LocalDate opprettetdato;
 
