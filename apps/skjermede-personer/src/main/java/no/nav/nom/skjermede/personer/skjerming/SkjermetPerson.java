@@ -60,6 +60,9 @@ public class SkjermetPerson {
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
 
-    @Column(name = "SENDT_TIL_TPS")
-    private LocalDate sendtTilTps;
+    @Column(name = "ENDRING_SENDT_TPS")
+    private LocalDateTime endringSendtTps;
+
+    @Column(name = "OPPHOR_SENDT_TPS")
+    private LocalDateTime opphorSendtTps;
 }

@@ -19,8 +19,8 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
     Optional<SkjermetPerson> getSkjermetPersonByPersonident(String personident);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
-                   "WHERE SENDT_TIL_TPS IS NULL AND " +
-                   "(SKJERMET_TIL IS NULL OR SKJERMET_TIL <= current_timestamp) " +
+                   "WHERE ENDRING_SENDT_TPS IS NULL OR " +
+                   "SKJERMET_TIL IS NOT NULL AND OPPHOR_SENDT_TPS IS NULL " +
                    "ORDER BY SKJERMET_FRA", nativeQuery = true)
     List<SkjermetPerson> getAllIkkeSendtTilTps();
 

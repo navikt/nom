@@ -18,10 +18,11 @@ import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TemporaryQueue;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -30,6 +31,8 @@ public class TpsService {
 
     private static final String KILDE_SYSTEM = "NOM";
     private static final String BRUKERIDENT = "srvnomskjermet";
+    private static final String ENDRING = "endringsmelding";
+    private static final String OPPHOR = "opphorsmelding";
 
     private final JmsTemplate jmsTemplate;
     private final MessageConverter messageConverter;
@@ -37,46 +40,54 @@ public class TpsService {
     private final JmsConfigProperties jmsConfigProperties;
     private final SkjermetPersonRepository skjermetPersonRepository;
 
+    @Transactional
     void sendAndUpdate(final SkjermetPerson skjermetPerson) {
         try (val connection = connectionFactory.createConnection()) {
             connection.start();
-            val session = connection.createSession();
-            val replyQueue = session.createTemporaryQueue();
 
-            send(session, new MQQueue(jmsConfigProperties.getQueueName()), replyQueue, skjermetPerson);
-            handleReply(mottaSvarmelding(session, replyQueue));
+            val destinationQueue = new MQQueue(jmsConfigProperties.getQueueName());
+            destinationQueue.setTargetClient(JMSC.MQJMS_CLIENT_NONJMS_MQ);
+
+            if (skjermetPerson.getEndringSendtTps() == null) {
+                sendMelding(skjermetPerson, connection, destinationQueue, true);
+            }
+
+            if (skjermetPerson.getSkjermetTil() != null && skjermetPerson.getOpphorSendtTps() == null) {
+                sendMelding(skjermetPerson, connection, destinationQueue, false);
+            }
         } catch (Exception e) {
             log.error("Feil intraff ved synkronisering av skjerming informasjon mot tsp: {}", e.getMessage());
         }
     }
 
-    @Transactional
-    void handleReply(final SfePersonDataDTO reply) {
-        if (!reply.isOk()) {
-            val feilmelding = reply.getSfeTilbakeMelding().getSvarStatus().getReturnMelding();
-            throw new TpsMqException(String.format("Registring av skjerming info i tps mislyktes: %s", feilmelding));
+    private void sendMelding(final SkjermetPerson skjermetPerson,
+                             final Connection connection,
+                             final MQQueue destination,
+                             final boolean isEndring) {
+        try (val session = connection.createSession(); val producer = session.createProducer(destination)) {
+            val replyQueue = session.createTemporaryQueue();
+            val endringsMelding = messageConverter.toMessage(buildPersondata(skjermetPerson, true), session);
+
+            endringsMelding.setJMSReplyTo(replyQueue);
+            producer.send(endringsMelding);
+            validateReply(mottaSvarmelding(session, replyQueue));
+
+            if (isEndring) {
+                skjermetPerson.setEndringSendtTps(LocalDateTime.now());
+            } else {
+                skjermetPerson.setOpphorSendtTps(LocalDateTime.now());
+            }
+
+            skjermetPersonRepository.save(skjermetPerson);
+        } catch (Exception e) {
+            throw new TpsMqException(String.format("Sending av %s til tps mislyktes", (isEndring ? ENDRING : OPPHOR)));
         }
-
-        val personident = getPersonIdent(reply);
-        val persistentSkjermetPerson = skjermetPersonRepository
-                .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new RuntimeException("Ugyldig personident mottatt i svarmelding"));
-
-        persistentSkjermetPerson.setSendtTilTps(LocalDate.now());
-        skjermetPersonRepository.save(persistentSkjermetPerson);
     }
 
-    private void send(final Session session,
-                      final MQQueue destinationQueue,
-                      final TemporaryQueue replyQueue,
-                      final SkjermetPerson skjermetPerson) {
-        try (val producer = session.createProducer(destinationQueue)) {
-            val message = messageConverter.toMessage(buildPersondata(skjermetPerson), session);
-            message.setJMSReplyTo(replyQueue);
-            destinationQueue.setTargetClient(JMSC.MQJMS_CLIENT_NONJMS_MQ);
-            producer.send(message);
-        } catch (Exception e) {
-            throw new TpsMqException("Sending av melding til tps mislyktes");
+    private void validateReply(final SfePersonDataDTO reply) {
+        if (!reply.isOk()) {
+            val feilmelding = reply.getSfeTilbakeMelding().getSvarStatus().getReturnMelding();
+            throw new TpsMqException(feilmelding);
         }
     }
 
@@ -85,27 +96,21 @@ public class TpsService {
             val message = consumer.receive(2000L);
             return (SfePersonDataDTO) messageConverter.fromMessage(message);
         } catch (Exception e) {
-            throw new TpsMqException("Mottak av svarmelding fra tps mislyktes: %s");
+            throw new TpsMqException(String.format("Mottak av svarmelding fra tps mislyktes: {} : {}", e.getMessage(), e.getCause().getMessage()));
         }
     }
 
-    private SfePersonDataDTO buildPersondata(final SkjermetPerson skjermetPerson) {
+    private SfePersonDataDTO buildPersondata(final SkjermetPerson skjermetPerson, final boolean isEndring) {
         val systemInfo = SystemInfoDTO.builder().kildeSystem(KILDE_SYSTEM).brukerident(BRUKERIDENT).build();
         val endring = EndreEgenAnsattDTO.builder()
                 .personident(skjermetPerson.getPersonident())
                 .skjermetFom(skjermetPerson.getSkjermetFra().toLocalDate())
                 .build();
         val opphor =  new OpphorEgenAnsattDTO(skjermetPerson.getPersonident());
-        val sfeAjourforing = skjermetPerson.getSkjermetTil() == null
+        val sfeAjourforing = isEndring
                 ? SfeAjourforingDTO.builder().systemInfo(systemInfo).endreEgenAnsatt(endring).build()
                 : SfeAjourforingDTO.builder().systemInfo(systemInfo).opphorEgenAnsatt(opphor).build();
 
         return SfePersonDataDTO.builder().sfeAjourforing(sfeAjourforing).build();
-    }
-
-    private String getPersonIdent(final SfePersonDataDTO reply) {
-        return reply.getSfeAjourforing().getEndreEgenAnsatt() == null
-                ? reply.getSfeAjourforing().getOpphorEgenAnsatt().getPersonident()
-                :reply.getSfeAjourforing().getEndreEgenAnsatt().getPersonident();
     }
 }

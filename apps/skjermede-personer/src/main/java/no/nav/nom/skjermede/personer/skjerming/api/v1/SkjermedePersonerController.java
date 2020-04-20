@@ -138,7 +138,6 @@ public class SkjermedePersonerController {
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
-        skjermetPerson.setSendtTilTps(null);
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
     }
