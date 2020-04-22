@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,9 @@ public class SkjermetPersonResponseDTO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endretDato;
 
+    private String tilknyttetRessursFornavn;
+    private String tilknyttetRessursEtternavn;
+
     public static SkjermetPersonResponseDTO fromEntity(final SkjermetPerson skjermetPerson) {
         return builder()
                 .fornavn(skjermetPerson.getFornavn())
@@ -41,5 +45,13 @@ public class SkjermetPersonResponseDTO {
                 .opprettetDato(skjermetPerson.getOpprettetDato())
                 .endretDato(skjermetPerson.getEndretDato())
                 .build();
+    }
+    public static SkjermetPersonResponseDTO fromEntityAndRessurs(final SkjermetPerson skjermetPerson, final RessursDTO ressurs) {
+        SkjermetPersonResponseDTO response = fromEntity(skjermetPerson);
+        if (ressurs != null){
+            response.tilknyttetRessursFornavn = ressurs.getFornavn();
+            response.tilknyttetRessursEtternavn = ressurs.getEtternavn();
+        }
+        return response;
     }
 }

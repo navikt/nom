@@ -11,7 +11,11 @@ import java.util.Optional;
 public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, Long> {
 
     List<SkjermetPerson> findAllByPersonident(String personident);
-    List<SkjermetPerson> findAllByTilknyttetRessurs(String personident);
+
+    @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
+            "WHERE TILKNYTTET_RESSURS = :tilknyttetRessurs AND " +
+            "(SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
+    List<SkjermetPerson> findAllByTilknyttetRessurs(String tilknyttetRessurs);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
                    "WHERE PERSONIDENT = :personident AND " +

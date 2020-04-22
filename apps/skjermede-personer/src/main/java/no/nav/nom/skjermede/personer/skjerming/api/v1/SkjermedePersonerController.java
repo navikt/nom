@@ -59,6 +59,19 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
+        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("navident", skjermetPerson.getTilknyttetRessurs());
+
+            val ressurs = restTemplate.exchange(
+                    String.format("%s/ansatt?gyldig=false&ressursType=INTERN", ressursAPI),
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    RessursDTO.class).getBody();
+
+            return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
+        }
+
         return skjermetPerson != null ? SkjermetPersonResponseDTO.fromEntity(skjermetPerson) : null;
     }
 
@@ -134,7 +147,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE)));
+                .orElseThrow(() -> new SkjermingNotFoundException(SkjermingConstants.NOT_FOUND_MESSAGE));
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
@@ -150,7 +163,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new SkjermingNotFoundException(String.format(SkjermingConstants.NOT_FOUND_MESSAGE, personident)));
+                .orElseThrow(() -> new SkjermingNotFoundException(SkjermingConstants.NOT_FOUND_MESSAGE));
 
         skjermetPersonRepository.deleteById(skjermetPerson.getId());
     }
