@@ -13,8 +13,8 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
     List<SkjermetPerson> findAllByPersonident(String personident);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
-            "WHERE TILKNYTTET_RESSURS = :tilknyttetRessurs AND " +
-            "(SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
+                   "WHERE TILKNYTTET_RESSURS = :tilknyttetRessurs AND " +
+                   "(SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
     List<SkjermetPerson> findAllByTilknyttetRessurs(String tilknyttetRessurs);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
