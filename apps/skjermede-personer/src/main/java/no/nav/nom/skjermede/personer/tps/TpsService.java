@@ -66,7 +66,7 @@ public class TpsService {
                              final boolean isEndring) {
         try (val session = connection.createSession(); val producer = session.createProducer(destination)) {
             val replyQueue = session.createTemporaryQueue();
-            val endringsMelding = messageConverter.toMessage(buildPersondata(skjermetPerson, true), session);
+            val endringsMelding = messageConverter.toMessage(buildPersondata(skjermetPerson, isEndring), session);
 
             endringsMelding.setJMSReplyTo(replyQueue);
             producer.send(endringsMelding);
