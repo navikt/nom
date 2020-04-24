@@ -60,8 +60,8 @@ public class ForesporselController {
         }
 
         foresporsel.setBekreftet(true);
-        foresporsel.setBekreftetDato(LocalDateTime.now());
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel));
+        foresporselRepository.delete(foresporsel);
 
         return "Bekreftelse av skjerming registrert";
     }
