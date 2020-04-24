@@ -11,15 +11,12 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class ScheduledForesporselCleaner {
 
     private final ForesporselRepository foresporselRepository;
 
-    @Scheduled(cron = "0 0 * * * *")
-    @Transactional
+    @Scheduled(cron = "0 30 * * * *")
     public void scheduledCleaner() {
         foresporselRepository.deleteAllByEpostSendtBeforeOrBekreftetTrue(LocalDateTime.now().minusDays(14));
-        log.info("Forespørsler som er bekreftet eller utgått ble slettet");
     }
 }
