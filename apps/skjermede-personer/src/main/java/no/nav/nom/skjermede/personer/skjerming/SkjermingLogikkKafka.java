@@ -43,7 +43,7 @@ public class SkjermingLogikkKafka {
                         if(!Objects.equals(sluttDato, skjermetPerson.getSkjermetTil())){
                             skjermetPerson.setSkjermetTil(sluttDato);
                             skjermetPerson.setEndretDato(LocalDateTime.now());
-                            log.info("Skjermingen for id: {} med tilknyttetressurs: {} har fått satt skjermet til og med dato.", skjermetPerson.getId(), navident);
+                            log.info("Skjermingen for id: {} med tilknyttetressurs: {} har fått satt skjermet til dato.", skjermetPerson.getId(), navident);
                         }
                     });
                     repository.saveAll(skjermetFamilie);
