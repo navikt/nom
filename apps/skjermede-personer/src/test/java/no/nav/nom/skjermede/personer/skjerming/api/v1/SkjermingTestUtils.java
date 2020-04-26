@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class TestUtils {
+public class SkjermingTestUtils {
 
     public static final String PERSONIDENT = "12345678910";
     public static final String NAVIDENT = "A000000";

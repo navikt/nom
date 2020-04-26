@@ -59,7 +59,7 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermingUnauthorized() throws Exception {
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.of(TestUtils.skjermetPerson()));
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.of(SkjermingTestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isUnauthorized());
@@ -67,18 +67,18 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjerming() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.of(TestUtils.skjermetPerson()));
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.of(SkjermingTestUtils.skjermetPerson()));
 
         mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk());
     }
 
     @Test
     public void testHentSkjermingNotFound() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.ofNullable(null));
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.ofNullable(null));
 
         mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk()).andExpect(jsonPath("$").doesNotExist());
     }
@@ -91,10 +91,10 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
-        when(repository.findAllByTilknyttetRessurs(TestUtils.NAVIDENT)).thenReturn(Arrays.asList(TestUtils.skjermetPerson()));
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(SkjermingTestUtils.ressurs());
+        when(repository.findAllByTilknyttetRessurs(SkjermingTestUtils.NAVIDENT)).thenReturn(Arrays.asList(SkjermingTestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
 
         val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER))
                 .andExpect(status().isOk())
@@ -115,7 +115,7 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermingerForAnsatt() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.ALLE)).andExpect(status().isOk());
@@ -123,16 +123,16 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testOpprettSkjermingDuplicate() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.of(TestUtils.skjermetPerson()));
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.of(SkjermingTestUtils.skjermetPerson()));
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isBadRequest());
     }
 
     @Test
     public void testOpprettSkjermingUnauthorized() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isUnauthorized());
@@ -140,27 +140,27 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testOpprettSkjerming() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.empty());
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(TestUtils.ressurs());
-        when(repository.save(any(SkjermetPerson.class))).thenReturn(TestUtils.skjermetPerson());
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(SkjermingTestUtils.ressurs());
+        when(repository.save(any(SkjermetPerson.class))).thenReturn(SkjermingTestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isCreated());
     }
 
     @Test
     public void testOpphorSkjermingNotFound() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.empty());
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
 
         mockMvc.perform(requestBuilder(HttpMethod.PUT)).andExpect(status().isNotFound());
     }
 
     @Test
     public void testOpphorSkjermingUnauthorized() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
 
         mockMvc.perform(requestBuilder(HttpMethod.PUT)).andExpect(status().isUnauthorized());
@@ -168,17 +168,17 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testOpphorSkjerming() throws Exception {
-        when(tokenUtil.getSubject()).thenReturn(TestUtils.PERSONIDENT);
+        when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(repository.getSkjermetPersonByPersonident(TestUtils.PERSONIDENT)).thenReturn(Optional.of(TestUtils.skjermetPerson()));
-        when(repository.save(any(SkjermetPerson.class))).thenReturn(TestUtils.skjermetPerson());
+        when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.of(SkjermingTestUtils.skjermetPerson()));
+        when(repository.save(any(SkjermetPerson.class))).thenReturn(SkjermingTestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.PUT)).andExpect(status().isOk());
     }
 
     private String getBearerToken(final String subject) throws Exception {
         final String token = mockMvc
-                .perform(get(String.format("/local/jwt?subject=%s", TestUtils.PERSONIDENT)))
+                .perform(get(String.format("/local/jwt?subject=%s", SkjermingTestUtils.PERSONIDENT)))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -193,6 +193,6 @@ public class SkjermedePersonerControllerTest {
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken(TestUtils.PERSONIDENT));
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken(SkjermingTestUtils.PERSONIDENT));
     }
 }

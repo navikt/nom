@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.skjerming.api.v1;
+package no.nav.nom.skjermede.personer;
 
 import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;

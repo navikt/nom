@@ -41,7 +41,7 @@ public class ForesporselController {
     @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository
-                .findByFunksjonellIdAndBekreftetNull(funksjonellId)
+                .findByFunksjonellIdAndBekreftetFalse(funksjonellId)
                 .orElse(null);
 
         if (foresporsel == null) {
@@ -71,9 +71,7 @@ public class ForesporselController {
         validerTilgang();
 
         val personident = tokenUtil.getSubject();
-        val foresporsel = foresporselRepository
-                .findByPersonidentAndBekreftetNull(personident)
-                .orElse(null);
+        val foresporsel = foresporselRepository.findByPersonidentAndBekreftetFalse(personident).orElse(null);
 
         return foresporsel != null ? ForesporselResponseDTO.fromEntity(foresporsel) : null;
     }
@@ -84,7 +82,7 @@ public class ForesporselController {
 
         val personident = tokenUtil.getSubject();
 
-        if (foresporselRepository.existsByPersonident(personident)) {
+        if (foresporselRepository.existsByPersonidentAndBekreftetFalse(personident)) {
             throw new DuplicateForesporselException(ForesporselConstants.DUPLICATE_FORESPORSEL_MESSAGE);
         }
 
