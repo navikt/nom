@@ -89,6 +89,7 @@ public class ForesporselController {
         val foresporsel = foresporselRequestDTO.toEntity();
         foresporsel.setPersonident(personident);
         foresporsel.setFunksjonellId(UUID.randomUUID());
+        foresporsel.setBekreftet(false);
         foresporsel.setOpprettetDato(LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.CREATED)
