@@ -6,7 +6,7 @@ spring:
   datasource:
     username: postgres
     password: password
-    url: jdbc:postgresql://127.0.0.1:5433/postgres-skjermet
+    url: jdbc:postgresql://localhost:5433/postgres-skjermet
   kafka:
     listener:
       missing-topics-fatal: false

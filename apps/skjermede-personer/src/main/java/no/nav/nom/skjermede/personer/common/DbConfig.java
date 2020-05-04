@@ -20,7 +20,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableScheduling
 @EnableJpaRepositories(basePackages = {"no.nav.nom.skjermede.personer"})
 @Profile("!local & !test")
 public class DbConfig {
