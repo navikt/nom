@@ -52,9 +52,22 @@ public class SkjermingLogikkKafka {
                 repository.getSkjermetPersonByPersonident(skjermetHendelse.getPersonident())
                         .ifPresentOrElse(
                                 (eksisterende) -> {
+                                    // Personen har vært skjermet tidligere via familie eller har videreført skjermingen:
+                                    if (eksisterende.getTilknyttetRessurs() != null) {
+                                        if (skjermetHendelse.getSkjermetTil() == null || skjermetHendelse.getSkjermetTil().isAfter(LocalDateTime.now())) {
+                                            eksisterende.setSkjermetTil(skjermetHendelse.getSkjermetFra().isBefore(LocalDateTime.now()) ? LocalDateTime.now() : skjermetHendelse.getSkjermetFra());
+                                            eksisterende.setEndretDato(LocalDateTime.now());
+                                            repository.save(eksisterende);
+
+                                            skjermetHendelse.setSkjermetFra(skjermetHendelse.getSkjermetFra().isBefore(LocalDateTime.now()) ? LocalDateTime.now() : skjermetHendelse.getSkjermetFra());
+                                            skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
+                                            nySkjerming(skjermetHendelse);
+                                            log.info("Skjerming overført til ny rad for ansettelse for ident: {}", navident);
+                                        }
+                                    }
                                     // Personen har en endring i person opplysninger eller fått utsatt/endret sluttdatoen sin,
                                     // eller starter igjen innenfor mnderSkjermetPlus.
-                                    if(skjermetHendelse.getSkjermetFra().equals(eksisterende.getSkjermetFra()) || eksisterende.getSkjermetTil().isBefore(skjermetHendelse.getSkjermetFra())){
+                                    else {
                                         eksisterende.setEndretDato(LocalDateTime.now());
                                         eksisterende.setFornavn(skjermetHendelse.getFornavn());
                                         eksisterende.setEtternavn(skjermetHendelse.getEtternavn());
@@ -62,21 +75,14 @@ public class SkjermingLogikkKafka {
                                         repository.save(eksisterende);
                                         log.info("Ny oppdatering fra aapen-nom-ressurs-v1 for ident: {}", navident);
                                     }
-                                    // Personen har vært skjermet tidligere (muligens via familie):
-                                    else{
-                                        eksisterende.setSkjermetTil(LocalDateTime.now());
-                                        eksisterende.setEndretDato(LocalDateTime.now());
-                                        repository.save(eksisterende);
-
-                                        nySkjerming(skjermetHendelse);
-                                        log.info("Skjerming overført til ny rad for ansettelse for ident: {}", navident);
-                                    }
                                 },
                                 () -> {
                                     // Hvis en person har vært skjermet tidligere, men avskjermet seg via nav.no skal det ikke skjermes igjen.
                                     // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt skjermet tidligere.
                                     List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());
                                     if(historiskSkjermet == null || historiskSkjermet.stream().noneMatch(historisk -> historisk.getSkjermetFra().equals(skjermetHendelse.getSkjermetFra()))){
+                                        skjermetHendelse.setSkjermetFra(skjermetHendelse.getSkjermetFra().isBefore(LocalDateTime.now()) ? LocalDateTime.now() : skjermetHendelse.getSkjermetFra());
+                                        skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
                                         nySkjerming(skjermetHendelse);
                                         log.info("Ny skjerming opprettet fra aapen-nom-ressurs-v1 for ident: {}", navident);
                                     }
