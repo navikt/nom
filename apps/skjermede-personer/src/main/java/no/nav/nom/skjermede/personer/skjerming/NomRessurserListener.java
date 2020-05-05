@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.context.annotation.Profile;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +16,7 @@ public class NomRessurserListener {
     private final SkjermingLogikkKafka skjermingLogikkKafka;
 
     @Transactional
-    //@KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
+    @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDTO ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident());
