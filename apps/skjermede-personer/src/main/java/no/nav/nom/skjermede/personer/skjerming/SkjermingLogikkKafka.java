@@ -52,7 +52,7 @@ public class SkjermingLogikkKafka {
                 repository.getSkjermetPersonByPersonident(skjermetHendelse.getPersonident())
                         .ifPresentOrElse(
                                 (eksisterende) -> {
-                                    // Personen har vært skjermet tidligere via familie eller har videreført skjermingen:
+                                    // Personen har vært skjermet tidligere via familie eller har videreført skjermingen
                                     if (eksisterende.getTilknyttetRessurs() != null) {
                                         if (skjermetHendelse.getSkjermetTil() == null || skjermetHendelse.getSkjermetTil().isAfter(LocalDateTime.now())) {
                                             eksisterende.setSkjermetTil(skjermetHendelse.getSkjermetFra().isBefore(LocalDateTime.now()) ? LocalDateTime.now() : skjermetHendelse.getSkjermetFra());
