@@ -18,11 +18,11 @@ spec:
     - name: FORESPORSEL_API
       value: https://www-q0.nav.no/person/personopplysninger/skjerming-proxy/v1/foresporsel
     - name: TPS_MQ_QUEUE_MANAGER_URL
-      value: mq://b27apvl173.preprod.local:1413/MQ1LSC03
+      value: mq://b27apvl175.preprod.local:1413/MQ0LSC03
     - name: TPS_MQ_QUEUE_CHANNEL
-      value: Q1_SKJERMET
+      value: Q0_SKJERMET
     - name: TPS_MQ_QUEUE_NAME
-      value: QA.Q1_412.SFE_ENDRINGSMELDING
+      value: QA.Q0_412.SFE_ENDRINGSMELDING
     - name: TPS_MQ_QUEUE_USERNAME
       value: srvappserver
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
