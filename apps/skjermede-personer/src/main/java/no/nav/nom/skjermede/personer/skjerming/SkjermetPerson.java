@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -56,9 +55,15 @@ public class SkjermetPerson {
     @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettetDato;
 
+    @Column(name = "OPPRETTET_AV", insertable = false)
+    private String opprettetAv;
+
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
+
+    @Column(name = "ENDRET_AV", insertable = false)
+    private String endretAv;
 
     @Column(name = "ENDRING_SENDT_TPS")
     private LocalDateTime endringSendtTps;
