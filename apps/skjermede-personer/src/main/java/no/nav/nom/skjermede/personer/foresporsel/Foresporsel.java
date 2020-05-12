@@ -52,7 +52,7 @@ public class Foresporsel {
     @Column(name = "EPOST_SENDT")
     private LocalDateTime epostSendt;
 
-    @Column(name = "BEKREFTET")
+    @Column(name = "BEKREFTET", insertable = false)
     private Boolean bekreftet;
 
     @NotNull
