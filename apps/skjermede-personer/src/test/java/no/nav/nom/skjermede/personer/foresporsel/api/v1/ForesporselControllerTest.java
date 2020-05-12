@@ -14,24 +14,29 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Paths;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
@@ -58,29 +63,24 @@ public class ForesporselControllerTest {
 
     @Test
     public void testOpprettForesporsel() throws Exception {
-        Foresporsel foresporsel = ForesporselTestUtils.foresporsel();
-        when(tokenUtil.getSubject()).thenReturn(foresporsel.getPersonident());
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
-        when(foresporselRepository.existsByPersonidentAndBekreftetFalse(foresporsel.getPersonident())).thenReturn(Boolean.FALSE);
-        when(foresporselRepository.save(any(Foresporsel.class))).thenReturn(foresporsel);
+        when(foresporselRepository.existsByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Boolean.FALSE);
+        when(foresporselRepository.save(any(Foresporsel.class))).thenReturn(ForesporselTestUtils.foresporsel());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)
                 .content(objectMapper.writeValueAsString(ForesporselTestUtils.foresporselRequest())))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.opprettetDato", is(foresporsel.getOpprettetDato().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))));
+                .andExpect(status().isCreated());
     }
 
     @Test
     public void testHentForesporsel() throws Exception {
-        Foresporsel foresporsel = ForesporselTestUtils.foresporsel();
-        when(tokenUtil.getSubject()).thenReturn(foresporsel.getPersonident());
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(foresporselRepository.findByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT))
-                .thenReturn(Optional.of(foresporsel));
+                .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.opprettetDato", is(foresporsel.getOpprettetDato().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))));
+        mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk());
     }
 
     @Test
