@@ -3,6 +3,7 @@ package no.nav.nom.skjermede.personer.foresporsel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
@@ -12,8 +13,8 @@ import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,9 +35,16 @@ import java.util.UUID;
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class ForesporselController {
 
+    @Value("${ressurser.api}")
+    private String ressursAPI;
+
+    @Value("${maanderPlusSkjerming}")
+    private int mnderSkjermetPlus;
+
     private final ForesporselRepository foresporselRepository;
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final TokenUtil tokenUtil;
+    private final RestTemplate restTemplate;
 
     @Unprotected
     @Transactional
@@ -59,8 +69,22 @@ public class ForesporselController {
             skjermetPersonRepository.save(skjermet);
         }
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("navident", foresporsel.getTilknyttetRessurs());
+
+        val ressurs = restTemplate.exchange(
+                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                RessursDTO.class).getBody();
+
+        if (ressurs == null) {
+            log.error("Forsøk på bekreftelse av skjerming med ugyldig nav-ident: {}", foresporsel.getTilknyttetRessurs());
+            return "Ugyldig operasjon";
+        }
+
         foresporsel.setBekreftet(true);
-        skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel));
+        skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
         foresporselRepository.delete(foresporsel);
 
         return "Bekreftelse av skjerming registrert";
@@ -102,13 +126,14 @@ public class ForesporselController {
         }
     }
 
-    private SkjermetPerson mapToSkjermetPerson(final Foresporsel foresporsel) {
+    private SkjermetPerson mapToSkjermetPerson(final Foresporsel foresporsel, LocalDate sluttdato) {
         return SkjermetPerson.builder()
                 .personident(foresporsel.getPersonident())
                 .fornavn(foresporsel.getFornavn())
                 .etternavn(foresporsel.getEtternavn())
                 .tilknyttetRessurs(foresporsel.getTilknyttetRessurs())
                 .skjermetFra(LocalDateTime.now())
+                .skjermetTil(sluttdato != null ? sluttdato.plusMonths(mnderSkjermetPlus).atTime(23, 59) : null)
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .build();
