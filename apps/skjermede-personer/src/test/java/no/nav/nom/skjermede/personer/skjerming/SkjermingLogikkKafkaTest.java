@@ -447,6 +447,8 @@ public class SkjermingLogikkKafkaTest {
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         Foresporsel foresporsel = lagreForesporsel();
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
+                .thenReturn(new ResponseEntity<>(RessursDTO.builder().navident("V123456").build(), HttpStatus.OK));
         foresporselController.bekreftForesporsel(foresporsel.getFunksjonellId());
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
@@ -480,6 +482,8 @@ public class SkjermingLogikkKafkaTest {
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         Foresporsel foresporsel = lagreForesporsel();
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
+                .thenReturn(new ResponseEntity<>(RessursDTO.builder().navident("V123456").build(), HttpStatus.OK));
         foresporselController.bekreftForesporsel(foresporsel.getFunksjonellId());
 
         ressursDto.setSluttdato(null);
@@ -519,6 +523,8 @@ public class SkjermingLogikkKafkaTest {
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         Foresporsel foresporsel = lagreForesporsel();
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
+                .thenReturn(new ResponseEntity<>(RessursDTO.builder().navident("V123456").build(), HttpStatus.OK));
         foresporselController.bekreftForesporsel(foresporsel.getFunksjonellId());
 
         List<SkjermetPerson> tempSavedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
@@ -558,6 +564,8 @@ public class SkjermingLogikkKafkaTest {
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         Foresporsel foresporsel = lagreForesporsel();
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class)))
+                .thenReturn(new ResponseEntity<>(RessursDTO.builder().navident("V123456").build(), HttpStatus.OK));
         foresporselController.bekreftForesporsel(foresporsel.getFunksjonellId());
 
         ressursDto.setSluttdato(sluttdato.plusMonths(2));
