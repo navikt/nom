@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
-import no.nav.nom.skjermede.personer.foresporsel.exception.DuplicateForesporselException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
@@ -23,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -107,7 +106,7 @@ public class ForesporselController {
         val personident = tokenUtil.getSubject();
 
         if (foresporselRepository.existsByPersonidentAndBekreftetFalse(personident)) {
-            throw new DuplicateForesporselException(ForesporselConstants.DUPLICATE_FORESPORSEL_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ForesporselConstants.DUPLICATE_FORESPORSEL_MESSAGE);
         }
 
         val foresporsel = foresporselRequestDTO.toEntity();
@@ -122,7 +121,7 @@ public class ForesporselController {
 
     private void validerTilgang() {
         if (!tokenUtil.isAuthorized()) {
-            throw new UnauthorizedOperationException(ForesporselConstants.UNAUTHORIZED_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ForesporselConstants.UNAUTHORIZED_MESSAGE);
         }
     }
 
