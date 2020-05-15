@@ -19,7 +19,6 @@ public class SkjermingLogikkKafka {
     @Value("${maanderPlusSkjerming}")
     private int mnderSkjermetPlus;
 
-
     /*
 1. Hendelse kommer inn.
 2. Hvis hendelse er av type INTERN, fortsett, hvis ikke ikke gjør noe.
