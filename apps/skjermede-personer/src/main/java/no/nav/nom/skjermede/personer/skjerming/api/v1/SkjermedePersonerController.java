@@ -5,16 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.common.exception.UnauthorizedOperationException;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.DuplicateSkjermingException;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.exception.SkjermingNotFoundException;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -115,7 +117,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
 
         if (skjermetPersonRepository.getSkjermetPersonByPersonident(personident).isPresent()) {
-            throw new DuplicateSkjermingException(SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -147,7 +149,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new SkjermingNotFoundException(SkjermingConstants.NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SkjermingConstants.NOT_FOUND_MESSAGE));
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
@@ -163,14 +165,14 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new SkjermingNotFoundException(SkjermingConstants.NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SkjermingConstants.NOT_FOUND_MESSAGE));
 
         skjermetPersonRepository.deleteById(skjermetPerson.getId());
     }
 
     private void validerTilgang() {
         if (!tokenUtil.isAuthorized()) {
-            throw new UnauthorizedOperationException(SkjermingConstants.UNAUTHORIZED_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, SkjermingConstants.UNAUTHORIZED_MESSAGE);
         }
     }
 }
