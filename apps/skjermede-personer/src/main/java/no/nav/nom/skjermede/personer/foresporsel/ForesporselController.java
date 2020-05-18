@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
+import no.nav.nom.skjermede.personer.skjerming.Kilder;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
@@ -69,6 +70,7 @@ public class ForesporselController {
         if (skjermet != null) {
             skjermet.setSkjermetTil(LocalDateTime.now());
             skjermet.setEndretDato(LocalDateTime.now());
+            skjermet.setEndretAv(Kilder.BRUKER);
             skjermetPersonRepository.save(skjermet);
             // Trenger ikke sette kafka produced til false. Hvis endringer på 2 forskjellige rader skjer med lik
             // timestamp i "endret" kolonnen, vil det kunne oppstå feil. Vil overskrives av ny skjerming på kafka uansett.
@@ -142,6 +144,8 @@ public class ForesporselController {
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .kafkaProduced(false)
+                .endretAv(Kilder.BRUKER)
+                .opprettetAv(Kilder.BRUKER)
                 .build();
     }
 }
