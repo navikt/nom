@@ -14,21 +14,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -51,6 +58,9 @@ public class ForesporselControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private RestTemplate restTemplate;
+
     @Test
     public void testOpprettForesporsel() throws Exception {
         when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
@@ -71,6 +81,41 @@ public class ForesporselControllerTest {
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
 
         mockMvc.perform(requestBuilder(HttpMethod.GET)).andExpect(status().isOk());
+    }
+
+    @Test
+    public void testBekreftForesporsel() throws Exception {
+        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
+                .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(ForesporselTestUtils.ressurs());
+
+        mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Bekreftelse av skjerming registrert"));
+    }
+
+    @Test
+    public void testBekreftForesporselAnsattUgyldig() throws Exception {
+        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
+                .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
+        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(new ResponseEntity(HttpStatus.OK));
+
+        mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Ugyldig operasjon"));
+    }
+
+    @Test
+    public void testBekreftForesporselFunksjonellIdUgyldig() throws Exception {
+        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
+                .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
+
+        mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", UUID.randomUUID())))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Ugyldig operasjon"));
     }
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
