@@ -89,6 +89,8 @@ public class SkjermingLogikkKafka {
         private void nySkjerming(SkjermetPerson nySkjermetPerson){
             nySkjermetPerson.setEndretDato(LocalDateTime.now());
             nySkjermetPerson.setOpprettetDato(LocalDateTime.now());
+            nySkjermetPerson.setOpprettetAv("nom-ressurs");
+            nySkjermetPerson.setEndretAv("nom-ressurs");
             nySkjermetPerson.setKafkaProduced(false);
             repository.save(nySkjermetPerson);
         }

@@ -224,6 +224,8 @@ public class SkjermingLogikkKafkaTest {
     private void lagreSkjermetPerson(SkjermetPerson skjermetPerson){
         skjermetPerson.setEndretDato(LocalDateTime.now());
         skjermetPerson.setOpprettetDato(LocalDateTime.now());
+        skjermetPerson.setOpprettetAv("test");
+        skjermetPerson.setEndretAv("test");
         skjermetPersonRepository.save(skjermetPerson);
     }
 }
