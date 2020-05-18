@@ -55,14 +55,14 @@ public class SkjermetPerson {
     @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettetDato;
 
-    @Column(name = "OPPRETTET_AV", insertable = false)
+    @Column(name = "OPPRETTET_AV")
     private String opprettetAv;
 
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
 
-    @Column(name = "ENDRET_AV", insertable = false)
+    @Column(name = "ENDRET_AV")
     private String endretAv;
 
     @Column(name = "ENDRING_SENDT_TPS")
