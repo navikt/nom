@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -55,15 +57,19 @@ public class SkjermetPerson {
     @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettetDato;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "OPPRETTET_AV")
-    private String opprettetAv;
+    private Kilde opprettetAv;
 
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "ENDRET_AV")
-    private String endretAv;
+    private Kilde endretAv;
 
     @Column(name = "ENDRING_SENDT_TPS")
     private LocalDateTime endringSendtTps;

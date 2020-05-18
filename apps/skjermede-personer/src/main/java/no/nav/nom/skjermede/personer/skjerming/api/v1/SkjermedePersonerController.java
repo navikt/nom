@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.skjerming.Kilder;
+import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;
@@ -137,8 +137,8 @@ public class SkjermedePersonerController {
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
                 .kafkaProduced(false)
-                .endretAv(Kilder.BRUKER)
-                .opprettetAv(Kilder.BRUKER)
+                .endretAv(Kilde.BRUKER)
+                .opprettetAv(Kilde.BRUKER)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -158,7 +158,7 @@ public class SkjermedePersonerController {
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
         skjermetPerson.setKafkaProduced(false);
-        skjermetPerson.setEndretAv(Kilder.BRUKER);
+        skjermetPerson.setEndretAv(Kilde.BRUKER);
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
     }

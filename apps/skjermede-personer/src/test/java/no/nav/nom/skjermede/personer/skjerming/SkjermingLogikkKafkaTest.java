@@ -6,7 +6,9 @@ import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.nom.skjermede.personer.SkjermedePersoner;
 import no.nav.nom.skjermede.personer.skjerming.kafka.listener.NomRessurserListener;
 import no.nav.nom.skjermede.personer.skjerming.kafka.listener.SkjermingLogikkKafka;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -226,8 +228,8 @@ public class SkjermingLogikkKafkaTest {
     private void lagreSkjermetPerson(SkjermetPerson skjermetPerson){
         skjermetPerson.setEndretDato(LocalDateTime.now());
         skjermetPerson.setOpprettetDato(LocalDateTime.now());
-        skjermetPerson.setOpprettetAv("test");
-        skjermetPerson.setEndretAv("test");
+        skjermetPerson.setOpprettetAv(Kilde.SERVICEBRUKER);
+        skjermetPerson.setEndretAv(Kilde.SERVICEBRUKER);
         skjermetPersonRepository.save(skjermetPerson);
     }
 }
