@@ -37,7 +37,7 @@ public class ForesporselController {
     private final TokenUtil tokenUtil;
 
     @Unprotected
-    @Transactional
+    @Transactional(value = "transactionManager")
     @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository
@@ -57,6 +57,8 @@ public class ForesporselController {
             skjermet.setSkjermetTil(LocalDateTime.now());
             skjermet.setEndretDato(LocalDateTime.now());
             skjermetPersonRepository.save(skjermet);
+            // Trenger ikke sette kafka produced til false. Hvis endringer på 2 forskjellige rader skjer med lik
+            // timestamp i "endret" kolonnen, vil det kunne oppstå feil. Vil overskrives av ny skjerming på kafka uansett.
         }
 
         foresporsel.setBekreftet(true);
@@ -110,6 +112,7 @@ public class ForesporselController {
                 .skjermetFra(LocalDateTime.now())
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
+                .kafkaProduced(false)
                 .build();
     }
 }

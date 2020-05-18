@@ -36,7 +36,7 @@ services:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-server:2181
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CREATE_TOPICS=aapen-nom-ressurs-v1:1:1:compact
+      - KAFKA_CREATE_TOPICS=aapen-nom-ressurs-v1:1:1:compact, aapen-nom-skjermede-personer-v1:1:1:compact
     depends_on:
       - zookeeper-server
   ibm-mq:

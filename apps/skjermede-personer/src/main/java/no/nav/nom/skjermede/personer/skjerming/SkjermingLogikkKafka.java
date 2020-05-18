@@ -42,6 +42,7 @@ public class SkjermingLogikkKafka {
                         LocalDateTime sluttDato = skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil();
                         if(!Objects.equals(sluttDato, skjermetPerson.getSkjermetTil())){
                             skjermetPerson.setSkjermetTil(sluttDato);
+                            skjermetPerson.setKafkaProduced(false);
                             skjermetPerson.setEndretDato(LocalDateTime.now());
                             log.info("Skjermingen for id: {} med tilknyttetressurs: {} har fått satt skjermet til dato.", skjermetPerson.getId(), navident);
                         }
@@ -56,6 +57,7 @@ public class SkjermingLogikkKafka {
                                     // eller starter igjen innenfor mnderSkjermetPlus.
                                     if(skjermetHendelse.getSkjermetFra().equals(eksisterende.getSkjermetFra()) || eksisterende.getSkjermetTil().isBefore(skjermetHendelse.getSkjermetFra())){
                                         eksisterende.setEndretDato(LocalDateTime.now());
+                                        eksisterende.setKafkaProduced(false);
                                         eksisterende.setFornavn(skjermetHendelse.getFornavn());
                                         eksisterende.setEtternavn(skjermetHendelse.getEtternavn());
                                         eksisterende.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
@@ -87,6 +89,7 @@ public class SkjermingLogikkKafka {
         private void nySkjerming(SkjermetPerson nySkjermetPerson){
             nySkjermetPerson.setEndretDato(LocalDateTime.now());
             nySkjermetPerson.setOpprettetDato(LocalDateTime.now());
+            nySkjermetPerson.setKafkaProduced(false);
             repository.save(nySkjermetPerson);
         }
 }

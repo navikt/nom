@@ -14,7 +14,7 @@ public class NomRessurserListener {
 
     private final SkjermingLogikkKafka skjermingLogikkKafka;
 
-    @Transactional
+    @Transactional(value = "transactionManager")
     //@KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
     void onMessage(RessursDTO ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {

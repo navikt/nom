@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -65,4 +64,7 @@ public class SkjermetPerson {
 
     @Column(name = "OPPHOR_SENDT_TPS")
     private LocalDateTime opphorSendtTps;
+
+    @Column(name = "KAFKA_PRODUCED")
+    private boolean kafkaProduced;
 }
