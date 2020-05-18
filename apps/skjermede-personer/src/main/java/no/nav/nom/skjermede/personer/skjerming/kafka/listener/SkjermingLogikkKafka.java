@@ -1,6 +1,9 @@
-package no.nav.nom.skjermede.personer.skjerming;
+package no.nav.nom.skjermede.personer.skjerming.kafka.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.skjermede.personer.skjerming.Kilder;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -34,7 +37,7 @@ public class SkjermingLogikkKafka {
     4.2.c  Hvis personen ikke har vært skjermet med lik start/skjermet_fom dato fra før av, lag ny skjerming for personen.
 
  */
-    void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
+    public void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
                 // gyldig til på familie. (vi kan ikke alltid anta at en ansatt er skjermet, så må derfor gjøres her)
                 List<SkjermetPerson> skjermetFamilie = repository.findAllByTilknyttetRessursAndValid(navident);
                 if(!skjermetFamilie.isEmpty()){

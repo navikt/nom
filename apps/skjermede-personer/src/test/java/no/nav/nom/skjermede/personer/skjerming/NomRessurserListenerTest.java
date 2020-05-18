@@ -2,6 +2,8 @@ package no.nav.nom.skjermede.personer.skjerming;
 
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.contract.nom.dto.Ressurstype;
+import no.nav.nom.skjermede.personer.skjerming.kafka.listener.NomRessurserListener;
+import no.nav.nom.skjermede.personer.skjerming.kafka.listener.SkjermingLogikkKafka;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

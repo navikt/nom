@@ -4,6 +4,8 @@ import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.nom.skjermede.personer.SkjermedePersoner;
+import no.nav.nom.skjermede.personer.skjerming.kafka.listener.NomRessurserListener;
+import no.nav.nom.skjermede.personer.skjerming.kafka.listener.SkjermingLogikkKafka;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
