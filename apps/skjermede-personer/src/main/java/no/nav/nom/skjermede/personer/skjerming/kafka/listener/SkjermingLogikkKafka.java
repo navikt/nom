@@ -33,8 +33,8 @@ public class SkjermingLogikkKafka {
     4.1.b.1  Dersom dette stemmer, avslutt nåværende skjerming og lag ny. Nåværende skjerming's skjermetTil er lik ny skjerming's skjermetFra dato.
     4.1.b.2  Dersom dette ikke stemmer, ikke gjør noe. Oppdatering på gammel ansettelsesforhold skal ikke påvirke nåværende skjerming, med mindre forholdet blir aktivt igjen.
     4.1.c  Hvis personen ikke har tilknyttet ressurs, oppdater allerede eksisterende rad. Hvis personen har en sluttdato, avslutt skjermingen (+6mnder).
-    4.2.a  Hvis aktiv skjerming ikke finnes, sjekk om personen noen gang har vært skjermet med lik start/skjermet_fra dato som skjermetHendelse.
-    4.2.a.1  Dersom dette stemmer (skjerming har blitt avsluttet tidligere), ikke gjør noe.
+    4.2.a  Hvis aktiv skjerming ikke finnes, sjekk om den ansatte opphørte sin forrige skjerming (endret_av Kilde.BRUKER).
+    4.2.a.1  Dersom dette stemmer (skjerming har blitt opphørt tidligere), ikke gjør noe.
     4.2.a.2  Dersom dette ikke stemmer, lag ny skjerming for personen. SkjermingFra kan tidligst være nå, og er sluttdato allerede satt settes også skjermetTil (+6mndr).
  */
     public void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
