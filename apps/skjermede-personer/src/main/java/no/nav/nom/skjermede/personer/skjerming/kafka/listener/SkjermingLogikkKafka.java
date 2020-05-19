@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -83,10 +84,10 @@ public class SkjermingLogikkKafka {
                                     }
                                 },
                                 () -> {
-                                    // Hvis en person har vært skjermet tidligere, men avskjermet seg via nav.no skal det ikke skjermes igjen.
-                                    // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt skjermet tidligere.
+                                    // Hvis en ansatt har vært skjermet tidligere, men avskjermet seg via nav.no skal den ikke skjermes igjen.
+                                    // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt avskjermet tidligere.
                                     List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());
-                                    if(historiskSkjermet == null || historiskSkjermet.stream().noneMatch(historisk -> historisk.getSkjermetFra().equals(skjermetHendelse.getSkjermetFra()))){
+                                    if(historiskSkjermet == null || historiskSkjermet.stream().filter(skjermetPerson -> skjermetPerson.getTilknyttetRessurs() == null ).max(Comparator.comparing(SkjermetPerson::getEndretDato)).filter(skjermetPerson -> skjermetPerson.getEndretAv() == Kilde.BRUKER).isEmpty()){
                                         skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
                                         nySkjerming(skjermetHendelse);
                                         log.info("Ny skjerming opprettet fra aapen-nom-ressurs-v1 for ident: {}", navident);

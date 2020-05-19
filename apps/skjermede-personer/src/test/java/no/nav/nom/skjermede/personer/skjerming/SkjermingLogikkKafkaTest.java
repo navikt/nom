@@ -9,9 +9,6 @@ import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.SkjermedePersonerController;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import no.nav.nom.skjermede.personer.skjerming.kafka.listener.NomRessurserListener;
 import no.nav.nom.skjermede.personer.skjerming.kafka.listener.SkjermingLogikkKafka;
 import org.junit.jupiter.api.Assertions;
@@ -110,6 +107,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(LocalDate.now(), savedSkjermetPerson.getSkjermetFra().toLocalDate());
         Assertions.assertEquals(ressursDto.getFornavn(), savedSkjermetPerson.getFornavn());
         Assertions.assertEquals(ressursDto.getEtternavn(), savedSkjermetPerson.getEtternavn());
+        Assertions.assertEquals(savedSkjermetPerson.getEndretAv(), Kilde.SERVICEBRUKER);
         Assertions.assertNull(savedSkjermetPerson.getTilknyttetRessurs());
         Assertions.assertNotNull(savedSkjermetPerson.getOpprettetDato());
         Assertions.assertNotNull(savedSkjermetPerson.getEndretDato());
@@ -163,7 +161,6 @@ public class SkjermingLogikkKafkaTest {
         ressursDto.setSluttdato(sluttdato);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
-//        ressursDto.setStartdato(LocalDate.now().minusDays(1)); //TODO : Samme dato?
         ressursDto.setSluttdato(null);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
@@ -180,7 +177,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertNull(familie.getSkjermetTil());
     }
 
-//    @Test // This fails
+    @Test
     public void tidligereAnsattStarterIgjenUtenforSeksMnder(){
         lagreSkjermetPerson(familieMedlem);
 
@@ -188,7 +185,6 @@ public class SkjermingLogikkKafkaTest {
         ressursDto.setSluttdato(sluttdato);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
-//        ressursDto.setStartdato(LocalDate.now().minusDays(1)); // TODO: Samme dato?
         ressursDto.setSluttdato(null);
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
@@ -216,6 +212,7 @@ public class SkjermingLogikkKafkaTest {
         SkjermetPerson opphortSkjerming = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident()).get(0);
 
         lagreSkjermetPerson(familieMedlem);
+
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
@@ -224,6 +221,7 @@ public class SkjermingLogikkKafkaTest {
         SkjermetPerson skjermetPerson = savedSkjermetPersonList.get(0);
         Assertions.assertEquals(opphortSkjerming.getSkjermetTil(), skjermetPerson.getSkjermetTil());
         Assertions.assertEquals(opphortSkjerming.getSkjermetFra(), skjermetPerson.getSkjermetFra());
+        Assertions.assertEquals(opphortSkjerming.getEndretAv(), Kilde.BRUKER);
 
         Assertions.assertFalse(skjermetPersonRepository.getSkjermetPersonByPersonident(ressursDto.getPersonident()).isPresent());
 
@@ -236,12 +234,15 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void eksisterendeAnsattVilIkkeSkjermesSlutter(){
+        ressursDto.setStartdato(LocalDate.now().minusMonths(2));
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
         lagreSkjermetPerson(familieMedlem);
 
         when(tokenUtil.getSubject()).thenReturn(ressursDto.getPersonident());
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         skjermedePersonerController.opphorSkjerming();
+
+        SkjermetPerson opphortSkjerming = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident()).get(0);
 
         ressursDto.setSluttdato(LocalDate.now().minusMonths(1));
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
@@ -250,9 +251,9 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(1, savedSkjermetPersonList.size());
 
         SkjermetPerson skjermetPerson = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(ressursDto.getStartdato(), skjermetPerson.getSkjermetTil().toLocalDate());
-        Assertions.assertEquals(LocalDate.now(), skjermetPerson.getSkjermetFra().toLocalDate());
-        Assertions.assertNotEquals(ressursDto.getSluttdato(), skjermetPerson.getSkjermetTil().toLocalDate());
+        Assertions.assertEquals(skjermetPerson, opphortSkjerming);
+        Assertions.assertEquals(ressursDto.getStartdato(), skjermetPerson.getSkjermetFra().toLocalDate());
+        Assertions.assertEquals(LocalDate.now(), skjermetPerson.getSkjermetTil().toLocalDate());
 
         Assertions.assertFalse(skjermetPersonRepository.getSkjermetPersonByPersonident(ressursDto.getPersonident()).isPresent());
 
@@ -275,6 +276,38 @@ public class SkjermingLogikkKafkaTest {
 
         SkjermetPerson familieSkjerming = savedSkjermetPersonList.get(0);
         Assertions.assertEquals(familieSkjerming.getSkjermetTil(), ressursDto.getStartdato().atStartOfDay());
+
+        SkjermetPerson ansattSkjerming = savedSkjermetPersonList.get(1);
+        Assertions.assertEquals(ansattSkjerming.getSkjermetFra(), ressursDto.getStartdato().atStartOfDay());
+
+        List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
+        Assertions.assertEquals(2, familieList.size());
+        Assertions.assertEquals(familieList, savedSkjermetPersonList);
+
+        SkjermetPerson aktivSkjerming = skjermetPersonRepository.getSkjermetPersonByPersonident(ressursDto.getPersonident()).get();
+        Assertions.assertEquals(aktivSkjerming, ansattSkjerming);
+    }
+
+    @Test
+    public void tidligereSkjermetFamilieBlirAnsatt() {
+        lagreSkjermetPerson(familieMedlem);
+
+        when(tokenUtil.getSubject()).thenReturn(familieMedlem.getPersonident());
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        skjermedePersonerController.opphorSkjerming();
+
+        SkjermetPerson opphortSkjerming = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident()).get(0);
+
+        ressursDto.setPersonident(familieMedlem.getPersonident());
+        ressursDto.setStartdato(LocalDate.now().minusMonths(1));
+        skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
+
+        List<SkjermetPerson> savedSkjermetPersonList = skjermetPersonRepository.findAllByPersonident(ressursDto.getPersonident());
+        Assertions.assertEquals(2, savedSkjermetPersonList.size());
+
+        SkjermetPerson familieSkjerming = savedSkjermetPersonList.get(0);
+        Assertions.assertEquals(familieSkjerming, opphortSkjerming);
+        Assertions.assertEquals(LocalDate.now(), familieSkjerming.getSkjermetTil().toLocalDate());
 
         SkjermetPerson ansattSkjerming = savedSkjermetPersonList.get(1);
         Assertions.assertEquals(ansattSkjerming.getSkjermetFra(), ressursDto.getStartdato().atStartOfDay());
