@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
+import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,7 +111,7 @@ public class SkjermedePersonerController {
     }
 
     @PostMapping
-    @Transactional
+    @Transactional(value = "transactionManager")
     public ResponseEntity<SkjermetPersonResponseDTO> opprettSkjerming() {
         validerTilgang();
 
@@ -135,13 +136,16 @@ public class SkjermedePersonerController {
                 .skjermetFra(LocalDateTime.now())
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
+                .kafkaProduced(false)
+                .endretAv(Kilde.BRUKER)
+                .opprettetAv(Kilde.BRUKER)
                 .build();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson)));
     }
 
-    @Transactional
+    @Transactional(value = "transactionManager")
     @PutMapping
     public SkjermetPersonResponseDTO opphorSkjerming() {
         validerTilgang();
@@ -153,11 +157,13 @@ public class SkjermedePersonerController {
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
+        skjermetPerson.setKafkaProduced(false);
+        skjermetPerson.setEndretAv(Kilde.BRUKER);
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
     }
 
-    @Transactional
+    @Transactional(value = "transactionManager")
     @DeleteMapping
     public void slettSkjerming() {
         validerTilgang();

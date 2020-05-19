@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
+import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
@@ -50,7 +51,7 @@ public class ForesporselController {
     private final RestTemplate restTemplate;
 
     @Unprotected
-    @Transactional
+    @Transactional(value = "transactionManager")
     @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository
@@ -69,7 +70,11 @@ public class ForesporselController {
         if (skjermet != null) {
             skjermet.setSkjermetTil(LocalDateTime.now());
             skjermet.setEndretDato(LocalDateTime.now());
+            skjermet.setOpprettetAv(Kilde.BRUKER);
+            skjermet.setEndretAv(Kilde.BRUKER);
             skjermetPersonRepository.save(skjermet);
+            // Trenger ikke sette kafka produced til false. Hvis endringer på 2 forskjellige rader skjer med lik
+            // timestamp i "endret" kolonnen, vil det kunne oppstå feil. Vil overskrives av ny skjerming på kafka uansett.
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -139,6 +144,9 @@ public class ForesporselController {
                 .skjermetTil(sluttdato != null ? sluttdato.plusMonths(mnderSkjermetPlus).atTime(23, 59) : null)
                 .opprettetDato(LocalDateTime.now())
                 .endretDato(LocalDateTime.now())
+                .kafkaProduced(false)
+                .endretAv(Kilde.BRUKER)
+                .opprettetAv(Kilde.BRUKER)
                 .build();
     }
 }

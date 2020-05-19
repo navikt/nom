@@ -1,6 +1,9 @@
-package no.nav.nom.skjermede.personer.skjerming;
+package no.nav.nom.skjermede.personer.skjerming.kafka.listener;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.skjermede.personer.skjerming.Kilde;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
+import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,7 +36,7 @@ public class SkjermingLogikkKafka {
     4.2.a.1  Dersom dette stemmer (skjerming har blitt avsluttet tidligere), ikke gjør noe.
     4.2.a.2  Dersom dette ikke stemmer, lag ny skjerming for personen. SkjermingFra kan tidligst være nå, og er sluttdato allerede satt settes også skjermetTil (+6mndr).
  */
-    void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
+    public void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
                 // gyldig til på familie. (vi kan ikke alltid anta at en ansatt er skjermet, så må derfor gjøres her)
                 List<SkjermetPerson> skjermetFamilie = repository.findAllByTilknyttetRessursAndValid(navident);
                 if(!skjermetFamilie.isEmpty()){
@@ -41,6 +44,8 @@ public class SkjermingLogikkKafka {
                         LocalDateTime sluttDato = skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil();
                         if(!Objects.equals(sluttDato, skjermetPerson.getSkjermetTil())){
                             skjermetPerson.setSkjermetTil(sluttDato);
+                            skjermetPerson.setKafkaProduced(false);
+                            skjermetPerson.setEndretAv(Kilde.SERVICEBRUKER);
                             skjermetPerson.setEndretDato(LocalDateTime.now());
                             log.info("Skjermingen for id: {} med tilknyttetressurs: {} har fått satt skjermet til dato.", skjermetPerson.getId(), navident);
                         }
@@ -56,6 +61,7 @@ public class SkjermingLogikkKafka {
                                         if (skjermetHendelse.getSkjermetTil() == null || skjermetHendelse.getSkjermetTil().isAfter(LocalDateTime.now())) {
                                             eksisterende.setSkjermetTil(skjermetHendelse.getSkjermetFra());
                                             eksisterende.setEndretDato(LocalDateTime.now());
+                                            eksisterende.setEndretAv(Kilde.SERVICEBRUKER);
                                             repository.save(eksisterende);
 
                                             skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
@@ -67,6 +73,8 @@ public class SkjermingLogikkKafka {
                                     // eller starter igjen innenfor mnderSkjermetPlus.
                                     else {
                                         eksisterende.setEndretDato(LocalDateTime.now());
+                                        eksisterende.setKafkaProduced(false);
+                                        eksisterende.setEndretAv(Kilde.SERVICEBRUKER);
                                         eksisterende.setFornavn(skjermetHendelse.getFornavn());
                                         eksisterende.setEtternavn(skjermetHendelse.getEtternavn());
                                         eksisterende.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
@@ -90,6 +98,9 @@ public class SkjermingLogikkKafka {
         private void nySkjerming(SkjermetPerson nySkjermetPerson){
             nySkjermetPerson.setEndretDato(LocalDateTime.now());
             nySkjermetPerson.setOpprettetDato(LocalDateTime.now());
+            nySkjermetPerson.setOpprettetAv(Kilde.SERVICEBRUKER);
+            nySkjermetPerson.setEndretAv(Kilde.SERVICEBRUKER);
+            nySkjermetPerson.setKafkaProduced(false);
             repository.save(nySkjermetPerson);
         }
 }

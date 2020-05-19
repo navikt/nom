@@ -40,7 +40,7 @@ public class TpsService {
     private final JmsConfigProperties jmsConfigProperties;
     private final SkjermetPersonRepository skjermetPersonRepository;
 
-    @Transactional
+    @Transactional(value = "transactionManager")
     void sendAndUpdate(final SkjermetPerson skjermetPerson) {
         try (val connection = connectionFactory.createConnection()) {
             connection.start();

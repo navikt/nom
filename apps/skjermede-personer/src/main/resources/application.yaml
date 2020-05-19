@@ -33,6 +33,7 @@ app:
     username: ${app.username}
     password: ${app.password}
     group-id-prefix: ${nais.app.name}-${nais.namespace}
+    topic.skjermet.name: aapen-skjermede-personer-v1
   scheduledTasks:
     repositoryMetrics: 0 0 * ? * * # Every hour
 
@@ -50,6 +51,16 @@ spring.kafka:
     value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     properties:
       spring.json.trusted.packages: '*'
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    transaction-id-prefix: ${kafka-transaction-uuid}-
+    acks: all
+    retries: 30
+    properties:
+      max.block.ms: 15000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 1
 
 no.nav:
   security:
