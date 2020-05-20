@@ -1,0 +1,35 @@
+spring:
+  kafka:
+    listener:
+      missing-topics-fatal: false
+    consumer:
+      group-id: skjermede-personer-pip
+      bootstrap-servers: localhost:9092
+      client-id: skjermede-personer-pip
+      properties:
+        spring.json.trusted.packages: '*'
+        security.protocol: PLAINTEXT
+        sasl:
+          mechanism:
+          jaas.config:
+        ssl:
+          truststore.location: NO_VALUE
+          truststore.password: NO_VALUE
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 30
+      properties:
+        max.block.ms: 15000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+app:
+  kafka:
+    username: NO_VALUE
+    password: NO_VALUE
+    group-id-prefix: NO_VALUE

@@ -1,0 +1,30 @@
+app:
+  kafka:
+    username: ${app.username}
+    password: ${app.password}
+    group-id-prefix: ${nais.app.name}-${nais.namespace}
+    topic.skjermet.name: aapen-skjermede-personer-v1
+
+spring.kafka:
+  properties:
+    security.protocol: SASL_SSL
+    sasl:
+      mechanism: PLAIN
+      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  consumer:
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: '*'
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      base-path: /internal
+      exposure.include: prometheus
+  endpoint:
+    prometheus:
+      enabled: true
