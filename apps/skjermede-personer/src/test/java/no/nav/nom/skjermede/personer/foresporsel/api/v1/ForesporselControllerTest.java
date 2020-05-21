@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
+import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselConstants;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,6 +50,9 @@ public class ForesporselControllerTest {
 
     @MockBean
     private ForesporselRepository foresporselRepository;
+
+    @MockBean
+    private NomRessurserService nomRessurserService;
 
     @MockBean
     private SkjermetPersonRepository skjermetPersonRepository;
@@ -85,10 +90,10 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporsel() throws Exception {
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(ForesporselTestUtils.ressurs());
+        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -97,10 +102,10 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporselAnsattUgyldig() throws Exception {
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(new ResponseEntity(HttpStatus.OK));
+        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(null);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -109,7 +114,7 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporselFunksjonellIdUgyldig() throws Exception {
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
 

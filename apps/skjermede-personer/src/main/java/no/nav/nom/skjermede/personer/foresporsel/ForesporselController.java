@@ -3,7 +3,7 @@ package no.nav.nom.skjermede.personer.foresporsel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.contract.nom.dto.RessursDTO;
+import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
@@ -13,9 +13,6 @@ import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -39,52 +35,35 @@ import java.util.UUID;
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class ForesporselController {
 
-    @Value("${ressurser.api}")
-    private String ressursAPI;
-
     @Value("${maanderPlusSkjerming}")
     private int mnderSkjermetPlus;
 
     private final ForesporselRepository foresporselRepository;
     private final SkjermetPersonRepository skjermetPersonRepository;
+    private final NomRessurserService nomRessurserService;
     private final TokenUtil tokenUtil;
-    private final RestTemplate restTemplate;
 
     @Unprotected
     @Transactional(value = "transactionManager")
     @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
-        val foresporsel = foresporselRepository
-                .findByFunksjonellIdAndBekreftetFalse(funksjonellId)
-                .orElse(null);
+        val foresporsel = foresporselRepository.findByFunksjonellIdAndBekreftetFalse(funksjonellId).orElse(null);
 
         if (foresporsel == null) {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig funksjonell id: {}", funksjonellId);
             return "Ugyldig operasjon";
         }
 
-        val skjermet = skjermetPersonRepository
-                .getSkjermetPersonByPersonident(foresporsel.getPersonident())
-                .orElse(null);
+        val skjermet = skjermetPersonRepository.getSkjermetPersonByPersonident(foresporsel.getPersonident()).orElse(null);
 
         if (skjermet != null) {
             skjermet.setSkjermetTil(LocalDateTime.now());
             skjermet.setEndretDato(LocalDateTime.now());
-            skjermet.setOpprettetAv(Kilde.BRUKER);
             skjermet.setEndretAv(Kilde.BRUKER);
             skjermetPersonRepository.save(skjermet);
-            // Trenger ikke sette kafka produced til false. Hvis endringer på 2 forskjellige rader skjer med lik
-            // timestamp i "endret" kolonnen, vil det kunne oppstå feil. Vil overskrives av ny skjerming på kafka uansett.
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("navident", foresporsel.getTilknyttetRessurs());
-
-        val ressurs = restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                RessursDTO.class).getBody();
+        val ressurs = nomRessurserService.getInternRessurs(foresporsel.getTilknyttetRessurs(), true);
 
         if (ressurs == null) {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig nav-ident: {}", foresporsel.getTilknyttetRessurs());

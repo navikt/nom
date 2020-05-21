@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
+import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -14,14 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -30,12 +29,14 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
@@ -49,10 +50,10 @@ public class SkjermedePersonerControllerTest {
     private SkjermetPersonRepository repository;
 
     @MockBean
-    private TokenUtil tokenUtil;
+    private NomRessurserService nomRessurserService;
 
     @MockBean
-    private RestTemplate restTemplate;
+    private TokenUtil tokenUtil;
 
     @Autowired
     private MockMvc mockMvc;
@@ -91,7 +92,7 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(SkjermingTestUtils.ressurs());
+        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
         when(repository.findAllByTilknyttetRessurs(SkjermingTestUtils.NAVIDENT)).thenReturn(Arrays.asList(SkjermingTestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
@@ -143,7 +144,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(SkjermingTestUtils.ressurs());
+        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
         when(repository.save(any(SkjermetPerson.class))).thenReturn(SkjermingTestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isCreated());
