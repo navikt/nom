@@ -18,7 +18,7 @@ public class NomRessurserService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${ressurser.api}")
+    @Value("${ressurser-api}")
     private String ressursAPI;
 
     public RessursDTO getInternRessurs(final String navident, final boolean aktiv) {
