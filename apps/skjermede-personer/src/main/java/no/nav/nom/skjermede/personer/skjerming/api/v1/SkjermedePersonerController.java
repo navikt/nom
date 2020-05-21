@@ -29,9 +29,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(SkjermingConstants.BASE_URL)
+@RequestMapping(SkjermedePersonerController.BASE_URL)
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class SkjermedePersonerController {
+
+    public static final String BASE_URL = "/api/v1/skjerming";
+    public static final String ALLE = "alle";
+    public static final String FAMILIEMEDLEMMER = "familiemedlemmer";
+    public static final String NOT_FOUND_MESSAGE = "Fant ingen skjerming for innlogget bruker";
+    public static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
+    public static final String DUPLICATE_SKJERMING_MESSAGE = "Personen er allerede skjermet";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final NomRessurserService nomRessurserService;
@@ -63,7 +70,7 @@ public class SkjermedePersonerController {
         return skjermetPerson != null ? SkjermetPersonResponseDTO.fromEntity(skjermetPerson) : null;
     }
 
-    @GetMapping(SkjermingConstants.FAMILIEMEDLEMMER)
+    @GetMapping(FAMILIEMEDLEMMER)
     public List<SkjermetPersonResponseDTO> hentSkjermedeFamiliemedlemer() {
         validerTilgang();
 
@@ -76,7 +83,7 @@ public class SkjermedePersonerController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping(SkjermingConstants.ALLE)
+    @GetMapping(ALLE)
     public List<SkjermetPersonResponseDTO> hentAlleSkjerminger() {
         validerTilgang();
 
@@ -96,7 +103,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
 
         if (skjermetPersonRepository.getSkjermetPersonByPersonident(personident).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, SkjermingConstants.DUPLICATE_SKJERMING_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DUPLICATE_SKJERMING_MESSAGE);
         }
 
         val ressurs = nomRessurserService.getInternRessurs(personident, Boolean.TRUE);
@@ -124,7 +131,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SkjermingConstants.NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_MESSAGE));
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPerson.setEndretDato(LocalDateTime.now());
@@ -142,14 +149,14 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, SkjermingConstants.NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_MESSAGE));
 
         skjermetPersonRepository.deleteById(skjermetPerson.getId());
     }
 
     private void validerTilgang() {
         if (!tokenUtil.isAuthorized()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, SkjermingConstants.UNAUTHORIZED_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_MESSAGE);
         }
     }
 }

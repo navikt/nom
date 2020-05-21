@@ -2,7 +2,6 @@ package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

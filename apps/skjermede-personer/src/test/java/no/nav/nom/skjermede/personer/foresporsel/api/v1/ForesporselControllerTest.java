@@ -7,7 +7,6 @@ import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
-import no.nav.nom.skjermede.personer.foresporsel.ForesporselConstants;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -15,12 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -125,8 +121,8 @@ public class ForesporselControllerTest {
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
         val path = requestPath.length == 0
-                ? Paths.get(ForesporselConstants.BASE_URL)
-                : Paths.get(ForesporselConstants.BASE_URL, requestPath);
+                ? Paths.get(ForesporselController.BASE_URL)
+                : Paths.get(ForesporselController.BASE_URL, requestPath);
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)

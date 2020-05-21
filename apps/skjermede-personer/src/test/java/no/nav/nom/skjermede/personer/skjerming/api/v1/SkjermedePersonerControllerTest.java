@@ -87,7 +87,7 @@ public class SkjermedePersonerControllerTest {
     @Test
     public void testHentSkjermedeFamiliemedlemerUnauthorized() throws Exception {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
 
-        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.FAMILIEMEDLEMMER))
+        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.FAMILIEMEDLEMMER))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -111,7 +111,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(Strings.EMPTY);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.ALLE)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.ALLE)).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermingConstants.ALLE)).andExpect(status().isOk());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.ALLE)).andExpect(status().isOk());
     }
 
     @Test
@@ -189,8 +189,8 @@ public class SkjermedePersonerControllerTest {
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
         val path = requestPath.length == 0
-                ? Paths.get(SkjermingConstants.BASE_URL)
-                : Paths.get(SkjermingConstants.BASE_URL, requestPath);
+                ? Paths.get(SkjermedePersonerController.BASE_URL)
+                : Paths.get(SkjermedePersonerController.BASE_URL, requestPath);
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)

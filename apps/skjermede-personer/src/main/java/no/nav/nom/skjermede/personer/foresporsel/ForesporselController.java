@@ -31,12 +31,17 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ForesporselConstants.BASE_URL)
+@RequestMapping(ForesporselController.BASE_URL)
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class ForesporselController {
 
     @Value("${maanderPlusSkjerming}")
     private int mnderSkjermetPlus;
+
+    public static final String BASE_URL = "/api/v1/foresporsel";
+    public static final String FORESPORSEL_BEKREFTELSE = "bekreft";
+    public static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
+    public static final String DUPLICATE_FORESPORSEL_MESSAGE = "Duplikat skjerming-forespørsel for innlogget bruker";
 
     private final ForesporselRepository foresporselRepository;
     private final SkjermetPersonRepository skjermetPersonRepository;
@@ -45,7 +50,7 @@ public class ForesporselController {
 
     @Unprotected
     @Transactional(value = "transactionManager")
-    @GetMapping(ForesporselConstants.FORESPORSEL_BEKREFTELSE)
+    @GetMapping(FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository.findByFunksjonellIdAndBekreftetFalse(funksjonellId).orElse(null);
 
@@ -94,7 +99,7 @@ public class ForesporselController {
         val personident = tokenUtil.getSubject();
 
         if (foresporselRepository.existsByPersonidentAndBekreftetFalse(personident)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ForesporselConstants.DUPLICATE_FORESPORSEL_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ForesporselController.DUPLICATE_FORESPORSEL_MESSAGE);
         }
 
         val foresporsel = foresporselRequestDTO.toEntity();
@@ -109,7 +114,7 @@ public class ForesporselController {
 
     private void validerTilgang() {
         if (!tokenUtil.isAuthorized()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ForesporselConstants.UNAUTHORIZED_MESSAGE);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, ForesporselController.UNAUTHORIZED_MESSAGE);
         }
     }
 
