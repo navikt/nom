@@ -1,0 +1,44 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: skjermede-personer-pip
+  namespace: default
+  labels:
+    team: nom
+spec:
+  env:
+    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+    - name: VAULT_USER_SECRET_PATH
+      value: serviceuser/dev/srvnom-skjermet
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://skjermede-personer-pip.nais.preprod.local
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  liveness:
+    path: internal/isAlive
+    initialDelay: 60
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/isReady
+    initialDelay: 60
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2048Mi
+    limits:
+      cpu: 1000m
+      memory: 4096Mi
+  vault:
+    enabled: true
+  prometheus:
+    enabled: true
+    path: internal/prometheus

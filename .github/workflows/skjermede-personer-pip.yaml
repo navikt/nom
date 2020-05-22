@@ -1,0 +1,70 @@
+name: Build, Deploy skjermede-personer-pip
+
+on:
+  push:
+    branches:
+      - master
+      - 'dev/*'
+    paths:
+      - 'apps/skjermede-personer-pip/**'
+      - '.nais/*/skjermede-personer-pip.yaml'
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:${{ github.sha }}
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Cache Depdendencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+        run: mvn clean package --projects :skjermede-personer-pip --also-make
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build --tag ${IMAGE} --build-arg JAR_PATH=apps/skjermede-personer-pip/target/app.jar .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE}
+
+  deploy-dev:
+    name: Deploy to NAIS dev-fss
+    needs: build-jar-docker
+    if: startsWith(github.ref, 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: .nais/dev-fss/skjermede-personer-pip.yaml
+
+  deploy-prod:
+    name: Deploy to NAIS prod-fss
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: .nais/prod-fss/skjermede-personer-pip.yaml

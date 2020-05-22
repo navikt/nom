@@ -67,8 +67,8 @@ no.nav:
     jwt:
       issuer:
         selvbetjening:
-          discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
-          accepted_audience: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
+          discoveryurl: ${AAD_B2C_DISCOVERYURL}
+          accepted_audience: ${LOGINSERVICE_CLIENTID}
 
 aad:
     client_id: 2d7bd936-3f44-4878-a3db-22fe2aa947ae
@@ -76,11 +76,9 @@ aad:
     username: srvSkjermedep@nav.no
     password: 620A2UjMpxPqjt
 
-ressurser:
-  api: ${NOM_RESSURSER_API:http://localhost:8080/api/v1/ressurs}
+ressurser-api: ${NOM_RESSURSER_API:http://localhost:8080/api/v1/ressurs}
 
-foresporsel:
-  api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}
+foresporsel-api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}
 
 tps:
   mq:

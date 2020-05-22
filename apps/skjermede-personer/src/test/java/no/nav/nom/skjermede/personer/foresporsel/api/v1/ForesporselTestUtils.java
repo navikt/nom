@@ -3,8 +3,6 @@ package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,11 +32,11 @@ public class ForesporselTestUtils {
                 .build();
     }
 
-    public static ResponseEntity<RessursDTO> ressurs() {
-        return new ResponseEntity<>(RessursDTO.builder()
+    public static RessursDTO ressurs() {
+        return RessursDTO.builder()
                 .personident(PERSONIDENT)
                 .navident(TILKNYTTET_RESSURS)
                 .sluttdato(LocalDate.now())
-                .build(), HttpStatus.OK);
+                .build();
     }
 }
