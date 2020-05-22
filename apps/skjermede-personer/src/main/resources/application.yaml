@@ -76,11 +76,9 @@ aad:
     username: srvSkjermedep@nav.no
     password: 620A2UjMpxPqjt
 
-ressurser:
-  api: ${NOM_RESSURSER_API:http://localhost:8080/api/v1/ressurs}
+ressurser-api: ${NOM_RESSURSER_API:http://localhost:8080/api/v1/ressurs}
 
-foresporsel:
-  api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}
+foresporsel-api: ${FORESPORSEL_API:http://localhost:8081/api/v1/foresporsel}
 
 tps:
   mq:
