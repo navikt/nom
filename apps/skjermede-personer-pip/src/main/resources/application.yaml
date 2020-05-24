@@ -4,7 +4,6 @@ app:
     password: ${app.password}
     group-id-prefix: ${nais.app.name}-${nais.namespace}
     topic.skjermet.name: aapen-skjermede-personer-v1
-
 spring.kafka:
   properties:
     security.protocol: SASL_SSL
@@ -28,3 +27,12 @@ management:
   endpoint:
     prometheus:
       enabled: true
+spring.cloud.vault:
+  authentication: KUBERNETES
+  config:
+    order: -10
+    lifecycle.enabled: true
+  kubernetes:
+    role: ${app.name}
+    kubernetes-path: kubernetes/${stack}/fss
+    service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
