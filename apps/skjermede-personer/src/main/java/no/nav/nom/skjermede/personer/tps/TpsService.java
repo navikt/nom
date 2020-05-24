@@ -51,7 +51,7 @@ public class TpsService {
             }
 
             if (skjermetPerson.getOpphorSendtTps() == null &&
-                skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isAfter(LocalDateTime.now())) {
+                skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
             }
         } catch (Exception e) {
