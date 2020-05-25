@@ -252,8 +252,9 @@ public class SkjermingLogikkKafkaTest {
 
         SkjermetPerson skjermetPerson = savedSkjermetPersonList.get(0);
         Assertions.assertEquals(skjermetPerson, opphortSkjerming);
-        Assertions.assertEquals(ressursDto.getStartdato(), skjermetPerson.getSkjermetFra().toLocalDate());
+        Assertions.assertEquals(LocalDate.now(), skjermetPerson.getSkjermetFra().toLocalDate());
         Assertions.assertEquals(LocalDate.now(), skjermetPerson.getSkjermetTil().toLocalDate());
+        Assertions.assertTrue(skjermetPerson.getSkjermetFra().isBefore(skjermetPerson.getSkjermetTil()));
 
         Assertions.assertFalse(skjermetPersonRepository.getSkjermetPersonByPersonident(ressursDto.getPersonident()).isPresent());
 
@@ -278,7 +279,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(familieSkjerming.getSkjermetTil(), ressursDto.getStartdato().atStartOfDay());
 
         SkjermetPerson ansattSkjerming = savedSkjermetPersonList.get(1);
-        Assertions.assertEquals(ansattSkjerming.getSkjermetFra(), ressursDto.getStartdato().atStartOfDay());
+        Assertions.assertEquals(ansattSkjerming.getSkjermetFra().toLocalDate(), ressursDto.getStartdato());
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
         Assertions.assertEquals(2, familieList.size());
@@ -310,7 +311,7 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(LocalDate.now(), familieSkjerming.getSkjermetTil().toLocalDate());
 
         SkjermetPerson ansattSkjerming = savedSkjermetPersonList.get(1);
-        Assertions.assertEquals(ansattSkjerming.getSkjermetFra(), ressursDto.getStartdato().atStartOfDay());
+        Assertions.assertTrue(familieSkjerming.getSkjermetTil().isBefore(ansattSkjerming.getSkjermetFra()));
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
         Assertions.assertEquals(2, familieList.size());
@@ -493,10 +494,11 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(2, savedSkjermetPersonList.size());
 
         SkjermetPerson somAnsattSkjerming = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(sluttdato.minusMonths(1).atStartOfDay(), somAnsattSkjerming.getSkjermetFra());
+        Assertions.assertEquals(somAnsattSkjerming.getSkjermetFra().toLocalDate(), LocalDate.now());
 
         SkjermetPerson somFamilieSkjerming = savedSkjermetPersonList.get(1);
         Assertions.assertNull(somFamilieSkjerming.getSkjermetTil());
+        Assertions.assertTrue(somAnsattSkjerming.getSkjermetTil().isBefore(somFamilieSkjerming.getSkjermetFra()));
         Assertions.assertEquals(somAnsattSkjerming.getSkjermetTil().toLocalDate(), somFamilieSkjerming.getSkjermetFra().toLocalDate());
         Assertions.assertEquals(somFamilieSkjerming.getTilknyttetRessurs(), foresporsel.getTilknyttetRessurs());
 
@@ -509,14 +511,11 @@ public class SkjermingLogikkKafkaTest {
 
     @Test
     public void tidligereAnsattViderefortSkjermingStarterIgjen() {
-        val sluttdato = LocalDate.now().minusMonths(1);
-        ressursDto.setStartdato(sluttdato.minusMonths(1));
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
-        familieMedlem.setSkjermetFra(sluttdato.minusMonths(1).atStartOfDay());
         lagreSkjermetPerson(familieMedlem);
 
-        ressursDto.setSluttdato(sluttdato);
+        ressursDto.setSluttdato(LocalDate.now().minusMonths(1));
         skjermingLogikkKafka.handterAnsattHendelse(NomRessurserListener.converted(ressursDto), ressursDto.getNavident());
 
         Foresporsel foresporsel = lagreForesporsel();
@@ -531,13 +530,13 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(3, savedSkjermetPersonList.size());
 
         SkjermetPerson somAnsattSkjerming = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(sluttdato.minusMonths(1).atStartOfDay(), somAnsattSkjerming.getSkjermetFra());
+        Assertions.assertEquals(somAnsattSkjerming.getSkjermetFra().toLocalDate(), LocalDate.now());
 
         SkjermetPerson somFamilieSkjerming = savedSkjermetPersonList.get(1);
-        Assertions.assertEquals(somAnsattSkjerming.getSkjermetTil().toLocalDate(), somFamilieSkjerming.getSkjermetFra().toLocalDate());
+        Assertions.assertTrue(somAnsattSkjerming.getSkjermetTil().isBefore(somFamilieSkjerming.getSkjermetFra()));
 
         SkjermetPerson somAnsattIgjenSkjerming = savedSkjermetPersonList.get(2);
-        Assertions.assertEquals(somFamilieSkjerming.getSkjermetTil().toLocalDate(), somAnsattIgjenSkjerming.getSkjermetFra().toLocalDate());
+        Assertions.assertTrue(somFamilieSkjerming.getSkjermetTil().isBefore(somAnsattIgjenSkjerming.getSkjermetFra()));
         Assertions.assertNull(somAnsattIgjenSkjerming.getSkjermetTil());
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
@@ -575,9 +574,10 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(tempSavedSkjermetPersonList, savedSkjermetPersonList);
 
         SkjermetPerson somAnsattSkjerming = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(startdato.atStartOfDay(), somAnsattSkjerming.getSkjermetFra());
+        Assertions.assertEquals(somAnsattSkjerming.getSkjermetFra().toLocalDate(), LocalDate.now());
 
         SkjermetPerson somFamilieSkjerming = savedSkjermetPersonList.get(1);
+        Assertions.assertTrue(somAnsattSkjerming.getSkjermetTil().isBefore(somFamilieSkjerming.getSkjermetFra()));
         Assertions.assertEquals(somFamilieSkjerming.getSkjermetFra().toLocalDate(), somAnsattSkjerming.getSkjermetTil().toLocalDate());
         Assertions.assertNull(somFamilieSkjerming.getSkjermetTil());
 
@@ -613,13 +613,14 @@ public class SkjermingLogikkKafkaTest {
         Assertions.assertEquals(3, savedSkjermetPersonList.size());
 
         SkjermetPerson somAnsattSkjerming = savedSkjermetPersonList.get(0);
-        Assertions.assertEquals(sluttdato.minusMonths(1).atStartOfDay(), somAnsattSkjerming.getSkjermetFra());
+        Assertions.assertEquals(somAnsattSkjerming.getSkjermetFra().toLocalDate(), LocalDate.now());
 
         SkjermetPerson somFamilieSkjerming = savedSkjermetPersonList.get(1);
+        Assertions.assertTrue(somAnsattSkjerming.getSkjermetTil().isBefore(somFamilieSkjerming.getSkjermetFra()));
         Assertions.assertEquals(somAnsattSkjerming.getSkjermetTil().toLocalDate(), somFamilieSkjerming.getSkjermetFra().toLocalDate());
 
         SkjermetPerson somAnsattIgjenSkjerming = savedSkjermetPersonList.get(2);
-        Assertions.assertEquals(somFamilieSkjerming.getSkjermetTil().toLocalDate(), somAnsattIgjenSkjerming.getSkjermetFra().toLocalDate());
+        Assertions.assertTrue(somFamilieSkjerming.getSkjermetTil().isBefore(somAnsattIgjenSkjerming.getSkjermetFra()));
         Assertions.assertEquals(somAnsattIgjenSkjerming.getSkjermetTil().toLocalDate(), sluttdato.plusMonths(2 + mnderPlusSkjerming));
 
         List<SkjermetPerson> familieList = skjermetPersonRepository.findAllByPersonident(familieMedlem.getPersonident());
