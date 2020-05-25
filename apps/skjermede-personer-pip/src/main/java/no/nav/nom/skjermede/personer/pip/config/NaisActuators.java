@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.pip;
+package no.nav.nom.skjermede.personer.pip.config;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
