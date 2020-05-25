@@ -1,7 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.ressurser;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.context.annotation.Profile;
@@ -15,11 +14,13 @@ public class RepositoryMetricFactory {
 
     private final MeterRegistry meterRegistry;
 
-    private final RessursRepository repository;
+    private final RessursRepository ressursRepository;
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
-        meterRegistry.gauge("database_ressurs_gauge", Tags.of("type", Ressurstype.INTERN.toString(), "status", "active"), repository.countAllValid(Ressurstype.INTERN.toString()));
-        meterRegistry.gauge("database_ressurs_gauge", Tags.of("type", Ressurstype.EKSTERN.toString(), "status", "active"), repository.countAllValid(Ressurstype.EKSTERN.toString()));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.INTERN.toString(), "status", "any").increment(ressursRepository.countAllByRessurstype(Ressurstype.INTERN));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.INTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.INTERN));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.EKSTERN.toString(), "status", "any").increment(ressursRepository.countAllByRessurstype(Ressurstype.EKSTERN));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.EKSTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.EKSTERN));
     }
 }

@@ -23,8 +23,10 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     Optional<Ressurs> findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(String navident);
 
-    @Query(value = "SELECT COUNT(*) FROM T_RESSURS WHERE (sluttdato IS NULL OR sluttdato > CURRENT_DATE) AND ressurstype = :ressurstype", nativeQuery = true)
-    long countAllValid(@Param("ressurstype") String ressurstype);
+    long countAllByRessurstype(Ressurstype ressurstype);
+
+    @Query(value = "SELECT COUNT(*) FROM T_RESSURS WHERE sluttdato <= CURRENT_DATE AND ressurstype = :ressurstype", nativeQuery = true)
+    long countInactiveByRessurstype(@Param("ressurstype") Ressurstype ressurstype);
 
     @Query(value = "SELECT * FROM T_RESSURS WHERE NAVIDENT = :navident AND (SLUTTDATO IS NULL OR SLUTTDATO > CURRENT_DATE)", nativeQuery = true)
     Optional<Ressurs> getGyldigRessursByNavident(String navident);
