@@ -19,8 +19,8 @@ public class RepositoryMetricFactory {
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
         meterRegistry.counter("database_ressurs_count", "type", Ressurstype.INTERN.toString(), "status", "any").increment(ressursRepository.countAllByRessurstype(Ressurstype.INTERN));
-        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.INTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.INTERN));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.INTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.INTERN.toString()));
         meterRegistry.counter("database_ressurs_count", "type", Ressurstype.EKSTERN.toString(), "status", "any").increment(ressursRepository.countAllByRessurstype(Ressurstype.EKSTERN));
-        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.EKSTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.EKSTERN));
+        meterRegistry.counter("database_ressurs_count", "type", Ressurstype.EKSTERN.toString(), "status", "inactive").increment(ressursRepository.countInactiveByRessurstype(Ressurstype.EKSTERN.toString()));
     }
 }
