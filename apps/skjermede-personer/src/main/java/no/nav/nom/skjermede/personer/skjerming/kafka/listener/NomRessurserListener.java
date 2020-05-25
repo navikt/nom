@@ -19,10 +19,10 @@ public class NomRessurserListener {
     private final SkjermingLogikkKafka skjermingLogikkKafka;
 
     @Transactional(value = "transactionManager")
-//    @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
-    @KafkaListener(groupId = "skjermede-personer", topicPartitions =
-    @TopicPartition(topic = "aapen-nom-ressurs-v1", partitionOffsets =
-    @PartitionOffset(partition = "0", initialOffset = "0")))
+    @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
+//    @KafkaListener(groupId = "skjermede-personer", topicPartitions =
+//    @TopicPartition(topic = "aapen-nom-ressurs-v1", partitionOffsets =
+//    @PartitionOffset(partition = "0", initialOffset = "0")))
     public void onMessage(RessursDTO ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident());
