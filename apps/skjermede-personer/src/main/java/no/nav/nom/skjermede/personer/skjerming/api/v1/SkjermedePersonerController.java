@@ -62,7 +62,7 @@ public class SkjermedePersonerController {
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
         if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null) {
-            val ressurs = nomRessurserService.getInternRessurs(skjermetPerson.getTilknyttetRessurs(), false);
+            val ressurs = nomRessurserService.getInternRessursByNavident(skjermetPerson.getTilknyttetRessurs(), false);
 
             return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
         }
@@ -75,7 +75,7 @@ public class SkjermedePersonerController {
         validerTilgang();
 
         val personident = tokenUtil.getSubject();
-        val ressurs = nomRessurserService.getInternRessurs(personident, Boolean.FALSE);
+        val ressurs = nomRessurserService.getInternRessursByPersonident(personident, Boolean.FALSE);
 
         return skjermetPersonRepository.findAllByTilknyttetRessurs(ressurs.getNavident())
                 .stream()
@@ -106,7 +106,7 @@ public class SkjermedePersonerController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DUPLICATE_SKJERMING_MESSAGE);
         }
 
-        val ressurs = nomRessurserService.getInternRessurs(personident, Boolean.TRUE);
+        val ressurs = nomRessurserService.getInternRessursByPersonident(personident, Boolean.TRUE);
         val skjermetPerson = SkjermetPerson.builder()
                 .personident(personident)
                 .fornavn(ressurs.getFornavn())

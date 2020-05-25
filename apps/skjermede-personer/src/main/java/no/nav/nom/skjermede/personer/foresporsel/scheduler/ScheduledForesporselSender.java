@@ -55,7 +55,7 @@ public class ScheduledForesporselSender {
     }
 
     private String hentEpost(final String navident) {
-        val ressurs = nomRessurserService.getInternRessurs(navident, Boolean.TRUE);
+        val ressurs = nomRessurserService.getInternRessursByNavident(navident, Boolean.TRUE);
 
         if (ressurs == null || ressurs.getEpost() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ressurs med navident %s ikke funnet", navident));

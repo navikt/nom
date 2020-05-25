@@ -21,9 +21,20 @@ public class NomRessurserService {
     @Value("${ressurser-api}")
     private String ressursAPI;
 
-    public RessursDTO getInternRessurs(final String navident, final boolean aktiv) {
+    public RessursDTO getInternRessursByNavident(final String navident, final boolean aktiv) {
         val headers = new HttpHeaders();
         headers.set("navident", navident);
+
+        return restTemplate.exchange(
+                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN", ressursAPI, aktiv),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                RessursDTO.class).getBody();
+    }
+
+    public RessursDTO getInternRessursByPersonident(final String personident, final boolean aktiv) {
+        val headers = new HttpHeaders();
+        headers.set("personident", personident);
 
         return restTemplate.exchange(
                 String.format("%s/ansatt?gyldig=%s&ressursType=INTERN", ressursAPI, aktiv),
