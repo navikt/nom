@@ -4,7 +4,6 @@ app:
     password: ${app.password}
     group-id-prefix: ${nais.app.name}-${nais.namespace}
     topic.skjermet.name: aapen-skjermede-personer-v1
-
 spring.kafka:
   properties:
     security.protocol: SASL_SSL
