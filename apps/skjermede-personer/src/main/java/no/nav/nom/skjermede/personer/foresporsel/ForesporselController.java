@@ -68,7 +68,7 @@ public class ForesporselController {
             skjermetPersonRepository.save(skjermet);
         }
 
-        val ressurs = nomRessurserService.getInternRessurs(foresporsel.getTilknyttetRessurs(), true);
+        val ressurs = nomRessurserService.getInternRessursByNavident(foresporsel.getTilknyttetRessurs(), true);
 
         if (ressurs == null) {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig nav-ident: {}", foresporsel.getTilknyttetRessurs());

@@ -89,7 +89,7 @@ public class ForesporselControllerTest {
         val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
+        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class ForesporselControllerTest {
         val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(null);
+        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(null);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())

@@ -92,7 +92,7 @@ public class SkjermedePersonerControllerTest {
 
     @Test
     public void testHentSkjermedeFamiliemedlemer() throws Exception {
-        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
         when(repository.findAllByTilknyttetRessurs(SkjermingTestUtils.NAVIDENT)).thenReturn(Arrays.asList(SkjermingTestUtils.skjermetPerson()));
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
@@ -144,7 +144,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(repository.getSkjermetPersonByPersonident(SkjermingTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
-        when(nomRessurserService.getInternRessurs(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(SkjermingTestUtils.ressurs());
         when(repository.save(any(SkjermetPerson.class))).thenReturn(SkjermingTestUtils.skjermetPerson());
 
         mockMvc.perform(requestBuilder(HttpMethod.POST)).andExpect(status().isCreated());
