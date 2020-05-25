@@ -16,18 +16,22 @@ public class Skjermingsperiode {
 
     public Skjermingsperiode(LocalDateTime fra, LocalDateTime til) {
         this.fra = fra.toEpochSecond(ZoneOffset.UTC);
-        this.til = til.toEpochSecond(ZoneOffset.UTC);
+        if(til == null) {
+            this.til = null;
+        } else {
+            this.til = til.toEpochSecond(ZoneOffset.UTC);
+        }
     }
 
     public LocalDateTime fra()  {
         return LocalDateTime.ofEpochSecond(this.fra, 0, ZoneOffset.UTC);
     }
 
-    public Optional<LocalDateTime> til() {
+    public LocalDateTime til() {
         if(this.til == null) {
-            return Optional.empty();
+            return null;
         } else {
-            return Optional.of(LocalDateTime.ofEpochSecond(this.til, 0, ZoneOffset.UTC));
+            return LocalDateTime.ofEpochSecond(this.til, 0, ZoneOffset.UTC);
         }
     }
 }

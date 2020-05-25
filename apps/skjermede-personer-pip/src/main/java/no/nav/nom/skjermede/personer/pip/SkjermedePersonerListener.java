@@ -2,6 +2,7 @@ package no.nav.nom.skjermede.personer.pip;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.skjermede.dto.SkjermetPersonDTO;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -10,6 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -29,7 +32,7 @@ public class SkjermedePersonerListener {
             // no-op
         } catch(RuntimeException e) {
             log.error("Error fetching event with key: " + record.key() + ". SkjermetFra: " + record.value().getSkjermetFra() + ", skjermetTil: " + record
-            .value().getSkjermetTil());
+            .value().getSkjermetTil() + ". Exception: " + e);
         }
     }
 }

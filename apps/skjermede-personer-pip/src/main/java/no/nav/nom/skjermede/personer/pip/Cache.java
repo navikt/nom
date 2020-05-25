@@ -21,7 +21,7 @@ public class Cache {
 
         return (periode != null) &&
                 (periode.fra().isBefore(LocalDateTime.now())) &&
-                (periode.til().isEmpty() || periode.til().get().isAfter(LocalDateTime.now()));
+                (periode.til() == null || periode.til().isAfter(LocalDateTime.now()));
     }
 
     HashMap<String, Skjermingsperiode> getAll() {
@@ -32,8 +32,8 @@ public class Cache {
         return skjermedePersoner.size();
     }
 
-    public void store(String personident, Skjermingsperiode periode) {
-        if(periode.til().isEmpty() || periode.til().get().isAfter(LocalDateTime.now())) {
+    void store(String personident, Skjermingsperiode periode) {
+        if(periode.til() == null || periode.til().isAfter(LocalDateTime.now())) {
             skjermedePersoner.put(personident, periode);
         }
     }

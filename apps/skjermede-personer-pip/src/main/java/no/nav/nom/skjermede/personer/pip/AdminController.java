@@ -12,12 +12,10 @@ import java.util.HashMap;
 @AllArgsConstructor
 public class AdminController {
     private final Cache cache;
-    private final MeterRegistry metric;
 
     @GetMapping("/size")
     public int isSkjermet(@RequestParam String personident, @RequestParam String apiKey) {
         validate(apiKey);
-        metric.counter("calls").increment();
         return cache.size();
     }
 
