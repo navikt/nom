@@ -1,6 +1,8 @@
 package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
@@ -11,6 +13,7 @@ import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,8 +32,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,8 +63,16 @@ public class ForesporselControllerTest {
     @MockBean
     private RestTemplate restTemplate;
 
+    @MockBean
+    private MeterRegistry meterRegistry;
+
+    @MockBean
+    private Counter counter;
+
+
     @Test
     public void testOpprettForesporsel() throws Exception {
+        when(meterRegistry.counter(anyString(), ArgumentMatchers.<String>any())).thenReturn(counter);
         when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(foresporselRepository.existsByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Boolean.FALSE);
@@ -85,6 +95,7 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporsel() throws Exception {
+        when(meterRegistry.counter(anyString(), ArgumentMatchers.<String>any())).thenReturn(counter);
         UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));

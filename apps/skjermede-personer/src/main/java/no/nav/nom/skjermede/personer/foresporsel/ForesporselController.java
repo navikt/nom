@@ -1,5 +1,7 @@
 package no.nav.nom.skjermede.personer.foresporsel;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -49,6 +51,8 @@ public class ForesporselController {
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final TokenUtil tokenUtil;
     private final RestTemplate restTemplate;
+    private final MeterRegistry meterRegistry;
+
 
     @Unprotected
     @Transactional(value = "transactionManager")
@@ -90,6 +94,8 @@ public class ForesporselController {
             return "Ugyldig operasjon";
         }
 
+        meterRegistry.counter("foresporsel_count", "status", "godkjent").increment();
+
         foresporsel.setBekreftet(true);
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
         foresporselRepository.delete(foresporsel);
@@ -122,6 +128,8 @@ public class ForesporselController {
         foresporsel.setFunksjonellId(UUID.randomUUID());
         foresporsel.setBekreftet(false);
         foresporsel.setOpprettetDato(LocalDateTime.now());
+
+        meterRegistry.counter("foresporsel_count", "status", "opprettet").increment();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));

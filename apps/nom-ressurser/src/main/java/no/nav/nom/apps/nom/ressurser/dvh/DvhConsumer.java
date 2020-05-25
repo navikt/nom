@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.common.LeaderElection;
@@ -28,61 +29,64 @@ public class DvhConsumer {
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
     private final LeaderElection leaderElection;
+    private final MeterRegistry meterRegistry;
+
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final long incrementValue = 1000L;
 
     @Scheduled(cron = "${app.scheduledTasks.dvhConsumer}")
     public void dvhScheduler(){
-        log.info("Oppdaterer fra datavarehus..");
-        while (hentBulkOppdatering() == incrementValue);
-        log.info("Oppdatering fra datavarehus ferdig.");
+        if(leaderElection.isLeader()) {
+            log.info("Oppdaterer fra datavarehus..");
+            while (hentBulkOppdatering() == incrementValue);
+            log.info("Oppdatering fra datavarehus ferdig.");
+        }
     }
 
     @Transactional(value = "transactionManager")
     public int hentBulkOppdatering(){
-        if(leaderElection.isLeader()) {
-            Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
-            String url = dvhEndpoint + "?in_sekvensnummer_fra=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset() + incrementValue);
-            log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
-            DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
+        Offset dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
+        String url = dvhEndpoint + "?in_sekvensnummer_fra=" + dvhOffset.getOffset() + "&in_sekvensnummer_til=" + (dvhOffset.getOffset() + incrementValue);
+        log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
+        DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
-            if (result != null && result.getAnsatteResultList() != null && !result.getAnsatteResultList().isEmpty()) {
-                List<DvhRessursDTO> resultRessurs = result.getAnsatteResultList();
+        if (result != null && result.getAnsatteResultList() != null && !result.getAnsatteResultList().isEmpty()) {
+            List<DvhRessursDTO> resultRessurs = result.getAnsatteResultList();
 
-                resultRessurs.sort(Comparator.comparingLong(DvhRessursDTO::getOffset));
-                resultRessurs.stream()
-                        .filter(ressurs -> {
-                            if (ressurs.getNavident() != null) {
-                                log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
-                                return true;
-                            } else {
-                                log.warn("Ugyldig hendelse fra dvh, navident mangler for sekvensnr: {}", ressurs.getOffset());
-                                return false;
-                            }
-                        })
-                        .map(DvhConsumer::converted)
-                        .forEach(ressurs ->
-                                ressursRepository.findByPersonident(ressurs.getPersonident())
-                                        .ifPresentOrElse(
-                                                (eksisterende) -> {
-                                                    ressurs.setId(eksisterende.getId());
-                                                    ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
-                                                    ressurs.setEndretDato(LocalDate.now());
-                                                    ressursRepository.save(ressurs);
-                                                },
-                                                () -> {
-                                                    ressurs.setOpprettetDato(LocalDate.now());
-                                                    ressurs.setEndretDato(LocalDate.now());
-                                                    ressursRepository.save(ressurs);
-                                                }
-                                        )
-                        );
-                dvhOffset.setOffset(resultRessurs.get(resultRessurs.size() - 1).getOffset());
-                offsetRepository.save(dvhOffset);
+            resultRessurs.sort(Comparator.comparingLong(DvhRessursDTO::getOffset));
+            resultRessurs.stream()
+                    .filter(ressurs -> {
+                        if (ressurs.getNavident() != null) {
+                            log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
+                            meterRegistry.counter("dvh_messages_read_count").increment();
+                            return true;
+                        } else {
+                            log.warn("Ugyldig hendelse fra dvh, navident mangler for sekvensnr: {}", ressurs.getOffset());
+                            return false;
+                        }
+                    })
+                    .map(DvhConsumer::converted)
+                    .forEach(ressurs ->
+                            ressursRepository.findByPersonident(ressurs.getPersonident())
+                                    .ifPresentOrElse(
+                                            (eksisterende) -> {
+                                                ressurs.setId(eksisterende.getId());
+                                                ressurs.setOpprettetDato(eksisterende.getOpprettetDato());
+                                                ressurs.setEndretDato(LocalDate.now());
+                                                ressursRepository.save(ressurs);
+                                            },
+                                            () -> {
+                                                ressurs.setOpprettetDato(LocalDate.now());
+                                                ressurs.setEndretDato(LocalDate.now());
+                                                ressursRepository.save(ressurs);
+                                            }
+                                    )
+                    );
+            dvhOffset.setOffset(resultRessurs.get(resultRessurs.size() - 1).getOffset());
+            offsetRepository.save(dvhOffset);
 
-                return result.getAnsatteResultList().size();
-            }
+            return result.getAnsatteResultList().size();
         }
         return 0;
     }

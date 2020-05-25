@@ -19,7 +19,7 @@ public class RepositoryMetricFactory {
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
-        meterRegistry.gauge("database.ressurs.count", Tags.of("count", "distinct", "type", Ressurstype.INTERN.toString(), "validation", "valid"), repository.countDistinctByFunksjonellIdAndValid(Ressurstype.INTERN.toString()));
-        meterRegistry.gauge("database.ressurs.count", Tags.of("count", "distinct", "type", Ressurstype.EKSTERN.toString(), "validation", "valid"), repository.countDistinctByFunksjonellIdAndValid(Ressurstype.EKSTERN.toString()));
+        meterRegistry.gauge("database_ressurs_gauge", Tags.of("type", Ressurstype.INTERN.toString(), "status", "active"), repository.countAllValid(Ressurstype.INTERN.toString()));
+        meterRegistry.gauge("database_ressurs_gauge", Tags.of("type", Ressurstype.EKSTERN.toString(), "status", "active"), repository.countAllValid(Ressurstype.EKSTERN.toString()));
     }
 }

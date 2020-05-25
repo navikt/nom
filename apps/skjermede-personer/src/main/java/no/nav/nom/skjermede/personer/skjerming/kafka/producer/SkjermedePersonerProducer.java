@@ -1,5 +1,6 @@
 package no.nav.nom.skjermede.personer.skjerming.kafka.producer;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.skjermede.dto.SkjermetPersonDTO;
@@ -22,20 +23,23 @@ public class SkjermedePersonerProducer {
 
     private final KafkaTemplate<String, SkjermetPersonDTO> kafkaTemplate;
     private final SkjermetPersonRepository skjermetPersonRepository;
+    private final MeterRegistry meterRegistry;
+
 
 
     @Value("${app.kafka.topic.skjermet.name}")
-    private String ressursTopic;
+    private String skjermetTopic;
 
     @Transactional(value = "transactionManager")
     public void send(List<SkjermetPerson> skjermedePersoner) {
         skjermedePersoner.sort(Comparator.comparing(SkjermetPerson::getEndretDato));
         skjermedePersoner.forEach(skjermetPerson -> {
-                    kafkaTemplate.send(ressursTopic, skjermetPerson.getPersonident(), converted(skjermetPerson));
+                    kafkaTemplate.send(skjermetTopic, skjermetPerson.getPersonident(), converted(skjermetPerson));
                     skjermetPerson.setKafkaProduced(true);
                     log.info("Produsert ny hendelse ut på kafka for ID: {}", skjermetPerson.getId());
                 });
         skjermetPersonRepository.saveAll(skjermedePersoner);
+        meterRegistry.counter("kafka_messages_produced_count", "topic", skjermetTopic).increment(skjermedePersoner.size());
     }
 
     private static SkjermetPersonDTO converted(SkjermetPerson skjermetPerson) {
