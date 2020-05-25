@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-vault-config</artifactId>
+            <artifactId>spring-cloud-starter-vault-no.nav.nom.skjermede.personer.pip.config</artifactId>
         </dependency>
     </dependencies>
 

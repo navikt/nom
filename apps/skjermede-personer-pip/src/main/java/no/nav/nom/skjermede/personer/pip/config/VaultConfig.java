@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.pip;
+package no.nav.nom.skjermede.personer.pip.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
