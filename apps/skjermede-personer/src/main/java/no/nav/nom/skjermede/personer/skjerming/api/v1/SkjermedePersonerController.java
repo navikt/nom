@@ -44,6 +44,7 @@ public class SkjermedePersonerController {
     private final NomRessurserService nomRessurserService;
     private final TokenUtil tokenUtil;
 
+
     @GetMapping("all")
     @Unprotected
     public List<SkjermetPersonResponseDTO> hentAlle() {
