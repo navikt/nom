@@ -79,7 +79,7 @@ public class ForesporselController {
             return "Ugyldig operasjon";
         }
 
-        meterRegistry.counter("foresporsel_count", "status", "godkjent").increment();
+        meterRegistry.counter("foresporsel.count", "status", "godkjent").increment();
 
         foresporsel.setBekreftet(true);
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
@@ -114,7 +114,7 @@ public class ForesporselController {
         foresporsel.setBekreftet(false);
         foresporsel.setOpprettetDato(LocalDateTime.now());
 
-        meterRegistry.counter("foresporsel_count", "status", "opprettet").increment();
+        meterRegistry.counter("foresporsel.count", "status", "opprettet").increment();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));

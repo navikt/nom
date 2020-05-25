@@ -18,7 +18,7 @@ public class RepositoryMetricFactory {
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
-        meterRegistry.gauge("database_skjermet_gauge", Tags.of("type", "ansatt", "status", "active"), repository.countAllActiveSkjermetAnsatte());
-        meterRegistry.gauge("database_skjermet_gauge", Tags.of("type", "familie", "status", "active"), repository.countAllActiveSkjermetFamilie());
+        meterRegistry.gauge("database.skjermet.gauge", Tags.of("type", "ansatt", "status", "active"), repository.countAllActiveSkjermetAnsatte());
+        meterRegistry.gauge("database.skjermet.gauge", Tags.of("type", "familie", "status", "active"), repository.countAllActiveSkjermetFamilie());
     }
 }

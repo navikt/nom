@@ -39,7 +39,7 @@ public class SkjermedePersonerProducer {
                     log.info("Produsert ny hendelse ut på kafka for ID: {}", skjermetPerson.getId());
                 });
         skjermetPersonRepository.saveAll(skjermedePersoner);
-        meterRegistry.counter("kafka_messages_produced_count", "topic", skjermetTopic).increment(skjermedePersoner.size());
+        meterRegistry.counter("kafka.messages.produced.count", "topic", skjermetTopic).increment(skjermedePersoner.size());
     }
 
     private static SkjermetPersonDTO converted(SkjermetPerson skjermetPerson) {

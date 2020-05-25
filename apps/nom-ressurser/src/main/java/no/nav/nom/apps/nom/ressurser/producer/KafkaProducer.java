@@ -34,7 +34,7 @@ public class KafkaProducer {
         });
 
         repository.saveAll(ressursList);
-        meterRegistry.counter("kafka_messages_produced_count", "topic", ressursTopic).increment(ressursList.size());
+        meterRegistry.counter("kafka.messages.produced.count", "topic", ressursTopic).increment(ressursList.size());
     }
 
     private static RessursDTO converted(Ressurs ressurs) {

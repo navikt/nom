@@ -59,7 +59,7 @@ public class DvhConsumer {
                     .filter(ressurs -> {
                         if (ressurs.getNavident() != null) {
                             log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
-                            meterRegistry.counter("dvh_messages_read_count").increment();
+                            meterRegistry.counter("dvh.messages.read.count").increment();
                             return true;
                         } else {
                             log.warn("Ugyldig hendelse fra dvh, navident mangler for sekvensnr: {}", ressurs.getOffset());
