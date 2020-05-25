@@ -17,6 +17,10 @@ spec:
       value: https://nom-ressurser.nais.adeo.no/api/v1/ressurs
     - name: FORESPORSEL_API
       value: https://skjermede-personer.nais.adeo.no/api/v1/foresporsel
+    - name: AAD_B2C_DISCOVERYURL
+      value: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
+    - name: LOGINSERVICE_CLIENTID
+      value: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://a01apvl062.adeo.no:1414/MPLSC03
     - name: TPS_MQ_QUEUE_CHANNEL

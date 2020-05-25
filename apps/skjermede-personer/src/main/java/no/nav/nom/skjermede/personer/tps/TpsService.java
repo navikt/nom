@@ -14,7 +14,6 @@ import no.nav.nom.skjermede.personer.tps.dto.OpphorEgenAnsattDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SfeAjourforingDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SfePersonDataDTO;
 import no.nav.nom.skjermede.personer.tps.dto.SystemInfoDTO;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ public class TpsService {
     private static final String ENDRING = "endringsmelding";
     private static final String OPPHOR = "opphorsmelding";
 
-    private final JmsTemplate jmsTemplate;
     private final MessageConverter messageConverter;
     private final ConnectionFactory connectionFactory;
     private final JmsConfigProperties jmsConfigProperties;
@@ -56,7 +54,8 @@ public class TpsService {
                 meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
             }
 
-            if (skjermetPerson.getSkjermetTil() != null && skjermetPerson.getOpphorSendtTps() == null) {
+            if (skjermetPerson.getOpphorSendtTps() == null &&
+                skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
                 meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
             }

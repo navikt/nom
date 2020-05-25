@@ -6,9 +6,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
+import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
-import no.nav.nom.skjermede.personer.foresporsel.ForesporselConstants;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -17,12 +17,9 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -32,7 +29,9 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +49,9 @@ public class ForesporselControllerTest {
 
     @MockBean
     private ForesporselRepository foresporselRepository;
+
+    @MockBean
+    private NomRessurserService nomRessurserService;
 
     @MockBean
     private SkjermetPersonRepository skjermetPersonRepository;
@@ -96,10 +98,10 @@ public class ForesporselControllerTest {
     @Test
     public void testBekreftForesporsel() throws Exception {
         when(meterRegistry.counter(anyString(), ArgumentMatchers.<String>any())).thenReturn(counter);
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(ForesporselTestUtils.ressurs());
+        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -108,10 +110,10 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporselAnsattUgyldig() throws Exception {
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(Class.class))).thenReturn(new ResponseEntity(HttpStatus.OK));
+        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(null);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -120,7 +122,7 @@ public class ForesporselControllerTest {
 
     @Test
     public void testBekreftForesporselFunksjonellIdUgyldig() throws Exception {
-        UUID uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
+        val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
 
@@ -131,8 +133,8 @@ public class ForesporselControllerTest {
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
         val path = requestPath.length == 0
-                ? Paths.get(ForesporselConstants.BASE_URL)
-                : Paths.get(ForesporselConstants.BASE_URL, requestPath);
+                ? Paths.get(ForesporselController.BASE_URL)
+                : Paths.get(ForesporselController.BASE_URL, requestPath);
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)

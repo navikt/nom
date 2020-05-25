@@ -3,18 +3,14 @@ package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.contract.nom.dto.RessursDTO;
+import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.foresporsel.mail.GraphService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -26,12 +22,10 @@ import java.time.LocalDateTime;
 public class ScheduledForesporselSender {
 
     private final ForesporselRepository foresporselRepository;
+    private final NomRessurserService nomRessurserService;
     private final GraphService graphService;
 
-    @Value("${ressurser.api}")
-    private String ressursAPI;
-
-    @Value("${foresporsel.api}")
+    @Value("${foresporsel-api}")
     private String foresporselAPI;
 
     @Scheduled(fixedDelay = 10000, initialDelay = 10000)
@@ -41,13 +35,13 @@ public class ScheduledForesporselSender {
 
     private void sendForesporsler() {
         foresporselRepository.findAllByEpostSendtNull().forEach(foresporsel -> {
-            final String content = new StringBuilder()
+            val content = new StringBuilder()
                     .append(String.format("Du får denne eposten fordi %s %s har oppgitt deg som nært familiemedlem. ", foresporsel.getFornavn(), foresporsel.getEtternavn()))
                     .append("Hvis dette er riktig kan du bekrefte ved å klikke på knappen under. ")
                     .append(String.format("%s %s vil da bli skjermet i NAV sine fagsystemer. ", foresporsel.getFornavn(), foresporsel.getEtternavn()))
                     .append("Det innebærer at bare saksbehandlere med særlig tilgang kan se informasjon og behandle saker. ")
-                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/intranett-personvern/SitePages/Alle-ansatte-skjermes-fra-01.01.2020.aspx\">her</a>")
-                    .append(String.format("<br><a href=\"%s/bekreft?id=%s\"><button>Bekreft</button></a>", foresporselAPI, foresporsel.getFunksjonellId()))
+                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/intranett-personvern/SitePages/Alle-ansatte-skjermes-fra-01.01.2020.aspx\">her</a>.")
+                    .append(String.format("<br><br><a href=\"%s/bekreft?id=%s\"><button>Bekreft Forespørsel</button></a>", foresporselAPI, foresporsel.getFunksjonellId()))
                     .toString();
 
             try {
@@ -61,18 +55,12 @@ public class ScheduledForesporselSender {
     }
 
     private String hentEpost(final String navident) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("navident", navident);
-
-        val ressurs = new RestTemplate().exchange(
-                String.format("%s/ansatt?gyldig=true&ressursType=INTERN", ressursAPI),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                RessursDTO.class).getBody();
+        val ressurs = nomRessurserService.getInternRessursByNavident(navident, Boolean.TRUE);
 
         if (ressurs == null || ressurs.getEpost() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ressurs med navident %s ikke funnet", navident));
         }
+
         return ressurs.getEpost();
     }
 }

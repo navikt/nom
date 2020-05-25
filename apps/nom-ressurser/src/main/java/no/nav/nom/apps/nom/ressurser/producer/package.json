@@ -1,0 +1,385 @@
+{
+  "_id": "2032053258976",
+  "offset": "981337",
+  "partition": 0,
+  "value": {
+    "hentPerson": {
+      "adressebeskyttelse": [],
+      "bostedsadresse": [],
+      "deltBosted": [],
+      "doedsfall": [],
+      "falskIdentitet": null,
+      "familierelasjoner": [],
+      "foedsel": [
+        {
+          "foedselsaar": 1900,
+          "foedselsdato": "1900-02-04",
+          "foedeland": "EST",
+          "foedested": null,
+          "foedekommune": null,
+          "metadata": {
+            "opplysningsId": "cb0a2050-a9b6-4451-9dc0-ecda8ba8c20d",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-10-15T08:56:52.902",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        },
+        {
+          "foedselsaar": 1900,
+          "foedselsdato": "1900-02-04",
+          "foedeland": "EST",
+          "foedested": null,
+          "foedekommune": null,
+          "metadata": {
+            "opplysningsId": "65748ea6-803c-41f8-be52-f41851b9a2cd",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-11-05T09:42:29.183",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              },
+              {
+                "type": "KORRIGER",
+                "registrert": "2019-12-11T15:31:19.94",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "44020049909",
+          "type": "DNR",
+          "status": "I_BRUK",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "SYNUTOPIA",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "c924db5e-75e4-4d38-87ba-a78078c00b92",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-06-25T09:54:39.947",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "NAV"
+              },
+              {
+                "type": "KORRIGER",
+                "registrert": "2019-07-31T09:28:25.371",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "dsf-folkeregister-synkronisering"
+              },
+              {
+                "type": "KORRIGER",
+                "registrert": "2019-10-15T08:56:52.902",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "SYNUTOPIA"
+              }
+            ]
+          }
+        },
+        {
+          "identifikasjonsnummer": "45126599610",
+          "type": "DNR",
+          "status": "OPPHOERT",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-12-11T15:31:06",
+            "gyldighetstidspunkt": "2019-12-11T00:00:00",
+            "opphoerstidspunkt": null,
+            "kilde": "dsf-folkeregister-synkronisering",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "d3af9da4-edb9-4067-8606-b656405394e6",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-11-05T09:42:29.183",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "SYNUTOPIA"
+              },
+              {
+                "type": "KORRIGER",
+                "registrert": "2019-12-11T15:31:19.94",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "dsf-folkeregister-synkronisering"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisterpersonstatus": [
+        {
+          "status": "midlertidig",
+          "forenkletStatus": "dNummer",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "SYNUTOPIA",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "fd7cffce-4687-4662-a30a-72d9966a30a6",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-10-15T08:56:52.902",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "SYNUTOPIA"
+              }
+            ]
+          }
+        }
+      ],
+      "fullmakt": [],
+      "identitetsgrunnlag": [
+        {
+          "status": "IKKE_KONTROLLERT",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-22T09:02:37.93",
+            "gyldighetstidspunkt": "2019-10-22T09:02:37.93",
+            "opphoerstidspunkt": null,
+            "kilde": "utlendingsdirektoratet",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "f07e8760-7863-45a8-bed7-e30ac45a638d",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-10-22T09:02:44.615",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "utlendingsdirektoratet"
+              }
+            ]
+          }
+        }
+      ],
+      "kontaktadresse": [],
+      "kontaktinformasjonForDoedsbo": [],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "synutopia",
+            "aarsak": "SyntheticDataGen",
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "457c5c12-563c-4106-b444-f8f058af8106",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-10-15T08:56:52.902",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "KANTETE",
+          "mellomnavn": "VELKOMMEN",
+          "etternavn": "FRAKK",
+          "forkortetNavn": "KANTETE VELKOMMEN FRAKK",
+          "originaltNavn": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "synutopia",
+            "aarsak": "SyntheticDataGen",
+            "sekvens": 0
+          },
+          "metadata": {
+            "opplysningsId": "dad26382-3c60-4b51-8c63-9debda0008b1",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-10-15T08:56:52.902",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        },
+        {
+          "fornavn": "KANTETE",
+          "mellomnavn": "VELKOMMEN",
+          "etternavn": "FRAKK",
+          "forkortetNavn": "KANTETE VELKOMMEN FRAKK",
+          "originaltNavn": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "synutopia",
+            "aarsak": "SyntheticDataGen",
+            "sekvens": 0
+          },
+          "metadata": {
+            "opplysningsId": "a926dc9a-7410-408c-a42c-511a558bb3c0",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2019-11-05T09:42:29.183",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              },
+              {
+                "type": "KORRIGER",
+                "registrert": "2019-12-11T15:31:19.94",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        }
+      ],
+      "opphold": [],
+      "oppholdsadresse": [],
+      "sikkerhetstiltak": [],
+      "sivilstand": [
+        {
+          "type": "UOPPGITT",
+          "gyldigFraOgMed": "2019-10-15",
+          "myndighet": null,
+          "kommune": null,
+          "sted": null,
+          "utland": null,
+          "relatertVedSivilstand": null,
+          "bekreftelsesdato": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "2019-10-15T08:56:43.052",
+            "opphoerstidspunkt": null,
+            "kilde": "synutopia",
+            "aarsak": "SyntheticDataGen",
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "7825d4c1-c75b-4436-b4b0-82b900e1de84",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2020-01-20T08:45:25.668",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "EST",
+          "gyldigFraOgMed": null,
+          "gyldigTilOgMed": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2019-10-15T08:56:43.052",
+            "gyldighetstidspunkt": "1900-02-04T09:56:43.092",
+            "opphoerstidspunkt": null,
+            "kilde": "synutopia",
+            "aarsak": "SyntheticDataGen",
+            "sekvens": null
+          },
+          "metadata": {
+            "opplysningsId": "bdcb7762-cf86-4f25-b047-db433aa7b618",
+            "master": "Freg",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2020-02-04T13:55:36.982",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "kilde": "synutopia"
+              }
+            ]
+          }
+        }
+      ],
+      "tilrettelagtKommunikasjon": [],
+      "utenlandskIdentifikasjonsnummer": [],
+      "telefonnummer": [],
+      "innflyttingTilNorge": [],
+      "utflyttingFraNorge": []
+    },
+    "hentIdenter": {
+      "identer": [
+        {
+          "ident": "44020049909",
+          "historisk": false,
+          "gruppe": "FOLKEREGISTERIDENT",
+          "metadata": null
+        },
+        {
+          "ident": "45126599610",
+          "historisk": true,
+          "gruppe": "FOLKEREGISTERIDENT",
+          "metadata": null
+        },
+        {
+          "ident": "2263381810617",
+          "historisk": true,
+          "gruppe": "AKTORID",
+          "metadata": null
+        },
+        {
+          "ident": "2032053258976",
+          "historisk": false,
+          "gruppe": "AKTORID",
+          "metadata": null
+        }
+      ]
+    }
+  },
+  "headers": {},
+  "_class": "no.nav.pdl.apps.dokumentlager.consumer.KafkaRecord"
+}

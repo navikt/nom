@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, Long> {
 
     List<SkjermetPerson> findAllByPersonident(String personident);
-
     List<SkjermetPerson> findAllByKafkaProduced(boolean produced);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +

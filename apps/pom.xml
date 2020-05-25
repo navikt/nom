@@ -13,6 +13,7 @@
     <modules>
         <module>nom-ressurser</module>
         <module>skjermede-personer</module>
+        <module>skjermede-personer-pip</module>
     </modules>
 
     <artifactId>apps</artifactId>
