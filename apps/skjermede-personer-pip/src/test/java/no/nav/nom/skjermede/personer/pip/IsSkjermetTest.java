@@ -1,8 +1,6 @@
 package no.nav.nom.skjermede.personer.pip;
 
 import lombok.val;
-import no.nav.nom.skjermede.personer.pip.Cache;
-import no.nav.nom.skjermede.personer.pip.Skjermingsperiode;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
