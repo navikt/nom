@@ -40,8 +40,8 @@ public class ScheduledForesporselSender {
                     .append("Hvis dette er riktig kan du bekrefte ved å klikke på knappen under. ")
                     .append(String.format("%s %s vil da bli skjermet i NAV sine fagsystemer. ", foresporsel.getFornavn(), foresporsel.getEtternavn()))
                     .append("Det innebærer at bare saksbehandlere med særlig tilgang kan se informasjon og behandle saker. ")
-                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/intranett-personvern/SitePages/Alle-ansatte-skjermes-fra-01.01.2020.aspx\">her</a>")
-                    .append(String.format("<br><a href=\"%s/bekreft?id=%s\"><button>Bekreft</button></a>", foresporselAPI, foresporsel.getFunksjonellId()))
+                    .append("Les mer om skjerming <a href=\"https://navno.sharepoint.com/sites/intranett-personvern/SitePages/Alle-ansatte-skjermes-fra-01.01.2020.aspx\">her</a>.")
+                    .append(String.format("<br><br><a href=\"%s/bekreft?id=%s\"><button>Bekreft Forespørsel</button></a>", foresporselAPI, foresporsel.getFunksjonellId()))
                     .toString();
 
             try {
