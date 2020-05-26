@@ -22,25 +22,25 @@ public class RepositoryMetricFactory {
 
     private final AtomicLong anyEkstern;
 
-    private final AtomicLong inactiveIntern;
+    private final AtomicLong activeIntern;
 
-    private final AtomicLong inactiveEkstern;
+    private final AtomicLong activeEkstern;
 
     @Autowired
     public RepositoryMetricFactory(MeterRegistry meterRegistry, RessursRepository ressursRepository){
         this.meterRegistry = meterRegistry;
         this.ressursRepository = ressursRepository;
         anyIntern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.INTERN.toString(), "status", "any"), new AtomicLong(0));
-        inactiveIntern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.INTERN.toString(), "status", "inactive"), new AtomicLong(0));
+        activeIntern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.INTERN.toString(), "status", "aktiv"), new AtomicLong(0));
         anyEkstern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.EKSTERN.toString(), "status", "any"), new AtomicLong(0));
-        inactiveEkstern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.EKSTERN.toString(), "status", "inactive"), new AtomicLong(0));
+        activeEkstern = meterRegistry.gauge("database.ressurs.gauge", Tags.of("type", Ressurstype.EKSTERN.toString(), "status", "aktiv"), new AtomicLong(0));
     }
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
         anyIntern.set(ressursRepository.countAllByRessurstype(Ressurstype.INTERN));
         anyEkstern.set(ressursRepository.countAllByRessurstype(Ressurstype.EKSTERN));
-        inactiveIntern.set(ressursRepository.countInactiveByRessurstype(Ressurstype.INTERN.toString()));
-        inactiveEkstern.set(ressursRepository.countInactiveByRessurstype(Ressurstype.EKSTERN.toString()));
+        activeIntern.set(ressursRepository.countActiveByRessurstype(Ressurstype.INTERN.toString()));
+        activeEkstern.set(ressursRepository.countActiveByRessurstype(Ressurstype.EKSTERN.toString()));
     }
 }
