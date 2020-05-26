@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class PipController {
     private final Cache cache;
-    private final MeterRegistry metric;
 
     @GetMapping("/skjermet")
     public boolean isSkjermet(@RequestParam String personident) {
-        metric.counter("calls").increment();
         return cache.isSkjermet(personident);
     }
 }

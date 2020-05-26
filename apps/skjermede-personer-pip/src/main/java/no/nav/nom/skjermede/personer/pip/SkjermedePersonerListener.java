@@ -20,14 +20,12 @@ import java.util.Optional;
 public class SkjermedePersonerListener {
 
     private final Cache cache;
-    private final MeterRegistry metric;
 
     @KafkaListener(groupId = "skjermede-personer-pip", topicPartitions = @TopicPartition(topic = "aapen-skjermede-personer-v1", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")))
     public void onMessage(ConsumerRecord<String, SkjermetPersonDTO> record) {
         try {
             cache.store(record.key(), new Skjermingsperiode(record.value().getSkjermetFra(), record.value().getSkjermetTil()));
             log.info("Received offset " + record.offset());
-            metric.counter("events").increment();
         } catch(RetriableException e) {
             // no-op
         } catch(RuntimeException e) {
