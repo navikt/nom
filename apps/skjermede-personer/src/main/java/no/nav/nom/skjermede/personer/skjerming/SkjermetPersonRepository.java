@@ -34,13 +34,13 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
                     "AND (SKJERMET_TIL IS NULL OR current_timestamp <= SKJERMET_TIL)", nativeQuery = true)
     List<SkjermetPerson> findAllByTilknyttetRessursAndValid(String tilknyttetRessurs);
 
-    @Query(value =  "SELECT COUNT(DISTINCT(personident)) FROM T_SKJERMET_PERSON " +
+    @Query(value =  "SELECT COUNT(*) FROM T_SKJERMET_PERSON " +
                     "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp) " +
                     "AND tilknyttet_ressurs IS NULL", nativeQuery = true)
-    long countDistinctSkjermetAnsatte();
+    long countAllActiveSkjermetAnsatte();
 
-    @Query(value =  "SELECT COUNT(DISTINCT(personident)) FROM T_SKJERMET_PERSON " +
+    @Query(value =  "SELECT COUNT(*) FROM T_SKJERMET_PERSON " +
                     "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp) " +
                     "AND tilknyttet_ressurs IS NOT NULL", nativeQuery = true)
-    long countDistinctSkjermetFamilie();
+    long countAllActiveSkjermetFamilie();
 }

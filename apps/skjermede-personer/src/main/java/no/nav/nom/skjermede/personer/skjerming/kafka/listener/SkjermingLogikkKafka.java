@@ -36,6 +36,13 @@ public class SkjermingLogikkKafka {
     4.2.a  Hvis aktiv skjerming ikke finnes, sjekk om den ansatte opphørte sin forrige skjerming (endret_av Kilde.BRUKER).
     4.2.a.1  Dersom dette stemmer (skjerming har blitt opphørt tidligere), ikke gjør noe.
     4.2.a.2  Dersom dette ikke stemmer, lag ny skjerming for personen. SkjermingFra kan tidligst være nå, og er sluttdato allerede satt settes også skjermetTil (+6mndr).
+
+Merknader:
+- Startdato kan aldri være i fremtiden.
+- SkjermetFra blir alltid satt til nå.
+- Sluttdato kan være både i fortiden og fremtiden, og null.
+- Dersom en tidligere ansatt har videreført skjerming, og så begynner igjen: Vil skjermingen som familie bli avsluttet og ny skjerming som ansatt blir laget.
+- Tilsvarende skjer for en person som har vært skjermet som familie før, og så begynner å jobbe i NAV.
  */
     public void handterAnsattHendelse(SkjermetPerson skjermetHendelse, String navident) {
                 // gyldig til på familie. (vi kan ikke alltid anta at en ansatt er skjermet, så må derfor gjøres her)
@@ -65,7 +72,6 @@ public class SkjermingLogikkKafka {
                                             eksisterende.setEndretAv(Kilde.SERVICEBRUKER);
                                             repository.save(eksisterende);
 
-                                            skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
                                             nySkjerming(skjermetHendelse);
                                             log.info("Skjerming overført til ny rad for ansettelse for ident: {}", navident);
                                         }
@@ -88,7 +94,6 @@ public class SkjermingLogikkKafka {
                                     // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt avskjermet tidligere.
                                     List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());
                                     if(historiskSkjermet == null || historiskSkjermet.stream().filter(skjermetPerson -> skjermetPerson.getTilknyttetRessurs() == null ).max(Comparator.comparing(SkjermetPerson::getEndretDato)).filter(skjermetPerson -> skjermetPerson.getEndretAv() == Kilde.BRUKER).isEmpty()){
-                                        skjermetHendelse.setSkjermetTil(skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil());
                                         nySkjerming(skjermetHendelse);
                                         log.info("Ny skjerming opprettet fra aapen-nom-ressurs-v1 for ident: {}", navident);
                                     }
@@ -97,6 +102,8 @@ public class SkjermingLogikkKafka {
         }
 
         private void nySkjerming(SkjermetPerson nySkjermetPerson){
+            nySkjermetPerson.setSkjermetFra(LocalDateTime.now());
+            nySkjermetPerson.setSkjermetTil(nySkjermetPerson.getSkjermetTil() != null ? nySkjermetPerson.getSkjermetTil().plusMonths(mnderSkjermetPlus) : nySkjermetPerson.getSkjermetTil());
             nySkjermetPerson.setEndretDato(LocalDateTime.now());
             nySkjermetPerson.setOpprettetDato(LocalDateTime.now());
             nySkjermetPerson.setOpprettetAv(Kilde.SERVICEBRUKER);

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.ressurser.producer;
 
-import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +26,15 @@ public class KafkaProducer {
     private String ressursTopic;
 
     @Transactional(value = "transactionManager")
-    @Timed(value = "kafka.messages.produced.timed", description = "Time spent sending kafka messages", extraTags = {"topic", "aapen-nom-ressurs-v1"})
     public void send(List<Ressurs> ressursList) {
         ressursList.forEach(ressurs -> {
             kafkaTemplate.send(ressursTopic, ressurs.getNavident(), converted(ressurs));
             ressurs.setProduced(true);
-            meterRegistry.counter("kafka.messages.produced", "topic", ressursTopic).increment();
             log.info("Sendt ressurs med navident: {}", ressurs.getNavident());
         });
 
         repository.saveAll(ressursList);
+        meterRegistry.counter("kafka.messages.produced.count", "topic", ressursTopic).increment(ressursList.size());
     }
 
     private static RessursDTO converted(Ressurs ressurs) {

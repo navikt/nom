@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SkjermedePersonerPip {
+public class ApplicationStarter {
 
     public static void main(String[] args) {
-        SpringApplication.run(SkjermedePersonerPip.class);
+        SpringApplication.run(ApplicationStarter.class);
 
     }
 }

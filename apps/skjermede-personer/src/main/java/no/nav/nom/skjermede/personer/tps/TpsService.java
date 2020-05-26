@@ -2,6 +2,7 @@ package no.nav.nom.skjermede.personer.tps;
 
 import com.ibm.mq.jms.MQQueue;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -37,6 +38,8 @@ public class TpsService {
     private final ConnectionFactory connectionFactory;
     private final JmsConfigProperties jmsConfigProperties;
     private final SkjermetPersonRepository skjermetPersonRepository;
+    private final MeterRegistry meterRegistry;
+
 
     @Transactional(value = "transactionManager")
     void sendAndUpdate(final SkjermetPerson skjermetPerson) {
@@ -48,11 +51,13 @@ public class TpsService {
 
             if (skjermetPerson.getEndringSendtTps() == null) {
                 sendMelding(skjermetPerson, connection, destinationQueue, true);
+                meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
             }
 
             if (skjermetPerson.getOpphorSendtTps() == null &&
                 skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
+                meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
             }
         } catch (Exception e) {
             log.error("Feil intraff ved synkronisering av skjerming informasjon mot tsp: {}", e.getMessage());

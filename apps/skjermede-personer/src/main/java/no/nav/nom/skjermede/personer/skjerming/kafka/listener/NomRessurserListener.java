@@ -6,6 +6,8 @@ import no.nav.nom.contract.nom.dto.Ressurstype;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,9 @@ public class NomRessurserListener {
 
     @Transactional(value = "transactionManager")
     @KafkaListener(topics = "aapen-nom-ressurs-v1", groupId = "skjermede-personer")
+//    @KafkaListener(groupId = "skjermede-personer", topicPartitions =
+//    @TopicPartition(topic = "aapen-nom-ressurs-v1", partitionOffsets =
+//    @PartitionOffset(partition = "0", initialOffset = "0")))
     public void onMessage(RessursDTO ressurs) {
         if(ressurs.getRessurstype() == Ressurstype.INTERN) {
             skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident());

@@ -1,5 +1,7 @@
 package no.nav.nom.skjermede.personer.foresporsel;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -47,6 +49,8 @@ public class ForesporselController {
     private final SkjermetPersonRepository skjermetPersonRepository;
     private final NomRessurserService nomRessurserService;
     private final TokenUtil tokenUtil;
+    private final MeterRegistry meterRegistry;
+
 
     @Unprotected
     @Transactional(value = "transactionManager")
@@ -74,6 +78,8 @@ public class ForesporselController {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig nav-ident: {}", foresporsel.getTilknyttetRessurs());
             return "Ugyldig operasjon";
         }
+
+        meterRegistry.counter("foresporsel.count", "status", "godkjent").increment();
 
         foresporsel.setBekreftet(true);
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
@@ -107,6 +113,8 @@ public class ForesporselController {
         foresporsel.setFunksjonellId(UUID.randomUUID());
         foresporsel.setBekreftet(false);
         foresporsel.setOpprettetDato(LocalDateTime.now());
+
+        meterRegistry.counter("foresporsel.count", "status", "opprettet").increment();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));
