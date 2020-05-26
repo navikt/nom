@@ -547,7 +547,7 @@ public class SkjermingLogikkKafkaTest {
     }
 
     @Test
-    public void tidligereAnsattViderefortSkjermingEndrerSluttdatoTilFørIdag() {
+    public void tidligereAnsattViderefortSkjermingEndrerSluttdatoTilForIdag() {
         val startdato = LocalDate.now().minusMonths(3);
         val sluttdato = LocalDate.now().minusMonths(2);
         ressursDto.setStartdato(startdato);
