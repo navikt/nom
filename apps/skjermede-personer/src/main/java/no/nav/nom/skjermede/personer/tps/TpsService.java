@@ -51,13 +51,11 @@ public class TpsService {
 
             if (skjermetPerson.getEndringSendtTps() == null) {
                 sendMelding(skjermetPerson, connection, destinationQueue, true);
-                meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
             }
 
             if (skjermetPerson.getOpphorSendtTps() == null &&
                 skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
-                meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
             }
         } catch (Exception e) {
             log.error("Feil intraff ved synkronisering av skjerming informasjon mot tsp: {}", e.getMessage());
@@ -78,8 +76,10 @@ public class TpsService {
 
             if (isEndring) {
                 skjermetPerson.setEndringSendtTps(LocalDateTime.now());
+                meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
             } else {
                 skjermetPerson.setOpphorSendtTps(LocalDateTime.now());
+                meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
             }
 
             skjermetPersonRepository.save(skjermetPerson);
