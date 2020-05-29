@@ -21,7 +21,7 @@ public class MetricConfig {
     }
 
     @Bean
-    public AtomicLong familieActiveeGauge(){
+    public AtomicLong familieActiveGauge(){
         return meterRegistry.gauge("database.skjermet.gauge", Tags.of("type", "familie", "status", "aktiv"), new AtomicLong(0));
     }
 

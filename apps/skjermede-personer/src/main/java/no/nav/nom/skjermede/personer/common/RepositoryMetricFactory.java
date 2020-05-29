@@ -18,14 +18,14 @@ public class RepositoryMetricFactory {
 
     private final AtomicLong ansattActiveGauge;
 
-    private final AtomicLong familieActiveeGauge;
+    private final AtomicLong familieActiveGauge;
 
     private final AtomicLong foresporselActiveGauge;
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
         ansattActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetAnsatte());
-        familieActiveeGauge.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
+        familieActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
         foresporselActiveGauge.set(foresporselRepository.countAllByBekreftetFalse());
     }
 }
