@@ -24,9 +24,7 @@ public class NomRessurserListener {
 //    @TopicPartition(topic = "aapen-nom-ressurs-v1", partitionOffsets =
 //    @PartitionOffset(partition = "0", initialOffset = "0")))
     public void onMessage(RessursDTO ressurs) {
-        if(ressurs.getRessurstype() == Ressurstype.INTERN) {
-            skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident());
-        }
+        skjermingLogikkKafka.handterAnsattHendelse(converted(ressurs), ressurs.getNavident(), ressurs.getRessurstype());
     }
 
     public static SkjermetPerson converted(final RessursDTO record){
