@@ -1,6 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.common.LeaderElection;
@@ -29,7 +29,7 @@ public class DvhConsumer {
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
     private final LeaderElection leaderElection;
-    private final MeterRegistry meterRegistry;
+    private final Counter dvhReadCounter;
 
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -85,7 +85,7 @@ public class DvhConsumer {
             dvhOffset.setOffset(resultRessurs.get(resultRessurs.size() - 1).getOffset());
             offsetRepository.save(dvhOffset);
 
-            meterRegistry.counter("dvh.messages.read.count").increment(resultRessurs.size());
+            dvhReadCounter.increment(resultRessurs.size());
             return result.getAnsatteResultList().size();
         }
         return 0;

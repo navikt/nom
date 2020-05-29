@@ -1,6 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.producer;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
@@ -18,9 +18,9 @@ import java.util.List;
 @Slf4j
 public class KafkaProducer {
 
-    private final MeterRegistry meterRegistry;
     private final KafkaTemplate<String, RessursDTO> kafkaTemplate;
     private final RessursRepository repository;
+    private final Counter kakfaRessursCounter;
 
     @Value("${app.kafka.topic.ressurs.name}")
     private String ressursTopic;
@@ -34,7 +34,7 @@ public class KafkaProducer {
         });
 
         repository.saveAll(ressursList);
-        meterRegistry.counter("kafka.messages.produced.count", "topic", ressursTopic).increment(ressursList.size());
+        kakfaRessursCounter.increment(ressursList.size());
     }
 
     private static RessursDTO converted(Ressurs ressurs) {
