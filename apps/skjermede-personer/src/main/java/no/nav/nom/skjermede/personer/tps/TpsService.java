@@ -2,7 +2,7 @@ package no.nav.nom.skjermede.personer.tps;
 
 import com.ibm.mq.jms.MQQueue;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -38,7 +38,9 @@ public class TpsService {
     private final ConnectionFactory connectionFactory;
     private final JmsConfigProperties jmsConfigProperties;
     private final SkjermetPersonRepository skjermetPersonRepository;
-    private final MeterRegistry meterRegistry;
+    private final Counter tpsEndringCounter;
+    private final Counter tpsOpphorCounter;
+
 
 
     @Transactional(value = "transactionManager")
@@ -76,10 +78,10 @@ public class TpsService {
 
             if (isEndring) {
                 skjermetPerson.setEndringSendtTps(LocalDateTime.now());
-                meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
+                tpsEndringCounter.increment();
             } else {
                 skjermetPerson.setOpphorSendtTps(LocalDateTime.now());
-                meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
+                tpsOpphorCounter.increment();
             }
 
             skjermetPersonRepository.save(skjermetPerson);
