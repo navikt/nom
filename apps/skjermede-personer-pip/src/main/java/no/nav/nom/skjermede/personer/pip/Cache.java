@@ -2,8 +2,6 @@ package no.nav.nom.skjermede.personer.pip;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -12,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @Slf4j
