@@ -15,10 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ForesporselResponseDTO {
 
+    private String tilknyttetRessurs;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime opprettetDato;
 
     public static ForesporselResponseDTO fromEntity(final Foresporsel foresporsel) {
-        return builder().opprettetDato(foresporsel.getOpprettetDato()).build();
+        return builder().opprettetDato(foresporsel.getOpprettetDato()).tilknyttetRessurs(foresporsel.getTilknyttetRessurs()).build();
     }
 }

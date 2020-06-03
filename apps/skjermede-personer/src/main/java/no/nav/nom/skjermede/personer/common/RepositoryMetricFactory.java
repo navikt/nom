@@ -1,45 +1,31 @@
 package no.nav.nom.skjermede.personer.common;
 
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tags;
+import lombok.RequiredArgsConstructor;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-@Profile("!local & !test")
 @Component
+@RequiredArgsConstructor
 public class RepositoryMetricFactory {
-
-    private final MeterRegistry meterRegistry;
 
     private final SkjermetPersonRepository skjermetPersonRepository;
 
     private final ForesporselRepository foresporselRepository;
 
-    private final AtomicLong ansattActive;
+    private final AtomicLong ansattActiveGauge;
 
-    private final AtomicLong familieActive;
+    private final AtomicLong familieActiveGauge;
 
-    private final AtomicLong foresporselActive;
-
-    public RepositoryMetricFactory(MeterRegistry meterRegistry, SkjermetPersonRepository skjermetPersonRepository, ForesporselRepository foresporselRepository){
-        this.meterRegistry = meterRegistry;
-        this.skjermetPersonRepository = skjermetPersonRepository;
-        this.foresporselRepository = foresporselRepository;
-
-        ansattActive = meterRegistry.gauge("database.skjermet.gauge", Tags.of("type", "ansatt", "status", "aktiv"), new AtomicLong(0));
-        familieActive = meterRegistry.gauge("database.skjermet.gauge", Tags.of("type", "familie", "status", "aktiv"), new AtomicLong(0));
-        foresporselActive = meterRegistry.gauge("foresporsel.gauge", Tags.of("status", "aktiv"), new AtomicLong(0));
-    }
+    private final AtomicLong foresporselActiveGauge;
 
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
-        ansattActive.set(skjermetPersonRepository.countAllActiveSkjermetAnsatte());
-        familieActive.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
-        foresporselActive.set(foresporselRepository.countAllByBekreftetFalse());
+        ansattActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetAnsatte());
+        familieActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
+        foresporselActiveGauge.set(foresporselRepository.countAllByBekreftetFalse());
     }
 }
