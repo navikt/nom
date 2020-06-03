@@ -28,7 +28,7 @@ public class RepositoryMetricFactory {
     private void scheduledMetricExport(){
         ansattActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetAnsatte());
         familieActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
-        foresporselActiveGauge.set(foresporselRepository.countAllByBekreftetFalse());
+        foresporselActiveGauge.set(foresporselRepository.countAllByBekreftetFalseAndEpostSendtIsNotNull());
         foresporselEpostNullGauge.set(foresporselRepository.countAllByEpostSendtIsNull());
     }
 }

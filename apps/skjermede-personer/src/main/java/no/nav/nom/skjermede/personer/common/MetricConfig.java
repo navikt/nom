@@ -27,12 +27,12 @@ public class MetricConfig {
 
     @Bean
     public AtomicLong foresporselActiveGauge(){
-        return meterRegistry.gauge("foresporsel.gauge", Tags.of("status", "aktiv"), new AtomicLong(0));
+        return meterRegistry.gauge("foresporsel.gauge", Tags.of("epost", "sendt"), new AtomicLong(0));
     }
 
     @Bean
     public AtomicLong foresporselEpostNullGauge(){
-        return meterRegistry.gauge("foresporsel.gauge", Tags.of("status", "aktiv", "epost", "null"), new AtomicLong(0));
+        return meterRegistry.gauge("foresporsel.gauge", Tags.of("epost", "null"), new AtomicLong(0));
     }
 
     @Bean
