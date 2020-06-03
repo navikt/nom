@@ -22,10 +22,13 @@ public class RepositoryMetricFactory {
 
     private final AtomicLong foresporselActiveGauge;
 
+    private final AtomicLong foresporselEpostNullGauge;
+
     @Scheduled(cron = "${app.scheduledTasks.repositoryMetrics}")
     private void scheduledMetricExport(){
         ansattActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetAnsatte());
         familieActiveGauge.set(skjermetPersonRepository.countAllActiveSkjermetFamilie());
         foresporselActiveGauge.set(foresporselRepository.countAllByBekreftetFalse());
+        foresporselEpostNullGauge.set(foresporselRepository.countAllByEpostSendtIsNull());
     }
 }
