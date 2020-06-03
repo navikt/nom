@@ -84,7 +84,7 @@ public class TpsService {
 
             skjermetPersonRepository.save(skjermetPerson);
         } catch (Exception e) {
-            var sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31,0, 0);
+            val sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31,0, 0);
 
             if (isEndring) {
                 skjermetPerson.setEndringSendtTps(sendtTilTpsMislyktes);
