@@ -31,6 +31,11 @@ public class MetricConfig {
     }
 
     @Bean
+    public AtomicLong foresporselEpostNullGauge(){
+        return meterRegistry.gauge("foresporsel.gauge", Tags.of("status", "aktiv", "epost", "null"), new AtomicLong(0));
+    }
+
+    @Bean
     public Counter foresporselGodkjentCounter(){
         return Counter
                 .builder("foresporsel.count")
