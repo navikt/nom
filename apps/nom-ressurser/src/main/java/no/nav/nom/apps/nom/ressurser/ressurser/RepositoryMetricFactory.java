@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.ressurser.ressurser;
 
-
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.scheduling.annotation.Scheduled;

@@ -2,7 +2,6 @@ package no.nav.nom.skjermede.personer.pip;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 
 public class Skjermingsperiode {
 

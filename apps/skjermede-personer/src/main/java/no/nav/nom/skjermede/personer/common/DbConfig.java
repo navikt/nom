@@ -13,15 +13,14 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"no.nav.nom.skjermede.personer"})
 @Profile("!local & !test")
+@EnableJpaRepositories(basePackages = {"no.nav.nom.skjermede.personer"})
 public class DbConfig {
 
     @Value("${postgres.jdbc.url}")
