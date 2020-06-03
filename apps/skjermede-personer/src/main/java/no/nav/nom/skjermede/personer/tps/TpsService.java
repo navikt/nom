@@ -86,11 +86,16 @@ public class TpsService {
 
             skjermetPersonRepository.save(skjermetPerson);
         } catch (Exception e) {
+            var sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31,0, 0);
+
             if (isEndring) {
-                skjermetPerson.setEndringSendtTps(LocalDateTime.of(9999, 12, 31,0, 0));
-                skjermetPersonRepository.save(skjermetPerson);
+                skjermetPerson.setEndringSendtTps(sendtTilTpsMislyktes);
+            } else {
+                skjermetPerson.setOpphorSendtTps(sendtTilTpsMislyktes);
             }
 
+            skjermetPersonRepository.save(skjermetPerson);
+            
             throw new TpsMqException(String.format("Sending av %s til tps mislyktes", (isEndring ? ENDRING : OPPHOR)));
         }
     }
