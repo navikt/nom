@@ -16,7 +16,7 @@ public class ScheduledTpsSender {
     private final LeaderElector leaderElector;
     private final SkjermetPersonRepository skjermetPersonRepository;
 
-    //@Scheduled(fixedDelay = 5000, initialDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 5000)
     private void sendTilTps() {
         if (leaderElector.isLeader()) {
             skjermetPersonRepository.getAllIkkeSendtTilTps().stream().forEach(tpsService::sendAndUpdate);
