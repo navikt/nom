@@ -66,6 +66,7 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+  leaderElection: true
   prometheus:
     enabled: true
     path: internal/prometheus

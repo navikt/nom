@@ -15,4 +15,6 @@ public interface ForesporselRepository extends JpaRepository<Foresporsel, Long> 
     boolean existsByPersonidentAndBekreftetFalse(String personident);
     void deleteAllByEpostSendtBeforeOrBekreftetTrue(LocalDateTime before);
     Optional<Foresporsel> findByPersonidentAndBekreftetFalse(String personIdent);
+    long countAllByBekreftetFalseAndEpostSendtIsNotNull();
+    long countAllByEpostSendtIsNull();
 }

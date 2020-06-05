@@ -1,6 +1,6 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.common.LeaderElection;
@@ -29,7 +29,7 @@ public class DvhConsumer {
     private final RessursRepository ressursRepository;
     private final OffsetRepository offsetRepository;
     private final LeaderElection leaderElection;
-    private final MeterRegistry meterRegistry;
+    private final Counter dvhReadCounter;
 
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -59,7 +59,6 @@ public class DvhConsumer {
                     .filter(ressurs -> {
                         if (ressurs.getNavident() != null) {
                             log.info("Gylding hendelse fra dvh med sekvensnr: {}", ressurs.getOffset());
-                            meterRegistry.counter("dvh.messages.read.count").increment();
                             return true;
                         } else {
                             log.warn("Ugyldig hendelse fra dvh, navident mangler for sekvensnr: {}", ressurs.getOffset());
@@ -86,6 +85,7 @@ public class DvhConsumer {
             dvhOffset.setOffset(resultRessurs.get(resultRessurs.size() - 1).getOffset());
             offsetRepository.save(dvhOffset);
 
+            dvhReadCounter.increment(resultRessurs.size());
             return result.getAnsatteResultList().size();
         }
         return 0;

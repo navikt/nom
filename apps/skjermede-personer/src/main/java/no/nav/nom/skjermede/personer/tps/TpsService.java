@@ -2,7 +2,7 @@ package no.nav.nom.skjermede.personer.tps;
 
 import com.ibm.mq.jms.MQQueue;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -38,7 +38,9 @@ public class TpsService {
     private final ConnectionFactory connectionFactory;
     private final JmsConfigProperties jmsConfigProperties;
     private final SkjermetPersonRepository skjermetPersonRepository;
-    private final MeterRegistry meterRegistry;
+    private final Counter tpsEndringCounter;
+    private final Counter tpsOpphorCounter;
+
 
 
     @Transactional(value = "transactionManager")
@@ -51,13 +53,11 @@ public class TpsService {
 
             if (skjermetPerson.getEndringSendtTps() == null) {
                 sendMelding(skjermetPerson, connection, destinationQueue, true);
-                meterRegistry.counter("tps_messages_sent_count", "type", "endring").increment();
             }
 
             if (skjermetPerson.getOpphorSendtTps() == null &&
                 skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
-                meterRegistry.counter("tps_messages_sent_count", "type", "opphor").increment();
             }
         } catch (Exception e) {
             log.error("Feil intraff ved synkronisering av skjerming informasjon mot tsp: {}", e.getMessage());
@@ -78,12 +78,24 @@ public class TpsService {
 
             if (isEndring) {
                 skjermetPerson.setEndringSendtTps(LocalDateTime.now());
+                tpsEndringCounter.increment();
             } else {
                 skjermetPerson.setOpphorSendtTps(LocalDateTime.now());
+                tpsOpphorCounter.increment();
             }
 
             skjermetPersonRepository.save(skjermetPerson);
         } catch (Exception e) {
+            val sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31,0, 0);
+
+            if (isEndring) {
+                skjermetPerson.setEndringSendtTps(sendtTilTpsMislyktes);
+            } else {
+                skjermetPerson.setOpphorSendtTps(sendtTilTpsMislyktes);
+            }
+
+            skjermetPersonRepository.save(skjermetPerson);
+            
             throw new TpsMqException(String.format("Sending av %s til tps mislyktes", (isEndring ? ENDRING : OPPHOR)));
         }
     }

@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
@@ -33,18 +32,15 @@ class NomRessurserListenerTest {
     }
 
     @Test
-    void onMessageIntern() {
+    void onMessage() {
         ressurs.setRessurstype(Ressurstype.INTERN);
         nomRessurserListener.onMessage(ressurs);
 
-        verify(skjermingLogikkKafka).handterAnsattHendelse(NomRessurserListener.converted(ressurs), ressurs.getNavident());
-    }
+        verify(skjermingLogikkKafka).handterAnsattHendelse(NomRessurserListener.converted(ressurs), ressurs.getNavident(), Ressurstype.INTERN);
 
-    @Test
-    void onMessageEkstern() {
         ressurs.setRessurstype(Ressurstype.EKSTERN);
         nomRessurserListener.onMessage(ressurs);
 
-        verify(skjermingLogikkKafka, never()).handterAnsattHendelse(NomRessurserListener.converted(ressurs), ressurs.getNavident());
+        verify(skjermingLogikkKafka).handterAnsattHendelse(NomRessurserListener.converted(ressurs), ressurs.getNavident(), Ressurstype.EKSTERN);
     }
 }
