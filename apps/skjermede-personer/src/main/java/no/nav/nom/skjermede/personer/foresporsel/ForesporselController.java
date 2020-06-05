@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,6 +44,7 @@ public class ForesporselController {
     public static final String FORESPORSEL_BEKREFTELSE = "bekreft";
     public static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
     public static final String DUPLICATE_FORESPORSEL_MESSAGE = "Duplikat skjerming-forespørsel for innlogget bruker";
+    public static final String NOT_FOUND_MESSAGE = "Fant ingen forespørsel for innlogget bruker";
 
     private final ForesporselRepository foresporselRepository;
     private final SkjermetPersonRepository skjermetPersonRepository;
@@ -50,6 +52,7 @@ public class ForesporselController {
     private final TokenUtil tokenUtil;
     private final Counter foresporselGodkjentCounter;
     private final Counter foresporselOpprettetCounter;
+    private final Counter foresporselSlettetCounter;
 
 
     @Unprotected
@@ -118,6 +121,20 @@ public class ForesporselController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ForesporselResponseDTO.fromEntity(foresporselRepository.save(foresporsel)));
+    }
+
+    @DeleteMapping
+    public ForesporselResponseDTO slettForesporsel() {
+        validerTilgang();
+
+        val personident = tokenUtil.getSubject();
+        val foresporsel = foresporselRepository.findByPersonidentAndBekreftetFalse(personident)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_MESSAGE));
+
+        foresporselRepository.delete(foresporsel);
+        foresporselSlettetCounter.increment();
+
+        return ForesporselResponseDTO.fromEntity(foresporsel);
     }
 
     private void validerTilgang() {

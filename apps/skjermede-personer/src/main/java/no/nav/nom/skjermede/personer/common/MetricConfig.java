@@ -52,6 +52,14 @@ public class MetricConfig {
     }
 
     @Bean
+    public Counter foresporselSlettetCounter(){
+        return Counter
+                .builder("foresporsel.count")
+                .tags("status", "slettet")
+                .register(meterRegistry);
+    }
+
+    @Bean
     public Counter tpsEndringCounter(){
         return Counter
                 .builder("tps.messages.sent.count")

@@ -30,7 +30,9 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -123,12 +125,34 @@ public class ForesporselControllerTest {
                 .andExpect(content().string("Ugyldig operasjon"));
     }
 
+    @Test
+    public void testSlettetForesporsel() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(foresporselRepository.findByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
+        doNothing().when(foresporselRepository).delete(any(Foresporsel.class));
+
+        mockMvc.perform(requestBuilder(HttpMethod.DELETE))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testSlettetForesporselNotFound() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(foresporselRepository.findByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
+        doNothing().when(foresporselRepository).delete(any(Foresporsel.class));
+
+        mockMvc.perform(requestBuilder(HttpMethod.DELETE))
+                .andExpect(status().isNotFound());
+    }
+
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
         val path = requestPath.length == 0
                 ? Paths.get(ForesporselController.BASE_URL)
                 : Paths.get(ForesporselController.BASE_URL, requestPath);
 
-        return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
+        return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : method == HttpMethod.PUT ? put(path.toString()) : delete(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getBearerToken(ForesporselTestUtils.PERSONIDENT));
     }
