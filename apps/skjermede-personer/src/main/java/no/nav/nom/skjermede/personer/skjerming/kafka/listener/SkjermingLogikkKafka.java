@@ -122,7 +122,7 @@ Merknader:
                                         // Hvis en ansatt har vært skjermet tidligere, men avskjermet seg via nav.no skal den ikke skjermes igjen.
                                         // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt avskjermet tidligere.
                                         List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());
-                                        if (historiskSkjermet == null || historiskSkjermet.stream().filter(skjermetPerson -> skjermetPerson.getTilknyttetRessurs() == null).max(Comparator.comparing(SkjermetPerson::getEndretDato)).filter(skjermetPerson -> skjermetPerson.getEndretAv() != Kilde.SERVICEBRUKER).isEmpty()) {
+                                        if (historiskSkjermet == null || historiskSkjermet.stream().filter(skjermetPerson -> skjermetPerson.getTilknyttetRessurs() == null).max(Comparator.comparing(SkjermetPerson::getEndretDato)).filter(skjermetPerson -> skjermetPerson.getEndretAv() == Kilde.BRUKER || skjermetPerson.getEndretAv() == Kilde.MANUELL).isEmpty()) {
                                             nySkjerming(skjermetHendelse);
                                             log.info("Ny skjerming opprettet fra aapen-nom-ressurs-v1 for ident: {}", navident);
                                         }
