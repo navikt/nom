@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -92,7 +93,14 @@ public class DvhConsumer {
     }
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
-        LocalDate sluttDato = dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato();
+        LocalDate sluttDato;
+        if(Objects.equals(dvhRessursDTO.getRessursTypeKode(), "E") || Objects.equals(dvhRessursDTO.getAnsattType(), "Eksternt")){
+            sluttDato = dvhRessursDTO.getRemedySluttDato();
+        }
+        else {
+            sluttDato = dvhRessursDTO.getAgressoSluttDato() == null ? dvhRessursDTO.getRemedySluttDato() : dvhRessursDTO.getAgressoSluttDato();
+        }
+
         if(sluttDato != null && sluttDato.isEqual(LocalDate.parse("2099-12-31"))){
             sluttDato = null;
         }
