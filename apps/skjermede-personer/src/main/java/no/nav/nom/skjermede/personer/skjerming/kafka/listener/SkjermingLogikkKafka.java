@@ -84,12 +84,14 @@ Merknader:
                                     // Hvis ekstern har skjerming fra tidligere internt forhold:
                                     if(ressurstype == Ressurstype.EKSTERN){
                                         if(eksisterende.getSkjermetTil() == null || eksisterende.getSkjermetTil().isAfter(LocalDateTime.now().plusMonths(mnderSkjermetPlus))) {
-                                            eksisterende.setEndretDato(LocalDateTime.now());
-                                            eksisterende.setKafkaProduced(false);
-                                            eksisterende.setSkjermetTil(LocalDateTime.now().plusMonths(mnderSkjermetPlus));
-                                            eksisterende.setEndretAv(Kilde.SERVICEBRUKER);
-                                            repository.save(eksisterende);
-                                            log.info("Ansatt gått over til å bli ekstern og skjerming oppheves for ident: {}", navident);
+                                            if(eksisterende.getTilknyttetRessurs() == null) {
+                                                eksisterende.setEndretDato(LocalDateTime.now());
+                                                eksisterende.setKafkaProduced(false);
+                                                eksisterende.setSkjermetTil(LocalDateTime.now().plusMonths(mnderSkjermetPlus));
+                                                eksisterende.setEndretAv(Kilde.SERVICEBRUKER);
+                                                repository.save(eksisterende);
+                                                log.info("Ansatt gått over til å bli ekstern og skjerming oppheves for ident: {}", navident);
+                                            }
                                         }
                                     }
                                     // Personen har vært skjermet tidligere via familie eller har videreført skjermingen
