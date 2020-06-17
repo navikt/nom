@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.common.unntakskode.UnntakskodeRepository;
+import no.nav.nom.skjermede.personer.common.Unntakskode;
 import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,6 @@ public class SkjermedePersonerController {
     public static final String DUPLICATE_SKJERMING_MESSAGE = "Personen er allerede skjermet";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
-    private final UnntakskodeRepository unntakskodeRepository;
     private final NomRessurserService nomRessurserService;
     private final TokenUtil tokenUtil;
 
@@ -63,7 +63,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
-        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && !unntakskodeRepository.findKoder().contains(skjermetPerson.getTilknyttetRessurs())) {
+        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && Arrays.stream(Unntakskode.values()).noneMatch(kode -> kode.toString().equals(skjermetPerson.getTilknyttetRessurs()))) {
             val ressurs = nomRessurserService.getInternRessursByNavident(skjermetPerson.getTilknyttetRessurs(), false);
 
             return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
