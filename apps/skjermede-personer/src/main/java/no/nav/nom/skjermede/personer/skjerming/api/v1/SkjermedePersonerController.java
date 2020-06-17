@@ -61,7 +61,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
-        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null) {
+        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && !skjermetPerson.getTilknyttetRessurs().startsWith("KODE")) {
             val ressurs = nomRessurserService.getInternRessursByNavident(skjermetPerson.getTilknyttetRessurs(), false);
 
             return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
