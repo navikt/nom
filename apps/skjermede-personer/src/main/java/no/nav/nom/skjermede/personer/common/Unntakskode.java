@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Unntakskode {
-    KODE001("Pensjonistutbetaling");
+    KODE001("Tidligere ansatt");
 
     public final String beskrivelse;
 }
