@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
+import no.nav.nom.skjermede.personer.common.unntakskode.UnntakskodeRepository;
 import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -41,6 +42,7 @@ public class SkjermedePersonerController {
     public static final String DUPLICATE_SKJERMING_MESSAGE = "Personen er allerede skjermet";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
+    private final UnntakskodeRepository unntakskodeRepository;
     private final NomRessurserService nomRessurserService;
     private final TokenUtil tokenUtil;
 
@@ -61,7 +63,7 @@ public class SkjermedePersonerController {
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
-        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && !skjermetPerson.getTilknyttetRessurs().startsWith("KODE")) {
+        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && !unntakskodeRepository.findKoder().contains(skjermetPerson.getTilknyttetRessurs())) {
             val ressurs = nomRessurserService.getInternRessursByNavident(skjermetPerson.getTilknyttetRessurs(), false);
 
             return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
