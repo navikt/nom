@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Unntakskode {
-    KODE001("Tidligere ansatt");
+    KODE001("Tidligere ansatt"),
+    KODE002("Tett knytning til NAV");
 
     public final String beskrivelse;
 }
