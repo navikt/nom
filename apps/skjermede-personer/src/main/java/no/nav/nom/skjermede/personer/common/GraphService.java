@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel.mail;
+package no.nav.nom.skjermede.personer.common;
 
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.extensions.EmailAddress;
@@ -9,13 +9,12 @@ import com.microsoft.graph.models.extensions.Recipient;
 import com.microsoft.graph.models.generated.BodyType;
 import com.microsoft.graph.requests.extensions.GraphServiceClient;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GraphService {
@@ -23,22 +22,30 @@ public class GraphService {
     private static final String TITTEL = "Forespørsel om skjerming";
     private static final String AVSENDER = "noreply-skjerming@nav.no";
 
-    private final TokenService tokenService;
+    public String getNavident(final String accessToken) {
+        return graphServiceClient(accessToken)
+                .me()
+                .buildRequest()
+                .select("onPremisesSamAccountName")
+                .get().onPremisesSamAccountName;
+    }
 
-    public void sendMail(final String content, final String recipient) throws Exception {
-        final Message message = composeMessage(content, recipient);
-        final String accessToken = tokenService.getAccessToken();
-        final IGraphServiceClient graphService = GraphServiceClient.builder()
-                    .authenticationProvider(httpRequest -> {
-                        httpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
-                    }).buildClient();
+    public void sendMail(final String content, final String recipient, final String accessToken) {
+        val message = composeMessage(content, recipient);
+        val graphServiceClient = graphServiceClient(accessToken);
 
-            graphService.getLogger().setLoggingLevel(LoggerLevel.ERROR);
+        graphServiceClient.getLogger().setLoggingLevel(LoggerLevel.ERROR);
+        graphServiceClient.me()
+                .sendMail(message, null)
+                .buildRequest()
+                .post();
+    }
 
-            graphService.me()
-                    .sendMail(message, null)
-                    .buildRequest()
-                    .post();
+    private IGraphServiceClient graphServiceClient(final String accessToken) {
+        return GraphServiceClient.builder()
+                .authenticationProvider(httpRequest ->
+                    httpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken)))
+                .buildClient();
     }
 
     private Message composeMessage(final String content, final String recipient) {

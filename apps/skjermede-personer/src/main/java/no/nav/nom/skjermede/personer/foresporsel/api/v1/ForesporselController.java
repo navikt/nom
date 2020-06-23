@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel;
+package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 
 import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
-import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
+import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
+import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
+import no.nav.nom.skjermede.personer.common.GraphService;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselRequestDTO;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselResponseDTO;
+import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -53,17 +57,25 @@ public class ForesporselController {
     private final Counter foresporselGodkjentCounter;
     private final Counter foresporselOpprettetCounter;
     private final Counter foresporselSlettetCounter;
-
+    private final GraphService graphService;
+    private final TokenService tokenService;
 
     @Unprotected
     @Transactional(value = "transactionManager")
     @GetMapping(FORESPORSEL_BEKREFTELSE)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository.findByFunksjonellIdAndBekreftetFalse(funksjonellId).orElse(null);
+        val accessToken =tokenService.getOboAccessToken();
+        val navident = graphService.getNavident(accessToken);
 
         if (foresporsel == null) {
             log.error("Forsøk på bekreftelse av skjerming med ugyldig funksjonell id: {}", funksjonellId);
             return "Ugyldig operasjon";
+        }
+
+        if (!navident.equalsIgnoreCase(foresporsel.getTilknyttetRessurs())) {
+            log.error("Forsøk på bekreftelse av skjerming av en uatorisert bruker: {}", navident);
+            return UNAUTHORIZED_MESSAGE;
         }
 
         val skjermet = skjermetPersonRepository.getSkjermetPersonByPersonident(foresporsel.getPersonident()).orElse(null);
@@ -76,11 +88,6 @@ public class ForesporselController {
         }
 
         val ressurs = nomRessurserService.getInternRessursByNavident(foresporsel.getTilknyttetRessurs(), true);
-
-        if (ressurs == null) {
-            log.error("Forsøk på bekreftelse av skjerming med ugyldig nav-ident: {}", foresporsel.getTilknyttetRessurs());
-            return "Ugyldig operasjon";
-        }
 
         foresporselGodkjentCounter.increment();
 

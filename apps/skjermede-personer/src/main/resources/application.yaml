@@ -8,6 +8,21 @@ spring:
   kafka:
     consumer:
       groupid: skjermede-personer
+  security:
+    oauth2:
+      client:
+        registration:
+          aad:
+            client-id: a3658183-c7b9-4ea3-8254-3653e824db56
+            client-secret: GKczRvs:RDN:9[3Bnl5.COsKvfd1_hry
+            authorization-grant-type: authorization_code
+            redirect-uri: '${AAD_REDIRECT_BASE_URI:http://localhost:8081}/login/oauth2/code/{registrationId}'
+            scope: openid, https://graph.microsoft.com/user.read
+        provider:
+          aad:
+            authorization-uri: ${AAD_ISSUER_URI:https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851}/oauth2/v2.0/authorize
+            token-uri: ${AAD_ISSUER_URI:https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851}/oauth2/v2.0/token
+            jwk-set-uri: ${AAD_ISSUER_URI:https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851}/discovery/v2.0/keys
 
 maanderPlusSkjerming: 6
 

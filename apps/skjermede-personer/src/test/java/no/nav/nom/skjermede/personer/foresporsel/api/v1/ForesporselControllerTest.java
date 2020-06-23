@@ -8,8 +8,9 @@ import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
-import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
+import no.nav.nom.skjermede.personer.common.GraphService;
+import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -68,6 +70,15 @@ public class ForesporselControllerTest {
     @MockBean
     private Counter counter;
 
+    @MockBean
+    private GraphService graphService;
+
+    @MockBean
+    private TokenService tokenService;
+
+    @MockBean
+    private OAuth2AuthorizedClientService oAuth2AuthorizedClientService;
+
     @Test
     public void testOpprettForesporsel() throws Exception {
         when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
@@ -95,7 +106,10 @@ public class ForesporselControllerTest {
         val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
-        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
+        when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean()))
+                .thenReturn(ForesporselTestUtils.ressurs());
+        when(tokenService.getOboAccessToken()).thenReturn("");
+        when(graphService.getNavident(anyString())).thenReturn(ForesporselTestUtils.TILKNYTTET_RESSURS);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
@@ -108,10 +122,12 @@ public class ForesporselControllerTest {
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
         when(nomRessurserService.getInternRessursByNavident(anyString(), anyBoolean())).thenReturn(null);
+        when(tokenService.getOboAccessToken()).thenReturn("");
+        when(graphService.getNavident(anyString())).thenReturn(ForesporselTestUtils.TILKNYTTET_RESSURS.substring(1));
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Ugyldig operasjon"));
+                .andExpect(content().string("Tilgang nektet"));
     }
 
     @Test
@@ -119,6 +135,8 @@ public class ForesporselControllerTest {
         val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
                 .thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
+        when(tokenService.getOboAccessToken()).thenReturn("");
+        when(graphService.getNavident(anyString())).thenReturn(ForesporselTestUtils.TILKNYTTET_RESSURS);
 
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", UUID.randomUUID())))
                 .andExpect(status().isOk())
@@ -132,8 +150,7 @@ public class ForesporselControllerTest {
         when(foresporselRepository.findByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Optional.of(ForesporselTestUtils.foresporsel()));
         doNothing().when(foresporselRepository).delete(any(Foresporsel.class));
 
-        mockMvc.perform(requestBuilder(HttpMethod.DELETE))
-                .andExpect(status().isOk());
+        mockMvc.perform(requestBuilder(HttpMethod.DELETE)).andExpect(status().isOk());
     }
 
     @Test
@@ -143,8 +160,7 @@ public class ForesporselControllerTest {
         when(foresporselRepository.findByPersonidentAndBekreftetFalse(ForesporselTestUtils.PERSONIDENT)).thenReturn(Optional.empty());
         doNothing().when(foresporselRepository).delete(any(Foresporsel.class));
 
-        mockMvc.perform(requestBuilder(HttpMethod.DELETE))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(requestBuilder(HttpMethod.DELETE)).andExpect(status().isNotFound());
     }
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {

@@ -1,6 +1,7 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SkjermetPersonResponseDTO {
 
+    @JsonProperty()
     private String fornavn;
     private String etternavn;
     private String tilknyttetRessurs;

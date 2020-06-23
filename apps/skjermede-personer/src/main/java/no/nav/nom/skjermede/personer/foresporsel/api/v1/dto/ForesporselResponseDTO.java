@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel.dto;
+package no.nav.nom.skjermede.personer.foresporsel.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

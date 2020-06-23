@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel.mail;
+package no.nav.nom.skjermede.personer.foresporsel.azure;
 
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.IPublicClientApplication;
@@ -6,6 +6,10 @@ import com.microsoft.aad.msal4j.PublicClientApplication;
 import com.microsoft.aad.msal4j.UserNamePasswordParameters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,7 +24,8 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class TokenService {
 
-    private  final AADProperties aadProperties;
+    private final AADProperties aadProperties;
+    private final OAuth2AuthorizedClientService authClientService;
 
     private String accessToken;
     private LocalDateTime expiresOn;
@@ -31,6 +36,12 @@ public class TokenService {
         }
 
         return accessToken;
+    }
+
+    public String getOboAccessToken() {
+        val authToken = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        val client = authClientService.loadAuthorizedClient(authToken.getAuthorizedClientRegistrationId(), authToken.getName());
+        return client.getAccessToken().getTokenValue();
     }
 
     private void refreshToken() throws Exception {

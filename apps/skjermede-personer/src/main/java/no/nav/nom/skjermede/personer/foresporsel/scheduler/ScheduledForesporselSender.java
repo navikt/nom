@@ -6,7 +6,8 @@ import lombok.val;
 import no.nav.nom.skjermede.personer.common.LeaderElector;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
-import no.nav.nom.skjermede.personer.foresporsel.mail.GraphService;
+import no.nav.nom.skjermede.personer.common.GraphService;
+import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class ScheduledForesporselSender {
     private final NomRessurserService nomRessurserService;
     private final GraphService graphService;
     private final LeaderElector leaderElector;
+    private final TokenService tokenService;
 
     @Value("${foresporsel-api}")
     private String foresporselAPI;
@@ -49,7 +51,7 @@ public class ScheduledForesporselSender {
                     .toString();
 
             try {
-                graphService.sendMail(content, hentEpost(foresporsel.getTilknyttetRessurs()));
+                graphService.sendMail(content, hentEpost(foresporsel.getTilknyttetRessurs()), tokenService.getAccessToken());
                 foresporsel.setEpostSendt(LocalDateTime.now());
                 foresporselRepository.save(foresporsel);
             } catch (Exception e) {

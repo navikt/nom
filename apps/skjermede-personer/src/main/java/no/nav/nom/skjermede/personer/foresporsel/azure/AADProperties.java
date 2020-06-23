@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel.mail;
+package no.nav.nom.skjermede.personer.foresporsel.azure;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

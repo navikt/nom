@@ -2,7 +2,7 @@ package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 
 import no.nav.nom.contract.nom.dto.RessursDTO;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
-import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselRequestDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
