@@ -94,7 +94,7 @@ public class DvhConsumer {
 
     private static Ressurs converted(DvhRessursDTO dvhRessursDTO){
         LocalDate sluttDato;
-        if(Objects.equals(dvhRessursDTO.getRessursTypeKode(), "E") || Objects.equals(dvhRessursDTO.getAnsattType(), "Eksternt")){
+        if(Objects.equals(dvhRessursDTO.getRessursTypeKode(), "E") || Objects.equals(dvhRessursDTO.getAnsattType(), "Eksternt") || Objects.equals(dvhRessursDTO.getAnsattType(), "Annen Statlig")){
             sluttDato = dvhRessursDTO.getRemedySluttDato();
         }
         else {
@@ -120,7 +120,10 @@ public class DvhConsumer {
     }
 
     private static Ressurstype convertedRessursType(String ressurstypeKode, String ansattType){
-        if(ressurstypeKode != null) {
+        if(Objects.equals(ansattType, "Annen Statlig")){
+            return Ressurstype.ANNEN_STAT;
+        }
+        else if(ressurstypeKode != null) {
             switch (ressurstypeKode.toUpperCase()) {
                 case "F":
                 case "K":
