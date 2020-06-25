@@ -29,7 +29,7 @@ public class RessursController {
     @GetMapping("ansatt") //todo: Skal denne være beskyttet med persontoken eller servicebruker?
     public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
                                           @RequestHeader(required = false) String personident,
-                                          @RequestParam(required = false) String ressursType,
+                                          @RequestParam(required = false) List<String> ressursType,
                                           @RequestParam(defaultValue = "true") boolean gyldig){
         if (navident == null && personident == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi identifikator i header enten som navident eller personident.");
@@ -44,7 +44,8 @@ public class RessursController {
         }
 
         if (ressursType != null) {
-            ressurs = ressurs.filter(ressursen -> ressursen.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase())));
+            ressursType.replaceAll(String::toUpperCase);
+            ressurs = ressurs.filter(ressursen -> ressursType.contains(ressursen.getRessurstype().toString()));
         }
 
         return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);
