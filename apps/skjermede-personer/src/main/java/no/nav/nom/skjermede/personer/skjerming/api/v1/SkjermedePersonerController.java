@@ -15,7 +15,6 @@ import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -141,19 +140,6 @@ public class SkjermedePersonerController {
         skjermetPerson.setEndretAv(Kilde.BRUKER);
 
         return SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson));
-    }
-
-    @Transactional(value = "transactionManager")
-    @DeleteMapping
-    public void slettSkjerming() {
-        validerTilgang();
-
-        val personident = tokenUtil.getSubject();
-        val skjermetPerson = skjermetPersonRepository
-                .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_MESSAGE));
-
-        skjermetPersonRepository.deleteById(skjermetPerson.getId());
     }
 
     private void validerTilgang() {

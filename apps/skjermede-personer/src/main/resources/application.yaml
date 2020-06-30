@@ -69,6 +69,9 @@ no.nav:
         selvbetjening:
           discoveryurl: ${AAD_B2C_DISCOVERYURL}
           accepted_audience: ${LOGINSERVICE_CLIENTID}
+        reststs:
+          discoveryurl: http://security-token-service.default/rest/v1/sts/.well-known/openid-configuration
+          accepted_audience: srvskjermingsbrev
 
 aad:
     client_id: 2d7bd936-3f44-4878-a3db-22fe2aa947ae
