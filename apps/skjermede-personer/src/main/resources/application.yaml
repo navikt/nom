@@ -69,7 +69,7 @@ no.nav:
         selvbetjening:
           discoveryurl: ${AAD_B2C_DISCOVERYURL}
           accepted_audience: ${LOGINSERVICE_CLIENTID}
-          proxy: http://webproxy.nais:8088
+          proxyurl: http://webproxy.nais:8088
         reststs:
           discoveryurl: ${STS_DISCOVERYURL}
           accepted_audience: srvskjermingsbrev
