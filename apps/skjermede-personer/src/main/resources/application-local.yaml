@@ -39,6 +39,8 @@ no.nav:
         selvbetjening:
           discoveryurl: http://metadata
           accepted_audience: aud-localhost
+          proxyurl:
         reststs:
           discoveryurl: http://metadata
           accepted_audience: aud-localhost
+          proxyurl:
