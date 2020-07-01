@@ -72,7 +72,7 @@ no.nav:
           proxyurl: http://webproxy.nais:8088
         reststs:
           discoveryurl: ${STS_DISCOVERYURL}
-          accepted_audience: srvskjermingsbrev
+          accepted_audience: ${STS_AUD_SERVICEUSER}
           proxyurl:
 
 aad:

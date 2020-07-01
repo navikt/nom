@@ -23,6 +23,8 @@ spec:
       value: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
+    - name: STS_AUD_SERVICEUSER
+      value: skjermingsbrev, srvdolly, srvdolly_u
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://b27apvl175.preprod.local:1413/MQ0LSC03
     - name: TPS_MQ_QUEUE_CHANNEL
@@ -43,6 +45,7 @@ spec:
   port: 8080
   ingresses:
     - https://skjermede-personer.nais.preprod.local
+  webproxy: true
   replicas:
     min: 1
     max: 1
