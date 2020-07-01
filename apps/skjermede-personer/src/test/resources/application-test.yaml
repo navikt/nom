@@ -5,6 +5,9 @@ no.nav:
         selvbetjening:
           discoveryurl: http://metadata
           accepted_audience: aud-localhost
+        reststs:
+          discoveryurl: http://metadata2
+          accepted_audience: aud-localhost
 
 spring:
   main:

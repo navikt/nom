@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.skjermede.personer.JWTTestConfig;
 import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
@@ -40,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
-@WebMvcTest(controllers = {SkjermedePersonerController.class, JWTTokenProviderConfig.class})
+@WebMvcTest(controllers = {SkjermedePersonerController.class, JWTTestConfig.class})
 public class SkjermedePersonerControllerTest {
 
     @Autowired

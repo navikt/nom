@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
+import no.nav.nom.skjermede.personer.JWTTestConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
-@WebMvcTest(controllers = {ForesporselController.class, JWTTokenProviderConfig.class})
+@WebMvcTest(controllers = {ForesporselController.class, JWTTestConfig.class})
 public class ForesporselControllerTest {
 
     @Autowired

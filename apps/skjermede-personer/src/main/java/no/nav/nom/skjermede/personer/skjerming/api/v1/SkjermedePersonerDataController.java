@@ -1,6 +1,5 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -39,7 +38,6 @@ public class SkjermedePersonerDataController {
     public static final String UKJENT_PERSONIDENT = "Ukjent personident";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
-    private final ObjectMapper objectMapper;
 
     @PostMapping
     @Transactional(value = "transactionManager")

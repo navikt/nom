@@ -70,7 +70,7 @@ no.nav:
           discoveryurl: ${AAD_B2C_DISCOVERYURL}
           accepted_audience: ${LOGINSERVICE_CLIENTID}
         reststs:
-          discoveryurl: https://security-token-service.nais.preprod.local/rest/v1/sts/.well-known/openid-configuration
+          discoveryurl: ${STS_DISCOVERYURL:}
           accepted_audience: srvskjermingsbrev
 
 aad:
