@@ -5,9 +5,11 @@ no.nav:
         selvbetjening:
           discoveryurl: http://metadata
           accepted_audience: aud-localhost
+          proxyurl:
         reststs:
           discoveryurl: http://metadata2
           accepted_audience: aud-localhost
+          proxyurl:
 
 spring:
   main:
