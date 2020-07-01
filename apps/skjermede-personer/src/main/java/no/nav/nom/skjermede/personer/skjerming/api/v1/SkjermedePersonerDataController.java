@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(SkjermedePersonerDataController.BASE_URL)
-@ProtectedWithClaims(issuer = "reststs", claimMap = { "acr=Level4" })
+@ProtectedWithClaims(issuer = "reststs")
 public class SkjermedePersonerDataController {
 
     public static final String BASE_URL = "/api/v1/skjermingdata";
