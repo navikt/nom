@@ -70,7 +70,7 @@ no.nav:
           discoveryurl: ${AAD_B2C_DISCOVERYURL}
           accepted_audience: ${LOGINSERVICE_CLIENTID}
         reststs:
-          discoveryurl: ${STS_DISCOVERYURL:}
+          discoveryurl: ${STS_DISCOVERYURL}
           accepted_audience: srvskjermingsbrev
 
 aad:
