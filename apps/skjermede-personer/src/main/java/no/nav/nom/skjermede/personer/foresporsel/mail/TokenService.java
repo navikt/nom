@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -37,6 +39,7 @@ public class TokenService {
         final IPublicClientApplication pca = PublicClientApplication
                 .builder(aadProperties.getClientId())
                 .authority(aadProperties.getAuthority())
+                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("http://webproxy.nais", 8088)))
                 .build();
         final UserNamePasswordParameters credentials = UserNamePasswordParameters.builder(
                 Collections.singleton("User.Read"),
