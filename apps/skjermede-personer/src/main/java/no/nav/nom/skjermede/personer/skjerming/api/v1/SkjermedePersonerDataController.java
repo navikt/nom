@@ -35,14 +35,17 @@ public class SkjermedePersonerDataController {
     public static final String BASE_URL = "/api/v1/skjermingdata";
     public static final String DELETE_SKJERMING = "{personident}";
     public static final String AVSKJERM = "opphor/{personident}";
-    public static final String UKJENT_PERSONIDENT = "Ukjent personident";
+    public static final String IKKE_SKJERMET = "Fant ikke skjerming for oppgitte personident";
+    public static final String DUPLIKAT_MELDING = "Duplikate skjerminger intraff";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
 
     @PostMapping
     @Transactional(value = "transactionManager")
-    public ResponseEntity<List<SkjermetPersonDataResponseDTO>> opprettSkjerminger(@RequestBody final List<SkjermetPersonDataRequestDTO> data) {
-        val skjerminger = data.stream().
+    public ResponseEntity<List<SkjermetPersonDataResponseDTO>> opprettSkjerminger(@RequestBody final List<SkjermetPersonDataRequestDTO> request) {
+        sjekkDuplikater(request);
+
+        val skjerminger = request.stream().
                 map(dto -> {
                     SkjermetPerson entity = dto.toEntity();
                     entity.setOpprettetAv(Kilde.SERVICEBRUKER);
@@ -70,9 +73,17 @@ public class SkjermedePersonerDataController {
     public void opphorSkjerming(@PathVariable final String personident) {
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, UKJENT_PERSONIDENT));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, IKKE_SKJERMET));
 
         skjermetPerson.setSkjermetTil(LocalDateTime.now());
         skjermetPersonRepository.save(skjermetPerson);
+    }
+
+    public void sjekkDuplikater(final List<SkjermetPersonDataRequestDTO> request) {
+        request.forEach(skjerming -> {
+            if (skjermetPersonRepository.getSkjermetPersonByPersonident(skjerming.getPersonident()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, DUPLIKAT_MELDING);
+            }
+        });
     }
 }
