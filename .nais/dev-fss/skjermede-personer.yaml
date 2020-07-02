@@ -24,7 +24,7 @@ spec:
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
     - name: STS_AUD_SERVICEUSER
-      value: srvskjermingsbrev, srvdolly, srvdolly_u
+      value: srvnom-skjermet, srvdolly, srvdolly_u
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://b27apvl175.preprod.local:1413/MQ0LSC03
     - name: TPS_MQ_QUEUE_CHANNEL
