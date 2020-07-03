@@ -84,6 +84,11 @@ no.nav:
         selvbetjening:
           discoveryurl: ${AAD_B2C_DISCOVERYURL}
           accepted_audience: ${LOGINSERVICE_CLIENTID}
+          proxyurl: http://webproxy.nais:8088
+        reststs:
+          discoveryurl: ${STS_DISCOVERYURL}
+          accepted_audience: ${STS_AUD_SERVICEUSER}
+          proxyurl:
 
 aad:
     client_id: 2d7bd936-3f44-4878-a3db-22fe2aa947ae

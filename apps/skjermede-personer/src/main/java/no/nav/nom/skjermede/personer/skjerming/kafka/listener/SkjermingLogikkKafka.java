@@ -54,7 +54,7 @@ Merknader:
                 List<SkjermetPerson> skjermetFamilie = repository.findAllByTilknyttetRessursAndValid(navident);
                 if(!skjermetFamilie.isEmpty()){
                     skjermetFamilie.forEach(skjermetPerson -> {
-                        if(ressurstype == Ressurstype.INTERN) {
+                        if(ressurstype == Ressurstype.INTERN || ressurstype == Ressurstype.ANNEN_STAT) {
                             LocalDateTime sluttDato = skjermetHendelse.getSkjermetTil() != null ? skjermetHendelse.getSkjermetTil().plusMonths(mnderSkjermetPlus) : skjermetHendelse.getSkjermetTil();
                             if (!Objects.equals(sluttDato, skjermetPerson.getSkjermetTil())) {
                                 skjermetPerson.setSkjermetTil(sluttDato);
@@ -120,7 +120,7 @@ Merknader:
                                     }
                                 },
                                 () -> {
-                                    if(ressurstype == Ressurstype.INTERN) {
+                                    if(ressurstype == Ressurstype.INTERN || ressurstype == Ressurstype.ANNEN_STAT) {
                                         // Hvis en ansatt har vært skjermet tidligere, men avskjermet seg via nav.no skal den ikke skjermes igjen.
                                         // Skjermes kun ved et nytt ansettelsesforhold som ikke har blitt avskjermet tidligere.
                                         List<SkjermetPerson> historiskSkjermet = repository.findAllByPersonident(skjermetHendelse.getPersonident());

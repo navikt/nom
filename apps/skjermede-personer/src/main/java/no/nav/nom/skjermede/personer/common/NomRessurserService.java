@@ -26,7 +26,7 @@ public class NomRessurserService {
         headers.set("navident", navident);
 
         return restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN", ressursAPI, aktiv),
+                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 RessursDTO.class).getBody();
@@ -37,7 +37,7 @@ public class NomRessurserService {
         headers.set("personident", personident);
 
         return restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN", ressursAPI, aktiv),
+                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 RessursDTO.class).getBody();

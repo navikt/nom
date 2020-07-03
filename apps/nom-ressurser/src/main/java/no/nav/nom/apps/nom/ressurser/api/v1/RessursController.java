@@ -6,10 +6,16 @@ import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursRequestDTO;
 import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -29,7 +35,7 @@ public class RessursController {
     @GetMapping("ansatt") //todo: Skal denne være beskyttet med persontoken eller servicebruker?
     public RessursResponseDTO hentRessurs(@RequestHeader(required = false) String navident,
                                           @RequestHeader(required = false) String personident,
-                                          @RequestParam(required = false) String ressursType,
+                                          @RequestParam(required = false) List<String> ressursType,
                                           @RequestParam(defaultValue = "true") boolean gyldig){
         if (navident == null && personident == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Oppgi identifikator i header enten som navident eller personident.");
@@ -44,7 +50,8 @@ public class RessursController {
         }
 
         if (ressursType != null) {
-            ressurs = ressurs.filter(ressursen -> ressursen.getRessurstype().equals(Ressurstype.valueOf(ressursType.toUpperCase())));
+            ressursType.replaceAll(String::toUpperCase);
+            ressurs = ressurs.filter(ressursen -> ressursType.contains(ressursen.getRessurstype().toString()));
         }
 
         return ressurs.map(RessursResponseDTO::fromEntity).orElse(null);
