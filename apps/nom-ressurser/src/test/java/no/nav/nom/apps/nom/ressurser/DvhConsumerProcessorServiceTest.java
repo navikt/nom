@@ -32,6 +32,7 @@ public class DvhConsumerProcessorServiceTest {
 
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
     private static final String ANNEN_STATLIG = "Annen Statlig";
+    private static final String KOMMUNALT = "NAV Kommunalt";
     private static final String EKSTERNT = "Eksternt";
     private static final String NAVIDENT = "A000000";
     private static final String FNR = "12345678910";
@@ -119,6 +120,18 @@ public class DvhConsumerProcessorServiceTest {
 
         Assertions.assertEquals(arg.getValue().getSluttdato(), D2099);
         Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.EKSTERN);
+    }
+
+    @Test
+    public void testProcessRessurserKommunalt() {
+        dvhRessursDTO.setAnsattType(KOMMUNALT);
+        dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
+
+        val arg = ArgumentCaptor.forClass(Ressurs.class);
+        verify(ressursRepository).save(arg.capture());
+
+        Assertions.assertEquals(arg.getValue().getSluttdato(), dvhRessursDTO.getRemedySluttDato());
+        Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.INTERN);
     }
 
     @Test

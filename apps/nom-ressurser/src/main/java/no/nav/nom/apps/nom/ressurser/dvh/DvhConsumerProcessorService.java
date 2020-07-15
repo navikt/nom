@@ -71,7 +71,7 @@ public class DvhConsumerProcessorService {
 
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
         if (dvhRessursDTO.getRessursTypeKode().equals("E") ||
-            Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
+            Arrays.asList("Eksternt", "Annen Statlig", "NAV Kommunalt").contains(dvhRessursDTO.getAnsattType())) {
             return dvhRessursDTO.getRemedySluttDato();
         }
 
