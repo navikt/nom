@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 public class DvhResultWrapper {
-    @JsonProperty("NOM_ANSATTEResult")
+    @JsonProperty("Nom_AnsatteResult")
     private List<DvhRessursDTO> ansatteResultList;
 }
 
