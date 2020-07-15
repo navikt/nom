@@ -1,11 +1,13 @@
 package no.nav.nom.apps.nom.ressurser.dvh;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Getter
+@Data
+@Builder
 public class DvhRessursDTO {
 
     @JsonProperty("SEKVENSNR")
@@ -34,6 +36,9 @@ public class DvhRessursDTO {
 
     @JsonProperty("REMEDY_SLUTT_DATO")
     private LocalDate remedySluttDato;
+
+    @JsonProperty("REMEDY_PERMISJON")
+    private String permittert;
 
     @JsonProperty("AGRESSO_SLUTT_DATO")
     private LocalDate agressoSluttDato;
