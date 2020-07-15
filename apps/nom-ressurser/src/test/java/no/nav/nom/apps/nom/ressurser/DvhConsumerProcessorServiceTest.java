@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DvhConsumerProcessorService.class)
-public class DvhConsumerTest {
+public class DvhConsumerProcessorServiceTest {
 
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
     private static final String ANNEN_STATLIG = "Annen Statlig";

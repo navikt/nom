@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile("!local")
-@Slf4j
+@Profile("!local & !test")
 public class DvhConsumer {
 
     @Value("${dvh.endpoint}")
