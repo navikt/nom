@@ -71,8 +71,13 @@ public class DvhConsumerProcessorService {
 
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
         if (dvhRessursDTO.getRessursTypeKode().equals("E") ||
-            Arrays.asList("Eksternt", "Annen Statlig", "NAV Kommunalt").contains(dvhRessursDTO.getAnsattType())) {
+            Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
             return dvhRessursDTO.getRemedySluttDato();
+        }
+
+        if (dvhRessursDTO.getAnsattType().equals("NAV Kommunalt")) {
+            return dvhRessursDTO.getPermittert().equals("JA")
+                    ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
         }
 
         return dvhRessursDTO.getRemedySluttDato().equals(D2099)
@@ -84,7 +89,7 @@ public class DvhConsumerProcessorService {
         return ressursRepository.getGyldigRessursByNavident(navident).map(Ressurs::getSluttdato).orElse(null);
     }
 
-    private Ressurstype convertedRessursType(final String ressurstypeKode, final String ansattType){
+    private Ressurstype convertedRessursType(final String ressurstypeKode, final String ansattType) {
         if (ansattType.equals("Annen Statlig")) {
             return Ressurstype.ANNEN_STAT;
         }

@@ -79,7 +79,6 @@ public class DvhConsumerProcessorServiceTest {
 
         Assertions.assertEquals(arg.getValue().getSluttdato(), dvhRessursDTO.getRemedySluttDato());
         Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.INTERN);
-
     }
 
     @Test
