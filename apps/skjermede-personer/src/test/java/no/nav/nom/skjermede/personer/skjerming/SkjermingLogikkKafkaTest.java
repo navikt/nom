@@ -40,7 +40,7 @@ public class SkjermingLogikkKafkaTest {
     private SkjermetPersonRepository skjermetPersonRepository;
 
     @Value("${maanderPlusSkjerming}")
-    private int mnderPlusSkjerming = 6;
+    private int mnderPlusSkjerming;
 
     @Autowired
     private SkjermingLogikkKafka skjermingLogikkKafka;
