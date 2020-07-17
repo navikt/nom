@@ -28,9 +28,6 @@ public class DvhRessursDTO {
     @JsonProperty("EPOST")
     private String epost;
 
-    @JsonProperty("ANSATT_RESSURS_KODE")
-    private String ressursTypeKode;
-
     @JsonProperty("REMEDY_START_DATO")
     private LocalDate remedyStartDato;
 
@@ -45,4 +42,7 @@ public class DvhRessursDTO {
 
     @JsonProperty("ANSATT_TYPE")
     private String ansattType;
+
+    @JsonProperty("ANSATT_RESSURS_KODE")
+    private String ressursTypeKode;
 }
