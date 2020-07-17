@@ -70,19 +70,19 @@ public class DvhConsumerProcessorService {
     }
 
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
-        if (dvhRessursDTO.getRessursTypeKode().equals("E") ||
+        if ("E".equals(dvhRessursDTO.getRessursTypeKode()) ||
             Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
             return dvhRessursDTO.getRemedySluttDato();
         }
 
-        if (dvhRessursDTO.getAnsattType().equals("NAV Kommunalt")) {
-            return dvhRessursDTO.getPermittert().equals("JA")
+        if ("NAV Kommunalt".equals(dvhRessursDTO.getAnsattType())) {
+            return "JA".equals(dvhRessursDTO.getPermittert())
                     ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
         }
 
-        return dvhRessursDTO.getPermittert().equalsIgnoreCase("JA")
+        return "JA".equals(dvhRessursDTO.getPermittert())
                 ? getPersistedSluttDato(dvhRessursDTO.getNavident())
-                : dvhRessursDTO.getRemedySluttDato().equals(D2099) ? dvhRessursDTO.getAgressoSluttDato() : dvhRessursDTO.getRemedySluttDato();
+                : D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getAgressoSluttDato() : dvhRessursDTO.getRemedySluttDato();
     }
 
     private LocalDate getPersistedSluttDato(final String navident) {
@@ -90,7 +90,7 @@ public class DvhConsumerProcessorService {
     }
 
     private Ressurstype convertedRessursType(final String ressurstypeKode, final String ansattType) {
-        if (ansattType.equals("Annen Statlig")) {
+        if ("Annen Statlig".equals(ansattType)) {
             return Ressurstype.ANNEN_STAT;
         }
 
@@ -100,7 +100,7 @@ public class DvhConsumerProcessorService {
                 case "K":
                 case "M":
                 case "N":
-                    return ansattType.equals("Eksternt") ? Ressurstype.EKSTERN : Ressurstype.INTERN;
+                    return "Eksternt".equals(ansattType) ? Ressurstype.EKSTERN : Ressurstype.INTERN;
                 case "E":
                 case "I":
                 case "L":
@@ -116,7 +116,7 @@ public class DvhConsumerProcessorService {
             }
         }
 
-        return ansattType.equals("NAV Kommunalt") || ansattType.equals("NAV Statlig")
-                ? Ressurstype.INTERN : (ansattType.equals("Eksternt") ? Ressurstype.EKSTERN : null);
+        return "NAV Kommunalt".equals(ansattType) || "NAV Statlig".equals(ansattType)
+                ? Ressurstype.INTERN : ("Eksternt".equals(ansattType) ? Ressurstype.EKSTERN : null);
     }
 }
