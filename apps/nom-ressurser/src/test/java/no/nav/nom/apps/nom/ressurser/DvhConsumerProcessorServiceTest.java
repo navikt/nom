@@ -51,7 +51,7 @@ public class DvhConsumerProcessorServiceTest {
                 .navident(NAVIDENT)
                 .personIdent(FNR)
                 .remedySluttDato(LocalDate.now())
-                .agressoSluttDato(LocalDate.now().plusDays(1))
+                .agressoSluttDato(LocalDate.now().minusDays(1))
                 .ressursTypeKode("M")
                 .ansattType("NAV Statlig")
                 .permittert("Nei")
@@ -77,13 +77,14 @@ public class DvhConsumerProcessorServiceTest {
         val arg = ArgumentCaptor.forClass(Ressurs.class);
         verify(ressursRepository).save(arg.capture());
 
-        Assertions.assertEquals(arg.getValue().getSluttdato(), dvhRessursDTO.getRemedySluttDato());
+        Assertions.assertEquals(arg.getValue().getSluttdato(), dvhRessursDTO.getAgressoSluttDato());
         Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.INTERN);
     }
 
     @Test
     public void testProcessRessurserStatligPermittert() {
         dvhRessursDTO.setPermittert("JA");
+        dvhRessursDTO.setAgressoSluttDato(null);
 
         when(ressursRepository.getGyldigRessursByNavident(anyString())).thenReturn(Optional.of(Ressurs.builder().sluttdato(null).build()));
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));

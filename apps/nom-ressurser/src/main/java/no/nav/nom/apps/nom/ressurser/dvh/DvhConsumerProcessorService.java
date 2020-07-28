@@ -80,9 +80,9 @@ public class DvhConsumerProcessorService {
                     ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
         }
 
-        return "JA".equals(dvhRessursDTO.getPermittert())
-                ? getPersistedSluttDato(dvhRessursDTO.getNavident())
-                : D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getAgressoSluttDato() : dvhRessursDTO.getRemedySluttDato();
+        return dvhRessursDTO.getAgressoSluttDato() != null && !D2099.equals(dvhRessursDTO.getAgressoSluttDato())
+                ? dvhRessursDTO.getAgressoSluttDato() : "JA".equals(dvhRessursDTO.getPermittert())
+                ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
     }
 
     private LocalDate getPersistedSluttDato(final String navident) {
