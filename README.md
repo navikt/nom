@@ -7,9 +7,9 @@
 En midlertidig feil med docker-oppsettet er at kafka topic på en ny container ikke opprettes før første melding på topicet er sendt.
 
 ## Hvordan benytte pgAdmin lokalt
-pgAdmin er satt opp lokalt på adressen http://localhost:8089/ med bruker/passord = user@domain.com/password.
-For å nå en lokal nom database velg 'create server' og gi den ett navn på 'general' tabben.
-På Connection tabben sett opp følgende:
+pgAdmin er satt opp lokalt på adressen http://localhost:8089/ med bruker/passord = `user@domain.com/password`.
+For å nå en lokal nom database velg 'Create server' og gi den ett navn på 'General' tabben.
+På 'Connection' tabben sett opp følgende:
 ```
 Host name:  ressurs-db/skjermet-db (velg en)
 port: 5432/5433 (henholdsvis)
