@@ -122,6 +122,8 @@
                         <configuration>
                             <rules>
                                 <dependencyConvergence/>
+                                <ReactorModuleConvergence/>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
                     </execution>
