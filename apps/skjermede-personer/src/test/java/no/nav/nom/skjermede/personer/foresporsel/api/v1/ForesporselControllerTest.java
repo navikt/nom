@@ -8,7 +8,6 @@ import no.nav.nom.skjermede.personer.JWTTokenProvderTestConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
-import no.nav.nom.skjermede.personer.foresporsel.ForesporselController;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.foresporsel;
+package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 
 import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
-import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselRequestDTO;
-import no.nav.nom.skjermede.personer.foresporsel.dto.ForesporselResponseDTO;
+import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
+import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselRequestDTO;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselResponseDTO;
 import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
