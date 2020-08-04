@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@Api(tags = "Skjermingsdata")
+@Api(tags = "Skjermingdata")
 @RequiredArgsConstructor
 @RequestMapping(value = SkjermedePersonerDataController.BASE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @ProtectedWithClaims(issuer = "reststs")
@@ -62,10 +62,10 @@ public class SkjermedePersonerDataController {
             value = "\"Bearer \" +  sts utstedt access token", required = true)
     @ApiOperation(
             value = "Oppretter skjerminger",
-            notes = "Skjerminger kan opprettes kun av dolly",
+            notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<SkjermetPersonDataResponseDTO>> opprettSkjerminger(
-            @ApiParam("Liste med opplysninger om personer som skal skjermes")
+            @ApiParam("Liste med skjerminger")
             @RequestBody final List<SkjermetPersonDataRequestDTO> request) {
         sjekkDuplikater(request);
 
@@ -98,7 +98,7 @@ public class SkjermedePersonerDataController {
             value = "\"Bearer \" +  sts utstedt access token", required = true)
     @ApiOperation(
             value = "Sletter all skjermingshistorikk for spesifisert personident",
-            notes = "Skjerminger kan slettes kun av dolly",
+            notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public void slettSkjerming(@ApiParam("Fødselsnummeret til personen") @PathVariable final String personident) {
         skjermetPersonRepository.deleteAll(skjermetPersonRepository.findAllByPersonident(personident));
@@ -116,7 +116,7 @@ public class SkjermedePersonerDataController {
             value = "\"Bearer \" +  sts utstedt access token", required = true)
     @ApiOperation(
             value = "Opphever skjerming for spesifisert personident",
-            notes = "Skjerminger kan oppheves kun av dolly",
+            notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public void opphorSkjerming(@ApiParam("Fødselsnummeret til personen") @PathVariable final String personident) {
         val skjermetPerson = skjermetPersonRepository
