@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @EnableScheduling
 @SpringBootApplication
-@EnableJwtTokenValidation
+@EnableJwtTokenValidation(ignore = {"org.springframework", "springfox"})
 public class SkjermedePersoner {
     public static void main(String[] args) {
         System.setProperty("kafka-transaction-uuid", UUID.randomUUID().toString().substring(0, 8));
