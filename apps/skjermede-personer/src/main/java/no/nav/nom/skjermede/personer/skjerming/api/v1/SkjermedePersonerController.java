@@ -1,5 +1,10 @@
 package no.nav.nom.skjermede.personer.skjerming.api.v1;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -13,12 +18,14 @@ import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,8 +36,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@Api(tags = "Skjerming")
 @RequiredArgsConstructor
-@RequestMapping(SkjermedePersonerController.BASE_URL)
+@RequestMapping(value = SkjermedePersonerController.BASE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @ProtectedWithClaims(issuer = "selvbetjening", claimMap = { "acr=Level4" })
 public class SkjermedePersonerController {
 
@@ -47,6 +55,7 @@ public class SkjermedePersonerController {
 
     @GetMapping("all")
     @Unprotected
+    @ApiOperation(value = "unavailable", hidden = true)
     public List<SkjermetPersonResponseDTO> hentAlle() {
         return skjermetPersonRepository
                 .findAll()
@@ -56,13 +65,26 @@ public class SkjermedePersonerController {
     }
 
     @GetMapping
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Henter opplysninger om en aktiv skjerming for et internt ansatt",
+            notes = "Konsumenten, identifisert via id-tokenet, kan hente skjermingsopplysninger kun om seg selv",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            tags = "Skjerming")
     public SkjermetPersonResponseDTO hentSkjerming() {
         validerTilgang();
 
         val personident = tokenUtil.getSubject();
         val skjermetPerson = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
 
-        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null && Arrays.stream(Unntakskode.values()).noneMatch(kode -> kode.toString().equals(skjermetPerson.getTilknyttetRessurs()))) {
+        if (skjermetPerson != null && skjermetPerson.getTilknyttetRessurs() != null
+            && Arrays.stream(Unntakskode.values()).noneMatch(kode -> kode.toString().equals(skjermetPerson.getTilknyttetRessurs()))) {
             val ressurs = nomRessurserService.getInternRessursByNavident(skjermetPerson.getTilknyttetRessurs(), false);
 
             return SkjermetPersonResponseDTO.fromEntityAndRessurs(skjermetPerson, ressurs);
@@ -72,6 +94,18 @@ public class SkjermedePersonerController {
     }
 
     @GetMapping(FAMILIEMEDLEMMER)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Henter opplysninger om aktive skjerminger for familiemedlemmer til et internt ansatt",
+            notes = "Konsumenten, identifisert via id-tokenet, kan hente skjermingsopplysninger kun om sine familimedlemmer",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            tags = "Skjerming")
     public List<SkjermetPersonResponseDTO> hentSkjermedeFamiliemedlemer() {
         validerTilgang();
 
@@ -85,6 +119,18 @@ public class SkjermedePersonerController {
     }
 
     @GetMapping(ALLE)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Henter opplysninger om aktiv og historiske skjerminger for et internt ansatt",
+            notes = "Konsumenten, identifisert via id-tokenet, kan hente skjermingsopplysninger kun om seg selv",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            tags = "Skjerming")
     public List<SkjermetPersonResponseDTO> hentAlleSkjerminger() {
         validerTilgang();
 
@@ -97,7 +143,21 @@ public class SkjermedePersonerController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Transactional(value = "transactionManager")
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "Skjerming opprettet"),
+            @ApiResponse(code = 400, message = "Forsøk på duplikat skjerming"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Skjermer et internt ansatt",
+            notes = "Konsumenten, identifisert via id-tokenet, kan skjerme kun seg selv",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            tags = "Skjerming")
     public ResponseEntity<SkjermetPersonResponseDTO> opprettSkjerming() {
         validerTilgang();
 
@@ -124,8 +184,21 @@ public class SkjermedePersonerController {
                 .body(SkjermetPersonResponseDTO.fromEntity(skjermetPersonRepository.save(skjermetPerson)));
     }
 
-    @Transactional(value = "transactionManager")
     @PutMapping
+    @Transactional(value = "transactionManager")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Skjerming opphørt"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
+            @ApiResponse(code = 404, message = "Skjerming for gjeldende ansatt ikke funnet"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Opphever aktiv skjerming for et internt ansatt",
+            notes = "Konsumenten, identifisert via id-tokenet, kan avskjerme kun seg selv",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            tags = "Skjerming")
     public SkjermetPersonResponseDTO opphorSkjerming() {
         validerTilgang();
 

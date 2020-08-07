@@ -35,6 +35,7 @@
         <javassist.version>3.24.0-GA</javassist.version>
         <ow2-asm.version>7.1</ow2-asm.version>
         <ibm-mq.version>2.2.5</ibm-mq.version>
+        <springfox-swagger.version>2.9.2</springfox-swagger.version>
     </properties>
 
     <dependencyManagement>
@@ -107,6 +108,16 @@
                 <artifactId>micrometer-registry-prometheus</artifactId>
                 <version>${micrometer.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger2</artifactId>
+                <version>${springfox-swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.springfox</groupId>
+                <artifactId>springfox-swagger-ui</artifactId>
+                <version>${springfox-swagger.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -122,6 +133,8 @@
                         <configuration>
                             <rules>
                                 <dependencyConvergence/>
+                                <ReactorModuleConvergence/>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                         </configuration>
                     </execution>

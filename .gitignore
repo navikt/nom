@@ -5,3 +5,4 @@
 *.iml
 /docs/*.html
 *.DS_Store
+.vscode

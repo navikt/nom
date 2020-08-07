@@ -1,8 +1,7 @@
-package no.nav.nom.skjermede.personer;
+package no.nav.nom.skjermede.personer.common;
 
 import com.nimbusds.jose.util.IOUtils;
 import com.nimbusds.jose.util.Resource;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever;
 
@@ -11,17 +10,16 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-@RequiredArgsConstructor
 public class CustomFileResourceRetriever extends ProxyAwareResourceRetriever {
 
     private static final String JWSK_FILE = "/jwkset.json";
 
-    public Resource retrieveResource( URL url) {
+    public Resource retrieveResource(final URL url) {
         val content = this.getContentFromFile(url);
         return content != null ? new Resource(content, "application/json") : null;
     }
 
-    private String getContentFromFile( URL url) {
+    private String getContentFromFile(final URL url) {
         try {
             if (url.toString().contains("metadata")) {
                 val filename = String.format("/%s.json", url.toString().substring(url.toString().indexOf("metadata")));
