@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,12 +43,30 @@ import java.util.stream.Collectors;
 public class SkjermedePersonerDataController {
 
     public static final String BASE_URL = "/api/v1/skjermingdata";
-    public static final String DELETE_SKJERMING = "{personident}";
-    public static final String AVSKJERM = "opphor/{personident}";
     public static final String IKKE_SKJERMET = "Fant ikke skjerming for oppgitte personident";
     public static final String DUPLIKAT_MELDING = "Duplikate skjerminger intraff";
 
     private final SkjermetPersonRepository skjermetPersonRepository;
+
+    @GetMapping("{personident}")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 404, message = "Skjerming for oppgitt personident ikke funnet"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  sts utstedt access token", required = true)
+    @ApiOperation(
+            value = "Henter en skjerming",
+            notes = "Konsumeres kun av dolly",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public SkjermetPersonDataResponseDTO hentSkjerming(
+            @ApiParam(value = "Fødselsnummeret til personen", required = true) @PathVariable final String personident) {
+        val skjermetPerson = skjermetPersonRepository.
+                getSkjermetPersonByPersonident(personident)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, IKKE_SKJERMET));
+        return SkjermetPersonDataResponseDTO.fromEntity(skjermetPerson);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -65,7 +84,7 @@ public class SkjermedePersonerDataController {
             notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<SkjermetPersonDataResponseDTO>> opprettSkjerminger(
-            @ApiParam("Liste med skjerminger")
+            @ApiParam(value = "Liste med skjerminger", required = true, name = "skjerminger")
             @RequestBody final List<SkjermetPersonDataRequestDTO> request) {
         sjekkDuplikater(request);
 
@@ -87,7 +106,7 @@ public class SkjermedePersonerDataController {
         return ResponseEntity.status(HttpStatus.CREATED).body(lagredeSkjerminger);
     }
 
-    @DeleteMapping(DELETE_SKJERMING)
+    @DeleteMapping("{personident}")
     @Transactional(value = "transactionManager")
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -100,11 +119,11 @@ public class SkjermedePersonerDataController {
             value = "Sletter all skjermingshistorikk for spesifisert personident",
             notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public void slettSkjerming(@ApiParam("Fødselsnummeret til personen") @PathVariable final String personident) {
+    public void slettSkjerming(@ApiParam(value = "Fødselsnummeret til personen", required = true) @PathVariable final String personident) {
         skjermetPersonRepository.deleteAll(skjermetPersonRepository.findAllByPersonident(personident));
     }
 
-    @PutMapping(AVSKJERM)
+    @PutMapping("opphor/{personident}")
     @Transactional(value = "transactionManager")
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -118,7 +137,7 @@ public class SkjermedePersonerDataController {
             value = "Opphever skjerming for spesifisert personident",
             notes = "Konsumeres kun av dolly",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public void opphorSkjerming(@ApiParam("Fødselsnummeret til personen") @PathVariable final String personident) {
+    public void opphorSkjerming(@ApiParam(value = "Fødselsnummeret til personen", required = true) @PathVariable final String personident) {
         val skjermetPerson = skjermetPersonRepository
                 .getSkjermetPersonByPersonident(personident)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, IKKE_SKJERMET));
