@@ -33,8 +33,8 @@ public class Cache {
         val periode = skjermedePersoner.get(personident);
 
         return (periode != null) &&
-                (periode.fra().isBefore(LocalDateTime.now())) &&
-                (periode.til() == null || periode.til().isAfter(LocalDateTime.now()));
+                (periode.getFra().isBefore(LocalDateTime.now())) &&
+                (periode.getTil() == null || periode.getTil().isAfter(LocalDateTime.now()));
     }
 
     HashMap<String, Skjermingsperiode> getAll() {
@@ -46,7 +46,7 @@ public class Cache {
     }
 
     void store(String personident, Skjermingsperiode periode) {
-        if(periode.til() == null || periode.til().isAfter(LocalDateTime.now())) {
+        if(periode.getTil() == null || periode.getTil().isAfter(LocalDateTime.now())) {
             skjermedePersoner.put(personident, periode);
         }
     }

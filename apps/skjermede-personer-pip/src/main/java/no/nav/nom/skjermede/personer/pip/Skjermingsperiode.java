@@ -22,11 +22,11 @@ public class Skjermingsperiode {
         }
     }
 
-    public LocalDateTime fra()  {
+    public LocalDateTime getFra()  {
         return LocalDateTime.ofEpochSecond(this.fra, 0, ZoneOffset.UTC);
     }
 
-    public LocalDateTime til() {
+    public LocalDateTime getTil() {
         if(this.til == null) {
             return null;
         } else {
