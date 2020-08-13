@@ -11,6 +11,8 @@ import java.util.UUID;
 @Repository
 public interface ForesporselRepository extends JpaRepository<Foresporsel, Long> {
     List<Foresporsel> findAllByEpostSendtNull();
+    List<Foresporsel> findAllByTilknyttetRessurs(String tilknyttetRessurs);
+    Optional<Foresporsel> findByTilknyttetRessursAndFornavnAndEtternavnAndBekreftetFalse(String tilknyttetRessurs, String fornavn, String etternavn);
     Optional<Foresporsel> findByFunksjonellIdAndBekreftetFalse(UUID funksjonellId);
     boolean existsByPersonidentAndBekreftetFalse(String personident);
     void deleteAllByEpostSendtBeforeOrBekreftetTrue(LocalDateTime before);

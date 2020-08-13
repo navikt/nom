@@ -18,6 +18,7 @@ import no.nav.nom.skjermede.personer.common.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselRequestDTO;
 import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.ForesporselResponseDTO;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
+import no.nav.nom.skjermede.personer.foresporsel.dto.TilknyttetForesporselDTO;
 import no.nav.nom.skjermede.personer.skjerming.Kilde;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
@@ -40,7 +41,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -55,9 +58,13 @@ public class ForesporselController {
 
     public static final String BASE_URL = "/api/v1/foresporsel";
     public static final String FORESPORSEL_BEKREFTELSE = "bekreft";
+    public static final String TILKNYTTET_FORESPORSEL_BEKREFTELSE = "tilknyttede/bekreft";
+    public static final String TILNYTTEDE_FORESPORSLER = "tilknyttede";
     public static final String UNAUTHORIZED_MESSAGE = "Tilgang nektet";
     public static final String DUPLICATE_FORESPORSEL_MESSAGE = "Duplikat skjerming-forespørsel for innlogget bruker";
     public static final String NOT_FOUND_MESSAGE = "Fant ingen forespørsel for innlogget bruker";
+    public static final String ANSATT_NOT_ACTIVE_MESSAGE = "Ansatt med tilknyttet NAV-ident er ikke gyldig";
+    public static final String TILKNYTTET_FORESPORSEL_NOT_FOUND_MESSAGE = "Fant ikke den tilknyttede forespørselen";
 
     private final ForesporselRepository foresporselRepository;
     private final SkjermetPersonRepository skjermetPersonRepository;
@@ -75,7 +82,7 @@ public class ForesporselController {
     @ApiOperation(value = "Unavailable", hidden = true)
     public String bekreftForesporsel(@RequestParam("id") final UUID funksjonellId) {
         val foresporsel = foresporselRepository.findByFunksjonellIdAndBekreftetFalse(funksjonellId).orElse(null);
-        val accessToken =tokenService.getOboAccessToken();
+        val accessToken = tokenService.getOboAccessToken();
         val navident = graphService.getNavident(accessToken);
 
         if (foresporsel == null) {
@@ -108,6 +115,45 @@ public class ForesporselController {
         return "Bekreftelse av skjerming registrert";
     }
 
+    @Transactional(value = "transactionManager")
+    @PostMapping(TILKNYTTET_FORESPORSEL_BEKREFTELSE)
+    @ApiOperation(value = "Unavailable", hidden = true)
+    public TilknyttetForesporselDTO bekreftTilknyttetForesporsel(@RequestBody final TilknyttetForesporselDTO tilknyttetForesporsel) {
+        validerTilgang();
+
+        val personident = tokenUtil.getSubject();
+
+        val ressurs = nomRessurserService.getInternRessursByPersonident(personident, true);
+
+        if (ressurs == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ForesporselController.ANSATT_NOT_ACTIVE_MESSAGE);
+        }
+
+        val foresporsel = foresporselRepository.findByTilknyttetRessursAndFornavnAndEtternavnAndBekreftetFalse(ressurs.getNavident(), tilknyttetForesporsel.getFornavn(), tilknyttetForesporsel.getEtternavn())
+                .orElse(null);
+
+        if (foresporsel == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ForesporselController.TILKNYTTET_FORESPORSEL_NOT_FOUND_MESSAGE);
+        }
+
+        val skjermet = skjermetPersonRepository.getSkjermetPersonByPersonident(personident).orElse(null);
+
+        if (skjermet != null) {
+            skjermet.setSkjermetTil(LocalDateTime.now());
+            skjermet.setEndretDato(LocalDateTime.now());
+            skjermet.setEndretAv(Kilde.BRUKER);
+            skjermetPersonRepository.save(skjermet);
+        }
+
+        foresporselGodkjentCounter.increment();
+
+        foresporsel.setBekreftet(true);
+        skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
+        foresporselRepository.delete(foresporsel);
+
+        return tilknyttetForesporsel;
+    }
+
     @GetMapping
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
@@ -117,8 +163,8 @@ public class ForesporselController {
             paramType = "header", name = "Authorization",
             value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
     @ApiOperation(
-            value = "Henter gjeldende aktive forespørselet opprettet for godkjenning av et ansatt",
-            notes = "Forespørselet er aktivt så lenge det ikke er godkjent",
+            value = "Henter gjeldende aktive forespørsel opprettet for godkjenning av et ansatt",
+            notes = "Forespørselen er aktiv så lenge den ikke er godkjent",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ForesporselResponseDTO hentForesporsel() {
         validerTilgang();
@@ -127,6 +173,31 @@ public class ForesporselController {
         val foresporsel = foresporselRepository.findByPersonidentAndBekreftetFalse(personident).orElse(null);
 
         return foresporsel != null ? ForesporselResponseDTO.fromEntity(foresporsel) : null;
+    }
+
+    @GetMapping(TILNYTTEDE_FORESPORSLER)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiImplicitParam(
+            paramType = "header", name = "Authorization",
+            value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
+    @ApiOperation(
+            value = "Henter aktive forespørsler med tilknyttet ressurs lik den ansattes NAV-ident",
+            notes = "Forespørsler er aktive så lenge den ikke er godkjent",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<TilknyttetForesporselDTO> hentTilknyttedeForsporsler() {
+        validerTilgang();
+
+        val personident = tokenUtil.getSubject();
+        val ressurs = nomRessurserService.getInternRessursByPersonident(personident, true);
+
+        if (ressurs == null) {
+            return null;
+        }
+
+        return foresporselRepository.findAllByTilknyttetRessurs(ressurs.getNavident()).stream().map(TilknyttetForesporselDTO::fromEntity).collect(Collectors.toList());
     }
 
     @PostMapping
@@ -174,8 +245,8 @@ public class ForesporselController {
             paramType = "header", name = "Authorization",
             value = "\"Bearer \" +  token utstedt av IDPorten", required = true)
     @ApiOperation(
-            value = "Sletter gjeldende aktive skjermingsforespørselet",
-            notes = "Forespørselet er aktivt så lenge det ikke er godkjent",
+            value = "Sletter gjeldende aktive skjermingsforespørsel",
+            notes = "Forespørselen er aktiv så lenge den ikke er godkjent",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ForesporselResponseDTO slettForesporsel() {
         validerTilgang();

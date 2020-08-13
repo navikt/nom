@@ -1,5 +1,6 @@
 package no.nav.nom.skjermede.personer.foresporsel.api.v1;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.common.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
+import no.nav.nom.skjermede.personer.foresporsel.dto.TilknyttetForesporselDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +28,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselController.ANSATT_NOT_ACTIVE_MESSAGE;
+import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselController.TILKNYTTET_FORESPORSEL_NOT_FOUND_MESSAGE;
+import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselTestUtils.TILKNYTTET_RESSURS;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -102,6 +111,42 @@ public class ForesporselControllerTest {
     }
 
     @Test
+    public void testHentTilknyttetForesporsel() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
+        val familie1 = ForesporselTestUtils.foresporsel();
+        val familie2 = ForesporselTestUtils.foresporsel();
+        familie2.setFornavn("Ola");
+        when(foresporselRepository.findAllByTilknyttetRessurs(TILKNYTTET_RESSURS))
+                .thenReturn(Arrays.asList(familie1, familie2));
+
+        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, "/tilknyttede"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        List<TilknyttetForesporselDTO> tilknyttedeForesporsler = objectMapper.readValue(response, new TypeReference<>() {
+        });
+
+        assertEquals(tilknyttedeForesporsler.size(), 2);
+        assertEquals(tilknyttedeForesporsler.get(0).getFornavn(), "Jenny");
+        assertEquals(tilknyttedeForesporsler.get(1).getFornavn(), "Ola");
+    }
+
+    @Test
+    public void testHentTilknyttetForesporselAnsattUgyldig() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(null);
+
+        mockMvc.perform(requestBuilder(HttpMethod.GET, "/tilknyttede"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+    }
+
+    @Test
     public void testBekreftForesporsel() throws Exception {
         val uuid = ForesporselTestUtils.foresporsel().getFunksjonellId();
         when(foresporselRepository.findByFunksjonellIdAndBekreftetFalse(uuid))
@@ -114,6 +159,57 @@ public class ForesporselControllerTest {
         mockMvc.perform(requestBuilder(HttpMethod.GET, String.format("bekreft?id=%s", uuid)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Bekreftelse av skjerming registrert"));
+    }
+
+    @Test
+    public void testBekreftTilknyttetForesporsel() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
+        val foresporsel = ForesporselTestUtils.foresporsel();
+        when(foresporselRepository.findByTilknyttetRessursAndFornavnAndEtternavnAndBekreftetFalse(TILKNYTTET_RESSURS, foresporsel.getFornavn(), foresporsel.getEtternavn())).thenReturn(Optional.of(foresporsel));
+
+        val tilknyttetForesporsel = TilknyttetForesporselDTO.builder()
+                .fornavn(foresporsel.getFornavn())
+                .etternavn(foresporsel.getEtternavn())
+                .opprettetDato(LocalDateTime.now())
+                .build();
+
+        mockMvc.perform(requestBuilder(HttpMethod.POST, "tilknyttede/bekreft")
+                .content(objectMapper.writeValueAsString(tilknyttetForesporsel)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testBekreftTilknyttetForesporselNotGyldigAnsatt() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(null);
+        val foresporsel = ForesporselTestUtils.foresporsel();
+        when(foresporselRepository.findByTilknyttetRessursAndFornavnAndEtternavnAndBekreftetFalse(TILKNYTTET_RESSURS, foresporsel.getFornavn(), foresporsel.getEtternavn())).thenReturn(Optional.of(foresporsel));
+
+        val tilknyttetForesporsel = TilknyttetForesporselDTO.builder().fornavn(foresporsel.getFornavn()).etternavn(foresporsel.getEtternavn()).opprettetDato(LocalDateTime.now()).build();
+
+        mockMvc.perform(requestBuilder(HttpMethod.POST, "tilknyttede/bekreft")
+                .content(objectMapper.writeValueAsString(tilknyttetForesporsel)))
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason(ANSATT_NOT_ACTIVE_MESSAGE));
+    }
+
+    @Test
+    public void testBekreftTilknyttetForesporselIngenAktiveForesporsel() throws Exception {
+        when(tokenUtil.getSubject()).thenReturn(ForesporselTestUtils.PERSONIDENT);
+        when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
+        when(nomRessurserService.getInternRessursByPersonident(anyString(), anyBoolean())).thenReturn(ForesporselTestUtils.ressurs());
+        val foresporsel = ForesporselTestUtils.foresporsel();
+        when(foresporselRepository.findByTilknyttetRessursAndFornavnAndEtternavnAndBekreftetFalse(TILKNYTTET_RESSURS, foresporsel.getFornavn(), foresporsel.getEtternavn())).thenReturn(Optional.empty());
+
+        val tilknyttetForesporsel = TilknyttetForesporselDTO.builder().fornavn(foresporsel.getFornavn()).etternavn(foresporsel.getEtternavn()).opprettetDato(LocalDateTime.now()).build();
+
+        mockMvc.perform(requestBuilder(HttpMethod.POST, "tilknyttede/bekreft")
+                .content(objectMapper.writeValueAsString(tilknyttetForesporsel)))
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason(TILKNYTTET_FORESPORSEL_NOT_FOUND_MESSAGE));
     }
 
     @Test
