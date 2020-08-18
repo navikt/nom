@@ -20,7 +20,7 @@ spec:
     - name: AAD_ISSUER_URI
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
     - name: AAD_REDIRECT_BASE_URI
-      value: https://skjermede-personer.nais.preprod.local
+      value: https://www-q0.nav.no
     - name: AAD_B2C_DISCOVERYURL
       value: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
     - name: LOGINSERVICE_CLIENTID

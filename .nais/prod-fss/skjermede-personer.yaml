@@ -17,6 +17,10 @@ spec:
       value: https://nom-ressurser.nais.adeo.no/api/v1/ressurs
     - name: FORESPORSEL_API
       value: https://www.nav.no/person/personopplysninger/skjerming-proxy/v1/foresporsel
+    - name: AAD_ISSUER_URI
+      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
+    - name: AAD_REDIRECT_BASE_URI
+      value: https://www.nav.no
     - name: AAD_B2C_DISCOVERYURL
       value: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
     - name: LOGINSERVICE_CLIENTID

@@ -23,6 +23,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .oauth2Client()
                 .and()
-                .oauth2Login();
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/person/personopplysninger/skjerming-proxy/oauth2/authorization/aad")
+                        .authorizationEndpoint(authorization -> authorization.baseUri("/api/oauth2/authorization"))
+                        .redirectionEndpoint(redirection -> redirection.baseUri("/person/personopplysninger/skjerming-proxy/login/oauth2/code/aad"))
+                        .successHandler(new BekreftForesporselSuccessHandler())
+                );
     }
 }
