@@ -49,7 +49,6 @@ spec:
   port: 8080
   ingresses:
     - https://skjermede-personer.nais.preprod.local
-  webproxy: true
   replicas:
     min: 1
     max: 1
@@ -74,6 +73,9 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/azuread
+        kvPath: /azuread/data/dev/creds/skjermede-personer
   leaderElection: true
   prometheus:
     enabled: true
