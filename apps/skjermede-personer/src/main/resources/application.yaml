@@ -13,8 +13,8 @@ spring:
       client:
         registration:
           aad:
-            client-id: ${CLIENT_ID}
-            client-secret: ${CLIENT_SECRET}
+            client-id: ${AAD_CLIENT_ID}
+            client-secret: ${AAD_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: '${AAD_REDIRECT_BASE_URI:http://localhost:8085}/person/personopplysninger/skjerming-proxy/login/oauth2/code/{registrationId}'
             scope: openid, https://graph.microsoft.com/user.read
