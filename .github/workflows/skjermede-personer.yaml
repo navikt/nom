@@ -39,7 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build --tag ${IMAGE} --build-arg SCRIPT_PATH=apps/skjermede-personer/init.sh JAR_PATH=apps/skjermede-personer/target/app.jar .
+          docker build --tag ${IMAGE} --build-arg SCRIPT_PATH=apps/skjermede-personer/init.sh --build-arg JAR_PATH=apps/skjermede-personer/target/app.jar .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
 
