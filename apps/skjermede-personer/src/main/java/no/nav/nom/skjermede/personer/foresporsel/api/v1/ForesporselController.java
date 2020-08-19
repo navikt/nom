@@ -112,7 +112,7 @@ public class ForesporselController {
         skjermetPersonRepository.save(mapToSkjermetPerson(foresporsel, ressurs.getSluttdato()));
         foresporselRepository.delete(foresporsel);
 
-        return "Bekreftelse av skjerming registrert";
+        return "Bekreftelse av skjerming registrert"; //OBS: Skjerming-proxy er avhengig av denne. Endrer du denne må du endre begge plassene.
     }
 
     @Transactional(value = "transactionManager")
