@@ -18,7 +18,7 @@ spec:
     - name: FORESPORSEL_API
       value: https://www.nav.no/person/personopplysninger/skjerming-proxy/v1/foresporsel
     - name: AAD_ISSUER_URI
-      value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
+      value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b
     - name: AAD_REDIRECT_BASE_URI
       value: https://www.nav.no
     - name: AAD_B2C_DISCOVERYURL
