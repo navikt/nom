@@ -13,8 +13,8 @@ spring:
       client:
         registration:
           aad:
-            client-id: ${AAD_CLIENT_ID}
-            client-secret: ${AAD_CLIENT_SECRET}
+            client-id: a3658183-c7b9-4ea3-8254-3653e824db56
+            client-secret: GKczRvs:RDN:9[3Bnl5.COsKvfd1_hry
             authorization-grant-type: authorization_code
             redirect-uri: '${AAD_REDIRECT_BASE_URI:http://localhost:8085}/person/personopplysninger/skjerming-proxy/login/oauth2/code/{registrationId}'
             scope: openid, https://graph.microsoft.com/user.read
