@@ -74,6 +74,9 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/azuread
+        kvPath: /azuread/data/prod/creds/skjermede-personer
   leaderElection: true
   prometheus:
     enabled: true
