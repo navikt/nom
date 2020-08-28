@@ -10,10 +10,8 @@ import no.nav.nom.skjermede.personer.common.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -51,9 +49,12 @@ public class ScheduledForesporselSender {
                     .toString();
 
             try {
-                graphService.sendMail(content, hentEpost(foresporsel.getTilknyttetRessurs()), tokenService.getAccessToken());
-                foresporsel.setEpostSendt(LocalDateTime.now());
-                foresporselRepository.save(foresporsel);
+                val epost = hentEpost(foresporsel.getTilknyttetRessurs());
+                if (epost != null) {
+                    graphService.sendMail(content, epost, tokenService.getAccessToken());
+                    foresporsel.setEpostSendt(LocalDateTime.now());
+                    foresporselRepository.save(foresporsel);
+                }
             } catch (Exception e) {
                 log.error(String.format("Sending av skjerming-forespørsel epost mislyktes: %s", e.getMessage()));
             }
@@ -63,10 +64,6 @@ public class ScheduledForesporselSender {
     private String hentEpost(final String navident) {
         val ressurs = nomRessurserService.getInternRessursByNavident(navident, Boolean.TRUE);
 
-        if (ressurs == null || ressurs.getEpost() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ressurs med navident %s ikke funnet", navident));
-        }
-
-        return ressurs.getEpost();
+        return ressurs == null || ressurs.getEpost() == null ? null : ressurs.getEpost();
     }
 }
