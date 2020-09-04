@@ -25,4 +25,4 @@ spec:
       for: 1m
       severity: warning
       description: "Uvanlig mye trafikk mot de sikrede endepunktene i skjermede-personer"
-      action: "Sjekk Grafana til app {{ $labels.log_app }}, for å se hvorfor det er så mye trafikk: `sum(increase(http_server_requests_seconds_count{app=\"skjermede-personer\", kubernetes_namespace=\"default\", uri=~\"/api/v1/(foresporsel|skjerming)(/.*|)$\"}[10m]))`"
+      action: "Sjekk Grafana for å se hvorfor det er så mye trafikk."
