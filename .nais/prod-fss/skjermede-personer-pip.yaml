@@ -17,6 +17,7 @@ spec:
   port: 8080
   ingresses:
     - https://skjermede-personer-pip.nais.adeo.no
+    - https://skjermede-personer-pip.adeo.no
   replicas:
     min: 1
     max: 1
