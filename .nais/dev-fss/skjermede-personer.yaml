@@ -49,6 +49,7 @@ spec:
   port: 8080
   ingresses:
     - https://skjermede-personer.nais.preprod.local
+    - https://skjermede-personer.dev.adeo.no
   webproxy: true
   replicas:
     min: 1

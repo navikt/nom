@@ -27,6 +27,7 @@ spec:
   port: 8080
   ingresses:
     - https://nom-ressurser.nais.preprod.local
+    - https://nom-ressurser.dev.adeo.no
   webproxy: true
   leaderElection: true
   replicas:
