@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,6 +30,11 @@ public class DvhConsumer {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final long incrementValue = 1000L;
+
+    @PostConstruct
+    public void onStartUp() {
+        dvhScheduler();
+    }
 
     @Scheduled(cron = "${app.scheduledTasks.dvhConsumer}")
     public void dvhScheduler(){
