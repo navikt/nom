@@ -7,12 +7,12 @@ import lombok.val;
 import no.nav.nom.apps.nom.ressurser.common.LeaderElection;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-
-import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -31,8 +31,8 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final long incrementValue = 1000L;
 
-    @PostConstruct
-    public void onStartUp() {
+    @EventListener
+    public void onStartUp(ContextRefreshedEvent contextRefreshedEvent) {
         dvhScheduler();
     }
 
