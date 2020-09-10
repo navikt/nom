@@ -31,7 +31,7 @@ public class DvhConsumer {
 
     private final long DELAY = 60*60*1000;
 
-    @Scheduled(initialDelay = 180000, fixedDelay = 180000)
+    @Scheduled(initialDelay = 180000, fixedDelay = DELAY)
     @Transactional(value = "transactionManager")
     public void dvhScheduler(){
         if(leaderElection.isLeader()) {
