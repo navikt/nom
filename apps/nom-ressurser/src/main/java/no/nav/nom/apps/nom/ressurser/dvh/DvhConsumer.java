@@ -7,8 +7,6 @@ import lombok.val;
 import no.nav.nom.apps.nom.ressurser.common.LeaderElection;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +29,10 @@ public class DvhConsumer {
     private final RestTemplate restTemplate = new RestTemplate();
     private final long incrementValue = 1000L;
 
-    @EventListener
-    public void onStartUp(ContextRefreshedEvent contextRefreshedEvent) {
-        dvhScheduler();
-    }
+    private final long DELAY = 60*60*1000;
 
-    @Scheduled(cron = "${app.scheduledTasks.dvhConsumer}")
+    @Scheduled(initialDelay = 180000, fixedDelay = 180000)
+    @Transactional(value = "transactionManager")
     public void dvhScheduler(){
         if(leaderElection.isLeader()) {
             log.info("Oppdaterer fra datavarehus..");
@@ -45,7 +41,6 @@ public class DvhConsumer {
         }
     }
 
-    @Transactional(value = "transactionManager")
     public int hentBulkOppdatering(){
         val dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
         val url = new StringBuilder(dvhEndpoint)
