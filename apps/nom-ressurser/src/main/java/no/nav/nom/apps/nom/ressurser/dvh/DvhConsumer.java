@@ -53,7 +53,7 @@ public class DvhConsumer {
         log.info("Leser fra sekvens {} til sekvens {}", dvhOffset.getOffset(), dvhOffset.getOffset() + incrementValue);
         DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
-        if (result != null && result.getAnsatteResultList() != null) {
+        if (result != null && !result.getAnsatteResultList().isEmpty()) {
             val resultList = result.getAnsatteResultList();
             dvhConsumerProcessorService.processRessurser(resultList);
 
