@@ -101,22 +101,12 @@ public class DvhConsumerProcessorService {
                 case "M":
                 case "N":
                     return "Eksternt".equals(ansattType) ? Ressurstype.EKSTERN : Ressurstype.INTERN;
-                case "E":
-                case "I":
-                case "L":
-                case "O":
-                case "P":
-                case "S":
-                case "T":
-                case "V":
-                case "Y":
-                    return Ressurstype.EKSTERN;
                 default:
-                    return null;
+                    return Ressurstype.EKSTERN;
             }
         }
 
         return "NAV Kommunalt".equals(ansattType) || "NAV Statlig".equals(ansattType)
-                ? Ressurstype.INTERN : ("Eksternt".equals(ansattType) ? Ressurstype.EKSTERN : null);
+                ? Ressurstype.INTERN : Ressurstype.EKSTERN;
     }
 }
