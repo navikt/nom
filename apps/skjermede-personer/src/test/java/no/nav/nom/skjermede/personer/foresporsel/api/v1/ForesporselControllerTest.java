@@ -12,7 +12,7 @@ import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.common.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
-import no.nav.nom.skjermede.personer.foresporsel.dto.TilknyttetForesporselDTO;
+import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.TilknyttetForesporselDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
