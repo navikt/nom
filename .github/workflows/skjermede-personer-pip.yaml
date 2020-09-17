@@ -15,7 +15,7 @@ on:
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-personer-pip:latest
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:latest
 
 jobs:
   build-jar-docker:
