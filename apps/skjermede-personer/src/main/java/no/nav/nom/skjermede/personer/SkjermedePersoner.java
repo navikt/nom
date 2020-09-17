@@ -14,5 +14,6 @@ public class SkjermedePersoner {
     public static void main(String[] args) {
         System.setProperty("kafka-transaction-uuid", UUID.randomUUID().toString().substring(0, 8));
         SpringApplication.run(SkjermedePersoner.class);
+
     }
 }
