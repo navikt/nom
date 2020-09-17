@@ -78,6 +78,8 @@ spec:
     paths:
       - mountPath: /var/run/secrets/nais.io/azuread
         kvPath: /azuread/data/prod/creds/skjermede-personer
+      - kvPath: /apikey/appdynamics/prod
+        mountPath: /var/run/secrets/nais.io/vault
   leaderElection: true
   prometheus:
     enabled: true
