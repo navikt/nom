@@ -6,10 +6,12 @@ on:
       - master
       - 'dev/*'
     paths-ignore:
-      - 'apps/nom-personer/**'
-      - 'apps/nom-personer-pip/**'
-      - '.nais/*/nom-personer*'
-      - '.github/**/nom-personer*'
+      - 'apps/skjermede-personer/**'
+      - 'apps/skjermede-personer-pip/**'
+      - '.nais/*/skjermede-personer.yaml'
+      - '.nais/*/skjermede-personer-pip*'
+      - '.github/**/skjermede-personer.yaml'
+      - '.github/**/skjermede-personer-pip*'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-ressurser:${{ github.sha }}
