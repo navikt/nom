@@ -5,12 +5,17 @@ on:
     branches:
       - master
       - 'dev/*'
-    paths:
-      - 'apps/skjermede-personer/**'
-      - '.nais/*/skjermede-personer.yaml'
+    paths-ignore:
+      - 'apps/nom-ressurser/**'
+      - 'apps/skjermede-personer-pip/**'
+      - '.nais/*/nom-ressurser.yaml'
+      - '.nais/*/skjermede-personer-pip*'
+      - '.github/**/nom-ressurser.yaml'
+      - '.github/**/skjermede-personer-pip*'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-personer:latest
 
 jobs:
   build-jar-docker:
@@ -39,14 +44,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build --tag ${IMAGE} --build-arg SCRIPT_PATH=apps/skjermede-personer/init.sh --build-arg JAR_PATH=apps/skjermede-personer/target/app.jar .
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg SCRIPT_PATH=apps/skjermede-personer/init.sh --build-arg JAR_PATH=apps/skjermede-personer/target/app.jar .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
+          docker push ${IMAGE_LATEST}
 
   deploy-dev:
     name: Deploy to NAIS dev-fss
     needs: build-jar-docker
-    if: startsWith(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
