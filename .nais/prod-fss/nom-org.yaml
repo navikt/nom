@@ -1,0 +1,34 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-org
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  image: {{ image }}
+  port: 8080
+  ingresses:
+    - https://nom-org.adeo.no
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  liveness:
+    path: internal/isAlive
+    initialDelay: 60
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/isReady
+    initialDelay: 60
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2048Mi
+    limits:
+      cpu: 1000m
+      memory: 4096Mi

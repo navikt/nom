@@ -7,10 +7,13 @@ on:
       - 'dev/*'
     paths-ignore:
       - '.github/**/delete_old_packages.yaml'
+      - 'apps/nom-org/**'
       - 'apps/nom-ressurser/**'
       - 'apps/skjermede-personer-pip/**'
+      - '.nais/*/nom-org.yaml'
       - '.nais/*/nom-ressurser.yaml'
       - '.nais/*/skjermede-personer-pip*'
+      - '.github/**/nom-org.yaml'
       - '.github/**/nom-ressurser.yaml'
       - '.github/**/skjermede-personer-pip*'
 
