@@ -1,4 +1,4 @@
-name: Build, Deploy nom-org
+name: Build, Deploy nom-enheter
 
 on:
   push:
@@ -18,8 +18,8 @@ on:
       - '.github/**/skjermede-personer-pip*'
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-org:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-org:latest
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-enheter:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-enheter:latest
 
 jobs:
   build-jar-docker:
@@ -43,12 +43,12 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :nom-org --also-make
+        run: mvn clean package --projects :nom-enheter --also-make
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/nom-org/target/app.jar .
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/nom-enheter/target/app.jar .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
           docker push ${IMAGE_LATEST}
@@ -63,7 +63,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/dev-fss/nom-org.yaml
+          RESOURCE: .nais/dev-fss/nom-enheter.yaml
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -76,7 +76,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/prod-fss/nom-org.yaml
+          RESOURCE: .nais/prod-fss/nom-enheter.yaml
 
   security:
     runs-on: ubuntu-latest

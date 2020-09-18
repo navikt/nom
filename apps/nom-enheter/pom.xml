@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nom-org</artifactId>
-    <name>NOM :: APPS :: NOM Org</name>
+    <artifactId>nom-enheter</artifactId>
+    <name>NOM :: APPS :: NOM Enheter</name>
 
     <dependencies>
         <dependency>

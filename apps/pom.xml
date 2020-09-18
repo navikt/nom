@@ -11,7 +11,7 @@
     </parent>
 
     <modules>
-        <module>nom-org</module>
+        <module>nom-enheter</module>
         <module>nom-ressurser</module>
         <module>skjermede-personer</module>
         <module>skjermede-personer-pip</module>

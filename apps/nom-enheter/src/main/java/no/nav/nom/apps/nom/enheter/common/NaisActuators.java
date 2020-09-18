@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.org.common;
+package no.nav.nom.apps.nom.enheter.common;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

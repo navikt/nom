@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: nom-org
+  name: nom-enheter
   namespace: nom
   labels:
     team: nom
@@ -9,7 +9,7 @@ spec:
   image: {{ image }}
   port: 8080
   ingresses:
-    - https://nom-org.dev.adeo.no
+    - https://nom-enheter.dev.adeo.no
   replicas:
     min: 1
     max: 1
