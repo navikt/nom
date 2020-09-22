@@ -11,9 +11,9 @@ pgAdmin er satt opp lokalt på adressen http://localhost:8089/ med bruker/passor
 For å nå en lokal nom database velg 'Create server' og gi den ett navn på 'General' tabben.
 På 'Connection' tabben sett opp følgende:
 ```
-Host name:  ressurs-db/skjermet-db (velg en)
-port: 5432/5433 (henholdsvis)
-Maintenance database: postgres-ressurs/postgres-skjermet (henholdsvis)
+Host name:  enhet-db/ressurs-db/skjermet-db (velg en)
+port: 5432/5433/5434 (henholdsvis)
+Maintenance database: postgres-enheter/postgres-ressurs/postgres-skjermet (henholdsvis)
 Username: postgres
 Password: password
 ```
