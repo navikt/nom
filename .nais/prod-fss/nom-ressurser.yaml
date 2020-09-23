@@ -27,7 +27,6 @@ spec:
   port: 8080
   ingresses:
     - https://nom-ressurser.nais.adeo.no
-    - https://nom-ressurser.adeo.no
   replicas:
     min: 1
     max: 1
