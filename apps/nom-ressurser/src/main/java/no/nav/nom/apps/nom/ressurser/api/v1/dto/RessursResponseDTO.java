@@ -1,49 +1,33 @@
 package no.nav.nom.apps.nom.ressurser.api.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.contract.nom.dto.Ressurstype;
 
 import java.time.LocalDate;
-
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RessursResponseDTO {
 
-    @JsonProperty
     private String personident;
-
-    @JsonProperty
     private String navident;
-
-    @JsonProperty
     private String fornavn;
-
-    @JsonProperty
     private String etternavn;
-
-    @JsonProperty
     private String epost;
-
-    @JsonProperty
     private Ressurstype ressurstype;
+    private Boolean permisjon;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startdato;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate sluttdato;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate opprettetdato;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate endretdato;
 
     public static RessursResponseDTO fromEntity(final Ressurs ressurs) {
         return builder()
@@ -53,10 +37,9 @@ public class RessursResponseDTO {
                 .etternavn(ressurs.getEtternavn())
                 .epost(ressurs.getEpost())
                 .ressurstype(ressurs.getRessurstype())
+                .permisjon(ressurs.getPermisjon())
                 .startdato(ressurs.getStartdato())
                 .sluttdato(ressurs.getSluttdato())
-                .opprettetdato(ressurs.getOpprettetDato())
-                .endretdato(ressurs.getEndretDato())
                 .build();
     }
 }

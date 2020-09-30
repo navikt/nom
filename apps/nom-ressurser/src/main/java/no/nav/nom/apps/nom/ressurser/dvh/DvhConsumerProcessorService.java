@@ -44,6 +44,7 @@ public class DvhConsumerProcessorService {
                 .etternavn(dvhRessursDTO.getEtternavn())
                 .epost(dvhRessursDTO.getEpost())
                 .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode(), dvhRessursDTO.getAnsattType()))
+                .permisjon(dvhRessursDTO.getPermisjon() != null && dvhRessursDTO.getPermisjon().equals("yes"))
                 .startdato(dvhRessursDTO.getRemedyStartDato())
                 .sluttdato(getSluttDato(dvhRessursDTO))
                 .endretDato(LocalDate.now())
@@ -76,12 +77,12 @@ public class DvhConsumerProcessorService {
         }
 
         if ("NAV Kommunalt".equals(dvhRessursDTO.getAnsattType())) {
-            return "JA".equals(dvhRessursDTO.getPermittert())
+            return "JA".equals(dvhRessursDTO.getPermisjon())
                     ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
         }
 
         return dvhRessursDTO.getAgressoSluttDato() != null && !D2099.equals(dvhRessursDTO.getAgressoSluttDato())
-                ? dvhRessursDTO.getAgressoSluttDato() : "JA".equals(dvhRessursDTO.getPermittert())
+                ? dvhRessursDTO.getAgressoSluttDato() : "JA".equals(dvhRessursDTO.getPermisjon())
                 ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
     }
 

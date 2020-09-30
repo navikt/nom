@@ -56,6 +56,10 @@ public class Ressurs {
     private Ressurstype ressurstype;
 
     @NotNull
+    @Column(name = "PERMISJON")
+    private Boolean permisjon;
+
+    @NotNull
     @Column(name = "STARTDATO")
     private LocalDate startdato;
 

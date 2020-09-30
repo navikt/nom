@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.ressurser.ressurser;
 
-import no.nav.nom.contract.nom.dto.Ressurstype;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,13 +14,7 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     Optional<Ressurs> findByNavident(String navident);
 
-    List<Ressurs> findAllByPersonidentAndRessurstype(String personIdent, Ressurstype ressurstype);
-
     List<Ressurs> findAllByProduced(boolean produced);
-
-    List<Ressurs> findAllByPersonident(String personident);
-
-    Optional<Ressurs> findFirstByNavidentAndEpostNotNullOrderByOpprettetDatoDesc(String navident);
 
     @Query(value = "SELECT COUNT(*) FROM T_RESSURS WHERE (sluttdato > CURRENT_DATE OR sluttdato IS NULL) AND ressurstype = :ressurstype", nativeQuery = true)
     long countActiveByRessurstype(@Param("ressurstype") String ressurstype);
