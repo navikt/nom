@@ -29,6 +29,8 @@ public class RessursDTO {
 
     private Ressurstype ressurstype;
 
+    private Boolean permisjon;
+
     private LocalDate startdato;
 
     private LocalDate sluttdato;

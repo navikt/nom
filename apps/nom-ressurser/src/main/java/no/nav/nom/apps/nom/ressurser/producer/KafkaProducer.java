@@ -45,6 +45,7 @@ public class KafkaProducer {
                 .etternavn(ressurs.getEtternavn())
                 .epost(ressurs.getEpost())
                 .ressurstype(ressurs.getRessurstype())
+                .permisjon((ressurs.getPermisjon()))
                 .startdato(ressurs.getStartdato())
                 .sluttdato(ressurs.getSluttdato())
                 .opprettetdato(ressurs.getOpprettetDato())

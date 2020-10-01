@@ -1,0 +1,23 @@
+name: Release NOM libs (Github Package Registry)
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'dev/*'
+    path:
+      - './libs/contract-nom-dto/**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Run Maven release
+        run: ./libs/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

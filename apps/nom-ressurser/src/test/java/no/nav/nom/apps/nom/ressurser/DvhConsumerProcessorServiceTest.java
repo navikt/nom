@@ -54,7 +54,7 @@ public class DvhConsumerProcessorServiceTest {
                 .agressoSluttDato(LocalDate.now().minusDays(1))
                 .ressursTypeKode("M")
                 .ansattType("NAV Statlig")
-                .permittert("Nei")
+                .permisjon("Nei")
                 .build();
     }
 
@@ -83,7 +83,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @Test
     public void testProcessRessurserStatligPermittert() {
-        dvhRessursDTO.setPermittert("JA");
+        dvhRessursDTO.setPermisjon("JA");
         dvhRessursDTO.setAgressoSluttDato(null);
 
         when(ressursRepository.getGyldigRessursByNavident(anyString())).thenReturn(Optional.of(Ressurs.builder().sluttdato(null).build()));

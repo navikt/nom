@@ -39,7 +39,7 @@ public class DvhRessursDTO {
     private LocalDate remedySluttDato;
 
     @JsonProperty("REMEDY_PERMISJON")
-    private String permittert;
+    private String permisjon;
 
     @JsonProperty("AGRESSO_SLUTT_DATO")
     private LocalDate agressoSluttDato;
