@@ -32,6 +32,9 @@ spec:
   ingresses:
     - https://nom-ressurser.nais.preprod.local
     - https://nom-ressurser.dev.adeo.no
+  azure:
+    application:
+      enabled: true
   webproxy: true
   leaderElection: true
   replicas:
