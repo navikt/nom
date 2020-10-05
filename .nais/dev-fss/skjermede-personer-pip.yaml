@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: skjermede-personer-pip
-  namespace: default
+  namespace: nom
   labels:
     team: nom
 spec:
