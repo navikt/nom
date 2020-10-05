@@ -24,6 +24,10 @@ spring:
             token-uri: ${AAD_ISSUER_URI:https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851}/oauth2/v2.0/token
             jwk-set-uri: ${AAD_ISSUER_URI:https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851}/discovery/v2.0/keys
 
+server:
+  error:
+    include-message: always
+
 maanderPlusSkjerming: 6
 
 postgres:

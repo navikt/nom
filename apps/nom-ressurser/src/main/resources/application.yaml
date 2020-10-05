@@ -15,6 +15,10 @@ spring:
     schemas: public
     table: schema_version
 
+server:
+  error:
+    include-message: always
+    
 postgres:
   mountPath: postgresql/${DB_ENV}
   jdbc:
