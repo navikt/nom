@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: nom-ressurser
-  namespace: default
+  namespace: nom
   labels:
     team: nom
 spec:
@@ -23,10 +23,17 @@ spec:
       value: prod
     - name: DVH_ENDPOINT
       value: https://tdv-p.adeo.no:9402/json/Hr/Nom/Nom_Ansatte
+    - name: AAD_B2C_DISCOVERYURL
+      value: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
+    - name: LOGINSERVICE_CLIENTID
+      value: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
   image: {{image}}
   port: 8080
   ingresses:
     - https://nom-ressurser.nais.adeo.no
+  azure:
+    application:
+      enabled: true
   replicas:
     min: 1
     max: 1

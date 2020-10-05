@@ -56,3 +56,12 @@ spring.kafka:
       max.block.ms: 15000
       enable.idempotence: true
       max.in.flight.requests.per.connection: 1
+
+no.nav:
+  security:
+    jwt:
+      issuer:
+        selvbetjening:
+          discoveryurl: ${AAD_B2C_DISCOVERYURL}
+          accepted_audience: ${LOGINSERVICE_CLIENTID}
+          proxyurl: http://webproxy.nais:8088

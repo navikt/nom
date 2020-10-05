@@ -16,6 +16,8 @@ public interface RessursRepository extends JpaRepository<Ressurs, Long> {
 
     List<Ressurs> findAllByProduced(boolean produced);
 
+    List<Ressurs> findAllByPersonident(String personIdent);
+
     @Query(value = "SELECT COUNT(*) FROM T_RESSURS WHERE (sluttdato > CURRENT_DATE OR sluttdato IS NULL) AND ressurstype = :ressurstype", nativeQuery = true)
     long countActiveByRessurstype(@Param("ressurstype") String ressurstype);
 
