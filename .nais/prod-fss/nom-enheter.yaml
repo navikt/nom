@@ -8,6 +8,7 @@ metadata:
 spec:
   image: {{ image }}
   port: 8080
+  leaderElection: true
   ingresses:
     - https://nom-enheter.adeo.no
   gcp:
