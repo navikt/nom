@@ -118,7 +118,7 @@ public class DvhConsumerProcessorServiceTest {
         val arg = ArgumentCaptor.forClass(Ressurs.class);
         verify(ressursRepository).save(arg.capture());
 
-        Assertions.assertEquals(arg.getValue().getSluttdato(), D2099);
+        Assertions.assertNull(arg.getValue().getSluttdato());
         Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.EKSTERN);
     }
 
