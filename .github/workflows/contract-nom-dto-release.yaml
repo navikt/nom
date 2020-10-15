@@ -6,7 +6,7 @@ on:
       - 'master'
       - 'dev/*'
     path:
-      - './libs/contract-nom-dto/**'
+      - 'libs/contract-nom-dto/**'
 
 jobs:
   release:
