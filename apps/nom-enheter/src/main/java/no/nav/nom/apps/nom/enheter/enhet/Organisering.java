@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -61,4 +62,17 @@ public class Organisering {
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
+
+    @Override
+    public boolean equals(Object o){
+        if(o == this){
+            return true;
+        }
+        else if(o instanceof Organisering){
+            if(Objects.equals(overenhet, ((Organisering) o).getOverenhet()))
+                if(Objects.equals(underenhet, ((Organisering) o).getUnderenhet()))
+                    return Objects.equals(organiseringstype, ((Organisering) o).getOrganiseringstype());
+        }
+        return false;
+    }
 }

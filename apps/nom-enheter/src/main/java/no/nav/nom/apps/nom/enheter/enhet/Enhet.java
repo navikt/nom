@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -29,6 +30,10 @@ public class Enhet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "enhetIdGenerator")
     @SequenceGenerator(name = "enhetIdGenerator", sequenceName = "T_ENHET_SEQ", allocationSize = 1)
     private Long id;
+
+    @NotNull
+    @Column(name= "dvh_id")
+    private String dvhId;
 
     @NotNull
     @Column(name = "ENHETSNR")
@@ -72,4 +77,19 @@ public class Enhet {
     @NotNull
     @Column(name = "ENDRET_DATO")
     private LocalDateTime endretDato;
+
+    @Override
+    public boolean equals(Object o){
+        if(o == this){
+            return true;
+        }
+        else if(o instanceof Enhet){
+            if(Objects.equals(dvhId, ((Enhet) o).dvhId))
+                if(Objects.equals(navn, ((Enhet) o).getNavn()))
+                    if(Objects.equals(enhetstype, ((Enhet) o).getEnhetstype()))
+                        if(Objects.equals(agressoNr, ((Enhet) o).getAgressoNr()))
+                            return Objects.equals(remedyNr, ((Enhet) o).getRemedyNr());
+        }
+        return false;
+    }
 }
