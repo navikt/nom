@@ -72,7 +72,7 @@ public class DvhConsumerProcessorService {
     private Enhet convertedEnhet(DvhEnhetDTO enhet){
         LocalDateTime currentTime = LocalDateTime.now();
         return Enhet.builder()
-                .dvhId(enhet.getNodeNivaa()+enhet.getEnhetKode())
+                .dvhId(enhet.getEnhetKode()+enhet.getNodeNivaa())
                 .navn(enhet.getEnhetNavn())
                 .enhetstype(enhet.getEnhetType())
                 .agressoNr(enhet.getAgressoNr())
@@ -89,8 +89,8 @@ public class DvhConsumerProcessorService {
     private Organisering convertedOrganisering(DvhEnhetDTO enhet){
         LocalDateTime currentTime = LocalDateTime.now();
         return Organisering.builder()
-                .overenhet(enhetRepository.findByDvhId(enhet.getNodeNivaaOver()+enhet.getOverEnhetKode()).stream().findAny().map(Enhet::getEnhetsnr).orElse(null))
-                .underenhet(enhetRepository.findByDvhId(enhet.getNodeNivaa()+enhet.getEnhetKode()).stream().findAny().map(Enhet::getEnhetsnr).orElse(null))
+                .overenhet(enhetRepository.findByDvhId(enhet.getOverEnhetKode()+enhet.getNodeNivaaOver()).stream().findAny().map(Enhet::getEnhetsnr).orElse(null))
+                .underenhet(enhetRepository.findByDvhId(enhet.getEnhetKode()+enhet.getNodeNivaa()).stream().findAny().map(Enhet::getEnhetsnr).orElse(null))
                 .organiseringstype(enhet.getOrganiseringsType())
                 .gyldigFra(enhet.getOrgGyldigFra() != null ? enhet.getOrgGyldigFra() : currentTime.toLocalDate())
                 .gyldigTil(enhet.getOrgGyldigTil())
