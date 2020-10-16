@@ -73,12 +73,13 @@ public class DvhConsumerProcessorService {
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
         if ("E".equals(dvhRessursDTO.getRessursTypeKode()) ||
             Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
-            return dvhRessursDTO.getRemedySluttDato();
+            return !D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getRemedySluttDato() : null;
         }
 
         if ("NAV Kommunalt".equals(dvhRessursDTO.getAnsattType())) {
             return "JA".equals(dvhRessursDTO.getPermisjon())
-                    ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
+                    ? getPersistedSluttDato(dvhRessursDTO.getNavident())
+                    : !D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getRemedySluttDato() : null;
         }
 
         return dvhRessursDTO.getAgressoSluttDato() != null && !D2099.equals(dvhRessursDTO.getAgressoSluttDato())
