@@ -29,7 +29,7 @@ public class DvhConsumerProcessorService {
     private void processEnheter(List<Enhet> enhetList){
         enhetList.forEach(
                         enhet -> {
-                            Enhet eksisterendeEnhet = enhetRepository.findByDvhIdAndGyldigTilIsNull(enhet.getDvhId());
+                            Enhet eksisterendeEnhet = enhetRepository.findAllByDvhIdAndValid(enhet.getDvhId());
                             if(!Objects.equals(enhet, eksisterendeEnhet)) {
                                 if (eksisterendeEnhet != null) {
                                     eksisterendeEnhet.setGyldigTil(enhet.getGyldigFra());
@@ -56,7 +56,7 @@ public class DvhConsumerProcessorService {
                     return true;
                 })
                 .forEach(organisering -> {
-                    Organisering eksisterende = organiseringRepository.findByOverenhetAndUnderenhetAndOrganiseringstypeAndGyldigTilIsNull(organisering.getOverenhet(), organisering.getUnderenhet(), organisering.getOrganiseringstype());
+                    Organisering eksisterende = organiseringRepository.findByOverAndUnderEnhetAndValid(organisering.getOverenhet(), organisering.getUnderenhet());
                     if(!Objects.equals(organisering, eksisterende)){
                         if(eksisterende != null){
                             eksisterende.setGyldigTil(organisering.getGyldigFra());
