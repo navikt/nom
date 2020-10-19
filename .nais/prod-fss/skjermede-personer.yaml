@@ -6,6 +6,8 @@ metadata:
   labels:
     team: nom
 spec:
+  envFrom:
+    - configMap: loginservice-idporten
   env:
     - name: DB_HOST
       value: A01DBVL009.adeo.no
@@ -21,10 +23,6 @@ spec:
       value: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b
     - name: AAD_REDIRECT_BASE_URI
       value: https://www.nav.no
-    - name: AAD_B2C_DISCOVERYURL
-      value: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
-    - name: LOGINSERVICE_CLIENTID
-      value: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
     - name: STS_AUD_SERVICEUSER

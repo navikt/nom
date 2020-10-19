@@ -86,8 +86,8 @@ no.nav:
     jwt:
       issuer:
         selvbetjening:
-          discoveryurl: ${AAD_B2C_DISCOVERYURL}
-          accepted_audience: ${LOGINSERVICE_CLIENTID}
+          discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
+          accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
           proxyurl: http://webproxy.nais:8088
         reststs:
           discoveryurl: ${STS_DISCOVERYURL}

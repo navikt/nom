@@ -6,6 +6,8 @@ metadata:
   labels:
     team: nom
 spec:
+  envFrom:
+    - configMap: loginservice-idporten
   env:
     - name: DB_HOST
       value: b27dbvl009.preprod.local
@@ -23,10 +25,6 @@ spec:
       value: preprod
     - name: DVH_ENDPOINT
       value: https://d26apvl00118.test.local:9402/json/Hr/Nom/Nom_Ansatte
-    - name: AAD_B2C_DISCOVERYURL
-      value: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
-    - name: LOGINSERVICE_CLIENTID
-      value: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
   image: {{image}}
   port: 8080
   ingresses:
