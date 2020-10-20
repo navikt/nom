@@ -29,7 +29,7 @@ public class DvhConsumerProcessorService {
     private void processEnheter(List<Enhet> enhetList){
         enhetList.forEach(
                         enhet -> {
-                            Enhet eksisterendeEnhet = enhetRepository.findAllByDvhIdAndValid(enhet.getDvhId());
+                            Enhet eksisterendeEnhet = enhetRepository.findByDvhIdAndValid(enhet.getDvhId());
                             if(!Objects.equals(enhet, eksisterendeEnhet)) {
                                 if (eksisterendeEnhet != null) {
                                     eksisterendeEnhet.setGyldigTil(enhet.getGyldigFra());

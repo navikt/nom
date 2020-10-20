@@ -13,7 +13,7 @@ public interface EnhetRepository extends JpaRepository<Enhet, Long> {
                     "WHERE dvh_id = :dvhId " +
                     "AND gyldig_fra <= CURRENT_TIMESTAMP " +
                     "AND (gyldig_til IS NULL OR gyldig_til > CURRENT_DATE)", nativeQuery = true)
-    Enhet findAllByDvhIdAndValid(String dvhId);
+    Enhet findByDvhIdAndValid(String dvhId);
 
     List<Enhet> findByDvhId(String dvhId);
 

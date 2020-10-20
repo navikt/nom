@@ -7,10 +7,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrganiseringRepository extends JpaRepository<Organisering, Long> {
 
-    @Query(value =  "SELECT * FROM T_ENHET " +
-                    "WHERE dvh_id = :dvhId " +
-                    "AND gyldig_fra <= CURRENT_TIMESTAMP " +
-                    "AND (gyldig_til IS NULL OR gyldig_til > CURRENT_DATE)", nativeQuery = true)
+    @Query(value =  "SELECT * FROM T_ORGANISERING " +
+                    "WHERE OVERENHET = :overEnhet AND UNDERENHET = :underEnhet " +
+                    "AND GYLDIG_FRA <= CURRENT_TIMESTAMP " +
+                    "AND (SLUTTDATO IS NULL OR SLUTTDATO > CURRENT_DATE)", nativeQuery = true)
     Organisering findByOverAndUnderEnhetAndValid(Long overEnhet, Long underEnhet);
 
 }
