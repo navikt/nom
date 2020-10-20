@@ -13,7 +13,7 @@ spec:
   port: 8080
   leaderElection: true
   ingresses:
-    - https://nom-enheter.adeo.no
+    - https://nom-enheter.intern.nav.no
   gcp:
     sqlInstances:
       - type: POSTGRES_11
