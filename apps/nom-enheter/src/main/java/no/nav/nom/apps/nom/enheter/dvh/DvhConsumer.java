@@ -6,6 +6,7 @@ import lombok.val;
 import no.nav.nom.apps.nom.enheter.common.LeaderElection;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,10 @@ public class DvhConsumer {
                     .toString();
 
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
+
+            log.info("attempt 1");
+            restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+            log.info("attempt 2");
             DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
             if (result != null && !result.getEnhetResultList().isEmpty()) {
