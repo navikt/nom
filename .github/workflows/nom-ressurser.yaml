@@ -10,12 +10,15 @@ on:
       - 'apps/skjermede-personer/**'
       - 'apps/skjermede-personer-pip/**'
       - 'apps/nom-enheter/**'
+      - 'apps/nom-proxy/**'
       - '.nais/*/skjermede-personer.yaml'
       - '.nais/*/skjermede-personer-pip*'
       - '.nais/*/nom-enheter.yaml'
+      - '.nais/*/nom-proxy.yaml'
       - '.github/**/skjermede-personer.yaml'
       - '.github/**/skjermede-personer-pip*'
       - '.github/**/nom-enheter.yaml'
+      - '.github/**/nom-proxy.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-ressurser:${{ github.sha }}
