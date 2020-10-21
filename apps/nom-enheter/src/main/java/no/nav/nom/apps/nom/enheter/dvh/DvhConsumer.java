@@ -38,15 +38,12 @@ public class DvhConsumer {
             log.info("Oppdaterer fra datavarehus..");
             val dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
             val url = new StringBuilder(dvhEndpoint)
-                    .append("?in_sekvens_fra=")
-                    .append(dvhOffset.getOffset())
+                    .append("?in_sekvens_fra=0")
+                    //.append(dvhOffset.getOffset())
+                    .append("&in_sekvens_til=5")
                     .toString();
 
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
-
-            log.info("attempt 1");
-            restTemplate.exchange("https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE", HttpMethod.GET, null, String.class);
-            log.info("attempt 2");
             DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
             if (result != null && !result.getEnhetResultList().isEmpty()) {
