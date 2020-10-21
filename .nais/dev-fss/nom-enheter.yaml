@@ -12,6 +12,7 @@ spec:
   image: {{ image }}
   port: 8080
   leaderElection: true
+  webproxy: true
   ingresses:
     - https://nom-enheter.dev.intern.nav.no
   gcp:
