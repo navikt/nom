@@ -43,6 +43,10 @@ public class DvhConsumer {
                     .toString();
 
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
+
+            log.info("attempt 1");
+            restTemplate.exchange("https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE", HttpMethod.GET, null, String.class);
+            log.info("attempt 2");
             DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
 
             if (result != null && !result.getEnhetResultList().isEmpty()) {
