@@ -24,8 +24,8 @@ public class DvhConsumer {
     @Value("${proxy.endpoint.hrog.hierarki}")
     private String nomProxyEndpoint;
 
-    @Qualifier(value = "nomProxyRestTemplate")
-    private final RestTemplate restTemplate;
+    @Qualifier("nomProxyRestTemplate")
+    private final RestTemplate nomProxyRestTemplate;
     private final OffsetRepository offsetRepository;
     private final LeaderElection leaderElection;
     private final DvhConsumerProcessorService dvhConsumerProcessorService;
@@ -36,7 +36,6 @@ public class DvhConsumer {
     @Transactional(value = "transactionManager")
     public void dvhScheduler(){
         if(leaderElection.isLeader()) {
-            log.info("dvh consumer: "+restTemplate.toString());
             log.info("Oppdaterer fra datavarehus..");
             val dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
             val url = UriComponentsBuilder
@@ -45,7 +44,7 @@ public class DvhConsumer {
                     .build().toUriString();
 
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
-            DvhResultWrapper result = restTemplate.getForObject(url, DvhResultWrapper.class);
+            DvhResultWrapper result = nomProxyRestTemplate.getForObject(url, DvhResultWrapper.class);
 
             if (result != null && !result.getEnhetResultList().isEmpty()) {
                 val resultList = result.getEnhetResultList();

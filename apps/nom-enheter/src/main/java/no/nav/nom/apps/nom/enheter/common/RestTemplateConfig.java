@@ -20,13 +20,6 @@ import java.util.Optional;
 @Configuration
 public class RestTemplateConfig {
 
-    @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate template =  new RestTemplate();
-        log.info("bean1: "+template.toString());
-        return template;
-    }
-
     @Qualifier(value = "nomProxyRestTemplate")
     @Bean
     public RestTemplate nomProxyRestTemplate(
@@ -42,7 +35,6 @@ public class RestTemplateConfig {
         RestTemplate template = restTemplateBuilder
                 .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
                 .build();
-        log.info("bean2: "+template.toString());
         return template;
     }
 
