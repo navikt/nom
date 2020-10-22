@@ -15,5 +15,5 @@ no.nav.security.jwt:
         scope: ${NOM_PROXY_CLIENT_ID}
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
-          client-jwk: ${AZURE_APP_JWKS}
+          client-jwk: ${AZURE_APP_JWK}
           client-auth-method: private_key_jwt
