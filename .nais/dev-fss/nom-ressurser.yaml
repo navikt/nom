@@ -24,7 +24,7 @@ spec:
     - name: STACK
       value: preprod
     - name: DVH_ENDPOINT
-      value: https://d26apvl00118.test.local:9402/json/Hr/Nom/Nom_Ansatte
+      value: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
   image: {{image}}
   port: 8080
   ingresses:

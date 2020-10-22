@@ -1,0 +1,87 @@
+name: Build, Deploy nom-proxy
+
+on:
+  push:
+    branches:
+      - master
+      - 'dev/*'
+    paths-ignore:
+      - '.github/**/delete_old_packages.yaml'
+      - 'apps/nom-ressurser/**'
+      - 'apps/skjermede-personer/**'
+      - 'apps/skjermede-personer-pip/**'
+      - 'apps/nom-enheter/**'
+      - '.nais/*/nom-ressurser.yaml'
+      - '.nais/*/skjermede-personer.yaml'
+      - '.nais/*/skjermede-personer-pip*'
+      - '.nais/*/nom-enheter.yaml'
+      - '.github/**/nom-ressurser.yaml'
+      - '.github/**/skjermede-personer.yaml'
+      - '.github/**/skjermede-personer-pip*'
+      - '.github/**/nom-enheter.yaml'
+
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-proxy:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-proxy:latest
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Cache Depdendencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Build
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+        run: mvn clean package --projects :nom-proxy --also-make
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/nom-proxy/target/app.jar .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE}
+          docker push ${IMAGE_LATEST}
+
+  deploy-dev:
+    name: Deploy to NAIS dev-fss
+    needs: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: .nais/dev-fss/nom-proxy.yaml
+
+
+  security:
+    runs-on: ubuntu-latest
+    needs: build-jar-docker
+    steps:
+      - name: Run Snyk to check Docker image for vulnerabilities
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEVERITY_TRESHOLD: high
+        run: |
+          sudo npm install -g snyk
+          snyk auth ${SNYK_TOKEN}
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          snyk monitor --severity-threshold=${SEVERITY_TRESHOLD} --org=org-6kx --docker ${IMAGE_LATEST}
+        continue-on-error: false

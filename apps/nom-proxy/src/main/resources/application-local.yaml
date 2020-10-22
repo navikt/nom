@@ -1,0 +1,10 @@
+dvh.endpoint.hrog.hierarki: test
+
+no.nav:
+  security:
+    jwt:
+      issuer:
+        azure:
+          discoveryurl: http://metadata
+          accepted_audience: aud-localhost
+          proxyurl:

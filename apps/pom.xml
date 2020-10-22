@@ -15,6 +15,7 @@
         <module>nom-ressurser</module>
         <module>skjermede-personer</module>
         <module>skjermede-personer-pip</module>
+        <module>nom-proxy</module>
     </modules>
 
     <artifactId>apps</artifactId>

@@ -61,6 +61,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.dkanejs.maven.plugins</groupId>
+            <artifactId>docker-compose-maven-plugin</artifactId>
+            <version>4.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.sisu</groupId>
+                    <artifactId>org.eclipse.sisu.plexus</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-plugin-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,5 +87,54 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.dkanejs.maven.plugins</groupId>
+                        <artifactId>docker-compose-maven-plugin</artifactId>
+                        <version>4.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>up</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>up</goal>
+                                </goals>
+                                <configuration>
+                                    <composeFile>${project.parent.parent.basedir}/docker-compose.yml</composeFile>
+                                    <detachedMode>true</detachedMode>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>down</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>down</goal>
+                                </goals>
+                                <configuration>
+                                    <composeFile>${project.parent.parent.basedir}/docker-compose.yml</composeFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

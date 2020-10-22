@@ -5,7 +5,7 @@ on:
     branches:
       - 'master'
       - 'dev/*'
-    path:
+    paths:
       - 'libs/contract-nom-dto/**'
 
 jobs:
