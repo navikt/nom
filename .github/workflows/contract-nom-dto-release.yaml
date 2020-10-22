@@ -5,9 +5,8 @@ on:
     branches:
       - 'master'
       - 'dev/*'
-    path-ignore:
-      - '*'
-      - '!libs/contract-nom-dto/**'
+    paths:
+      - 'libs/contract-nom-dto/**'
 
 jobs:
   release:
