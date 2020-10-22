@@ -32,7 +32,6 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
-            <version>${token-validation.version}</version>
         </dependency>
     </dependencies>
 
