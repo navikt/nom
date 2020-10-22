@@ -8,7 +8,9 @@ metadata:
 spec:
   env:
     - name: PROXY_ENDPOINT_HROG_HIERARKI
-      value: https://tdv-u.adeo.no//api/v1/proxy/HRORG_HIERARKI
+      value: https://nom-proxy.dev-fss-pub.nais.io/api/v1/proxy/NOM_HRORG_HIEARKI_PARAM
+  envFrom:
+    - secret: nom-enheter-secrets
   image: {{ image }}
   port: 8080
   leaderElection: true
@@ -21,7 +23,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host:
+        - host: https://nom-proxy.dev-fss-pub.nais.io/
   gcp:
     sqlInstances:
       - type: POSTGRES_11
