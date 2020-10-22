@@ -1,9 +1,11 @@
 package no.nav.nom.apps.nom.proxy.common;
 
+import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Unprotected
 @RestController
 @RequestMapping(NaisActuators.BASE_URL)
 public class NaisActuators {

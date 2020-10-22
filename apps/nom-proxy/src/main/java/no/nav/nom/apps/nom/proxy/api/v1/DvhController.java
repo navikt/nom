@@ -2,6 +2,7 @@ package no.nav.nom.apps.nom.proxy.api.v1;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Protected
 @RestController
 @RequestMapping(value = "/api/v1/proxy", produces = APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
