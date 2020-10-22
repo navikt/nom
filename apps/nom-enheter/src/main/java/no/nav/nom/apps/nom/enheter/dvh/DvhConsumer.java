@@ -43,6 +43,7 @@ public class DvhConsumer {
                     .queryParam("in_sekvens_fra", dvhOffset.getOffset())
                     .build().toUriString();
 
+            log.info("url: "+url);
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
             DvhResultWrapper result = nomProxyRestTemplate.getForObject(url, DvhResultWrapper.class);
 
