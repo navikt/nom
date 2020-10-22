@@ -7,14 +7,21 @@ metadata:
     team: nom
 spec:
   env:
-    - name: DVH_ENDPOINT
-      value: https://tdv-u.adeo.no/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM
+    - name: PROXY_ENDPOINT_HROG_HIERARKI
+      value: https://tdv-u.adeo.no//api/v1/proxy/HRORG_HIERARKI
   image: {{ image }}
   port: 8080
   leaderElection: true
-  webproxy: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   ingresses:
     - https://nom-enheter.dev.intern.nav.no
+  accessPolicy:
+    outbound:
+      external:
+        - host:
   gcp:
     sqlInstances:
       - type: POSTGRES_11

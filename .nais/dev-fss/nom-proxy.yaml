@@ -12,6 +12,10 @@ spec:
   image: {{ image }}
   port: 8080
   webproxy: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   ingresses:
     - https://nom-proxy.dev.adeo.no
   replicas:
