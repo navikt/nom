@@ -73,18 +73,22 @@ public class DvhConsumerProcessorService {
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
         if ("E".equals(dvhRessursDTO.getRessursTypeKode()) ||
             Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
-            return !D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getRemedySluttDato() : null;
+            return getDateOrNull(dvhRessursDTO.getRemedySluttDato());
         }
 
         if ("NAV Kommunalt".equals(dvhRessursDTO.getAnsattType())) {
             return "JA".equals(dvhRessursDTO.getPermisjon())
                     ? getPersistedSluttDato(dvhRessursDTO.getNavident())
-                    : !D2099.equals(dvhRessursDTO.getRemedySluttDato()) ? dvhRessursDTO.getRemedySluttDato() : null;
+                    : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
         }
 
         return dvhRessursDTO.getAgressoSluttDato() != null && !D2099.equals(dvhRessursDTO.getAgressoSluttDato())
                 ? dvhRessursDTO.getAgressoSluttDato() : "JA".equals(dvhRessursDTO.getPermisjon())
-                ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : dvhRessursDTO.getRemedySluttDato();
+                ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
+    }
+
+    private LocalDate getDateOrNull(final LocalDate dato) {
+        return !D2099.equals(dato) ? dato : null;
     }
 
     private LocalDate getPersistedSluttDato(final String navident) {
