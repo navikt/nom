@@ -24,16 +24,16 @@ public class DvhController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @GetMapping("/HRORG_HIERARKI")
-    public String requestNomEnheter(@RequestParam(required = false) String sekvens_fra,
-                                    @RequestParam(required = false) String sekvens_til){
+    @GetMapping("/NOM_HRORG_HIEARKI_PARAM")
+    public String requestNomEnheter(@RequestParam(required = false) String in_sekvens_fra,
+                                    @RequestParam(required = false) String in_sekvens_til){
         val url = UriComponentsBuilder
                 .fromUriString(dvhHrogHierarkiUrl);
-        if (sekvens_fra != null){
-            url.queryParam("in_sekvens_fra", sekvens_fra);
+        if (in_sekvens_fra != null){
+            url.queryParam("in_sekvens_fra", in_sekvens_fra);
         }
-        if(sekvens_til != null){
-            url.queryParam("in_sekvens_til", sekvens_til);
+        if(in_sekvens_til != null){
+            url.queryParam("in_sekvens_til", in_sekvens_til);
         }
 
         return restTemplate.getForObject(url.build().toUriString(), String.class);

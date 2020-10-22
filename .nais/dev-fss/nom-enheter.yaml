@@ -23,7 +23,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: https://nom-proxy.dev-fss-pub.nais.io/
+        - host: https://nom-proxy.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_11
