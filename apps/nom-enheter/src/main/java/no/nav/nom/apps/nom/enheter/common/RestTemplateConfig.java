@@ -23,7 +23,7 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate template =  new RestTemplate();
-        log.info("bean2: "+template.toString());
+        log.info("bean1: "+template.toString());
         return template;
     }
 
