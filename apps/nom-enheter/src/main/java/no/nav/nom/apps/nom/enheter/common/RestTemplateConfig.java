@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.enheter.common;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.security.token.support.client.core.ClientProperties;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
+@Slf4j
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
 public class RestTemplateConfig {
@@ -47,6 +49,7 @@ public class RestTemplateConfig {
         return (request, body, execution) -> {
             OAuth2AccessTokenResponse response =
                     oAuth2AccessTokenService.getAccessToken(clientProperties);
+            log.info("token: "+response.getAccessToken());
             request.getHeaders().setBearerAuth(response.getAccessToken());
             return execution.execute(request, body);
         };
