@@ -71,6 +71,21 @@ public class DvhConsumerProcessorServiceTest {
     }
 
     @Test
+    public void testProcessRessurserStatligUtenRemedySluttdat() {
+        dvhRessursDTO.setRemedySluttDato(D2099);
+        dvhRessursDTO.setAgressoSluttDato(D2099);
+
+        dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
+
+        val arg = ArgumentCaptor.forClass(Ressurs.class);
+        verify(ressursRepository).save(arg.capture());
+        System.out.println(arg.getValue().getSluttdato());
+
+        Assertions.assertNull(arg.getValue().getSluttdato());
+        Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.INTERN);
+    }
+
+    @Test
     public void testProcessRessurserStatligMedRemedySluttdato() {
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
