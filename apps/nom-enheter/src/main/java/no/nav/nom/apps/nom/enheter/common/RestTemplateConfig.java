@@ -22,7 +22,9 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        RestTemplate template =  new RestTemplate();
+        log.info("bean2: "+template.toString());
+        return template;
     }
 
     @Qualifier(value = "nomProxyRestTemplate")
@@ -37,9 +39,11 @@ public class RestTemplateConfig {
                 Optional.ofNullable(clientConfigurationProperties.getRegistration().get("nom-proxy-client"))
                         .orElseThrow(() -> new RuntimeException("could not find oauth2 client config for nom-proxy-client"));
 
-        return restTemplateBuilder
+        RestTemplate template = restTemplateBuilder
                 .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
                 .build();
+        log.info("bean2: "+template.toString());
+        return template;
     }
 
     private ClientHttpRequestInterceptor bearerTokenInterceptor(

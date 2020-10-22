@@ -36,6 +36,7 @@ public class DvhConsumer {
     @Transactional(value = "transactionManager")
     public void dvhScheduler(){
         if(leaderElection.isLeader()) {
+            log.info("dvh consumer: "+restTemplate.toString());
             log.info("Oppdaterer fra datavarehus..");
             val dvhOffset = offsetRepository.findByOffsetName("DVH_OFFSET");
             val url = UriComponentsBuilder
