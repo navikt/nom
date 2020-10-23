@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,33 +20,36 @@ public class DvhConsumerProcessorService {
     private final EnhetRepository enhetRepository;
     private final OrganiseringRepository organiseringRepository;
 
-    public void processResult(List<DvhEnhetDTO> dvhEnhetList){
-        processEnheter(dvhEnhetList.stream().map(this::convertedEnhet).collect(Collectors.toList()));
-        processOrganiseringer(dvhEnhetList.stream().map(this::convertedOrganisering).collect(Collectors.toList()));
+    void processResult(List<DvhEnhetDTO> dvhEnhetList){
+        List<DvhEnhetDTO> filteredEnhetList = dvhEnhetList.stream().filter(e -> !e.getOrgNodeStatus().toUpperCase().equals("P")).collect(Collectors.toList());
+        processEnheter(filteredEnhetList);
+        processOrganiseringer(filteredEnhetList);
     }
 
-    private void processEnheter(List<Enhet> enhetList){
-        enhetList.forEach(
+    private void processEnheter(List<DvhEnhetDTO> enhetList){
+        enhetList.stream()
+                .map(this::convertedEnhet)
+                .forEach(
                         enhet -> {
                             Enhet eksisterendeEnhet = enhetRepository.findByDvhIdAndValid(enhet.getDvhId());
-                            if(!Objects.equals(enhet, eksisterendeEnhet)) {
-                                if (eksisterendeEnhet != null) {
-                                    eksisterendeEnhet.setGyldigTil(enhet.getGyldigFra());
-                                    eksisterendeEnhet.setEndretAv(enhet.getOpprettetAv());
-                                    eksisterendeEnhet.setEndretDato(enhet.getOpprettetDato());
-                                    enhetRepository.save(eksisterendeEnhet);
+                            if(eksisterendeEnhet != null && !enhet.equals(eksisterendeEnhet)) {
+                                eksisterendeEnhet.setGyldigTil(enhet.getGyldigFra());
+                                eksisterendeEnhet.setEndretAv(enhet.getOpprettetAv());
+                                eksisterendeEnhet.setEndretDato(enhet.getOpprettetDato());
+                                enhetRepository.save(eksisterendeEnhet);
 
-                                    enhet.setEnhetsnr(eksisterendeEnhet.getEnhetsnr());
-                                } else {
-                                    enhet.setEnhetsnr(enhetRepository.getNextEnhetNr());
-                                }
-                                enhetRepository.save(enhet);
+                                enhet.setEnhetsnr(eksisterendeEnhet.getEnhetsnr());
+                            } else {
+                                enhet.setEnhetsnr(enhetRepository.getNextEnhetNr());
                             }
+                            enhetRepository.save(enhet);
                         });
     }
 
-    private void processOrganiseringer(List<Organisering> organiseringList){
+    private void processOrganiseringer(List<DvhEnhetDTO> organiseringList){
         organiseringList.stream()
+                .filter(o -> !o.getNodeNivaa().toUpperCase().equals("ORGNIV0"))
+                .map(this::convertedOrganisering)
                 .filter(organisering -> {
                     if(organisering.getOverenhet() == null){
                         log.error("Forkastet organisering fra underenhet: "+organisering.getUnderenhet()+", overEnhet mangler i databasen.");
@@ -57,15 +59,13 @@ public class DvhConsumerProcessorService {
                 })
                 .forEach(organisering -> {
                     Organisering eksisterende = organiseringRepository.findByOverAndUnderEnhetAndValid(organisering.getOverenhet(), organisering.getUnderenhet());
-                    if(!Objects.equals(organisering, eksisterende)){
-                        if(eksisterende != null){
-                            eksisterende.setGyldigTil(organisering.getGyldigFra());
-                            eksisterende.setEndretAv(organisering.getOpprettetAv());
-                            eksisterende.setEndretDato(eksisterende.getOpprettDato());
-                            organiseringRepository.save(eksisterende);
-                        }
-                        organiseringRepository.save(organisering);
+                    if(eksisterende != null && !organisering.equals(eksisterende)){
+                        eksisterende.setGyldigTil(organisering.getGyldigFra());
+                        eksisterende.setEndretAv(organisering.getOpprettetAv());
+                        eksisterende.setEndretDato(eksisterende.getOpprettDato());
+                        organiseringRepository.save(eksisterende);
                     }
+                    organiseringRepository.save(organisering);
                 });
     }
 

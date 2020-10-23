@@ -32,10 +32,9 @@ public class RestTemplateConfig {
                 Optional.ofNullable(clientConfigurationProperties.getRegistration().get("nom-proxy-client"))
                         .orElseThrow(() -> new RuntimeException("could not find oauth2 client config for nom-proxy-client"));
 
-        RestTemplate template = restTemplateBuilder
+        return restTemplateBuilder
                 .additionalInterceptors(bearerTokenInterceptor(clientProperties, oAuth2AccessTokenService))
                 .build();
-        return template;
     }
 
     private ClientHttpRequestInterceptor bearerTokenInterceptor(
@@ -45,7 +44,6 @@ public class RestTemplateConfig {
         return (request, body, execution) -> {
             OAuth2AccessTokenResponse response =
                     oAuth2AccessTokenService.getAccessToken(clientProperties);
-            log.info("token: "+response.getAccessToken());
             request.getHeaders().setBearerAuth(response.getAccessToken());
             return execution.execute(request, body);
         };

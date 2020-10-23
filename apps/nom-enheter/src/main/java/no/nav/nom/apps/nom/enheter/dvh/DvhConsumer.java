@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -43,18 +44,16 @@ public class DvhConsumer {
                     .queryParam("in_sekvens_fra", dvhOffset.getOffset())
                     .build().toUriString();
 
-            log.info("url: "+url);
             log.info("Leser fra sekvens {}", dvhOffset.getOffset());
-            DvhResultWrapper result = nomProxyRestTemplate.getForObject(url, DvhResultWrapper.class);
+            List<DvhEnhetDTO> enhetResultList = nomProxyRestTemplate.getForObject(url, DvhResponseWrapper.class).getEnhetResultList();
 
-            if (result != null && !result.getEnhetResultList().isEmpty()) {
-                val resultList = result.getEnhetResultList();
-                resultList.sort(Comparator.comparingLong(DvhEnhetDTO::getOffset));
-                dvhConsumerProcessorService.processResult(resultList);
+            if (enhetResultList != null && !enhetResultList.isEmpty()) {
+                enhetResultList.sort(Comparator.comparingLong(DvhEnhetDTO::getOffset));
+                dvhConsumerProcessorService.processResult(enhetResultList);
 
-                dvhOffset.setOffset(resultList.get(resultList.size() - 1).getOffset());
+                dvhOffset.setOffset(enhetResultList.get(enhetResultList.size() - 1).getOffset());
+                log.info("Lest og prossesert til og med sekvensnr: {} fra dvh", dvhOffset.getOffset());
                 offsetRepository.save(dvhOffset);
-
             }
             log.info("Oppdatering fra datavarehus ferdig.");
         }
