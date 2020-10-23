@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Data
 @Entity
-@Table(name = "ENHET")
+@Table(name = "T_ENHET")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +32,7 @@ public class Enhet {
     private Long id;
 
     @NotNull
-    @Column(name= "dvh_id")
+    @Column(name= "DVH_ID")
     private String dvhId;
 
     @NotNull
@@ -67,7 +67,7 @@ public class Enhet {
     private String opprettetAv;
 
     @NotNull
-    @Column(name = "OPPRETTETDATO")
+    @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettetDato;
 
     @NotNull
