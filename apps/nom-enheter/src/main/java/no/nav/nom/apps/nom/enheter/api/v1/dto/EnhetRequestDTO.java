@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,7 +23,7 @@ public class EnhetRequestDTO {
 
     private LocalDate gyldigTil;
 
-    private Map<String,Long> sti;
+    private List<EnhetResponseSimple> sti;
 
-    private Map<String, Long> underEnheter;
+    private List<EnhetResponseSimple> underEnheter;
 }

@@ -9,5 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EnhetRequestSimple {
+public class EnhetResponseSimple {
+    private Long enhetsNr;
+
+    private String navn;
 }

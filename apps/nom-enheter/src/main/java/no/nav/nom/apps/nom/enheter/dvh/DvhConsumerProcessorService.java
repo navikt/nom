@@ -21,7 +21,7 @@ public class DvhConsumerProcessorService {
     private final OrganiseringRepository organiseringRepository;
 
     void processResult(List<DvhEnhetDTO> dvhEnhetList){
-        List<DvhEnhetDTO> filteredEnhetList = dvhEnhetList.stream().filter(e -> !e.getOrgNodeStatus().toUpperCase().equals("P")).collect(Collectors.toList());
+        List<DvhEnhetDTO> filteredEnhetList = dvhEnhetList.stream().filter(e -> e.getOrgNodeStatus().toUpperCase().equals("N")).collect(Collectors.toList());
         processEnheter(filteredEnhetList);
         processOrganiseringer(filteredEnhetList);
     }

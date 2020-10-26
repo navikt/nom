@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Slf4j
 @EnableOAuth2Client(cacheEnabled = true)
 @Configuration
+@Profile("!local")
 public class RestTemplateConfig {
 
     @Qualifier(value = "nomProxyRestTemplate")
