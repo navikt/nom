@@ -89,9 +89,13 @@ no.nav:
           discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
           accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
           proxyurl: http://webproxy.nais:8088
+        reststs-testonly:
+          discoveryurl: ${STS_DISCOVERYURL}
+          accepted_audience: ${STS_TESTONLY_AUDIENCE}
+          proxyurl:
         reststs:
           discoveryurl: ${STS_DISCOVERYURL}
-          accepted_audience: ${STS_AUD_SERVICEUSER}
+          accepted_audience: ${STS_AUDIENCE}
           proxyurl:
 
 aad:

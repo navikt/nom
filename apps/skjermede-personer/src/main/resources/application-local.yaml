@@ -40,7 +40,11 @@ no.nav:
           discoveryurl: http://metadata
           accepted_audience: aud-localhost
           proxyurl:
-        reststs:
+        reststs-testonly:
           discoveryurl: http://metadata2
+          accepted_audience: aud-localhost
+          proxyurl:
+        reststs:
+          discoveryurl: http://metadata3
           accepted_audience: aud-localhost
           proxyurl:

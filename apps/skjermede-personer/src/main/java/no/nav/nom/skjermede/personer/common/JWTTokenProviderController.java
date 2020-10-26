@@ -20,7 +20,8 @@ public class JWTTokenProviderController {
 
     private final Map<String, String> issuerMap = Map.of(
             "selvbetjening", "iss-localhost",
-            "reststs", "iss-localhost-2"
+            "reststs-testonly", "iss-localhost-2",
+            "reststs", "iss-localhost-3"
     );
 
     @Unprotected
