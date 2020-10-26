@@ -21,6 +21,9 @@ spec:
   ingresses:
     - https://nom-enheter.dev.intern.nav.no
   accessPolicy:
+    inbound:
+      rules:
+        - application: nom-ui
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
