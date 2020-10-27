@@ -28,7 +28,7 @@ spec:
     - name: STS_TESTONLY_AUDIENCE
       value: srvnom-skjermet, srvdolly, srvdolly_u
     - name: STS_AUDIENCE
-      value: NONE
+      value: srvnom-skjermet, srvdatavarehus_u-u
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://b27apvl175.preprod.local:1413/MQ0LSC03
     - name: TPS_MQ_QUEUE_CHANNEL
