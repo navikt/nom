@@ -41,6 +41,9 @@ public class DvhEnhetDTO {
     @JsonProperty("ORGNODE_KODE_OVER")
     private String overEnhetKode;
 
+    @JsonProperty("ORGNODE_NAVN_OVER")
+    private String overEnhetNavn;
+
     @JsonProperty("ORGNODE_NIVA_OVER")
     private String nodeNivaaOver;
 
@@ -52,4 +55,13 @@ public class DvhEnhetDTO {
 
     @JsonProperty("ORGANISERING_TYPE")
     private String organiseringsType;
+
+    @JsonProperty(value = "ORGNODE_STATUS")
+    private String orgNodeStatus;
+
+    @JsonProperty(value = "LEDER_RESOURCE_ID")
+    private String lederRessursId;
+
+    @JsonProperty(value = "LEDER_USER_ID")
+    private String lederBrukerId;
 }

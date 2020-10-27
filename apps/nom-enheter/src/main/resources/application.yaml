@@ -12,8 +12,12 @@ no.nav.security.jwt:
       nom-proxy-client:
         well-known-url: ${AZURE_APP_WELL_KNOWN_URL}
         grant-type: client_credentials
-        scope: ${NOM_PROXY_CLIENT_ID}
+        scope: api://${NOM_PROXY_CLIENT_ID}/.default
         authentication:
           client-id: ${AZURE_APP_CLIENT_ID}
           client-jwk: ${AZURE_APP_JWK}
           client-auth-method: private_key_jwt
+
+server:
+  error:
+    include-message: always

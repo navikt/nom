@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class DvhResultWrapper {
+class DvhResultWrapper {
     @JsonProperty("NOM_HRORG_HIEARKI_PARAMResult")
     private List<DvhEnhetDTO> enhetResultList;
 }

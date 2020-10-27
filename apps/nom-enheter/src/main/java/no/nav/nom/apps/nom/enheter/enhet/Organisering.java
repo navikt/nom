@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @Data
 @Entity
-@Table(name = "ORGANISERING")
+@Table(name = "T_ORGANISERING")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,7 +52,7 @@ public class Organisering {
     private String opprettetAv;
 
     @NotNull
-    @Column(name = "OPPRETT_DATO")
+    @Column(name = "OPPRETTET_DATO")
     private LocalDateTime opprettDato;
 
     @NotNull
