@@ -46,9 +46,7 @@ public class Cache {
     }
 
     void store(String personident, Skjermingsperiode periode) {
-        if(periode.getTil() == null || periode.getTil().isAfter(LocalDateTime.now())) {
             skjermedePersoner.put(personident, periode);
-        }
     }
 
 }

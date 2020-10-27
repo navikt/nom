@@ -1,3 +1,5 @@
+server.port: 8083
+
 app:
   kafka:
     username: ${app.username}
