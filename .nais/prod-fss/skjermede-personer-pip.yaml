@@ -28,9 +28,9 @@ spec:
     failureThreshold: 5
   readiness:
     path: internal/isReady
-    initialDelay: 60
+    initialDelay: 80
     periodSeconds: 5
-    timeout: 4
+    timeout: 5
     failureThreshold: 5
   resources:
     requests:
