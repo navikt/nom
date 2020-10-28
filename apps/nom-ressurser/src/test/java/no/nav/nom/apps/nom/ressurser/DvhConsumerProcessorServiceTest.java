@@ -1,6 +1,7 @@
 package no.nav.nom.apps.nom.ressurser;
 
 import lombok.val;
+import no.nav.nom.apps.nom.ressurser.dvh.DvhConstants;
 import no.nav.nom.apps.nom.ressurser.dvh.DvhConsumerProcessorService;
 import no.nav.nom.apps.nom.ressurser.dvh.DvhRessursDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
@@ -31,9 +32,6 @@ import static org.mockito.Mockito.when;
 public class DvhConsumerProcessorServiceTest {
 
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
-    private static final String ANNEN_STATLIG = "Annen Statlig";
-    private static final String KOMMUNALT = "NAV Kommunalt";
-    private static final String EKSTERNT = "Eksternt";
     private static final String NAVIDENT = "A000000";
     private static final String FNR = "12345678910";
 
@@ -53,7 +51,7 @@ public class DvhConsumerProcessorServiceTest {
                 .remedySluttDato(LocalDate.now())
                 .agressoSluttDato(LocalDate.now().minusDays(1))
                 .ressursTypeKode("M")
-                .ansattType("NAV Statlig")
+                .ansattType(DvhConstants.STATLIG)
                 .permisjon("Nei")
                 .build();
     }
@@ -79,7 +77,6 @@ public class DvhConsumerProcessorServiceTest {
 
         val arg = ArgumentCaptor.forClass(Ressurs.class);
         verify(ressursRepository).save(arg.capture());
-        System.out.println(arg.getValue().getSluttdato());
 
         Assertions.assertNull(arg.getValue().getSluttdato());
         Assertions.assertEquals(arg.getValue().getRessurstype(), Ressurstype.INTERN);
@@ -113,7 +110,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @Test
     public void testProcessRessurserMidlertidigEksternt() {
-        dvhRessursDTO.setAnsattType(EKSTERNT);
+        dvhRessursDTO.setAnsattType(DvhConstants.EKSTERN);
 
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
@@ -126,7 +123,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @Test
     public void testProcessRessurserEksternt() {
-        dvhRessursDTO.setAnsattType(EKSTERNT);
+        dvhRessursDTO.setAnsattType(DvhConstants.EKSTERN);
         dvhRessursDTO.setRemedySluttDato(D2099);
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
@@ -139,7 +136,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @Test
     public void testProcessRessurserKommunalt() {
-        dvhRessursDTO.setAnsattType(KOMMUNALT);
+        dvhRessursDTO.setAnsattType(DvhConstants.KOMMUNAL);
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
         val arg = ArgumentCaptor.forClass(Ressurs.class);
@@ -151,7 +148,7 @@ public class DvhConsumerProcessorServiceTest {
 
     @Test
     public void testProcessRessurserAnnenStatlig() {
-        dvhRessursDTO.setAnsattType(ANNEN_STATLIG);
+        dvhRessursDTO.setAnsattType(DvhConstants.ANNEN_STATLIG);
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
         val arg = ArgumentCaptor.forClass(Ressurs.class);

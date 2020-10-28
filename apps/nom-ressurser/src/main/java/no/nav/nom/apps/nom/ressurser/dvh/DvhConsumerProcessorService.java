@@ -18,6 +18,7 @@ import java.util.List;
 public class DvhConsumerProcessorService {
 
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
+
     private final RessursRepository ressursRepository;
 
     public void processRessurser(final List<DvhRessursDTO> dvhRessurser) {
@@ -72,11 +73,11 @@ public class DvhConsumerProcessorService {
 
     private LocalDate getSluttDato(final DvhRessursDTO dvhRessursDTO) {
         if ("E".equals(dvhRessursDTO.getRessursTypeKode()) ||
-            Arrays.asList("Eksternt", "Annen Statlig").contains(dvhRessursDTO.getAnsattType())) {
+            Arrays.asList(DvhConstants.EKSTERN, DvhConstants.ANNEN_STATLIG).contains(dvhRessursDTO.getAnsattType())) {
             return getDateOrNull(dvhRessursDTO.getRemedySluttDato());
         }
 
-        if ("NAV Kommunalt".equals(dvhRessursDTO.getAnsattType())) {
+        if (DvhConstants.KOMMUNAL.equals(dvhRessursDTO.getAnsattType())) {
             return "JA".equals(dvhRessursDTO.getPermisjon())
                     ? getPersistedSluttDato(dvhRessursDTO.getNavident())
                     : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
@@ -96,7 +97,7 @@ public class DvhConsumerProcessorService {
     }
 
     private Ressurstype convertedRessursType(final String ressurstypeKode, final String ansattType) {
-        if ("Annen Statlig".equals(ansattType)) {
+        if (DvhConstants.ANNEN_STATLIG.equals(ansattType)) {
             return Ressurstype.ANNEN_STAT;
         }
 
@@ -112,7 +113,7 @@ public class DvhConsumerProcessorService {
             }
         }
 
-        return "NAV Kommunalt".equals(ansattType) || "NAV Statlig".equals(ansattType)
+        return DvhConstants.KOMMUNAL.equals(ansattType) || DvhConstants.STATLIG.equals(ansattType)
                 ? Ressurstype.INTERN : Ressurstype.EKSTERN;
     }
 }
