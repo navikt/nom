@@ -7,13 +7,25 @@ metadata:
     team: nom
 spec:
   env:
-    - name: DVH_ENDPOINT
-      value: https://tdv-u.adeo.no:9402/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM
+    - name: PROXY_ENDPOINT_HROG_HIERARKI
+      value: https://nom-proxy.prod-fss-pub.nais.io/api/v1/proxy/NOM_HRORG_HIEARKI_PARAM
+  envFrom:
+    - secret: nom-enheter-secrets
   image: {{ image }}
   port: 8080
   leaderElection: true
+  azure:
+    application:
+      enabled: true
   ingresses:
     - https://nom-enheter.intern.nav.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-ui
+    outbound:
+      external:
+        - host: nom-proxy.prod-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_11
