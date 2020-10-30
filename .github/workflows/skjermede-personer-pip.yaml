@@ -51,9 +51,11 @@ jobs:
       - uses: satackey/action-docker-layer-caching@v0.0.8
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
+        with:
+          key: nom-docker-cache-{hash}
+          restore-keys: nom-docker-cache-
 
-      - run: docker-compose up --build
-
+      - run: docker-compose up --build -d
 
       - name: Build
         env:
