@@ -53,7 +53,7 @@ jobs:
 #          key: nom-docker-cache-{hash}
 #          restore-keys: nom-docker-cache-
 
-      - run: docker-compose up -d
+#      - run: docker-compose up -d
 
       - name: Build
         env:
