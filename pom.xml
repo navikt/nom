@@ -35,7 +35,6 @@
         <ibm-mq.version>2.2.5</ibm-mq.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
 
-        <skip-docker-compose>false</skip-docker-compose>
     </properties>
 
     <dependencyManagement>
@@ -192,10 +191,7 @@
 
     <profiles>
         <profile>
-            <id>parent-docker-compose</id>
-            <properties>
-                <skip-module-docker-compose-down>true</skip-module-docker-compose-down>
-            </properties>
+            <id>integration-test</id>
             <build>
                 <plugins>
                     <plugin>
@@ -210,7 +206,6 @@
                                     <goal>up</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${skip-docker-compose}</skip>
                                     <composeFile>${maven.multiModuleProjectDirectory}/docker-compose.yml</composeFile>
                                     <detachedMode>true</detachedMode>
                                 </configuration>
