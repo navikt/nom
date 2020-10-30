@@ -90,7 +90,7 @@
 
     <profiles>
         <profile>
-            <id>integration-test</id>
+            <id>module-docker-compose</id>
             <build>
                 <plugins>
                     <plugin>
@@ -116,11 +116,19 @@
                                     <goal>down</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>${skip-module-docker-compose-down}</skip>
                                     <composeFile>${project.parent.parent.basedir}/docker-compose.yml</composeFile>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <executions>

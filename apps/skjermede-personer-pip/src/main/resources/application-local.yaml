@@ -35,3 +35,8 @@ app:
     username: NO_VALUE
     password: NO_VALUE
     group-id-prefix: NO_VALUE
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG

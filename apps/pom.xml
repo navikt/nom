@@ -10,6 +10,10 @@
         <version>1.1.0</version>
     </parent>
 
+    <properties>
+        <skip-docker-compose>true</skip-docker-compose>
+    </properties>
+
     <modules>
         <module>nom-enheter</module>
         <module>nom-ressurser</module>

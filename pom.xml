@@ -34,6 +34,8 @@
         <ow2-asm.version>7.1</ow2-asm.version>
         <ibm-mq.version>2.2.5</ibm-mq.version>
         <springfox-swagger.version>2.9.2</springfox-swagger.version>
+
+        <skip-docker-compose>false</skip-docker-compose>
     </properties>
 
     <dependencyManagement>
@@ -116,6 +118,7 @@
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox-swagger.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -166,7 +169,57 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.3.1</version>
+                <executions>
+                    <execution>
+                        <id>get main root parent pom directory</id>
+                        <goals>
+                            <goal>highest-basedir</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>myDirectory</property>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>parent-docker-compose</id>
+            <properties>
+                <skip-module-docker-compose-down>true</skip-module-docker-compose-down>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.dkanejs.maven.plugins</groupId>
+                        <artifactId>docker-compose-maven-plugin</artifactId>
+                        <version>4.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>up</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>up</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip-docker-compose}</skip>
+                                    <composeFile>${maven.multiModuleProjectDirectory}/docker-compose.yml</composeFile>
+                                    <detachedMode>true</detachedMode>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
