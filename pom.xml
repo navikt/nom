@@ -117,7 +117,15 @@
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${springfox-swagger.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.dkanejs.maven.plugins</groupId>
+                <artifactId>docker-compose-maven-plugin</artifactId>
+                <version>4.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId></groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
