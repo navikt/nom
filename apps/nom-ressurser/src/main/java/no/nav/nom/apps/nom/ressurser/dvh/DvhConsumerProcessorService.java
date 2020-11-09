@@ -44,7 +44,7 @@ public class DvhConsumerProcessorService {
                 .etternavn(dvhRessursDTO.getEtternavn())
                 .epost(dvhRessursDTO.getEpost())
                 .ressurstype(convertedRessursType(dvhRessursDTO.getRessursTypeKode(), dvhRessursDTO.getAnsattType()))
-                .permisjon(dvhRessursDTO.getPermisjon() != null && dvhRessursDTO.getPermisjon().equals("yes"))
+                .permisjon(dvhRessursDTO.getPermisjon() != null && dvhRessursDTO.getPermisjon().equals("JA"))
                 .startdato(dvhRessursDTO.getRemedyStartDato())
                 .sluttdato(getSluttDato(dvhRessursDTO))
                 .endretDato(LocalDate.now())
