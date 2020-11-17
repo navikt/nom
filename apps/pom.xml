@@ -10,15 +10,15 @@
         <version>1.1.0</version>
     </parent>
 
+    <artifactId>apps</artifactId>
+    <name>NOM :: Apps</name>
+    <packaging>pom</packaging>
+
     <modules>
         <module>nom-enheter</module>
-        <module>nom-ressurser</module>
-        <module>skjermede-personer</module>
-        <module>skjermede-personer-pip</module>
         <module>nom-proxy</module>
+        <module>nom-ressurser</module>
+        <module>skjermede-personer-pip</module>
+        <module>skjermede-personer</module>
     </modules>
-
-    <artifactId>apps</artifactId>
-    <packaging>pom</packaging>
-    <name>NOM :: APPS</name>
 </project>

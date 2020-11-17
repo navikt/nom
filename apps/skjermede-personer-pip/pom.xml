@@ -2,58 +2,65 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>apps</artifactId>
         <groupId>no.nav.nom</groupId>
+        <artifactId>apps</artifactId>
         <version>1.1.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>skjermede-personer-pip</artifactId>
-    <name>NOM :: APPS :: Skjermede Personer Pip</name>
+    <name>NOM :: Apps :: Skjermede Personer Pip</name>
 
     <dependencies>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>contract-nom-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-vault-config</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-swagger.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-swagger.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>contract-nom-dto</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -65,10 +72,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.dkanejs.maven.plugins</groupId>
             <artifactId>docker-compose-maven-plugin</artifactId>
-            <version>4.0.0</version>
+            <version>${docker-compose-plugin.verson}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.eclipse.sisu</groupId>
@@ -80,6 +88,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

@@ -2,106 +2,131 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <artifactId>apps</artifactId>
         <groupId>no.nav.nom</groupId>
+        <artifactId>apps</artifactId>
         <version>1.1.0</version>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
-
     <artifactId>skjermede-personer</artifactId>
-    <name>NOM :: APPS :: Skjermede Personer</name>
+    <name>NOM :: Apps :: Skjermede Personer</name>
 
     <dependencies>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>contract-nom-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-vault-config</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>mq-jms-spring-boot-starter</artifactId>
+            <version>${ibm-mq.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-swagger.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-swagger.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>no.nav</groupId>
             <artifactId>vault-jdbc</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>msal4j</artifactId>
+            <version>${azure-msal4j.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.microsoft.graph</groupId>
             <artifactId>microsoft-graph</artifactId>
+            <version>${ms-graph.version}</version>
         </dependency>
+
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring</artifactId>
+            <version>${token-support.version}</version>
         </dependency>
-        <dependency>
-            <groupId>no.nav.security</groupId>
-            <artifactId>token-validation-test-support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>contract-nom-dto</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.security</groupId>
+            <artifactId>token-validation-test-support</artifactId>
+            <version>${token-support.version}</version>
+            <!-- <scope>test</scope> Detta burde fixes.... -->
         </dependency>
     </dependencies>
 
