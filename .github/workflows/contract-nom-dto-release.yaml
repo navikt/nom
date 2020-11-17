@@ -17,6 +17,6 @@ jobs:
         with:
           java-version: 14
       - name: Run Maven release
-        run: ./libs/release.sh
+        run: mvn -B --settings .mvn/settings.xml deploy -Dmaven.wagon.http.pool=false --project:contract-nom-dto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
