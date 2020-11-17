@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Api(tags = "admin")
 @RestController
@@ -40,7 +41,7 @@ public class AdminController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @ApiOperation(value = "Henter cachen - alle skjerminger")
     @GetMapping(value = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
-    public HashMap<String, Skjermingsperiode> getAll(@ApiParam(value = "Api nøkkel", required = true) @RequestParam String apiKey) {
+    public ConcurrentHashMap<String, Skjermingsperiode> getAll(@ApiParam(value = "Api nøkkel", required = true) @RequestParam String apiKey) {
         validate(apiKey);
         return cache.getAll();
     }

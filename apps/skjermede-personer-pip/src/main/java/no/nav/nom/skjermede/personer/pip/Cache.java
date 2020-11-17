@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Slf4j
 @NoArgsConstructor
 public class Cache {
 
-    static private final HashMap<String, Skjermingsperiode> skjermedePersoner = new HashMap<>();
+    static private final ConcurrentHashMap<String, Skjermingsperiode> skjermedePersoner = new ConcurrentHashMap<>();
 
     // Må holde en referanse til objektet, blir ellers tatt av garbage collector, og stopper eksportere metrikker.
     private Gauge cacheGauge;
@@ -24,7 +24,7 @@ public class Cache {
     @Autowired
     public Cache(MeterRegistry meterRegistry){
         cacheGauge = Gauge
-                .builder("skjermede.personer.cache.gauge", skjermedePersoner, HashMap::size)
+                .builder("skjermede.personer.cache.gauge", skjermedePersoner, ConcurrentHashMap::size)
                 .description("Skjermede personer cache info")
                 .register(meterRegistry);
     }
@@ -37,7 +37,7 @@ public class Cache {
                 (periode.getTil() == null || periode.getTil().isAfter(LocalDateTime.now()));
     }
 
-    HashMap<String, Skjermingsperiode> getAll() {
+    ConcurrentHashMap<String, Skjermingsperiode> getAll() {
         return skjermedePersoner;
     }
 
