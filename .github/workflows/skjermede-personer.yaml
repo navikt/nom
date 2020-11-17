@@ -3,22 +3,10 @@ name: Build, Deploy skjermede-personer
 on:
   push:
     branches:
-      - master
+      - 'master'
       - 'dev/*'
-    paths-ignore:
-      - '.github/**/delete_old_packages.yaml'
-      - 'apps/nom-enheter/**'
-      - 'apps/nom-proxy/**'
-      - 'apps/nom-ressurser/**'
-      - 'apps/skjermede-personer-pip/**'
-      - '.nais/*/nom-enheter.yaml'
-      - '.nais/*/nom-proxy.yaml'
-      - '.nais/*/nom-ressurser.yaml'
-      - '.nais/*/skjermede-personer-pip*'
-      - '.github/**/nom-enheter.yaml'
-      - '.github/**/nom-proxy.yaml'
-      - '.github/**/nom-ressurser.yaml'
-      - '.github/**/skjermede-personer-pip*'
+    paths:
+      - 'apps/skjermede-personer/*'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer:${{ github.sha }}

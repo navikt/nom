@@ -4,8 +4,8 @@ on:
     branches:
       - master
     paths:
-      - '.github/workflows/nom-ressurser-alerts.yaml'
       - '.nais/prod-fss/nom-ressurser-alerts.yaml'
+
 jobs:
   apply-alerts:
     name: Apply alerts to cluster

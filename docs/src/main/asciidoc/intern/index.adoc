@@ -1,0 +1,41 @@
+= Intern NOM Dok
+
+== Dokumentasjon
+
+Ligger under monorepo `nom/docs/src/main/asciidoc`.
+Det finnes en plugin til intellij som gjør dette enklere (Asciidoc plugin).
+En nyttig guide: https://www.vogella.com/tutorials/AsciiDoc/article.html[Vogella Asciidoctor].
+Og: https://powerman.name/doc/asciidoc[Powerman]
+
+=== Best practice
+
+New lines etter hvert setning.
+Asciidoctor lager ikke new lines basert på nye linjer i dokumentet, men med `+` eller doble linjer.
+Nye setninger lages på hver sin linje ettersom endringer i git da ikke blir helt kaos.
+
+== Teststrategi
+
+https://engineering.atspotify.com/2018/01/11/testing-of-microservices/[Spotify]
+
+== Arbeidsmetodikk
+
+=== QA / Parprogrammering
+
+== Lokalkjøring
+
+Skal ikke hindres.
+
+== Deployment og Branching
+
+== Monorepo
+
+== Arkitektur
+
+=== Dataflyt
+
+Agresso --> DVH --> NOM
+Remedy  --> DVH --> NOM
+
+== Konsumenter
+
+

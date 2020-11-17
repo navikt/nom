@@ -3,23 +3,10 @@ name: Build, Deploy nom-proxy
 on:
   push:
     branches:
-      - master
+      - 'master'
       - 'dev/*'
-    paths-ignore:
-      - '.github/**/delete_old_packages.yaml'
-      - 'apps/nom-ressurser/**'
-      - 'apps/skjermede-personer/**'
-      - 'apps/skjermede-personer-pip/**'
-      - 'apps/nom-enheter/**'
-      - '.nais/*/nom-ressurser.yaml'
-      - '.nais/*/skjermede-personer.yaml'
-      - '.nais/*/skjermede-personer-pip*'
-      - '.nais/*/nom-enheter.yaml'
-      - '.github/**/nom-ressurser.yaml'
-      - '.github/**/skjermede-personer.yaml'
-      - '.github/**/skjermede-personer-pip*'
-      - '.github/**/nom-enheter.yaml'
-
+    paths:
+      - 'apps/nom-proxy'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-proxy:${{ github.sha }}
