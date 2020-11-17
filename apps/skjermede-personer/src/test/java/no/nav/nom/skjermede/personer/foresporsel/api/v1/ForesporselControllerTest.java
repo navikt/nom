@@ -14,6 +14,7 @@ import no.nav.nom.skjermede.personer.common.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.TilknyttetForesporselDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
+import no.nav.nom.skjermede.personer.skjerming.api.v1.SkjermedePersonerController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +27,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -260,11 +262,12 @@ public class ForesporselControllerTest {
     }
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
-        val path = requestPath.length == 0
-                ? Paths.get(ForesporselController.BASE_URL)
-                : Paths.get(ForesporselController.BASE_URL, requestPath);
+        val path = UriComponentsBuilder.newInstance()
+                .path(ForesporselController.BASE_URL)
+                .pathSegment(requestPath)
+                .build().toString();
 
-        return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : method == HttpMethod.PUT ? put(path.toString()) : delete(path.toString()))
+        return (method == HttpMethod.GET ? get(path) : method == HttpMethod.POST ? post(path) : method == HttpMethod.PUT ? put(path) : delete(path))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getBearerToken(ForesporselTestUtils.PERSONIDENT));
     }
