@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.JWTTokenProvderTestConfig;
-import no.nav.nom.skjermede.personer.common.JWTTokenProviderConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.common.TokenUtil;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
@@ -22,8 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -189,9 +188,10 @@ public class SkjermedePersonerControllerTest {
     }
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
-        val path = requestPath.length == 0
-                ? Paths.get(SkjermedePersonerController.BASE_URL)
-                : Paths.get(SkjermedePersonerController.BASE_URL, requestPath);
+        val path = UriComponentsBuilder.newInstance()
+                .path(SkjermedePersonerController.BASE_URL)
+                .pathSegment(requestPath)
+                .build().toString();
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)
