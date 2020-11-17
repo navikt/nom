@@ -27,3 +27,4 @@ management:
   endpoint:
     prometheus:
       enabled: true
+spring.aop.auto: false

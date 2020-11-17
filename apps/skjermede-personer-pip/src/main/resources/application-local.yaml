@@ -5,9 +5,9 @@ spring:
     listener:
       missing-topics-fatal: false
     consumer:
-      group-id: skjermede-personer-pip
+      group-id: NO_VALUE
       bootstrap-servers: localhost:9092
-      client-id: skjermede-personer-pip
+      client-id: aapen-skjermede-personer-v1
       properties:
         spring.json.trusted.packages: '*'
         security.protocol: PLAINTEXT
@@ -30,13 +30,30 @@ spring:
         max.block.ms: 15000
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
+        security.protocol: PLAINTEXT
+        sasl:
+          mechanism:
+          jaas.config:
+        ssl:
+          truststore.location: NO_VALUE
+          truststore.password: NO_VALUE
+
 app:
   kafka:
     username: NO_VALUE
     password: NO_VALUE
-    group-id-prefix: NO_VALUE
+    group-id-prefix: skjermede-personer-pip-local
+    topic.skjermet.name: aapen-skjermede-personer-v1
 
 logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
+
+
+kafka:
+  bootstrap-servers: ${spring.embedded.kafka.brokers}
+  topic:
+    receiver: aapen-skjermede-personer-v1
+
+spring.aop.auto: true

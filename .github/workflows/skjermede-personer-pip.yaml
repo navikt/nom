@@ -43,25 +43,11 @@ jobs:
         with:
           java-version: 14
 
-#      # In this step, this action saves a list of existing images,
-#      # the cache is created without them in the post run.
-#      # It also restores the cache if it exists.
-#      - uses: satackey/action-docker-layer-caching@v0.0.8
-#        # Ignore the failure of a step and avoid terminating the job.
-#        continue-on-error: true
-#        with:
-#          key: nom-docker-cache-{hash}
-#          restore-keys: nom-docker-cache-
-
-#      - run: docker-compose up -d
-
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
         run: mvn clean verify --projects :skjermede-personer-pip --also-make -Pintegration-test
-
-
 
       - name: Build and publish Docker image
         env:

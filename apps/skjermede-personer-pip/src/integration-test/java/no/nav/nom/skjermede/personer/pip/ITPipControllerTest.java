@@ -13,7 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = ApplicationStarter.class,
+        properties = { "spring.kafka.consumer.client-id=ITPipControllerTest" })
 @ActiveProfiles("local")
 @AutoConfigureMockMvc
 public class ITPipControllerTest {
