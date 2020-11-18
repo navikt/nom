@@ -6,8 +6,6 @@ metadata:
   labels:
     team: nom
 spec:
-  envFrom:
-    - configmap: loginservice-idporten
   env:
     - name: DB_HOST
       value: b27dbvl009.preprod.local

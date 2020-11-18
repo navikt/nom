@@ -61,7 +61,7 @@ no.nav:
   security:
     jwt:
       issuer:
-        selvbetjening:
-          discoveryurl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-          accepted_audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
-          proxyurl: http://webproxy.nais:8088
+        aad:
+          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
+          accepted_audience: ${AZURE_APP_CLIENT_ID}
+          proxyurl:
