@@ -36,11 +36,6 @@ spec:
     limits:
       cpu: 1000m
       memory: 256Mi
-  vault:
-    enabled: true
-    paths:
-      - kvPath: /apikey/appdynamics/dev
-        mountPath: /var/run/secrets/nais.io/vault
   prometheus:
     enabled: true
     path: internal/prometheus
