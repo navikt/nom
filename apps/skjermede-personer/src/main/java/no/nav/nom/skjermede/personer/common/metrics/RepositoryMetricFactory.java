@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.common;
+package no.nav.nom.skjermede.personer.common.metrics;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;

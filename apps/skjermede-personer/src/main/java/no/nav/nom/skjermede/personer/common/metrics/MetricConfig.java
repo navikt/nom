@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.common;
+package no.nav.nom.skjermede.personer.common.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

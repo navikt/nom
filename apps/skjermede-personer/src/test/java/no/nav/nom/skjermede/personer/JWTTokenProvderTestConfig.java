@@ -1,6 +1,6 @@
 package no.nav.nom.skjermede.personer;
 
-import no.nav.nom.skjermede.personer.common.CustomFileResourceRetriever;
+import no.nav.nom.skjermede.personer.common.security.CustomFileResourceRetriever;
 import no.nav.security.token.support.core.configuration.ProxyAwareResourceRetriever;
 import no.nav.security.token.support.test.spring.TokenGeneratorController;
 import org.springframework.context.annotation.Bean;

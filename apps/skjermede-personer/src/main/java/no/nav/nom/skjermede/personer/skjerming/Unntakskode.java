@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.common;
+package no.nav.nom.skjermede.personer.skjerming;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

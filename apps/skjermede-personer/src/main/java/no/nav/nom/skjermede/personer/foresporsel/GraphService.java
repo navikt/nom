@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.common;
+package no.nav.nom.skjermede.personer.foresporsel;
 
 import com.microsoft.graph.logger.LoggerLevel;
 import com.microsoft.graph.models.extensions.EmailAddress;

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.JWTTokenProvderTestConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
-import no.nav.nom.skjermede.personer.common.TokenUtil;
+import no.nav.nom.skjermede.personer.common.security.TokenUtil;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPerson;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonResponseDTO;

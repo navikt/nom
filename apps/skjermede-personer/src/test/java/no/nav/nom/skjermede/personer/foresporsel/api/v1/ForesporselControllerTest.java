@@ -7,14 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.skjermede.personer.JWTTokenProvderTestConfig;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
-import no.nav.nom.skjermede.personer.common.TokenUtil;
+import no.nav.nom.skjermede.personer.common.security.TokenUtil;
 import no.nav.nom.skjermede.personer.foresporsel.Foresporsel;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
-import no.nav.nom.skjermede.personer.common.GraphService;
+import no.nav.nom.skjermede.personer.foresporsel.GraphService;
 import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import no.nav.nom.skjermede.personer.foresporsel.api.v1.dto.TilknyttetForesporselDTO;
 import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
-import no.nav.nom.skjermede.personer.skjerming.api.v1.SkjermedePersonerController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;

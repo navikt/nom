@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.common;
+package no.nav.nom.skjermede.personer.common.security;
 
 import com.nimbusds.jose.util.IOUtils;
 import com.nimbusds.jose.util.Resource;

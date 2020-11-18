@@ -1,7 +1,7 @@
 package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.skjermede.personer.common.LeaderElector;
+import no.nav.nom.skjermede.personer.common.platform.LeaderElector;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
