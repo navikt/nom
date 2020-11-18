@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/dvh/*'
+      - '.nais/*/dvh.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/dvh:${{ github.sha }}

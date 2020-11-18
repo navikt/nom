@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/skjermede-personer-pip/*'
+      - '.nais/*/skjermede-personer-pip.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:${{ github.sha }}

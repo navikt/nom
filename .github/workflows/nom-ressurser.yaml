@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/nom-ressurser/*'
+      - '.nais/*/nom-ressuser.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-ressurser:${{ github.sha }}
