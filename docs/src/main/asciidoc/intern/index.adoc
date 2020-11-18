@@ -31,6 +31,8 @@ Skal ikke hindres.
 
 == Arkitektur
 
+include::applikasjoner.adoc[leveloffset=1]
+
 === Dataflyt
 
 Agresso --> DVH --> NOM

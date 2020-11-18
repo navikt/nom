@@ -1,0 +1,11 @@
+= Applikasjoner
+
+== NOM-DVH
+
+Står for kommunkasjonen mellom datavarehus og NOM.
+DVH eksponerer noen endepunkter via tdv der hvor de gir oss opplysninger rundt enheter og ressurser.
+Disse opplysningene er igjen hentet fra eksterne kilder som Agresso, Norg, +++.
+På sikt, er det tenkt at NOM blir master for en del av disse opplysningene og at DVH får det fra oss i stede for alle disse andre spredte kildene.
+
+Informasjon hentes fra DVH via feeds som baserer seg på et offset, f.eks 10101920, der hvor man etterspør alle rader etter dette.
+Dataen blir så lagret på Kafka for at vi kan benytte den i andre applikasjoner.
