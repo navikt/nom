@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.dto.RessursDTO;
+import no.nav.nom.skjermede.personer.foresporsel.azure.TokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 public class NomRessurserService {
 
     private final RestTemplate restTemplate;
+    private final TokenService tokenService;
 
     @Value("${ressurser-api}")
     private String ressursAPI;
@@ -25,21 +27,29 @@ public class NomRessurserService {
         val headers = new HttpHeaders();
         headers.set("navident", navident);
 
-        return restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                RessursDTO.class).getBody();
+        return performRestcall(headers, aktiv);
     }
 
     public RessursDTO getInternRessursByPersonident(final String personident, final boolean aktiv) {
         val headers = new HttpHeaders();
         headers.set("personident", personident);
 
-        return restTemplate.exchange(
-                String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
-                HttpMethod.GET,
-                new HttpEntity<>(headers),
-                RessursDTO.class).getBody();
+        return performRestcall(headers, aktiv);
+    }
+
+    private RessursDTO performRestcall(final HttpHeaders headers, final boolean aktiv){
+        try {
+            val token = tokenService.getAccessToken();
+            System.out.println("tokenn: " + token);
+            headers.setBearerAuth(token);
+            return restTemplate.exchange(
+                    String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
+                    HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    RessursDTO.class).getBody();
+        }catch (Exception e){
+          log.error("Henting av token under kall til nom-ressurser feilet", e);
+        }
+        return null;
     }
 }

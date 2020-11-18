@@ -33,6 +33,7 @@ spec:
   azure:
     application:
       enabled: true
+      tennant: trygdeetaten.no
   webproxy: true
   leaderElection: true
   replicas:
