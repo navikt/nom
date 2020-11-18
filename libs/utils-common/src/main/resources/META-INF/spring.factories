@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  no.nav.nom.libs.utils.common.properties.PropertiesAutoConfig

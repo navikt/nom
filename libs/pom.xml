@@ -16,6 +16,7 @@
 
     <modules>
         <module>contract-nom-dto</module>
+        <module>utils-common</module>
     </modules>
 
 </project>

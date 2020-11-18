@@ -1,0 +1,7 @@
+management:
+  metrics.tags.product: nom
+  endpoint:
+    health.show-details: always
+  endpoints.web:
+    base-path: /internal
+    exposure.include: prometheus,health,heapdump,scheduledtasks,threaddump

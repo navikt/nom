@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="app.name" source="app.name"/>
+
+    <springProfile name="log-logstash">
+        <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="stdout_json"/>
+        </root>
+
+        <logger name="no.nav.nom" level="INFO" additivity="false">
+            <appender-ref ref="stdout_json"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="log-console">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date [%-5level] %logger{1} -- %message%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="STDOUT"/>
+        </root>
+
+        <logger name="no.nav.nom" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="log-console-error">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date [%-5level] %logger{1} -- %message%n</pattern>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+</configuration>
