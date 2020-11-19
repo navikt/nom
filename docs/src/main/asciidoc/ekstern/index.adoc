@@ -6,6 +6,9 @@
 :toc-title: Innhold
 :icons: font
 
+NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
+
+
 == Formål for NOM
 
 

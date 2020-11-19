@@ -1,4 +1,4 @@
-name: Build, Deploy skjermede-personer-pip
+name: Build, Deploy nom-proxy
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
       - 'master'
       - 'dev/*'
     paths:
-      - 'apps/skjermede-personer-pip/*'
-      - '.nais/*/skjermede-personer-pip.yaml'
+      - 'apps/nom-proxy/**'
+      - '.nais/*/nom-proxy.yaml'
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:latest
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-proxy:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-proxy:latest
 
 jobs:
   build-jar-docker:
@@ -31,18 +31,16 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 14
-
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean verify --projects :skjermede-personer-pip --also-make -Pintegration-test
-
+        run: mvn clean package --projects :nom-proxy --also-make
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/skjermede-personer-pip/target/app.jar .
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/nom-proxy/target/app.jar .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
           docker push ${IMAGE_LATEST}
@@ -57,7 +55,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: .nais/dev-fss/skjermede-personer-pip.yaml
+          RESOURCE: .nais/dev-fss/nom-proxy.yaml
 
   deploy-prod:
     name: Deploy to NAIS prod-fss
@@ -70,7 +68,8 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: .nais/prod-fss/skjermede-personer-pip.yaml
+          RESOURCE: .nais/prod-fss/nom-proxy.yaml
+
 
   security:
     runs-on: ubuntu-latest

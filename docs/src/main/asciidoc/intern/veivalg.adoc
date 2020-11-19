@@ -1,4 +1,4 @@
-= Teknologivalg
+= Veivalg
 
 == JSON vs Avro på Kafka
 
@@ -31,4 +31,4 @@ Valgt: JSON +
 Begrunnelse:
 
 * Alle kan JSON.
-* Vi har lite data.
+* Vi har lite data og fremtidig ser vi ingen veldig stor økning.

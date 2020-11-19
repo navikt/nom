@@ -1,4 +1,10 @@
 = Intern NOM Dok
+:sectnums:
+:sectanchors:
+:toc: left
+:toclevels: 2
+:toc-title: Innhold
+:icons: font
 
 == Dokumentasjon
 
@@ -36,9 +42,10 @@ include::applikasjoner.adoc[leveloffset=1]
 === Dataflyt
 
 Agresso --> DVH --> NOM
+
 Remedy  --> DVH --> NOM
 
 == Konsumenter
 
-include::teknologivalg.adoc[leveloffset=1]
+include::veivalg.adoc[leveloffset=1]
 
