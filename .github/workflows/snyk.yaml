@@ -1,0 +1,30 @@
+name: Snyk Monitor
+
+on:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - '**/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.3
+      - name: Cache Depdendencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: mvn snyk:monitor -Dsnyk-api-token=${SNYK_TOKEN} --batch-mode
