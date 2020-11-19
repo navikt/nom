@@ -1,11 +1,8 @@
-version: '2'
+version: '3'
 
 networks:
   kafka-net:
     driver: bridge
-  enhet-db:
-  ressurs-db:
-  skjermet-db:
 
 services:
   postgres-enheter:
@@ -15,10 +12,6 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-enheter'
-    networks:
-      enhet-db:
-        aliases:
-          - enheter
   postgres-ressurs:
     image: 'postgres:alpine'
     ports:
@@ -26,10 +19,6 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-ressurs'
-    networks:
-      ressurs-db:
-        aliases: 
-          - ressurs
   postgres-skjermet:
     image: 'postgres:alpine'
     ports:
@@ -37,10 +26,6 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-skjermet'
-    networks:
-      skjermet-db:
-        aliases:
-          - skjermet
   zookeeper-server:
     image: 'bitnami/zookeeper:latest'
     networks:
@@ -80,10 +65,6 @@ services:
       - "8089:80"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-    networks:
-      - enhet-db
-      - ressurs-db
-      - skjermet-db
 
 volumes:
   pgadmin-data:
