@@ -7,4 +7,5 @@ class RessursTestBase extends TestBase {
 
     @Autowired
     RessursDvhTask ressursDvhTask;
+
 }

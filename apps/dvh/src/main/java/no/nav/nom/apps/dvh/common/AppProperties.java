@@ -29,5 +29,6 @@ public class AppProperties {
     @Value
     public static class Ressurs {
         String url;
+        Long chunkSize;
     }
 }

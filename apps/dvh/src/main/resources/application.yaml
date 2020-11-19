@@ -4,4 +4,5 @@ app:
     enhet:
       url: ${app.dvh.base-url}/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM
     ressurs:
-      url: ${app.dvh.base-url}/
+      url: ${app.dvh.base-url}/json/Hr/Nom/Nom_Ansatte
+      chunkSize: 5000

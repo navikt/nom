@@ -2,4 +2,4 @@ spring.cloud.vault.enabled: false
 
 app:
   dvh:
-    base-url: http://localhost:${wiremock.server.port}/dvh
+    base-url: http://localhost:${wiremock.server.port}/

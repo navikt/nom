@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 class RessursDvhTask {
     private final long ONE_HOUR = 60 * 60 * 1000;
     private final long TEN_MINS = 10 * 60 * 1000;
-    private final int chunkSize = 5000;
 
     private final RestTemplate restTemplate;
     private final AppProperties properties;
@@ -54,7 +53,7 @@ class RessursDvhTask {
                 publishToKafka(ressurserAsJsonNodes);
                 stateRepository.saveOffset(Ressurs.TYPE, maxOffset);
             }
-            if (ressurserAsJsonNodes.size() < chunkSize) {
+            if (ressurserAsJsonNodes.size() < properties.getDvh().getRessurs().getChunkSize()) {
                 isFinishedReading = true;
             }
         }
@@ -75,7 +74,7 @@ class RessursDvhTask {
         return UriComponentsBuilder
                 .fromUriString(properties.getDvh().getRessurs().getUrl())
                 .queryParam("in_sekvensnummer_fra", offset)
-                .queryParam("in_sekvensnummer_til", offset+chunkSize)
+                .queryParam("in_sekvensnummer_til", offset+properties.getDvh().getRessurs().getChunkSize())
                 .build()
                 .toUriString();
     }

@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/dvh/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=0&in_sekvensnummer_til=1"
+    "url": "/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=0&in_sekvensnummer_til=3"
   },
   "response": {
     "status": 200,
@@ -9,20 +9,36 @@
       "Nom_AnsatteResponse": {
         "Nom_AnsatteResult": [
           {
-          "SEKVENSNR": 1,
-          "NAV_IDENT": "Z111111",
-          "FNR": "01234567891",
-          "FORNAVN": "Person1",
-          "ETTERNAVN": "En",
-          "EPOST": "person1@nav.no",
-          "REMEDY_START_DATO": "2006-10-19",
-          "REMEDY_SLUTT_DATO": "2019-02-15",
-          "AGRESSO_SLUTT_DATO": "2099-12-31",
-          "ANSATT_PER_IDAG": "JA",
-          "ANSETTELSESTYPE_BESK": "Pensjonistavlønning",
-          "ANSATT_TYPE": "NAV Statlig",
-          "ANSATT_RESSURS_KODE": "P",
-          "REMEDY_PERMISJON": null
+            "SEKVENSNR": 2,
+            "NAV_IDENT": "Z111112",
+            "FNR": "01234567892",
+            "FORNAVN": "Person2",
+            "ETTERNAVN": "To",
+            "EPOST": "person2@nav.no",
+            "REMEDY_START_DATO": "2006-10-19",
+            "REMEDY_SLUTT_DATO": "2019-02-15",
+            "AGRESSO_SLUTT_DATO": "2099-12-31",
+            "ANSATT_PER_IDAG": "JA",
+            "ANSETTELSESTYPE_BESK": "Pensjonistavlønning",
+            "ANSATT_TYPE": "NAV Statlig",
+            "ANSATT_RESSURS_KODE": "P",
+            "REMEDY_PERMISJON": null
+          },
+          {
+            "SEKVENSNR": 1,
+            "NAV_IDENT": "Z111111",
+            "FNR": "01234567891",
+            "FORNAVN": "Person1",
+            "ETTERNAVN": "En",
+            "EPOST": "person1@nav.no",
+            "REMEDY_START_DATO": "2006-10-19",
+            "REMEDY_SLUTT_DATO": "2019-02-15",
+            "AGRESSO_SLUTT_DATO": "2099-12-31",
+            "ANSATT_PER_IDAG": "JA",
+            "ANSETTELSESTYPE_BESK": "Pensjonistavlønning",
+            "ANSATT_TYPE": "NAV Statlig",
+            "ANSATT_RESSURS_KODE": "P",
+            "REMEDY_PERMISJON": null
           }
         ]
       }

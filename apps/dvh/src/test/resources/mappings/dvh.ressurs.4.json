@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=8&in_sekvensnummer_til=11"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "Nom_AnsatteResponse": {
+        "Nom_AnsatteResult": []
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

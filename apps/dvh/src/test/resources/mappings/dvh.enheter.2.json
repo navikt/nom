@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/dvh/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=0"
+    "url": "/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=0"
   },
   "response": {
     "status": 200,

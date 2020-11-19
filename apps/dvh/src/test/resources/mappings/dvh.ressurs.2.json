@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/dvh/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=1&in_sekvensnummer_til=3"
+    "url": "/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=2&in_sekvensnummer_til=5"
   },
   "response": {
     "status": 200,
@@ -9,24 +9,40 @@
       "Nom_AnsatteResponse": {
         "Nom_AnsatteResult": [
           {
-            "SEKVENSNR": 2,
-            "NAV_IDENT": "Z111112",
-            "FNR": "01234567892",
-            "FORNAVN": "Person2",
-            "ETTERNAVN": "To",
-            "EPOST": "person2@nav.no",
-            "REMEDY_START_DATO": "2006-08-18",
+            "SEKVENSNR": 5,
+            "NAV_IDENT": "Z111115",
+            "FNR": "01234567895",
+            "FORNAVN": "Person5",
+            "ETTERNAVN": "Fem",
+            "EPOST": "person5@nav.no",
+            "REMEDY_START_DATO": "1999-09-15",
             "REMEDY_SLUTT_DATO": "2019-01-29",
             "AGRESSO_SLUTT_DATO": "2099-12-31",
             "ANSATT_PER_IDAG": "JA",
-            "ANSETTELSESTYPE_BESK": "Ekstern",
+            "ANSETTELSESTYPE_BESK": "Pensjonistavlønning",
             "ANSATT_TYPE": "NAV Statlig",
-            "ANSATT_RESSURS_KODE": "E",
+            "ANSATT_RESSURS_KODE": "P",
             "REMEDY_PERMISJON": null
           },
           {
             "SEKVENSNR": 3,
             "NAV_IDENT": "Z111113",
+            "FNR": "01234567893",
+            "FORNAVN": "Person3",
+            "ETTERNAVN": "Tre",
+            "EPOST": "person3@nav.no",
+            "REMEDY_START_DATO": "1999-09-15",
+            "REMEDY_SLUTT_DATO": "2019-01-29",
+            "AGRESSO_SLUTT_DATO": "2099-12-31",
+            "ANSATT_PER_IDAG": "JA",
+            "ANSETTELSESTYPE_BESK": "Pensjonistavlønning",
+            "ANSATT_TYPE": "NAV Statlig",
+            "ANSATT_RESSURS_KODE": "P",
+            "REMEDY_PERMISJON": null
+          },
+          {
+            "SEKVENSNR": 4,
+            "NAV_IDENT": "Z111114",
             "FNR": "01234567893",
             "FORNAVN": "Person3",
             "ETTERNAVN": "Tre",

@@ -55,7 +55,7 @@ class EnhetDvhTest extends EnhetTestBase {
 
         task.perform();
 
-        WireMock.verify(getRequestedFor(urlEqualTo("/dvh/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=0")));
+        WireMock.verify(getRequestedFor(urlEqualTo("/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=0")));
     }
 
     @Test

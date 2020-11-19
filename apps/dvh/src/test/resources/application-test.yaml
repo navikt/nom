@@ -1,0 +1,4 @@
+app:
+  dvh:
+    ressurs:
+      chunkSize: 3
