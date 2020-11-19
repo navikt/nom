@@ -1,0 +1,7 @@
+app:
+  dvh:
+    topic: aapen-nom-dvhSource-v1
+    enhet:
+      url: ${app.dvh.base-url}/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM
+    ressurs:
+      url: ${app.dvh.base-url}/

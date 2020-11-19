@@ -1,0 +1,34 @@
+= Teknologivalg
+
+== JSON vs Avro på Kafka
+
+=== JSON
+
+*Fordeler*
+
+* Alle kan det og må kunne det pga det blir brukt flere steder.
+* Stort community, mye dokumentasjon.
+
+*Ulemper*
+
+* Ingen schema validering by default, dette kan legges på.
+* Tar mye plass (mye redundant data i forhold til Avro, f.eks field keys).
+
+=== Avro
+
+* Data tar minimalt med plass.
+* Støttet av schema registry.
+
+*Ulemper*
+
+* Noe nytt å lære seg.
+* Lite community og er lite vedlikeholdt per nå.
+
+=== Valg
+
+Valgt: JSON +
+
+Begrunnelse:
+
+* Alle kan JSON.
+* Vi har lite data.

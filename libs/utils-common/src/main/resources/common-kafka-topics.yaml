@@ -1,0 +1,10 @@
+nom.kafka.topics:
+  dvhSource-v1:
+    name: aapen-nom-dvhSource-v1
+    partitions: 1
+    retention-ms: -1
+    compaction: true
+    description: Data fra Datavarehus via nom-dvh
+    consumers:
+    producers:
+      - srvnom-dvh

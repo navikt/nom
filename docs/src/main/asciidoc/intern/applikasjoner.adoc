@@ -8,4 +8,18 @@ Disse opplysningene er igjen hentet fra eksterne kilder som Agresso, Norg, +++.
 På sikt, er det tenkt at NOM blir master for en del av disse opplysningene og at DVH får det fra oss i stede for alle disse andre spredte kildene.
 
 Informasjon hentes fra DVH via feeds som baserer seg på et offset, f.eks 10101920, der hvor man etterspør alle rader etter dette.
-Dataen blir så lagret på Kafka for at vi kan benytte den i andre applikasjoner.
+Dataen blir så lagret på Kafka for at vi kan benytte i andre applikasjoner.
+
+Offset blir lagret sammen med dataen, slik at ved oppstart av applikasjonen så vil man laste inn alle records og beholde det siste offsettet innenfor typen.
+F.eks:
+
+[source]
+----
+Key: Enhet-9238823, Value: { "offset": 9238823..... }
+Key: Enhet-9238824, Value: { "offset": 9238824..... }
+Key: Ressurs-102939, Value: { "offset": 102939..... }
+----
+
+Spiller man av Kafka topicen fra begynnelsen og opp til topp, så sitter man igjen med offset for `enhet=9238824` og `ressurs=102939`.
+
+Data lagres på Kafka topicen: `aapen-nom-dvhSource-v1`.

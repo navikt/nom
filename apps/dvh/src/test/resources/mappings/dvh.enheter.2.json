@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/dvh/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=0"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "NOM_HRORG_HIEARKI_PARAMResponse": {
+        "NOM_HRORG_HIEARKI_PARAMResult": []
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

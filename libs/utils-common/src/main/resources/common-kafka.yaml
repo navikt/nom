@@ -1,0 +1,40 @@
+app.kafka:
+  group-id-prefix: ${app.name}-${nais.namespace}
+
+spring.kafka:
+  client-id: ${app.name}
+  properties:
+    security.protocol: SASL_SSL
+    sasl:
+      mechanism: PLAIN
+      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.username}" password="${app.password}";
+    ssl:
+      truststore.location: ${javax.net.ssl.trustStore:}
+      truststore.password: ${javax.net.ssl.trustStorePassword:}
+  listener:
+    concurrency: 1
+    poll-timeout: 1000
+    ack-mode: batch
+    type: batch
+  producer:
+    acks: all
+    retries: 2147483647
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    transaction-id-prefix: ${kafka-transaction-id-prefix}-
+    properties:
+      max.block.ms: 15000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+  consumer:
+    properties:
+      isolation.level: read_committed
+      specific.avro.reader: true
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    max-poll-records: 100
+    auto-offset-reset: none
+    enable-auto-commit: false
+
+spring.jmx.enabled: true
+server.tomcat.mbeanregistry.enabled: true

@@ -6,7 +6,7 @@ on:
       - 'master'
       - 'dev/*'
     paths:
-      - 'apps/dvh/*'
+      - 'apps/dvh/**'
       - '.nais/*/dvh.yaml'
 
 env:

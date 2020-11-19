@@ -9,6 +9,14 @@ spec:
   env:
     - name: STACK
       value: preprod
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash,k8s,vault
+    - name: VAULT_USER_SECRET_PATH
+      value: serviceuser/dev/srvnom-dvh
+    - name: APP_DVH_BASE_URL
+      value: https://tdv-u.adeo.no
+    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
   image: {{image}}
   port: 8080
   ingresses:
@@ -35,7 +43,9 @@ spec:
       memory: 256Mi
     limits:
       cpu: 1000m
-      memory: 256Mi
+      memory: 1024Mi
   prometheus:
     enabled: true
     path: internal/prometheus
+  vault:
+    enabled: true

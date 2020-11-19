@@ -40,4 +40,5 @@ Remedy  --> DVH --> NOM
 
 == Konsumenter
 
+include::teknologivalg.adoc[leveloffset=1]
 
