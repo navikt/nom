@@ -6,7 +6,7 @@ on:
       - 'master'
       - 'dev/*'
     paths:
-      - 'apps/nom-ressurser/*'
+      - 'apps/nom-ressurser/**'
       - '.nais/*/nom-ressuser.yaml'
 
 env:
