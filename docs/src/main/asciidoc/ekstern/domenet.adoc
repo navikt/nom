@@ -1,0 +1,13 @@
+= Domenet
+
+== Organisasjonsenhet
+
+Beskrivelse:
+Eksempler:
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                    |Eksempel
+|Navn           |Ja         |Navnet på en enhet             |NAV Oslo - Gamle byen
+|Nummer         |Ja/Nei     |4-siffret nummer for en enhet  |0104
+|===

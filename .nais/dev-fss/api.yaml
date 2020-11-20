@@ -14,8 +14,8 @@ spec:
   ingresses:
     - https://nom-api.dev.intern.nav.no
   replicas:
-    min: 1
-    max: 1
+    min: 2
+    max: 2
     cpuThresholdPercentage: 50
   liveness:
     path: internal/health/liveness

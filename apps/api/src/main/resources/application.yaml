@@ -1,0 +1,7 @@
+graphql:
+  servlet:
+    tracing-enabled: true
+  playground:
+    tabs:
+      - name: HentEnhet
+        query: classpath:playground/hentEnhet.graphql

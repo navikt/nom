@@ -1,0 +1,8 @@
+type Query {
+    hentEnhet(nummer: ID!): Enhet
+}
+
+type Enhet {
+    navn: String!
+    nummer: String!
+}

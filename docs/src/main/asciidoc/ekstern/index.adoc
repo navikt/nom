@@ -9,7 +9,7 @@
 NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
 
 
-== Formål for NOM
-
-
+include::visjon.adoc[leveloffset=1]
+include::domenet.adoc[leveloffset=1]
+include::tjenester.adoc[leveloffset=1]
 
