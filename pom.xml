@@ -32,8 +32,6 @@
         <logstash-logback-encoder.version>6.4</logstash-logback-encoder.version>
 
         <docker-compose-plugin.verson>4.0.0</docker-compose-plugin.verson>
-        <snyk.version>1.2.8</snyk.version>
-        <snyk-api-token>snyk-api-token</snyk-api-token>
     </properties>
 
     <modules>
@@ -162,18 +160,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <version>${snyk.version}</version>
-                <configuration>
-                    <apiToken>${snyk-api-token}</apiToken>
-                    <org>navikt</org>
-                    <failOnSeverity>false</failOnSeverity>
-                    <includeProvidedDependencies>false</includeProvidedDependencies>
-                </configuration>
             </plugin>
         </plugins>
     </build>

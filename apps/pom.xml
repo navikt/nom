@@ -15,12 +15,12 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>api</module>
+        <module>dvh</module>
         <module>nom-enheter</module>
         <module>nom-proxy</module>
         <module>nom-ressurser</module>
         <module>skjermede-personer-pip</module>
         <module>skjermede-personer</module>
-        <module>dvh</module>
-        <module>api</module>
     </modules>
 </project>

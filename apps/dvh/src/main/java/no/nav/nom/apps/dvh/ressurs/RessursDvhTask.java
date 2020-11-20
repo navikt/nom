@@ -65,7 +65,7 @@ class RessursDvhTask {
             val result = restTemplate.exchange(url, HttpMethod.GET, null, JsonNode.class);
             return findRessurser(result);
         } catch (RuntimeException e) {
-            log.error("Failed to fetch enheter from dvh", e);
+            log.error("Failed to fetch ressurser from dvh", e);
             return emptyList();
         }
     }
