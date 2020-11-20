@@ -2,6 +2,7 @@ package no.nav.nom.apps.dvh.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ class RessursDvhTask {
     private final StateRepository stateRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final MeterRegistry meterRegistry;
 
     @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform() {
@@ -52,6 +54,8 @@ class RessursDvhTask {
                 val maxOffset = findMaxOffset(ressurserAsJsonNodes);
                 publishToKafka(ressurserAsJsonNodes);
                 stateRepository.saveOffset(Ressurs.TYPE, maxOffset);
+                meterRegistry.counter("dvh.ressurser.sent").increment(ressurserAsJsonNodes.size());
+                log.info("{} ressurser sent to Kafka. Original offset: {}, new: {}", ressurserAsJsonNodes.size(), offset, maxOffset);
             }
             if (ressurserAsJsonNodes.size() < properties.getDvh().getRessurs().getChunkSize()) {
                 isFinishedReading = true;

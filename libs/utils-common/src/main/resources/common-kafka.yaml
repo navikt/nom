@@ -3,14 +3,18 @@ app.kafka:
 
 spring.kafka:
   client-id: ${app.name}
+  bootstrap-servers: ${KAFKA_BROKERS}
   properties:
-    security.protocol: SASL_SSL
-    sasl:
-      mechanism: PLAIN
-      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.username}" password="${app.password}";
+    security.protocol: SSL
     ssl:
-      truststore.location: ${javax.net.ssl.trustStore:}
-      truststore.password: ${javax.net.ssl.trustStorePassword:}
+      keystore:
+        type: PKCS12
+        location: ${KAFKA_KEYSTORE_PATH}
+        password: ${KAFKA_CREDSTORE_PASSWORD}
+      truststore:
+        location: ${KAFKA_TRUSTSTORE_PATH}
+        password: ${KAFKA_CREDSTORE_PASSWORD}
+      endpoint.identification.algorithm:
   listener:
     concurrency: 1
     poll-timeout: 1000

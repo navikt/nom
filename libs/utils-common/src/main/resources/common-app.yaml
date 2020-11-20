@@ -1,5 +1,5 @@
 management:
-  metrics.tags.product: nom
+  metrics.tags.app: ${app.name}
   endpoint:
     health.show-details: always
   endpoints.web:
