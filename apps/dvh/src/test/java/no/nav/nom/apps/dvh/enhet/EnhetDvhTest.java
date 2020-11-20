@@ -4,10 +4,12 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import lombok.val;
 import no.nav.nom.contract.dvh.Enhet;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -15,6 +17,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -41,10 +44,12 @@ class EnhetDvhTest extends EnhetTestBase {
         val sent = getRecordsFromKafka();
         val first = sent.get(0);
         assertBasicRecord(first, properties.getDvh().getTopic(), "Enhet-1337");
+        assertBasicDvhEvent(first, Enhet.TYPE);
         assertTrue(first.value().contains("\"ORGNODE_KODE\":\"000000\","));
 
         val second = sent.get(1);
         assertBasicRecord(second, properties.getDvh().getTopic(), "Enhet-1338");
+        assertBasicDvhEvent(first, Enhet.TYPE);
         assertTrue(second.value().contains("\"ORGNODE_KODE\":\"000\","));
     }
 

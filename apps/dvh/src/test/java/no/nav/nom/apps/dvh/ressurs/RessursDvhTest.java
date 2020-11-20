@@ -52,15 +52,15 @@ class RessursDvhTest extends RessursTestBase {
         inOrder.verify(kafkaTemplate).executeInTransaction(any());
         inOrder.verify(stateRepository).saveOffset(Ressurs.TYPE, 6L);
 
-
-
         val sent = getRecordsFromKafka();
         val first = sent.get(0);
         assertBasicRecord(first, properties.getDvh().getTopic(), "Ressurs-3");
+        assertBasicDvhEvent(first, Ressurs.TYPE);
         assertTrue(first.value().contains("\"NAV_IDENT\":\"Z111113\","));
 
         val second = sent.get(1);
         assertBasicRecord(second, properties.getDvh().getTopic(), "Ressurs-4");
+        assertBasicDvhEvent(second, Ressurs.TYPE);
         assertTrue(second.value().contains("\"NAV_IDENT\":\"Z111114\","));
     }
 

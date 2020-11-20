@@ -1,8 +1,13 @@
 package no.nav.nom.apps.dvh;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.dvh.common.AppProperties;
 import no.nav.nom.apps.dvh.state.StateRepository;
+import no.nav.nom.contract.dvh.DvhEvent;
+import no.nav.nom.contract.dvh.Enhet;
+import no.nav.nom.contract.dvh.Ressurs;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,11 +24,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
@@ -43,6 +50,9 @@ public class TestBase {
 
     @Autowired
     protected AppProperties properties;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
@@ -69,5 +79,21 @@ public class TestBase {
         assertEquals(topic, record.topic());
         assertNull(record.timestamp());
         assertNotEquals(null, record.value());
+    }
+
+    @SneakyThrows
+    public DvhEvent toDvhEvent(ProducerRecord<String, String> record) {
+        return objectMapper.readValue(record.value(), DvhEvent.class);
+    }
+
+    public void assertBasicDvhEvent(ProducerRecord<String, String> record, String eventType) {
+        val asDvhEvent = toDvhEvent(record);
+        UUID.fromString(asDvhEvent.getId()); // Check if valid UUID
+        assertEquals(eventType, asDvhEvent.getType());
+        if (eventType.equals(Enhet.TYPE)) {
+            assertEquals("Enhet-" + asDvhEvent.getOffset(), record.key());
+        } else if (eventType.equals(Ressurs.TYPE)) {
+            assertEquals("Ressurs-" + asDvhEvent.getOffset(), record.key());
+        }
     }
 }

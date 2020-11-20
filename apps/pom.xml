@@ -21,5 +21,6 @@
         <module>skjermede-personer-pip</module>
         <module>skjermede-personer</module>
         <module>dvh</module>
+        <module>api</module>
     </modules>
 </project>
