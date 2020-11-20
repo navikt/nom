@@ -1,7 +1,7 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: nom-dvhSource-v1
+  name: nom-dvhsource-v1
   namespace: nom
   labels:
     team: nom
