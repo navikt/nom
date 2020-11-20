@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @RequiredArgsConstructor
 class RessursDvhTask {
     private final long ONE_HOUR = 60 * 60 * 1000;
-    private final long TEN_MINS = 10 * 60 * 1000;
+    private final long FIVE_MINS = 5 * 60 * 1000;
 
     private final RestTemplate restTemplate;
     private final AppProperties properties;
@@ -40,7 +40,7 @@ class RessursDvhTask {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    //@Scheduled(initialDelay = TEN_MINS, fixedDelay = ONE_HOUR)
+    @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform() {
         var isFinishedReading = false;
 
