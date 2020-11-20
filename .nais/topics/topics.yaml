@@ -1,0 +1,23 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom-dvhSource-v1
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  pool: {{kafka-pool}}
+  config:
+    cleanupPolicy: compact
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-dvh
+      access: readwrite
+    - team: nom
+      application: nom-api
+      access: read
