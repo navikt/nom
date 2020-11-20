@@ -18,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 public class NomRessurserService {
 
     private final RestTemplate restTemplate;
-    private final TokenService tokenService;
 
     @Value("${ressurser-api}")
     private String ressursAPI;
@@ -38,18 +37,10 @@ public class NomRessurserService {
     }
 
     private RessursDTO performRestcall(final HttpHeaders headers, final boolean aktiv){
-        try {
-            val token = tokenService.getAccessToken();
-            System.out.println("tokenn: " + token);
-            headers.setBearerAuth(token);
             return restTemplate.exchange(
                     String.format("%s/ansatt?gyldig=%s&ressursType=INTERN,ANNEN_STAT", ressursAPI, aktiv),
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
                     RessursDTO.class).getBody();
-        }catch (Exception e){
-          log.error("Henting av token under kall til nom-ressurser feilet", e);
-        }
-        return null;
     }
 }
