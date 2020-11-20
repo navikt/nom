@@ -39,7 +39,7 @@ class RessursDvhTest extends RessursTestBase {
             private int count = 0;
 
             @Override
-            public Optional<Long> answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public Optional<Long> answer(InvocationOnMock invocationOnMock) {
                 return Optional.of((++count) == 1 ? 2L : 5L);
             }
         }).when(stateRepository).findSequenceFor(anyString());
