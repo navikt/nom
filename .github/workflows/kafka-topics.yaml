@@ -29,5 +29,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          VAR: kafka-pool=prod-dev
+          VAR: kafka-pool=nav-prod
           RESOURCE: .nais/topics/topics.yaml
