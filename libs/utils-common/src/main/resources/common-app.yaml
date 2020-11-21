@@ -1,7 +1,10 @@
 management:
   metrics.tags.app: ${app.name}
   endpoint:
-    health.show-details: always
+    health:
+      show-details: always
+      probes:
+        enabled: true
   endpoints.web:
     base-path: /internal
     exposure.include: prometheus,health,heapdump,scheduledtasks,threaddump

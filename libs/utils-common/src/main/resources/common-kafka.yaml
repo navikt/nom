@@ -25,7 +25,6 @@ spring.kafka:
     retries: 2147483647
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
-    transaction-id-prefix: ${kafka-transaction-id-prefix}-
     properties:
       max.block.ms: 15000
       enable.idempotence: true

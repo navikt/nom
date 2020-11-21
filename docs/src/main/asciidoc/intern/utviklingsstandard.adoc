@@ -1,0 +1,7 @@
+= Utviklingsstandard
+
+TODO:
+
+* Kafka GroupIds
+* Kafka ClientId
+* TransactionIds

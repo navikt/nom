@@ -1,3 +1,7 @@
+app:
+  dvh:
+    topic: nom.dvhsource-v1
+
 graphql:
   servlet:
     tracing-enabled: true
@@ -5,3 +9,8 @@ graphql:
     tabs:
       - name: HentEnhet
         query: classpath:playground/hentEnhet.graphql
+
+spring:
+  kafka:
+    consumer:
+      max-poll-records: 1000
