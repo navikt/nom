@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Tag;
 import lombok.val;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTags;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
+import org.springframework.boot.actuate.metrics.web.reactive.client.WebClientExchangeTags;
+import org.springframework.boot.actuate.metrics.web.reactive.client.WebClientExchangeTagsProvider;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 
@@ -20,18 +23,26 @@ import java.util.Arrays;
 class CommonConfig {
 
     @Bean
-    RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
+    WebClientExchangeTagsProvider webClientExchangeTagsProvider() {
+        return (request, response, throwable) ->
+            Arrays.asList(
+                    WebClientExchangeTags.method(request),
+                    WebClientExchangeTags.uri(request),
+                    WebClientExchangeTags.status(response, throwable),
+                    WebClientExchangeTags.clientName(request));
     }
 
-    @Bean
-    RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
-        return (urlTemplate, request, response) -> {
-            val uriTag = StringUtils.hasText(urlTemplate) ? RestTemplateExchangeTags.uri(urlTemplate.replaceFirst("\\?.*", "")) : Tag.of("uri", request.getURI().getPath());
+    @Bean(name = "enhetWebClient")
+    WebClient getEnhetWebClient(AppProperties properties) {
+        return WebClient.builder()
+                .baseUrl(properties.getDvh().getEnhet().getUrl())
+                .build();
+    }
 
-            return Arrays.asList(RestTemplateExchangeTags.method(request), uriTag,
-                    RestTemplateExchangeTags.status(response),
-                    RestTemplateExchangeTags.clientName(request));
-        };
+    @Bean(name = "ressursWebClient")
+    WebClient getRessursWebClient(AppProperties properties) {
+        return WebClient.builder()
+                .baseUrl(properties.getDvh().getRessurs().getUrl())
+                .build();
     }
 }
