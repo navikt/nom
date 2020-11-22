@@ -4,7 +4,7 @@ on:
     branches:
       - master
     paths:
-      - '.nais/alerts/*/dvh-alerts.yaml'
+      - '.nais/alerts/dvh-alerts.yaml'
 
 jobs:
   apply-alerts:
