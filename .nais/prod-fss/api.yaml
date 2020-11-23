@@ -37,6 +37,6 @@ spec:
       memory: 1024Mi
   prometheus:
     enabled: true
-    path: nom-api/internal/prometheus
+    path: /internal/prometheus
   kafka:
     pool: nav-prod
