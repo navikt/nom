@@ -35,9 +35,9 @@ Datakatalogen:
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
-|ID             |Ja         |Generert UUID som tilegnes organiseringen      |123e4567-e89b-12d3-a456-426614174000
-|OverId         |Ja         |Navnet på en organisasjonsenhet                |Id til organisasjonsenhet over.
-|UnderId        |Ja         |Dagen fra organisasjonsenheten blir gyldig     |Id til organisasjonsenhet under.
+|ID             |Ja         |Generert UUID som tilegnes organiseringen      |123e4567-e89b-12d3-a456-426614174001
+|OverId         |Ja         |Id til organisasjonsenhet over                 |123e4567-e89b-12d3-a456-426614174002
+|UnderId        |Ja         |Id til organisasjonsenhet under.               |123e4567-e89b-12d3-a456-426614174003
 |Type           |Ja         |Dagen fra organisasjonsenheten blir gyldig     |
 |Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22
 |Gyldig til     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
