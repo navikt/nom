@@ -10,7 +10,7 @@ graphql:
       - name: HentEnhet
         query: classpath:playground/hentEnhet.graphql
 
-spring:
-  kafka:
-    consumer:
-      max-poll-records: 1000
+spring.kafka.consumer.max-poll-records: 1000
+
+# Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
+management.endpoints.web.exposure.include: health,prometheus
