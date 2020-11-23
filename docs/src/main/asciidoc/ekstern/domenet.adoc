@@ -2,12 +2,43 @@
 
 == Organisasjonsenhet
 
-Beskrivelse:
-Eksempler:
+https://data.adeo.no/begrep/BEGREP-207[Datakatalogen]
+
+Beskrivelse: +
+Delmengde av en organisasjon som etableres som følge av forhandlinger i medbestemmelsesapparatet, og som består av leder, og kan ha ressurser og underliggende organisasjonsenheter.
+Begrepet brukes om alle nivåer i hierakiet.
+En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
+
+Eksempler: +
+Økonomi linjen er en organisasjonsenhet og har overenhet NAV (organisasjon), og har en underenhet som heter økonomi stønad som også er en organisasjonsenhet.
 
 [%header,cols=4*]
 |===
-|Felt           |Påkrevd    |Beskrivelse                    |Eksempel
-|Navn           |Ja         |Navnet på en enhet             |NAV Oslo - Gamle byen
-|Nummer         |Ja/Nei     |4-siffret nummer for en enhet  |0104
+|Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
+|Id             |Ja         |Generert UUID som tilegnes organisasjonsenhet  |123e4567-e89b-12d3-a456-426614174000
+|Navn           |Ja         |Navnet på en organisasjonsenhet                |NAV Oslo - Gamle byen
+|Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22
+|Gyldig til     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
+|===
+
+== Organisering
+
+Beskrivelse: +
+Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
+En organisering omfatter 2 enheter og typen organisering mellom dem.
+En organisasjonsenhet kan ta del i flere organiseringer.
+
+Eksempler:
+
+Datakatalogen:
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
+|ID             |Ja         |Generert UUID som tilegnes organiseringen      |123e4567-e89b-12d3-a456-426614174000
+|OverId         |Ja         |Navnet på en organisasjonsenhet                |Id til organisasjonsenhet over.
+|UnderId        |Ja         |Dagen fra organisasjonsenheten blir gyldig     |Id til organisasjonsenhet under.
+|Type           |Ja         |Dagen fra organisasjonsenheten blir gyldig     |
+|Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22
+|Gyldig til     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
 |===
