@@ -1,0 +1,41 @@
+= Eksempler på hendelsesforløp
+
+== Orgenheter slås sammen
+
+`orgenhet1` og `orgenhet2` skal slås sammen til en større enhet
+
+Det blir besluttet at `orgenhet2` innlemmes i `orgenhet1`.
+
+*! `orgenhet2` settes til nedlagt 3 måneder fra nåværende tidspunkt.*
+
+NOM godtar ikke denne endringen pga følgende problemer:
+
+* de ansatte ved `orgenhet2` har ikke noe tilholdssted 3 måneder fra nå
+* `orgenhet3` som er en underenhet av `orgenhet2` blir koblet ut av hierarkiet 3 måneder fra nå
+* `leder2` vil ikke lengre være leder for noen enhet
+
+Nytt forsøk. Må sette sammen flere endringer på en gang slik at systemtilstanden til enhver tid
+er noe som henger sammen og gir mening.
+
+*! Samled endringer:*
+
+* `orgenhet2` settes til nedlagt 3 måneder fra nåværende tidspunkt
+* alle ansatte ved `orgenhet2` flyttes til `orgenhet1` om 3 måneder
+* `orgenhet1` settes til overenhet for `orgenhet3` om 3 måneder
+* `leder2` er ikke lengre leder om 3 måneder
+
+Disse endringene henger sammen, og NOM kan godkjenne og legge dem inn.
+
+Deretter må alle berørte varsles. NOM kan eksponere dette som en hendelse på kafka, type
+"orgenhet2 planlagt nedlagt".
+
+Etter 3 måneder trer endringene i kraft.
+
+
+== Orgenhet detaljer endres
+
+`orgenhet1 - en enhet` skal endre navn til `orgenhet1 - den enheten`
+
+*! Endring legges inn, og trer i kraft (nå / om en uke / en måned tilbake)*
+
+En slik endring påvirker ikke andre orgenheter eller ansatte, og kan tre i kraft uten noe særlig problemer.

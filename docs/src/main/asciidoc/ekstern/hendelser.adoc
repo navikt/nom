@@ -19,6 +19,7 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
 * Enheter sammenslått
 * Enhet splittet opp
 * Enhet flyttet geografisk
+* Enhet detaljer endret
 
 === Ansatt
 
@@ -26,6 +27,7 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
 * Ansatt har sluttet
 * Ansatt har fått ny tilgang/rettighet
 * Ansatt har mistet tilgang/rettighet
+* Ansatt detaljer endret
 
 === Ansatt + Orgenhet
 
@@ -37,6 +39,7 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
 * Leder opprettet
 * Leder fjernet
 * Leder har fått ny (overordnet) leder
+* Leder detaljer endret
 
 === Leder + Ansatt
 
@@ -57,3 +60,9 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører
 
 * Lønn utbetalt
 * Stilling utlyst
+* Produktteam opprettet
+* Produktteam nedlagt
+* Kompetanserolle opprettet
+* Ansatt betalt tilbake ifm telefonabonnement.
+* Ansatt ut i ferie
+* Ansatt ut i permisjon
