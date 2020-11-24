@@ -1,4 +1,4 @@
-package no.nav.nom.skjermede.personer.pip;
+package no.nav.nom.skjermede.personer.pip.api;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
+import no.nav.nom.skjermede.personer.pip.Cache;
+import no.nav.nom.skjermede.personer.pip.Skjermingsperiode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Api(tags = "admin")

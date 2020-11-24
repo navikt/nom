@@ -29,7 +29,7 @@ public class Cache {
                 .register(meterRegistry);
     }
 
-    boolean isSkjermet(String personident) {
+    public boolean isSkjermet(String personident) {
         val periode = skjermedePersoner.get(personident);
 
         return (periode != null) &&
@@ -37,11 +37,11 @@ public class Cache {
                 (periode.getTil() == null || periode.getTil().isAfter(LocalDateTime.now()));
     }
 
-    ConcurrentHashMap<String, Skjermingsperiode> getAll() {
+    public ConcurrentHashMap<String, Skjermingsperiode> getAll() {
         return skjermedePersoner;
     }
 
-    int size() {
+    public int size() {
         return skjermedePersoner.size();
     }
 
