@@ -1,6 +1,0 @@
-query {
-    hentEnhet(nummer: "1337") {
-        navn
-        nummer
-    }
-}

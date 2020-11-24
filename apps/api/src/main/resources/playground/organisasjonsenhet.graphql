@@ -1,0 +1,8 @@
+query {
+    organisasjonsenhet(where: {id: "test"}) {
+        id
+        navn
+        gyldigFom
+        gyldigTil
+    }
+}

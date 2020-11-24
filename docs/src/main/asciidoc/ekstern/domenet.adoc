@@ -1,15 +1,17 @@
 = Domenet
 
 == Organisasjonsenhet
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/BEGREP-207[Datakatalogen] | Oppslag: Kommer | Hendelser: Kommer
+|===
 
-https://data.adeo.no/begrep/BEGREP-207[Datakatalogen]
-
-Beskrivelse: +
+*Beskrivelse:* +
 Delmengde av en organisasjon som etableres som følge av forhandlinger i medbestemmelsesapparatet, og som består av leder, og kan ha ressurser og underliggende organisasjonsenheter.
 Begrepet brukes om alle nivåer i hierakiet.
 En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
 
-Eksempler: +
+*Eksempler:* +
 Økonomi linjen er en organisasjonsenhet og har overenhet NAV (organisasjon), og har en underenhet som heter økonomi stønad som også er en organisasjonsenhet.
 
 [%header,cols=4*]
@@ -22,21 +24,23 @@ Eksempler: +
 |===
 
 == Organisering
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
+|===
 
-Beskrivelse: +
+*Beskrivelse:* +
 Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
 En organisering omfatter 2 enheter og typen organisering mellom dem.
 En organisasjonsenhet kan ta del i flere organiseringer.
 
-Eksempler:
-
-Datakatalogen:
+*Eksempler:*
 
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
 |ID             |Ja         |Generert UUID som tilegnes organiseringen      |123e4567-e89b-12d3-a456-426614174001
-|OverId         |Ja         |Id til organisasjonsenhet over                 |123e4567-e89b-12d3-a456-426614174002
+|Retning        |Ja         |Overenhet eller underenhet                     |123e4567-e89b-12d3-a456-426614174002
 |UnderId        |Ja         |Id til organisasjonsenhet under.               |123e4567-e89b-12d3-a456-426614174003
 |Type           |Ja         |Dagen fra organisasjonsenheten blir gyldig     |
 |Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22

@@ -1,8 +1,17 @@
+scalar Date
+scalar DateTime
+
 type Query {
-    hentEnhet(nummer: ID!): Enhet
+    organisasjonsenhet(where: OrganisasjonsenhetSearch!): [Organisasjonsenhet!]!
 }
 
-type Enhet {
+input OrganisasjonsenhetSearch {
+    id: String
+}
+
+type Organisasjonsenhet {
+    id: ID!
     navn: String!
-    nummer: String!
+    gyldigFom: Date!
+    gyldigTil: Date
 }
