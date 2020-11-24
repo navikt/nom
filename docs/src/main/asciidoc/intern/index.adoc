@@ -6,6 +6,8 @@
 :toc-title: Innhold
 :icons: font
 
+include::interne-hendelser.adoc[leveloffset=1]
+
 == Dokumentasjon
 
 Ligger under monorepo `nom/docs/src/main/asciidoc`.

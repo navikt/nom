@@ -1,0 +1,141 @@
+= Interne Hendelser
+
+Forslag til intern hendelsesmodell.
+
+== Grunnprinsipper og terminologier
+
+=== Endringstyper
+En endringstype er den opprinnelige handlingen som ble gjort av en bruker.
+
+Når man snakker om endringstyper og hendelser, så vil alltids endringstyper være i fortid.
+Dette er fordi hendelsen er et resultat av noe som har skjedd og en logg på dette.
+
+==== Opprettet
+Opprettelse av en ny organisasjonsenhet / ressurs / organisering.
+
+Denne vil ikke få en ID via UI, men blir generert av backend.
+Validering vil skje på tvers, dvs at man sjekker mot andre organisasjonsenheter om ting går på tvers.
+Eksempel på dette er hvis man ender opp med å ta inn 4-talls nummer, så kan en valideringsregel være at man ikke kan opprette en organisasjonsenhet med et likt 4-tall som en eksisterende enhet.
+
+==== Endret
+Endre spesifike opplysninger på en enhet.
+
+Her kommer man med en eksisterende ID for organisasjonsenhet og skal endre noen spesifikke felter.
+Eksempel er at man i dag har Oslo Gamle Byen, men fra 2021-01-01 så skal denne hete: Oslo Gamle Staden.
+Dvs at det som sto der før 2021-01-01 var korrekt, men vi skal endre noen attributter på enheten som kan slå inn på et gitt tidspunkt.
+
+==== Korrigert
+Det som står der er feil, har aldri vært korrekt.
+
+Her kommer man inn med ID på enheten + gyldig fom og feltene som skal korrigeres.
+ID + GyldigFom vil være nok informasjon til å entydig identifisere hvilke hendelse det er snakk om, men må byttes ut til den tekniske hendelsesIden på baksiden.
+Grunnen til dette er fordi man skal peke på en spesifik forekomst til en organisasjonsenhet i tid.
+Et alternativ til å peke på hendelsesIden ville være å peke på Iden til Enheten + tidspunkt, men det gjør at man ikke kan endre tidspunktet ettersom det da ville være id + tidspunkt som gjør den unik.
+
+.Eksempel
+[source]
+----
+                      2021-01-01
+                          \/
+|---- NAV Gamke Byen ---->|---- NAV Gamle Staden ---->
+|---- NAV Gamle Byen ---->
+----
+I dette tilfellet, sier man at NAV Gamke Byen aldri har vært korrekt og skal være NAV Gamle Byen.
+
+==== Opphørt
+Setter gyldig til en dato.
+_Kan diskuteres om trengs._
+Alternativet er å lage en endring som setter gyldig til.
+
+==== Annullert
+Skulle aldri ha blitt opprettet til å begynne med.
+
+.Originalt
+[source]
+----
+|---- NAV Gamle Byen ---->|---- NAV Gamlk Staden ---->
+----
+Det skulle aldri ha vært utført en *endring* på NAV Gamle Byen, så endringen skal annulleres.
+Da vil man annullere kun den siste og stå igjen med:
+
+.Resultat etter annullering
+[source]
+----
+|---- NAV Gamle Byen ---->
+----
+
+Det samme kan man si om en original opprettelse.
+F.eks ved at man oppretter en organisasjonsenhet for mye eller en som ikke skulle vært lagd av andre grunner.
+
+=== Tidslinjer
+Tidslinjer blir definert innad en id.
+F.eks for enhet, så vil en organisasjonsenhet ha en ikke meningsbærende id (UUID) som vil gjelde for den spesifikke enheten i hele livsløpet.
+Men enheten kan endres over tid.
+
+.Eksempel
+[source]
+----
+|---- NAV Gamle Byen ---->|---- NAV Gamle Staden ---->
+----
+I dette tilfellet, så snakker man om en endring i tid.
+Dette setter *IKKE* gyldig til på den forrige.
+Begrunnelsen for dette er at endringer natulig tar over for endringer med nyere gyldig fra dato.
+Dette gjør at man slipper å kjøre cascading endringer dersom man skal flytte på gyldig fra.
+
+.Eksempel på cascading endringer
+[source]
+----
+          Dagens dato
+             \/
+|---- NAV Gamle Byen ----||---- NAV Gamle Staden ---->
+
+Satt inn feil dato frem i tid for når NAV Gamle Staden skal ta over.
+Nå vil man måtte korrigere på NAV Gamle Byen (gyldig til) og NAV Gamle Staden (gyldig fom).
+----
+
+== Tekniske detaljer
+
+En hendelse i NOM er et innslag av en handling fra et system eller en autorisert bruker.
+Eksempler er opprettelse av enheter, ressurser, o.l..
+Alle disse, blir wrappet inn i en felles hendelsesklasse som inneholder metadata om hva som omfattes, hvem som utførte handlingen, når det ble gjort.
+Merk: Det er forskjell mellom den interne hendelsesmodellen og hva som blir eksponert ut på GraphQL.
+GraphQL er et view av mange forskjellige hendelser som kan være utført over tid.
+Eksempelvis, hvis en organisasjonsenhet har blitt opprettet, så korrigert, da vil kun informasjon fra korrigeringen bli presentert (den opprinnelige opprettelsen blir da teknisk historisk).
+
+.Forløp
+[source]
+----
+Bruker                          NOM-Api                     Kafka
+    ------Opprett Enhet--------->
+                                Validering
+                                    ---- I en Transaksjon ---->
+
+                                    <-- Leses inn i In-Mem ----
+    <-----Response--------------
+----
+Ett issue med modellen er at forskjellige pods vil potensielt være noe ute av sync i noen ms.
+Svaret tilbake til bruker/ui kommer fra samme pod, så i hovedsak ikke et problem på den forespørselen, men potensielt hvis man spør flere ganger imellom der.
+Dette vil være et edge case, men greit å være obs på det.
+
+=== Utforming av hendelser
+
+[source,java]
+----
+include::../../../../../libs/contract-nom-dto/src/main/java/no/nav/nom/contract/nom/hendelse/Hendelse.java[tag=class]
+----
+
+[%header,cols="20%,10%,70%"]
+|===
+|Felt                   |Påkrevd    |Beskrivelse
+|id                     | Ja        | Unik ID for denne hendelsen
+|reqId                  | Ja        | Unik ID for en delmengde av endringer, f.eks bolk eller at 1x forretningshendelse trigger flere endringer
+|type                   | Ja        | Typen data som ligger i data
+|data                   | Nei       | Data i Json, kan være null ved f.eks annulleringer, eventuelt om man lager det påkrevd, for så å måtte begrunne hvorfor man annullerer
+|endringstype           | Ja        | Aksjonen som ble utført
+|opprettetAv            | Ja        | NavIdent eller mail på person som utført endringen, ofte tatt fra OIDC token subject
+|opprettet              | Ja        | Tidspunktet denne hendelsen ble opprettet
+|tidligereId            | Nei       | I tilfeller ved korrigering og annullering, så peker man spesifikt på iden til en tidligere hendelse
+|===
+
+
+
