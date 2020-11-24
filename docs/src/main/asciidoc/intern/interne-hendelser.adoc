@@ -119,23 +119,10 @@ Dette vil være et edge case, men greit å være obs på det.
 
 === Utforming av hendelser
 
+==== Wrapper
+
 [source,java]
 ----
 include::../../../../../libs/contract-nom-dto/src/main/java/no/nav/nom/contract/nom/hendelse/Hendelse.java[tag=class]
 ----
-
-[%header,cols="20%,10%,70%"]
-|===
-|Felt                   |Påkrevd    |Beskrivelse
-|id                     | Ja        | Unik ID for denne hendelsen
-|reqId                  | Ja        | Unik ID for en delmengde av endringer, f.eks bolk eller at 1x forretningshendelse trigger flere endringer
-|type                   | Ja        | Typen data som ligger i data
-|data                   | Nei       | Data i Json, kan være null ved f.eks annulleringer, eventuelt om man lager det påkrevd, for så å måtte begrunne hvorfor man annullerer
-|endringstype           | Ja        | Aksjonen som ble utført
-|opprettetAv            | Ja        | NavIdent eller mail på person som utført endringen, ofte tatt fra OIDC token subject
-|opprettet              | Ja        | Tidspunktet denne hendelsen ble opprettet
-|tidligereId            | Nei       | I tilfeller ved korrigering og annullering, så peker man spesifikt på iden til en tidligere hendelse
-|===
-
-
 

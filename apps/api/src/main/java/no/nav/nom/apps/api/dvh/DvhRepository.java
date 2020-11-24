@@ -22,6 +22,10 @@ public class DvhRepository {
         events.add(event);
     }
 
+    public List<DvhEvent> findAll() {
+        return events;
+    }
+
     public Optional<Enhet> findEnhetByNummer(String nummer) {
         return events.stream()
                 .filter(e -> Enhet.TYPE.equals(e.getType()))
