@@ -1,0 +1,44 @@
+= Historikk
+
+Forslag til historikk
+
+=== Definisjoner på funksjonell og teknisk historikk
+
+Data skal ses på i tre lag.
+
+* *Aggregerte operasjoner* (teknisk historikk)
+** En enkeltoperasjon eller hendelse `h~n~` representerer en endring (på struktur og attributer) plassert i (funksjonell) tid.
+`n` er bare et sekvensnr/løpenummer/naturlig tall (`h~0~` , `h~1~` , `h~2~` , `...` , `h~n~`)
+
+** Eksempel på enkeltoperasjoner:
+*** `Opprett x, 2011-01-01`
+*** `Endre x, 2013-02-02`
+*** `Fjerne x, 2013-04-02`
+*** `Koble sammen y og z, 2015-01-08`
+*** `Koble fra y og z, 2016-01-16`
+*** `...`
+
+** Enkeltoperasjonene utføres sekvensielt og summen av dem genererer et sett med *tidslinjer*
+*** Enkeltoperasjonen `h~n~` er avhengig av alle foregående operasjoner `h~m~` der `m < n`
+
+* *Tidslinje* (funksjonell historikk)
+** En tidslinje er en funksjon  `t(id,t)` av entitet-id og tid, som returnerer attributter
+*** `t("012309", dato("2010-01-01"))` => `{navn: NAV Gammle Oslo, ...}`
+*** `t("012309", dato("2010-04-01"))` => `{navn: NAV Gamle Oslo, ...}`
+*** `t("012309", dato("2018-01-01"))` => `{navn: NAV Gamle Kristiania, ...}`
+** Tidslinjen bryr seg ikke med hva som er framtid og fortid. En kan dermed overskrive (rette på) gammel historikk, og dette er ønskelig.
+
+* *Sample* (operasjonelle data)
+** Operasjonelle data er tidslinjer evaluert mot bestemte tidspunkt.
+I de fleste tilfeller vil dette være av type `date.now()`
+** Eventuelt kan en konsument/interessent hente ut hele livsløpet (tidslinjen) til en entitet
+** Kan også i endepunkter kunne flagge om et "sample" er stabilt 3 måneder fram i tid (eller ikke).
+Da kan konsumenter få varsel om tilstander som skal endres, uten de selv blir nødt til å bry seg med gyldighetsdatoer.
+
+
+
+=== Validering av operasjoner
+
+Det er helt nødvendig å ha streng validering på aggregerte operasjoner slik at de i sum alltid
+genererer gyldige data (tidslinjer som stemmer overrens).
+
