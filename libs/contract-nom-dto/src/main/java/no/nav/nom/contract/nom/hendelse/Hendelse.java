@@ -1,9 +1,12 @@
 package no.nav.nom.contract.nom.hendelse;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Builder;
+import lombok.NonNull;
 import lombok.Value;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * #########################################
@@ -12,15 +15,43 @@ import java.time.LocalDateTime;
  */
 // tag::class[]
 @Value
+@Builder
 public class Hendelse {
-    String id;                      // b960900e-f58c-4d65-ad72-0eacceb5722c
-    String reqId;                   // 2fabfeb1-6f6b-4a93-87a6-982fdfcc8074
-    String type;                    // "no.nav.nom.hendelse:Enhet"
-    JsonNode data;                  // { "fid": "UUID....", "navn": "NAV Gamle Oslo"... }
-    Endringstype endringstype;      // OPPRETTET
-    String opprettetAv;             // test.testesen@nav.no
-    LocalDateTime opprettet;        // 2020-11-24T13:37:00Z
-    String tidligereId;             // null
+
+    // Unik id per hendelse. Opprettes av backend.
+    @NonNull
+    UUID id;
+
+    // Unik id for en forretningshendelse, f.eks nedleggelse av enhet kan generere flere hendelser. Opprettes av client.
+    @NonNull
+    UUID reqId;
+
+    // Hvilke type data som ligger i feltet data.
+    // Eksempel: no.nav.nom.hendelse:Enhet
+    @NonNull
+    String type;
+
+    // Data i JSON format.
+    // Eksempel: { "fid": "UUID....", "navn": "NAV Gamle Oslo"... }
+    JsonNode data;
+
+    // Aksjonen som ble utført.
+    // Eksempel: OPPRETT
+    @NonNull
+    Endringstype endringstype;
+
+    // Subject fra JWT token.
+    // Eksempel: test.testesen@nav.no
+    @NonNull
+    String opprettetAv;
+
+    // Tidspunkt hendelsen ble opprettet.
+    // Eksempel: 2020-11-24T13:37:00Z
+    @NonNull
+    LocalDateTime opprettet;
+
+    // Peker til en tidligere hendelsesid i tilfeller ved korrigering og annullering.
+    UUID tidligereId;
 
     public enum Endringstype {
         OPPRETET, ENDRET, KORRIGERT, OPPHOERT, ANNULLERT
