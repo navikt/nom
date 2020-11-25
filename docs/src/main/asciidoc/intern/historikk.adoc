@@ -4,19 +4,71 @@ Forslag til historikk
 
 === Definisjoner på funksjonell og teknisk historikk
 
-Data skal ses på i tre lag.
+Data skal ses på i tre lag. Aggregerte operasjoner, tidslinjer, og samples.
 
 * *Aggregerte operasjoner* (teknisk historikk)
 ** En enkeltoperasjon eller hendelse `h~n~` representerer en endring (på struktur og attributer) plassert i (funksjonell) tid.
 `n` er bare et sekvensnr/løpenummer/naturlig tall (`h~0~` , `h~1~` , `h~2~` , `...` , `h~n~`)
 
 ** Eksempel på enkeltoperasjoner:
-*** `Opprett x, 2011-01-01`
-*** `Endre x, 2013-02-02`
-*** `Fjerne x, 2013-04-02`
-*** `Koble sammen y og z, 2015-01-08`
-*** `Koble fra y og z, 2016-01-16`
-*** `...`
++
+[source,javascript]
+----
+{
+    "h": 0,
+    "op": "opprett enhet",
+    "gyldigFom": "2020-01-01",
+    "gyldigTil": null,
+    "data": {
+        "id": 4321,
+        "navn": "NAV Oslo"
+    }
+}
+----
++
+[source,javascript]
+----
+{
+    "h": 1,
+    "op": "opprett enhet",
+    "gyldigFom": "2020-01-01",
+    "gyldigTil": null,
+    "data": {
+        "id": 1234,
+        "navn": "NAV Helsfyr"
+    }
+}
+----
++
+[source,javascript]
+----
+{
+    "h": 2,
+    "op": "opprett kobling",
+    "gyldigFom": "2020-01-01",
+    "gyldigTil": null,
+    "data": {
+        "id": 300,
+        "overEnhet": "4321",
+        "underEnhet": "1234"
+    }
+}
+----
++
+[source,javascript]
+----
+{
+    "h": 3,
+    "op": "endre kobling",
+    "gyldigFom": "2020-05-10",
+    "gyldigTil": null,
+    "data": {
+        "id": 300,
+        "overEnhet": "1234",
+        "underEnhet": "4321"
+    }
+}
+----
 
 ** Enkeltoperasjonene utføres sekvensielt og summen av dem genererer et sett med *tidslinjer*
 *** Enkeltoperasjonen `h~n~` er avhengig av alle foregående operasjoner `h~m~` der `m < n`
@@ -26,7 +78,7 @@ Data skal ses på i tre lag.
 *** `t("012309", dato("2010-01-01"))` => `{navn: NAV Gammle Oslo, ...}`
 *** `t("012309", dato("2010-04-01"))` => `{navn: NAV Gamle Oslo, ...}`
 *** `t("012309", dato("2018-01-01"))` => `{navn: NAV Gamle Kristiania, ...}`
-** Tidslinjen bryr seg ikke med hva som er framtid og fortid. En kan dermed overskrive (rette på) gammel historikk, og dette er ønskelig.
+** Tidslinjen er likegyldig til system-tid. En kan dermed overskrive (rette på) gammel og framtidig data.
 
 * *Sample* (operasjonelle data)
 ** Operasjonelle data er tidslinjer evaluert mot bestemte tidspunkt.
@@ -40,5 +92,5 @@ Da kan konsumenter få varsel om tilstander som skal endres, uten de selv blir n
 === Validering av operasjoner
 
 Det er helt nødvendig å ha streng validering på aggregerte operasjoner slik at de i sum alltid
-genererer gyldige data (tidslinjer som stemmer overrens).
+genererer gyldige data (tidslinjer som stemmer overrens på tvers av entiteter).
 
