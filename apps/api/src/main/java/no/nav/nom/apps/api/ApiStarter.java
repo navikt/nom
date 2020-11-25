@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api;
 
+import no.nav.nom.libs.utils.common.properties.PropertyUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -8,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @ConfigurationPropertiesScan
 public class ApiStarter {
     public static void main(String[] args) {
-        System.setProperty("app.name", "nom-api");
+        PropertyUtils.initDefaultProperties("nom-api");
         SpringApplication.run(ApiStarter.class, args);
     }
 }
