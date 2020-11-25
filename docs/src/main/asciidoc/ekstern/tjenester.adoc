@@ -1,8 +1,0 @@
-= Tjenester
-
-== hentEnhet
-
-Tjeneste for å hente en enhet og tilhørende informasjon.
-
-Sikkerhet: ?
-

@@ -1,0 +1,18 @@
+= Integrasjon
+
+NOM tilbyr integrasjon via GraphQL og Kafka.
+
+== GraphQL
+
+GraphQL kan prøves ut i dev https://nom-api.dev.intern.nav.no/playground[her] (Krever naisdevice eller via utviklerimage).
+Det ligger lastet inn pre-utfylte forespørsler som kan bygges videre på.
+Skjema kan utforskes ved å gå https://nom-api.dev.intern.nav.no/voyager[her].
+
+=== Organisasjonsenhet
+
+Tjeneste for å hente organisasjonsenheter og tilhørende informasjon.
+
+[source,graphql]
+----
+include::../../../../../apps/api/src/test/resources/organisasjonsenhet/scenario1.graphql[]
+----

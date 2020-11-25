@@ -11,6 +11,6 @@ NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-inter
 
 include::visjon.adoc[leveloffset=1]
 include::domenet.adoc[leveloffset=1]
-include::tjenester.adoc[leveloffset=1]
+include::integrasjon.adoc[leveloffset=1]
 include::hendelser.adoc[leveloffset=1]
 
