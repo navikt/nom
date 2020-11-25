@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean verify --projects :skjermede-personer-pip --also-make -Pintegration-test
+        run: mvn clean verify --projects :skjermede-personer-pip --also-make -Pintegration-test --batch-mode
 
       - name: Build and publish Docker image
         env:
