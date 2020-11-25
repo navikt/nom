@@ -21,7 +21,7 @@ public class KafkaConfig {
     ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory(
             ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
             ConsumerFactory<Object, Object> kafkaConsumerFactory) {
-        return KafkaContainerUtils.containerFactory(configurer, kafkaConsumerFactory, 1000);
+        return KafkaContainerUtils.containerFactory(configurer, kafkaConsumerFactory);
     }
 
 }
