@@ -7,6 +7,8 @@
 :icons: font
 
 include::interne-hendelser.adoc[leveloffset=1]
+include::eksterne-systemer.adoc[leveloffset=1]
+
 
 == Dokumentasjon
 
