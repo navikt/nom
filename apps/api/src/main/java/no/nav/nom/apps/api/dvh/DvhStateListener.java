@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.contract.dvh.DvhEvent;
+import no.nav.nom.contract.dvh.Enhet;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -43,7 +44,10 @@ public class DvhStateListener {
     public void onMessage(ConsumerRecords<String, String> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false)
                 .map(this::convert)
-                .forEach(repository::save);
+                .filter(e -> e.getType().equals(Enhet.TYPE))
+                .filter(e -> e.getData().get("ORGNODE_TYPE").asText().equals("NAVENHET"))
+                .map(e -> new DvhOrganisasjonsenhet(e.getData()))
+                .forEach(repository::saveEnhet);
 
         verifyUpToDate(consumer);
     }
@@ -61,7 +65,7 @@ public class DvhStateListener {
             if (complete) {
                 initialLoadComplete.set(true);
                 AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.CORRECT);
-                log.info("State restored from Kafka, changing to LivenessState.CORRECT. Total records persisted: {}", repository.size());
+                log.info("State restored from Kafka, changing to LivenessState.CORRECT. Total records persisted: {}", repository.enhetCount());
             }
         }
     }

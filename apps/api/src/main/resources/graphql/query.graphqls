@@ -2,7 +2,7 @@ scalar Date
 scalar DateTime
 
 type Query {
-    organisasjonsenhet(where: OrganisasjonsenhetSearch!): [Organisasjonsenhet!]!
+    organisasjonsenhet(where: OrganisasjonsenhetSearch): [Organisasjonsenhet!]!
 }
 
 input OrganisasjonsenhetSearch {
