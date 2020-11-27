@@ -69,6 +69,7 @@
         <dependency>
             <groupId>no.nav</groupId>
             <artifactId>vault-jdbc</artifactId>
+            <version>${vault-jdbc.version}</version>
         </dependency>
 
         <dependency>
