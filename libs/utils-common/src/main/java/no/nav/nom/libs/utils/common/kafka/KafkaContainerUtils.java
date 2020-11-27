@@ -14,13 +14,10 @@ public class KafkaContainerUtils {
 
     public static ConcurrentKafkaListenerContainerFactory<?, ?> containerFactory(
             ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
-            ConsumerFactory<Object, Object> kafkaConsumerFactory,
-            long msWait) {
+            ConsumerFactory<Object, Object> kafkaConsumerFactory) {
 
         val factory = new ConcurrentKafkaListenerContainerFactory<>();
         configurer.configure(factory, kafkaConsumerFactory);
-        // Må være mindre enn max.poll.interval.ms. Denne er default 30 sekunder.
-        factory.getContainerProperties().setAuthorizationExceptionRetryInterval(Duration.ofMillis(msWait));
         factory.getContainerProperties().setSubBatchPerPartition(false);
         return factory;
     }

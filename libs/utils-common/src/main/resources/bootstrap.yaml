@@ -1,8 +1,0 @@
-# Får ikke satt disse properties'a i f.eks common-app.yaml, da blir de lastet for sent inn i Spring
-spring.main:
-  banner-mode: 'off'
-  cloud-platform: kubernetes
-
-# For å vente på at alle HTTP requests skal bli ferdig før den skrus av
-server.shutdown: graceful
-

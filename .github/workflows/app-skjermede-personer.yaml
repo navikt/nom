@@ -35,7 +35,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :skjermede-personer --also-make
+        run: mvn clean package --projects :skjermede-personer --also-make --batch-mode
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

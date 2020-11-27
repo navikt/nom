@@ -1,4 +1,5 @@
 app:
   dvh:
+    base-url: http://localhost:${wiremock.server.port}/
     ressurs:
       chunkSize: 3

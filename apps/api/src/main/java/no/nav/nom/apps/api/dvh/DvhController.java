@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.contract.dvh.DvhEvent;
-import no.nav.nom.contract.dvh.Enhet;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,9 +15,8 @@ public class DvhController {
 
     // For analyse
     @GetMapping("/internal/dvh/events/enheter")
-    public List<DvhEvent> dump() {
-        return repository.findAll().stream()
-                .filter(e -> Enhet.TYPE.equals(e.getType()))
+    public List<DvhOrganisasjonsenhet> dump() {
+        return repository.findAllEnheter().stream()
                 .collect(toUnmodifiableList());
     }
 }

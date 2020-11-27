@@ -1,0 +1,50 @@
+= Eksterne systemer
+
+== DVH
+
+Format fra datavarehus.
+
+=== Feed 1: Enhetsinformasjon
+Ønsker en changelog.
+
+Note: Hvis det finnes en EK, vil vi gjerne ha dette.
+Dersom det blir relevant å ta inn enheter fra forskjellige systemer, så ta med dette også (ORG_NODE_TYPE_KODE).
+
+Behovet har vært signalisert at er kun det _formelle_ hierarkiet og dermed også de enhetene som er en del av dette?
+Virtuelle arbeidskøer holdes utenfor.
+
+.Enhet
+[%header,cols="20%,5%,10%,65%"]
+|===
+|Attributt              |Prioritet      |Eksempel   |Beskrivelse
+|Sekvens                |               |           |Change log sekvens
+|DvhId                  |Høy            |           |EK? EK kan være et nummer eller tekst, avhengig av hva som skal til for å lage en EK
+|Nummer                 |Høy            |0301       |4er tall, eventuelt med bydel, hva brukes mest?
+|Navn                   |Høy            |           |NAV Oslo - Sagene
+|GyldigFra              |Høy            |           |
+|GyldigTil              |Høy            |           |
+|LederRessursId         |               |           |Null hvis ikke relevant
+|AgressoNr              |               |           |Null hvis ikke relevant
+|RemedyNummer           |               |           |Null hvis ikke relevant
+|Opprettet              |               |           |Tidspunkt for opprettelse
+|OpprettetAv            |               |           |Hvem som opprettet enheten
+|===
+
+=== Feed 2: Organisering
+Ønsker en changelog.
+
+Behovet har vært signalisert at er kun det _formelle_ hierarkiet.
+
+.Organisering
+[%header,cols="20%,5%,10%,65%"]
+|===
+|Attributt              |Prioritet      |Eksempel   |Beskrivelse
+|Sekvens                |               |           |Change log sekvens
+|DvhId                  |Høy            |           |EK? EK kan være et nummer eller tekst, avhengig av hva som skal til for å lage en EK
+|Overenhet              |Høy            |           |EK til Overenhet
+|Underenhet             |Høy            |           |EK til Underenhet
+|GyldigFra              |Høy            |           |
+|GyldigTil              |Høy            |           |
+|Opprettet              |               |           |Tidspunkt for opprettelse
+|OpprettetAv            |               |           |Hvem som opprettet organiseringen
+|===
