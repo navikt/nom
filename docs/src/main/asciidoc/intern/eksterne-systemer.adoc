@@ -13,22 +13,24 @@ Dersom det blir relevant å ta inn enheter fra forskjellige systemer, så ta med
 Behovet har vært signalisert at er kun det _formelle_ hierarkiet og dermed også de enhetene som er en del av dette?
 Virtuelle arbeidskøer holdes utenfor.
 
-.Enhet
+.OrgNode
 [%header,cols="20%,5%,10%,65%"]
 |===
 |Attributt              |Prioritet      |Eksempel   |Beskrivelse
 |Sekvens                |               |           |Change log sekvens
 |DvhId                  |Høy            |           |EK? EK kan være et nummer eller tekst, avhengig av hva som skal til for å lage en EK
-|Nummer                 |Høy            |0301       |4er tall, eventuelt med bydel, hva brukes mest?
 |Navn                   |Høy            |           |NAV Oslo - Sagene
-|GyldigFra              |Høy            |           |
-|GyldigTil              |Høy            |           |
-|LederRessursId         |               |           |Null hvis ikke relevant
-|AgressoNr              |               |           |Null hvis ikke relevant
+|LederRessursNr         |               |           |Null hvis ikke relevant
+|NorgId                 |Høy            |0301       |Norg enhets ID. 4er tall, eventuelt med bydel, hva brukes mest?
+|AgressoNr              |               |0301001    |Null hvis ikke relevant
 |RemedyNummer           |               |           |Null hvis ikke relevant
+|GyldigFom              |Høy            |           |Fra og med
+|GyldigTil              |Høy            |           |til (ekslusiv)
 |Opprettet              |               |           |Tidspunkt for opprettelse
 |OpprettetAv            |               |           |Hvem som opprettet enheten
 |===
+
+Det kan være flere rader med lik DvhId. Høyeste sekvensnr betegner gjeldende rad for gitt DvhId.
 
 === Feed 2: Organisering
 Ønsker en changelog.
@@ -40,9 +42,9 @@ Behovet har vært signalisert at er kun det _formelle_ hierarkiet.
 |===
 |Attributt              |Prioritet      |Eksempel   |Beskrivelse
 |Sekvens                |               |           |Change log sekvens
-|DvhId                  |Høy            |           |EK? EK kan være et nummer eller tekst, avhengig av hva som skal til for å lage en EK
-|Overenhet              |Høy            |           |EK til Overenhet
-|Underenhet             |Høy            |           |EK til Underenhet
+|DvhStukturId           |Høy            |           |EK? EK kan være et nummer eller tekst, avhengig av hva som skal til for å lage en EK
+|DvhIdOver              |Høy            |           |EK til Overenhet
+|DvhIdUnder             |Høy            |           |EK til Underenhet
 |GyldigFra              |Høy            |           |
 |GyldigTil              |Høy            |           |
 |Opprettet              |               |           |Tidspunkt for opprettelse
