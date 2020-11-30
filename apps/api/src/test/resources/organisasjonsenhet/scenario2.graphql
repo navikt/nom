@@ -1,0 +1,8 @@
+query {
+    organisasjonsenhet {
+        id
+        navn
+        gyldigFom
+        gyldigTil
+    }
+}

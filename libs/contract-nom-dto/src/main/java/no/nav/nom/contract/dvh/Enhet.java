@@ -1,11 +1,13 @@
 package no.nav.nom.contract.dvh;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDate;
 
 @Value
+@Builder
 public class Enhet {
     public static final String TYPE = "no.nav.nom.dvh:Enhet";
 
