@@ -1,0 +1,141 @@
+// @import '~normalize.css';
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	height: 100%;
+}
+
+/* pga IE 11 som brukes på tynnklientene */
+main {
+	display: block;
+}
+
+body {
+	background-color: @bg-primary-light;
+	color: @navMorkGra;
+	font-family: 'Source Sans Pro', Arial, sans-serif;
+	line-height: 1.5;
+	margin: 0;
+	min-height: 100%;
+	position: relative;
+}
+
+#app {
+	height: 100%;
+}
+
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+select {
+	/* for Firefox */
+	-moz-appearance: none;
+	/* for Chrome */
+	-webkit-appearance: none;
+}
+/* for IE10 */
+select::-ms-expand {
+	display: none;
+}
+
+.clearfix::after {
+	content: '';
+	clear: both;
+	display: table;
+}
+
+.link {
+	color: @navBla;
+	text-decoration: none;
+	border-bottom: 1px solid @navBla;
+	cursor: pointer;
+}
+
+.link:hover,
+.link:active,
+.link:focus {
+	color: @navBla;
+	cursor: pointer;
+	border-bottom: 1px solid rgba(0, 0, 0, 0);
+}
+
+.show-for-sr {
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	overflow: hidden;
+	position: absolute !important;
+	width: 1px;
+}
+
+.typo-sidetittel {
+	font-size: 2.5rem;
+	line-height: 2.75rem;
+}
+
+.header_img_h1_align {
+	float: left;
+	margin-top: 3px;
+	padding-right: 5px;
+}
+
+.modal_header_img_align {
+	float: left;
+	margin-top: 2px;
+	padding-right: 10px;
+	height: 30px;
+}
+
+// Dropdown list
+.dropdown-field {
+	display: inline-block;
+	margin-right: 30px;
+	vertical-align: top;
+	:hover {
+		cursor: pointer;
+	}
+	:hover:disabled {
+		cursor: not-allowed;
+	}
+}
+.dropdown-field:last-child {
+	margin-right: 0;
+}
+.dropdown-field >>> .skjemaelement__label {
+	font-weight: bold;
+	margin-bottom: 8px; /* pga knappen Ny kode skal komme på linje med valg av kodeverk*/
+}
+.dropdown-field >>> .autocompl-dropdown__input,
+.dropdown-field >>> .autocompl-dropdown__button {
+	height: 50px;
+	line-height: 2rem;
+}
+button.dropdown-field {
+	height: 50px;
+	margin: 35px 0 8px; /* pga knappen Ny kode skal komme på linje med valg av kodeverk*/
+}
+
+@media only screen and (max-width: 706px) {
+	.dropdown-field {
+		margin-right: 4%;
+		width: 48%;
+	}
+}
+@media only screen and (max-width: 500px) {
+	.dropdown-field {
+		margin-right: 0;
+		width: 100%;
+	}
+}
+
+.navImageBackground {
+	width: 100vw;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}

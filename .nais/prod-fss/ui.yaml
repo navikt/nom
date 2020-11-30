@@ -1,0 +1,47 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-ui
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  image: {{image}}
+  port: 8080
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash
+    - name: AAD_REDIRECT_URL
+      value: https://nom-ui.intern.nav.no/oauth2/callback
+  envFrom:
+    - secret: nom-ui-secrets
+  ingresses:
+    - https://nom-ui.intern.nav.no
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 256Mi
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  azure:
+    application:
+      enabled: true

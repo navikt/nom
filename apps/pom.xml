@@ -20,5 +20,6 @@
         <module>nom-ressurser</module>
         <module>skjermede-personer-pip</module>
         <module>skjermede-personer</module>
+        <module>ui</module>
     </modules>
 </project>

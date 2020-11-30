@@ -77,3 +77,7 @@ local.properties
 .sts4-cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse
+
+apps/ui/src/main/resources/public/**
+apps/ui/**/node_modules/
+apps/ui/**/build/

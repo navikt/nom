@@ -1,0 +1,5 @@
+node_modules
+build
+src/local/decorator
+src/serviceworker.ts
+src/setupProxy.js

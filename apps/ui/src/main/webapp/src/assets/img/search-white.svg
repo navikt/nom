@@ -1,0 +1,12 @@
+
+<svg contentScriptType="text/ecmascript" width="24"
+     xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify"
+     contentStyleType="text/css" viewBox="0 0 24 24" height="24"
+     preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"
+     version="1.0">
+  <g fill="none" stroke-miterlimit="10" stroke="#3e3832"
+     stroke-linejoin="round">
+    <circle r="8" cx="8.5" cy="8.5"/>
+    <path stroke-linecap="round" d="M14.156 14.156l9.344 9.344"/>
+  </g>
+</svg>

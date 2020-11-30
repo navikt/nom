@@ -1,0 +1,114 @@
+name: Build, Deploy UI
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'dev/*'
+    paths:
+      - 'apps/ui/**'
+      - '.nais/*/ui.yaml'
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/ui:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/ui:latest
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/dev')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set node environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: 11
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-cache-${{ hashFiles('apps/ui/src/main/webapp/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-cache-
+      - name: Run npm ci
+        run: |
+          cd apps/ui/src/main/webapp/
+          npm ci
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN}}
+      - name: Run npm build
+        run: |
+          cd apps/ui/src/main/webapp/
+          npm run build
+      - name: Copy react app to resources
+        run: |
+          cd apps/ui/src/main/
+          cp -r webapp/build/ resources/
+          mv resources/build resources/public
+      - name: Cache Depdendencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Build
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+        run: mvn clean package --projects :ui --also-make
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/ui/target/app.jar .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE}
+          docker push ${IMAGE_LATEST}
+
+
+  deploy-dev:
+    name: Deploy to NAIS dev-gcp
+    needs: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/dev-fss/ui.yaml
+
+#  deploy-prod:
+#    name: Deploy to NAIS prod-gcp
+#    needs: build-jar-docker
+#    if: github.ref == 'refs/heads/master'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: .nais/prod-fss/ui.yaml
+#
+#  security:
+#    runs-on: ubuntu-latest
+#    needs: build-jar-docker
+#    steps:
+#      - name: Run Snyk to check Docker image for vulnerabilities
+#        env:
+#          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SEVERITY_TRESHOLD: high
+#        run: |
+#          sudo npm install -g snyk
+#          snyk auth ${SNYK_TOKEN}
+#          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+#          snyk monitor --severity-threshold=${SEVERITY_TRESHOLD} --org=org-6kx --docker ${IMAGE_LATEST}
+#        continue-on-error: false
