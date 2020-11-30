@@ -20,7 +20,7 @@ En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
 |Id             |Ja         |Generert UUID som tilegnes organisasjonsenhet  |123e4567-e89b-12d3-a456-426614174000
 |Navn           |Ja         |Navnet på en organisasjonsenhet                |NAV Oslo - Gamle byen
 |Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22
-|Gyldig til     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
+|Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
 |===
 
 == Organisering
@@ -32,7 +32,7 @@ En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
 *Beskrivelse:* +
 Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
 En organisering omfatter 2 enheter og typen organisering mellom dem.
-En organisasjonsenhet kan ta del i flere organiseringer.
+En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan bare ha én overenhet.
 
 *Eksempler:*
 
@@ -40,9 +40,8 @@ En organisasjonsenhet kan ta del i flere organiseringer.
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
 |ID             |Ja         |Generert UUID som tilegnes organiseringen                  |7457a63b-c130-46a3-8278-deb23e2a526f
-|Retning        |Ja         |Overenhet eller underenhet                                 |over
-|Enhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
-|Type           |Ja         |Dagen fra organisasjonsenheten blir gyldig                 |
+|Retning        |Ja         |Overenhet eller underenhet                                 |"over:"/"under:"
+|Organisasjonsenhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
 |Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig                 |2009-01-22
-|Gyldig til     |Nei        |Dagen organisasjonsenheten blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
+|Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
 |===
