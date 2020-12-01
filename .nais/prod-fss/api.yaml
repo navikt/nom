@@ -8,7 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash,k8s,kafka
+      value: log-logstash,kafka
   image: {{image}}
   port: 8080
   ingresses:
@@ -40,3 +40,7 @@ spec:
     path: /internal/prometheus
   kafka:
     pool: nav-prod
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-ui

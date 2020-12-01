@@ -13,8 +13,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
-    - name: AAD_REDIRECT_URL
-      value: https://nom-ui.dev.intern.nav.no/oauth2/callback
   ingresses:
     - https://nom-ui.dev.intern.nav.no
   replicas:
@@ -45,7 +43,12 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: trygdeetaten.no
       replyURLs:
-        - http://localhost:8080/oauth2/callback
-        - http://localhost:3000/oauth2/callback
-        - https://nom-ui.dev.intern.nav.no/oauth2/callback
+        - http://localhost:8080/login/oauth2/code/aad
+        - http://localhost:3000/login/oauth2/code/aad
+        - https://nom-ui.dev.intern.nav.no/login/oauth2/code/aad
+  accessPolicy:
+    outbound:
+      rules:
+        - application: nom-api
