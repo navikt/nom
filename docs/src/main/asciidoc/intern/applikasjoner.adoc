@@ -23,3 +23,13 @@ Key: Ressurs-102939, Value: { "offset": 102939..... }
 Spiller man av Kafka topicen fra begynnelsen og opp til topp, så sitter man igjen med offset for `enhet=9238824` og `ressurs=102939`.
 
 Data lagres på Kafka topicen: `aapen-nom-dvhSource-v1`.
+
+=== Lokalt mot miljø
+
+Husk å legge til secrets i `nom-ui` sin `application-local.yaml` under resources, denne ligger i `.gitignore`.
+
+Man kan kjøre kube port-forward for å få tilgang til ressurser som ligger i miljø, f.eks `nom-api`.
+Dette gjøres ved å:
+
+* `kubectl get po -n nom`, finn en av pod'sa til `nom-api`.
+* `kubectl port-forward pods/[pod-name] -n nom 8081:8080`

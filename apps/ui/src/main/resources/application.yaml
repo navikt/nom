@@ -1,5 +1,10 @@
 management.endpoints.web.exposure.include: health,prometheus
 
+app:
+  api:
+    base-url: http://nom-api
+    graphQL-url: ${app.api.base-url}/graphql
+
 spring:
   security:
     oauth2:

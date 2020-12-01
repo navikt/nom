@@ -1,6 +1,7 @@
 package no.nav.nom.apps.ui.controllers;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.apps.ui.common.AppProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,9 +12,10 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class NomApiProxyController {
     private final RestTemplate restTemplate;
+    private final AppProperties properties;
 
     @PostMapping("api/v1/nom-api/graphql")
     public ResponseEntity<String> query(@RequestBody String body) {
-        return restTemplate.postForEntity("http://nom-api/graphql", body, String.class);
+        return restTemplate.postForEntity(properties.getApi().getGraphQLUrl(), body, String.class);
     }
 }
