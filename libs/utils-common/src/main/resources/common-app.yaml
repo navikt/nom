@@ -8,3 +8,6 @@ management:
   endpoints.web:
     base-path: /internal
     exposure.include: prometheus,health,heapdump,scheduledtasks,threaddump
+
+app.security.resource-server:
+  accepted-audience: ${AZURE_APP_CLIENT_ID:}, api://${AZURE_APP_CLIENT_ID:}

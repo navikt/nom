@@ -11,7 +11,7 @@ public class ApiDummy {
 
     private final static ObjectMapper om = new ObjectMapper();
 
-    @GetMapping(value="/api/**")
+    @GetMapping(value="/api")
     public JsonNode getOrg(){
         val out =  om.createObjectNode();
         out.put("enhetsNr","1234");
