@@ -1,6 +1,8 @@
 management.endpoints.web.exposure.include: health,prometheus
 
 app:
+  aad:
+    issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
   api:
     base-url: http://nom-api
     graphQL-url: ${app.api.base-url}/graphql
@@ -18,7 +20,7 @@ spring:
             scope: openid
         provider:
           aad:
-            issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
-      resourceserver:
-        jwt:
-          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+            issuer-uri: ${app.aad.issuer-uri}
+
+# Refresh token er valid i 30 dager, men anbefalt å bruke noe mindre enn dette.
+server.servlet.session.timeout: 7d

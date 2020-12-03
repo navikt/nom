@@ -1,28 +1,17 @@
-package no.nav.nom.apps.ui.common.security;
+package no.nav.nom.apps.ui.common;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.ui.azure.AadOAuth2AccessTokenResponseClient;
-import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-import java.util.Set;
-
 @RequiredArgsConstructor
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    public static final String ROTATION_ENDPOINT = "/api/v1/me/rotate-credentials";
     private final AadOAuth2AccessTokenResponseClient tokenResponseClient;
-    private final CookieBasedAuthorizedClientRepository cookieBasedAuthorizedClientRepository;
-    private final OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
-    @Value("${app.security.resource-server.accepted-audience}")
-    private Set<String> acceptedAudience;
 
     @Override
     public void configure(WebSecurity web) {
@@ -31,7 +20,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         Begrunnelse for å bruke dette i stede for å ta http.mvcMatchers("/internal/**").permitAll()
         er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
          */
-        web.ignoring().mvcMatchers("/internal/**", ROTATION_ENDPOINT);
+        web.ignoring().mvcMatchers("/internal/**");
     }
 
     /*
@@ -49,16 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
 
                 .oauth2Login() // Login skjer via OAuth2
-                .authorizedClientRepository(cookieBasedAuthorizedClientRepository) // Tilstand skal lagres tilbake i Cookies.
                 .tokenEndpoint()
                 .accessTokenResponseClient(tokenResponseClient) // Bytte fra code til AccessToken, IdToken + RefreshToken skjer via egen Azure AD client.
-                .and()
-                .and()
-
-                .oauth2ResourceServer()
-                .bearerTokenResolver(new CookieBasedTokenResolver()) // Tokens hentes fra cookies
-                .jwt()
-                .decoder(JwtUtils.jwtDecoder(oAuth2ResourceServerProperties, acceptedAudience)) // Default implementasjon validerer ikke Audience, så overskrives.
                 .and()
                 .and()
 
