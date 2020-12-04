@@ -1,33 +1,23 @@
-package no.nav.nom.apps.ui.security.auth;
+package no.nav.nom.apps.ui.api.security;
 
-import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.ui.security.SecurityTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 
 import static no.nav.nom.apps.ui.common.Matchers.hasKeyWithSingleValueThat;
 import static no.nav.nom.apps.ui.common.Matchers.isOnlyRedirectTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 class AuthFlowSecurityTest extends SecurityTestBase {
-    private static final String BASE = "http:\\/\\/localhost:\\d.*\\/";                                             // Pga Wiremock variabel port
-    private static final String STEP1_REDIRECT_URL_PATTERN = BASE + "oauth2\\/authorization\\/aad";                 // Spring Security
     private static final String STEP2_REDIRECT_URL_PATTERN = BASE + "oauth2\\/v2.0\\/authorize\\?.*";               // Spring Security
     private static final String STEP2_AAD_REDIRECT_URL_PATTERN = BASE + "login\\/oauth2\\/code\\/aad";              // Ligger configurert i property
 
@@ -38,7 +28,7 @@ class AuthFlowSecurityTest extends SecurityTestBase {
         // Step 1: Kall gjøres til applikasjonen der bruker ikke er logget inn.
         // Dette trigger en redirect til /oauth2/authorization/aad
         val step1 = template.getForEntity("/", String.class);
-        assertThat(step1, isOnlyRedirectTo(STEP1_REDIRECT_URL_PATTERN));
+        assertThat(step1, isOnlyRedirectTo(AUTHENTICATION_ENDPOINT));
 
 
         // Step 2: Sessjon blir opprettet der tilstand lagres (blant annet original url)
@@ -84,7 +74,7 @@ class AuthFlowSecurityTest extends SecurityTestBase {
     }
 
     @Test
-    @DisplayName("Authorization Flow Error Codes - Nonce")
+    @DisplayName("Authorization Flow Error Codes - Invalid Nonce")
     void scenario2() {
         val step1 = template.getForEntity("/", String.class);
         val step2 = template.getForEntity(getRedirectLocation(step1), String.class);
@@ -95,7 +85,7 @@ class AuthFlowSecurityTest extends SecurityTestBase {
     }
 
     @Test
-    @DisplayName("Authorization Flow Error Codes - Audience")
+    @DisplayName("Authorization Flow Error Codes - Invalid Audience")
     void scenario3() {
         val step1 = template.getForEntity("/", String.class);
         val step2 = template.getForEntity(getRedirectLocation(step1), String.class);
@@ -106,27 +96,15 @@ class AuthFlowSecurityTest extends SecurityTestBase {
         assertThat(step3, isOnlyRedirectTo(BASE + "login\\?error"));
     }
 
-    private String getRedirectLocation(ResponseEntity<?> response) {
-        assertThat(response.getHeaders().get("Location"), hasSize(1));
-        return response.getHeaders().get("Location").get(0);
-    }
-
-    @SneakyThrows
-    private MultiValueMap<String, String> extractUrlParams(String url) {
-        return UriComponentsBuilder.fromUriString(url).build().getQueryParams();
-    }
-
-    // Av en eller annen grunn, så blir state key url-encoda, dette fører til at state key ikke finnes fordi f.eks = blir til %3D.
-    private String constructUrlForStep3WithStep2State(ResponseEntity<?> step2) {
-        val decoded = URLDecoder.decode(step2.getHeaders().get("Location").get(0), Charset.defaultCharset());
-        val keys = extractUrlParams(decoded);
-
-        return "/login/oauth2/code/aad?code=codeFromAad&state=" + keys.getFirst("state");
-    }
-
-    private HttpEntity<String> transferSessionCookie(ResponseEntity<?> responseEntity) {
-        val headers = new HttpHeaders();
-        headers.set("Cookie", responseEntity.getHeaders().get("Set-Cookie").stream().filter(e -> e.startsWith("JSESSIONID")).findFirst().orElseThrow());
-        return new HttpEntity<>(headers);
+    @Test
+    @DisplayName("Authorization Flow Error Codes - Expired")
+    void scenario4() {
+        val step1 = template.getForEntity("/", String.class);
+        val step2 = template.getForEntity(getRedirectLocation(step1), String.class);
+        val step2UrlParams = extractUrlParams(getRedirectLocation(step2));
+        mockTokenResponseClientWith(validAccessToken(), validIdToken(step2UrlParams.getFirst("nonce")).expirationTime(Date.from(LocalDateTime.now().minusHours(1).toInstant(ZoneOffset.UTC))), refreshToken());
+        val step3Request = transferSessionCookie(step2);
+        val step3 = template.exchange(constructUrlForStep3WithStep2State(step2), HttpMethod.GET, step3Request, String.class);
+        assertThat(step3, isOnlyRedirectTo(BASE + "login\\?error"));
     }
 }
