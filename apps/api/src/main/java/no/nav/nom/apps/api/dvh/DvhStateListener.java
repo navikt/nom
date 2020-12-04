@@ -46,8 +46,10 @@ public class DvhStateListener {
                 .map(this::convert)
                 .filter(e -> e.getType().equals(Enhet.TYPE))
                 .filter(e -> e.getData().get("ORGNODE_TYPE").asText().equals("NAVENHET"))
-                .map(e -> new DvhOrganisasjonsenhet(e.getData()))
-                .forEach(repository::saveEnhet);
+                .forEach(e -> {
+                    repository.saveEnhet(new DvhOrganisasjonsenhet(e.getData()));
+                    repository.saveOrganisering(new DvhOrganisering(e.getData()));
+                });
 
         verifyUpToDate(consumer);
     }

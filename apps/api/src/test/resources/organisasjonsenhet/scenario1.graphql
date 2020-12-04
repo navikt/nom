@@ -3,6 +3,6 @@ query {
         id
         navn
         gyldigFom
-        gyldigTil
+        gyldigTom
     }
 }

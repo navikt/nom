@@ -4,135 +4,87 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.DvhStateListener;
-import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.TopicPartition;
+import no.nav.nom.contract.nom.api.graphql.Organisering;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Autowired
-    private DvhStateListener dvhStateListener;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
+    @Test
     @SneakyThrows
     @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql med id parameter")
-    @Test
     void scenario11(){
-        val id = "testId";
-        val navn = "testNavn";
-        val testDato = LocalDate.now();
-
-        sendFromKafkaMock(
-                List.of(
-                        Enhet.builder()
-                                .enhetKode(id)
-                                .enhetNavn(navn)
-                                .enhetType("NAVENHET")
-                                .enhetGyldigFra(testDato)
-                                .enhetGyldigTil(testDato.plusMonths(1))
-                                .build()
-                )
-        );
+        val inputEnhet = enhetTestTemplate("", null,0);
+        kafkaUtils.sendFromKafkaMock(inputEnhet);
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario1.graphql");
-        assertTrue(response.isOk());
+        assertThat(response, hasNoErrors());
 
-        val organisasjonsEnhet = response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class).get(0);
-        assertEquals(id, organisasjonsEnhet.getId());
-        assertEquals(navn, organisasjonsEnhet.getNavn());
-        assertEquals(testDato, organisasjonsEnhet.getGyldigFom());
-        assertEquals(testDato.plusMonths(1), organisasjonsEnhet.getGyldigTil());
+        val outputEnhet = response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class).get(0);
+        orgEnhetAsserter(inputEnhet, outputEnhet);
     }
 
-    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql uten id parameter")
     @Test
-    void scenario12() throws Exception {
-        val id = "testId";
-        val navn = "testNavn";
-        val testDato = LocalDate.now();
+    @SneakyThrows
+    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql uten id parameter")
+    void scenario12() {
+        val inputEnhet = enhetTestTemplate("", null,0);
+        val inputEnhet2 = enhetTestTemplate("2", inputEnhet.getEnhetKode(), 1);
 
-        sendFromKafkaMock(
-                List.of(
-                        Enhet.builder()
-                                .enhetKode(id)
-                                .enhetNavn(navn)
-                                .enhetType("NAVENHET")
-                                .enhetGyldigFra(testDato)
-                                .enhetGyldigTil(testDato.plusMonths(1))
-                                .build(),
-                        Enhet.builder()
-                                .enhetKode(id+"2")
-                                .enhetNavn(navn+"2")
-                                .enhetType("NAVENHET")
-                                .enhetGyldigFra(testDato.minusMonths(1))
-                                .enhetGyldigTil(testDato.plusMonths(2))
-                                .build()
-                )
-        );
+        kafkaUtils.sendFromKafkaMock(inputEnhet, inputEnhet2);
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario2.graphql");
-        assertTrue(response.isOk());
+        assertThat(response, hasNoErrors());
         assertEquals(2, response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class).size());
     }
 
-    private void sendFromKafkaMock(List<Object> objectList){
-
-        val consumer = mock(Consumer.class);
-        doReturn(Map.of(new TopicPartition("", 0), 0L)).when(consumer).endOffsets(any());
-        doReturn(0L).when(consumer).position(any());
-
-        val recordsAsJson = createConsumerRecords(objectList.stream()
-                        .map(e -> {
-                            return DvhEvent.builder()
-                                    .type(Enhet.TYPE)
-                                    .data(toJsonNode(e))
-                                    .build();
-                        })
-                        .map(this::toJson)
-                        .map(e -> createConsumerRecord("", e))
-                        .collect(Collectors.toUnmodifiableList()));
-
-        dvhStateListener.onMessage(recordsAsJson, consumer);
-    }
-
-    public <K, V> ConsumerRecord<K, V> createConsumerRecord(K key, V value) {
-        return new ConsumerRecord<>("", 0, 0, key, value);
-    }
-
-
-    public <K, V>ConsumerRecords<K, V> createConsumerRecords(List<ConsumerRecord<K, V>> records) {
-        return new ConsumerRecords<>(Map.of(new TopicPartition("test", 123), records));
-    }
-
-    private JsonNode toJsonNode(Object object){
-        return objectMapper.convertValue(object, JsonNode.class);
-    }
-
+    @Test
     @SneakyThrows
-    private String toJson(Object object){
-        return objectMapper.writeValueAsString(object);
+    @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, leser og validerer organiseringene")
+    void scenario21(){
+        val inputEnhetOver = enhetTestTemplate("1", null, 0);
+        val inputEnhet = enhetTestTemplate("2", inputEnhetOver.getEnhetKode(), 1);
+        val inputEnhetUnder = enhetTestTemplate("3", inputEnhet.getEnhetKode(), 2);
+
+        kafkaUtils.sendFromKafkaMock(inputEnhetOver, inputEnhet, inputEnhetUnder);
+
+        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario3.graphql");
+        assertThat(response, hasNoErrors());
+        val organiseringerResponse = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+
+        organiseringerResponse.get("organiseringer")
+                .forEach(o -> {
+                    val enhet = objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class);
+                    val organisering = objectMapper.convertValue(o, Organisering.class);
+
+                    orgEnhetAsserter(organisering.getRetning().equals("over") ? inputEnhetOver : inputEnhetUnder, enhet);
+                    organiseringAsserter(organisering.getRetning().equals("over") ? inputEnhet : inputEnhetUnder, organisering);
+                });
     }
+
+    private void orgEnhetAsserter(Enhet faktaEnhet, Organisasjonsenhet actualEnhet){
+        assertEquals(faktaEnhet.getEnhetKode(), actualEnhet.getId());
+        assertEquals(faktaEnhet.getEnhetNavn(), actualEnhet.getNavn());
+        assertEquals(faktaEnhet.getEnhetGyldigFra(), actualEnhet.getGyldigFom());
+        assertEquals(faktaEnhet.getEnhetGyldigTil(), actualEnhet.getGyldigTom());
+    }
+
+    private void organiseringAsserter(Enhet faktaEnhet, Organisering actualOrganisering){
+        assertEquals(faktaEnhet.getOrgGyldigFra(), actualOrganisering.getGyldigFom());
+        assertEquals(faktaEnhet.getOrgGyldigFra(), actualOrganisering.getGyldigTom());
+    }
+
+
 }
 

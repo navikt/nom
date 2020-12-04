@@ -13,5 +13,13 @@ type Organisasjonsenhet {
     id: ID!
     navn: String!
     gyldigFom: Date!
-    gyldigTil: Date
+    gyldigTom: Date
+    organiseringer : [Organisering!]!
+}
+
+type Organisering {
+    retning: String!
+    organisasjonsenhet : Organisasjonsenhet!
+    gyldigFom: Date!
+    gyldigTom: Date
 }

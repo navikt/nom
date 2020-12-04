@@ -6,8 +6,8 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import org.springframework.stereotype.Component;
 
@@ -24,24 +24,15 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
 
         if (objectNode == null) {
             return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
-                    .data(dvhRepository.findAllEnheter().stream().map(this::convert).collect(Collectors.toList()))
+                    .data(dvhRepository.findAllEnheter().stream().map(ConverterUtils::convertOrgEnhet).collect(Collectors.toList()))
                     .build();
         }
         val result = dvhRepository.findEnhetByNummer(objectNode.findValue("id").asText())
-                .map(this::convert)
+                .map(ConverterUtils::convertOrgEnhet)
                 .map(List::of)
                 .orElse(Collections.emptyList());
         return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
                 .data(result)
-                .build();
-    }
-
-    private Organisasjonsenhet convert(DvhOrganisasjonsenhet dvhOrganisasjonsenhet){
-        return Organisasjonsenhet.builder()
-                .id(dvhOrganisasjonsenhet.getNummer())
-                .navn(dvhOrganisasjonsenhet.getNavn())
-                .gyldigFom(dvhOrganisasjonsenhet.getGyldigFom())
-                .gyldigTil(dvhOrganisasjonsenhet.getGyldigTil())
                 .build();
     }
 }

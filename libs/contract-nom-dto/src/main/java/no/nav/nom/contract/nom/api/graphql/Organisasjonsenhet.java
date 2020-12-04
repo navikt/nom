@@ -11,5 +11,5 @@ public class Organisasjonsenhet {
     String id;
     String navn;
     LocalDate gyldigFom;
-    LocalDate gyldigTil;
+    LocalDate gyldigTom;
 }

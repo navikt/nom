@@ -45,3 +45,51 @@ En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan ba
 |Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig                 |2009-01-22
 |Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
 |===
+
+== Ressurs
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/BEGREP-14[Datakatalogen] | Oppslag: Kommer | Hendelser: Kommer
+|===
+
+*Beskrivelse:* +
+person som utfører oppgaver på vegne av NAV.
+
+
+*Eksempler:* +
+Alle personer som er tilknyttet NAV som arbeidstaker, enten direkte eller gjennom underleverandører.
+
+Kodeverk omfatter: +
+- Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
+- Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
+
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
+|Nav-ident      |Ja         |Intern identifikator som tildeles hver ansatt i nav fra ...|Z123456
+|Personident    |Ja         |Ellevesifret registreringsnummer som tildeles av
+                            den norske stat til alle landets innbyggere                 |12345678901
+
+|===
+
+== Avtale??
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+
+
+*Eksempler:* +
+
+Kodeverk omfatter: +
+
+
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
+|Nav-ident      |Ja         |Intern identifikator som tildeles hver ansatt i nav fra ...|Z123456
+|Personident    |Ja         |Ellevesifret registreringsnummer som tildeles av
+den norske stat til alle landets innbyggere                 |12345678901
