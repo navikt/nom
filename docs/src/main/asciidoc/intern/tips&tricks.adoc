@@ -1,0 +1,5 @@
+= Tipcs & Tricks
+
+* Se .tools for diverse verktøy.
+* `kubectl port-forward`: Gjøre kall til tjenester i miljø.
+`kubectl port-forward deployment/[deployment-name, f.eks nom-api] -n nom 8081:8080`.

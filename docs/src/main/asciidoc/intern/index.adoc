@@ -31,10 +31,6 @@ https://engineering.atspotify.com/2018/01/11/testing-of-microservices/[Spotify]
 
 === QA / Parprogrammering
 
-== Lokalkjøring
-
-Skal ikke hindres.
-
 == Deployment og Branching
 
 == Monorepo
@@ -50,6 +46,8 @@ Agresso --> DVH --> NOM
 Remedy  --> DVH --> NOM
 
 == Konsumenter
+
+include::tips&tricks.adoc[leveloffset=1]
 
 include::veivalg.adoc[leveloffset=1]
 

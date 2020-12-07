@@ -59,9 +59,10 @@ person som utfører oppgaver på vegne av NAV.
 *Eksempler:* +
 Alle personer som er tilknyttet NAV som arbeidstaker, enten direkte eller gjennom underleverandører.
 
-Kodeverk omfatter: +
-- Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
-- Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
+Omfatter:
+
+* Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
+* Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
 
 
 [%header,cols=4*]
@@ -69,8 +70,7 @@ Kodeverk omfatter: +
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
 |Nav-ident      |Ja         |Intern identifikator som tildeles hver ansatt i nav fra ...|Z123456
 |Personident    |Ja         |Ellevesifret registreringsnummer som tildeles av
-                            den norske stat til alle landets innbyggere                 |12345678901
-
+                            den norske stat til alle landets innbyggere                 |1234567890
 |===
 
 == Avtale??
@@ -85,11 +85,3 @@ Kodeverk omfatter: +
 
 Kodeverk omfatter: +
 
-
-
-[%header,cols=4*]
-|===
-|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|Nav-ident      |Ja         |Intern identifikator som tildeles hver ansatt i nav fra ...|Z123456
-|Personident    |Ja         |Ellevesifret registreringsnummer som tildeles av
-den norske stat til alle landets innbyggere                 |12345678901

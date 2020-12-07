@@ -1,5 +1,10 @@
 = Applikasjoner
 
+== NOM-Api
+
+Integrasjonspunkt for konsumenter utenfor NOM og NOM-Ui.
+Eksponerer GraphQL for å hente informasjon fra NOM.
+
 == NOM-DVH
 
 Står for kommunkasjonen mellom datavarehus og NOM.
@@ -24,12 +29,18 @@ Spiller man av Kafka topicen fra begynnelsen og opp til topp, så sitter man igj
 
 Data lagres på Kafka topicen: `aapen-nom-dvhSource-v1`.
 
-=== Lokalt mot miljø
+== NOM-Ui
 
-Husk å legge til secrets i `nom-ui` sin `application-local.yaml` under resources, denne ligger i `.gitignore`.
+Frackend (backend for frontend) for ui delen av NOM.
+Holder på sessjoner for bruker og proxyer kall videre til eventuelle nedstrøms-tjenester.
+Proxy benyttes for å støtte accessPolicies mellom applikasjoner, pluss at man må bytte ut token til et `on-behalf-of` token som har audience den appen man kontakter.
 
-Man kan kjøre kube port-forward for å få tilgang til ressurser som ligger i miljø, f.eks `nom-api`.
-Dette gjøres ved å:
+=== Lokal utvikling mot miljø
 
-* `kubectl get po -n nom`, finn en av pod'sa til `nom-api`.
-* `kubectl port-forward pods/[pod-name] -n nom 8081:8080`
+Opprett filen `application-local.yaml` og legg inn client-id, client-secret og tenant.
+Se fulle navn i hva som benyttes i vanlig property filen til nom-ui (altså som kommer fra Kubernetes i miljø).
+Aktiver så profile local i IntelliJ og kjør eventuelt `port-forward` (se annet kapittel for kommando, søk i dokumentet) for å få tiltang til ressurser i dev.
+
+Hvis man går mot miljø, husk å oppdatere base-paths for tjenestene man benyttes til å matche hva man har port-forwarda til.
+F.eks, `api.base-base: localhost:8081`.
+
