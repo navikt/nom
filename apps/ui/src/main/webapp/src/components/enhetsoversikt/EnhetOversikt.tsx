@@ -127,7 +127,7 @@ export default function EnhetOversikt(props: EnhetOversiktProps): JSX.Element {
         <div className="EnhetOversikt">
           <AlertStripeFeil>{enhetLookup.error.message}</AlertStripeFeil>
           <Knapp onClick={refresh}>Refresh</Knapp>
-          <Lenke href="/app/oversikt">Tilbake til oversikt</Lenke>
+          <Lenke href="/oversikt">Tilbake til oversikt</Lenke>
         </div>
       );
     }

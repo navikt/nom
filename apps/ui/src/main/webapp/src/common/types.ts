@@ -14,3 +14,9 @@ export interface OrgEnhetData{
     koblinger: OrgEnhetKoblinger;
 }
 
+export interface OrganisasjonsEnhet{
+    id: string;
+    navn: string;
+    gyldigFom: string;
+    gyldigTom: string;
+}

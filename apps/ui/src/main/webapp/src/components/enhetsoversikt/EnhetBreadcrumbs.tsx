@@ -12,7 +12,7 @@ export default function EnhetBreadcrumbs(
   return (
     <div className="EnhetOversikt__EnhetBreadcrumbs">
       {props.sti.map((it, idx) => {
-        const link = "/app/oversikt/" + it.enhetNr;
+        const link = "/oversikt/" + it.enhetNr;
         const isLast = idx === props.sti.length - 1;
         if (!isLast) {
           return (

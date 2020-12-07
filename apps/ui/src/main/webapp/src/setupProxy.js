@@ -10,13 +10,13 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   );
-  app.use("/login", createProxyMiddleware({
-    target: "http://localhost:" + BACKEND_PORT,
-      changeOrigin: true
-  }));
+//   app.use("/login", createProxyMiddleware({
+//     target: "http://localhost:" + BACKEND_PORT,
+//       changeOrigin: true
+//   }));
 
-  app.use("/secret", createProxyMiddleware({
-    target: "http://localhost:" + BACKEND_PORT,
-    changeOrigin: true
-}));
+//   app.use("/secret", createProxyMiddleware({
+//     target: "http://localhost:" + BACKEND_PORT,
+//     changeOrigin: true
+// }));
 };

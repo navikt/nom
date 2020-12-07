@@ -1,6 +1,9 @@
 package no.nav.nom.apps.ui.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 import no.nav.nom.apps.ui.common.AppProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +16,20 @@ import org.springframework.web.client.RestTemplate;
 public class NomApiProxyController {
     private final RestTemplate restTemplate;
     private final AppProperties properties;
+    private final ObjectMapper om;
 
+
+    @SneakyThrows
     @PostMapping("api/v1/nom-api/graphql")
     public ResponseEntity<String> query(@RequestBody String body) {
-        return restTemplate.postForEntity(properties.getApi().getGraphQLUrl(), body, String.class);
+        val graphQlUrl = properties.getApi().getGraphQLUrl();
+        val bodyNode = om.createObjectNode();
+        bodyNode.put("query",body);
+        val request = om.writeValueAsString(bodyNode);
+        return restTemplate.postForEntity(graphQlUrl, request, String.class);
     }
+
+
+
+
 }

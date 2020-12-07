@@ -1,3 +1,4 @@
+
 export const FETCH_CONFIG_GET: RequestInit = {
   method: "GET",
   mode: "cors",
@@ -8,18 +9,24 @@ export const FETCH_CONFIG_GET: RequestInit = {
   },
 };
 
-export const API_URL = (function (): string {
-  // return "https://nom-ui.intern.dev.nav.no/";
-  return "";
-})();
 
-export const FETCH_CONFIG_POST: RequestInit = {
+export const GRAPHQL_FETCH_CONFIG_POST: RequestInit = {
   method: "POST",
   mode: "cors",
   cache: "no-cache",
   credentials: "same-origin",
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "application/graphql",
+    "X-XSRF-TOKEN": (function () {
+      const row = document.cookie
+        .split(";")
+        .find((row) => row.startsWith("XSRF-TOKEN"));
+      if (row) {
+        return row.split("=")[1];
+      } else {
+        throw new Error("Missing XSRF cookie");
+      }
+    })(),
   },
 };
 
@@ -45,10 +52,9 @@ export async function startApiPost<T>(
   data: T
 ): Promise<Response> {
   try {
-    const body = JSON.stringify(data);
-    // console.log({x: data});
+    const body: any = data;
     const response = await fetch(url, {
-      ...FETCH_CONFIG_POST,
+      ...GRAPHQL_FETCH_CONFIG_POST,
       signal: abortSignal,
       body: body,
     });
@@ -87,5 +93,14 @@ export async function validateJson(
     const failingJson = await response.text();
     console.error({ feilformatertJson: failingJson });
     throw new Error("Fikk feilformatert JSON fra server");
+  }
+}
+
+export async function validateGraphql(json: any): Promise<Record<string, any>> {
+  if (json.errors) {
+    console.error({ graphqlFeilmelding: json.errors });
+    throw new Error("Graphl-feil");
+  } else {
+    return json;
   }
 }

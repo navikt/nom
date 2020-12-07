@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import About from "./pages/about/About";
+import Graphql from "./pages/graphql/Graphql";
 import Oversikt from "./pages/oversikt/Oversikt";
 import Root from "./pages/root/Root";
 import * as serviceWorker from "./serviceWorker";
@@ -15,14 +16,20 @@ function AppRouter(): JSX.Element{
       <Route exact path="/">
         <Root />
       </Route>
-      <Route exact path="/app/about">
+      <Route exact path="/about">
         <About />
       </Route>
-      <Route exact path="/app/oversikt">
-        <Redirect to="/app/oversikt/rot" />
+      <Route exact path="/oversikt">
+        <Redirect to="/oversikt/rot" />
       </Route>
-      <Route exact path="/app/oversikt/:id">
+      <Route exact path="/oversikt/:id">
         <Oversikt />
+      </Route>
+      <Route exact path="/graphql">
+        <Redirect to="/graphql/4121803" />
+      </Route>
+      <Route exact path="/graphql/:id">
+        <Graphql />
       </Route>
       <Route>
         {/* default..  */}
@@ -45,3 +52,4 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+

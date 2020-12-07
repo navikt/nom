@@ -22,7 +22,7 @@ function Tabell(props: {underEnheter: OrgEnhetFelter[]}): JSX.Element{
       type: "string",
       renderCell: function (item, value): JSX.Element {
         const it = (item as any) as OrgEnhetFelter;
-        return <Link to={"/app/oversikt/" + it.enhetNr}>{value}</Link>;
+        return <Link to={"/oversikt/" + it.enhetNr}>{value}</Link>;
       },
     },
     { id: "enhetNr", label: "Nr", type: "string" },
