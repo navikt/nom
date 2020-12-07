@@ -13,7 +13,6 @@ export default function NomUiHeader(props: any): JSX.Element{
       <div className="NomUiHeader__pages">
         <Link to="/">Home</Link>
         <Link to="/About">About</Link>
-        <Link to="/Oversikt">Oversikt</Link>
         <Link to="/Graphql">Graphql</Link>
       </div>
     </div>

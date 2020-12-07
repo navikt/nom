@@ -1,4 +1,3 @@
-
 export const FETCH_CONFIG_GET: RequestInit = {
   method: "GET",
   mode: "cors",
@@ -8,7 +7,6 @@ export const FETCH_CONFIG_GET: RequestInit = {
     "Content-Type": "application/json",
   },
 };
-
 
 export const GRAPHQL_FETCH_CONFIG_POST: RequestInit = {
   method: "POST",
@@ -24,7 +22,8 @@ export const GRAPHQL_FETCH_CONFIG_POST: RequestInit = {
       if (row) {
         return row.split("=")[1];
       } else {
-        throw new Error("Missing XSRF cookie");
+        console.error("Missing XSRF cookie");
+        return "";
       }
     })(),
   },

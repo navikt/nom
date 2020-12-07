@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import useGetOrganisasjonsEnhet from "../../api/useGetOrganisasjonsEnhet";
-import EnhetOversikt from "../../components/enhetsoversikt";
 import NomUiHeader from "../../components/header/NomUiHeader";
 
 export default function Graphql(): JSX.Element {
