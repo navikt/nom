@@ -9,6 +9,8 @@ graphql:
     tabs:
       - name: HentEnhet
         query: classpath:playground/organisasjonsenhet.graphql
+      - name: HentRessurs
+        query: classpath:playground/ressurs.graphql
 
 spring.kafka.consumer.max-poll-records: 1000
 

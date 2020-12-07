@@ -1,0 +1,23 @@
+# Query som henter ressurser med navIdent som parameter:
+query HentRessursMedNavIdent {
+    ressurs(where: {navIdent: "testNavIdent"}) {
+        navIdent
+        personIdent
+    }
+}
+
+# Query som henter ressurser med personIdent som parameter:
+query HentRessursMedPersonIdent{
+    ressurs(where: {personIdent: "testPersonIdent"}) {
+        navIdent
+        personIdent
+    }
+}
+
+# Query som henter alle ressurser:
+query HentAlleRessurser{
+    ressurs {
+        navIdent
+        personIdent
+    }
+}

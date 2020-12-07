@@ -1,0 +1,6 @@
+query {
+    ressurs(where: {personIdent: "testPersonIdent"}) {
+        navIdent
+        personIdent
+    }
+}

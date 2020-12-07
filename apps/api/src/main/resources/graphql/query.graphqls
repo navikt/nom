@@ -3,10 +3,16 @@ scalar DateTime
 
 type Query {
     organisasjonsenhet(where: OrganisasjonsenhetSearch): [Organisasjonsenhet!]!
+    ressurs(where: RessursSearch): [Ressurs!]!
 }
 
 input OrganisasjonsenhetSearch {
     id: String
+}
+
+input RessursSearch {
+    navIdent: String
+    personIdent: String
 }
 
 type Organisasjonsenhet {
@@ -22,4 +28,10 @@ type Organisering {
     organisasjonsenhet : Organisasjonsenhet!
     gyldigFom: Date!
     gyldigTom: Date
+}
+
+
+type Ressurs {
+    navIdent: String!
+    personIdent: String!
 }

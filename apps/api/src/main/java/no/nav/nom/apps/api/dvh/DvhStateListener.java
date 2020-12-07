@@ -44,11 +44,19 @@ public class DvhStateListener {
     public void onMessage(ConsumerRecords<String, String> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false)
                 .map(this::convert)
-                .filter(e -> e.getType().equals(Enhet.TYPE))
-                .filter(e -> e.getData().get("ORGNODE_TYPE").asText().equals("NAVENHET"))
+                .filter(e -> {
+                    if(e.getType().equals(Enhet.TYPE)) {
+                        return e.getData().get("ORGNODE_TYPE").asText().equals("NAVENHET");
+                    }
+                    return true;
+                })
                 .forEach(e -> {
-                    repository.saveEnhet(new DvhOrganisasjonsenhet(e.getData()));
-                    repository.saveOrganisering(new DvhOrganisering(e.getData()));
+                    if(e.getType().equals(Enhet.TYPE)) {
+                        repository.saveEnhet(new DvhOrganisasjonsenhet(e.getData()));
+                        repository.saveOrganisering(new DvhOrganisering(e.getData()));
+                    } else{
+                        repository.saveRessurs(new DvhRessurs(e.getData()));
+                    }
                 });
 
         verifyUpToDate(consumer);

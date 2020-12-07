@@ -7,6 +7,7 @@ import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhStateListener;
 import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Enhet;
+import no.nav.nom.contract.dvh.Ressurs;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -39,7 +40,7 @@ public class KafkaUtils {
         val recordsAsJson = createConsumerRecords(List.of(objects).stream()
                 .map(e -> {
                     return DvhEvent.builder()
-                            .type(Enhet.TYPE)
+                            .type(e instanceof Enhet ? Enhet.TYPE : Ressurs.TYPE)
                             .data(toJsonNode(e))
                             .build();
                 })

@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DvhRepository {
 
     private final Map<String, DvhOrganisasjonsenhet> enheterByNumber = new ConcurrentHashMap<>(1000);
+    private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
     private final List<DvhOrganisering> organiseringer = Collections.synchronizedList(new LinkedList<>());
 
     public void saveEnhet(DvhOrganisasjonsenhet enhet) {
@@ -42,8 +43,27 @@ public class DvhRepository {
         return organiseringer;
     }
 
+    public void saveRessurs(DvhRessurs ressurs){
+        ressursByNavIdent.put(ressurs.getNavIdent(), ressurs);
+    }
+
+    public Optional<DvhRessurs> findByNavIdent(String navIdent){
+        return Optional.ofNullable(ressursByNavIdent.get(navIdent));
+    }
+
+    public Optional<DvhRessurs> findByPersonIdent(String personIdent){
+        return ressursByNavIdent.values().stream()
+                .filter(r -> r.getPersonIdent().equals(personIdent))
+                .findAny();
+    }
+
+    public Collection<DvhRessurs> findAllRessurser(){
+        return ressursByNavIdent.values();
+    }
+
     public void clearRepository(){
         enheterByNumber.clear();
+        ressursByNavIdent.clear();
         organiseringer.clear();
     }
 }
