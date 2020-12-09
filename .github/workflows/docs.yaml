@@ -30,7 +30,7 @@ jobs:
           mv docs/target/intern/index.html public/index-intern.html
       - name: Deploy
         if: success()
-        uses: crazy-max/ghaction-github-pages@v2.1.3
+        uses: crazy-max/ghaction-github-pages@v2.2.0
         with:
           target_branch: gh-pages
           build_dir: public
