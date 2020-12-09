@@ -1,0 +1,11 @@
+query {
+    organisasjonsenhet(where: {id: "testId"}) {
+        id
+        leder{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
+    }
+}

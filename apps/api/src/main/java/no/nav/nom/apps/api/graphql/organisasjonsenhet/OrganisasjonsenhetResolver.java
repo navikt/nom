@@ -21,14 +21,13 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Organisasjonsenhet>> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
-
         if (objectNode == null) {
             return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
-                    .data(dvhRepository.findAllEnheter().stream().map(ConverterUtils::convertOrgEnhet).collect(Collectors.toList()))
+                    .data(dvhRepository.findAllEnheter().stream().map(ConverterUtils::convert).collect(Collectors.toList()))
                     .build();
         }
         val result = dvhRepository.findEnhetByNummer(objectNode.findValue("id").asText())
-                .map(ConverterUtils::convertOrgEnhet)
+                .map(ConverterUtils::convert)
                 .map(List::of)
                 .orElse(Collections.emptyList());
         return DataFetcherResult.<List<Organisasjonsenhet>>newResult()

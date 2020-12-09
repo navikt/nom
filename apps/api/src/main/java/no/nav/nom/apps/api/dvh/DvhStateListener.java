@@ -54,6 +54,9 @@ public class DvhStateListener {
                     if(e.getType().equals(Enhet.TYPE)) {
                         repository.saveEnhet(new DvhOrganisasjonsenhet(e.getData()));
                         repository.saveOrganisering(new DvhOrganisering(e.getData()));
+                        if(e.getData().hasNonNull("LEDER_RESOURCE_ID")) {
+                            repository.saveOrgLeder(new DvhLeder(e.getData()));
+                        }
                     } else{
                         repository.saveRessurs(new DvhRessurs(e.getData()));
                     }

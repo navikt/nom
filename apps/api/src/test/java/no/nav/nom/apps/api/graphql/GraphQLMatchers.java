@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.graphql.spring.boot.test.GraphQLResponse;
 import lombok.val;
 import org.hamcrest.CustomMatcher;
@@ -13,7 +14,7 @@ public class GraphQLMatchers {
             public boolean matches(Object actual) {
                 val response = ((GraphQLResponse) actual);
                 if(response.getRawResponse().getBody().contains("errors")) {
-                    return CollectionUtils.isEmpty(response.getList("$.errors", String.class));
+                    return CollectionUtils.isEmpty(response.getList("$.errors", JsonNode.class));
                 }
                 return true;
             }
@@ -25,7 +26,7 @@ public class GraphQLMatchers {
             @Override
             public boolean matches(Object actual) {
                 val response = ((GraphQLResponse) actual);
-                return !CollectionUtils.isEmpty(response.getList("$.errors", String.class));
+                return !CollectionUtils.isEmpty(response.getList("$.errors", JsonNode.class));
             }
         };
     }

@@ -17,6 +17,7 @@ public class DvhRepository {
 
     private final Map<String, DvhOrganisasjonsenhet> enheterByNumber = new ConcurrentHashMap<>(1000);
     private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
+    private final Map<String, DvhLeder> lederByEnhetNr = new ConcurrentHashMap<>(1000);
     private final List<DvhOrganisering> organiseringer = Collections.synchronizedList(new LinkedList<>());
 
     public void saveEnhet(DvhOrganisasjonsenhet enhet) {
@@ -47,7 +48,7 @@ public class DvhRepository {
         ressursByNavIdent.put(ressurs.getNavIdent(), ressurs);
     }
 
-    public Optional<DvhRessurs> findByNavIdent(String navIdent){
+    public Optional<DvhRessurs> findRessursByNavIdent(String navIdent){
         return Optional.ofNullable(ressursByNavIdent.get(navIdent));
     }
 
@@ -57,8 +58,23 @@ public class DvhRepository {
                 .findAny();
     }
 
+    public Optional<DvhRessurs> findRessursByRessursId(String ressursId){
+        return ressursByNavIdent.keySet().stream()
+                .filter(s -> s.contains(ressursId))
+                .findAny()
+                .map(ressursByNavIdent::get);
+    }
+
     public Collection<DvhRessurs> findAllRessurser(){
         return ressursByNavIdent.values();
+    }
+
+    public void saveOrgLeder(DvhLeder leder){
+        lederByEnhetNr.put(leder.getOrgEnhetNr(), leder);
+    }
+
+    public Optional<DvhLeder> findLederByEnhetNr(String enhetNr){
+        return Optional.ofNullable(lederByEnhetNr.get(enhetNr));
     }
 
     public void clearRepository(){

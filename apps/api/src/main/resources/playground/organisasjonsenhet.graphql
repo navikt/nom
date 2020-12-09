@@ -1,8 +1,69 @@
-query {
+# Henter alle organisasjonsenheter
+query HentAlleOrganisasjonsenheter {
+    organisasjonsenhet {
+        id
+        navn
+        gyldigFom
+        gyldigTom
+    }
+}
+
+# Henter organisasjonsenhet med gitt id:
+query HentOrganisasjonsenhetMedId {
     organisasjonsenhet(where: {id: "test"}) {
         id
         navn
         gyldigFom
         gyldigTom
+    }
+}
+
+# Henter organisasjonsenhet med organiseringer:
+query HentOrganisasjonsenhetOgOrganisering {
+    organisasjonsenhet(where: {id: "test"}) {
+        id
+        navn
+        gyldigFom
+        gyldigTom
+        organiseringer{
+            retning
+            organisasjonsenhet{
+                id
+                navn
+                gyldigFom
+                gyldigTom
+                organiseringer{
+                    retning
+                    organisasjonsenhet{
+                        id
+                        navn
+                    }
+                }
+            }
+            gyldigFom
+            gyldigTom
+        }
+        leder{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
+    }
+}
+
+# Henter organisasjonsenhet med leder:
+query HentOrganisasjonsenhetOgLeder {
+    organisasjonsenhet(where: {id: "test"}) {
+        id
+        navn
+        gyldigFom
+        gyldigTom
+        leder{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
     }
 }

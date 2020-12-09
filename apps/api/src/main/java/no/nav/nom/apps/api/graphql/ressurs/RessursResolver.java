@@ -7,7 +7,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.DvhRessurs;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
@@ -24,29 +24,22 @@ public class RessursResolver implements GraphQLQueryResolver {
 
         if (objectNode == null) {
             return DataFetcherResult.<List<Ressurs>>newResult()
-                    .data(dvhRepository.findAllRessurser().stream().map(this::convert).collect(Collectors.toUnmodifiableList()))
+                    .data(dvhRepository.findAllRessurser().stream().map(ConverterUtils::convert).collect(Collectors.toUnmodifiableList()))
                     .build();
         }
 
         val result = objectNode.findValue("navIdent") != null ?
-                            dvhRepository.findByNavIdent(objectNode.findValue("navIdent").asText())
-                                    .map(this::convert)
+                            dvhRepository.findRessursByNavIdent(objectNode.findValue("navIdent").asText())
+                                    .map(ConverterUtils::convert)
                                     .map(List::of)
                                     .orElse(Collections.emptyList()) :
                             dvhRepository.findByPersonIdent(objectNode.findValue("personIdent").asText())
-                                    .map(this::convert)
+                                    .map(ConverterUtils::convert)
                                     .map(List::of)
                                     .orElse(Collections.emptyList());
 
         return DataFetcherResult.<List<Ressurs>>newResult()
                 .data(result)
-                .build();
-    }
-
-    private Ressurs convert(DvhRessurs dvhRessurs){
-        return Ressurs.builder()
-                .navIdent(dvhRessurs.getNavIdent())
-                .personIdent(dvhRessurs.getPersonIdent())
                 .build();
     }
 }

@@ -27,7 +27,7 @@ public abstract class GraphQLTestBase extends TestBase {
         dvhRepository.clearRepository();
     }
 
-    protected Enhet enhetTestTemplate(String suffix, String overEnhetKode, int fraTilIncrement){
+    protected Enhet enhetTestTemplate(String suffix, String overEnhetKode, int fraTilIncrement, String lederRessursId){
         return Enhet.builder()
                 .enhetKode("testId"+suffix)
                 .enhetNavn("testNavn"+suffix)
@@ -37,6 +37,7 @@ public abstract class GraphQLTestBase extends TestBase {
                 .overEnhetKode(overEnhetKode != null ? overEnhetKode : "testId"+"Over"+suffix)
                 .orgGyldigFra(LocalDate.now().minusMonths(fraTilIncrement))
                 .orgGyldigTil(LocalDate.now().plusMonths(fraTilIncrement))
+                .lederRessursId(lederRessursId)
                 .build();
     }
 
