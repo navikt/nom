@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: ${ENV}
   jpa:
     hibernate:
       ddl-auto: none
@@ -91,7 +93,7 @@ no.nav:
           proxyurl: http://webproxy.nais:8088
         reststs:
           discoveryurl: ${STS_DISCOVERYURL}
-          accepted_audience: ${STS_AUD_SERVICEUSER}
+          accepted_audience: ${STS_AUDIENCE}
           proxyurl:
 
 aad:

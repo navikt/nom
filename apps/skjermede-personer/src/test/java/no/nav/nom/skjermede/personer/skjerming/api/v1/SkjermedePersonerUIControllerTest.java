@@ -21,8 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ActiveProfiles("test")
 @RequiredArgsConstructor
-@WebMvcTest(controllers = {SkjermedePersonerController.class, JWTTokenProvderTestConfig.class})
-public class SkjermedePersonerControllerTest {
+@WebMvcTest(controllers = {SkjermedePersonerUIController.class, JWTTokenProvderTestConfig.class})
+public class SkjermedePersonerUIControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -87,7 +87,7 @@ public class SkjermedePersonerControllerTest {
     @Test
     public void testHentSkjermedeFamiliemedlemerUnauthorized() throws Exception {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerUIController.FAMILIEMEDLEMMER)).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
 
-        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.FAMILIEMEDLEMMER))
+        val response = mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerUIController.FAMILIEMEDLEMMER))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -111,7 +111,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(Strings.EMPTY);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.FALSE);
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.ALLE)).andExpect(status().isUnauthorized());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerUIController.ALLE)).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SkjermedePersonerControllerTest {
         when(tokenUtil.getSubject()).thenReturn(SkjermingTestUtils.PERSONIDENT);
         when(tokenUtil.isAuthorized()).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerController.ALLE)).andExpect(status().isOk());
+        mockMvc.perform(requestBuilder(HttpMethod.GET, SkjermedePersonerUIController.ALLE)).andExpect(status().isOk());
     }
 
     @Test
@@ -188,10 +188,9 @@ public class SkjermedePersonerControllerTest {
     }
 
     private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
-        val path = UriComponentsBuilder.newInstance()
-                .path(SkjermedePersonerController.BASE_URL)
-                .pathSegment(requestPath)
-                .build().toString();
+        val path = requestPath.length == 0
+                ? Paths.get(SkjermedePersonerUIController.BASE_URL)
+                : Paths.get(SkjermedePersonerUIController.BASE_URL, requestPath);
 
         return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
                 .contentType(MediaType.APPLICATION_JSON)

@@ -10,6 +10,8 @@ spec:
     - configmap: loginservice-idporten
     - secret: skjermede-personer-secrets
   env:
+    - name: ENV
+      value: dev
     - name: DB_HOST
       value: b27dbvl009.preprod.local
     - name: DB_NAME
@@ -26,8 +28,8 @@ spec:
       value: https://www-q0.nav.no
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
-    - name: STS_AUD_SERVICEUSER
-      value: srvnom-skjermet, srvdolly, srvdolly_u
+    - name: STS_AUDIENCE
+      value: srvnom-skjermet, srvdolly, srvdolly_u, srvdatavarehus_u-u
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://b27apvl175.preprod.local:1413/MQ0LSC03
     - name: TPS_MQ_QUEUE_CHANNEL

@@ -14,6 +14,10 @@ public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, 
     List<SkjermetPerson> findAllByKafkaProduced(boolean produced);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
+                   "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
+    List<SkjermetPerson> findAllActive();
+
+    @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
                    "WHERE TILKNYTTET_RESSURS = :tilknyttetRessurs AND " +
                    "(SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)
     List<SkjermetPerson> findAllByTilknyttetRessurs(String tilknyttetRessurs);

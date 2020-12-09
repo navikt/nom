@@ -15,6 +15,7 @@ import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonDataRequestDTO;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonDataResponseDTO;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@Api(tags = "Skjermingdata")
+@Profile("!prod")
+@Api(tags = "skjermingdata")
 @RequiredArgsConstructor
 @RequestMapping(value = SkjermedePersonerDataController.BASE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @ProtectedWithClaims(issuer = "reststs")
@@ -51,6 +53,7 @@ public class SkjermedePersonerDataController {
     @GetMapping("{personident}")
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "Ugyldig Bearer token eller uatorisert konsument"),
             @ApiResponse(code = 404, message = "Skjerming for oppgitt personident ikke funnet"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @ApiImplicitParam(

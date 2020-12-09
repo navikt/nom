@@ -10,6 +10,8 @@ spec:
     - configmap: loginservice-idporten
     - secret: skjermede-personer-secrets
   env:
+    - name: ENV
+      value: prod
     - name: DB_HOST
       value: A01DBVL009.adeo.no
     - name: DB_NAME
@@ -26,7 +28,7 @@ spec:
       value: https://www.nav.no
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
-    - name: STS_AUD_SERVICEUSER
+    - name: STS_AUDIENCE
       value: NONE
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://a01apvl062.adeo.no:1414/MPLSC03

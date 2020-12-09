@@ -3,6 +3,8 @@ app.kafka:
   password: NO_VALUE
 
 spring:
+  profiles:
+    active: test
   datasource:
     username: postgres
     password: password
