@@ -11,8 +11,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
-  envFrom:
-    - secret: nom-ui-secrets
   ingresses:
     - https://nom-ui.intern.nav.no
   replicas:
