@@ -15,6 +15,7 @@ import no.nav.nom.skjermede.personer.skjerming.SkjermetPersonRepository;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonDataRequestDTO;
 import no.nav.nom.skjermede.personer.skjerming.api.v1.dto.SkjermetPersonDataResponseDTO;
 import no.nav.security.token.support.core.api.ProtectedWithClaims;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +37,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@Profile({"test", "local"})
 @Api(tags = "skjermingdata")
 @RequiredArgsConstructor
 @RequestMapping(value = SkjermedePersonerDataController.BASE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
-@ProtectedWithClaims(issuer = "reststs-testonly")
+@ProtectedWithClaims(issuer = "reststs")
 public class SkjermedePersonerDataController {
 
     public static final String BASE_URL = "/api/v1/skjermingdata";
