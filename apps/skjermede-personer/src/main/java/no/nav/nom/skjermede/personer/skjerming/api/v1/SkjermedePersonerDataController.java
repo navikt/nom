@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@Profile({"test", "local"})
+@Profile("!prod")
 @Api(tags = "skjermingdata")
 @RequiredArgsConstructor
 @RequestMapping(value = SkjermedePersonerDataController.BASE_URL, produces = MediaType.APPLICATION_JSON_VALUE)
