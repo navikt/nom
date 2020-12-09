@@ -73,15 +73,29 @@ Omfatter:
                             den norske stat til alle landets innbyggere                 |1234567890
 |===
 
-== Avtale??
+== Kobling
 [cols="3"]
 |===
 |===
 
 *Beskrivelse:* +
+Kobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere koblinger samtidig,
+og en organisasjonsenhet kan ha kobling med flere ressurser.
+
+Kan en ansatt ha flere koblinger med samme orgenhet?
 
 
 *Eksempler:* +
+Ansatt Ola har en kobling med organisasjonsenhet 010100 - Halden
 
 Kodeverk omfatter: +
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
+|Ressurs        |Ja         |Ressursen koblingen gjelder                               |Se ressurs objekt
+|Organisasjonsenhet        |Ja         |Organisasjonsenheten Koblingen gjelder         |Se organisasjonsenhet objekt
+|Gyldig fom     |Ja         |Datoen Koblingen blir gyldig                              |2009-01-22
+|Gyldig tom     |Nei        |Koblingens siste gyldighets dato                          |2020-02-14, NULL hvis ikke satt.
+|===
 
