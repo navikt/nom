@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -50,7 +49,8 @@ public abstract class ApiTestBase extends TestBase {
     @Autowired
     protected RSAKey rsaKey;
 
-    protected String sessionId;
+    protected String sessionCookieValue;
+    protected String xsrfCookieValue;
 
     @BeforeEach
     public void beforeEach() {
@@ -59,7 +59,7 @@ public abstract class ApiTestBase extends TestBase {
 
     @AfterEach
     public void afterEach() {
-        sessionId = null; // Start på nytt i hver test
+        sessionCookieValue = null; // Start på nytt i hver test
     }
 
     protected void logInWith(JWTClaimsSet.Builder claimsSet) {
@@ -69,13 +69,14 @@ public abstract class ApiTestBase extends TestBase {
         mockTokenResponseClientWith(validAccessToken(), claimsSet.claim("nonce", step2UrlParams.getFirst("nonce")), refreshToken());
         val step3Request = transferSessionCookie(step2);
         val step3 = template.exchange(constructUrlForStep3WithStep2State(step2), HttpMethod.GET, step3Request, String.class);
-        sessionId = getSessionCookieId(step3);
+        sessionCookieValue = getSessionCookieId(step3);
+        xsrfCookieValue = getCookieValue(step3, "XSRF-TOKEN");
     }
 
     protected RequestEntity<?> requestWithCurrentSession(String url) {
-        assertThat(sessionId, is(notNullValue()));
+        assertThat(sessionCookieValue, is(notNullValue()));
         return RequestEntity.get(URI.create(url))
-                .header("Cookie", sessionId)
+                .header("Cookie", sessionCookieValue)
                 .build();
     }
 
@@ -134,7 +135,13 @@ public abstract class ApiTestBase extends TestBase {
     }
 
     protected String getSessionCookieId(ResponseEntity<?> responseEntity) {
-        return Objects.requireNonNull(responseEntity.getHeaders().get("Set-Cookie")).stream().filter(e -> e.startsWith("JSESSIONID")).findFirst().orElseThrow();
+        return getCookieValue(responseEntity, "JSESSIONID");
+    }
 
+    protected String getCookieValue(ResponseEntity<?> entity, String key) {
+        return entity.getHeaders().get("Set-Cookie").stream()
+                .filter(e -> e.startsWith(key))
+                .findFirst()
+                .orElseThrow();
     }
 }

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/nom-api/graphql",
+    "bodyPatterns": [
+      {
+        "contains": "query"
+      },
+      {
+        "contains": "Hello"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "data": {
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

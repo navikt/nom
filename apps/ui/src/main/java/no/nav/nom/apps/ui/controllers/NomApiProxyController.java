@@ -13,23 +13,18 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequiredArgsConstructor
-public class NomApiProxyController {
+class NomApiProxyController {
     private final RestTemplate restTemplate;
     private final AppProperties properties;
     private final ObjectMapper om;
 
-
     @SneakyThrows
     @PostMapping("api/v1/nom-api/graphql")
-    public ResponseEntity<String> query(@RequestBody String body) {
+    ResponseEntity<String> query(@RequestBody String body) {
         val graphQlUrl = properties.getApi().getGraphQLUrl();
         val bodyNode = om.createObjectNode();
-        bodyNode.put("query",body);
+        bodyNode.put("query", body);
         val request = om.writeValueAsString(bodyNode);
         return restTemplate.postForEntity(graphQlUrl, request, String.class);
     }
-
-
-
-
 }
