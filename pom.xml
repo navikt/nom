@@ -22,7 +22,7 @@
         <azure-msal4j.version>1.8.0</azure-msal4j.version>
         <ibm-mq.version>2.3.5</ibm-mq.version>
         <java.version>14</java.version>
-        <javassist.version>3.25.0-GA</javassist.version>
+        <javassist.version>3.27.0-GA</javassist.version>
         <ms-graph.version>2.4.0</ms-graph.version>
         <ow2-asm.version>7.1</ow2-asm.version>
         <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
