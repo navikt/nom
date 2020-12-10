@@ -40,6 +40,9 @@ spec:
     path: /internal/prometheus
   kafka:
     pool: nav-prod
+  azure:
+    application:
+      enabled: true
   accessPolicy:
     inbound:
       rules:
