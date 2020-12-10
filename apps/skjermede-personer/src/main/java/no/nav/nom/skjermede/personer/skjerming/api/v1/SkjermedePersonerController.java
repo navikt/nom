@@ -39,7 +39,7 @@ public class SkjermedePersonerController {
             paramType = "header", name = "Authorization",
             value = "\"Bearer \" +  sts utstedt access token", required = true)
     @ApiOperation(value = "Henter en alle aktive skjerminger", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SkjermetPersonResponseDTO> henntAlleSkjerminger() {
+    public List<SkjermetPersonResponseDTO> hentAlleSkjerminger() {
         return skjermetPersonRepository
                 .findAllActive()
                 .stream()
