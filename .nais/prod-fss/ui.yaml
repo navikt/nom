@@ -45,3 +45,4 @@ spec:
     outbound:
       rules:
         - application: nom-api
+
