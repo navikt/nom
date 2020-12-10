@@ -86,7 +86,7 @@ Kan en ansatt ha flere koblinger med samme orgenhet?
 
 
 *Eksempler:* +
-Ansatt Ola har en kobling med organisasjonsenhet 010100 - Halden
+Ansatt Ola har en kobling med organisasjonsenhet 0101000 - Halden
 
 Kodeverk omfatter: +
 
