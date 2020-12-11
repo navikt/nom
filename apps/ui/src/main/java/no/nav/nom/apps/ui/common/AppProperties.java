@@ -12,10 +12,11 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @AllArgsConstructor
 @ConfigurationProperties("app")
 public class AppProperties {
-    private final Api api;
+    private final NomApi nomApi;
 
     @Value
-    public static class Api {
+    public static class NomApi {
+        String clientId;
         String graphQLUrl;
     }
 }

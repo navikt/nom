@@ -1,6 +1,7 @@
 AZURE_APP_CLIENT_ID: client-id
 AZURE_APP_CLIENT_SECRET: client-secret
 AZURE_APP_TENANT_ID: tenant
+NOM_API_CLIENT_ID: nom-api-client-id
 
 app:
   aad.issuer-uri: http://localhost:${wiremock.server.port}/aad

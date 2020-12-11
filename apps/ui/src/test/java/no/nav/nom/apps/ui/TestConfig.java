@@ -1,16 +1,18 @@
 package no.nav.nom.apps.ui;
 
-import com.microsoft.aad.msal4j.IConfidentialClientApplication;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import lombok.SneakyThrows;
-import no.nav.nom.apps.ui.azure.AadOAuth2AccessTokenResponseClient;
+import lombok.val;
+import org.apache.http.NoHttpResponseException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import static org.mockito.Mockito.mock;
+import java.net.SocketException;
+import java.util.Set;
 
 @SpringBootApplication
 @Import(UiStarter.class)
@@ -19,24 +21,32 @@ public class TestConfig {
 
     @Bean
     @SneakyThrows
-    AadOAuth2AccessTokenResponseClient tokenResponseClient() {
-        // Hadde håpet på å bruke Wiremock til å også få med MS sitt rammeverk (msal/ConfidentialClientApplication)
-        // men ettersom de har så mye validering, private static final fields og package private klasser som må modifiseres,
-        // ser jeg ingen annen vei enn å mocke ut hele denne klassen. Hvis det kommer noen ny versjon av msal som "gjør litt mindre", så gjerne bytt ut.
-        return mock(AadOAuth2AccessTokenResponseClient.class);
-    }
-
-    @Bean
-    IConfidentialClientApplication confidentialClientApplication() {
-        return mock(IConfidentialClientApplication.class);
-    }
-
-    @Bean
-    @SneakyThrows
     RSAKey rsaKey() {
         return new RSAKeyGenerator(2048)
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID(RSA_KEY_ID)
                 .generate();
+    }
+
+    /**
+     * Pga Connection-reuse så ender det opp med å måtte gå flere runder,
+     * men ønsker ikke å kjøre med Retry enabled fordi 4xx og 5xx vil da også bli forsøkt på nytt.
+     * Det er bare issuet med connection-reuse som skal feile her og prøves på nytt.
+     */
+    @Bean
+    RestTemplateCustomizer restTemplateCustomizer() {
+        val retryable = Set.of(NoHttpResponseException.class, SocketException.class);
+
+        return restTemplate -> restTemplate.getInterceptors().add((request, body, execution) -> {
+            while (true) {
+                try {
+                    return execution.execute(request, body);
+                } catch (Exception e) {
+                    if (!retryable.contains(e.getClass())) {
+                        throw e;
+                    }
+                }
+            }
+        });
     }
 }

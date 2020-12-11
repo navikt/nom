@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration(proxyBeanMethods = false)
-public class CommonConfig {
+class CommonConfig {
 
     @Bean
     RestTemplate restTemplate(RestTemplateBuilder builder) {

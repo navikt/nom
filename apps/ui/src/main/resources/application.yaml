@@ -3,7 +3,8 @@ management.endpoints.web.exposure.include: health,prometheus
 app:
   aad:
     issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
-  api:
+  nom-api:
+    client-id: ${NOM_API_CLIENT_ID}
     base-url: http://nom-api
     graphQL-url: ${app.api.base-url}/graphql
 
@@ -13,11 +14,15 @@ spring:
       client:
         registration:
           aad:
+            provider: aad
             client-id: ${AZURE_APP_CLIENT_ID}
             client-secret: ${AZURE_APP_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            scope: openid
+            # ClientId/.default er for å få accessToken som går for denne appen, offline_access er for å få refresh token.
+            # Profile er for å få med mer opplysninger (e.g. navn)
+            # Note: Siden vi setter scope til denne appen, så får man ikke user-info/details endpoint og dermed hentes ikke bruker opplysninger via OidcUserService.
+            scope: openid,offline_access,${AZURE_APP_CLIENT_ID}/.default,profile
         provider:
           aad:
             issuer-uri: ${app.aad.issuer-uri}

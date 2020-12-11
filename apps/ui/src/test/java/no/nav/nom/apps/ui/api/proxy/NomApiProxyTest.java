@@ -24,7 +24,7 @@ class NomApiProxyTest extends ApiTestBase {
     @Test
     @DisplayName("Call with authenticated session and xsrf token returns data")
     void scenario1() {
-        logInWith(validIdToken());
+        logInWith(validAccessToken(), validIdToken(), refreshToken());
 
         val result = template.exchange(postWith(currentSessionAndXsrf()), String.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
@@ -53,7 +53,7 @@ class NomApiProxyTest extends ApiTestBase {
     @Test
     @DisplayName("Call with authenticated session and invalid xsrf token returns 403")
     void scenario4() {
-        logInWith(validIdToken());
+        logInWith(validAccessToken(), validIdToken(), refreshToken());
         xsrfCookieValue = null;
 
         val result = template.exchange(postWith(currentSessionAndXsrf()), String.class);
@@ -73,5 +73,4 @@ class NomApiProxyTest extends ApiTestBase {
         Optional.ofNullable(xsrfCookieValue).ifPresent(e -> headers.add("X-XSRF-TOKEN", xsrfCookieValue.substring(xsrfCookieValue.indexOf("=") + 1, xsrfCookieValue.indexOf(";"))));
         return headers;
     }
-
 }

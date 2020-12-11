@@ -1,39 +1,43 @@
 package no.nav.nom.apps.ui.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.ui.TestBase;
-import no.nav.nom.apps.ui.azure.AadOAuth2AccessTokenResponseClient;
+import no.nav.nom.apps.ui.azure.AadConsumer;
 import no.nav.nom.apps.ui.common.SecurityTestUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Set;
+import java.time.Duration;
+import java.util.Date;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames.ID_TOKEN;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 public abstract class ApiTestBase extends TestBase {
+    protected static final String USER_SUBJECT = "b252dd03-6a19-4601-b749-ba4cea4008d2";
     protected static final String BASE = "http:\\/\\/localhost:\\d.*\\/";                                             // Pga Wiremock variabel port
     protected static final String AUTHENTICATION_ENDPOINT = BASE + "oauth2\\/authorization\\/aad";                    // Spring Security
 
@@ -41,7 +45,10 @@ public abstract class ApiTestBase extends TestBase {
     protected TestRestTemplate template;
 
     @Autowired
-    protected AadOAuth2AccessTokenResponseClient tokenResponseClientMock;
+    protected AadConsumer aadConsumer;
+
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @Autowired
     protected SecurityTestUtils securityUtils;
@@ -54,19 +61,20 @@ public abstract class ApiTestBase extends TestBase {
 
     @BeforeEach
     public void beforeEach() {
+        sessionCookieValue = null;
+        xsrfCookieValue = null;
         stubFor(get("/aad/discovery/v2.0/keys").willReturn(aResponse().withBody(String.format("{\"keys\":[%s]}", rsaKey.toPublicJWK().toString()))));
     }
 
-    @AfterEach
-    public void afterEach() {
-        sessionCookieValue = null; // Start på nytt i hver test
-    }
-
-    protected void logInWith(JWTClaimsSet.Builder claimsSet) {
+    protected void logInWith(JWTClaimsSet.Builder accessTokenClaims, JWTClaimsSet.Builder idTokenClaims, String refreshToken) {
         val step1 = template.getForEntity("/", String.class);
         val step2 = template.getForEntity(getRedirectLocation(step1), String.class);
         val step2UrlParams = extractUrlParams(getRedirectLocation(step2));
-        mockTokenResponseClientWith(validAccessToken(), claimsSet.claim("nonce", step2UrlParams.getFirst("nonce")), refreshToken());
+
+        idTokenClaims.claim("nonce", step2UrlParams.getFirst("nonce"));
+        stubAadForAuthCode(accessTokenClaims, idTokenClaims, refreshToken);
+        stubAadUserInfo(idTokenClaims.getClaims().get("sub").toString());
+
         val step3Request = transferSessionCookie(step2);
         val step3 = template.exchange(constructUrlForStep3WithStep2State(step2), HttpMethod.GET, step3Request, String.class);
         sessionCookieValue = getSessionCookieId(step3);
@@ -80,25 +88,9 @@ public abstract class ApiTestBase extends TestBase {
                 .build();
     }
 
-    protected void mockTokenResponseClientWith(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
-        val response = OAuth2AccessTokenResponse.withToken(securityUtils.createToken(accessToken))
-                .refreshToken(refreshToken)
-                .scopes(Set.of("derp"))
-                .tokenType(OAuth2AccessToken.TokenType.BEARER)
-                .additionalParameters(Map.of(ID_TOKEN, securityUtils.createToken(idToken)))
-                .build();
-
-        when(tokenResponseClientMock.getTokenResponse(any())).thenReturn(response);
-    }
-
     protected JWTClaimsSet.Builder validIdToken() {
-        return validIdToken(null);
-    }
-
-    protected JWTClaimsSet.Builder validIdToken(String nonce) {
         return securityUtils.validJwtClaims()
-                .claim("nonce", nonce) // Nonce i en login context må stemme med hva som har blitt sendt inn i login flow.
-                .subject("b252dd03-6a19-4601-b749-ba4cea4008d2") // AAD gir en id på subject
+                .subject(USER_SUBJECT) // AAD gir en id på subject
                 .claim("name", "Alice Wonderland");
     }
 
@@ -143,5 +135,50 @@ public abstract class ApiTestBase extends TestBase {
                 .filter(e -> e.startsWith(key))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    public void stubAadForAuthCode(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
+        val asJson = tokenResponseAsJson(accessToken, idToken, refreshToken);
+
+        stubFor(post("/aad/tenant/oauth2/v2.0/token")
+                .withRequestBody(containing("authorization_code"))
+                .willReturn(aResponse()
+                        .withBody(asJson)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")));
+    }
+
+    public void stubAadForRefreshToken(String currentRefreshToken, JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken) {
+        val asJson = tokenResponseAsJson(accessToken, idToken, currentRefreshToken);
+
+        stubFor(post("/aad/tenant/oauth2/v2.0/token")
+                .withRequestBody(containing("refresh_token"))
+                .withRequestBody(containing(currentRefreshToken))
+                .willReturn(aResponse()
+                        .withBody(asJson)
+                        .withHeader("Content-Type", "application/json; charset=utf-8")));
+    }
+
+    @SneakyThrows
+    private String tokenResponseAsJson(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
+        val iat = (Date) accessToken.getClaims().get("iat");
+        val exp = (Date) accessToken.getClaims().get("exp");
+
+        val node = objectMapper.createObjectNode();
+        node.put("token_type", "Bearer");
+        node.put("scope", "email openid profile, GroupMember.Read.All User.Read");
+        node.put("expires_in", Duration.between(iat.toInstant(), exp.toInstant()).getSeconds());
+        node.put("ext_expires_in", Duration.between(iat.toInstant(), exp.toInstant()).getSeconds());
+        node.put("access_token", securityUtils.createToken(accessToken));
+        node.put("refresh_token", refreshToken);
+        node.put("id_token", securityUtils.createToken(idToken));
+        return objectMapper.writeValueAsString(node);
+    }
+
+    @SneakyThrows
+    public void stubAadUserInfo(String sub) {
+        val userInfoNode = objectMapper.createObjectNode();
+        userInfoNode.put("sub", sub);
+        val userInfoAsJson = objectMapper.writeValueAsString(userInfoNode);
+        stubFor(get("/aad/oidc/userinfo").willReturn(aResponse().withBody(userInfoAsJson).withHeader("Content-Type", "application/json")));
     }
 }

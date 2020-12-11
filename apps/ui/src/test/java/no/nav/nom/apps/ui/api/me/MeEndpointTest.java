@@ -18,7 +18,7 @@ class MeEndpointTest extends ApiTestBase {
     @Test
     @DisplayName("Call with authenticated session returns data")
     void scenario1() {
-        logInWith(validIdToken());
+        logInWith(validAccessToken(), validIdToken(), refreshToken());
 
         val result = template.exchange(requestWithCurrentSession("/api/v1/me"), MeTo.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));

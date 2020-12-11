@@ -12,6 +12,7 @@ import lombok.val;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -24,12 +25,6 @@ public class SecurityTestUtils {
     private final RSAKey rsaKey;
     private final Environment env;
 
-
-    @SneakyThrows
-    public String createValidToken(String nonce) {
-        return createToken(validJwtClaims().claim("nonce", nonce));
-    }
-
     public JWTClaimsSet.Builder validJwtClaims() {
         val wiremockPort = env.getRequiredProperty("wiremock.server.port");
 
@@ -38,7 +33,7 @@ public class SecurityTestUtils {
                 .audience("client-id")
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))
-                .expirationTime(Date.from(LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC)));
+                .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));
     }
 
     @SneakyThrows

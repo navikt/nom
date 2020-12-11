@@ -26,9 +26,4 @@ class AadConfig {
                 .authority(authUrl)
                 .build();
     }
-
-    @Bean
-    AadOAuth2AccessTokenResponseClient tokenResponseClient(IConfidentialClientApplication confidentialClient, MeterRegistry meterRegistry) {
-        return new AadOAuth2AccessTokenResponseClient(confidentialClient, meterRegistry);
-    }
 }
