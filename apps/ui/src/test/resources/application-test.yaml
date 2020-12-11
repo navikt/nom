@@ -5,4 +5,4 @@ NOM_API_CLIENT_ID: nom-api-client-id
 
 app:
   aad.issuer-uri: http://localhost:${wiremock.server.port}/aad
-  api.base-url: http://localhost:${wiremock.server.port}/nom-api
+  nom-api.base-url: http://localhost:${wiremock.server.port}/nom-api
