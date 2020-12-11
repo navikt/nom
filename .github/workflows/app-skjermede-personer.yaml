@@ -69,19 +69,3 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
           RESOURCE: .nais/prod-fss/skjermede-personer.yaml
-
-  security:
-    runs-on: ubuntu-latest
-    needs: build-jar-docker
-    steps:
-      - name: Run Snyk to check Docker image for vulnerabilities
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SEVERITY_TRESHOLD: high
-        run: |
-          sudo npm install -g snyk
-          snyk auth ${SNYK_TOKEN}
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          snyk monitor --severity-threshold=${SEVERITY_TRESHOLD} --org=org-6kx --docker ${IMAGE_LATEST}
-        continue-on-error: false
