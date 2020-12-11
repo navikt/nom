@@ -6,7 +6,7 @@ app:
   nom-api:
     client-id: ${NOM_API_CLIENT_ID}
     base-url: http://nom-api
-    graphQL-url: ${app.api.base-url}/graphql
+    graphQL-url: ${app.nom-api.base-url}/graphql
 
 spring:
   security:
