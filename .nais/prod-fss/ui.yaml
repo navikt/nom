@@ -11,6 +11,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
+    - name: NOM_API_CLIENT_ID
+      value: 09035a8b-1c89-4417-ba32-4ea8916c9700
   ingresses:
     - https://nom-ui.intern.nav.no
   replicas:

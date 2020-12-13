@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -26,7 +27,13 @@ public class AccessTokenRotatingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain fc) throws ServletException, IOException {
         try {
-            if (SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+
+            val authenticated = Optional.ofNullable(SecurityContextHolder.getContext())
+                    .map(e -> e.getAuthentication())
+                    .map(e -> e.isAuthenticated())
+                    .orElse(false);
+
+            if (authenticated) {
                 rotateAccessKeyIfExpired(req, res);
             }
         } catch (RuntimeException e) {
