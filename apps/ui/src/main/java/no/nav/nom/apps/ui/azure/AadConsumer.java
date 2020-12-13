@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -19,16 +18,16 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static java.lang.String.format;
+import static java.lang.String.join;
 import static org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames.ID_TOKEN;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AadConsumer {
-    private static final String TOKEN_BODY_FORMAT = "client_id=%s&scope=%s&%s&grant_type=%s";
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final RestTemplate restTemplate;
 
@@ -38,7 +37,12 @@ public class AadConsumer {
     public OAuth2AccessTokenResponse getAccessTokenFromRefreshToken(String refreshToken) {
         val aadRegistration = clientRegistrationRepository.findByRegistrationId("aad");
         val scopes = aadRegistration.getClientId() + "/.default";
-        val body = format(TOKEN_BODY_FORMAT, aadRegistration.getClientId(), scopes, "refresh_token=" + refreshToken, "refresh_token");
+
+        val body = "client_id=" + aadRegistration.getClientId() +
+                "&scope=" + scopes +
+                "&refresh_token=" + refreshToken +
+                "&grant_type=refresh_token";
+
         val request = createPostRequest(body);
 
         val response = restTemplate.exchange(request, JsonNode.class);
@@ -49,9 +53,18 @@ public class AadConsumer {
     @Timed("azure-ad.getOnBehalfOfTokenFor")
     @Counted("azure-ad.getOnBehalfOfTokenFor")
     public OAuth2AccessTokenResponse getOnBehalfOfTokenFor(String accessToken, Set<String> scopes) {
+        val aadRegistration = clientRegistrationRepository.findByRegistrationId("aad");
 
-        //return convert(result);
-        return null;
+        val body = "client_id=" + aadRegistration.getClientId() +
+                "&scope=" + join("+", scopes) +
+                "&grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer" +
+                "&assertion=" + accessToken +
+                "&requested_token_use=on_behalf_of";
+
+        val request = createPostRequest(body);
+
+        val response = restTemplate.exchange(request, JsonNode.class);
+        return convert(response.getBody());
     }
 
     @SneakyThrows
@@ -66,13 +79,17 @@ public class AadConsumer {
     }
 
     private OAuth2AccessTokenResponse convert(JsonNode node) {
-        return OAuth2AccessTokenResponse
+        val builder = OAuth2AccessTokenResponse
                 .withToken(node.get("access_token").asText())
                 .refreshToken(node.get("refresh_token").asText())
-                .additionalParameters(Map.of(ID_TOKEN, node.get("id_token").asText()))
                 .scopes(Set.of(node.get("scope").asText().split(" ")))
                 .expiresIn(node.get("expires_in").asInt())
-                .tokenType(OAuth2AccessToken.TokenType.BEARER)
-                .build();
+                .tokenType(OAuth2AccessToken.TokenType.BEARER);
+
+        Optional.ofNullable(node.get("id_token"))
+                .map(JsonNode::asText)
+                .ifPresent(e -> builder.additionalParameters(Map.of(ID_TOKEN, e)));
+
+        return builder.build();
     }
 }

@@ -15,6 +15,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
+import java.util.Set;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,20 +27,21 @@ class NomApiProxyController extends AbstractAuthenticatedApi {
 
     @SneakyThrows
     @PostMapping("api/v1/nom-api/graphql")
-    ResponseEntity<String> query(@RequestBody String body, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        rotateAccessKeyIfExpired(servletRequest, servletResponse);
-
-        val request = createRequest(body);
+    ResponseEntity<String> query(@RequestBody String body, HttpServletRequest req) {
+        val request = createRequest(body, req);
 
         return restTemplate.exchange(request, String.class);
     }
 
     @SneakyThrows
-    private RequestEntity<String> createRequest(String body) {
+    private RequestEntity<String> createRequest(String body, HttpServletRequest req) {
+        val obo = getOnBehalfOfToken(req, Set.of(properties.getNomApi().getClientId() + "/.default"));
 
         val bodyNode = om.createObjectNode();
         bodyNode.put("query", body);
-        val requestJson = om.writeValueAsString(bodyNode);
-        return new RequestEntity<>(requestJson, HttpMethod.POST, new URI(properties.getNomApi().getGraphQLUrl()));
+
+        return RequestEntity.post(new URI(properties.getNomApi().getGraphQLUrl()))
+                .header(AUTHORIZATION, "Bearer " + obo)
+                .body(om.writeValueAsString(bodyNode));
     }
 }

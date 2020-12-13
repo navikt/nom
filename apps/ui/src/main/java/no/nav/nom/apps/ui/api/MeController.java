@@ -7,17 +7,12 @@ import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 @RestController
 @RequiredArgsConstructor
-class MeController extends AbstractAuthenticatedApi {
+class MeController {
 
     @GetMapping("/api/v1/me")
-    MeTo me(@AuthenticationPrincipal DefaultOidcUser principal, HttpServletRequest req, HttpServletResponse res) {
-        rotateAccessKeyIfExpired(req, res);
-
+    MeTo me(@AuthenticationPrincipal DefaultOidcUser principal) {
         return new MeTo(principal.getFullName());
     }
 }

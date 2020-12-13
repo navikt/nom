@@ -5,12 +5,19 @@ import no.nav.nom.apps.ui.azure.AadConsumer;
 import no.nav.nom.apps.ui.common.AppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.lang.String.join;
+import static java.util.stream.Collectors.joining;
 
 abstract class AbstractAuthenticatedApi {
 
@@ -23,27 +30,30 @@ abstract class AbstractAuthenticatedApi {
     @Autowired
     protected AadConsumer aadConsumer;
 
-    protected void rotateAccessKeyIfExpired(HttpServletRequest req, HttpServletResponse res) {
+    protected String getOnBehalfOfToken(HttpServletRequest req, Set<String> scopes) {
         val currentAuth = SecurityContextHolder.getContext().getAuthentication();
         val currentClient = clientRepository.loadAuthorizedClient("aad", currentAuth, req);
 
-        if (hasExpiredAccessToken(currentClient)) {
-            val refreshToken = currentClient.getRefreshToken().getTokenValue();
-            val refreshed = aadConsumer.getAccessTokenFromRefreshToken(refreshToken);
+        // Bare en string som alltids matcher samme scopes, kan også f.eks bruke hashing.
+        val oboSessionKey = URLEncoder.encode(scopes.stream().sorted().collect(joining(",")), Charset.defaultCharset());
+        val existingToken = Optional.ofNullable(req.getSession(false))
+                .map(e -> e.getAttribute(oboSessionKey))
+                .map(e -> (OAuth2AccessToken) e);
 
-            val refreshedClient = new OAuth2AuthorizedClient(
-                    currentClient.getClientRegistration(),
-                    currentClient.getPrincipalName(),
-                    refreshed.getAccessToken(),
-                    refreshed.getRefreshToken());
-
-            clientRepository.saveAuthorizedClient(refreshedClient, currentAuth, req, res);
+        if (doFetchOnBehalfOf(existingToken)) {
+            val result = aadConsumer.getOnBehalfOfTokenFor(currentClient.getAccessToken().getTokenValue(), scopes);
+            req.getSession().setAttribute(oboSessionKey, result.getAccessToken());
+            return result.getAccessToken().getTokenValue();
+        } else {
+            return existingToken.get().getTokenValue();
         }
     }
 
-    private boolean hasExpiredAccessToken(OAuth2AuthorizedClient client) {
-        val expires = client.getAccessToken().getExpiresAt();
-        val threshold = Instant.now().plusSeconds(60); // For at tokens ikke blir invalid mens de er i bruk.
-        return expires.isBefore(threshold);
+    private boolean doFetchOnBehalfOf(Optional<OAuth2AccessToken> current) {
+        return current
+                // 10 Sec left of On-Behalf-Of token, refresh. Note, this only works if there is a refresh on the access token!
+                // This is because the OBO will only last as long as the users access-token.
+                .filter(e -> Duration.between(Instant.now(), e.getExpiresAt()).getSeconds() > 10)
+                .isEmpty();
     }
 }

@@ -31,8 +31,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.notNullValue;
 
-@DisplayName("Aad Security")
-class AadSecurityTest extends SecurityTestBase {
+@DisplayName("Auth Security")
+class AuthSecurityTest extends SecurityTestBase {
     private static final String STEP2_REDIRECT_URL_PATTERN = BASE + "oauth2\\/v2.0\\/authorize\\?.*";               // Spring Security
     private static final String STEP2_AAD_REDIRECT_URL_PATTERN = BASE + "login\\/oauth2\\/code\\/aad";              // Ligger configurert i property
 

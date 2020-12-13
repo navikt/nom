@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -31,6 +32,7 @@ public class SecurityTestUtils {
         return new JWTClaimsSet.Builder()
                 .subject("alice")
                 .audience("client-id")
+                .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))
                 .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));

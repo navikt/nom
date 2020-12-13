@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.ui.TestBase;
 import no.nav.nom.apps.ui.azure.AadConsumer;
@@ -24,6 +25,7 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -138,40 +140,55 @@ public abstract class ApiTestBase extends TestBase {
     }
 
     public void stubAadForAuthCode(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
-        val asJson = tokenResponseAsJson(accessToken, idToken, refreshToken);
+        val tokens = tokenResponse(accessToken, idToken, refreshToken);
 
         stubFor(post("/aad/tenant/oauth2/v2.0/token")
                 .withRequestBody(containing("authorization_code"))
                 .willReturn(aResponse()
-                        .withBody(asJson)
+                        .withBody(tokens.getEndpointResponse())
                         .withHeader("Content-Type", "application/json; charset=utf-8")));
     }
 
     public void stubAadForRefreshToken(String currentRefreshToken, JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken) {
-        val asJson = tokenResponseAsJson(accessToken, idToken, currentRefreshToken);
+        val tokens = tokenResponse(accessToken, idToken, currentRefreshToken);
 
         stubFor(post("/aad/tenant/oauth2/v2.0/token")
                 .withRequestBody(containing("refresh_token"))
                 .withRequestBody(containing(currentRefreshToken))
                 .willReturn(aResponse()
-                        .withBody(asJson)
+                        .withBody(tokens.getEndpointResponse())
                         .withHeader("Content-Type", "application/json; charset=utf-8")));
     }
 
+    public TokenResponse stubAadForOnBehalfOf(JWTClaimsSet.Builder accessToken, String refreshToken) {
+        val tokens = tokenResponse(accessToken, null, refreshToken);
+
+        stubFor(post("/aad/tenant/oauth2/v2.0/token")
+                .withRequestBody(containing("on_behalf_of"))
+                .willReturn(aResponse()
+                        .withBody(tokens.getEndpointResponse())
+                        .withHeader("Content-Type", "application/json; charset=utf-8")));
+        return tokens;
+    }
+
     @SneakyThrows
-    private String tokenResponseAsJson(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
+    private TokenResponse tokenResponse(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
         val iat = (Date) accessToken.getClaims().get("iat");
         val exp = (Date) accessToken.getClaims().get("exp");
+
+        val accessTokenAsJwt = securityUtils.createToken(accessToken);
+        val idTokenAsJwt = Optional.ofNullable(idToken).map(e -> securityUtils.createToken(e)).orElse(null);
 
         val node = objectMapper.createObjectNode();
         node.put("token_type", "Bearer");
         node.put("scope", "email openid profile, GroupMember.Read.All User.Read");
         node.put("expires_in", Duration.between(iat.toInstant(), exp.toInstant()).getSeconds());
         node.put("ext_expires_in", Duration.between(iat.toInstant(), exp.toInstant()).getSeconds());
-        node.put("access_token", securityUtils.createToken(accessToken));
-        node.put("refresh_token", refreshToken);
-        node.put("id_token", securityUtils.createToken(idToken));
-        return objectMapper.writeValueAsString(node);
+        node.put("access_token", accessTokenAsJwt);
+        Optional.ofNullable(refreshToken).ifPresent(e -> node.put("refresh_token", e));
+        Optional.ofNullable(idTokenAsJwt).ifPresent(e -> node.put("id_token", e));
+        val asJson = objectMapper.writeValueAsString(node);
+        return new TokenResponse(accessTokenAsJwt, idTokenAsJwt, refreshToken, asJson);
     }
 
     @SneakyThrows
@@ -180,5 +197,21 @@ public abstract class ApiTestBase extends TestBase {
         userInfoNode.put("sub", sub);
         val userInfoAsJson = objectMapper.writeValueAsString(userInfoNode);
         stubFor(get("/aad/oidc/userinfo").willReturn(aResponse().withBody(userInfoAsJson).withHeader("Content-Type", "application/json")));
+    }
+
+    @Value
+    public static class TokenResponse {
+        String accessToken;
+        String idToken;
+        String refreshToken;
+        String endpointResponse;
+    }
+
+    public HttpHeaders headersWithCurrentSessionAndXsrf() {
+        val headers = new HttpHeaders();
+        Optional.ofNullable(sessionCookieValue).ifPresent(e -> headers.add("Cookie", e));
+        Optional.ofNullable(xsrfCookieValue).ifPresent(e -> headers.add("Cookie", e));
+        Optional.ofNullable(xsrfCookieValue).ifPresent(e -> headers.add("X-XSRF-TOKEN", xsrfCookieValue.substring(xsrfCookieValue.indexOf("=") + 1, xsrfCookieValue.indexOf(";"))));
+        return headers;
     }
 }
