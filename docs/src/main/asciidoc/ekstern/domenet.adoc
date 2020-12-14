@@ -99,3 +99,29 @@ Kodeverk omfatter: +
 |Gyldig tom     |Nei        |Koblingens siste gyldighets dato                          |2020-02-14, NULL hvis ikke satt.
 |===
 
+== Leder
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+Leder er knytningen mellom en ressurs og en organisasjonsenhet. En organisasjonsenhet kan ha leder kobling med flere ressurser, men hvor bare 1 kan være aktiv.
+
+Kan en ressurs kan flere leder koblinger samtidig?
+
+*Eksempler:* +
+Ansatt Ola var leder for organisasjonsenhet 0101000 - Halden i perioden 2018-01-01 til og med 2019-12-01,
+Ansatt Heidi tok over som leder fra 2019-12-02.
+
+Kodeverk omfatter: +
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
+|Ressurs        |Ja         |Ressursen leder kodblingen gjelder                         |Se ressurs objekt
+|Organisasjonsenhet        |Ja         |Organisasjonsenheten Koblingen gjelder          |Se organisasjonsenhet objekt
+|Gyldig fom     |Ja         |Datoen leder koblingen blir gyldig                         |2009-01-22
+|Gyldig tom     |Nei        |Leder koblingens siste gyldighets dato                     |2020-02-14, NULL hvis ikke satt.
+|===
+
+
