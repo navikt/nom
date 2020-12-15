@@ -21,7 +21,7 @@ type Organisasjonsenhet {
     gyldigFom: Date!
     gyldigTom: Date
     organiseringer : [Organisering!]!
-    leder: OrganisasjonsenhetsLeder
+    leder: [OrganisasjonsenhetsLeder!]!
 }
 
 type Organisering {

@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -17,7 +18,7 @@ public class DvhRepository {
 
     private final Map<String, DvhOrganisasjonsenhet> enheterByNumber = new ConcurrentHashMap<>(1000);
     private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
-    private final Map<String, DvhLeder> lederByEnhetNr = new ConcurrentHashMap<>(1000);
+    private final Map<String, List<DvhLeder>> lederByEnhetNr = new ConcurrentHashMap<>(1000);
     private final List<DvhOrganisering> organiseringer = Collections.synchronizedList(new LinkedList<>());
 
     public void saveEnhet(DvhOrganisasjonsenhet enhet) {
@@ -70,11 +71,18 @@ public class DvhRepository {
     }
 
     public void saveOrgLeder(DvhLeder leder){
-        lederByEnhetNr.put(leder.getOrgEnhetNr(), leder);
+        val lederMapping = lederByEnhetNr.get(leder.getOrgEnhetNr());
+
+        if(lederMapping == null) {
+            lederByEnhetNr.put(leder.getOrgEnhetNr(), List.of(leder));
+        }else {
+            lederMapping.add(leder);
+        }
     }
 
-    public Optional<DvhLeder> findLederByEnhetNr(String enhetNr){
-        return Optional.ofNullable(lederByEnhetNr.get(enhetNr));
+    public List<DvhLeder> findLederByEnhetNr(String enhetNr){
+        return Optional.ofNullable(lederByEnhetNr.get(enhetNr))
+                .orElse(Collections.emptyList());
     }
 
     public void clearRepository(){

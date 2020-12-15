@@ -1,18 +1,20 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
+import java.util.List;
+
 import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,10 +90,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         assertThat(response, hasNoErrors());
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
-        val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder").get("ressurs"), Ressurs.class);
-
-        assertEquals(inputLeder.getNavident(), outputLeder.getNavIdent());
-        assertEquals(inputLeder.getPersonIdent(), outputLeder.getPersonIdent());
+        val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {}).get(0);
+                
+        assertEquals(inputLeder.getNavident(), outputLeder.getRessurs().getNavIdent());
+        assertEquals(inputLeder.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
@@ -103,7 +105,12 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock(inputEnhet);
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario4.graphql");
-        assertThat(response, hasErrors());
+        assertThat(response, hasNoErrors());
+
+        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {});
+
+        assertEquals(0, outputLedere.size());
     }
 
     private void orgEnhetAsserter(Enhet faktaEnhet, Organisasjonsenhet actualEnhet){
