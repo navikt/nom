@@ -35,7 +35,7 @@
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <wiremock-extension.version>0.1.3.RELEASE</wiremock-extension.version>
 
-        <snyk-plugin.version>1.2.6</snyk-plugin.version>
+        <snyk-plugin.version>1.2.9</snyk-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
         <docker-compose-plugin.verson>4.0.0</docker-compose-plugin.verson>
 
