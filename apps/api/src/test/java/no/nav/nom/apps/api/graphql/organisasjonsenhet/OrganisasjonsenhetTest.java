@@ -100,11 +100,11 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32(){
-        val inputEnhet = enhetTestTemplate("", null, 0, null);
+        val inputEnhet = enhetTestTemplate("32", null, 0, null);
 
         kafkaUtils.sendFromKafkaMock(inputEnhet);
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario4.graphql");
+        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario32.graphql");
         assertThat(response, hasNoErrors());
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
