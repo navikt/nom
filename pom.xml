@@ -26,7 +26,7 @@
         <ms-graph.version>2.5.0</ms-graph.version>
         <ow2-asm.version>9.0</ow2-asm.version>
         <spring-cloud.version>Hoxton.SR9</spring-cloud.version>
-        <spring.graphql-version>8.0.0</spring.graphql-version>
+        <spring.graphql-version>8.1.1</spring.graphql-version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <checker-qual.version>3.8.0</checker-qual.version>
         <graphql.extended.scalaras-version>15.0.0</graphql.extended.scalaras-version>
