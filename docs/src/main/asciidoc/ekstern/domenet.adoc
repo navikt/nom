@@ -12,14 +12,14 @@ Begrepet brukes om alle nivåer i hierakiet.
 En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
 
 *Eksempler:* +
-Økonomi linjen er en organisasjonsenhet og har overenhet NAV (organisasjon), og har en underenhet som heter økonomi stønad som også er en organisasjonsenhet.
+NAV Økonomi Stønad er en organisasjonsenhet og har overenhet NAV (organisasjon), og har en underenhet som heter økonomi stønad som også er en organisasjonsenhet.
 
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
 |Id             |Ja         |Generert UUID som tilegnes organisasjonsenhet  |123e4567-e89b-12d3-a456-426614174000
-|Navn           |Ja         |Navnet på en organisasjonsenhet                |NAV Oslo - Gamle byen
-|Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig     |2009-01-22
+|Navn           |Ja         |Navnet på en organisasjonsenhet                |NAV Søndre Nordstrand
+|Gyldig fom     |Ja         |Dagen organisasjonsenheten blir gyldig     |2009-01-22
 |Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
 |===
 
@@ -34,16 +34,14 @@ Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner
 En organisering omfatter 2 enheter og typen organisering mellom dem.
 En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan bare ha én overenhet.
 
-*Eksempler:*
-
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
 |ID             |Ja         |Generert UUID som tilegnes organiseringen                  |7457a63b-c130-46a3-8278-deb23e2a526f
 |Retning        |Ja         |Overenhet eller underenhet                                 |"over:"/"under:"
 |Organisasjonsenhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
-|Gyldig fom     |Ja         |Dagen fra organisasjonsenheten blir gyldig                 |2009-01-22
-|Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
+|Gyldig fom     |Ja         |Dagen organiseringen blir gyldig                 |2009-01-22
+|Gyldig tom     |Nei        |Dagen organiseringen blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
 |===
 
 == Ressurs
@@ -53,11 +51,11 @@ En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan ba
 |===
 
 *Beskrivelse:* +
-person som utfører oppgaver på vegne av NAV.
+Person som utfører oppgaver på vegne av NAV.
 
 
 *Eksempler:* +
-Alle personer som er tilknyttet NAV som arbeidstaker, enten direkte eller gjennom underleverandører.
+Alle personer som er tilknyttet NAV som ressurs, enten direkte eller gjennom underleverandører.
 
 Omfatter:
 
@@ -68,7 +66,7 @@ Omfatter:
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|Nav-ident      |Ja         |Intern identifikator som tildeles hver ansatt i nav fra ...|Z123456
+|Nav-ident      |Ja         |Intern identifikator som tildeles hver person i NAV fra IDM |Z123456
 |Personident    |Ja         |Ellevesifret registreringsnummer som tildeles av
                             den norske stat til alle landets innbyggere                 |1234567890
 |===
@@ -81,8 +79,7 @@ Omfatter:
 *Beskrivelse:* +
 Kobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere koblinger samtidig,
 og en organisasjonsenhet kan ha kobling med flere ressurser.
-
-Kan en ansatt ha flere koblinger med samme orgenhet?
+Per nå kan ikke en ressurs ha flere koblinger til samme organisasjonsenhet.
 
 
 *Eksempler:* +
@@ -94,8 +91,8 @@ Kodeverk omfatter: +
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
 |Ressurs        |Ja         |Ressursen koblingen gjelder                               |Se ressurs objekt
-|Organisasjonsenhet        |Ja         |Organisasjonsenheten Koblingen gjelder         |Se organisasjonsenhet objekt
-|Gyldig fom     |Ja         |Datoen Koblingen blir gyldig                              |2009-01-22
+|Organisasjonsenhet        |Ja         |Organisasjonsenheten koblingen gjelder         |Se organisasjonsenhet objekt
+|Gyldig fom     |Ja         |Datoen koblingen blir gyldig                              |2009-01-22
 |Gyldig tom     |Nei        |Koblingens siste gyldighets dato                          |2020-02-14, NULL hvis ikke satt.
 |===
 
@@ -105,9 +102,8 @@ Kodeverk omfatter: +
 |===
 
 *Beskrivelse:* +
-Leder er knytningen mellom en ressurs og en organisasjonsenhet. En organisasjonsenhet kan ha leder kobling med flere ressurser, men hvor bare 1 kan være aktiv.
-
-Kan en ressurs kan flere leder koblinger samtidig?
+Leder er knytningen mellom en ressurs og en organisasjonsenhet. Flere ressurser kan ha lederknyttning mot en organisasjonsenhet, men hvor bare 1 kan være aktiv.
+En ressurs kan være leder for flere organisasjonsenheter samtidig.
 
 *Eksempler:* +
 Ansatt Ola var leder for organisasjonsenhet 0101000 - Halden i perioden 2018-01-01 til og med 2019-12-01,
@@ -118,10 +114,10 @@ Kodeverk omfatter: +
 [%header,cols=4*]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|Ressurs        |Ja         |Ressursen leder kodblingen gjelder                         |Se ressurs objekt
-|Organisasjonsenhet        |Ja         |Organisasjonsenheten Koblingen gjelder          |Se organisasjonsenhet objekt
-|Gyldig fom     |Ja         |Datoen leder koblingen blir gyldig                         |2009-01-22
-|Gyldig tom     |Nei        |Leder koblingens siste gyldighets dato                     |2020-02-14, NULL hvis ikke satt.
+|Ressurs        |Ja         |Ressursen leder knyttningen gjelder                         |Se ressurs objekt
+|Organisasjonsenhet        |Ja         |Organisasjonsenheten knyttningen gjelder          |Se organisasjonsenhet objekt
+|Gyldig fom     |Ja         |Datoen leder knyttningen blir gyldig                         |2009-01-22
+|Gyldig tom     |Nei        |Leder knyttningen siste gyldighets dato                     |2020-02-14, NULL hvis ikke satt.
 |===
 
 
