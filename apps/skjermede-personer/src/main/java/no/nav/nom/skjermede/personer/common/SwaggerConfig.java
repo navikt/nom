@@ -24,8 +24,8 @@ public class SwaggerConfig {
                 .useDefaultResponseMessages(false)
                 .groupName("Skjermede personer API")
                 .tags(
-                        new Tag("skjerming", "Tilrettelegger forvaltning og oppslag av skjermingsopplysninger for selvbetjent b2c løsning på nav.no"),
-                        new Tag("skjerming-ui", "Tilrettelegger skjermingsopplysninger for b2b konsumenter"),
+                        new Tag("skjerming", "Tilrettelegger skjermingsopplysninger for b2b konsumenter"),
+                        new Tag("skjerming-ui", "Tilrettelegger forvaltning og oppslag av skjermingsopplysninger for selvbetjent b2c løsning på nav.no"),
                         new Tag("skjermingdata", "Tilrettelegger forvaltning av testdata fra dolly"))
                 .apiInfo(skjermedePersonerApiInfo());
     }
