@@ -29,7 +29,7 @@ public class StillingDvhTask {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
+    //@Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform(){
         val stillinger = getStillingerResponse();
         publishToKafka(stillinger);
