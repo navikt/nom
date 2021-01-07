@@ -13,3 +13,7 @@ app:
 
 spring.kafka.producer.properties:
   compression-type: snappy
+
+spring:
+  codec:
+    max-in-memory-size: 20MB
