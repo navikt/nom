@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.dvh.DvhStateListener;
 import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.dvh.Ressurs;
+import no.nav.nom.contract.dvh.StillingTabell;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -39,8 +40,12 @@ public class KafkaUtils {
 
         val recordsAsJson = createConsumerRecords(List.of(objects).stream()
                 .map(e -> {
+                    val typeStr = e instanceof Enhet ? Enhet.TYPE :
+                            (e instanceof Ressurs) ? Ressurs.TYPE :
+                                    (e instanceof StillingTabell) ? StillingTabell.TYPE :
+                                            null;
                     return DvhEvent.builder()
-                            .type(e instanceof Enhet ? Enhet.TYPE : Ressurs.TYPE)
+                            .type(typeStr)
                             .data(toJsonNode(e))
                             .build();
                 })

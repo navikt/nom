@@ -67,3 +67,20 @@ query HentOrganisasjonsenhetOgLeder {
         }
     }
 }
+
+query HentAlleOrganisasjonsenhetOgKoblinger {
+    organisasjonsenhet {
+        id
+        navn
+        gyldigFom
+        gyldigTom
+        koblinger{
+            ressurs{
+                navIdent
+                personIdent
+            }
+            gyldigFom
+            gyldigTom
+        }
+    }
+}

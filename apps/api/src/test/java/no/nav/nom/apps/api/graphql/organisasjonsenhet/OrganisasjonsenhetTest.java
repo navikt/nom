@@ -18,6 +18,7 @@ import java.util.List;
 import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
@@ -91,7 +92,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {}).get(0);
-                
+
         assertEquals(inputLeder.getNavident(), outputLeder.getRessurs().getNavIdent());
         assertEquals(inputLeder.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
     }
@@ -112,6 +113,44 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         assertEquals(0, outputLedere.size());
     }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kan hente ut kobling for organisasjonsenhet.")
+    void scenario41() {
+        val inputEnhet = enhetTestTemplate("41", null, 0, null);
+        val inputRessurs = ressursTestTemplate("41");
+        val inputStilling = stillingTestTemplate(inputEnhet.getEnhetKode(), inputRessurs.getNavident(), 0);
+
+        val inputStillingTabell = stillingTabellTestTemplate(inputStilling);
+
+        kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs, inputStillingTabell);
+
+        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
+        assertThat(response, hasNoErrors());
+
+        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val actualNavIdent = outputEnhetJson.get("koblinger").get(0).get("ressurs").get("navIdent");
+        assertEquals(inputRessurs.getNavident(), actualNavIdent.asText());
+
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
+    void scenario42() {
+        val inputEnhet = enhetTestTemplate("41", null, 0, null);
+
+
+        kafkaUtils.sendFromKafkaMock(inputEnhet);
+
+        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
+        assertThat(response, hasNoErrors());
+
+        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        assertTrue(outputEnhetJson.get("koblinger").isEmpty());
+    }
+
 
     private void orgEnhetAsserter(Enhet faktaEnhet, Organisasjonsenhet actualEnhet){
         assertEquals(faktaEnhet.getEnhetKode(), actualEnhet.getId());

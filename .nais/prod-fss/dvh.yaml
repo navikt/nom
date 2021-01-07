@@ -13,6 +13,8 @@ spec:
       value: log-logstash,k8s,kafka
     - name: APP_DVH_BASE_URL
       value: https://tdv-p.adeo.no:9402
+  envFrom:
+    - secret: nom-tdv-cred
   image: {{image}}
   port: 8080
   ingresses:

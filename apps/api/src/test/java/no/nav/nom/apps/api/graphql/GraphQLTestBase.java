@@ -6,10 +6,14 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.dvh.Ressurs;
+import no.nav.nom.contract.dvh.Stilling;
+import no.nav.nom.contract.dvh.StillingTabell;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 public abstract class GraphQLTestBase extends TestBase {
 
@@ -47,4 +51,23 @@ public abstract class GraphQLTestBase extends TestBase {
                 .personIdent("testPersonIdent"+suffix)
                 .build();
     }
+
+    protected Stilling stillingTestTemplate(String agressoNr, String navIdent, int fraTilIncrement) {
+        return Stilling.builder()
+                .orgEnhet(agressoNr)
+                .resourceId(navIdent.substring(1))
+                .fraDato(LocalDate.now().minusDays(fraTilIncrement))
+                .tilDato(LocalDate.now().plusDays(fraTilIncrement))
+                .ansettelsesTypeBesk("dummy")
+                .stillingIBunn(1.0)
+                .timestamp(LocalDateTime.now())
+                .orgEnhetBesk("dummy")
+                .permisjon("JOBBER")
+                .build();
+    }
+
+    protected StillingTabell stillingTabellTestTemplate(Stilling... stillinger) {
+        return StillingTabell.builder().elementer(Arrays.asList(stillinger.clone())).build();
+    }
+
 }

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class RessursResolver implements GraphQLQueryResolver {
+class RessursResolver implements GraphQLQueryResolver {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Ressurs>> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {

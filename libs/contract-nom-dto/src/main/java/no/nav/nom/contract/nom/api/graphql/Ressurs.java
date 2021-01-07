@@ -6,6 +6,7 @@ import lombok.Value;
 @Value
 @Builder
 public class Ressurs {
-    private String navIdent;
-    private String personIdent;
+    String navIdent;
+    String personIdent;
 }
+

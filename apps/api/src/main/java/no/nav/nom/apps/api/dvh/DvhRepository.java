@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class DvhRepository {
     private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
     private final Map<String, List<DvhLeder>> lederByEnhetNr = new ConcurrentHashMap<>(1000);
     private final List<DvhOrganisering> organiseringer = Collections.synchronizedList(new LinkedList<>());
+    private final List<DvhKobling> koblinger = Collections.synchronizedList(new LinkedList<>());
 
     public void saveEnhet(DvhOrganisasjonsenhet enhet) {
         enheterByNumber.put(enhet.getNummer(), enhet);
@@ -70,6 +72,8 @@ public class DvhRepository {
         return ressursByNavIdent.values();
     }
 
+    public Collection<DvhKobling> findAllKoblinger() {return koblinger;}
+
     public void saveOrgLeder(DvhLeder leder){
         val lederMapping = lederByEnhetNr.get(leder.getOrgEnhetNr());
 
@@ -80,14 +84,34 @@ public class DvhRepository {
         }
     }
 
+    public void saveKobling(DvhKobling kobling){
+        koblinger.add(kobling);
+    }
+
+    public List<DvhKobling> getKoblingerForEnhet(String enhetId){
+        return koblinger.stream().filter(x -> x.getAgressoId().equals(enhetId)).collect(Collectors.toUnmodifiableList());
+    }
+
     public List<DvhLeder> findLederByEnhetNr(String enhetNr){
         return Optional.ofNullable(lederByEnhetNr.get(enhetNr))
                 .orElse(Collections.emptyList());
+    }
+
+
+    public void clearKoblinger(){
+        koblinger.clear();
     }
 
     public void clearRepository(){
         enheterByNumber.clear();
         ressursByNavIdent.clear();
         organiseringer.clear();
+        koblinger.clear();
+    }
+
+    public List<DvhKobling> getKoblingerForRessurs(String resourceId) {
+        return findAllKoblinger().stream()
+                .filter(s -> s.getRessursId().equals(resourceId))
+                .collect(Collectors.toUnmodifiableList());
     }
 }

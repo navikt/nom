@@ -17,8 +17,11 @@ public class AppProperties {
     @Value
     public static class Dvh {
         String topic;
+        String tdvUsername;
+        String tdvPassword;
         Enhet enhet;
         Ressurs ressurs;
+        Stilling stilling;
     }
 
     @Value
@@ -30,5 +33,10 @@ public class AppProperties {
     public static class Ressurs {
         String url;
         Long chunkSize;
+    }
+
+    @Value
+    public static class Stilling {
+        String url;
     }
 }

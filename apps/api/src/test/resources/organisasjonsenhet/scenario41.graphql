@@ -1,0 +1,14 @@
+query {
+    organisasjonsenhet(where: {id: "testId41"}) {
+        id
+        navn
+        gyldigFom
+        gyldigTom
+        koblinger{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
+    }
+}

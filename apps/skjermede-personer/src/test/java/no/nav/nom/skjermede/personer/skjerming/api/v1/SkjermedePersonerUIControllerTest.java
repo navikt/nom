@@ -187,12 +187,14 @@ public class SkjermedePersonerUIControllerTest {
         return String.format("Bearer %s", token);
     }
 
-    private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String ...requestPath) throws Exception {
-        val path = requestPath.length == 0
-                ? Paths.get(SkjermedePersonerUIController.BASE_URL)
-                : Paths.get(SkjermedePersonerUIController.BASE_URL, requestPath);
+    private MockHttpServletRequestBuilder requestBuilder(final HttpMethod method, final String... requestPath) throws Exception {
+        val pathSb = new StringBuilder(SkjermedePersonerUIController.BASE_URL);
+        for (val pathSegment : requestPath) {
+            pathSb.append("/").append(pathSegment);
+        }
+        val pathStr = pathSb.toString();
 
-        return (method == HttpMethod.GET ? get(path.toString()) : method == HttpMethod.POST ? post(path.toString()) : put(path.toString()))
+        return (method == HttpMethod.GET ? get(pathStr) : method == HttpMethod.POST ? post(pathStr) : put(pathStr))
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, getBearerToken(SkjermingTestUtils.PERSONIDENT));
     }

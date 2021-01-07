@@ -1,0 +1,12 @@
+query {
+    ressurs(where: {navIdent: "testNavIdent42"}) {
+        navIdent
+        personIdent
+        koblinger{
+            organisasjonsenhet{
+                id
+                navn
+            }
+        }
+    }
+}

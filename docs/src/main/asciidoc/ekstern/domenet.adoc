@@ -120,4 +120,6 @@ Kodeverk omfatter: +
 |Gyldig tom     |Nei        |Leder knyttningen siste gyldighets dato                     |2020-02-14, NULL hvis ikke satt.
 |===
 
+fast/kommunal/statlig kan være på ressurs og ikke stilling?
+
 

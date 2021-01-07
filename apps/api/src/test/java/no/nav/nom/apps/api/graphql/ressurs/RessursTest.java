@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @DisplayName("GraphQL.HentRessurs")
@@ -60,4 +62,40 @@ public class RessursTest extends RessursTestBase {
         val outputRessurs = response.getList("$.data.ressurs", Ressurs.class);
         assertEquals(3, outputRessurs.size());
     }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kan hente ut kobling for ressurs")
+    void scenario21() {
+        val inputEnhet = enhetTestTemplate("42", null, 0, null);
+        val inputRessurs = ressursTestTemplate("42");
+        val inputStilling = stillingTestTemplate(inputEnhet.getEnhetKode(), inputRessurs.getNavident(), 0);
+
+        val inputStillingTabell = stillingTabellTestTemplate(inputStilling);
+
+        kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs, inputStillingTabell);
+
+        val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
+        assertThat(response, hasNoErrors());
+
+        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
+        val actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("id");
+        assertEquals(inputEnhet.getEnhetKode(), actualOrganisasjonsEnhetId.asText());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
+    void scenario22() {
+        val inputRessurs = ressursTestTemplate("42");
+        kafkaUtils.sendFromKafkaMock(inputRessurs);
+
+        val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
+        assertThat(response, hasNoErrors());
+
+
+        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
+        assertTrue(ressurs.get("koblinger").isEmpty());
+    }
+
 }

@@ -22,6 +22,7 @@ type Organisasjonsenhet {
     gyldigTom: Date
     organiseringer : [Organisering!]!
     leder: [OrganisasjonsenhetsLeder!]!
+    koblinger: [OrganisasjonsenhetsKobling!]!
 }
 
 type Organisering {
@@ -31,12 +32,24 @@ type Organisering {
     gyldigTom: Date
 }
 
-
 type Ressurs {
     navIdent: String!
     personIdent: String!
+    koblinger: [RessursKobling!]!
 }
 
 type OrganisasjonsenhetsLeder{
     ressurs: Ressurs!
+}
+
+type OrganisasjonsenhetsKobling {
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type RessursKobling {
+    organisasjonsenhet: Organisasjonsenhet!
+    gyldigFom: Date!
+    gyldigTom: Date
 }
