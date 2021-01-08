@@ -1,6 +1,6 @@
 app:
   dvh:
-    base-url: http://localhost:${wiremock.server.port}/
+    base-url: http://localhost:8081/
     tdvUsername: test-stilling-user
     tdvPassword: test-stilling-pass
     ressurs:
