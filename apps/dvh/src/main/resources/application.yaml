@@ -12,7 +12,7 @@ app:
       url: ${app.dvh.base-url}/json/Hr/NOM2/stilling2nom
 
 spring.kafka.producer.properties:
-  compression-type: snappy
+  compression-type: gzip
 
 spring:
   codec:
