@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.mockito.Mockito.mock;
 
@@ -15,5 +16,10 @@ public class TestConfig {
     @Bean
     ConsumerFactory<String, String> consumerFactory() {
         return mock(ConsumerFactory.class);
+    }
+
+    @Bean
+    KafkaTemplate<String, String> kafkaTemplate() {
+        return mock(KafkaTemplate.class);
     }
 }

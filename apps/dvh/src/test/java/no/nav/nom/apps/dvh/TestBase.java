@@ -37,16 +37,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles({"test", "log-console-error"})
-@AutoConfigureWireMock(port = 8081)
+@AutoConfigureWireMock(port = 0)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-//@SpringBootTest(classes = TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class TestBase {
 
     @SpyBean
     protected StateRepository stateRepository;
 
-    @MockBean
+    @Autowired
     protected KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired

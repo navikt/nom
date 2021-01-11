@@ -1,8 +1,10 @@
 package no.nav.nom.apps.dvh.state;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.Map;
 
@@ -10,11 +12,22 @@ import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @DisplayName("StateRepository")
 class StateRepositoryTest extends StateTestBase {
+    private StateLoader loader;
+    private StateRepository repository;
+
+    @BeforeEach
+    void setup() {
+        loader = mock(StateLoader.class);
+        Mockito.reset(loader, consumerFactory);
+        // Oppretter ny for hver gang siden det må valideres på intern state, noe som blir vanskelig med singletons fra Spring.
+        repository = new StateRepository(loader);
+    }
 
     @Test
     @DisplayName("StateRepository returnerer state fra StateLoader")
