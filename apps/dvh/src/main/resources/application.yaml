@@ -11,9 +11,7 @@ app:
     stilling:
       url: ${app.dvh.base-url}/json/Hr/NOM2/stilling2nom
 
-spring.kafka.producer.properties:
-  compression-type: gzip
-
 spring:
-  codec:
-    max-in-memory-size: 20MB
+  kafka:
+    producer:
+      compression-type: lz4
