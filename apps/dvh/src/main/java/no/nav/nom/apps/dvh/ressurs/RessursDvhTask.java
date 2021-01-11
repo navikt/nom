@@ -12,13 +12,14 @@ import no.nav.nom.apps.dvh.state.StateRepository;
 import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Ressurs;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ class RessursDvhTask {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final MeterRegistry meterRegistry;
-    private final WebClient ressursWebClient;
+    private final RestTemplate restTemplate;
 
     @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform() {
@@ -64,31 +65,26 @@ class RessursDvhTask {
 
     private List<JsonNode> findRessurser(long offset) {
         try {
-            JsonNode response = getRessurserResponse(offset);
-            return findRessurser(response);
+            val url = constructUrl(offset);
+            val result = restTemplate.exchange(url, HttpMethod.GET, null, JsonNode.class);
+            return findRessurser(result);
         } catch (RuntimeException e) {
             log.error("Failed to fetch ressurser from dvh", e);
             return emptyList();
         }
     }
 
-    private JsonNode getRessurserResponse(long offset) {
-        return ressursWebClient.get()
-                .uri( uriBuilder -> constructUriParameters(uriBuilder, offset))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-    }
-
-    private URI constructUriParameters(UriBuilder builder, long offset) {
-        return builder
+    private String constructUrl(long offset) {
+        return UriComponentsBuilder
+                .fromUriString(properties.getDvh().getRessurs().getUrl())
                 .queryParam("in_sekvensnummer_fra", offset)
                 .queryParam("in_sekvensnummer_til", offset+properties.getDvh().getRessurs().getChunkSize())
-                .build();
+                .build()
+                .toUriString();
     }
 
-    private List<JsonNode> findRessurser(JsonNode result) {
-        return StreamSupport.stream(result.get("Nom_AnsatteResponse").get("Nom_AnsatteResult").spliterator(), false)
+    private List<JsonNode> findRessurser(ResponseEntity<JsonNode> result) {
+        return StreamSupport.stream(result.getBody().get("Nom_AnsatteResponse").get("Nom_AnsatteResult").spliterator(), false)
                 .sorted(Comparator.comparingLong(jsonRessurs -> jsonRessurs.get("SEKVENSNR").asLong()))
                 .collect(toUnmodifiableList());
     }

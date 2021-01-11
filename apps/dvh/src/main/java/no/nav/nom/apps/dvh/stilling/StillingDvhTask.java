@@ -10,11 +10,12 @@ import no.nav.nom.apps.dvh.common.AppProperties;
 import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Stilling;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 @Slf4j
@@ -25,7 +26,7 @@ public class StillingDvhTask {
     private final long FIVE_MINS = 5 * 60 * 1000;
 
     private final AppProperties properties;
-    private final WebClient stillingWebClient;
+    private final RestTemplate restTemplate;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
@@ -36,12 +37,8 @@ public class StillingDvhTask {
     }
 
     private JsonNode getStillingerResponse(){
-        return stillingWebClient.get()
-                .uri(properties.getDvh().getStilling().getUrl())
-                .headers(headers -> headers.setBasicAuth(properties.getDvh().getTdvUsername(), properties.getDvh().getTdvPassword()))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        return restTemplate.exchange(properties.getDvh().getStilling().getUrl(),
+                HttpMethod.GET, null, JsonNode.class).getBody();
     }
 
     private void publishToKafka(JsonNode node){

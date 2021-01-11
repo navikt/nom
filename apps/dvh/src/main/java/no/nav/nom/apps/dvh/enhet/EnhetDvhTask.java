@@ -12,13 +12,14 @@ import no.nav.nom.apps.dvh.state.StateRepository;
 import no.nav.nom.contract.dvh.DvhEvent;
 import no.nav.nom.contract.dvh.Enhet;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
@@ -38,7 +39,7 @@ public class EnhetDvhTask {
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final MeterRegistry meterRegistry;
-    private final WebClient enhetWebClient;
+    private final RestTemplate restTemplate;
 
     @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform() {
@@ -56,30 +57,25 @@ public class EnhetDvhTask {
 
     private List<JsonNode> findEnheter(long offset) {
         try {
-            JsonNode response = getEnhetResponse(offset);
-            return findEnheter(response);
+            val url = constructUrl(offset);
+            val result = restTemplate.exchange(url, HttpMethod.GET, null, JsonNode.class);
+            return findEnheter(result);
         } catch (RuntimeException e) {
             log.error("Failed to fetch enheter from dvh", e);
             return emptyList();
         }
     }
 
-    private JsonNode getEnhetResponse(long offset) {
-        return enhetWebClient.get()
-                .uri( uriBuilder -> constructUriParameters(uriBuilder, offset))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-    }
-
-    private URI constructUriParameters(UriBuilder builder, long offset) {
-        return builder
+    private String constructUrl(long offset) {
+        return UriComponentsBuilder
+                .fromUriString(properties.getDvh().getEnhet().getUrl())
                 .queryParam("in_sekvens_fra", offset)
-                .build();
+                .build()
+                .toUriString();
     }
 
-    private List<JsonNode> findEnheter(JsonNode result) {
-        return StreamSupport.stream(result.get("NOM_HRORG_HIEARKI_PARAMResponse").get("NOM_HRORG_HIEARKI_PARAMResult").spliterator(), false)
+    private List<JsonNode> findEnheter(ResponseEntity<JsonNode> result) {
+        return StreamSupport.stream(result.getBody().get("NOM_HRORG_HIEARKI_PARAMResponse").get("NOM_HRORG_HIEARKI_PARAMResult").spliterator(), false)
                 .collect(toUnmodifiableList());
     }
 

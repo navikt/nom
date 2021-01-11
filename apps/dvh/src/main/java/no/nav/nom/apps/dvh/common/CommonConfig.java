@@ -1,12 +1,17 @@
 package no.nav.nom.apps.dvh.common;
 
-import org.springframework.boot.actuate.metrics.web.reactive.client.WebClientExchangeTags;
-import org.springframework.boot.actuate.metrics.web.reactive.client.WebClientExchangeTagsProvider;
+import io.micrometer.core.instrument.Tag;
+import lombok.val;
+import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTags;
+import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
@@ -16,33 +21,27 @@ import java.util.Arrays;
 class CommonConfig {
 
     @Bean
-    WebClientExchangeTagsProvider webClientExchangeTagsProvider() {
-        return (request, response, throwable) ->
-            Arrays.asList(
-                    WebClientExchangeTags.method(request),
-                    WebClientExchangeTags.uri(request),
-                    WebClientExchangeTags.status(response, throwable),
-                    WebClientExchangeTags.clientName(request));
-    }
-
-    @Bean(name = "enhetWebClient")
-    WebClient getEnhetWebClient(AppProperties properties) {
-        return WebClient.builder()
-                .baseUrl(properties.getDvh().getEnhet().getUrl())
+    RestTemplate restTemplate(RestTemplateBuilder builder, AppProperties properties) {
+        return builder
+                .additionalInterceptors(basicAuthInterceptor(properties.getDvh().getTdvUsername(), properties.getDvh().getTdvPassword()))
                 .build();
     }
 
-    @Bean(name = "ressursWebClient")
-    WebClient getRessursWebClient(AppProperties properties) {
-        return WebClient.builder()
-                .baseUrl(properties.getDvh().getRessurs().getUrl())
-                .build();
+    @Bean
+    RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
+        return (urlTemplate, request, response) -> {
+            val uriTag = StringUtils.hasText(urlTemplate) ? RestTemplateExchangeTags.uri(urlTemplate.replaceFirst("\\?.*", "")) : Tag.of("uri", request.getURI().getPath());
+
+            return Arrays.asList(RestTemplateExchangeTags.method(request), uriTag,
+                    RestTemplateExchangeTags.status(response),
+                    RestTemplateExchangeTags.clientName(request));
+        };
     }
 
-    @Bean(name = "stillingWebClient")
-    WebClient getStillingWebClient(AppProperties properties) {
-        return WebClient.builder()
-                .baseUrl(properties.getDvh().getStilling().getUrl())
-                .build();
+    private ClientHttpRequestInterceptor basicAuthInterceptor(String username, String password){
+        return ((request, body, execution) -> {
+            request.getHeaders().setBasicAuth(username, password);
+            return  execution.execute(request, body);
+        });
     }
 }
