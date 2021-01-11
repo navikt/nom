@@ -12,6 +12,7 @@ import no.nav.nom.contract.dvh.Stilling;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.http.HttpMethod;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,7 +31,7 @@ public class StillingDvhTask {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    //@Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
+    @Scheduled(initialDelay = FIVE_MINS, fixedDelay = ONE_HOUR)
     public void perform(){
         val stillinger = getStillingerResponse();
         publishToKafka(stillinger);
