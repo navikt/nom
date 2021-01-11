@@ -43,6 +43,8 @@ spec:
   azure:
     application:
       enabled: true
+      replyURLs:
+        - https://nom-ui.intern.nav.no/login/oauth2/code/aad
   accessPolicy:
     outbound:
       rules:
