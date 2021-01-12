@@ -12,6 +12,9 @@ app:
       url: ${app.dvh.base-url}/json/Hr/NOM2/stilling2nom
 
 spring:
-  kafka:
-    producer:
-      compression-type: lz4
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AZURE_APP_WELL_KNOWN_URL}
+          accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}

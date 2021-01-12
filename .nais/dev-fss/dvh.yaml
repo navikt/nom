@@ -17,9 +17,14 @@ spec:
     - secret: nom-tdv-cred
   image: {{image}}
   port: 8080
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   ingresses:
     - https://nom-dvh.nais.preprod.local
     - https://nom-dvh.dev.adeo.no
+    - https://nom-dvh.dev-fss-pub.nais.io
   replicas:
     min: 1
     max: 1

@@ -5,3 +5,11 @@ app:
     tdvPassword: test-stilling-pass
     ressurs:
       chunkSize: 3
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:${wiremock.server.port}/aad
+          accepted-audience: test
