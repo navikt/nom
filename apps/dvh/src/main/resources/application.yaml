@@ -16,5 +16,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${AZURE_APP_WELL_KNOWN_URL}
+          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
