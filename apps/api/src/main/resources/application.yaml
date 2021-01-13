@@ -9,6 +9,13 @@ graphql:
         query: classpath:playground/organisasjonsenhet.graphql
       - name: HentRessurs
         query: classpath:playground/ressurs.graphql
+  servlet:
+    mapping: /graphql
+    enabled: true
+    corsEnabled: true
+    cors:
+      allowed-origins: *
+
 
 spring.kafka.consumer.max-poll-records: 1000
 
