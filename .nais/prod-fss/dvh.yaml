@@ -20,6 +20,7 @@ spec:
   azure:
     application:
       enabled: true
+  webproxy: true
   ingresses:
     - https://nom-dvh.nais.adeo.no
     - https://nom-dvh.prod-fss-pub.nais.io
