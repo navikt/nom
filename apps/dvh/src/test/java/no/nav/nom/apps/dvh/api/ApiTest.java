@@ -1,5 +1,9 @@
 package no.nav.nom.apps.dvh.api;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.net.URI;
+import java.time.Instant;
+import java.util.Date;
 
 public class ApiTest extends ApiTestBase {
     private static final String URL = "/proxy/stillinger";
@@ -30,7 +36,13 @@ public class ApiTest extends ApiTestBase {
     @SneakyThrows
     @DisplayName("Validerer gyldig respons med medsendt token")
     public void scenario11(){
-        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, getHeaders("test"), String.class);
+        val claims = securityTestUtils.validJwtClaims();
+        val token = securityTestUtils.createToken(claims);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
     }
 
@@ -44,21 +56,92 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Validerer 401 UNAUTHORIZED ved ugyldig audience i token")
-    public void scenario22(){
-        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, getHeaders("feilAud"), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    @DisplayName("Validerer 401 UNAUTHORIZED ved ikke signert token")
+    public void scenario23(){
+        val claims = securityTestUtils.validJwtClaims();
+        val signer = new RSASSASigner(rsaKey);
+        val signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("annenKey").build(), claims.build());
+        signedJWT.sign(signer);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(signedJWT.serialize());
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
     }
 
-
-    private HttpEntity<String> getHeaders(String audience){
-        val claims = securityTestUtils.validJwtClaims(audience);
+    @Test
+    @SneakyThrows
+    @DisplayName("Validerer 401 UNAUTHORIZED ved ugyldig issuer i token")
+    public void scenario22(){
+        val claims = securityTestUtils.validJwtClaims();
+        claims.issuer("annenIssuer");
         val token = securityTestUtils.createToken(claims);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
 
-        return new HttpEntity<>("body", headers);
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Validerer 403 FORBIDDEN ved ugyldig subject i token")
+    public void scenario24(){
+        val claims = securityTestUtils.validJwtClaims();
+        claims.subject("ugyldigSubject");
+        val token = securityTestUtils.createToken(claims);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Validerer 401 UNAUTHORIZED ved ugyldig audience i token")
+    public void scenario25(){
+        val claims = securityTestUtils.validJwtClaims();
+        claims.audience("ugyldigAudience");
+        val token = securityTestUtils.createToken(claims);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Validerer 401 UNAUTHORIZED ved utløpt token")
+    public void scenario26(){
+        val claims = securityTestUtils.validJwtClaims();
+        claims.expirationTime(Date.from(Instant.now().minusSeconds(60 * 60)));
+        val token = securityTestUtils.createToken(claims);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Validerer 401 UNAUTHORIZED ved not before time frem i tid i tokenet")
+    public void scenario27(){
+        val claims = securityTestUtils.validJwtClaims();
+        claims.notBeforeTime(Date.from(Instant.now().plusSeconds(60 * 60)));
+        val token = securityTestUtils.createToken(claims);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create(URL), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
     }
 }

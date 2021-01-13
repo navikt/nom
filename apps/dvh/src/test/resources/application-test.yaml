@@ -13,3 +13,4 @@ spring:
         jwt:
           issuer-uri: http://localhost:${wiremock.server.port}/aad
           accepted-audience: test
+          subjects: testSubject

@@ -24,12 +24,12 @@ public class SecurityTestUtils {
     private final RSAKey rsaKey;
     private final Environment env;
 
-    public JWTClaimsSet.Builder validJwtClaims(String audience) {
+    public JWTClaimsSet.Builder validJwtClaims() {
         val wiremockPort = env.getRequiredProperty("wiremock.server.port");
 
         return new JWTClaimsSet.Builder()
                 .subject("testSubject")
-                .audience(audience == null ? "test" : audience)
+                .audience("test")
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))
