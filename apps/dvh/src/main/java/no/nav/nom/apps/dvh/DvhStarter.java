@@ -14,5 +14,6 @@ public class DvhStarter {
         PropertyUtils.initDefaultProperties("nom-dvh");
         KafkaUtils.assignRandomTransactionIdPrefix();
         SpringApplication.run(DvhStarter.class, args);
+        
     }
 }
