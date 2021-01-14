@@ -14,7 +14,7 @@ graphql:
     enabled: true
     corsEnabled: true
     cors:
-      allowed-origins: *
+      allowed-origins: "*"
 
 
 spring.kafka.consumer.max-poll-records: 1000
