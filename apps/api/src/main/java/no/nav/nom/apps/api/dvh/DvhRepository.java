@@ -85,7 +85,7 @@ public class DvhRepository {
         val lederMapping = lederByEnhetNr.get(leder.getOrgEnhetNr());
 
         if(lederMapping == null) {
-            lederByEnhetNr.put(leder.getOrgEnhetNr(), List.of(leder));
+            lederByEnhetNr.put(leder.getOrgEnhetNr(), new LinkedList<>(List.of(leder)));
         }else {
             lederMapping.add(leder);
         }
