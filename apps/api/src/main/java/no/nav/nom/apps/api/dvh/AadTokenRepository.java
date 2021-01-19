@@ -47,7 +47,7 @@ public class AadTokenRepository {
         aadRequestMap.add("grant_type", aadProperties.getGrantType());
 
         val result =  webClient.method(HttpMethod.POST)
-                .uri(aadProperties.getIssuerBaseUrl()+"/token")
+                .uri(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token")
                 .body(BodyInserters.fromMultipartData(aadRequestMap))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
