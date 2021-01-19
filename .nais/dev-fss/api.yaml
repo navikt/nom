@@ -9,6 +9,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,kafka
+    - name: DVH_STILLINGER_URL
+      value: https://nom-dvh.dev-fss-pub.nais.io
   image: {{image}}
   port: 8080
   ingresses:
@@ -48,3 +50,6 @@ spec:
     inbound:
       rules:
         - application: nom-ui
+    outbound:
+      external:
+        - host: nom-dvh.dev-fss-pub.nais.io

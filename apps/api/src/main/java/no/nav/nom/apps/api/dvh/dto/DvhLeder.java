@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
@@ -9,7 +9,7 @@ public class DvhLeder {
     private String ressursId;
     private String orgEnhetNr;
 
-    DvhLeder(JsonNode node) {
+    public DvhLeder(JsonNode node) {
         this.ressursId = node.get("LEDER_RESOURCE_ID").asText();
         this.orgEnhetNr = node.get("ORGNODE_KODE").asText();
     }

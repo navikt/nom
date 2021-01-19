@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
@@ -13,7 +13,7 @@ public class DvhOrganisering {
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
-    DvhOrganisering(JsonNode node) {
+    public DvhOrganisering(JsonNode node) {
         overenhetNummer = node.get("ORGNODE_KODE_OVER").asText();
         underenhetNummer = node.get("ORGNODE_KODE").asText();
         gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA_ORG").asText());

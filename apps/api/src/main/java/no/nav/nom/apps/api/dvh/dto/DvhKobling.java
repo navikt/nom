@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
@@ -14,7 +14,7 @@ public class DvhKobling {
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
-    DvhKobling(JsonNode node) {
+    public DvhKobling(JsonNode node) {
         ressursId = node.get("RESOURCE_ID").asText();
         agressoId = node.get("ORGENHET").asText();
         gyldigFom = LocalDate.parse(node.get("FRA_DATO").asText());

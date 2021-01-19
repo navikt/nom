@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
@@ -8,7 +8,7 @@ public class DvhRessurs {
     private String navIdent;
     private String personIdent;
 
-    DvhRessurs(JsonNode node) {
+    public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
     }

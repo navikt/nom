@@ -24,6 +24,19 @@ query HentRessursOgKoblinger {
                 navn
                 gyldigFom
                 gyldigTom
+                organiseringer{
+                    retning
+                    organisasjonsenhet{
+                        id
+                        navn
+                        koblinger{
+                            ressurs{
+                                navIdent
+                                personIdent
+                            }
+                        }
+                    }
+                }
             }
             gyldigFom
             gyldigTom
