@@ -59,7 +59,7 @@ public class AadTokenRepository {
     @SneakyThrows
     private String generateClientAssertionToken(){
         val claimSet = new JWTClaimsSet.Builder()
-                .audience(aadProperties.getIssuerBaseUrl())
+                .audience(aadProperties.getIssuerBaseUrl()+"/v2.0")
                 .expirationTime(Date.from(Instant.now().plusSeconds(60 * 5)))
                 .issuer(aadProperties.getClientId())
                 .jwtID(UUID.randomUUID().toString())

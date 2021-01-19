@@ -4,7 +4,7 @@ app:
     baseUrl:
 
 aad:
-  issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+  issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
   clientId: ${AZURE_APP_CLIENT_ID}
   clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
   jwk: ${AZURE_APP_JWK}
