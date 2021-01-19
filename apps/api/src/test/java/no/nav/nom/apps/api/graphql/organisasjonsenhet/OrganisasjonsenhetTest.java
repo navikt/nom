@@ -147,7 +147,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        val inputEnhet = enhetTestTemplate("41", null, 0, null);
+        val inputEnhet = enhetTestTemplate("", null, 0, null);
 
 
         kafkaUtils.sendFromKafkaMock(inputEnhet);

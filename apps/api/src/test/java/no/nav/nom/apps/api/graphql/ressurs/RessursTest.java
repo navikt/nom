@@ -90,7 +90,7 @@ public class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        val inputRessurs = ressursTestTemplate("42");
+        val inputRessurs = ressursTestTemplate("2");
         kafkaUtils.sendFromKafkaMock(inputRessurs);
 
         val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
