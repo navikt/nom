@@ -11,6 +11,8 @@ spec:
       value: log-logstash,kafka
     - name: DVH_STILLINGER_URL
       value: https://nom-dvh.dev-fss-pub.nais.io
+    - name: DVH_AAD_SCOPE
+      value: 8db514b3-62dc-4ff8-895a-039067aa4a33
   image: {{image}}
   port: 8080
   ingresses:
