@@ -25,7 +25,7 @@ public class DvhRestConsumer {
     @Scheduled(fixedDelay = ONE_HOUR)
     public void loadKoblingerFromDvh(){
 
-        val result = webClient.method(HttpMethod.GET)
+        val result = webClient.get()
                 .uri(appProperties.getDvh().getBaseUrl()+"/proxy/stillinger")
                 .headers(headers -> headers.setBearerAuth(aadTokenRepository.getDvhToken()))
                 .retrieve()
