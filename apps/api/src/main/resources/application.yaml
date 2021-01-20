@@ -9,7 +9,7 @@ aad:
   clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
   jwk: ${AZURE_APP_JWK}
   grantType: client_credentials
-  dvhScope: ${DVH_AAD_SCOPE}
+  dvhScope: ${DVH_AAD_SCOPE}.default
 
 graphql:
   playground:

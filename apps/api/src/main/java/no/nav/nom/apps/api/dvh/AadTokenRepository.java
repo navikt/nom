@@ -10,7 +10,6 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -42,19 +41,17 @@ public class AadTokenRepository {
 
     @SneakyThrows
     private SignedJWT fetchToken(){
-        val url =  UriComponentsBuilder
-                .fromUriString(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token")
-                .queryParam("scope", aadProperties.getDvhScope())
-                .queryParam("client_id", aadProperties.getClientId())
-                .queryParam("client_assertion_type", aadProperties.getClientAssertionType())
-                .queryParam("client_assertion", generateClientAssertionToken())
-                .queryParam("grant_type", aadProperties.getGrantType())
-                .build()
-                .toUriString();
+        val aadRequestMap = new LinkedMultiValueMap<String, String>();
+        aadRequestMap.add("scope", aadProperties.getDvhScope());
+        aadRequestMap.add("client_id", aadProperties.getClientId());
+        aadRequestMap.add("client_assertion_type", aadProperties.getClientAssertionType());
+        aadRequestMap.add("client_assertion", generateClientAssertionToken());
+        aadRequestMap.add("grant_type", aadProperties.getGrantType());
 
         val result =  webClient.post()
-                .uri(url)
+                .uri(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromMultipartData(aadRequestMap))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
