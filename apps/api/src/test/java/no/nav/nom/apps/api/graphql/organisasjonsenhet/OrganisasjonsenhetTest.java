@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private DvhRestConsumer dvhRestConsumer;
 
     @Test
     @SneakyThrows
@@ -102,7 +107,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32(){
         val inputEnhet = enhetTestTemplate("32", null, 0, null);
-
         kafkaUtils.sendFromKafkaMock(inputEnhet);
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario32.graphql");
@@ -116,30 +120,34 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Kan hente ut kobling for organisasjonsenhet.")
+    @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        val inputEnhet = enhetTestTemplate("41", null, 0, null);
-        val inputRessurs = ressursTestTemplate("41");
-        val inputStilling = stillingTestTemplate(inputEnhet.getEnhetKode(), inputRessurs.getNavident(), 0);
-
-        val inputStillingTabell = stillingTabellTestTemplate(inputStilling);
-
-        kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs, inputStillingTabell);
+        dvhRestConsumer.loadKoblingerFromDvh();
+        val inputEnhet = enhetTestTemplate("", null, 0, null);
+        val inputRessurs = ressursTestTemplate("");
+        kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs);
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
         assertThat(response, hasNoErrors());
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
-        val actualNavIdent = outputEnhetJson.get("koblinger").get(0).get("ressurs").get("navIdent");
-        assertEquals(inputRessurs.getNavident(), actualNavIdent.asText());
+        val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrganisasjonsenhetsKobling>>() {});
 
+        assertEquals(1, outputKoblinger.size());
+        val outputKobling = outputKoblinger.get(0);
+        assertEquals("2021-01-01", outputKobling.getGyldigFom().toString());
+        assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
+
+        val outputRessurs = outputKoblinger.get(0).getRessurs();
+        assertEquals(inputRessurs.getNavident(), outputRessurs.getNavIdent());
+        assertEquals(inputRessurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        val inputEnhet = enhetTestTemplate("41", null, 0, null);
+        val inputEnhet = enhetTestTemplate("", null, 0, null);
 
 
         kafkaUtils.sendFromKafkaMock(inputEnhet);

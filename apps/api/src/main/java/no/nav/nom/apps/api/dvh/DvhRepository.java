@@ -2,6 +2,11 @@ package no.nav.nom.apps.api.dvh;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.dvh.dto.DvhKobling;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -72,13 +77,15 @@ public class DvhRepository {
         return ressursByNavIdent.values();
     }
 
-    public Collection<DvhKobling> findAllKoblinger() {return koblinger;}
+    public Collection<DvhKobling> findAllKoblinger() {
+        return koblinger;
+    }
 
     public void saveOrgLeder(DvhLeder leder){
         val lederMapping = lederByEnhetNr.get(leder.getOrgEnhetNr());
 
         if(lederMapping == null) {
-            lederByEnhetNr.put(leder.getOrgEnhetNr(), List.of(leder));
+            lederByEnhetNr.put(leder.getOrgEnhetNr(), new LinkedList<>(List.of(leder)));
         }else {
             lederMapping.add(leder);
         }

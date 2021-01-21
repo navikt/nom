@@ -25,6 +25,8 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
                     val ressurs  = dvhRepository.findRessursByRessursId(dvh.getRessursId()).get();
                     return OrganisasjonsenhetsKobling.builder()
                                     .ressurs(ConverterUtils.convert(ressurs))
+                                    .gyldigFom(dvh.getGyldigFom())
+                                    .gyldigTom(dvh.getGyldigTom())
                                     .build();
                 })
                 .collect(Collectors.toUnmodifiableList());

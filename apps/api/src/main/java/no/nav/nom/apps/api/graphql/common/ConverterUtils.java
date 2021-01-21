@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.common;
 
-import no.nav.nom.apps.api.dvh.DvhOrganisasjonsenhet;
-import no.nav.nom.apps.api.dvh.DvhRessurs;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 

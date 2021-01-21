@@ -1,16 +1,16 @@
 package no.nav.nom.apps.api.dvh;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import no.nav.nom.contract.dvh.*;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -23,7 +23,6 @@ import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
@@ -60,15 +59,6 @@ public class DvhStateListener {
                         repository.saveOrganisering(new DvhOrganisering(e.getData()));
                         if (e.getData().hasNonNull("LEDER_RESOURCE_ID")) {
                             repository.saveOrgLeder(new DvhLeder(e.getData()));
-                        }
-                    } else if (e.getType().equals(StillingTabell.TYPE)) {
-                        repository.clearKoblinger();
-                        val node = e.getData();
-                        val arrNode = (ArrayNode) node.get("stilling2nomResult");
-                        for (JsonNode jsonNode : arrNode) {
-                            ObjectNode x = (ObjectNode) jsonNode;
-                            DvhKobling kobling = new DvhKobling(x);
-                            repository.saveKobling(kobling);
                         }
                     } else if (e.getType().equals(Ressurs.TYPE)) {
                         repository.saveRessurs(new DvhRessurs(e.getData()));

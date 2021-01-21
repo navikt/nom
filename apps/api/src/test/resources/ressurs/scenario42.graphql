@@ -1,5 +1,5 @@
 query {
-    ressurs(where: {navIdent: "testNavIdent42"}) {
+    ressurs(where: {navIdent: "testNavIdent2"}) {
         navIdent
         personIdent
         koblinger{

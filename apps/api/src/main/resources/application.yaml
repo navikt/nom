@@ -1,6 +1,15 @@
 app:
   dvh:
     topic: nom.dvhsource-v1
+    baseUrl: ${DVH_STILLINGER_URL}
+
+aad:
+  issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+  clientId: ${AZURE_APP_CLIENT_ID}
+  clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+  jwk: ${AZURE_APP_JWK}
+  grantType: client_credentials
+  dvhScope: ${DVH_AAD_SCOPE}/.default
 
 graphql:
   playground:
