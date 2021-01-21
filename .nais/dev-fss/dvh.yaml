@@ -14,7 +14,7 @@ spec:
     - name: APP_DVH_BASE_URL
       value: https://tdv-u.adeo.no
     - name: ACCEPTED_SUBJECTS
-      value: 17487989-d874-4b22-ab20-3fd7b99785d6
+      value: cb62b1c3-62b7-4e5c-839a-357f117108fb
   envFrom:
     - secret: nom-tdv-cred
   image: {{image}}

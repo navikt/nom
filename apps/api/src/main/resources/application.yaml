@@ -1,7 +1,7 @@
 app:
   dvh:
     topic: nom.dvhsource-v1
-    baseUrl:
+    baseUrl: ${DVH_STILLINGER_URL}
 
 aad:
   issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
