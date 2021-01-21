@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
@@ -19,18 +21,15 @@ public class DvhRestConsumer {
 
     private final AadTokenRepository aadTokenRepository;
     private final DvhRepository dvhRepository;
-    private final WebClient webClient;
+    private final RestTemplate restTemplate;
     private final AppProperties appProperties;
 
     @Scheduled(fixedDelay = ONE_HOUR)
     public void loadKoblingerFromDvh(){
+        val headers = new HttpHeaders();
+        headers.setBearerAuth(aadTokenRepository.getDvhToken());
 
-        val result = webClient.get()
-                .uri(appProperties.getDvh().getBaseUrl()+"/proxy/stillinger")
-                .headers(headers -> headers.setBearerAuth(aadTokenRepository.getDvhToken()))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        val result = restTemplate.exchange(appProperties.getDvh().getBaseUrl()+"/proxy/stillinger", HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
 
         dvhRepository.clearKoblinger();
         val arrNode = (ArrayNode) result.get("stilling2nomResult");

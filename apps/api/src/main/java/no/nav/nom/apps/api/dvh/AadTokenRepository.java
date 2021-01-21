@@ -10,13 +10,11 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.util.Date;
@@ -27,7 +25,8 @@ import java.util.UUID;
 public class AadTokenRepository {
 
     private final AadProperties aadProperties;
-    private final WebClient webClient;
+    private final RestTemplate restTemplate;
+
     private SignedJWT cachedToken;
 
     @SneakyThrows
@@ -48,13 +47,7 @@ public class AadTokenRepository {
         aadRequestMap.add("client_assertion", generateClientAssertionToken());
         aadRequestMap.add("grant_type", aadProperties.getGrantType());
 
-        val result =  webClient.post()
-                .uri(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromMultipartData(aadRequestMap))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
+        val result = restTemplate.exchange(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadRequestMap), JsonNode.class).getBody();
 
         return SignedJWT.parse(result.get("access_token").asText());
     }
