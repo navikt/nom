@@ -7,36 +7,40 @@
     "status": 200,
     "transformers": ["response-template"],
     "jsonBody": {
-      "stilling2nomResult":[
-        {
-          "RESOURCE_ID":"estNavIdent",
-          "FRA_DATO":"2021-01-01",
-          "TIL_DATO":"2099-12-31",
-          "ANSETTELSESTYPE_BESK":"Fast",
-          "PARTTIME_PCT":100,
-          "ORGENHET":"testId",
-          "ORGENHET_BESK":"Værnes, Arbeid- og oppfølging",
-          "ORGENHET_I_BUNN":"1783200",
-          "LEDER_I_BUNN":"199998",
-          "LEDER_PAA_STILLING":"199998",
-          "STILLING_I_BUNN":1.0,
-          "PERMISJON":"JOBBER",
-          "LAST_UPDATE":"2019-11-01T10:49:02.000Z"
-        },
-        {
-          "RESOURCE_ID":"estNavIdent2",
-          "FRA_DATO":"2021-01-01",
-          "TIL_DATO":"2099-12-31",
-          "ANSETTELSESTYPE_BESK":"Fast",
-          "PARTTIME_PCT":100,
-          "ORGENHET":"testId2",
-          "ORGENHET_BESK":"Økonomi Pensjon Utbetaling 2",
-          "ORGENHET_I_BUNN":"5222202",
-          "LEDER_I_BUNN":"199999",
-          "LEDER_PAA_STILLING":"199999",
-          "STILLING_I_BUNN":1.0,
-          "PERMISJON":"JOBBER",
-          "LAST_UPDATE":"2018-10-26T09:26:12.000Z"}]
+      "stilling2nomResponse":{
+        "stilling2nomResult": [
+          {
+            "RESOURCE_ID": "estNavIdent",
+            "FRA_DATO": "2021-01-01",
+            "TIL_DATO": "2099-12-31",
+            "ANSETTELSESTYPE_BESK": "Fast",
+            "PARTTIME_PCT": 100,
+            "ORGENHET": "testId",
+            "ORGENHET_BESK": "Værnes, Arbeid- og oppfølging",
+            "ORGENHET_I_BUNN": "1783200",
+            "LEDER_I_BUNN": "199998",
+            "LEDER_PAA_STILLING": "199998",
+            "STILLING_I_BUNN": 1.0,
+            "PERMISJON": "JOBBER",
+            "LAST_UPDATE": "2019-11-01T10:49:02.000Z"
+          },
+          {
+            "RESOURCE_ID": "estNavIdent2",
+            "FRA_DATO": "2021-01-01",
+            "TIL_DATO": "2099-12-31",
+            "ANSETTELSESTYPE_BESK": "Fast",
+            "PARTTIME_PCT": 100,
+            "ORGENHET": "testId2",
+            "ORGENHET_BESK": "Økonomi Pensjon Utbetaling 2",
+            "ORGENHET_I_BUNN": "5222202",
+            "LEDER_I_BUNN": "199999",
+            "LEDER_PAA_STILLING": "199999",
+            "STILLING_I_BUNN": 1.0,
+            "PERMISJON": "JOBBER",
+            "LAST_UPDATE": "2018-10-26T09:26:12.000Z"
+          }
+        ]
+      }
     },
     "headers": {
       "Content-Type": "application/json"
