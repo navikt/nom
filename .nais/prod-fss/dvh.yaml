@@ -13,6 +13,8 @@ spec:
       value: log-logstash,k8s,kafka
     - name: APP_DVH_BASE_URL
       value: https://tdv-p.adeo.no:9402
+    - name: ACCEPTED_SUBJECTS
+      value: 476401e7-5eec-4fd8-8390-a89c6f14cd08
   envFrom:
     - secret: nom-tdv-cred
   image: {{image}}
