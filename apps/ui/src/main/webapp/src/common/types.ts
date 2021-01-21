@@ -1,22 +1,27 @@
-export interface OrgEnhetFelter{
-    enhetNr: string;
-    enhetNavn: string;
-    enhetType: string;
+export interface OrgEnhetFelter {
+  enhetNr: string;
+  enhetNavn: string;
+  enhetType: string;
 }
 
-export interface OrgEnhetKoblinger{
-    sti: OrgEnhetFelter[];
-    underEnheter: OrgEnhetFelter[];
+export interface OrgEnhetKoblinger {
+  sti: OrgEnhetFelter[];
+  underEnheter: OrgEnhetFelter[];
 }
 
-export interface OrgEnhetData{
-    data: OrgEnhetFelter;
-    koblinger: OrgEnhetKoblinger;
+export interface OrgEnhetData {
+  data: OrgEnhetFelter;
+  koblinger: OrgEnhetKoblinger;
 }
 
-export interface OrganisasjonsEnhet{
-    id: string;
-    navn: string;
-    gyldigFom: string;
-    gyldigTom: string;
+export interface OrganisasjonsEnhet {
+  id: string;
+  navn: string;
+  gyldigFom: string;
+  gyldigTom: string;
+}
+
+export interface Ressurs {
+  id: string;
+  pnr: string;
 }

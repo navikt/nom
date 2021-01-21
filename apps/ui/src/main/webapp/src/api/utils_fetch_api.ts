@@ -1,59 +1,51 @@
-export const FETCH_CONFIG_GET: RequestInit = {
-  method: "GET",
-  mode: "cors",
-  cache: "no-cache",
-  credentials: "same-origin",
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
+import fetch_configs from "./utils_fetch_configs"
 
-export const GRAPHQL_FETCH_CONFIG_POST: RequestInit = {
-  method: "POST",
-  mode: "cors",
-  cache: "no-cache",
-  credentials: "same-origin",
-  headers: {
-    "Content-Type": "application/graphql",
-    "X-XSRF-TOKEN": (function () {
-      const row = document.cookie
-        .split(";")
-        .find((row) => row.startsWith("XSRF-TOKEN"));
-      if (row) {
-        return row.split("=")[1];
-      } else {
-        console.error("Missing XSRF cookie");
-        return "";
-      }
-    })(),
-  },
-};
+// export async function startApiGet(
+//   url: string,
+//   abortSignal: AbortSignal
+// ): Promise<Response> {
+//   try {
+//     const response = await fetch(url, {
+//       ...fetch_configs.GET_SIMPLE,
+//       signal: abortSignal,
+//     });
+//     return response;
+//   } catch (err) {
+//     console.error(err);
+//     throw err;
+//   }
+// }
 
-export async function startApiGet(
-  url: string,
-  abortSignal: AbortSignal
-): Promise<Response> {
-  try {
-    const response = await fetch(url, {
-      ...FETCH_CONFIG_GET,
-      signal: abortSignal,
-    });
-    return response;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
+// export async function startApiPost<T>(
+//   url: string,
+//   abortSignal: AbortSignal,
+//   data: T
+// ): Promise<Response> {
+//   try {
+//     const body: any = data;
+//     const response = await fetch(url, {
+//       ...fetch_configs.POST_GRAPHQL,
+//       signal: abortSignal,
+//       body: body,
+//     });
+//     return response;
+//   } catch (err) {
+//     console.error(err);
+//     throw err;
+//   }
+// }
 
-export async function startApiPost<T>(
+
+export async function performFetch<T>(
   url: string,
   abortSignal: AbortSignal,
-  data: T
-): Promise<Response> {
+  fetchConfig: RequestInit,
+  data?: T
+): Promise<Response>{
   try {
     const body: any = data;
     const response = await fetch(url, {
-      ...GRAPHQL_FETCH_CONFIG_POST,
+      ...fetchConfig,
       signal: abortSignal,
       body: body,
     });
@@ -63,6 +55,33 @@ export async function startApiPost<T>(
     throw err;
   }
 }
+
+
+export async function performFetch2<TI,TO>(
+  url: string,
+  abortSignal: AbortSignal,
+  fetchConfig: RequestInit,
+  data?: TI
+): Promise<TO>{
+  try {
+    const body: any = data;
+    const apiGetres = await fetch(url, {
+      ...fetchConfig,
+      signal: abortSignal,
+      body: body,
+    });
+    const httpOkRes = await handleHttpResponse(apiGetres);
+    const jsonOkRes = await validateJson(httpOkRes);
+    const graphqlOkRes = await validateGraphql(jsonOkRes) as GraphqlResponse;
+    return graphqlOkRes.data as TO;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+
+}
+
+
 
 export async function handleHttpResponse(
   response: Response
@@ -102,4 +121,10 @@ export async function validateGraphql(json: any): Promise<Record<string, any>> {
   } else {
     return json;
   }
+}
+
+
+interface GraphqlResponse{
+  data: any
+  errors: any
 }

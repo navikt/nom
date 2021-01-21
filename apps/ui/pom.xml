@@ -54,6 +54,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
             <!-- Pga spring-cloud-contract-wiremock kjøres opp samtidig som context, må vi ha denne for å
             starte wiremock FØR spring. Dette er fordi det gjøres kall mot "AzureAD" i bootstrap -->
             <groupId>com.thomaskasene.wiremock</groupId>

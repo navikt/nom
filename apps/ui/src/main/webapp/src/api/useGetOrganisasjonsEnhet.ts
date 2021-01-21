@@ -4,10 +4,11 @@ import { OrganisasjonsEnhet } from "../common/types";
 import { lookups, LookupState } from "./utils_api_hook";
 import {
   handleHttpResponse,
-  startApiPost,
+  performFetch as doWrappedFetch,
   validateGraphql,
   validateJson,
 } from "./utils_fetch_api";
+import fetchConfig from "./utils_fetch_configs";
 
 function createQuery(id: string | null): string {
   const whereClause = id ? `where: {id: "${id}"}` : "where: null";
@@ -17,6 +18,13 @@ function createQuery(id: string | null): string {
             navn
             gyldigFom
             gyldigTom
+            organiseringer {
+              retning
+              organisasjonsenhet{
+                navn
+                id
+              }
+            }
         }
     }`;
 }
@@ -41,9 +49,10 @@ async function doFetch(
   setOut: CallableFunction
 ): Promise<void> {
   try {
-    const apiGetres = await startApiPost(
+    const apiGetres = await doWrappedFetch(
       graphqlApiUrl,
       signal,
+      fetchConfig.POST_GRAPHQL,
       createQuery(id)
     );
     const httpOkRes = await handleHttpResponse(apiGetres);

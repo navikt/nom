@@ -17,6 +17,6 @@ class WebConfig implements WebMvcConfigurer {
         // map /xxxxx osv til /index.html, altså single directory
         registry.addViewController("/{x:[\\w\\-]+}").setViewName("forward:/index.html");
         // map /xxxxx/xxxx o.l. ekskludert api og alle . extensions slik som .js, .css o.l..
-        registry.addViewController("/{x:^(?!api$).*$}/**/{y:[\\w\\-]+}").setViewName("forward:/index.html");//
+        registry.addViewController("{x:^(?!api$).*$}/**/{y:[\\w\\-]+}").setViewName("forward:/index.html");//
     }
 }
