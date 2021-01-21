@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -40,14 +42,17 @@ public class AadTokenRepository {
 
     @SneakyThrows
     private SignedJWT fetchToken(){
-        val aadRequestMap = new LinkedMultiValueMap<String, String>();
-        aadRequestMap.add("scope", aadProperties.getDvhScope());
-        aadRequestMap.add("client_id", aadProperties.getClientId());
-        aadRequestMap.add("client_assertion_type", aadProperties.getClientAssertionType());
-        aadRequestMap.add("client_assertion", generateClientAssertionToken());
-        aadRequestMap.add("grant_type", aadProperties.getGrantType());
+        val aadHeaders = new HttpHeaders();
+        aadHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        val result = restTemplate.exchange(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadRequestMap), JsonNode.class).getBody();
+        val aadBodyMap = new LinkedMultiValueMap<String, String>();
+        aadBodyMap.add("scope", aadProperties.getDvhScope());
+        aadBodyMap.add("client_id", aadProperties.getClientId());
+        aadBodyMap.add("client_assertion_type", aadProperties.getClientAssertionType());
+        aadBodyMap.add("client_assertion", generateClientAssertionToken());
+        aadBodyMap.add("grant_type", aadProperties.getGrantType());
+
+        val result = restTemplate.exchange(aadProperties.getIssuerBaseUrl()+"/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
 
         return SignedJWT.parse(result.get("access_token").asText());
     }
