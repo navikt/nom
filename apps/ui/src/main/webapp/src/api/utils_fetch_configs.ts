@@ -30,31 +30,30 @@ const POST_GRAPHQL: RequestInit = {
 };
 
 function postGraphQl(query: string): RequestInit {
-  let out : RequestInit = {
+  const out: RequestInit = {
     method: "POST",
     mode: "cors",
     cache: "no-cache",
     credentials: "same-origin",
-  }
+  };
   out.headers = {
-      "Content-Type": "application/graphql",
-      "X-XSRF-TOKEN": (function (): string {
-        const row = document.cookie
-          .split(";")
-          .find((row) => row.startsWith("XSRF-TOKEN"));
-        if (row) {
-          return row.split("=")[1];
-        } else {
-          console.error("Missing XSRF cookie");
-          return "";
-        }
-        
-      })()
-    }
-    
-    out.body = query
+    "Content-Type": "application/graphql",
+    "X-XSRF-TOKEN": (function (): string {
+      const row = document.cookie
+        .split(";")
+        .find((row) => row.startsWith("XSRF-TOKEN"));
+      if (row) {
+        return row.split("=")[1];
+      } else {
+        console.error("Missing XSRF cookie");
+        return "";
+      }
+    })(),
+  };
 
-  return out // as RequestInit;
+  out.body = query;
+
+  return out; // as RequestInit;
 }
 
 export default {

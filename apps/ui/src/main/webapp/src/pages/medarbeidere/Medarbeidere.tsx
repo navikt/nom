@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import useFetchRessurs from "../../api/useFetchRessurs";
 import NomUiHeader from "../../components/header/NomUiHeader";
 
-export default function Medarbeidere(props: any) {
+export default function Medarbeidere(props: any): JSX.Element {
   const { id } = useParams<any>();
   const [res, refresh] = useFetchRessurs(id);
 
