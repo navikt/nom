@@ -25,8 +25,7 @@ spec:
       tenant: trygdeetaten.no
   webproxy: true
   ingresses:
-    - https://nom-dvh.nais.preprod.local
-    - https://nom-dvh.dev.adeo.no
+    - https://nom-dvh.dev.intern.nav.no
     - https://nom-dvh.dev-fss-pub.nais.io
   replicas:
     min: 1

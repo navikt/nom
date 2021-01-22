@@ -24,7 +24,7 @@ spec:
       enabled: true
   webproxy: true
   ingresses:
-    - https://nom-dvh.nais.adeo.no
+    - https://nom-dvh.intern.nav.no
     - https://nom-dvh.prod-fss-pub.nais.io
   replicas:
     min: 1
