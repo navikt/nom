@@ -7,7 +7,6 @@
     "status": 200,
     "transformers": ["response-template"],
     "jsonBody": {
-      "stilling2nomResponse":{
         "stilling2nomResult": [
           {
             "RESOURCE_ID": "estNavIdent",
@@ -40,7 +39,6 @@
             "LAST_UPDATE": "2018-10-26T09:26:12.000Z"
           }
         ]
-      }
     },
     "headers": {
       "Content-Type": "application/json"

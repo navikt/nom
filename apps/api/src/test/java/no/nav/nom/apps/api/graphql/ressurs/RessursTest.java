@@ -72,11 +72,12 @@ public class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        dvhRestConsumer.loadKoblingerFromDvh();
+
         val inputEnhet = enhetTestTemplate("2", null, 0, null);
         val inputRessurs = ressursTestTemplate("2");
 
         kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs);
+        dvhRestConsumer.loadKoblingerFromDvh();
 
         val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
         assertThat(response, hasNoErrors());

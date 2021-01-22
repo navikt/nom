@@ -95,14 +95,14 @@ public class DvhRepository {
         val organisasjonsenhet = findEnhetByNummer(kobling.getAgressoId()).orElse(null);
         val dvhRessurs = findRessursByRessursId(kobling.getRessursId()).orElse(null);
         if (organisasjonsenhet == null && dvhRessurs == null){
-            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Enhet og ressurs mangler");
+            System.out.println(kobling.getAgressoId()+"\t\t\t"+kobling.getRessursId()+"\t\t\t"+"Enhet og ressurs mangler");
         }
         else if (organisasjonsenhet == null){
-            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Enhet mangler");
+            System.out.println(kobling.getAgressoId()+"\t\t\t"+kobling.getRessursId()+"\t\t\t"+"Enhet mangler");
 
         }
         else if (dvhRessurs == null){
-            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Ressurs mangler");
+            System.out.println(kobling.getAgressoId()+"\t\t\t"+kobling.getRessursId()+"\t\t\t"+"Ressurs mangler");
         }
         else {
             koblinger.add(kobling);

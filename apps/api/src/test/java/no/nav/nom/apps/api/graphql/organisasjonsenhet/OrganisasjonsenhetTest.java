@@ -122,10 +122,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        dvhRestConsumer.loadKoblingerFromDvh();
         val inputEnhet = enhetTestTemplate("", null, 0, null);
         val inputRessurs = ressursTestTemplate("");
         kafkaUtils.sendFromKafkaMock(inputEnhet, inputRessurs);
+        dvhRestConsumer.loadKoblingerFromDvh();
 
         val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
         assertThat(response, hasNoErrors());
