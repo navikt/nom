@@ -35,9 +35,7 @@ import static no.nav.nom.libs.utils.common.metrics.MetricUtils.KEY;
 @Component
 @RequiredArgsConstructor
 public class DvhStateListener {
-    public static final String CACHE = "cache-source";
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final ApplicationEventPublisher appEventPublisher;
     private final AppProperties properties;
     private final DvhRepository repository;
     private final ObjectMapper objectMapper;
@@ -82,9 +80,11 @@ public class DvhStateListener {
 
             if (complete) {
                 initialLoadComplete.set(true);
-                AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.CORRECT);
-                log.info("State restored from Kafka, changing to LivenessState.CORRECT. Total records persisted: {}", repository.enhetCount());
             }
         }
+    }
+
+    public boolean getInitialLoadStatus(){
+        return initialLoadComplete.get();
     }
 }
