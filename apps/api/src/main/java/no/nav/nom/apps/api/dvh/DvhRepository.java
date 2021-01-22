@@ -92,7 +92,21 @@ public class DvhRepository {
     }
 
     public void saveKobling(DvhKobling kobling){
-        koblinger.add(kobling);
+        val organisasjonsenhet = findEnhetByNummer(kobling.getAgressoId()).orElse(null);
+        val dvhRessurs = findRessursByRessursId(kobling.getRessursId()).orElse(null);
+        if (organisasjonsenhet == null && dvhRessurs == null){
+            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Enhet og ressurs mangler");
+        }
+        else if (organisasjonsenhet == null){
+            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Enhet mangler");
+
+        }
+        else if (dvhRessurs == null){
+            System.out.println(kobling.getAgressoId()+"\t"+kobling.getRessursId()+"\t"+"Ressurs mangler");
+        }
+        else {
+            koblinger.add(kobling);
+        }
     }
 
     public List<DvhKobling> getKoblingerForEnhet(String enhetId){

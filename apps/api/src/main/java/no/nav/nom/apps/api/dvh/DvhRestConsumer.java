@@ -32,7 +32,7 @@ public class DvhRestConsumer {
         val result = restTemplate.exchange(appProperties.getDvh().getBaseUrl()+"/proxy/stillinger", HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
 
         dvhRepository.clearKoblinger();
-        val arrNode = (ArrayNode) result.get("stilling2nomResponse").get("stilling2nomResult");
+        val arrNode = (ArrayNode) result.get("stilling2nomResult");
         for (JsonNode jsonNode : arrNode) {
             ObjectNode x = (ObjectNode) jsonNode;
             DvhKobling kobling = new DvhKobling(x);
