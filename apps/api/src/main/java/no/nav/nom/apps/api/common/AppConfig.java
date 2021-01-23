@@ -23,9 +23,9 @@ public class AppConfig {
     @ConditionalOnMissingBean
     public WebClient webClient(){ return WebClient.create(); }
 
-    @Value( "${proxy.host}" )
+    @Value( "${proxy.host:DEFAULT_NONE}" )
     private String proxyHost;
-    @Value( "${proxy.port}" )
+    @Value( "${proxy.port:0}" )
     private Integer proxyPort;
 
     @Bean
