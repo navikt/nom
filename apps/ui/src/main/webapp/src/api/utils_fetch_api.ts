@@ -1,40 +1,5 @@
 import fetch_configs from "./utils_fetch_configs";
 
-// export async function startApiGet(
-//   url: string,
-//   abortSignal: AbortSignal
-// ): Promise<Response> {
-//   try {
-//     const response = await fetch(url, {
-//       ...fetch_configs.GET_SIMPLE,
-//       signal: abortSignal,
-//     });
-//     return response;
-//   } catch (err) {
-//     console.error(err);
-//     throw err;
-//   }
-// }
-
-// export async function startApiPost<T>(
-//   url: string,
-//   abortSignal: AbortSignal,
-//   data: T
-// ): Promise<Response> {
-//   try {
-//     const body: any = data;
-//     const response = await fetch(url, {
-//       ...fetch_configs.POST_GRAPHQL,
-//       signal: abortSignal,
-//       body: body,
-//     });
-//     return response;
-//   } catch (err) {
-//     console.error(err);
-//     throw err;
-//   }
-// }
-
 export async function validateJson(
   response: Response
 ): Promise<Record<string, any>> {
@@ -89,29 +54,6 @@ export async function performFetch<T>(
       body: body,
     });
     return response;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
-
-export async function performFetch2<TI, TO>(
-  url: string,
-  abortSignal: AbortSignal,
-  fetchConfig: RequestInit,
-  data?: TI
-): Promise<TO> {
-  try {
-    const body: any = data;
-    const apiGetres = await fetch(url, {
-      ...fetchConfig,
-      signal: abortSignal,
-      body: body,
-    });
-    const httpOkRes = await handleHttpResponse(apiGetres);
-    const jsonOkRes = await validateJson(httpOkRes);
-    const graphqlOkRes = (await validateGraphql(jsonOkRes)) as GraphqlResponse;
-    return graphqlOkRes.data as TO;
   } catch (err) {
     console.error(err);
     throw err;

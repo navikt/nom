@@ -8,6 +8,8 @@ import Organisasjonsenheter from "./pages/organisasjonsenheter/Organisasjonsenhe
 import Root from "./pages/root/Root";
 import * as serviceWorker from "./serviceWorker";
 
+import "./index.css";
+
 function AppRouter(): JSX.Element {
   return (
     <Switch>

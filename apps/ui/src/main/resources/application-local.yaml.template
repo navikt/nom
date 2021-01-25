@@ -1,0 +1,11 @@
+AZURE_APP_CLIENT_ID: <dummy - Se dokumentasjon>
+AZURE_APP_WELL_KNOWN_URL: <dummy - Se dokumentasjon>
+AZURE_APP_CERTIFICATE_KEY_ID: <dummy - Se dokumentasjon>
+AZURE_APP_TENANT_ID: <dummy - Se dokumentasjon>
+AZURE_APP_CLIENT_SECRET: <dummy - Se dokumentasjon>
+NOM_API_CLIENT_ID: <dummy - Se dokumentasjon>
+
+app:
+  nom-api:
+    base-url: http://localhost:8081 # kubectl port forward til nom-api i miljø
+    graphQL-url: ${app.nom-api.base-url}/graphql

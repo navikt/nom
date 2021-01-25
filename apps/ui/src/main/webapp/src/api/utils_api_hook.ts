@@ -1,4 +1,4 @@
-export type LookupState<T> =
+export type LookupState =
   | {
       lookupState: "WAITING";
     }
@@ -11,23 +11,27 @@ export type LookupState<T> =
     }
   | {
       lookupState: "RESOLVED";
-      result: T;
+      result: any;
     };
 
 export const lookups = {
-  createError: function <T>(msg: string): LookupState<T> {
+  createError: function (msg: string): LookupState {
     return { lookupState: "ERROR", error: new Error(msg) };
   },
 
-  createResolved: function <T>(result: T): LookupState<T> {
-    return { lookupState: "RESOLVED", result: result };
+  createResolved: function (
+    result: any,
+    subNav?: (obj: any) => any
+  ): LookupState {
+    const tmp = subNav ? subNav(result) : result;
+    return { lookupState: "RESOLVED", result: tmp };
   },
 
-  createWaiting: function createLookupWaiting<T>(): LookupState<T> {
+  createWaiting: function createLookupWaiting(): LookupState {
     return { lookupState: "WAITING" };
   },
 
-  createPending: function <T>(): LookupState<T> {
+  createPending: function (): LookupState {
     return { lookupState: "PENDING" };
   },
 };

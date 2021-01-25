@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import NomLogin from "./NomLogin";
 import NomUiHomeLink from "./NomUiHomeLink";
 
-export default function NomUiHeader(props: any): JSX.Element{
+export default function NomUiHeader(props: any): JSX.Element {
   return (
     <div className="NomUiHeader">
       <div className="NomUiHeader__banner">
