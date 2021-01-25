@@ -1,12 +1,13 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import useGetOrganisasjonsEnhet from "../../api/useGetOrganisasjonsEnhet";
+import { useGetOrganisasjonsEnhet } from "../../api/graphql_fetch_hooks";
 import NomUiHeader from "../../components/header/NomUiHeader";
 
 export default function Organisasjonsenheter(props: any): JSX.Element {
   const { id } = useParams<any>();
 
   const [res, refresh] = useGetOrganisasjonsEnhet(id);
+
 
   let out: any = <div></div>;
 

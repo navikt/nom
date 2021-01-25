@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router";
-import useFetchRessurs from "../../api/useFetchRessurs";
+import { useFetchRessurs } from "../../api/graphql_fetch_hooks";
 import NomUiHeader from "../../components/header/NomUiHeader";
 
 export default function Medarbeidere(props: any): JSX.Element {

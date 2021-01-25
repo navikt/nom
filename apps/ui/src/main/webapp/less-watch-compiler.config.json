@@ -1,6 +1,6 @@
 {
   "watchFolder": "src",
-  "outputFolder": "public",
+  "outputFolder": "src",
   "mainFile": "index.less",
   "plugins": "npm-import=\"prefix=~\""
 }

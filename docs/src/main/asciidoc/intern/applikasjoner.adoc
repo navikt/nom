@@ -37,7 +37,18 @@ Proxy benyttes for å støtte accessPolicies mellom applikasjoner, pluss at man 
 
 === Lokal utvikling mot miljø
 
-Opprett filen `application-local.yaml` og legg inn client-id, client-secret og tenant.
+* Kopier teksten i filen `apps/ui/src/main/resources/application-local-template.yaml` til en ny fil `application-local.yaml` i samme mappe
+* Sett inn oppdaterte AAD credentials i `application-local.yaml`. Hentes i clusteret, gjerne med et script.
+* Start ui lokalt, med profiles `log-console,local,dev`
+* start port forwarding mot nom-api med `kubectl port-forward $podarg -n nom 8081:8080`, hvor `$podarg` er på formen
+`pods/nom-api-xxxxxxxxxx-xxxxx` og må være peke på en aktiv pod i dev-gcp.
+** her kan det være lurt å pakke inn port forwarding i en loop, da den ellers må restartes manuelt med jamne mellomrom.
+* kjør `npm install` i apps/ui/src/main/webapp/
+* kjør `npm run build:watchall` i samme mappe.
+* Gå til localhost:8080 i nettleser
+* Manuell refresh i nettleser skal nå ta inn endringer i react webappen.
+
+
 Se fulle navn i hva som benyttes i vanlig property filen til nom-ui (altså som kommer fra Kubernetes i miljø).
 Aktiver så profile local i IntelliJ og kjør eventuelt `port-forward` (se annet kapittel for kommando, søk i dokumentet) for å få tiltang til ressurser i dev.
 

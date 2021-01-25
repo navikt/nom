@@ -5,8 +5,7 @@ export default function About(props: any): JSX.Element {
   return (
     <div className="About">
       <NomUiHeader />
-      About page here. TODO?
-      Version?
+      About page here. TODO? Version?
     </div>
   );
 }
