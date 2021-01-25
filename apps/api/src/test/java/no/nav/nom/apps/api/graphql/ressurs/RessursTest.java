@@ -72,7 +72,6 @@ public class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-
         val inputEnhet = enhetTestTemplate("2", null, 0, null);
         val inputRessurs = ressursTestTemplate("2");
 

@@ -1,0 +1,15 @@
+aad:
+  issuerBaseUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
+  clientId: <dummy - Se README.MD>
+  clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+  jwk: <dummy - Se README.MD>
+  grantType: client_credentials
+  dvhScope: <dummy - Se README.MD>
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+proxy:
+  host: 127.0.0.1
+  port: 8866
