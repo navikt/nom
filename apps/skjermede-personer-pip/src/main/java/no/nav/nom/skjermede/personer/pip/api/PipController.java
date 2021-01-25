@@ -24,6 +24,7 @@ public class PipController {
     private final String MISSING_PERSONIDENT = "Personident mangler";
     private final Cache cache;
 
+    @Deprecated
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Bad Request"),
