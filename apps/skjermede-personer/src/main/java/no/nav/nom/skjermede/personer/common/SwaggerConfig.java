@@ -37,9 +37,9 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.basePackage("no.nav.nom.skjermede.personer.foresporsel.api.v1"))
                 .build()
                 .useDefaultResponseMessages(false)
-                .groupName("Forespørsel API")
+                .groupName("Foresporsel API")
                 .tags(new Tag("Forespørsel", "Tilrettelegger oppreting, oppslag og sletting av skjermingsforespørsler"))
-                .apiInfo(skjermedePersonerApiInfo());
+                .apiInfo(foresporselApiInfo());
     }
 
     private ApiInfo skjermedePersonerApiInfo() {
@@ -56,7 +56,7 @@ public class SwaggerConfig {
 
     private ApiInfo foresporselApiInfo() {
         return new ApiInfoBuilder()
-                .title("Foresporsel API")
+                .title("Forespørsel API")
                 .description("Beskrivelse kommer ...")
                 .version("v1")
                 .contact(new Contact(
