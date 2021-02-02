@@ -27,6 +27,8 @@ public class RessursKoblingResolver implements GraphQLResolver<Ressurs>{
                     val orgenhet = dvhRepository.findEnhetByNummer(dvh.getAgressoId()).get();
                     return RessursKobling.builder()
                                     .organisasjonsenhet(ConverterUtils.convert(orgenhet))
+                                    .gyldigFom(dvh.getGyldigFom())
+                                    .gyldigTom(dvh.getGyldigTom())
                                     .build();
                 })
                 .collect(Collectors.toUnmodifiableList());

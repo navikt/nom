@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/json/Hr/Nom/Nom_Ansatte?in_sekvensnummer_fra=0&in_sekvensnummer_til=3"
+    "url": "/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1"
   },
   "response": {
     "status": 200,

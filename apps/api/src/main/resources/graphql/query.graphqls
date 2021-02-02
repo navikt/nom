@@ -53,3 +53,8 @@ type RessursKobling {
     gyldigFom: Date!
     gyldigTom: Date
 }
+
+enum Retning {
+    over,
+    under,
+}

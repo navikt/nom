@@ -19,17 +19,17 @@ public class AppProperties {
         String topic;
         String tdvUsername;
         String tdvPassword;
-        Enhet enhet;
+
+        @Deprecated
         Ressurs ressurs;
+
         Stilling stilling;
+        Ressurser ressurser;
+        Enheter enheter;
     }
 
     @Value
-    public static class Enhet {
-        String url;
-    }
-
-    @Value
+    @Deprecated()
     public static class Ressurs {
         String url;
         Long chunkSize;
@@ -37,6 +37,17 @@ public class AppProperties {
 
     @Value
     public static class Stilling {
+        String url;
+    }
+
+    @Value
+    public static class Ressurser {
+        String url;
+        Integer bucketCount;
+    }
+
+    @Value
+    public static class Enheter {
         String url;
     }
 }

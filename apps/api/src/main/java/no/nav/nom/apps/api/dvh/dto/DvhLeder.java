@@ -10,7 +10,7 @@ public class DvhLeder {
     private String orgEnhetNr;
 
     public DvhLeder(JsonNode node) {
-        this.ressursId = node.get("LEDER_RESOURCE_ID").asText();
-        this.orgEnhetNr = node.get("ORGNODE_KODE").asText();
+        this.ressursId = node.get("leder_resource_id").asText();
+        this.orgEnhetNr = node.get("orgnode_kode").asText();
     }
 }

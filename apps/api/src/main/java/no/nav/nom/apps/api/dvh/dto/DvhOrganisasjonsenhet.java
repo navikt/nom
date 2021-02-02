@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
-import lombok.val;
 
 import java.time.LocalDate;
 
@@ -14,10 +13,13 @@ public class DvhOrganisasjonsenhet {
     private LocalDate gyldigTom;
 
     public DvhOrganisasjonsenhet(JsonNode node) {
-        this.nummer = node.get("ORGNODE_KODE").asText();
-        this.navn = node.get("ORGNODE_NAVN").asText();
-        this.gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA").asText());
-        val gyldigTomText = node.get("GYLDIG_TIL");
-        this.gyldigTom = gyldigTomText != null ? LocalDate.parse(gyldigTomText.asText()) : null;
+        this.nummer = node.get("orgnode_kode").asText();
+        this.navn = node.get("orgnode_navn").asText();
+        gyldigFom = LocalDate.now().minusDays(1);
+        gyldigTom = null;
+
+        //this.gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA").asText());
+        //val gyldigTomText = node.get("GYLDIG_TIL");
+        //this.gyldigTom = gyldigTomText != null ? LocalDate.parse(gyldigTomText.asText()) : null;
     }
 }

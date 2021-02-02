@@ -45,25 +45,8 @@ public class DvhStateListener {
     public void onMessage(ConsumerRecords<String, String> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false)
                 .map(this::convert)
-                .filter(e -> {
-                    if (e.getType().equals(Enhet.TYPE)) {
-                        return e.getData().get("ORGNODE_TYPE").asText().equals("NAVENHET");
-                    }
-                    return true;
-                })
-                .forEach(e -> {
-                    if (e.getType().equals(Enhet.TYPE)) {
-                        repository.saveEnhet(new DvhOrganisasjonsenhet(e.getData()));
-                        repository.saveOrganisering(new DvhOrganisering(e.getData()));
-                        if (e.getData().hasNonNull("LEDER_RESOURCE_ID")) {
-                            repository.saveOrgLeder(new DvhLeder(e.getData()));
-                        }
-                    } else if (e.getType().equals(Ressurs.TYPE)) {
-                        repository.saveRessurs(new DvhRessurs(e.getData()));
-                    } else {
-                        throw new IllegalStateException("type " + e.getType() + " not supported ");
-                    }
-                });
+                .filter(e -> e.getType().equals(Ressurs.TYPE))
+                .forEach(e -> repository.saveRessurs(new DvhRessurs(e.getData())));
 
         verifyUpToDate(consumer);
     }

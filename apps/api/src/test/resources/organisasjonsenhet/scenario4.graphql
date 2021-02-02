@@ -1,5 +1,5 @@
 query {
-    organisasjonsenhet(where: {id: "testId"}) {
+    organisasjonsenhet(where: {id: "testId1"}) {
         id
         leder{
             ressurs{

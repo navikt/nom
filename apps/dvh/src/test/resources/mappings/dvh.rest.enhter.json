@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/json/Hr/Nom/NOM_HRORG_HIEARKI_PARAM?in_sekvens_fra=1337"
+    "url": "/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1"
   },
   "response": {
     "status": 200,

@@ -31,6 +31,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Deprecated
 class RessursDvhTask {
     private final long ONE_HOUR = 60 * 60 * 1000;
     private final long FIVE_MINS = 5 * 60 * 1000;

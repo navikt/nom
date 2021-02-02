@@ -21,9 +21,8 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Organisering>> organiseringer(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        val dvhOrganiseringer = dvhRepository.getOrganiseringer().stream()
-                .filter(e -> orgEnhet.getId().equals(e.getOverenhetNummer()) || orgEnhet.getId().equals(e.getUnderenhetNummer()))
-                .map(e -> convert(e, orgEnhet))
+        val dvhOrganiseringer = dvhRepository.findOrganiseringerByEnhet(orgEnhet.getId()).stream()
+                .map(o -> convert(o, orgEnhet))
                 .collect(toUnmodifiableList());
 
         return DataFetcherResult.<List<Organisering>>newResult()
