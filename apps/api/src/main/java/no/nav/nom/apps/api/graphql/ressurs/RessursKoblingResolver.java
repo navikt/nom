@@ -21,10 +21,10 @@ public class RessursKoblingResolver implements GraphQLResolver<Ressurs>{
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<RessursKobling>> koblinger(Ressurs ressurs, DataFetchingEnvironment env) {
-        final List<RessursKobling> result = dvhRepository.getKoblingerForRessurs(ressurs.getNavIdent().substring(1))
+        final List<RessursKobling> result = dvhRepository.getKoblingerByRessursId(ressurs.getNavIdent().substring(1))
                 .stream()
                 .map(dvh -> {
-                    val orgenhet = dvhRepository.findEnhetByNummer(dvh.getAgressoId()).get();
+                    val orgenhet = dvhRepository.getEnhetByAgressoId(dvh.getAgressoId()).get();
                     return RessursKobling.builder()
                                     .organisasjonsenhet(ConverterUtils.convert(orgenhet))
                                     .gyldigFom(dvh.getGyldigFom())

@@ -21,10 +21,10 @@ public class LederResolver implements GraphQLResolver<Organisasjonsenhet> {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<OrganisasjonsenhetsLeder>> leder(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        val lederRessurser = dvhRepository.findLederByEnhetNr(orgEnhet.getId()).stream()
+        val lederRessurser = dvhRepository.getLederByAgressoId(orgEnhet.getAgressoId()).stream()
                 .map(l -> OrganisasjonsenhetsLeder.builder()
                         .ressurs(
-                            dvhRepository.findRessursByRessursId(l.getRessursId())
+                            dvhRepository.getRessursByRessursId(l.getRessursId())
                             .map(ConverterUtils::convert)
                             .orElseThrow()
                         )

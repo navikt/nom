@@ -23,10 +23,10 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     public DataFetcherResult<List<Organisasjonsenhet>> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
         if (objectNode == null) {
             return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
-                    .data(dvhRepository.findAllEnheter().stream().map(ConverterUtils::convert).collect(Collectors.toList()))
+                    .data(dvhRepository.getAllEnheter().stream().map(ConverterUtils::convert).collect(Collectors.toList()))
                     .build();
         }
-        val result = dvhRepository.findEnhetByNummer(objectNode.findValue("id").asText())
+        val result = dvhRepository.getEnhetByAgressoId(objectNode.findValue("agressoId").asText())
                 .map(ConverterUtils::convert)
                 .map(List::of)
                 .orElse(Collections.emptyList());

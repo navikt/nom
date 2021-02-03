@@ -81,7 +81,7 @@ public class RessursTest extends RessursTestBase {
         assertThat(response, hasNoErrors());
 
         val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
-        val actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("id").asText();
+        val actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
         assertEquals("testId2", actualOrganisasjonsEnhetId);
     }
 

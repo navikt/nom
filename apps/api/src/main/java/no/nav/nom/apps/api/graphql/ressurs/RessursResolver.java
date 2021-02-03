@@ -24,16 +24,16 @@ class RessursResolver implements GraphQLQueryResolver {
 
         if (objectNode == null) {
             return DataFetcherResult.<List<Ressurs>>newResult()
-                    .data(dvhRepository.findAllRessurser().stream().map(ConverterUtils::convert).collect(Collectors.toUnmodifiableList()))
+                    .data(dvhRepository.getAllRessurser().stream().map(ConverterUtils::convert).collect(Collectors.toUnmodifiableList()))
                     .build();
         }
 
         val result = objectNode.findValue("navIdent") != null ?
-                            dvhRepository.findRessursByNavIdent(objectNode.findValue("navIdent").asText())
+                            dvhRepository.getRessursByNavIdent(objectNode.findValue("navIdent").asText())
                                     .map(ConverterUtils::convert)
                                     .map(List::of)
                                     .orElse(Collections.emptyList()) :
-                            dvhRepository.findByPersonIdent(objectNode.findValue("personIdent").asText())
+                            dvhRepository.getRessursByPersonIdent(objectNode.findValue("personIdent").asText())
                                     .map(ConverterUtils::convert)
                                     .map(List::of)
                                     .orElse(Collections.emptyList());

@@ -1,8 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +61,7 @@ public class DvhRestConsumer {
     }
 
     private void loadKoblingerFromDvh(){
-        val jsonStillinger = postDvh("/proxy/stillinger");
+        val jsonStillinger = dvhExchange("/proxy/stillinger");
         val koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
                 .map(DvhKobling::new)
@@ -73,7 +71,7 @@ public class DvhRestConsumer {
     }
 
     private void loadOrgenhetFromDvh(){
-        val jsonOrgenheter = postDvh("/proxy/enheter");
+        val jsonOrgenheter = dvhExchange("/proxy/enheter");
         val orgenheter = new HashMap<String, DvhOrganisasjonsenhet>(1000);
         val ledere = new HashMap<String, List<DvhLeder>>(1000);
         val organiseringerByEnhet = new ConcurrentHashMap<String, List<DvhOrganisering>>(1000);
@@ -82,7 +80,7 @@ public class DvhRestConsumer {
                 .forEach(e -> {
                     if(validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
-                        orgenheter.put(orgenhet.getNummer(), orgenhet);
+                        orgenheter.put(orgenhet.getAgressoId(), orgenhet);
                     }
 
                     if(validateOrganisering(e)) {
@@ -105,7 +103,7 @@ public class DvhRestConsumer {
         dvhRepository.saveOrganiseringer(organiseringerByEnhet);
     }
 
-    private JsonNode postDvh(String urlPath){
+    private JsonNode dvhExchange(String urlPath){
         val headers = new HttpHeaders();
         headers.setBearerAuth(aadTokenRepository.getDvhToken());
 

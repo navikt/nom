@@ -1,6 +1,6 @@
 query {
     organisasjonsenhet {
-        id
+        agressoId
         navn
         gyldigFom
         gyldigTom

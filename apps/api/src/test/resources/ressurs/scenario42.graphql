@@ -4,7 +4,7 @@ query {
         personIdent
         koblinger{
             organisasjonsenhet{
-                id
+                agressoId
                 navn
             }
         }

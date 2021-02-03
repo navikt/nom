@@ -17,7 +17,7 @@ public class DvhController {
     // For analyse
     @GetMapping("/internal/dvh/events/enheter")
     public List<DvhOrganisasjonsenhet> dump() {
-        return repository.findAllEnheter().stream()
+        return repository.getAllEnheter().stream()
                 .collect(toUnmodifiableList());
     }
 }

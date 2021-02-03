@@ -18,7 +18,7 @@ public class OrganiseringToOrgEnhetResolver implements GraphQLResolver<Organiser
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(Organisering organisering, DataFetchingEnvironment env) {
-        val orgEnhet = dvhRepository.findEnhetByNummer(organisering.getOrgEnhetNr())
+        val orgEnhet = dvhRepository.getEnhetByAgressoId(organisering.getOrgEnhetNr())
                 .map(ConverterUtils::convert)
                 .orElseThrow();
 

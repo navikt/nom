@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,55 +26,55 @@ public class DvhRepository {
     private Map<String, DvhOrganisasjonsenhet> enheterByNumber;
     private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
     private Map<String, List<DvhLeder>> lederByEnhetNr;
-    private Map<String, List<DvhOrganisering>> organiseringByEnhet;
+    private Map<String, List<DvhOrganisering>> organiseringerByAgressoId;
     private List<DvhKobling> koblinger;
 
-    public Optional<DvhOrganisasjonsenhet> findEnhetByNummer(String nummer) {
-        return Optional.ofNullable(enheterByNumber.get(nummer));
+    public Optional<DvhOrganisasjonsenhet> getEnhetByAgressoId(String agressoId) {
+        return Optional.ofNullable(enheterByNumber.get(agressoId));
     }
 
-    public Collection<DvhOrganisasjonsenhet> findAllEnheter() {
+    public Collection<DvhOrganisasjonsenhet> getAllEnheter() {
         return enheterByNumber.values();
     }
 
-    public List<DvhOrganisering> findOrganiseringerByEnhet(String nummer){
-        return organiseringByEnhet.getOrDefault(nummer, Collections.emptyList());
+    public List<DvhOrganisering> getOrganiseringerByAgressoId(String agressoId){
+        return organiseringerByAgressoId.getOrDefault(agressoId, Collections.emptyList());
     }
 
     public void saveRessurs(DvhRessurs ressurs){
         ressursByNavIdent.put(ressurs.getNavIdent(), ressurs);
     }
 
-    public Optional<DvhRessurs> findRessursByNavIdent(String navIdent){
+    public Optional<DvhRessurs> getRessursByNavIdent(String navIdent){
         return Optional.ofNullable(ressursByNavIdent.get(navIdent));
     }
 
-    public Optional<DvhRessurs> findByPersonIdent(String personIdent){
+    public Optional<DvhRessurs> getRessursByPersonIdent(String personIdent){
         return ressursByNavIdent.values().stream()
                 .filter(r -> r.getPersonIdent().equals(personIdent))
                 .findAny();
     }
 
-    public Optional<DvhRessurs> findRessursByRessursId(String ressursId){
+    public Optional<DvhRessurs> getRessursByRessursId(String ressursId){
         return ressursByNavIdent.keySet().stream()
                 .filter(s -> s.contains(ressursId))
                 .findAny()
                 .map(ressursByNavIdent::get);
     }
 
-    public Collection<DvhRessurs> findAllRessurser(){
+    public Collection<DvhRessurs> getAllRessurser(){
         return ressursByNavIdent.values();
     }
 
-    public Collection<DvhKobling> findAllKoblinger() {
+    public Collection<DvhKobling> getAllKoblinger() {
         return koblinger;
     }
 
-    public List<DvhKobling> getKoblingerForEnhet(String enhetId){
+    public List<DvhKobling> getKoblingerByAgressoId(String enhetId){
         return koblinger.stream().filter(x -> x.getAgressoId().equals(enhetId)).collect(Collectors.toUnmodifiableList());
     }
 
-    public List<DvhLeder> findLederByEnhetNr(String enhetNr){
+    public List<DvhLeder> getLederByAgressoId(String enhetNr){
         return Optional.ofNullable(lederByEnhetNr.get(enhetNr))
                 .orElse(Collections.emptyList());
     }
@@ -88,15 +86,15 @@ public class DvhRepository {
     public void saveLedere(Map<String, List<DvhLeder>> lederByEnhetNr){
         this.lederByEnhetNr = lederByEnhetNr.entrySet().stream()
                 .filter((entry) ->{
-                    val enhet = findEnhetByNummer(entry.getKey());
+                    val enhet = getEnhetByAgressoId(entry.getKey());
                     entry.getValue().forEach(l -> {
-                        val ressurs = findRessursByRessursId(l.getRessursId());
+                        val ressurs = getRessursByRessursId(l.getRessursId());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
-                            log.warn("Leder relasjon misslyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet og ressurs mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet og ressurs mangler");
                         } else if(enhet.isEmpty()){
-                            log.warn("Leder relasjon misslyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet mangler");
                         } else if(ressurs.isEmpty()){
-                            log.warn("Leder relasjon misslyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Ressurs mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Ressurs mangler");
                             entry.getValue().remove(l);
                         }
                     });
@@ -106,19 +104,19 @@ public class DvhRepository {
     }
 
     public void saveOrganiseringer(Map<String, List<DvhOrganisering>> organiseringerByEnhet){
-        this.organiseringByEnhet = organiseringerByEnhet.entrySet().stream()
+        this.organiseringerByAgressoId = organiseringerByEnhet.entrySet().stream()
                 .filter(entry -> {
                     entry.setValue(
                             entry.getValue().stream()
                             .filter(o -> {
-                                val overEnhet = findEnhetByNummer(o.getOverenhetNummer());
-                                val underEnhet = findEnhetByNummer(o.getUnderenhetNummer());
+                                val overEnhet = getEnhetByAgressoId(o.getOverenhetNummer());
+                                val underEnhet = getEnhetByAgressoId(o.getUnderenhetNummer());
                                 if(overEnhet.isEmpty() && underEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon misslyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Over- og underenhet mangler");
+                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Over- og underenhet mangler");
                                 } else if(overEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon misslyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Overenhet mangler");
+                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Overenhet mangler");
                                 } else if(underEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon misslyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Underenhet mangler");
+                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Underenhet mangler");
                                 }else {
                                     return true;
                                 }
@@ -135,14 +133,14 @@ public class DvhRepository {
         this.koblinger = Collections.synchronizedList(
                 koblinger.stream()
                 .filter(k -> {
-                        val organisasjonsenhet = findEnhetByNummer(k.getAgressoId()).orElse(null);
-                        val dvhRessurs = findRessursByRessursId(k.getRessursId()).orElse(null);
+                        val organisasjonsenhet = getEnhetByAgressoId(k.getAgressoId()).orElse(null);
+                        val dvhRessurs = getRessursByRessursId(k.getRessursId()).orElse(null);
                         if (organisasjonsenhet == null && dvhRessurs == null) {
-                            log.warn("Kobling relasjon misslyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet og ressurs mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {
-                            log.warn("Kobling relasjon misslyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet mangler");
                         } else if (dvhRessurs == null) {
-                            log.warn("Kobling relasjon misslyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Ressurs mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Ressurs mangler");
                         } else {
                             return true;
                         }
@@ -155,12 +153,12 @@ public class DvhRepository {
     public void clearRepository(){
         enheterByNumber.clear();
         ressursByNavIdent.clear();
-        organiseringByEnhet.clear();
+        organiseringerByAgressoId.clear();
         koblinger.clear();
     }
 
-    public List<DvhKobling> getKoblingerForRessurs(String resourceId) {
-        return findAllKoblinger().stream()
+    public List<DvhKobling> getKoblingerByRessursId(String resourceId) {
+        return getAllKoblinger().stream()
                 .filter(s -> s.getRessursId().equals(resourceId))
                 .collect(Collectors.toUnmodifiableList());
     }

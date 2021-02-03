@@ -1,11 +1,11 @@
 query {
-    organisasjonsenhet(where: {id: "testId2"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "testId2"}) {
+        agressoId
         navn
         organiseringer{
             retning
             organisasjonsenhet{
-                id
+                agressoId
                 navn
                 gyldigFom
                 gyldigTom

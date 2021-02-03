@@ -75,8 +75,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                         o -> o.get("retning").asText(),
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
 
-        assertEquals("testId1", organiserteEnheter.get("over").getId());
-        assertEquals("testId3", organiserteEnheter.get("under").getId());
+        assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
+        assertEquals("testId3", organiserteEnheter.get("under").getAgressoId());
     }
 
     @Test
@@ -154,7 +154,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
 
     private void orgEnhetAsserter(Enhet faktaEnhet, Organisasjonsenhet actualEnhet){
-        assertEquals(faktaEnhet.getEnhetKode(), actualEnhet.getId());
+        assertEquals(faktaEnhet.getEnhetKode(), actualEnhet.getAgressoId());
         assertEquals(faktaEnhet.getEnhetNavn(), actualEnhet.getNavn());
         assertEquals(faktaEnhet.getEnhetGyldigFra(), actualEnhet.getGyldigFom());
         assertEquals(faktaEnhet.getEnhetGyldigTil(), actualEnhet.getGyldigTom());

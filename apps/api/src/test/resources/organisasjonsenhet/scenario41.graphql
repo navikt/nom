@@ -1,6 +1,6 @@
 query {
-    organisasjonsenhet(where: {id: "testId1"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "testId1"}) {
+        agressoId
         navn
         gyldigFom
         gyldigTom

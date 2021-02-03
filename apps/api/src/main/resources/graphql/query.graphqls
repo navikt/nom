@@ -7,7 +7,7 @@ type Query {
 }
 
 input OrganisasjonsenhetSearch {
-    id: String
+    agressoId: String
 }
 
 input RessursSearch {
@@ -16,7 +16,7 @@ input RessursSearch {
 }
 
 type Organisasjonsenhet {
-    id: ID!
+    agressoId: ID!
     navn: String!
     gyldigFom: Date!
     gyldigTom: Date

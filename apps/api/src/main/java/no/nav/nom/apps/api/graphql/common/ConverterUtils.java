@@ -9,7 +9,7 @@ public class ConverterUtils {
 
     public static Organisasjonsenhet convert(DvhOrganisasjonsenhet orgEnht){
         return Organisasjonsenhet.builder()
-                .id(orgEnht.getNummer())
+                .agressoId(orgEnht.getAgressoId())
                 .navn(orgEnht.getNavn())
                 .gyldigFom(orgEnht.getGyldigFom())
                 .gyldigTom(orgEnht.getGyldigTom())

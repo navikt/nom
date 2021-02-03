@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Value
 @Builder
 public class Organisasjonsenhet {
-    String id;
+    String agressoId;
     String navn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;

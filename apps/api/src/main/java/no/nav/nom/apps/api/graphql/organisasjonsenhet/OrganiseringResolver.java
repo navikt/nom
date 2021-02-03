@@ -21,7 +21,7 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Organisering>> organiseringer(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        val dvhOrganiseringer = dvhRepository.findOrganiseringerByEnhet(orgEnhet.getId()).stream()
+        val dvhOrganiseringer = dvhRepository.getOrganiseringerByAgressoId(orgEnhet.getAgressoId()).stream()
                 .map(o -> convert(o, orgEnhet))
                 .collect(toUnmodifiableList());
 
@@ -31,7 +31,7 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
     }
 
     private Organisering convert(DvhOrganisering organisering, Organisasjonsenhet orgEnhet){
-        val retning = organisering.getOverenhetNummer().equals(orgEnhet.getId()) ? "under" : "over";
+        val retning = organisering.getOverenhetNummer().equals(orgEnhet.getAgressoId()) ? "under" : "over";
 
         return Organisering.builder()
                 .id("")

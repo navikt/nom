@@ -1,6 +1,6 @@
 query {
-    organisasjonsenhet(where: {id: "testId2"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "testId2"}) {
+        agressoId
         leder{
             ressurs{
                 navIdent

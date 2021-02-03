@@ -7,13 +7,13 @@ import java.time.LocalDate;
 
 @Value
 public class DvhOrganisasjonsenhet {
-    private String nummer;
+    private String agressoId;
     private String navn;
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
     public DvhOrganisasjonsenhet(JsonNode node) {
-        this.nummer = node.get("orgnode_kode").asText();
+        this.agressoId = node.get("orgnode_kode").asText();
         this.navn = node.get("orgnode_navn").asText();
         gyldigFom = LocalDate.now().minusDays(1);
         gyldigTom = null;
