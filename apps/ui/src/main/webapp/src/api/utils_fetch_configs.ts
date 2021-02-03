@@ -63,7 +63,6 @@ export default {
     const CLOUD_PORT = "80";
     switch (window.location.port) {
       case CREATE_REACT_APP_PORT:
-        return "http://localhost:8081/graphql";
       case FRACKEND_PORT:
       case CLOUD_PORT:
       default:

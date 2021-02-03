@@ -7,7 +7,7 @@ export function createRessursQuery(id: string | null): string {
               koblinger {
                 organisasjonsenhet{
                   navn
-                  id
+                  agressoId
                 }
               }
           }
@@ -15,10 +15,10 @@ export function createRessursQuery(id: string | null): string {
 }
 
 export function createOrganisasjonsenhetQuery(id: string | null): string {
-  const whereClause = id ? `where: {id: "${id}"}` : "where: null";
+  const whereClause = id ? `where: {agressoId: "${id}"}` : "where: null";
   return `query {
           organisasjonsenhet(${whereClause}) {
-              id
+              agressoId
               navn
               gyldigFom
               gyldigTom
@@ -26,12 +26,13 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                 retning
                 organisasjonsenhet{
                   navn
-                  id
+                  agressoId
                 }
               }
               koblinger {
                   ressurs {
                       navIdent
+                      personIdent
                   }
               }
           }

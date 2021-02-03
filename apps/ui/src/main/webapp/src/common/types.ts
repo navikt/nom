@@ -7,6 +7,7 @@ export interface OrgEnhetFelter {
 export interface OrgEnhetKoblinger {
   sti: OrgEnhetFelter[];
   underEnheter: OrgEnhetFelter[];
+  ressurser: Ressurs[]
 }
 
 export interface OrgEnhetData {
