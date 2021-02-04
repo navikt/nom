@@ -29,3 +29,5 @@ spring:
 
 # Refresh token er valid i 30 dager, men anbefalt å bruke noe mindre enn dette.
 server.servlet.session.timeout: 7d
+
+server.servlet.session.cookie.name: JSESSIONID_NOMUI

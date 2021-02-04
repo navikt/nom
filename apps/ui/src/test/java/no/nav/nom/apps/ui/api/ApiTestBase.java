@@ -129,7 +129,7 @@ public abstract class ApiTestBase extends TestBase {
     }
 
     protected String getSessionCookieId(ResponseEntity<?> responseEntity) {
-        return getCookieValue(responseEntity, "JSESSIONID");
+        return getCookieValue(responseEntity, "JSESSIONID_NOMUI");
     }
 
     protected String getCookieValue(ResponseEntity<?> entity, String key) {

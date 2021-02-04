@@ -46,18 +46,13 @@ export async function performFetch<T>(
   fetchConfig: RequestInit,
   data?: T
 ): Promise<Response> {
-  try {
-    const body: any = data;
-    const response = await fetch(url, {
-      ...fetchConfig,
-      signal: abortSignal,
-      body: body,
-    });
-    return response;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
+  const body: any = data;
+  const response = await fetch(url, {
+    ...fetchConfig,
+    signal: abortSignal,
+    body: body,
+  });
+  return response;
 }
 
 interface GraphqlResponse {
