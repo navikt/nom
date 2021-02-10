@@ -4,7 +4,8 @@ on:
     branches:
       - master
     paths:
-      - '.nais/*/skjermede-personer-alerts.yaml'
+      - '.nais/alerts/dev/skjermede-personer-alerts.yaml'
+      - '.nais/alerts/prod/skjermede-personer-alerts.yaml'
 
 jobs:
   apply-alerts:
