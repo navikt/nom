@@ -1,10 +1,10 @@
-name: Deploy alerts to NAIS
+name: Deploy NOM-DVH alerts to NAIS
 on:
   push:
     branches:
       - master
     paths:
-      - '.nais/*/skjermede-personer-alerts.yaml'
+      - '.nais/*/dvh-alerts.yaml'
 
 jobs:
   apply-alerts:
@@ -13,15 +13,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.3.4
+
       - name: Deploy to dev
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: .nais/dev-fss/skjermede-personer-alerts.yaml
+          RESOURCE: .nais/alerts/dev/dvh-alerts.yaml
+
       - name: Deploy to prod
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: .nais/dev-fss/skjermede-personer-alerts.yaml
+          RESOURCE: .nais/alerts/prod/dvh-alerts.yaml
