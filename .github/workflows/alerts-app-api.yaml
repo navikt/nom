@@ -4,7 +4,8 @@ on:
     branches:
       - master
     paths:
-      - '.nais/*/api-alerts.yaml'
+      - '.nais/alerts/dev/api-alerts.yaml'
+      - '.nais/alerts/prod/api-alerts.yaml'
 
 jobs:
   apply-alerts:
