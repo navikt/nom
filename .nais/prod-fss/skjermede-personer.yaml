@@ -29,7 +29,7 @@ spec:
     - name: STS_DISCOVERYURL
       value: http://security-token-service.default.svc.nais.local/rest/v1/sts/.well-known/openid-configuration
     - name: STS_AUDIENCE
-      value: NONE
+      value: srvpdl-vom
     - name: TPS_MQ_QUEUE_MANAGER_URL
       value: mq://a01apvl062.adeo.no:1414/MPLSC03
     - name: TPS_MQ_QUEUE_CHANNEL
