@@ -26,3 +26,7 @@ spec:
       severity: warning
       description: "Uvanlig mye trafikk mot de sikrede endepunktene i skjermede-personer"
       action: "Sjekk Grafana for å se hvorfor det er så mye trafikk."
+    - alert: Differanse i kafka meldinger produsert/lest
+      expr: sum(increase(spring_kafka_listener_seconds_count{log_app="skjermede-personer"}[1m])) by (app, kubernetes_namespace) - sum(increase(kafka_messages_produced_count_total{log_app="nom-ressurser"}[1m])) by (app, kubernetes_namespace) != 0
+      for: 5m
+      action: "Sjekk loggene til {{ $labels.log_app }} i {{ $labels.log_namespace }}, og grafana for finne ut av differansen"
