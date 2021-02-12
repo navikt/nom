@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1"
 kind: "Alert"
 metadata:
-  name: nom-ui
+  name: nom-ui-alerts
   namespace: nom
   labels:
     team: nom
