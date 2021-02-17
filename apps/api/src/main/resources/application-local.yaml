@@ -6,10 +6,16 @@ aad:
   grantType: client_credentials
   dvhScope: <dummy - Se README.MD>
 
-spring:
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
-
 proxy:
   host: 127.0.0.1
   port: 8866
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${aad.issuerBaseUrl}/v2.0
+          accepted-audience: test1, api://test1

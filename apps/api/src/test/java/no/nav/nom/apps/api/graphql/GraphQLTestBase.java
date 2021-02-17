@@ -1,19 +1,23 @@
 package no.nav.nom.apps.api.graphql;
 
+import com.graphql.spring.boot.test.GraphQLResponse;
 import com.graphql.spring.boot.test.GraphQLTestTemplate;
+import com.nimbusds.jose.jwk.RSAKey;
+import lombok.SneakyThrows;
+import lombok.val;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.dvh.Ressurs;
-import no.nav.nom.contract.dvh.Stilling;
-import no.nav.nom.contract.dvh.StillingTabell;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public abstract class GraphQLTestBase extends TestBase {
 
@@ -26,23 +30,20 @@ public abstract class GraphQLTestBase extends TestBase {
     @Autowired
     protected KafkaUtils kafkaUtils;
 
+    @Autowired
+    protected SecurityTestUtils securityTestUtils;
+
+    @Autowired
+    private RSAKey rsaKey;
+
+    @BeforeEach
+    public void setup(){
+        stubFor(get("/aad/discovery/v2.0/keys").willReturn(aResponse().withBody(String.format("{\"keys\":[%s]}", rsaKey.toPublicJWK().toString()))));
+    }
+
     @AfterEach
     protected void clearRepository(){
         dvhRepository.clearRepository();
-    }
-
-    protected Enhet enhetTestTemplate(String suffix, String overEnhetKode, int fraTilIncrement, String lederRessursId){
-        return Enhet.builder()
-                .enhetKode("testId"+suffix)
-                .enhetNavn("testNavn"+suffix)
-                .enhetType("NAVENHET")
-                .enhetGyldigFra(LocalDate.now().minusMonths(fraTilIncrement))
-                .enhetGyldigTil(LocalDate.now().plusMonths(fraTilIncrement))
-                .overEnhetKode(overEnhetKode != null ? overEnhetKode : "testId"+"Over"+suffix)
-                .orgGyldigFra(LocalDate.now().minusMonths(fraTilIncrement))
-                .orgGyldigTil(LocalDate.now().plusMonths(fraTilIncrement))
-                .lederRessursId(lederRessursId)
-                .build();
     }
 
     protected Ressurs ressursTestTemplate(String suffix){
@@ -52,22 +53,15 @@ public abstract class GraphQLTestBase extends TestBase {
                 .build();
     }
 
-    protected Stilling stillingTestTemplate(String agressoNr, String navIdent, int fraTilIncrement) {
-        return Stilling.builder()
-                .orgEnhet(agressoNr)
-                .resourceId(navIdent.substring(1))
-                .fraDato(LocalDate.now().minusDays(fraTilIncrement))
-                .tilDato(LocalDate.now().plusDays(fraTilIncrement))
-                .ansettelsesTypeBesk("dummy")
-                .stillingIBunn(1.0)
-                .timestamp(LocalDateTime.now())
-                .orgEnhetBesk("dummy")
-                .permisjon("JOBBER")
-                .build();
-    }
+    @SneakyThrows
+    protected GraphQLResponse postForResource(String resource){
+        val claims = securityTestUtils.validJwtClaims();
+        val token = securityTestUtils.createToken(claims);
 
-    protected StillingTabell stillingTabellTestTemplate(Stilling... stillinger) {
-        return StillingTabell.builder().elementer(Arrays.asList(stillinger.clone())).build();
+        val response = graphQLTestTemplate.withBearerAuth(token).postForResource(resource);
+        assertThat(response, hasNoErrors());
+
+        return response;
     }
 
 }

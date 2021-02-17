@@ -20,14 +20,14 @@ query HentRessursOgKoblinger {
         personIdent
         koblinger{
             organisasjonsenhet{
-                id
+                agressoId
                 navn
                 gyldigFom
                 gyldigTom
                 organiseringer{
                     retning
                     organisasjonsenhet{
-                        id
+                        agressoId
                         navn
                         koblinger{
                             ressurs{

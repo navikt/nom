@@ -16,11 +16,11 @@ const POST_GRAPHQL: RequestInit = {
   headers: {
     "Content-Type": "application/graphql",
     "X-XSRF-TOKEN": (function () {
-      const row = document.cookie
-        .split(";")
-        .find((row) => row.startsWith("XSRF-TOKEN"));
-      if (row) {
-        return row.split("=")[1];
+      const cookieStrNoSpaces = document.cookie.replaceAll("; ", ";");
+      const cookies = cookieStrNoSpaces.split(";");
+      const xsrfToken = cookies.find((it) => it.startsWith("XSRF-TOKEN"));
+      if (xsrfToken) {
+        return xsrfToken.split("=")[1];
       } else {
         console.error("Missing XSRF cookie");
         return "";

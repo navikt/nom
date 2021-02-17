@@ -9,14 +9,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @DisplayName("GraphQL.HentRessurs")
-public class RessursTest extends RessursTestBase {
+class RessursTest extends RessursTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
@@ -28,8 +26,7 @@ public class RessursTest extends RessursTestBase {
         val inputRessurs = ressursTestTemplate("");
         kafkaUtils.sendFromKafkaMock(inputRessurs);
 
-        val response = graphQLTestTemplate.postForResource("ressurs/scenario1.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("ressurs/scenario1.graphql");
 
         val outputRessurs = response.getList("$.data.ressurs", Ressurs.class).get(0);
         assertEquals(inputRessurs.getNavident(), outputRessurs.getNavIdent());
@@ -43,8 +40,7 @@ public class RessursTest extends RessursTestBase {
         val inputRessurs = ressursTestTemplate("");
         kafkaUtils.sendFromKafkaMock(inputRessurs);
 
-        val response = graphQLTestTemplate.postForResource("ressurs/scenario2.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("ressurs/scenario2.graphql");
 
         val outputRessurs = response.getList("$.data.ressurs", Ressurs.class).get(0);
         assertEquals(inputRessurs.getNavident(), outputRessurs.getNavIdent());
@@ -61,8 +57,7 @@ public class RessursTest extends RessursTestBase {
 
         kafkaUtils.sendFromKafkaMock(inputRessurs1, inputRessurs2, inputRessurs3);
 
-        val response = graphQLTestTemplate.postForResource("ressurs/scenario3.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("ressurs/scenario3.graphql");
 
         val outputRessurs = response.getList("$.data.ressurs", Ressurs.class);
         assertEquals(3, outputRessurs.size());
@@ -77,8 +72,7 @@ public class RessursTest extends RessursTestBase {
         kafkaUtils.sendFromKafkaMock(inputRessurs);
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("ressurs/scenario42.graphql");
 
         val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
         val actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
@@ -92,9 +86,7 @@ public class RessursTest extends RessursTestBase {
         val inputRessurs = ressursTestTemplate("2");
         kafkaUtils.sendFromKafkaMock(inputRessurs);
 
-        val response = graphQLTestTemplate.postForResource("ressurs/scenario42.graphql");
-        assertThat(response, hasNoErrors());
-
+        val response = postForResource("ressurs/scenario42.graphql");
 
         val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
         assertTrue(ressurs.get("koblinger").isEmpty());

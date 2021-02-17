@@ -1,7 +1,7 @@
 # Henter alle organisasjonsenheter
 query HentAlleOrganisasjonsenheter {
     organisasjonsenhet {
-        id
+        agressoId
         navn
         gyldigFom
         gyldigTom
@@ -10,8 +10,8 @@ query HentAlleOrganisasjonsenheter {
 
 # Henter organisasjonsenhet med gitt id:
 query HentOrganisasjonsenhetMedId {
-    organisasjonsenhet(where: {id: "test"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "test"}) {
+        agressoId
         navn
         gyldigFom
         gyldigTom
@@ -20,22 +20,22 @@ query HentOrganisasjonsenhetMedId {
 
 # Henter organisasjonsenhet med organiseringer:
 query HentOrganisasjonsenhetOgOrganisering {
-    organisasjonsenhet(where: {id: "test"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "test"}) {
+        agressoId
         navn
         gyldigFom
         gyldigTom
         organiseringer{
             retning
             organisasjonsenhet{
-                id
+                agressoId
                 navn
                 gyldigFom
                 gyldigTom
                 organiseringer{
                     retning
                     organisasjonsenhet{
-                        id
+                        agressoId
                         navn
                     }
                 }
@@ -54,8 +54,8 @@ query HentOrganisasjonsenhetOgOrganisering {
 
 # Henter organisasjonsenhet med leder:
 query HentOrganisasjonsenhetOgLeder {
-    organisasjonsenhet(where: {id: "test"}) {
-        id
+    organisasjonsenhet(where: {agressoId: "test"}) {
+        agressoId
         navn
         gyldigFom
         gyldigTom
@@ -70,7 +70,7 @@ query HentOrganisasjonsenhetOgLeder {
 
 query HentAlleOrganisasjonsenhetOgKoblinger {
     organisasjonsenhet {
-        id
+        agressoId
         navn
         gyldigFom
         gyldigTom

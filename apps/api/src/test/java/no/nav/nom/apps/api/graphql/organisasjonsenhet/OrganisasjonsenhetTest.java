@@ -6,11 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.contract.dvh.Enhet;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
-import no.nav.nom.contract.nom.api.graphql.Organisering;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,10 +36,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario1.graphql");
-        assertThat(response, hasNoErrors());
-
-        val outputEnhet = response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class);
+        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql").getList("$.data.organisasjonsenhet", Organisasjonsenhet.class);
         assertEquals(1, outputEnhet.size());
     }
 
@@ -54,8 +47,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario2.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario2.graphql");
         assertEquals(3, response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class).size());
     }
 
@@ -66,8 +58,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario3.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario3.graphql");
         val enhetResponse = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
 
         val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -88,8 +79,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock(inputLeder);
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario4.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario4.graphql");
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {}).get(0);
@@ -105,8 +95,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario32.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario32.graphql");
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {});
@@ -122,8 +111,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock(inputRessurs);
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario41.graphql");
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrganisasjonsenhetsKobling>>() {});
@@ -145,26 +133,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val response = graphQLTestTemplate.postForResource("organisasjonsenhet/scenario41.graphql");
-        assertThat(response, hasNoErrors());
+        val response = postForResource("organisasjonsenhet/scenario41.graphql");
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         assertTrue(outputEnhetJson.get("koblinger").isEmpty());
     }
-
-
-    private void orgEnhetAsserter(Enhet faktaEnhet, Organisasjonsenhet actualEnhet){
-        assertEquals(faktaEnhet.getEnhetKode(), actualEnhet.getAgressoId());
-        assertEquals(faktaEnhet.getEnhetNavn(), actualEnhet.getNavn());
-        assertEquals(faktaEnhet.getEnhetGyldigFra(), actualEnhet.getGyldigFom());
-        assertEquals(faktaEnhet.getEnhetGyldigTil(), actualEnhet.getGyldigTom());
-    }
-
-    private void organiseringAsserter(Enhet faktaEnhet, Organisering actualOrganisering){
-        assertEquals(faktaEnhet.getOrgGyldigFra(), actualOrganisering.getGyldigFom());
-        assertEquals(faktaEnhet.getOrgGyldigFra(), actualOrganisering.getGyldigTom());
-    }
-
-
 }
 
