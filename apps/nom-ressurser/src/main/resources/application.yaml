@@ -8,6 +8,8 @@ app:
     repositoryMetrics: 0 59 * ? * *  # Every hour
 
 spring:
+  profiles:
+    active: ${ENV}
   jpa:
     hibernate:
       ddl-auto: none
@@ -62,6 +64,6 @@ no.nav:
     jwt:
       issuer:
         aad:
-          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-          accepted_audience: ${AZURE_APP_CLIENT_ID}
+          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
+          accepted_audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
           proxyurl:

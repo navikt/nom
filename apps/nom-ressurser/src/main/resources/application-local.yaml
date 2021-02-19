@@ -28,12 +28,3 @@ management:
     web:
       base-path: /internal
       exposure.include: prometheus
-
-no.nav:
-  security:
-    jwt:
-      issuer:
-        selvbetjening:
-          discoveryurl: http://metadata
-          accepted_audience: aud-localhost
-          proxyurl:

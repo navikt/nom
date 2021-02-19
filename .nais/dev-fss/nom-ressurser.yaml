@@ -7,6 +7,8 @@ metadata:
     team: nom
 spec:
   env:
+    - name: ENV
+      value: dev
     - name: DB_HOST
       value: b27dbvl009.preprod.local
     - name: DB_NAME

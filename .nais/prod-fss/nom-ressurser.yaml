@@ -7,6 +7,8 @@ metadata:
     team: nom
 spec:
   env:
+    - name: ENV
+      value: prod
     - name: DB_HOST
       value: A01DBVL009.adeo.no
     - name: DB_NAME
