@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface SkjermetPersonRepository extends JpaRepository<SkjermetPerson, Long> {
 
     List<SkjermetPerson> findAllByPersonident(String personident);
-    List<SkjermetPerson> findAllByKafkaProduced(boolean produced);
+    List<SkjermetPerson> findAllByKafkaProducedOrderByEndretDatoAsc(boolean produced);
 
     @Query(value = "SELECT * FROM T_SKJERMET_PERSON " +
                    "WHERE (SKJERMET_TIL IS NULL OR SKJERMET_TIL >= current_timestamp)", nativeQuery = true)

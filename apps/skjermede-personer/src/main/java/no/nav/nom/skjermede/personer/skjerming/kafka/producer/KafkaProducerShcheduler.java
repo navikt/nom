@@ -16,6 +16,6 @@ public class KafkaProducerShcheduler {
 
     @Scheduled(fixedDelay = 5000)
     public void produce(){
-        kafkaProducer.send(skjermetPersonRepository.findAllByKafkaProduced(false));
+        kafkaProducer.send(skjermetPersonRepository.findAllByKafkaProducedOrderByEndretDatoAsc(false));
     }
 }
