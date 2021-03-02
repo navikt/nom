@@ -4,7 +4,6 @@
 :toclevels: 2
 :toc-title: Innhold
 :icons: font
-:images-dir:
 
 (Bilder vedlikeholdt i Gliffy på Confluence link:https://confluence.adeo.no/display/~G155033/NOM+tegninger[her] )
 
@@ -163,7 +162,7 @@ Det blir kanskje veldig komplisert å ivareta en fullstendig informasjon om hva 
 
 Siden dette vil benyttes av konsumenter må det tenkes godt igjennom hva som lages her, slik at vi slipper store problemer ved endringer i API og system.
 
-image:../images/Forretningshendelser.png[]
+image:./images/Forretningshendelser.png[]
 
 === Forretningshendelse data
 
@@ -205,11 +204,11 @@ Event source hendelsene er i lite egnet for å representere data ut til konsumen
 
 Vi bør ha en compacted kafka topic for hver av Enhet og Ressurs. Og disse objektene kan ha mer informasjon populert på objektene. For å lage disse projeksjonene må vi ha egne konsumenter som lytter på event source strømmene for å produsere hendelser hit (eller funker det kanskje å lage kafka streams?).
 
-image:../images/StateProducers.png[]
+image:./images/StateProducers.png[]
 
 == Situasjon mens DVH er master av data
 
-image:../images/DVHsomMaster.png[]
+image:./images/DVHsomMaster.png[]
 
 
 
