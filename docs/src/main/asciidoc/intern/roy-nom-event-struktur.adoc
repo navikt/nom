@@ -4,6 +4,7 @@
 :toclevels: 2
 :toc-title: Innhold
 :icons: font
+:images-dir:
 
 (Bilder vedlikeholdt i Gliffy på Confluence link:https://confluence.adeo.no/display/~G155033/NOM+tegninger[her] )
 
@@ -13,7 +14,7 @@ WARNING: Under arbeid
 
 Event sourcing som basis for persistens, med seperasjon av skriv og les på modell/data (cqrs).
 
-image:../images/skriv-til-event-source.png[]
+image:./images/skriv-til-event-source.png[]
 
 == Event sourcing av hendelse data til Kafka
 
