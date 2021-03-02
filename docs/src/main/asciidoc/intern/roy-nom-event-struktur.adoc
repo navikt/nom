@@ -5,6 +5,10 @@
 :toc-title: Innhold
 :icons: font
 
+(Bilder vedlikeholdt i Gliffy på Confluence link:https://confluence.adeo.no/display/~G155033/NOM+tegninger[her] )
+
+WARNING: Under arbeid
+
 == Generelt
 
 Event sourcing som basis for persistens, med seperasjon av skriv og les på modell/data (cqrs).
