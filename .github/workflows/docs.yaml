@@ -28,6 +28,7 @@ jobs:
           mkdir public
           mv docs/target/ekstern/index.html public/index.html
           mv docs/target/intern/index.html public/index-intern.html
+          mv docs/target/intern/roy-nom-event-struktur.html public/roy-nom-event-struktur.html
       - name: Deploy
         if: success()
         uses: crazy-max/ghaction-github-pages@v2.2.0
