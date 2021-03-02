@@ -1,0 +1,210 @@
+= Roy's input på event sourcing hendelser og arkitektur
+:sectanchors:
+:toc: left
+:toclevels: 2
+:toc-title: Innhold
+:icons: font
+
+== Generelt
+
+Event sourcing som basis for persistens, med seperasjon av skriv og les på modell/data (cqrs).
+
+image:../images/skriv-til-event-source.png[]
+
+== Event sourcing av hendelse data til Kafka
+
+En topic per aggregate, med event key lik den funksjonelle ID'en til aggregaten.
+
+[NOTE]
+====
+Ingenting utenfor en aggregate vil ikke ha referanser til noe inne i en aggregate. Kun til selve aggregaten i seg selv.
+Dette gir fordelen av at endringer utenfor ikke påvirker aggregaten og vica verca.
+[qoute, Uncle Bob, https://martinfowler.com/bliki/DDD_Aggregate.html]
+____
+A DDD aggregate is a cluster of domain objects that can be treated as a single unit
+____
+====
+
+== Event/hendelses object
+
+.Event sourcing hendleses stuktur
+[source, json]
+----
+{
+    "id": "fd3b3bdf-6b45-4618-ba31-ee014d62e089",
+    "reqId": "2f93c50a-7a74-11eb-9439-0242ac130002",
+    "type": "OPPRETTET",
+    "opprettetAv":"G155033",
+    "timestamp":"2020-11-24T13:37:00Z",
+    "payload": {
+        "type":"no.nav.nom.hendelse:EnhetEvtSrc",
+        "data": "<Enhet - Event source - Json data>"
+    }
+}
+----
+
+Når det gjelder type hendelse her så tror jeg ikke det er noe vits å skille på om det er en endring eller korreksjon etc. Dette er uansett intern NOM informasjon, og API'et vil gjerne ikke vite forskjellen uansett. Og en bruker som korrigerer en informasjon forholder seg ikke til hendelsene, og får ikke spesifisert hvilken hendelse som korrigering eller annulering tilhører.
+
+Det eneste jeg kan se for meg er evt. administrative korreksjoner foretatt av oss på dataene. F.eks. om vi må kansellere ett sett med hendelser som er utført.
+
+=== Organisasjons enhet
+
+Enhet består av informasjon om enheten, denne enhetens gyldighetsperiode(r?) og enhetens knytning til en annen enhet som underenhet og i hvilke perioder.
+
+.Enhet - Event sourcing payload data
+[source, json]
+----
+{
+    "fid": "73b41c29-3a70-4295-a084-535a3263e211",
+    "navn": "NAV Sagene",
+    "type": "Nav kontor",
+    "norgId": "0314",
+    "agressoId": "0314001",
+    "gyldighetsperiode": [
+        { "fom":"2010-01-01" }
+    ],
+    "overordnetEnhet": [
+        {
+            "fid": "5a17ec4e-4b15-4bab-b647-4d71b235c92a",
+             "gyldighetsperiode": {
+                "fom":"2010-01-01",
+                "til":"2014-05-31"
+            }
+        },
+        {
+            "fid": "e949699a-6538-4ea2-860a-539fae41c272",
+            "gyldighetsperiode": {
+                "fom":"2014-06-01"
+            }
+        }
+    ]
+}
+----
+
+Selve hendelses dataene behøver ikke inneholde mer enn selve endringen. F.eks. om navn på enhet er endret så er det kun behov for at dataene inneholder fid og navn.
+
+=== Ressurs
+
+Ressurs er en ansatt, innleid etc person som utfører arbeid i NAV.
+
+.Ressurs - Event sourcing payload data
+[source, json]
+----
+{
+    "fid": "b9451eba-1409-46ef-b6ac-fcfceae4c944",
+    "fnr": "07087225111",
+    "navn": "Roy Grini"
+    "navIdent": "g155033",
+    "lederFor": [
+        {
+            "fid": "5a17ec4e-4b15-4bab-b647-4d71b235c92a",
+            "periode": {
+                "fom":"2017-01-01",
+                "til":"2017-02-01"
+            }
+        }
+    ],
+    "knytning": [
+        {
+            "fid": "5a17ec4e-4b15-4bab-b647-4d71b235c92a",
+            "type": "Innleid",
+            "periode": {
+                "fom":"2012-05-01",
+                "til": "2014-05-01"
+            }
+        }
+        {
+            "fid": "5a17ec4e-4b15-4bab-b647-4d71b235c92a",
+            "type": "Fast ansatt",
+            "periode": {
+                "fom":"2014-05-01"
+            }
+        }
+    ],
+    "personalleder":[
+        {
+            "fid": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
+            "periode": {
+                "fom": "2014-05-01",
+                "til": "2017-01-01"
+            }
+        },
+        {
+            "fid": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
+            "periode": {
+                "fom":"2017-01-01",
+                "til":"2017-02-01"
+            }
+        },
+        {
+            "fid": "ebb23acf-5920-4bb8-aebe-971c5d5fbc36",
+            "periode": {
+                "fom": "2017-02-01"
+            }
+        },
+    ],
+}
+----
+
+Slik som for enhet trenger man kunn å levere endringsdataene i hendelsen, og ikke et komplett ressurs objekt.
+
+== Forretningshendelser
+
+Konsumenter ønsker kanskje å vite når det gjøres endringer på ulike objekter i NOM. API'et bør da også lage hendleser på en egen kafka strøm for å representere operasjoner. Denne strømmen trenger ikke å ha evig retention, og vil heller ikke ha compaction.
+
+Her må det gjøres vurderinger på hvordan disse hendelsene skal være.
+Det bør kanskje være kun en hendelse for en logisk operasjon foretatt mot API'et, hvor innholdet er beskriver hva som er gjort og hvilke objekter det har berørt.
+Det blir kanskje veldig komplisert å ivareta en fullstendig informasjon om hva og hvordan data har endret seg (CDC)
+
+Siden dette vil benyttes av konsumenter må det tenkes godt igjennom hva som lages her, slik at vi slipper store problemer ved endringer i API og system.
+
+image:../images/Forretningshendelser.png[]
+
+=== Forretningshendelse data
+
+En unik id for hver hendelse, denne kan være samme id som da er benyttet som reqId på event source hendelsene. Kanskje også ta med en 'fritekst' liknende informasjon om selve input parameterene til API kallet. Men dette bør ikke være data som konsumenter skal benytte for å avgjøre behandling. Dette er mer for debugging og informasjon for forståelse og bør kunne endres i struktur av oss når vi måtte trenge.
+
+.NOM endringshelndelser
+[source, json]
+----
+{
+    "id": "fd3b3bdf-6b45-4618-ba31-ee014d62e089",
+    "hendelse": "SlaaSammenEnheter",
+    "opprettetAv":"G155033",
+    "timestamp":"2020-11-24T13:37:00Z",
+    "beroerteEnheter": [
+        "fid": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
+        "fid": "a2db7cad-9401-40f9-8e8e-0c2fb2d90720"
+    ],
+    "beroerteRessurser": [
+        "fid": "b9451eba-1409-46ef-b6ac-fcfceae4c944",
+        "fid": "f598ffec-d0fa-4b9b-8d70-b1ee81e34dec",
+        "fid": "82d6fd8f-569b-4c35-839d-b27fef411a23",
+        ...
+    ],
+    "ustrukturertInfo": {
+        "apiMetode": "mergeEnheter"
+        "parameter": [
+            "utgaaendeEnhet": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
+            "mottakendeEnhet": "a2db7cad-9401-40f9-8e8e-0c2fb2d90720",
+            "flyttRessurserTilMottakendeEnhet": "true"
+            "gjelderFra": "2019-06-01"
+        ],
+    }
+}
+----
+
+== Projeksjoner for å lese data fra NOM
+
+Event source hendelsene er i lite egnet for å representere data ut til konsumenter gjennom et API eller en kafka topic. Her behøver state til objektene, og ikke hendelsen i seg selv. Og det er nå state som er mest interresant. Dette vil inneholde funksjonell historikk, men ikke teknisk. Om det er behov for teknsisk historikk på noe tidspunkt, så tar vi det da og ikke nå. Vi har uansett grunnlaget i event sourcingen.
+
+Vi bør ha en compacted kafka topic for hver av Enhet og Ressurs. Og disse objektene kan ha mer informasjon populert på objektene. For å lage disse projeksjonene må vi ha egne konsumenter som lytter på event source strømmene for å produsere hendelser hit (eller funker det kanskje å lage kafka streams?).
+
+image:../images/StateProducers.png[]
+
+== Situasjon mens DVH er master av data
+
+image:../images/DVHsomMaster.png[]
+
+
+
