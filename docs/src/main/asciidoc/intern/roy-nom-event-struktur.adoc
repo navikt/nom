@@ -200,7 +200,7 @@ En unik id for hver hendelse, denne kan være samme id som da er benyttet som re
 
 == Projeksjoner for å lese data fra NOM
 
-Event source hendelsene er i lite egnet for å representere data ut til konsumenter gjennom et API eller en kafka topic. Her behøver state til objektene, og ikke hendelsen i seg selv. Og det er nå state som er mest interresant. Dette vil inneholde funksjonell historikk, men ikke teknisk. Om det er behov for teknsisk historikk på noe tidspunkt, så tar vi det da og ikke nå. Vi har uansett grunnlaget i event sourcingen.
+Event source hendelsene er i lite egnet for å representere data ut til konsumenter gjennom et API eller en kafka topic. Her behøves state/snapshot til objektene, og ikke hendelsen i seg selv. Og det er state/snapshot som er mest interresant. Dette vil inneholde funksjonell historikk, men ikke teknisk. Om det er behov for teknsisk historikk på noe tidspunkt, så tar vi det da og ikke nå. Vi har uansett grunnlaget i event sourcingen.
 
 Vi bør ha en compacted kafka topic for hver av Enhet og Ressurs. Og disse objektene kan ha mer informasjon populert på objektene. For å lage disse projeksjonene må vi ha egne konsumenter som lytter på event source strømmene for å produsere hendelser hit (eller funker det kanskje å lage kafka streams?).
 
@@ -209,6 +209,42 @@ image:../images/StateProducers.png[]
 == Situasjon mens DVH er master av data
 
 image:../images/DVHsomMaster.png[]
+
+
+
+== Innspill, innvendinger og spørsmål under møtet i dag (2.mar.21)
+
+. Hvorfor flere topics for event sourcing?
+
+ Jeg synes det er naturlig kunne dele dette opp på en slik måte. Ser ikke noe bestemt grunn til at det ikke skal gjøres. Men dette er ikke noe jeg mener er påkrevd, så man kan gjerne ha det i en og samme topic.
+ /Roy
+
+. Men hva med rekkefølge på eventene når de er delt på to topics
+
+ Rekkefølge leveranse på events er kun garantert innenfor en partisjon i en topic. Og vi bør sette opp med flere partisjoner med en gang. Og det må være minst like mange partisjoner som det finnes konsumnetrer i samme konsumentgruppe. Det vil si at hvis man ønsker å fyre opp tre podder for å lese topicen i parallell, så må det være minst tre partisjoner. Ja, man kan starte med en partisjon, og utvide med flere etter hvert. Men eksisterende eventer i topicen vill ikke flyttes til noen ny partisjon (i.e. spre events jevnt på partisjonene), så man vil ha denne ubalansen for alltid etterpå.
+ Vi ønsker å ha rekkefølge på eventen innenfor et aggregate object, så vi bør (må?) ha event nøkkel lik funksjonell nøkkel siden dette bestemmer hvilken partisjon ting havner i.
+ /Roy
+
+. Hvorfor ikke la event source topics være åpne for konsumenter
+
+ Enkapsulering. Når vi benytter event sourcing og CQRS så skiller vi på skriv og les domene. Konsumenter skal da ha domene modell for les, og ikke skriv modellen vi benytter i selve event source'n. Vi slipper også å risikere at konsumentene sine behov sniker seg inn i event source modellene.
+ Samtidig vil vi ha større fleksibilitet til å endre eventsource modellen og dataene etter vårt behov uten å måtte ta direkte hensyn til konsumentene.
+ Men - det er ikke noe stort krav for meg dette. Og antaglig det raskeste og beste å starte med, inntill vi virkelig erfarer hva behovene er. Men er det åpent med konsumenter på, så er det vanskelig å lukke på et senere tidspunkt hvis det finnes konsumenter på topicen.
+ /Roy
+
+. Når 'NOM applikasjonen' starter opp vil den re-lese event sourcen fra start og bygge opp domenedataene
+
+ Slik jeg forstår så i PDL så leses hele eventsourcen på oppstart og domene objektene lages basert på dette. Domenedataene er vel i hovedsk snapshot objekter? Og i tillegg så produseres det livshendelser på en egen kø, så applikasjonen må ta vare på offset av hvor langt den har kommet i eventsourcen for å lage disse livshendelsene uten å produsere alle på nytt?
+ Jeg synes det er best å fortløpende ha en snapshot projeksjon av objektene i en log compacted kø som produseres fortløpende. Dette er automatisk hovedkilden for konsumenter for å lytte på endringer, kilden som NOM API leser fra. Også GraphQL spørringene.
+ /Roy
+
+. Det kan være viktig for forretning å skille mellom korreksjon og endring
+
+ Jeg er som nevnt tidligere usikker på om det er behov for å skille mellom en korreksjon og en endring på eventsource hendelsene. Hvis man har ett forretningsmessig behov å ta vare på perioden en enhet hadde ett navn, og en periode den hadde ett annet navn. Da må vi ta vare på dette i evnentsource objektet som en funkjsonell historikk, med periodiseringen. Ikke skjult i eventhistorikken som kun bør dekke teknisk historie.
+ Hva annulering, opphørt og andre mulige event typer er jeg litt usikker på skal dekke. Annulering av en endring, er vel å endre tilbake. Annulering av opprett er vel en slett. Opphør av en stilling høres ut for meg som sluttdato på ressursens stilling som er i den funksjonelle historikken.
+ Jeg stemmer for event source typer begrenses til Opprettet, Endret og Slettet.
+ /Roy
+
 
 
 
