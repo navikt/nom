@@ -234,3 +234,15 @@ I GraphQL blir det noe ala:
 }
 ----
 
+=== Kafka
+
+==== Event Sourcing Topic
+
+Inneholder alle hendelser av alle typer over tid, med endringer. Evig retention og cleanup policy = delete.
+
+==== Something something Topic
+
+Usikker på navn, i PDL var det persondokument.
+Inneholder nåværende informasjon om en entitet med et predefinert nivå man skal gå ned i koblet data.
+F.eks: Ressurs + koblinger + organisasjonsenhet sin id. Samme motsatt vei, Organisasjonsenhet + koblinger + ressursene sine id.
+
