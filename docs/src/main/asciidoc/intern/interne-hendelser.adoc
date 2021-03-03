@@ -126,3 +126,111 @@ Dette vil være et edge case, men greit å være obs på det.
 include::../../../../../libs/contract-nom-dto/src/main/java/no/nav/nom/contract/nom/hendelse/Hendelse.java[tag=class]
 ----
 
+Note:
+
+1. Dropper opprettetAv i hver hendelse, ligger i hendelse om utførelse av operasjonen.
+
+.Eksempel - Enhet Opprett
+[source,json]
+----
+{
+  "id": "bca0f4ca-5c62-4e0d-a991-78dfb7ce85c1",
+  "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
+  "type": "no.nav.nom:Operasjon:v1",
+  "endringstype": null,
+  "opprettet": "2021-02-03T13:37:00Z",
+  "data": {
+    "fid": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
+    "operasjon": "Enhet:Opprett",
+    "input": {
+      "navn": "Oslo Gamle Byen",
+      "gyldigFom": "2020-01-01"
+    },
+    "opprettetAv": "G141145"
+  }
+}
+----
+
+.Eksempel - Enhet Opprett
+[source,json]
+----
+{
+  "id": "39af382a-8ab0-4fbd-9ec1-baeab6ec9ec6",
+  "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
+  "type": "no.nav.nom:Enhet:v1",
+  "endringstype": "OPPRETTET",
+  "opprettet": "2021-02-03T13:37:00Z",
+  "data": {
+    "fid": "1edf5b33-a3f1-4388-9200-17fb6ea0a11b",
+    "navn": "Oslo Gamle Byen",
+    "gyldigFom": "2020-01-01"
+  }
+}
+----
+
+
+.Eksempel - Enhet Korrigert
+[source,json]
+----
+{
+  "id": "7e586831-6c98-4e5a-a953-fcdc5e0d2359",
+  "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
+  "type": "no.nav.nom:Operasjon:v1",
+  "endringstype": null,
+  "opprettet": "2021-03-03T13:37:00Z",
+  "data": {
+    "fid": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
+    "operasjon": "Enhet:Korriger",
+    "input": {
+      "navn": "Gamle Oslo"
+    },
+    "opprettetAv": "G141145"
+  }
+}
+----
+
+[source,json]
+----
+{
+  "id": "b65d953c-c666-4fe7-af47-aaf28a994b2e",
+  "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
+  "type": "no.nav.nom:Enhet:v1",
+  "endringstype": "KORRIGERT",
+  "opprettet": "2021-03-03T13:37:00Z",
+  "data": {
+    "fid": "1edf5b33-a3f1-4388-9200-17fb6ea0a11b",
+    "navn": "Gamle Oslo"
+  }
+}
+----
+
+I GraphQL blir det noe ala:
+
+.Eksempel - Enhet Korrigert
+[source,json]
+----
+{
+  "id": "1edf5b33-a3f1-4388-9200-17fb6ea0a11b",
+  "navn": "Gamle Oslo",
+  "gyldigFom": "2020-01-01",
+  "metadata": {
+    "endringer": [
+      {
+        "hendelseId": "39af382a-8ab0-4fbd-9ec1-baeab6ec9ec6",
+        "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
+        "opprettetAv": "G141145",
+        "opprettet": "2021-02-03T13:37:00Z",
+        "endringstype": "OPPRETTET"
+      },
+      {
+        "hendelseId": "b65d953c-c666-4fe7-af47-aaf28a994b2e",
+        "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
+        "opprettetAv": "G141145",
+        "opprettet": "2021-03-03T13:37:00Z",
+        "endringstype": "KORRIGERT"
+      }
+    ]
+  }
+}
+----
+
