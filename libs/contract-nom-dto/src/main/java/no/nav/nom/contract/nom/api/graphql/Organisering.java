@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Value
 public class Organisering {
     String id;
-    String retning;
+    OrganiseringRetning retning;
     String orgEnhetNr;
     LocalDate gyldigFom;
     LocalDate gyldigTom;

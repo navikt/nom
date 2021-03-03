@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +73,27 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
+    @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, filtrerer på retning")
+    void scenario33() {
+        kafkaUtils.sendFromKafkaMock();
+        dvhRestConsumer.loadFromDvh();
+
+        val response = postForResource("organisasjonsenhet/scenario33.graphql");
+        val enhetResponse = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+
+        val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+                .collect(Collectors.toMap(
+                        o -> o.get("retning").asText(),
+                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
+
+        Assertions.assertThat(organiserteEnheter).hasSize(1);
+        assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
+    }
+
+    @Test
+    @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
-    void scenario31(){
+    void scenario31() {
         val inputLeder = ressursTestTemplate("");
 
         kafkaUtils.sendFromKafkaMock(inputLeder);
@@ -91,7 +111,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
-    void scenario32(){
+    void scenario32() {
         kafkaUtils.sendFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 

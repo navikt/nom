@@ -1,0 +1,12 @@
+query {
+    organisasjonsenhet(where: {agressoId: "testId2"}) {
+        agressoId
+        navn
+        organiseringer(retning: over){
+            retning
+            organisasjonsenhet{
+                agressoId
+            }
+        }
+    }
+}

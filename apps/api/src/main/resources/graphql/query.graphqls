@@ -20,13 +20,13 @@ type Organisasjonsenhet {
     navn: String!
     gyldigFom: Date!
     gyldigTom: Date
-    organiseringer : [Organisering!]!
+    organiseringer (retning: Retning) : [Organisering!]!
     leder: [OrganisasjonsenhetsLeder!]!
     koblinger: [OrganisasjonsenhetsKobling!]!
 }
 
 type Organisering {
-    retning: String!
+    retning: Retning!
     organisasjonsenhet : Organisasjonsenhet!
     gyldigFom: Date!
     gyldigTom: Date

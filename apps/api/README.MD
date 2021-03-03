@@ -11,7 +11,7 @@ Kan hentes med dette shell scriptet. Krever jq installert (brew install jq)
     #!/bin/sh
     CTX=dev-gcp
     NS=nom
-    SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}'|grep ^nom-api|grep -v token|tail -1|cut -d ' ' -f1`
+    SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}' --context=${CTX} --namespace=${NS}|grep ^nom-api|grep -v token|tail -1|cut -d ' ' -f1`
     SECRET=`kubectl get secret $SECRET_NAME -o json --context=${CTX} --namespace=${NS}`
     CLIENT_ID=`echo $SECRET |jq '.data.AZURE_APP_CLIENT_ID' -r|base64 -d`
     TENANT_ID=`echo $SECRET |jq '.data.AZURE_APP_TENANT_ID' -r|base64 -d`
