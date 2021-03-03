@@ -97,7 +97,7 @@ Ressurs er en ansatt, innleid etc person som utfører arbeid i NAV.
 {
     "fid": "b9451eba-1409-46ef-b6ac-fcfceae4c944",
     "fnr": "07087225111",
-    "navn": "Roy Grini"
+    "navn": "Roy Grini",
     "navIdent": "g155033",
     "lederFor": [
         {
@@ -116,7 +116,7 @@ Ressurs er en ansatt, innleid etc person som utfører arbeid i NAV.
                 "fom":"2012-05-01",
                 "til": "2014-05-01"
             }
-        }
+        },
         {
             "fid": "5a17ec4e-4b15-4bab-b647-4d71b235c92a",
             "type": "Fast ansatt",
@@ -145,8 +145,8 @@ Ressurs er en ansatt, innleid etc person som utfører arbeid i NAV.
             "periode": {
                 "fom": "2017-02-01"
             }
-        },
-    ],
+        }
+    ]
 }
 ----
 
@@ -177,23 +177,23 @@ En unik id for hver hendelse, denne kan være samme id som da er benyttet som re
     "opprettetAv":"G155033",
     "timestamp":"2020-11-24T13:37:00Z",
     "beroerteEnheter": [
-        "fid": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
-        "fid": "a2db7cad-9401-40f9-8e8e-0c2fb2d90720"
+      { "fid": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63" },
+      { "fid": "a2db7cad-9401-40f9-8e8e-0c2fb2d90720" }
     ],
     "beroerteRessurser": [
-        "fid": "b9451eba-1409-46ef-b6ac-fcfceae4c944",
-        "fid": "f598ffec-d0fa-4b9b-8d70-b1ee81e34dec",
-        "fid": "82d6fd8f-569b-4c35-839d-b27fef411a23",
+        { "fid": "b9451eba-1409-46ef-b6ac-fcfceae4c944" },
+        { "fid": "f598ffec-d0fa-4b9b-8d70-b1ee81e34dec" },
+        { "fid": "82d6fd8f-569b-4c35-839d-b27fef411a23" },
         ...
     ],
     "ustrukturertInfo": {
-        "apiMetode": "mergeEnheter"
-        "parameter": [
+        "apiMetode": "mergeEnheter",
+        "parameter": {
             "utgaaendeEnhet": "ec9c94a3-80ee-44cb-aeaa-9e6d04f5cf63",
             "mottakendeEnhet": "a2db7cad-9401-40f9-8e8e-0c2fb2d90720",
-            "flyttRessurserTilMottakendeEnhet": "true"
+            "flyttRessurserTilMottakendeEnhet": "true",
             "gjelderFra": "2019-06-01"
-        ],
+        }
     }
 }
 ----

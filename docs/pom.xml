@@ -27,7 +27,6 @@
                             <doctype>docbook</doctype>
                             <preserveDirectories>true</preserveDirectories>
                             <relativeBaseDir>true</relativeBaseDir>
-                            <imagesDir>./</imagesDir>
                         </configuration>
 
                         <executions>
