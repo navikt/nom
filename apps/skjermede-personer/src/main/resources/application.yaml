@@ -112,3 +112,12 @@ tps:
     channel-name: ${TPS_MQ_QUEUE_CHANNEL:DEV.APP.SVRCONN}
     queue-name: ${TPS_MQ_QUEUE_NAME:DEV.QUEUE.1}
     username: ${TPS_MQ_QUEUE_USERNAME:app}
+
+nom:
+  libs:
+    utils:
+      common:
+        app:
+          load-properties: false
+        kafka:
+          load-properties: false

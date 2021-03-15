@@ -7,7 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/nom-ressurser/**'
-      - '.nais/*/nom-ressuser.yaml'
+      - '.nais/*/nom-ressurser.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-ressurser:${{ github.sha }}
@@ -30,7 +30,7 @@ jobs:
       - name: JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 15
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token

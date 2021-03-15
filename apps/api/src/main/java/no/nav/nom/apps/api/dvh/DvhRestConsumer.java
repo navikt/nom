@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
-import org.springframework.boot.availability.LivenessState;
+import org.springframework.boot.availability.ReadinessState;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +55,8 @@ public class DvhRestConsumer {
 
         if (!initialLoadComplete.get()) {
             initialLoadComplete.set(true);
-            AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.CORRECT);
-            log.info("Changing to LivenessState.CORRECT");
+            AvailabilityChangeEvent.publish(appEventPublisher, CACHE, ReadinessState.ACCEPTING_TRAFFIC);
+            log.info("Changing to ReadinessState.ACCEPTING_TRAFFIC");
         }
     }
 

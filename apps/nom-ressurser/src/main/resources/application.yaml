@@ -67,3 +67,12 @@ no.nav:
           discoveryurl: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
           accepted_audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
           proxyurl:
+
+nom:
+  libs:
+    utils:
+      common:
+        app:
+          load-properties: false
+        kafka:
+          load-properties: false

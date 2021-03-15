@@ -19,12 +19,12 @@ spec:
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
     - name: SPRING_KAFKA_TOPIC_RESSURS_NAME
       value: aapen-nom-ressurs-v1
-    - name: VAULT_USER_SECRET_PATH
-      value: serviceuser/dev/srvnom-ressurser
     - name: STACK
       value: preprod
     - name: DVH_ENDPOINT
       value: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash
   image: {{image}}
   port: 8080
   ingresses:
@@ -61,8 +61,8 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /apikey/appdynamics/dev
-        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: /serviceuser/data/dev/srvnom-ressurser
+        mountPath: /var/run/secrets/nais.io/srv
   prometheus:
     enabled: true
     path: internal/prometheus

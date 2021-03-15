@@ -1,6 +1,7 @@
 package no.nav.nom.skjermede.personer.tps.config;
 
 import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.jms.JmsConstants;
 import com.ibm.msg.client.wmq.WMQConstants;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -50,6 +51,7 @@ public class JmsConfig {
         connectionFactory.setTransportType(WMQConstants.WMQ_CM_CLIENT);
         connectionFactory.setCCSID(CCSID);
         connectionFactory.setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, CCSID);
+        connectionFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false);
 
         val adapter = new UserCredentialsConnectionFactoryAdapter();
         adapter.setTargetConnectionFactory(connectionFactory);

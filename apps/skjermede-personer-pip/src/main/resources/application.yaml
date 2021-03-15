@@ -28,3 +28,11 @@ management:
     prometheus:
       enabled: true
 spring.aop.auto: false
+nom:
+  libs:
+    utils:
+      common:
+        app:
+          load-properties: false
+        kafka:
+          load-properties: false
