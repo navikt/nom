@@ -27,7 +27,7 @@ class PipControllerTest {
     @MockBean
     private Cache cache;
 
-    @DisplayName("Tester gyldig scenario")
+    /*@DisplayName("Tester gyldig scenario")
     @Test
     void scenario11() throws Exception{
         val path = UriComponentsBuilder.newInstance()
@@ -55,6 +55,6 @@ class PipControllerTest {
                 .build().toString();
 
         mockMvc.perform(post(path)).andExpect(status().isBadRequest());
-    }
+    }*/
 
 }

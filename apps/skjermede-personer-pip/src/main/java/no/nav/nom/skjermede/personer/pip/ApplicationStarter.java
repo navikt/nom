@@ -11,5 +11,6 @@ public class ApplicationStarter {
     public static void main(String[] args) {
         readVaultSrvProps();
         SpringApplication.run(ApplicationStarter.class);
+
     }
 }

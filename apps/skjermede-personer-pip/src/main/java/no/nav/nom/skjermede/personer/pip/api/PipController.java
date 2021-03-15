@@ -24,7 +24,7 @@ public class PipController {
     private final String MISSING_PERSONIDENT = "Personident mangler";
     private final Cache cache;
 
-    @Deprecated
+    /*@Deprecated
     @ApiResponses({
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -51,5 +51,5 @@ public class PipController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
         }
         return cache.isSkjermet(personident);
-    }
+    }*/
 }
