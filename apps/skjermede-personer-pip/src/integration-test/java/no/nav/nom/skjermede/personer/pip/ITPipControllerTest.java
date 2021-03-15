@@ -24,7 +24,7 @@ public class ITPipControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    /*@Test
+    @Test
     void get_skjermet_status_for_ikke_skjermet_personident() throws Exception {
         mockMvc.perform(
                 get("/skjermet")
@@ -46,5 +46,5 @@ public class ITPipControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(Boolean.TRUE.toString()))
                 .andDo(print());
-    }*/
+    }
 }
