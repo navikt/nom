@@ -8,25 +8,34 @@ import org.apache.kafka.common.errors.RetriableException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.listener.ConsumerSeekAware;
+import org.springframework.kafka.listener.ConsumerSeekAware.ConsumerSeekCallback;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
 @Slf4j
-public class SkjermedePersonerListener {
+public class SkjermedePersonerListener implements ConsumerSeekAware {
 
     private final Cache cache;
 
-    @KafkaListener(groupId = "skjermede-personer-pip", topicPartitions = @TopicPartition(topic = "aapen-skjermede-personer-v1", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")))
+    @KafkaListener(groupId = "skjermede-personer-pip", topicPartitions = @TopicPartition(topic = "aapen-skjermede-personer-v1"))
     public void onMessage(ConsumerRecord<String, SkjermetPersonDTO> record) {
         try {
             cache.store(record.key(), new Skjermingsperiode(record.value().getSkjermetFra(), record.value().getSkjermetTil()));
             log.info("Received offset " + record.offset());
-        } catch(RetriableException e) {
+        } catch (RetriableException e) {
             // no-op
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("Error fetching event with key: " + record.key() + ". SkjermetFra: " + record.value().getSkjermetFra() + ", skjermetTil: " + record
-            .value().getSkjermetTil() + ". Exception: " + e);
+                    .value().getSkjermetTil() + ". Exception: " + e);
         }
+    }
+
+    @Override
+    public void onPartitionsAssigned(Map<org.apache.kafka.common.TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
+        assignments.keySet().forEach(p -> callback.seekToBeginning(p.topic(), p.partition()));
     }
 }
