@@ -21,7 +21,7 @@ public class SkjermedePersonerListener implements ConsumerSeekAware {
 
     private final Cache cache;
 
-    @KafkaListener(groupId = "skjermede-personer-pip", topicPartitions = @TopicPartition(topic = "aapen-skjermede-personer-v1"))
+    @KafkaListener(groupId = "skjermede-personer-pip", topicPartitions = @TopicPartition(topic = "aapen-skjermede-personer-v1", partitions = "0"))
     public void onMessage(ConsumerRecord<String, SkjermetPersonDTO> record) {
         try {
             cache.store(record.key(), new Skjermingsperiode(record.value().getSkjermetFra(), record.value().getSkjermetTil()));
