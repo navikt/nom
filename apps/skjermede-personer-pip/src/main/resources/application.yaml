@@ -3,7 +3,8 @@ app:
     username: ${app.username}
     password: ${app.password}
     group-id-prefix: ${nais.app.name}-${nais.namespace}
-    topic.skjermet.name: aapen-skjermede-personer-v1
+  skjermedePersoner:
+    topicName: aapen-skjermede-personer-v1
 spring.kafka:
   properties:
     security.protocol: SASL_SSL
@@ -18,15 +19,21 @@ spring.kafka:
     value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     properties:
       spring.json.trusted.packages: '*'
+    auto-offset-reset: earliest
 management:
   endpoints:
     enabled-by-default: false
     web:
       base-path: /internal
-      exposure.include: prometheus
+      exposure.include: prometheus, health
   endpoint:
     prometheus:
       enabled: true
+    health:
+      enabled: true
+      show-details: always
+      probes:
+        enabled: true
 spring.aop.auto: false
 nom:
   libs:

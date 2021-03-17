@@ -12,8 +12,5 @@ public class NaisActuators {
 
     @GetMapping("/isAlive")
     public void isAlive() {}
-
-    @GetMapping("/isReady")
-    public void isReady() {}
 }
 

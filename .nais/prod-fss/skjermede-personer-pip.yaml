@@ -22,12 +22,12 @@ spec:
     max: 1
     cpuThresholdPercentage: 50
   liveness:
-    path: internal/isAlive
+    path: internal/health/liveness
     initialDelay: 60
     periodSeconds: 5
     failureThreshold: 5
   readiness:
-    path: internal/isReady
+    path: internal/health/readiness
     initialDelay: 80
     periodSeconds: 5
     timeout: 5
