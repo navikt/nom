@@ -61,7 +61,7 @@ public class PipController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     @ApiOperation(
-            value = "Sjekker hvorvidt oppgitt person er skjermet",
+            value = "Sjekker hvorvidt en liste av personer er skjermet",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping("/skjermetBulk")
     public Map<String, Boolean> isSkjermetBulk(@RequestBody final SkjermetDataBulkRequestDTO requestDTO){
@@ -70,6 +70,6 @@ public class PipController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
         }
         return personidenter.stream()
-                .collect(Collectors.toMap(o-> o, cache::isSkjermet));
+                .collect(Collectors.toUnmodifiableMap(o-> o, cache::isSkjermet));
     }
 }
