@@ -50,7 +50,7 @@ public class PipController {
     @PostMapping("/skjermet")
     public boolean isSkjermetPost(@ApiParam(value = "Fødselsnummeret til personen", required = true) @RequestBody final SkjermetDataRequestDTO requestDTO) {
         val personident = requestDTO.getPersonident();
-        if(personident == null){
+        if (personident == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
         }
         return cache.isSkjermet(personident);
@@ -64,12 +64,12 @@ public class PipController {
             value = "Sjekker hvorvidt en liste av personer er skjermet",
             produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping("/skjermetBulk")
-    public Map<String, Boolean> isSkjermetBulk(@RequestBody final SkjermetDataBulkRequestDTO requestDTO){
+    public Map<String, Boolean> isSkjermetBulk(@RequestBody final SkjermetDataBulkRequestDTO requestDTO) {
         val personidenter = requestDTO.getPersonidenter();
-        if(personidenter == null || personidenter.isEmpty()){
+        if (personidenter == null || personidenter.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
         }
         return personidenter.stream()
-                .collect(Collectors.toUnmodifiableMap(o-> o, cache::isSkjermet));
+                .collect(Collectors.toUnmodifiableMap(o -> o, cache::isSkjermet));
     }
 }

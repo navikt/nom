@@ -43,3 +43,6 @@ nom:
           load-properties: false
         kafka:
           load-properties: false
+server:
+  error:
+    include-message: always
