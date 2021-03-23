@@ -55,13 +55,6 @@ public class DvhRepository {
                 .findAny();
     }
 
-    public Optional<DvhRessurs> getRessursByRessursId(String ressursId){
-        return ressursByNavIdent.keySet().stream()
-                .filter(s -> s.contains(ressursId))
-                .findAny()
-                .map(ressursByNavIdent::get);
-    }
-
     public Collection<DvhRessurs> getAllRessurser(){
         return ressursByNavIdent.values();
     }
@@ -88,13 +81,13 @@ public class DvhRepository {
                 .filter((entry) ->{
                     val enhet = getEnhetByAgressoId(entry.getKey());
                     entry.getValue().forEach(l -> {
-                        val ressurs = getRessursByRessursId(l.getRessursId());
+                        val ressurs = getRessursByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet og ressurs mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
                         } else if(enhet.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Enhet mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet mangler");
                         } else if(ressurs.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", ressursId: "+l.getRessursId()+", "+"Ressurs mangler");
+                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
                             entry.getValue().remove(l);
                         }
                     });
@@ -134,13 +127,13 @@ public class DvhRepository {
                 koblinger.stream()
                 .filter(k -> {
                         val organisasjonsenhet = getEnhetByAgressoId(k.getAgressoId()).orElse(null);
-                        val dvhRessurs = getRessursByRessursId(k.getRessursId()).orElse(null);
+                        val dvhRessurs = getRessursByNavIdent(k.getNavIdent()).orElse(null);
                         if (organisasjonsenhet == null && dvhRessurs == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet og ressurs mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Enhet mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet mangler");
                         } else if (dvhRessurs == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", ressursId: " + k.getRessursId() + ", " + "Ressurs mangler");
+                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
                         } else {
                             return true;
                         }
@@ -157,9 +150,9 @@ public class DvhRepository {
         koblinger.clear();
     }
 
-    public List<DvhKobling> getKoblingerByRessursId(String resourceId) {
+    public List<DvhKobling> getKoblingerByNavIdent(String navIdent) {
         return getAllKoblinger().stream()
-                .filter(s -> s.getRessursId().equals(resourceId))
+                .filter(s -> s.getNavIdent().equals(navIdent))
                 .collect(Collectors.toUnmodifiableList());
     }
 }

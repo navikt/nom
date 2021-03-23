@@ -10,6 +10,7 @@
         "stilling2nomResult": [
           {
             "RESOURCE_ID": "estNavIdent",
+            "NAV_ID": "testNavIdent",
             "FRA_DATO": "2021-01-01",
             "TIL_DATO": "2099-12-31",
             "ANSETTELSESTYPE_BESK": "Fast",
@@ -25,6 +26,7 @@
           },
           {
             "RESOURCE_ID": "estNavIdent2",
+            "NAV_ID": "testNavIdent2",
             "FRA_DATO": "2021-01-01",
             "TIL_DATO": "2099-12-31",
             "ANSETTELSESTYPE_BESK": "Fast",

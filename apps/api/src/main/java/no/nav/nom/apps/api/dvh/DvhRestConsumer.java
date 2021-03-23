@@ -144,22 +144,22 @@ public class DvhRestConsumer {
     }
 
     private boolean validateLeder(JsonNode e){
-        val validate = e.hasNonNull("leder_resource_id") && e.hasNonNull("orgnode_kode");
+        val validate = e.hasNonNull("leder_nav_id") && e.hasNonNull("orgnode_kode");
         if(validate){
             return true;
         } else {
-            log.warn("Ugyldig leder fra dvh, leder_resource_id: "+e.get("leder_resource_id").asText()+", orgnode_kode: "+e.get("orgnode_kode").asText());
+            log.warn("Ugyldig leder fra dvh, leder_nav_id: "+e.get("leder_nav_id").asText()+", orgnode_kode: "+e.get("orgnode_kode").asText());
             return false;
         }
     }
 
     private boolean validateKobling(JsonNode e){
-        val validate = e.hasNonNull("RESOURCE_ID") && e.hasNonNull("FRA_DATO")
+        val validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO")
                 && e.hasNonNull("ORGENHET");
         if(validate){
             return true;
         } else {
-            log.warn("Ugyldig kobling fra dvh, RESOURCE_ID: "+e.get("RESOURCE_ID").asText()+", ORGENHET: "+e.get("ORGENHET").asText()
+            log.warn("Ugyldig kobling fra dvh, NAV_ID: "+e.get("NAV_ID").asText()+", ORGENHET: "+e.get("ORGENHET").asText()
             +", FRA_DATO: "+e.get("FRA_DATO").asText());
             return false;
         }
