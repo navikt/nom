@@ -1,15 +1,26 @@
 app:
   dvh:
     topic: nom.dvhsource-v1
-    baseUrl: ${DVH_STILLINGER_URL}
+    baseUrl: ${NOM_DVH_BASEURL}
+    aadClientId: ${NOM_DVH_CLIENT_ID}/.default
+  pdl:
+    baseUrl: ${PDL_BASEURL}
+    tema: GEN
 
-aad:
-  issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
-  clientId: ${AZURE_APP_CLIENT_ID}
-  clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-  jwk: ${AZURE_APP_JWK}
-  grantType: client_credentials
-  dvhScope: ${DVH_AAD_SCOPE}/.default
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    clientId: ${AZURE_APP_CLIENT_ID}
+    clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    jwk: ${AZURE_APP_JWK}
+    grantType: client_credentials
+  sts:
+    issuerBaseUrl: ${STS_BASEURL}
+    username: ${SERVICEUSER_USERNAME}
+    password: ${SERVICEUSER_PASSWORD}
+    grantType: client_credentials
+    scope: openid
+
 
 graphql:
   playground:
@@ -36,5 +47,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${aad.issuerBaseUrl}/v2.0
+          issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}

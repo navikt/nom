@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql;
+package no.nav.nom.apps.api.graphql.common;
 
 import graphql.ErrorClassification;
 import graphql.ErrorType;

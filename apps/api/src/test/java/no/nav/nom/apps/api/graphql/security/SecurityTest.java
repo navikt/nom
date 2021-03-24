@@ -18,7 +18,7 @@ import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisplayName("GraphQL.Sikkerhet")
-class SecurityTest extends SecurityTestBase{
+class SecurityTest extends SecurityTestBase {
 
     private static final String organiseringResource = "organisasjonsenhet/scenario41.graphql";
     private static final String ressursResource = "ressurs/scenario42.graphql";
@@ -27,7 +27,7 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt manglende token, får man Unauthenticated error i responsen")
-    public void scenario11(){
+    public void scenario11() {
         postAndAssertResponse(organiseringResource, "");
         postAndAssertResponse(ressursResource, "");
     }
@@ -35,8 +35,8 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt feil signert token, får man Unauthenticated error i responsen")
-    public void scenario12(){
-        val rsaKey =  new RSAKeyGenerator(2048)
+    public void scenario12() {
+        val rsaKey = new RSAKeyGenerator(2048)
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID("annenKey")
                 .generate();
@@ -52,7 +52,7 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt ugyldig issuer i token, får man Unauthenticated error i responsen")
-    public void scenario22(){
+    public void scenario22() {
         val claims = securityTestUtils.validJwtClaims();
         claims.issuer("annenIssuer");
         val token = securityTestUtils.createToken(claims);
@@ -64,7 +64,7 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt ugyldig audience i token, får man Unauthenticated error i responsen")
-    public void scenario25(){
+    public void scenario25() {
         val claims = securityTestUtils.validJwtClaims();
         claims.audience("ugyldigAudience");
         val token = securityTestUtils.createToken(claims);
@@ -76,7 +76,7 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt utløpt token, får man Unauthenticated error i responsen")
-    public void scenario26(){
+    public void scenario26() {
         val claims = securityTestUtils.validJwtClaims();
         claims.expirationTime(Date.from(Instant.now().minusSeconds(60 * 60)));
         val token = securityTestUtils.createToken(claims);
@@ -88,7 +88,7 @@ class SecurityTest extends SecurityTestBase{
     @Test
     @SneakyThrows
     @DisplayName("Gitt not before time frem i tid i tokenet, får man Unauthenticated error i responsen")
-    public void scenario27(){
+    public void scenario27() {
         val claims = securityTestUtils.validJwtClaims();
         claims.notBeforeTime(Date.from(Instant.now().plusSeconds(60 * 60)));
         val token = securityTestUtils.createToken(claims);
@@ -98,7 +98,7 @@ class SecurityTest extends SecurityTestBase{
     }
 
     @SneakyThrows
-    private void postAndAssertResponse(String resource, String token){
+    private void postAndAssertResponse(String resource, String token) {
         val response = graphQLTestTemplate.withBearerAuth(token).postForResource(resource);
         assertThat(response, hasErrors());
         response.assertThatDataField().isNull();

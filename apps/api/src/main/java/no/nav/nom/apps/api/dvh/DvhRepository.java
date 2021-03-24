@@ -37,25 +37,25 @@ public class DvhRepository {
         return enheterByNumber.values();
     }
 
-    public List<DvhOrganisering> getOrganiseringerByAgressoId(String agressoId){
+    public List<DvhOrganisering> getOrganiseringerByAgressoId(String agressoId) {
         return organiseringerByAgressoId.getOrDefault(agressoId, Collections.emptyList());
     }
 
-    public void saveRessurs(DvhRessurs ressurs){
+    public void saveRessurs(DvhRessurs ressurs) {
         ressursByNavIdent.put(ressurs.getNavIdent(), ressurs);
     }
 
-    public Optional<DvhRessurs> getRessursByNavIdent(String navIdent){
+    public Optional<DvhRessurs> getRessursByNavIdent(String navIdent) {
         return Optional.ofNullable(ressursByNavIdent.get(navIdent));
     }
 
-    public Optional<DvhRessurs> getRessursByPersonIdent(String personIdent){
+    public Optional<DvhRessurs> getRessursByPersonIdent(String personIdent) {
         return ressursByNavIdent.values().stream()
                 .filter(r -> r.getPersonIdent().equals(personIdent))
                 .findAny();
     }
 
-    public Collection<DvhRessurs> getAllRessurser(){
+    public Collection<DvhRessurs> getAllRessurser() {
         return ressursByNavIdent.values();
     }
 
@@ -63,22 +63,22 @@ public class DvhRepository {
         return koblinger;
     }
 
-    public List<DvhKobling> getKoblingerByAgressoId(String enhetId){
+    public List<DvhKobling> getKoblingerByAgressoId(String enhetId) {
         return koblinger.stream().filter(x -> x.getAgressoId().equals(enhetId)).collect(Collectors.toUnmodifiableList());
     }
 
-    public List<DvhLeder> getLederByAgressoId(String enhetNr){
+    public List<DvhLeder> getLederByAgressoId(String enhetNr) {
         return Optional.ofNullable(lederByEnhetNr.get(enhetNr))
                 .orElse(Collections.emptyList());
     }
 
-    public void saveOrganisasjonsenheter(Map<String, DvhOrganisasjonsenhet> orgenheter){
+    public void saveOrganisasjonsenheter(Map<String, DvhOrganisasjonsenhet> orgenheter) {
         enheterByNumber = orgenheter;
     }
 
-    public void saveLedere(Map<String, List<DvhLeder>> lederByEnhetNr){
+    public void saveLedere(Map<String, List<DvhLeder>> lederByEnhetNr) {
         this.lederByEnhetNr = lederByEnhetNr.entrySet().stream()
-                .filter((entry) ->{
+                .filter((entry) -> {
                     val enhet = getEnhetByAgressoId(entry.getKey());
                     entry.getValue().forEach(l -> {
                         val ressurs = getRessursByNavIdent(l.getNavIdent());
@@ -96,33 +96,33 @@ public class DvhRepository {
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void saveOrganiseringer(Map<String, List<DvhOrganisering>> organiseringerByEnhet){
+    public void saveOrganiseringer(Map<String, List<DvhOrganisering>> organiseringerByEnhet) {
         this.organiseringerByAgressoId = organiseringerByEnhet.entrySet().stream()
                 .filter(entry -> {
                     entry.setValue(
                             entry.getValue().stream()
-                            .filter(o -> {
-                                val overEnhet = getEnhetByAgressoId(o.getOverenhetNummer());
-                                val underEnhet = getEnhetByAgressoId(o.getUnderenhetNummer());
-                                if(overEnhet.isEmpty() && underEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Over- og underenhet mangler");
-                                } else if(overEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Overenhet mangler");
-                                } else if(underEnhet.isEmpty()){
-                                    log.warn("Organisering relasjon mislyktes, overenhet: "+o.getOverenhetNummer()+", underenhet: "+o.getUnderenhetNummer()+", "+"Underenhet mangler");
-                                }else {
-                                    return true;
-                                }
-                                return false;
-                            })
-                            .collect(Collectors.toList())
+                                    .filter(o -> {
+                                        val overEnhet = getEnhetByAgressoId(o.getOverenhetNummer());
+                                        val underEnhet = getEnhetByAgressoId(o.getUnderenhetNummer());
+                                        if (overEnhet.isEmpty() && underEnhet.isEmpty()) {
+                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Over- og underenhet mangler");
+                                        } else if (overEnhet.isEmpty()) {
+                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Overenhet mangler");
+                                        } else if (underEnhet.isEmpty()) {
+                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Underenhet mangler");
+                                        } else {
+                                            return true;
+                                        }
+                                        return false;
+                                    })
+                                    .collect(Collectors.toList())
                     );
                     return !entry.getValue().isEmpty();
                 })
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void saveKoblinger(List<DvhKobling> koblinger){
+    public void saveKoblinger(List<DvhKobling> koblinger) {
         this.koblinger = Collections.synchronizedList(
                 koblinger.stream()
                 .filter(k -> {
@@ -143,7 +143,7 @@ public class DvhRepository {
         );
     }
 
-    public void clearRepository(){
+    public void clearRepository() {
         enheterByNumber.clear();
         ressursByNavIdent.clear();
         organiseringerByAgressoId.clear();

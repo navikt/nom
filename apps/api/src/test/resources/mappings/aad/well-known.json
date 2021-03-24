@@ -5,7 +5,9 @@
   },
   "response": {
     "status": 200,
-    "transformers": ["response-template"],
+    "transformers": [
+      "response-template"
+    ],
     "jsonBody": {
       "token_endpoint": "http://localhost:{{systemValue type='PROPERTY' key='wiremock.server.port'}}/aad/tenant/oauth2/v2.0/token",
       "token_endpoint_auth_methods_supported": [

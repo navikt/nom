@@ -62,7 +62,7 @@ public class DvhStateListener {
         }
     }
 
-    public boolean getInitialLoadStatus(){
+    public boolean getInitialLoadStatus() {
         return initialLoadComplete.get();
     }
 }

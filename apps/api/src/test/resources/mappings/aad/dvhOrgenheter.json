@@ -5,7 +5,9 @@
   },
   "response": {
     "status": 200,
-    "transformers": ["response-template"],
+    "transformers": [
+      "response-template"
+    ],
     "jsonBody": {
       "NOM_HRORG_HIERARKI_v1Result": [
         {
@@ -41,7 +43,7 @@
           "orgnode_niva_over": "ORGNIV3",
           "orgnode_status": "N"
         }
-        ]
+      ]
     },
     "headers": {
       "Content-Type": "application/json"

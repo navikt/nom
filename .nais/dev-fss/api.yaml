@@ -9,10 +9,20 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,kafka
-    - name: DVH_STILLINGER_URL
+    - name: NOM_DVH_BASEURL
       value: https://nom-dvh.dev-fss-pub.nais.io
-    - name: DVH_AAD_SCOPE
+    - name: NOM_DVH_CLIENT_ID
       value: 8db514b3-62dc-4ff8-895a-039067aa4a33
+    - name: STS_BASEURL
+      value: https://security-token-service.dev.adeo.no
+    - name: PDL_BASEURL
+      value: https://pdl-api.dev.intern.nav.no
+    - name: VAULT_USER_SECRET_PATH
+      value: serviceuser/dev/srvnom-api
+    - name: PDL_ENABLED
+      value: "false"
+  envFrom:
+    - secret: nom-api-serviceuser
   image: {{image}}
   port: 8080
   ingresses:

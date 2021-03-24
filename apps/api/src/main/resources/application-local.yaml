@@ -1,10 +1,22 @@
-aad:
-  issuerBaseUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
-  clientId: <dummy - Se README.MD>
-  clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-  jwk: <dummy - Se README.MD>
-  grantType: client_credentials
-  dvhScope: <dummy - Se README.MD>
+app:
+  pdl:
+    baseUrl: https://pdl-api.dev.intern.nav.no
+    tema: GEN
+pdl.enabled: false
+
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851
+    clientId: <dummy - Se README.MD>
+    clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    jwk: <dummy - Se README.MD>
+    grantType: client_credentials
+  sts:
+    issuerBaseUrl: https://security-token-service.dev.adeo.no
+    username: <dummy - Se README.MD>
+    password: <dummy - Se README.MD>
+    grantType: client_credentials
+    scope: <dummy - Se README.MD>
 
 proxy:
   host: 127.0.0.1
@@ -17,5 +29,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${aad.issuerBaseUrl}/v2.0
+          issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           accepted-audience: test1, api://test1

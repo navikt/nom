@@ -7,7 +7,7 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 
 public class ConverterUtils {
 
-    public static Organisasjonsenhet convert(DvhOrganisasjonsenhet orgEnht){
+    public static Organisasjonsenhet convert(DvhOrganisasjonsenhet orgEnht) {
         return Organisasjonsenhet.builder()
                 .agressoId(orgEnht.getAgressoId())
                 .navn(orgEnht.getNavn())
@@ -16,7 +16,7 @@ public class ConverterUtils {
                 .build();
     }
 
-    public static Ressurs convert(DvhRessurs dvhRessurs){
+    public static Ressurs convert(DvhRessurs dvhRessurs) {
         return Ressurs.builder()
                 .navIdent(dvhRessurs.getNavIdent())
                 .personIdent(dvhRessurs.getPersonIdent())

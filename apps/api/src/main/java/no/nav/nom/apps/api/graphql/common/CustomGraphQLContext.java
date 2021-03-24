@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql;
+package no.nav.nom.apps.api.graphql.common;
 
 import graphql.kickstart.execution.context.GraphQLContext;
 import lombok.Getter;
@@ -13,7 +13,6 @@ import javax.security.auth.Subject;
 @Getter
 @RequiredArgsConstructor
 public class CustomGraphQLContext implements GraphQLContext {
-
     private final Authentication authentication;
     private final DataLoaderRegistry dataLoaderRegistry;
 

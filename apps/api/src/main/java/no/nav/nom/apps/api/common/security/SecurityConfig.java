@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.common;
+package no.nav.nom.apps.api.common.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     @Bean
-    JwtAuthenticationProvider jwtAuthenticationProvider(Environment environment, OAuth2ResourceServerProperties oAuth2ResourceServerProperties){
+    JwtAuthenticationProvider jwtAuthenticationProvider(Environment environment, OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
         val audience = new HashSet<String>(List.of(environment.getRequiredProperty("spring.security.oauth2.resourceserver.jwt.accepted-audience", String[].class)));
         return new JwtAuthenticationProvider(JwtUtils.jwtDecoder(oAuth2ResourceServerProperties, audience));
     }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -37,7 +38,7 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source";
     private final long ONE_HOUR = 60 * 60 * 1000;
 
-    private final AadTokenRepository aadTokenRepository;
+    private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
@@ -106,7 +107,7 @@ public class DvhRestConsumer {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(aadTokenRepository.getDvhToken());
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getDvh().getAadClientId()));
 
         return restTemplate.exchange(appProperties.getDvh().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

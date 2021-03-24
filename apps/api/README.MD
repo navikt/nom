@@ -6,6 +6,7 @@ Kjør ApiStarter med VM options
     -Dspring.profiles.active=local
 
 ### Hente AAD properties
+
 Kan hentes med dette shell scriptet. Krever jq installert (brew install jq)
 
     #!/bin/sh
@@ -25,6 +26,7 @@ Kan hentes med dette shell scriptet. Krever jq installert (brew install jq)
     echo '  dvhScope: 8db514b3-62dc-4ff8-895a-039067aa4a33/.default'
 
 ### Kjøre med Fiddler Web Proxy for WebClient
+
 Sett opp Fiddler med 'capture HTTPS traffic' og 'Ignore server certificate errors (unsafe)'
 Under Connections, sett opp port 8866 (f.eks.), og 'Act as system proxy on startup'
 

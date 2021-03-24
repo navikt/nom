@@ -23,6 +23,12 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: dev-gcp
   webproxy: true
   ingresses:
     - https://nom-dvh.dev.intern.nav.no

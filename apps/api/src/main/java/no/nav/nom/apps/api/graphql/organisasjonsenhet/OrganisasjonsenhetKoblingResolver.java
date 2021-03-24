@@ -24,10 +24,10 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
                 .map(dvh -> {
                     val ressurs  = dvhRepository.getRessursByNavIdent(dvh.getNavIdent()).get();
                     return OrganisasjonsenhetsKobling.builder()
-                                    .ressurs(ConverterUtils.convert(ressurs))
-                                    .gyldigFom(dvh.getGyldigFom())
-                                    .gyldigTom(dvh.getGyldigTom())
-                                    .build();
+                            .ressurs(ConverterUtils.convert(ressurs))
+                            .gyldigFom(dvh.getGyldigFom())
+                            .gyldigTom(dvh.getGyldigTom())
+                            .build();
                 })
                 .collect(Collectors.toUnmodifiableList());
 

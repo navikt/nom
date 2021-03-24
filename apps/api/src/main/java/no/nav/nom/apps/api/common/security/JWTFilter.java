@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.common;
+package no.nav.nom.apps.api.common.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

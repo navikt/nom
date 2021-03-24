@@ -14,6 +14,20 @@ query HentRessursMedPersonIdent{
     }
 }
 
+query HentRessursMedNavn{
+    ressurs(where: {navIdent: "testNavIdent"}) {
+        navIdent
+        personIdent
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+    }
+}
+
 query HentRessursOgKoblinger {
     ressurs(where: {navIdent: "testNavIdent"}) {
         navIdent
