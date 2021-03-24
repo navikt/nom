@@ -7,14 +7,15 @@ import org.dataloader.DataLoaderRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-import javax.security.auth.Subject;
 import java.util.Optional;
+import javax.security.auth.Subject;
 
 @Getter
 @RequiredArgsConstructor
 public class CustomGraphQLContext implements GraphQLContext {
 
     private final Authentication authentication;
+    private final DataLoaderRegistry dataLoaderRegistry;
 
     @Override
     public Optional<Subject> getSubject() {
@@ -22,11 +23,11 @@ public class CustomGraphQLContext implements GraphQLContext {
     }
 
     @Override
-    public Optional<DataLoaderRegistry> getDataLoaderRegistry() {
-        return Optional.empty();
+    public DataLoaderRegistry getDataLoaderRegistry() {
+        return dataLoaderRegistry;
     }
 
-    public boolean isAuthenticated(){
+    public boolean isAuthenticated() {
         return authentication instanceof JwtAuthenticationToken && authentication.isAuthenticated();
     }
 }

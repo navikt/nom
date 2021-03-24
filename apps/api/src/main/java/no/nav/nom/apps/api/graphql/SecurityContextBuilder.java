@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.graphql;
 
 import graphql.kickstart.execution.context.GraphQLContext;
 import graphql.kickstart.servlet.context.GraphQLServletContextBuilder;
+import org.dataloader.DataLoaderRegistry;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -12,9 +13,10 @@ import javax.websocket.server.HandshakeRequest;
 
 @Component
 class SecurityContextBuilder implements GraphQLServletContextBuilder {
+
     @Override
     public GraphQLContext build(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        return new CustomGraphQLContext(SecurityContextHolder.getContext().getAuthentication());
+        return new CustomGraphQLContext(SecurityContextHolder.getContext().getAuthentication(), buildDataLoaderRegistry());
     }
 
     @Override
@@ -25,5 +27,10 @@ class SecurityContextBuilder implements GraphQLServletContextBuilder {
     @Override
     public GraphQLContext build() {
         return null;
+    }
+
+    private DataLoaderRegistry buildDataLoaderRegistry() {
+        DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
+        return dataLoaderRegistry;
     }
 }

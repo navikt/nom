@@ -26,7 +26,7 @@
         <ms-graph.version>2.8.1</ms-graph.version>
         <ow2-asm.version>9.1</ow2-asm.version>
         <spring-cloud.version>2020.0.2</spring-cloud.version>
-        <spring.graphql-version>8.1.1</spring.graphql-version>
+        <spring.graphql-version>11.0.0</spring.graphql-version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <checker-qual.version>3.11.0</checker-qual.version>
         <bouncycastle.version>1.68</bouncycastle.version>
