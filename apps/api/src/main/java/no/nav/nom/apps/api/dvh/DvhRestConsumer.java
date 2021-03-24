@@ -33,6 +33,7 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class DvhRestConsumer {
+
     public static final String CACHE = "cache-source";
     private final long ONE_HOUR = 60 * 60 * 1000;
 
@@ -46,8 +47,8 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedDelay = ONE_HOUR)
     @SneakyThrows
-    public void loadFromDvh(){
-        while (!dvhStateListener.getInitialLoadStatus()){
+    public void loadFromDvh() {
+        while (!dvhStateListener.getInitialLoadStatus()) {
             Thread.sleep(2000);
         }
         loadOrgenhetFromDvh();
@@ -60,7 +61,7 @@ public class DvhRestConsumer {
         }
     }
 
-    private void loadKoblingerFromDvh(){
+    private void loadKoblingerFromDvh() {
         val jsonStillinger = dvhExchange("/proxy/stillinger");
         val koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
@@ -70,7 +71,7 @@ public class DvhRestConsumer {
         dvhRepository.saveKoblinger(koblinger);
     }
 
-    private void loadOrgenhetFromDvh(){
+    private void loadOrgenhetFromDvh() {
         val jsonOrgenheter = dvhExchange("/proxy/enheter");
         val orgenheter = new HashMap<String, DvhOrganisasjonsenhet>(1000);
         val ledere = new HashMap<String, List<DvhLeder>>(1000);
@@ -78,17 +79,17 @@ public class DvhRestConsumer {
 
         StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI_v1Result").spliterator(), false)
                 .forEach(e -> {
-                    if(validateEnhet(e)) {
+                    if (validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
                         orgenheter.put(orgenhet.getAgressoId(), orgenhet);
                     }
 
-                    if(validateOrganisering(e)) {
+                    if (validateOrganisering(e)) {
                         val organisering = new DvhOrganisering(e);
                         putOrganisering(organiseringerByEnhet, organisering);
                     }
 
-                    if(validateLeder(e)) {
+                    if (validateLeder(e)) {
                         val leder = new DvhLeder(e);
                         if (ledere.containsKey(leder.getOrgEnhetNr())) {
                             ledere.get(leder.getOrgEnhetNr()).add(leder);
@@ -103,65 +104,70 @@ public class DvhRestConsumer {
         dvhRepository.saveOrganiseringer(organiseringerByEnhet);
     }
 
-    private JsonNode dvhExchange(String urlPath){
+    private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
         headers.setBearerAuth(aadTokenRepository.getDvhToken());
 
-        return restTemplate.exchange(appProperties.getDvh().getBaseUrl()+urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.getDvh().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
-    private void putOrganisering(Map<String, List<DvhOrganisering>> organiseringerByEnhet, DvhOrganisering organisering){
-        if (organiseringerByEnhet.containsKey(organisering.getOverenhetNummer())){
+    private void putOrganisering(Map<String, List<DvhOrganisering>> organiseringerByEnhet, DvhOrganisering organisering) {
+        if (organiseringerByEnhet.containsKey(organisering.getOverenhetNummer())) {
             organiseringerByEnhet.get(organisering.getOverenhetNummer()).add(organisering);
         } else {
             organiseringerByEnhet.put(organisering.getOverenhetNummer(), new LinkedList<>(List.of(organisering)));
         }
-        if (organiseringerByEnhet.containsKey(organisering.getUnderenhetNummer())){
+        if (organiseringerByEnhet.containsKey(organisering.getUnderenhetNummer())) {
             organiseringerByEnhet.get(organisering.getUnderenhetNummer()).add(organisering);
         } else {
             organiseringerByEnhet.put(organisering.getUnderenhetNummer(), new LinkedList<>(List.of(organisering)));
         }
     }
 
-    private boolean validateEnhet(JsonNode e){
-        val validate =  e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_navn");
-        if (validate){
+    private boolean validateEnhet(JsonNode e) {
+        val validate = e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_navn");
+        if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig enhet fra dvh, orgnode_kode: "+e.get("orgnode_kode").asText()+", orgnode_navn: "+e.get("orgnode_navn").asText());
+            log.warn("Ugyldig enhet fra dvh, orgnode_kode: " + getAsText(e, "orgnode_kode") + ", orgnode_navn: " + getAsText(e, "orgnode_navn"));
             return false;
         }
     }
 
-    private boolean validateOrganisering(JsonNode e){
+    private boolean validateOrganisering(JsonNode e) {
         val validate = e.hasNonNull("orgnode_kode_over") && e.hasNonNull("orgnode_kode");
-        if(validate){
+        if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig organisering fra dvh, orgnode_kode_over: "+e.get("orgnode_kode_over").asText()+", orgnode_kode: "+e.get("orgnode_kode").asText());
+            log.warn("Ugyldig organisering fra dvh, orgnode_kode_over: " + getAsText(e, "orgnode_kode_over") + ", orgnode_kode: " + getAsText(e, "orgnode_kode"));
             return false;
         }
     }
 
-    private boolean validateLeder(JsonNode e){
+    private boolean validateLeder(JsonNode e) {
         val validate = e.hasNonNull("leder_nav_id") && e.hasNonNull("orgnode_kode");
-        if(validate){
+        if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig leder fra dvh, leder_nav_id: "+e.get("leder_nav_id").asText()+", orgnode_kode: "+e.get("orgnode_kode").asText());
+            log.warn("Ugyldig leder fra dvh, leder_nav_id: " + getAsText(e, "leder_nav_id") + ", orgnode_kode: " + getAsText(e, "orgnode_kode"));
             return false;
         }
     }
 
-    private boolean validateKobling(JsonNode e){
+    private boolean validateKobling(JsonNode e) {
         val validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO")
                 && e.hasNonNull("ORGENHET");
-        if(validate){
+        if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig kobling fra dvh, NAV_ID: "+e.get("NAV_ID").asText()+", ORGENHET: "+e.get("ORGENHET").asText()
-            +", FRA_DATO: "+e.get("FRA_DATO").asText());
+            log.warn("Ugyldig kobling fra dvh, NAV_ID: " + getAsText(e, "NAV_ID") + ", ORGENHET: " + getAsText(e, "ORGENHET")
+                    + ", FRA_DATO: " + getAsText(e, "FRA_DATO"));
             return false;
         }
+    }
+
+    private String getAsText(JsonNode e, String field) {
+        JsonNode jsonNode = e.get(field);
+        return jsonNode == null ? "<null>" : jsonNode.asText();
     }
 }
