@@ -27,7 +27,7 @@ spec:
       rules:
         - application: nom-api
           namespace: nom
-          cluster: dev-gcp
+          cluster: prod-gcp
   webproxy: true
   ingresses:
     - https://nom-dvh.intern.nav.no
