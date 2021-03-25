@@ -78,13 +78,11 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>msal4j</artifactId>
-            <version>${azure-msal4j.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.graph</groupId>
             <artifactId>microsoft-graph</artifactId>
-            <version>${ms-graph.version}</version>
         </dependency>
 
         <dependency>

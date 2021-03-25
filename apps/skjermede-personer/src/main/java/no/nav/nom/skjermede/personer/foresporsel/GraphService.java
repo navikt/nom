@@ -1,19 +1,22 @@
 package no.nav.nom.skjermede.personer.foresporsel;
 
 import com.microsoft.graph.logger.LoggerLevel;
-import com.microsoft.graph.models.extensions.EmailAddress;
-import com.microsoft.graph.models.extensions.IGraphServiceClient;
-import com.microsoft.graph.models.extensions.ItemBody;
-import com.microsoft.graph.models.extensions.Message;
-import com.microsoft.graph.models.extensions.Recipient;
-import com.microsoft.graph.models.generated.BodyType;
-import com.microsoft.graph.requests.extensions.GraphServiceClient;
+import com.microsoft.graph.models.BodyType;
+import com.microsoft.graph.models.EmailAddress;
+import com.microsoft.graph.models.ItemBody;
+import com.microsoft.graph.models.Message;
+import com.microsoft.graph.models.Recipient;
+import com.microsoft.graph.models.User;
+import com.microsoft.graph.models.UserSendMailParameterSet;
+import com.microsoft.graph.requests.GraphServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.http.HttpHeaders;
+import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +26,12 @@ public class GraphService {
     private static final String AVSENDER = "noreply-skjerming@nav.no";
 
     public String getNavident(final String accessToken) {
-        return graphServiceClient(accessToken)
+        User user = graphServiceClient(accessToken)
                 .me()
                 .buildRequest()
                 .select("onPremisesSamAccountName")
-                .get().onPremisesSamAccountName;
+                .get();
+        return Objects.requireNonNull(user).onPremisesSamAccountName;
     }
 
     public void sendMail(final String content, final String recipient, final String accessToken) {
@@ -36,15 +40,17 @@ public class GraphService {
 
         graphServiceClient.getLogger().setLoggingLevel(LoggerLevel.ERROR);
         graphServiceClient.me()
-                .sendMail(message, null)
+                .sendMail(UserSendMailParameterSet.newBuilder()
+                        .withMessage(message)
+                        .withSaveToSentItems(false)
+                        .build())
                 .buildRequest()
                 .post();
     }
 
-    private IGraphServiceClient graphServiceClient(final String accessToken) {
+    private GraphServiceClient<Request> graphServiceClient(final String accessToken) {
         return GraphServiceClient.builder()
-                .authenticationProvider(httpRequest ->
-                    httpRequest.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken)))
+                .authenticationProvider(url -> CompletableFuture.completedFuture(accessToken))
                 .buildClient();
     }
 
