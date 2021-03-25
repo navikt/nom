@@ -7,10 +7,10 @@ metadata:
     team: nom
 spec:
   env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash
     - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-    - name: VAULT_USER_SECRET_PATH
-      value: serviceuser/dev/srvnom-skjermet
     - name: STACK
       value: preprod
   image: {{image}}
@@ -23,12 +23,12 @@ spec:
     max: 4
     cpuThresholdPercentage: 50
   liveness:
-    path: internal/isAlive
+    path: internal/health/liveness
     initialDelay: 60
     periodSeconds: 5
     failureThreshold: 5
   readiness:
-    path: internal/isReady
+    path: internal/health/readiness
     initialDelay: 60
     periodSeconds: 5
     timeout: 4
@@ -43,8 +43,8 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /apikey/appdynamics/dev
-        mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: /serviceuser/data/dev/srvnom-skjermet
+        mountPath: /var/run/secrets/nais.io/srv
   prometheus:
     enabled: true
     path: internal/prometheus

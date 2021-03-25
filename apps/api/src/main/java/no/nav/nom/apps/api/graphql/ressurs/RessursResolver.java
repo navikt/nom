@@ -7,9 +7,9 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.CustomGraphQLContext;
-import no.nav.nom.apps.api.graphql.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
+import no.nav.nom.apps.api.graphql.common.CustomGraphQLContext;
+import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ class RessursResolver implements GraphQLQueryResolver {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Ressurs>> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
-        if(((CustomGraphQLContext) env.getContext()).isAuthenticated()) {
+        if (((CustomGraphQLContext) env.getContext()).isAuthenticated()) {
             if (objectNode == null) {
                 return DataFetcherResult.<List<Ressurs>>newResult()
                         .data(dvhRepository.getAllRessurser().stream().map(ConverterUtils::convert).collect(Collectors.toUnmodifiableList()))
@@ -43,8 +43,7 @@ class RessursResolver implements GraphQLQueryResolver {
             return DataFetcherResult.<List<Ressurs>>newResult()
                     .data(result)
                     .build();
-        }
-        else {
+        } else {
             return DataFetcherResult.<List<Ressurs>>newResult()
                     .error(ErrorCode.UNAUTHENTICATED.construct(env, "Missing or invalid token"))
                     .build();

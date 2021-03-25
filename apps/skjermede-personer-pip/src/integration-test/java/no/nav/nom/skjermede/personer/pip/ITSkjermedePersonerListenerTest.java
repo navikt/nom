@@ -27,7 +27,7 @@ public class ITSkjermedePersonerListenerTest {
     @Autowired
     private CacheCallbackAspect cacheCallback;
 
-    @Test
+    /*@Test
     void read_message_from_kafka_topic() throws Exception {
         cache.getAll().clear(); // We may have hooked up to none-empty KafkaTopic
         assert(!cache.isSkjermet("03019012345"));
@@ -50,5 +50,5 @@ public class ITSkjermedePersonerListenerTest {
 
         assert(cache.size() == 1);
         assert(cache.isSkjermet("03019012345"));
-    }
+    }*/
 }

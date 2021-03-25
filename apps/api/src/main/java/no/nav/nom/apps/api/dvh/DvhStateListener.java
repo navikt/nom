@@ -7,17 +7,12 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
-import no.nav.nom.contract.dvh.*;
+import no.nav.nom.contract.dvh.DvhEvent;
+import no.nav.nom.contract.dvh.Ressurs;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.springframework.boot.availability.AvailabilityChangeEvent;
-import org.springframework.boot.availability.LivenessState;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
@@ -67,7 +62,7 @@ public class DvhStateListener {
         }
     }
 
-    public boolean getInitialLoadStatus(){
+    public boolean getInitialLoadStatus() {
         return initialLoadComplete.get();
     }
 }

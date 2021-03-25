@@ -9,13 +9,13 @@ import java.time.LocalDate;
 @Value
 public class DvhKobling {
 
-    private String ressursId;
+    private String navIdent;
     private String agressoId;
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
     public DvhKobling(JsonNode node) {
-        ressursId = node.get("RESOURCE_ID").asText();
+        navIdent = node.get("NAV_ID").asText();
         agressoId = node.get("ORGENHET").asText();
         gyldigFom = LocalDate.parse(node.get("FRA_DATO").asText());
         val gyldigTomText = node.get("TIL_DATO").asText();

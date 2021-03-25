@@ -37,7 +37,7 @@ import java.util.UUID;
 import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselController.ANSATT_NOT_ACTIVE_MESSAGE;
 import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselController.TILKNYTTET_FORESPORSEL_NOT_FOUND_MESSAGE;
 import static no.nav.nom.skjermede.personer.foresporsel.api.v1.ForesporselTestUtils.TILKNYTTET_RESSURS;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;

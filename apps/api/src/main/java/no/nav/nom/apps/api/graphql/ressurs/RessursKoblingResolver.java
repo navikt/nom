@@ -16,20 +16,20 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class RessursKoblingResolver implements GraphQLResolver<Ressurs>{
+public class RessursKoblingResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<RessursKobling>> koblinger(Ressurs ressurs, DataFetchingEnvironment env) {
-        final List<RessursKobling> result = dvhRepository.getKoblingerByRessursId(ressurs.getNavIdent().substring(1))
+        final List<RessursKobling> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
                 .stream()
                 .map(dvh -> {
                     val orgenhet = dvhRepository.getEnhetByAgressoId(dvh.getAgressoId()).get();
                     return RessursKobling.builder()
-                                    .organisasjonsenhet(ConverterUtils.convert(orgenhet))
-                                    .gyldigFom(dvh.getGyldigFom())
-                                    .gyldigTom(dvh.getGyldigTom())
-                                    .build();
+                            .organisasjonsenhet(ConverterUtils.convert(orgenhet))
+                            .gyldigFom(dvh.getGyldigFom())
+                            .gyldigTom(dvh.getGyldigTom())
+                            .build();
                 })
                 .collect(Collectors.toUnmodifiableList());
 

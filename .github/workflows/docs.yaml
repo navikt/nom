@@ -6,6 +6,7 @@ on:
       - 'master'
     paths:
       - 'docs/**'
+      - '.github/workflows/docs.yaml'
 
 jobs:
   build-publish:
@@ -17,7 +18,7 @@ jobs:
       - name: JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 15
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token
@@ -28,9 +29,11 @@ jobs:
           mkdir public
           mv docs/target/ekstern/index.html public/index.html
           mv docs/target/intern/index.html public/index-intern.html
+          mv docs/target/intern/roy-nom-event-struktur.html public/roy-nom-event-struktur.html
+          mv docs/target/intern/images public/images
       - name: Deploy
         if: success()
-        uses: crazy-max/ghaction-github-pages@v2.2.0
+        uses: crazy-max/ghaction-github-pages@v2.3.0
         with:
           target_branch: gh-pages
           build_dir: public

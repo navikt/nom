@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo npm install -g snyk
           snyk auth ${SNYK_TOKEN}
-          snyk monitor --severity-threshold=${SEVERITY_TRESHOLD} --org=org-6kx --docker navikt/java:14-appdynamics
+          snyk monitor --severity-threshold=${SEVERITY_TRESHOLD} --org=org-6kx --docker navikt/java:15
         continue-on-error: false
 
   snyk-monitor-maven:
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.1
       - name: Cache Depdendencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -37,6 +37,6 @@ jobs:
       - name: JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 15
       - name: Snyk monitor Maven
         run: mvn snyk:monitor -Dsnyk-api-token=${{ secrets.SNYK_TOKEN }} --batch-mode

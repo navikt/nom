@@ -11,21 +11,25 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.ProxyProvider;
+import reactor.netty.transport.ProxyProvider;
 
 @Configuration
 public class AppConfig {
     @Bean
-    public RestTemplate restTemplate(){ return new RestTemplate(); }
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 
     @Bean
     @Profile("!proxy")
     @ConditionalOnMissingBean
-    public WebClient webClient(){ return WebClient.create(); }
+    public WebClient webClient() {
+        return WebClient.create();
+    }
 
-    @Value( "${proxy.host:DEFAULT_NONE}" )
+    @Value("${proxy.host:DEFAULT_NONE}")
     private String proxyHost;
-    @Value( "${proxy.port:0}" )
+    @Value("${proxy.port:0}")
     private Integer proxyPort;
 
     @Bean
@@ -33,7 +37,7 @@ public class AppConfig {
     public WebClient insecureProxyWebClient() {
         HttpClient httpClient =
                 HttpClient.create()
-                        .secure( spec -> {
+                        .secure(spec -> {
                             spec.sslContext(SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE));
                         })
                         .tcpConfiguration(tcpClient ->

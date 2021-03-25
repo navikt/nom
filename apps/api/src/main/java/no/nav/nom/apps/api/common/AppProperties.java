@@ -12,10 +12,18 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties("app")
 public class AppProperties {
     private final Dvh dvh;
+    private final Pdl pdl;
 
     @Value
     public static class Dvh {
         String baseUrl;
         String topic;
+        String aadClientId;
+    }
+
+    @Value
+    public static class Pdl {
+        String baseUrl;
+        String tema;
     }
 }

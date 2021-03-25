@@ -22,6 +22,12 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: prod-gcp
   webproxy: true
   ingresses:
     - https://nom-dvh.intern.nav.no

@@ -1,4 +1,4 @@
-server.port: 8083
+server.port: 8084
 
 spring:
   kafka:
@@ -43,7 +43,6 @@ app:
     username: NO_VALUE
     password: NO_VALUE
     group-id-prefix: skjermede-personer-pip-local
-    topic.skjermet.name: aapen-skjermede-personer-v1
 
 logging:
   level:

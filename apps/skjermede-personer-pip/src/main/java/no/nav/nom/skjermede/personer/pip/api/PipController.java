@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Api(tags = "skjerming-pip")
 @RestController
 @AllArgsConstructor
@@ -47,9 +50,26 @@ public class PipController {
     @PostMapping("/skjermet")
     public boolean isSkjermetPost(@ApiParam(value = "Fødselsnummeret til personen", required = true) @RequestBody final SkjermetDataRequestDTO requestDTO) {
         val personident = requestDTO.getPersonident();
-        if(personident == null){
+        if (personident == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
         }
         return cache.isSkjermet(personident);
+    }
+
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @ApiOperation(
+            value = "Sjekker hvorvidt en liste av personer er skjermet",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/skjermetBulk")
+    public Map<String, Boolean> isSkjermetBulk(@RequestBody final SkjermetDataBulkRequestDTO requestDTO) {
+        val personidenter = requestDTO.getPersonidenter();
+        if (personidenter == null || personidenter.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, MISSING_PERSONIDENT);
+        }
+        return personidenter.stream()
+                .collect(Collectors.toUnmodifiableMap(o -> o, cache::isSkjermet));
     }
 }

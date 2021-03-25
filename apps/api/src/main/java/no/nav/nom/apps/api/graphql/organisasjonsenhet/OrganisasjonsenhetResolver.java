@@ -7,8 +7,8 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.CustomGraphQLContext;
-import no.nav.nom.apps.api.graphql.ErrorCode;
+import no.nav.nom.apps.api.graphql.common.CustomGraphQLContext;
+import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Organisasjonsenhet>> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
-        if(((CustomGraphQLContext) env.getContext()).isAuthenticated()) {
+        if (((CustomGraphQLContext) env.getContext()).isAuthenticated()) {
             if (objectNode == null) {
                 return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
                         .data(dvhRepository.getAllEnheter().stream().map(ConverterUtils::convert).collect(Collectors.toList()))
@@ -37,8 +37,7 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
             return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
                     .data(result)
                     .build();
-        }
-        else {
+        } else {
             return DataFetcherResult.<List<Organisasjonsenhet>>newResult()
                     .error(ErrorCode.UNAUTHENTICATED.construct(env, "Missing or invalid token"))
                     .build();

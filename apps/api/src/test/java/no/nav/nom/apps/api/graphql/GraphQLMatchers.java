@@ -13,7 +13,7 @@ public class GraphQLMatchers {
             @Override
             public boolean matches(Object actual) {
                 val response = ((GraphQLResponse) actual);
-                if(response.getRawResponse().getBody().contains("errors")) {
+                if (response.getRawResponse().getBody().contains("errors")) {
                     return CollectionUtils.isEmpty(response.getList("$.errors", JsonNode.class));
                 }
                 return true;

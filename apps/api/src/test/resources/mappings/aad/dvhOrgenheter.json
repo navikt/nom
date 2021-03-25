@@ -5,7 +5,9 @@
   },
   "response": {
     "status": 200,
-    "transformers": ["response-template"],
+    "transformers": [
+      "response-template"
+    ],
     "jsonBody": {
       "NOM_HRORG_HIERARKI_v1Result": [
         {
@@ -14,6 +16,7 @@
           "orgnode_navn": "testNavn",
           "leder_resource_id": "estNavIdent",
           "leder_user_id": "estNavIdent",
+          "leder_nav_id": "testNavIdent",
           "orgnode_kode_over": null,
           "orgnode_niva_over": "ORGNIV3",
           "orgnode_status": "N"
@@ -24,6 +27,7 @@
           "orgnode_navn": "testNavn",
           "leder_resource_id": null,
           "leder_user_id": null,
+          "leder_nav_id": null,
           "orgnode_kode_over": "testId1",
           "orgnode_niva_over": "ORGNIV3",
           "orgnode_status": "N"
@@ -34,11 +38,12 @@
           "orgnode_navn": "testNavn",
           "leder_resource_id": "108639",
           "leder_user_id": "108639",
+          "leder_nav_id": null,
           "orgnode_kode_over": "testId2",
           "orgnode_niva_over": "ORGNIV3",
           "orgnode_status": "N"
         }
-        ]
+      ]
     },
     "headers": {
       "Content-Type": "application/json"

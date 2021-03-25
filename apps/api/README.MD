@@ -6,12 +6,13 @@ Kjør ApiStarter med VM options
     -Dspring.profiles.active=local
 
 ### Hente AAD properties
+
 Kan hentes med dette shell scriptet. Krever jq installert (brew install jq)
 
     #!/bin/sh
     CTX=dev-gcp
     NS=nom
-    SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}'|grep ^nom-api|grep -v token|tail -1|cut -d ' ' -f1`
+    SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}' --context=${CTX} --namespace=${NS}|grep ^nom-api|grep -v token|tail -1|cut -d ' ' -f1`
     SECRET=`kubectl get secret $SECRET_NAME -o json --context=${CTX} --namespace=${NS}`
     CLIENT_ID=`echo $SECRET |jq '.data.AZURE_APP_CLIENT_ID' -r|base64 -d`
     TENANT_ID=`echo $SECRET |jq '.data.AZURE_APP_TENANT_ID' -r|base64 -d`
@@ -25,6 +26,7 @@ Kan hentes med dette shell scriptet. Krever jq installert (brew install jq)
     echo '  dvhScope: 8db514b3-62dc-4ff8-895a-039067aa4a33/.default'
 
 ### Kjøre med Fiddler Web Proxy for WebClient
+
 Sett opp Fiddler med 'capture HTTPS traffic' og 'Ignore server certificate errors (unsafe)'
 Under Connections, sett opp port 8866 (f.eks.), og 'Act as system proxy on startup'
 

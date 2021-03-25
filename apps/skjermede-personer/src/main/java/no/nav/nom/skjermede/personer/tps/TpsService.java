@@ -42,7 +42,6 @@ public class TpsService {
     private final Counter tpsOpphorCounter;
 
 
-
     @Transactional(value = "transactionManager")
     void sendAndUpdate(final SkjermetPerson skjermetPerson) {
         try (val connection = connectionFactory.createConnection()) {
@@ -56,18 +55,18 @@ public class TpsService {
             }
 
             if (skjermetPerson.getOpphorSendtTps() == null &&
-                skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
+                    skjermetPerson.getSkjermetTil() != null && skjermetPerson.getSkjermetTil().isBefore(LocalDateTime.now())) {
                 sendMelding(skjermetPerson, connection, destinationQueue, false);
             }
         } catch (Exception e) {
-            log.error("Feil intraff ved synkronisering av skjerming informasjon mot tsp: {}", e.getMessage());
+            log.error("Feil inntraff ved synkronisering av skjerming informasjon mot tps.", e);
         }
     }
 
     private void sendMelding(final SkjermetPerson skjermetPerson,
-                             final Connection connection,
-                             final MQQueue destination,
-                             final boolean isEndring) {
+            final Connection connection,
+            final MQQueue destination,
+            final boolean isEndring) {
         try (val session = connection.createSession(); val producer = session.createProducer(destination)) {
             val replyQueue = session.createTemporaryQueue();
             val melding = messageConverter.toMessage(buildPersondata(skjermetPerson, isEndring), session);
@@ -86,7 +85,7 @@ public class TpsService {
 
             skjermetPersonRepository.save(skjermetPerson);
         } catch (Exception e) {
-            val sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31,0, 0);
+            val sendtTilTpsMislyktes = LocalDateTime.of(9999, 12, 31, 0, 0);
 
             if (isEndring) {
                 skjermetPerson.setEndringSendtTps(sendtTilTpsMislyktes);
@@ -95,8 +94,8 @@ public class TpsService {
             }
 
             skjermetPersonRepository.save(skjermetPerson);
-            
-            throw new TpsMqException(String.format("Sending av %s til tps mislyktes", (isEndring ? ENDRING : OPPHOR)));
+
+            throw new TpsMqException(String.format("Sending av %s til tps mislyktes", (isEndring ? ENDRING : OPPHOR)), e);
         }
     }
 
@@ -112,7 +111,7 @@ public class TpsService {
             val message = consumer.receive(2000L);
             return (SfePersonDataDTO) messageConverter.fromMessage(message);
         } catch (Exception e) {
-            throw new TpsMqException(String.format("Mottak av svarmelding fra tps mislyktes: {} : {}", e.getMessage(), e.getCause().getMessage()));
+            throw new TpsMqException("Mottak av svarmelding fra tps mislyktes", e);
         }
     }
 
@@ -122,7 +121,7 @@ public class TpsService {
                 .personident(skjermetPerson.getPersonident())
                 .skjermetFom(skjermetPerson.getSkjermetFra().toLocalDate())
                 .build();
-        val opphor =  new OpphorEgenAnsattDTO(skjermetPerson.getPersonident());
+        val opphor = new OpphorEgenAnsattDTO(skjermetPerson.getPersonident());
         val sfeAjourforing = isEndring
                 ? SfeAjourforingDTO.builder().systemInfo(systemInfo).endreEgenAnsatt(endring).build()
                 : SfeAjourforingDTO.builder().systemInfo(systemInfo).opphorEgenAnsatt(opphor).build();

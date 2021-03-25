@@ -24,9 +24,9 @@ public class LederResolver implements GraphQLResolver<Organisasjonsenhet> {
         val lederRessurser = dvhRepository.getLederByAgressoId(orgEnhet.getAgressoId()).stream()
                 .map(l -> OrganisasjonsenhetsLeder.builder()
                         .ressurs(
-                            dvhRepository.getRessursByRessursId(l.getRessursId())
-                            .map(ConverterUtils::convert)
-                            .orElseThrow()
+                                dvhRepository.getRessursByNavIdent(l.getNavIdent())
+                                        .map(ConverterUtils::convert)
+                                        .orElseThrow()
                         )
                         .build()
                 )

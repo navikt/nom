@@ -32,7 +32,7 @@ public class KafkaUtils {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendFromKafkaMock(Object... objects){
+    public void sendFromKafkaMock(Object... objects) {
 
         val consumer = mock(Consumer.class);
         doReturn(Map.of(new TopicPartition("", 0), 0L)).when(consumer).endOffsets(any());
@@ -56,21 +56,21 @@ public class KafkaUtils {
         dvhStateListener.onMessage(recordsAsJson, consumer);
     }
 
-    private  <K, V> ConsumerRecord<K, V> createConsumerRecord(K key, V value) {
+    private <K, V> ConsumerRecord<K, V> createConsumerRecord(K key, V value) {
         return new ConsumerRecord<>("", 0, 0, key, value);
     }
 
 
-    private  <K, V> ConsumerRecords<K, V> createConsumerRecords(List<ConsumerRecord<K, V>> records) {
+    private <K, V> ConsumerRecords<K, V> createConsumerRecords(List<ConsumerRecord<K, V>> records) {
         return new ConsumerRecords<>(Map.of(new TopicPartition("test", 123), records));
     }
 
-    private JsonNode toJsonNode(Object object){
+    private JsonNode toJsonNode(Object object) {
         return objectMapper.convertValue(object, JsonNode.class);
     }
 
     @SneakyThrows
-    private String toJson(Object object){
+    private String toJson(Object object) {
         return objectMapper.writeValueAsString(object);
     }
 }

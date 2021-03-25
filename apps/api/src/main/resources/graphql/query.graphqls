@@ -20,13 +20,13 @@ type Organisasjonsenhet {
     navn: String!
     gyldigFom: Date!
     gyldigTom: Date
-    organiseringer : [Organisering!]!
+    organiseringer (retning: Retning) : [Organisering!]!
     leder: [OrganisasjonsenhetsLeder!]!
     koblinger: [OrganisasjonsenhetsKobling!]!
 }
 
 type Organisering {
-    retning: String!
+    retning: Retning!
     organisasjonsenhet : Organisasjonsenhet!
     gyldigFom: Date!
     gyldigTom: Date
@@ -36,6 +36,17 @@ type Ressurs {
     navIdent: String!
     personIdent: String!
     koblinger: [RessursKobling!]!
+    person: Person
+}
+
+type Person {
+    navn: Navn!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
 }
 
 type OrganisasjonsenhetsLeder{
