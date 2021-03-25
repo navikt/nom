@@ -25,4 +25,11 @@ export interface OrganisasjonsEnhet {
 export interface Ressurs {
   id: string;
   pnr: string;
+  person?: {
+    navn: {
+      fornavn?: string,
+      mellomnavn?: string,
+      etternavn?: string,
+    }
+  }
 }
