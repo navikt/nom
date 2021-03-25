@@ -40,7 +40,7 @@
         <stax2-api.version>4.2.1</stax2-api.version>
         <guava.version>30.1.1-jre</guava.version>
 
-        <snyk-plugin.version>1.2.9</snyk-plugin.version>
+        <snyk-plugin.version>2.0.0</snyk-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
         <docker-compose-plugin.verson>4.0.0</docker-compose-plugin.verson>
 
