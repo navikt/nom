@@ -41,9 +41,6 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
     private final AppProperties appProperties;
     private final RestTemplate restTemplate;
 
-    @Value("${pdl.enabled}")
-    private boolean pdlEnabled;
-
     @Override
     public CompletionStage<Map<String, DataFetcherResult<Person>>> load(Set<String> set, BatchLoaderEnvironment batchLoaderEnvironment) {
         return CompletableFuture.supplyAsync(() -> getNameBatch(set, batchLoaderEnvironment));
@@ -51,22 +48,6 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
 
     @SneakyThrows
     public Map<String, DataFetcherResult<Person>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
-        if(!pdlEnabled){
-            val result =  DataFetcherResult.<Person>newResult()
-                    .data(Person.builder()
-                            .navn(
-                                    RessursNavn.builder()
-                                            .fornavn("UNKNOWN")
-                                            .mellomnavn("UNKNOWN")
-                                            .etternavn("UNKNOWN")
-                                            .build()
-                            )
-                            .build()
-                    )
-                    .build();
-            return personidenter.stream()
-                    .collect(Collectors.toUnmodifiableMap(o -> o, o -> result));
-        }
         val headers = new HttpHeaders();
         val token = tokenRepository.getStsToken();
         headers.setContentType(MediaType.APPLICATION_JSON);

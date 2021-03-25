@@ -4,7 +4,6 @@ app:
   pdl:
     baseUrl: http://localhost:${wiremock.server.port}
     tema: GEN
-pdl.enabled: true
 
 authentication:
   aad:

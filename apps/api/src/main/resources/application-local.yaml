@@ -2,7 +2,6 @@ app:
   pdl:
     baseUrl: https://pdl-api.dev.intern.nav.no
     tema: GEN
-pdl.enabled: false
 
 authentication:
   aad:
