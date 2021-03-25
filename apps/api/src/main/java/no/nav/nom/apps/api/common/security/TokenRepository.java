@@ -107,6 +107,6 @@ public class TokenRepository {
 
     @SneakyThrows
     private boolean isValidToken(SignedJWT signedJwt) {
-        return signedJwt != null && signedJwt.getJWTClaimsSet().getExpirationTime().before(Date.from(Instant.now().plusSeconds(20)));
+        return signedJwt != null && signedJwt.getJWTClaimsSet().getExpirationTime().after(Date.from(Instant.now().plusSeconds(20)));
     }
 }
