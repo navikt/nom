@@ -1,3 +1,4 @@
+import { lookups } from "./utils_api_hook";
 import fetch_configs from "./utils_fetch_configs";
 
 export async function validateJson(
@@ -17,10 +18,11 @@ export async function validateJson(
 export async function validateGraphql(json: any): Promise<Record<string, any>> {
   if (json.errors) {
     console.error({ graphqlResponsMedFeil: json });
-    throw new Error("Graphl-feil");
-  } else {
-    return json;
+    if (!json.data) {
+      throw new Error("Graphl-feil");
+    }
   }
+  return json;
 }
 
 export async function handleHttpResponse(
