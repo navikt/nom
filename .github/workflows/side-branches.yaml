@@ -29,3 +29,29 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn clean test --threads=4 --batch-mode -Pintegration-test
+  build-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set node environment
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 15
+      - uses: actions/cache@v2.1.4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-cache-${{ hashFiles('apps/ui/src/main/webapp/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-cache-
+      - name: Run npm ci
+        run: |
+          cd apps/ui/src/main/webapp/
+          npm ci
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN}}
+      - name: Run npm build
+        run: |
+          cd apps/ui/src/main/webapp/
+          npm run build
