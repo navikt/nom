@@ -7,6 +7,7 @@
   "dependencies": {
     "classnames": "^2.2.6",
     "cra-build-watch": "^3.4.0",
+    "is-svg": "^4.2.2",
     "lodash.throttle": "^4.1.1",
     "nav-frontend-alertstriper": "^3.0.51",
     "nav-frontend-alertstriper-style": "^2.0.38",
