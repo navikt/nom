@@ -135,6 +135,10 @@ export default function OrganisasjonsenhetLinkview(props: {
                 },
               },
               { id: "pnr", label: "Personnummer", type: "string" },
+              { id: "fornavn", label: "Fornavn", type: "string"},
+              { id: "mellomnavn", label: "Mellomnavn", type: "string"},
+              { id: "etternavn", label: "Etternavn", type: "string"},
+
             ]}
             itemsPerPage={50}
             animatable={false}

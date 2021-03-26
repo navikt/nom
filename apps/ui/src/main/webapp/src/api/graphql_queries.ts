@@ -4,6 +4,13 @@ export function createRessursQuery(id: string | null): string {
           ressurs(${whereClause}) {
               navIdent
               personIdent
+              person {
+                navn {
+                  fornavn
+                  mellomnavn
+                  etternavn
+                }
+              }
               koblinger {
                 organisasjonsenhet{
                   navn
@@ -33,6 +40,13 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                   ressurs {
                       navIdent
                       personIdent
+                      person {
+                        navn {
+                          fornavn
+                          mellomnavn
+                          etternavn
+                        }
+                      }
                   }
               }
           }
