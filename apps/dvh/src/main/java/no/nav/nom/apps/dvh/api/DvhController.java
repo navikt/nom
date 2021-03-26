@@ -27,7 +27,7 @@ public class DvhController {
     @Value("${spring.security.oauth2.resourceserver.jwt.subjects}")
     private final List<String> AUTHORIZED_SUBJECTS;
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate restTemplateDvh;
     private final AppProperties appProperties;
 
     @GetMapping("/stillinger")
@@ -36,7 +36,7 @@ public class DvhController {
         if (tokenSubject == null || !AUTHORIZED_SUBJECTS.contains(tokenSubject)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, INVALID_SUBJECT);
         }
-        return restTemplate.exchange(appProperties.getDvh().getStilling().getUrl(),
+        return restTemplateDvh.exchange(appProperties.getDvh().getStilling().getUrl(),
                 HttpMethod.GET, null, String.class).getBody();
     }
 
@@ -51,7 +51,7 @@ public class DvhController {
                 "?bucketNum_in=" + bucketNum_in
                 : "";
 
-        return restTemplate.exchange(appProperties.getDvh().getRessurser().getUrl() + requestParamStr,
+        return restTemplateDvh.exchange(appProperties.getDvh().getRessurser().getUrl() + requestParamStr,
                 HttpMethod.GET, null, String.class).getBody();
     }
 
@@ -61,7 +61,7 @@ public class DvhController {
         if (tokenSubject == null || !AUTHORIZED_SUBJECTS.contains(tokenSubject)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, INVALID_SUBJECT);
         }
-        return restTemplate.exchange(appProperties.getDvh().getEnheter().getUrl(),
+        return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrl(),
                 HttpMethod.GET, null, String.class).getBody();
     }
 

@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeT
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -21,14 +22,15 @@ import java.util.Arrays;
 class CommonConfig {
 
     @Bean
-    RestTemplate restTemplate(RestTemplateBuilder builder, AppProperties properties) {
+    RestTemplate restTemplateDvh(RestTemplateBuilder builder, AppProperties properties) {
         return builder
                 .additionalInterceptors(basicAuthInterceptor(properties.getDvh().getTdvUsername(), properties.getDvh().getTdvPassword()))
                 .build();
     }
 
     @Bean
-    RestTemplate restTemplatePdl(){
+    @Primary
+    RestTemplate restTemplate(){
         return new RestTemplate();
     }
 

@@ -30,7 +30,7 @@ public class PdlController {
     private final String INVALID_SUBJECT = "Subject tokenet gjelder for er ikke godkjent";
 
     private final TokenRepository tokenRepository;
-    private final RestTemplate restTemplatePdl;
+    private final RestTemplate restTemplate;
     private final AppProperties appProperties;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.subjects}")
@@ -50,7 +50,7 @@ public class PdlController {
         headers.add("Nav-Consumer-Token", "Bearer " + token);
         headers.add("Tema", tema);
 
-        val result = restTemplatePdl.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
+        val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
 
 
         return ResponseEntity.status(HttpStatus.OK).body(result.getBody());
