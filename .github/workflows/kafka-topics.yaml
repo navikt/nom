@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'dev/*'
     paths:
       - '.nais/topics/*'
 
@@ -22,6 +23,7 @@ jobs:
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4

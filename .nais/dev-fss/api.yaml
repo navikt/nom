@@ -41,6 +41,7 @@ spec:
     limits:
       cpu: 1000m
       memory: 1024Mi
+  leaderElection: true
   prometheus:
     enabled: true
     path: /internal/prometheus

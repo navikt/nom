@@ -5,6 +5,8 @@ app:
     aadClientId: ${NOM_DVH_CLIENT_ID}/.default
   pdl:
     tema: GEN
+  hendelse:
+    topic: nom.hendelse-v1
 
 authentication:
   aad:

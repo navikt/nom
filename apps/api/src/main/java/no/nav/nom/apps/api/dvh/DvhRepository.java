@@ -3,11 +3,11 @@ package no.nav.nom.apps.api.dvh;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.domain.RessursRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,10 +23,10 @@ import java.util.stream.Collectors;
 public class DvhRepository {
 
     private Map<String, DvhOrganisasjonsenhet> enheterByNumber;
-    private final Map<String, DvhRessurs> ressursByNavIdent = new ConcurrentHashMap<>(1000);
     private Map<String, List<DvhLeder>> lederByEnhetNr;
     private Map<String, List<DvhOrganisering>> organiseringerByAgressoId;
     private List<DvhKobling> koblinger;
+    private final RessursRepository ressursRepository;
 
     public Optional<DvhOrganisasjonsenhet> getEnhetByAgressoId(String agressoId) {
         return Optional.ofNullable(enheterByNumber.get(agressoId));
@@ -39,24 +38,6 @@ public class DvhRepository {
 
     public List<DvhOrganisering> getOrganiseringerByAgressoId(String agressoId) {
         return organiseringerByAgressoId.getOrDefault(agressoId, Collections.emptyList());
-    }
-
-    public void saveRessurs(DvhRessurs ressurs) {
-        ressursByNavIdent.put(ressurs.getNavIdent(), ressurs);
-    }
-
-    public Optional<DvhRessurs> getRessursByNavIdent(String navIdent) {
-        return Optional.ofNullable(ressursByNavIdent.get(navIdent));
-    }
-
-    public Optional<DvhRessurs> getRessursByPersonIdent(String personIdent) {
-        return ressursByNavIdent.values().stream()
-                .filter(r -> r.getPersonIdent().equals(personIdent))
-                .findAny();
-    }
-
-    public Collection<DvhRessurs> getAllRessurser() {
-        return ressursByNavIdent.values();
     }
 
     public Collection<DvhKobling> getAllKoblinger() {
@@ -81,7 +62,7 @@ public class DvhRepository {
                 .filter((entry) -> {
                     val enhet = getEnhetByAgressoId(entry.getKey());
                     entry.getValue().forEach(l -> {
-                        val ressurs = getRessursByNavIdent(l.getNavIdent());
+                        val ressurs = ressursRepository.findByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
                             log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
                         } else if(enhet.isEmpty()){
@@ -127,7 +108,7 @@ public class DvhRepository {
                 koblinger.stream()
                 .filter(k -> {
                         val organisasjonsenhet = getEnhetByAgressoId(k.getAgressoId()).orElse(null);
-                        val dvhRessurs = getRessursByNavIdent(k.getNavIdent()).orElse(null);
+                        val dvhRessurs = ressursRepository.findByNavIdent(k.getNavIdent()).orElse(null);
                         if (organisasjonsenhet == null && dvhRessurs == null) {
                             log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {
@@ -145,7 +126,6 @@ public class DvhRepository {
 
     public void clearRepository() {
         enheterByNumber.clear();
-        ressursByNavIdent.clear();
         organiseringerByAgressoId.clear();
         koblinger.clear();
     }

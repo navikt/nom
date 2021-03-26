@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
-import org.assertj.core.api.Assertions;
+import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
@@ -34,7 +34,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql med id parameter")
     void scenario11() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).getList("$.data.organisasjonsenhet", Organisasjonsenhet.class);
@@ -45,7 +45,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql uten id parameter")
     void scenario12() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
@@ -56,7 +56,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, leser og validerer organiseringene")
     void scenario21() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario3.graphql", false);
@@ -75,7 +75,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, filtrerer på retning")
     void scenario33() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario33.graphql", false);
@@ -86,7 +86,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                         o -> o.get("retning").asText(),
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
 
-        Assertions.assertThat(organiserteEnheter).hasSize(1);
+        assertThat(organiserteEnheter).hasSize(1);
         assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
     }
 
@@ -94,9 +94,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
     void scenario31() {
-        val inputLeder = ressursTestTemplate("");
+        HendelseTo hendelse = createRessursHendelse("");
+        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
 
-        kafkaUtils.sendFromKafkaMock(inputLeder);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario4.graphql", false);
@@ -105,15 +105,15 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
         }).get(0);
 
-        assertEquals(inputLeder.getNavident(), outputLeder.getRessurs().getNavIdent());
-        assertEquals(inputLeder.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
+        assertEquals(getNavIdent(hendelse), outputLeder.getRessurs().getNavIdent());
+        assertEquals(getPersonIdent(hendelse), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario32.graphql", false);
@@ -129,9 +129,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
     void scenario34() {
-        val inputRessurs = ressursTestTemplate("");
-        pdlUtils.addPersonToPdlResponse(true, inputRessurs.getPersonIdent());
-        kafkaUtils.sendFromKafkaMock(inputRessurs);
+        HendelseTo hendelse = createRessursHendelse("");
+
+        pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
+        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
@@ -139,7 +140,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val lederNavn = outputEnhetJson.get("leder")
                 .get(0).get("ressurs").get("person").get("navn");
-        pdlUtils.assertNavn(inputRessurs.getPersonIdent(), lederNavn);
+        pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);
     }
 
 
@@ -147,8 +148,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        val inputRessurs = ressursTestTemplate("");
-        kafkaUtils.sendFromKafkaMock(inputRessurs);
+        HendelseTo hendelse = createRessursHendelse("");
+        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
@@ -163,30 +164,30 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
 
         val outputRessurs = outputKoblinger.get(0).getRessurs();
-        assertEquals(inputRessurs.getNavident(), outputRessurs.getNavIdent());
-        assertEquals(inputRessurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
+        assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        kafkaUtils.sendFromKafkaMock();
+        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
 
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
-        assertTrue(outputEnhetJson.get("koblinger").isEmpty());
+        assertThat(outputEnhetJson.get("koblinger")).isEmpty();
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        val inputRessurs = ressursTestTemplate("");
-        pdlUtils.addPersonToPdlResponse(true, inputRessurs.getPersonIdent());
-        kafkaUtils.sendFromKafkaMock(inputRessurs);
+        HendelseTo hendelse = createRessursHendelse("");
+        pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
+        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
@@ -194,7 +195,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
         val lederNavn = outputEnhetJson.get("koblinger")
                 .get(0).get("ressurs").get("person").get("navn");
-        pdlUtils.assertNavn(inputRessurs.getPersonIdent(), lederNavn);
+        pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);
     }
 }
 

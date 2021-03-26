@@ -1,7 +1,7 @@
 package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.skjermede.personer.common.platform.LeaderElector;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ScheduledForesporselCleaner {
 
     private final ForesporselRepository foresporselRepository;
-    private final LeaderElector leaderElector;
+    private final LeaderElection leaderElector;
 
     @Transactional(value = "transactionManager")
     @Scheduled(cron = "0 30 0 * * *")

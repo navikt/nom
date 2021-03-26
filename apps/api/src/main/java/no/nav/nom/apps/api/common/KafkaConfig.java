@@ -17,11 +17,15 @@ import static no.nav.nom.libs.utils.common.kafka.KafkaContainerUtils.DEFAULT_SPR
 @Configuration(proxyBeanMethods = false)
 public class KafkaConfig {
 
+    @SuppressWarnings("unchecked")
     @Bean(DEFAULT_SPRING_KAFKA_FACTORY_NAME) // Overskriver default Spring Boot, se KafkaAnnotationDrivenConfiguration
     ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory(
             ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
-            ConsumerFactory<Object, Object> kafkaConsumerFactory) {
-        return KafkaContainerUtils.containerFactory(configurer, kafkaConsumerFactory);
+            ConsumerFactory<Object, Object> kafkaConsumerFactory,
+            KafkaOffsetPostProcessor offsetPostProcessor) {
+        var factory = KafkaContainerUtils.containerFactory(configurer, kafkaConsumerFactory);
+        ((ConsumerFactory<Object, Object>) factory.getConsumerFactory()).addPostProcessor(offsetPostProcessor);
+        return factory;
     }
 
 }

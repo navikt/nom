@@ -1,6 +1,7 @@
 package no.nav.nom.contract.nom.hendelse;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -16,7 +17,7 @@ import java.util.UUID;
 // tag::class[]
 @Value
 @Builder
-public class Hendelse {
+public class HendelseTo {
 
     // Unik id per hendelse. Opprettes av backend.
     @NonNull
@@ -33,28 +34,23 @@ public class Hendelse {
 
     // Data i JSON format.
     // Eksempel: { "fid": "UUID....", "navn": "NAV Gamle Oslo"... }
-    JsonNode data;
+    ObjectNode data;
 
     // Aksjonen som ble utført.
     // Eksempel: OPPRETT
     @NonNull
     Endringstype endringstype;
 
-    // Subject fra JWT token.
-    // Eksempel: test.testesen@nav.no
-    @NonNull
-    String opprettetAv;
-
     // Tidspunkt hendelsen ble opprettet.
     // Eksempel: 2020-11-24T13:37:00Z
     @NonNull
     LocalDateTime opprettet;
 
-    // Peker til en tidligere hendelsesid i tilfeller ved korrigering og annullering.
+    // Peker til en tidligere hendelsesid i tilfeller ved annullering.
     UUID tidligereId;
 
     public enum Endringstype {
-        OPPRETET, ENDRET, KORRIGERT, OPPHOERT, ANNULLERT
+        OPPRETTET, ENDRET, ANNULLERT
     }
 }
 // end::class[]

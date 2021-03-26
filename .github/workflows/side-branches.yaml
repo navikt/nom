@@ -28,4 +28,4 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean test --threads=4 --batch-mode
+        run: mvn clean test --threads=4 --batch-mode -Pintegration-test

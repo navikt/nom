@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.kafka.ConcurrentKafkaListenerConta
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 
-import java.time.Duration;
-
 @UtilityClass
 public class KafkaContainerUtils {
     public static final String DEFAULT_SPRING_KAFKA_FACTORY_NAME = "kafkaListenerContainerFactory";

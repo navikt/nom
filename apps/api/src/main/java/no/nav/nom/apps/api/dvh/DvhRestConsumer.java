@@ -11,6 +11,10 @@ import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
+import no.nav.nom.apps.api.hendelse.HendelseListener;
+import no.nav.nom.apps.api.hendelse.HendelseService;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.context.ApplicationEventPublisher;
@@ -42,16 +46,19 @@ public class DvhRestConsumer {
     private final DvhRepository dvhRepository;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
-    private final DvhStateListener dvhStateListener;
+    private final HendelseListener hendelseListener;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final ApplicationEventPublisher appEventPublisher;
+    private final HendelseService hendelseService;
+    private final LeaderElection leaderElection;
 
     @Scheduled(fixedDelay = ONE_HOUR)
     @SneakyThrows
     public void loadFromDvh() {
-        while (!dvhStateListener.getInitialLoadStatus()) {
+        while (!hendelseListener.getInitialLoadStatus()) {
             Thread.sleep(2000);
         }
+        loadRessurserFromDvh();
         loadOrgenhetFromDvh();
         loadKoblingerFromDvh();
 
@@ -60,6 +67,17 @@ public class DvhRestConsumer {
             AvailabilityChangeEvent.publish(appEventPublisher, CACHE, ReadinessState.ACCEPTING_TRAFFIC);
             log.info("Changing to ReadinessState.ACCEPTING_TRAFFIC");
         }
+    }
+
+    private void loadRessurserFromDvh() {
+        if (!leaderElection.isLeader()) {
+            return;
+        }
+        var jsonRessurser = dvhExchange("/proxy/ressurser");
+
+        StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
+                .map(DvhRessurs::new)
+                .forEach(dvhRessurs -> hendelseService.opprettRessurs(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
     }
 
     private void loadKoblingerFromDvh() {
