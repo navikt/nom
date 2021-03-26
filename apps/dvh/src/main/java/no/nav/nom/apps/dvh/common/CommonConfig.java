@@ -28,6 +28,11 @@ class CommonConfig {
     }
 
     @Bean
+    RestTemplate restTemplatePdl(){
+        return new RestTemplate();
+    }
+
+    @Bean
     RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
         return (urlTemplate, request, response) -> {
             val uriTag = StringUtils.hasText(urlTemplate) ? RestTemplateExchangeTags.uri(urlTemplate.replaceFirst("\\?.*", "")) : Tag.of("uri", request.getURI().getPath());

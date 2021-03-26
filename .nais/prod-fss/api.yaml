@@ -13,14 +13,8 @@ spec:
       value: https://nom-dvh.prod-fss-pub.nais.io
     - name: NOM_DVH_CLIENT_ID
       value: 4a4249da-3552-4615-9cec-485a97148fac
-    - name: STS_BASEURL
-      value: https://security-token-service.adeo.no
-    - name: PDL_BASEURL
-      value: https://pdl-api.intern.nav.no
     - name: VAULT_USER_SECRET_PATH
       value: serviceuser/prod/srvnom-api
-  envFrom:
-    - secret: nom-api-serviceuser
   image: {{image}}
   port: 8080
   ingresses:

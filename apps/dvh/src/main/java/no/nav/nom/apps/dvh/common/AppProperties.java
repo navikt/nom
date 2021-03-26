@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties("app")
 public class AppProperties {
     private final Dvh dvh;
+    private final Pdl pdl;
 
     @Value
     public static class Dvh {
@@ -26,6 +27,12 @@ public class AppProperties {
         Stilling stilling;
         Ressurser ressurser;
         Enheter enheter;
+    }
+
+
+    @Value
+    public static class Pdl {
+        String baseUrl;
     }
 
     @Value

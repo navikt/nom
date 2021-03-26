@@ -4,7 +4,6 @@ app:
     baseUrl: ${NOM_DVH_BASEURL}
     aadClientId: ${NOM_DVH_CLIENT_ID}/.default
   pdl:
-    baseUrl: ${PDL_BASEURL}
     tema: GEN
 
 authentication:
@@ -14,13 +13,6 @@ authentication:
     clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     jwk: ${AZURE_APP_JWK}
     grantType: client_credentials
-  sts:
-    issuerBaseUrl: ${STS_BASEURL}
-    username: ${SERVICEUSER_USERNAME}
-    password: ${SERVICEUSER_PASSWORD}
-    grantType: client_credentials
-    scope: openid
-
 
 graphql:
   playground:

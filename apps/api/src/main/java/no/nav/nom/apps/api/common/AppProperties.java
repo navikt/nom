@@ -23,7 +23,6 @@ public class AppProperties {
 
     @Value
     public static class Pdl {
-        String baseUrl;
         String tema;
     }
 }

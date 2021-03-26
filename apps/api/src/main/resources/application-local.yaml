@@ -1,6 +1,5 @@
 app:
   pdl:
-    baseUrl: https://pdl-api.dev.intern.nav.no
     tema: GEN
 
 authentication:
@@ -10,12 +9,6 @@ authentication:
     clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     jwk: <dummy - Se README.MD>
     grantType: client_credentials
-  sts:
-    issuerBaseUrl: https://security-token-service.dev.adeo.no
-    username: <dummy - Se README.MD>
-    password: <dummy - Se README.MD>
-    grantType: client_credentials
-    scope: <dummy - Se README.MD>
 
 proxy:
   host: 127.0.0.1

@@ -15,8 +15,13 @@ spec:
       value: https://tdv-u.adeo.no
     - name: ACCEPTED_SUBJECTS
       value: cb62b1c3-62b7-4e5c-839a-357f117108fb
+    - name: STS_BASEURL
+      value: https://security-token-service.dev.adeo.no
+    - name: PDL_BASEURL
+      value: https://pdl-api.dev.intern.nav.no
   envFrom:
     - secret: nom-tdv-cred
+    - secret: nom-api-serviceuser
   image: {{image}}
   port: 8080
   azure:

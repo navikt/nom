@@ -1,10 +1,17 @@
 app:
+  pdl:
+    baseUrl: http://localhost:${wiremock.server.port}/
   dvh:
     base-url: http://localhost:${wiremock.server.port}/
     tdvUsername: test-stilling-user
     tdvPassword: test-stilling-pass
     ressurs:
       chunkSize: 3
+authentication:
+  sts:
+    issuerBaseUrl: http://localhost:${wiremock.server.port}/
+    username: test
+    password: test
 
 spring:
   security:

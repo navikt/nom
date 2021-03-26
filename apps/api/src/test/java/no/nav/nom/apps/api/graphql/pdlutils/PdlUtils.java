@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.common.AppProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @RequiredArgsConstructor
 public class PdlUtils {
     private final Map<String, HentPersonBulkEntry> pdlEntryByIdent = new HashMap<>();
+    private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
 
     public void assertNavn(String personIdent, JsonNode navn) {
@@ -37,7 +40,9 @@ public class PdlUtils {
     }
 
     private void mockPdlResponse() {
-        stubFor(post("/graphql").willReturn(aResponse()
+        stubFor(post("/proxy/pdl")
+                .withHeader("Tema", equalTo(appProperties.getPdl().getTema()))
+                .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(buildResponse())));
     }

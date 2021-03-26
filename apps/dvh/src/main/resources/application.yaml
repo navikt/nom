@@ -1,4 +1,6 @@
 app:
+  pdl:
+    baseUrl: ${PDL_BASEURL}
   dvh:
     topic: nom.dvhsource-v1
     tdvUsername: ${tdvuser}
@@ -13,6 +15,13 @@ app:
       bucketCount: 32
     enheter:
       url: ${app.dvh.base-url}/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1
+authentication:
+  sts:
+    issuerBaseUrl: ${STS_BASEURL}
+    username: ${SERVICEUSER_USERNAME}
+    password: ${SERVICEUSER_PASSWORD}
+    grantType: client_credentials
+    scope: openid
 
 spring:
   security:
