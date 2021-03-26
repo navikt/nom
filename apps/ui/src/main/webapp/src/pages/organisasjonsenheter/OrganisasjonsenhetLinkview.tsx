@@ -44,12 +44,12 @@ function transformResult(graphQlData: any): OrgEnhetData {
     koblinger: {
       sti: overenhet
         ? [
-            {
-              enhetNavn: overenhet.organisasjonsenhet.navn,
-              enhetNr: overenhet.organisasjonsenhet.agressoId,
-              enhetType: "Type (TODO)",
-            },
-          ]
+          {
+            enhetNavn: overenhet.organisasjonsenhet.navn,
+            enhetNr: overenhet.organisasjonsenhet.agressoId,
+            enhetType: "Type (TODO)",
+          },
+        ]
         : [],
       underEnheter: underEnheter2,
       ressurser: ressurser,
