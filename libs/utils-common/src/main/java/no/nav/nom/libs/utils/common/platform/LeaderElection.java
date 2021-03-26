@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.ressurser.common;
+package no.nav.nom.libs.utils.common.platform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -9,17 +9,19 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
 @AllArgsConstructor
 public class LeaderElection {
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Environment environment;
 
     public boolean isLeader() {
-        if(Arrays.asList(environment.getActiveProfiles()).contains("local")){
+        if (isLocal()) {
             return true;
         }
         String electorPath = System.getenv("ELECTOR_PATH");
@@ -35,5 +37,10 @@ public class LeaderElection {
             return false;
         }
         return leaderName.equals(hostname);
+    }
+
+    private boolean isLocal() {
+        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
+        return profiles.contains("local") || profiles.contains("test");
     }
 }

@@ -2,7 +2,6 @@ package no.nav.nom.skjermede.personer.pip;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import no.nav.nom.contract.skjermede.dto.SkjermetPersonDTO;
 import no.nav.nom.skjermede.personer.pip.config.AppProperties;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -19,13 +18,13 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static no.nav.nom.libs.utils.common.kafka.KafkaUtils.findEndOffsetForPartition;
-import static no.nav.nom.libs.utils.common.kafka.KafkaUtils.isAtOrAfterOffsetForPartition;
+import static no.nav.nom.libs.utils.common.kafka.KafkaUtils.verifyUpToDate;
 
 @Component
 @AllArgsConstructor
 @Slf4j
 public class SkjermedePersonerListener implements ConsumerSeekAware {
+
     public static final String CACHE = "cache-source";
 
     private final AppProperties appProperties;
@@ -39,7 +38,10 @@ public class SkjermedePersonerListener implements ConsumerSeekAware {
         try {
             cache.store(record.key(), new Skjermingsperiode(record.value().getSkjermetFra(), record.value().getSkjermetTil()));
             log.info("Received offset " + record.offset());
-            verifyUpToDate(consumer);
+            verifyUpToDate(consumer, appProperties.getSkjermedePersoner().getTopicName(), initialLoadComplete, () -> {
+                AvailabilityChangeEvent.publish(appEventPublisher, CACHE, ReadinessState.ACCEPTING_TRAFFIC);
+                log.info("Changing to ReadinessState.ACCEPTING_TRAFFIC");
+            });
         } catch (RetriableException e) {
             // no-op
         } catch (RuntimeException e) {
@@ -51,18 +53,5 @@ public class SkjermedePersonerListener implements ConsumerSeekAware {
     @Override
     public void onPartitionsAssigned(Map<org.apache.kafka.common.TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
         assignments.keySet().forEach(p -> callback.seekToBeginning(p.topic(), p.partition()));
-    }
-
-    private void verifyUpToDate(Consumer<String, String> consumer) {
-        if (!initialLoadComplete.get()) {
-            val endOffset = findEndOffsetForPartition(consumer, appProperties.getSkjermedePersoner().getTopicName(), 0);
-            val complete = isAtOrAfterOffsetForPartition(consumer, appProperties.getSkjermedePersoner().getTopicName(), 0, endOffset);
-
-            if (complete) {
-                initialLoadComplete.set(true);
-                AvailabilityChangeEvent.publish(appEventPublisher, CACHE, ReadinessState.ACCEPTING_TRAFFIC);
-                log.info("Changing to ReadinessState.ACCEPTING_TRAFFIC");
-            }
-        }
     }
 }

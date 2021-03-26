@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.mockito.Mockito.mock;
@@ -26,5 +25,10 @@ class TestConfig {
                 .keyUse(KeyUse.SIGNATURE)
                 .keyID(RSA_KEY_ID)
                 .generate();
+    }
+
+    @Bean
+    KafkaTemplate<String, String> kafkaTemplate() {
+        return mock(KafkaTemplate.class);
     }
 }

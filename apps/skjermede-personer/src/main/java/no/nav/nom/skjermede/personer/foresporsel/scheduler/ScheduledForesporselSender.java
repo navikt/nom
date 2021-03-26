@@ -3,7 +3,7 @@ package no.nav.nom.skjermede.personer.foresporsel.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.skjermede.personer.common.platform.LeaderElector;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import no.nav.nom.skjermede.personer.common.NomRessurserService;
 import no.nav.nom.skjermede.personer.foresporsel.ForesporselRepository;
 import no.nav.nom.skjermede.personer.foresporsel.GraphService;
@@ -24,7 +24,7 @@ public class ScheduledForesporselSender {
     private final ForesporselRepository foresporselRepository;
     private final NomRessurserService nomRessurserService;
     private final GraphService graphService;
-    private final LeaderElector leaderElector;
+    private final LeaderElection leaderElector;
     private final TokenService tokenService;
 
     @Value("${foresporsel-api}")

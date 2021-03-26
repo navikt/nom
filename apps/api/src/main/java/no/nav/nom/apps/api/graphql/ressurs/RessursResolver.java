@@ -6,7 +6,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.domain.RessursRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.CustomGraphQLContext;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
@@ -20,22 +20,25 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 class RessursResolver implements GraphQLQueryResolver {
-    private final DvhRepository dvhRepository;
+
+    private final RessursRepository ressursRepository;
 
     public DataFetcherResult<List<Ressurs>> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
         if (((CustomGraphQLContext) env.getContext()).isAuthenticated()) {
             if (objectNode == null) {
                 return DataFetcherResult.<List<Ressurs>>newResult()
-                        .data(dvhRepository.getAllRessurser().stream().map(ConverterUtils::convert).collect(Collectors.toUnmodifiableList()))
+                        .data(ressursRepository.getAlleRessurser().stream()
+                                .map(ConverterUtils::convert)
+                                .collect(Collectors.toUnmodifiableList()))
                         .build();
             }
 
             val result = objectNode.findValue("navIdent") != null ?
-                    dvhRepository.getRessursByNavIdent(objectNode.findValue("navIdent").asText())
+                    ressursRepository.findByNavIdent(objectNode.findValue("navIdent").asText())
                             .map(ConverterUtils::convert)
                             .map(List::of)
                             .orElse(Collections.emptyList()) :
-                    dvhRepository.getRessursByPersonIdent(objectNode.findValue("personIdent").asText())
+                    ressursRepository.findByPersonIdent(objectNode.findValue("personIdent").asText())
                             .map(ConverterUtils::convert)
                             .map(List::of)
                             .orElse(Collections.emptyList());

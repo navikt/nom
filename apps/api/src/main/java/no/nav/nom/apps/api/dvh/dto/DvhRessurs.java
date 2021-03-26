@@ -5,11 +5,13 @@ import lombok.Value;
 
 @Value
 public class DvhRessurs {
-    private String navIdent;
-    private String personIdent;
+
+    String navIdent;
+    String personIdent;
 
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
     }
+
 }
