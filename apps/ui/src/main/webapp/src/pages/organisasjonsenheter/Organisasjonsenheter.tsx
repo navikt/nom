@@ -34,7 +34,7 @@ export default function Organisasjonsenheter(props: any): JSX.Element {
       out = "Waiting";
       break;
     case "RESOLVEDWITHERRORS":
-      out = JSON.stringify(res,null,1);
+      out = JSON.stringify(res, null, 1);
       break;
   }
 

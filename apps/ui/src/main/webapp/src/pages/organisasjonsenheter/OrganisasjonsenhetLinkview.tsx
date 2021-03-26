@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import TableSorter from "tabell";
 import { LookupState } from "../../api/utils_api_hook";
 import { OrgEnhetFelter, Ressurs, OrgEnhetData } from "../../common/types";
-import AlertStripe from 'nav-frontend-alertstriper';
+import AlertStripe from "nav-frontend-alertstriper";
 
 function transformResult(graphQlData: any): OrgEnhetData {
   const underEnheter = graphQlData.organisasjonsenhet[0].organiseringer.filter(
@@ -41,12 +41,12 @@ function transformResult(graphQlData: any): OrgEnhetData {
     koblinger: {
       sti: overenhet
         ? [
-            {
-              enhetNavn: overenhet.organisasjonsenhet.navn,
-              enhetNr: overenhet.organisasjonsenhet.agressoId,
-              enhetType: "Type (TODO)",
-            },
-          ]
+          {
+            enhetNavn: overenhet.organisasjonsenhet.navn,
+            enhetNr: overenhet.organisasjonsenhet.agressoId,
+            enhetType: "Type (TODO)",
+          },
+        ]
         : [],
       underEnheter: underEnheter2,
       ressurser: ressurser,
@@ -54,7 +54,7 @@ function transformResult(graphQlData: any): OrgEnhetData {
   };
 }
 
-function LocalTable(props: { orgenhetData }) {
+function LocalTable(props: { orgenhetData }): JSX.Element {
   const orgenhetOver: OrgEnhetFelter | null = props.orgenhetData.koblinger
     .sti[0] as any;
   const orgenheterUnder: OrgEnhetFelter[] = props.orgenhetData.koblinger
@@ -161,7 +161,9 @@ export default function OrganisasjonsenhetLinkview(props: {
       const orgenhetData = transformResult(props.lookup.result);
       return (
         <div className="Organisasjonsenheter__linkview">
-          <AlertStripe type="feil"><p>Feil i graphql spørring, se console log</p></AlertStripe>
+          <AlertStripe type="feil">
+            <p>Feil i graphql spørring, se console log</p>
+          </AlertStripe>
           <LocalTable orgenhetData={orgenhetData}></LocalTable>
         </div>
       );
