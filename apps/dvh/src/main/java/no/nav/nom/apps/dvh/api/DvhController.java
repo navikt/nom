@@ -3,6 +3,8 @@ package no.nav.nom.apps.dvh.api;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.dvh.common.AppProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -27,7 +29,10 @@ public class DvhController {
     @Value("${spring.security.oauth2.resourceserver.jwt.subjects}")
     private final List<String> AUTHORIZED_SUBJECTS;
 
-    private final RestTemplate restTemplateDvh;
+    @Autowired //Lombok constructor injection funker ikke med qualifier.
+    @Qualifier("restTemplateDvh")
+    private RestTemplate restTemplateDvh;
+
     private final AppProperties appProperties;
 
     @GetMapping("/stillinger")

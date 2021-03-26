@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.dvh.common.AppProperties;
 import no.nav.nom.apps.dvh.common.TokenRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,14 +28,15 @@ import java.util.List;
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
 public class PdlController {
-    private final String INVALID_SUBJECT = "Subject tokenet gjelder for er ikke godkjent";
-
-    private final TokenRepository tokenRepository;
-    private final RestTemplate restTemplate;
-    private final AppProperties appProperties;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.subjects}")
     private final List<String> AUTHORIZED_SUBJECTS;
+    private final String INVALID_SUBJECT = "Subject tokenet gjelder for er ikke godkjent";
+    private final TokenRepository tokenRepository;
+    private final AppProperties appProperties;
+
+    @Autowired //Lombok constructor injection funker ikke med qualifier.
+    private RestTemplate restTemplate;
 
     @PostMapping("/pdl")
     public ResponseEntity<String> hentPersonBolk(@AuthenticationPrincipal Jwt jwt, @RequestBody String body, @RequestHeader("Tema") String tema) {

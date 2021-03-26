@@ -2,6 +2,7 @@ package no.nav.nom.apps.dvh.common;
 
 import io.micrometer.core.instrument.Tag;
 import lombok.val;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTags;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 class CommonConfig {
 
     @Bean
+    @Qualifier("restTemplateDvh")
     RestTemplate restTemplateDvh(RestTemplateBuilder builder, AppProperties properties) {
         return builder
                 .additionalInterceptors(basicAuthInterceptor(properties.getDvh().getTdvUsername(), properties.getDvh().getTdvPassword()))
