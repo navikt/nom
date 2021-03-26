@@ -16,7 +16,7 @@ spec:
     - name: ACCEPTED_SUBJECTS
       value: 476401e7-5eec-4fd8-8390-a89c6f14cd08
     - name: STS_BASEURL
-      value: https://security-token-service.adeo.no
+      value: https://security-token-service.nais.adeo.no
     - name: PDL_BASEURL
       value: https://pdl-api.intern.nav.no
   envFrom:
