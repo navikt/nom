@@ -12,6 +12,11 @@ export type LookupState =
   | {
       lookupState: "RESOLVED";
       result: any;
+    }
+  | {
+      lookupState: "RESOLVEDWITHERRORS";
+      result: any;
+      error: Error;
     };
 
 export const lookups = {
@@ -33,5 +38,15 @@ export const lookups = {
 
   createPending: function (): LookupState {
     return { lookupState: "PENDING" };
+  },
+
+  createResolvedWithErrors: function (
+    response: Record<string, any>
+  ): LookupState {
+    return {
+      lookupState: "RESOLVEDWITHERRORS",
+      result: response.data,
+      error: response.errors,
+    };
   },
 };

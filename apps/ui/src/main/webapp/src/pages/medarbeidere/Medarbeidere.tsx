@@ -21,6 +21,9 @@ export default function Medarbeidere(props: any): JSX.Element {
       break;
     case "WAITING":
       out = "Waiting";
+      break;
+    case "RESOLVEDWITHERRORS":
+      out = JSON.stringify(res, null, 1);
   }
   return (
     <div className="Medarbeidere">

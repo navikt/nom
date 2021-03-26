@@ -34,8 +34,12 @@ async function doPostGraphql(
     );
     const httpOkRes = await handleHttpResponse(apiGetres);
     const jsonOkRes = await validateJson(httpOkRes);
-    const graphqlOkRes = await validateGraphql(jsonOkRes);
-    setOut(lookups.createResolved(graphqlOkRes.data));
+    if (jsonOkRes.errors) {
+      console.error({ graphqlResponseWithErrors: jsonOkRes });
+      setOut(lookups.createResolvedWithErrors(jsonOkRes));
+    } else {
+      setOut(lookups.createResolved(jsonOkRes.data));
+    }
   } catch (err) {
     if (err instanceof DOMException) {
       return; // abortController
