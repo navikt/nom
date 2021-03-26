@@ -28,9 +28,9 @@ function transformResult(graphQlData: any): OrgEnhetData {
       return {
         id: it.ressurs.navIdent,
         pnr: it.ressurs.personIdent.substr(0, 5) + "....",
-        fornavn: it.person.navn.fornavn,
-        mellomnavn: it.person.navn.mellomnavn,
-        etternavn: it.person.navn.etternavn,
+        fornavn: it.ressurs.person.navn.fornavn,
+        mellomnavn: it.ressurs.person.navn.mellomnavn,
+        etternavn: it.ressurs.person.navn.etternavn,
       };
     }
   );
