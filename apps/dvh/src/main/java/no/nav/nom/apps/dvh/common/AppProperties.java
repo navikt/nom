@@ -17,12 +17,8 @@ public class AppProperties {
 
     @Value
     public static class Dvh {
-        String topic;
         String tdvUsername;
         String tdvPassword;
-
-        @Deprecated
-        Ressurs ressurs;
 
         Stilling stilling;
         Ressurser ressurser;
@@ -33,13 +29,6 @@ public class AppProperties {
     @Value
     public static class Pdl {
         String baseUrl;
-    }
-
-    @Value
-    @Deprecated()
-    public static class Ressurs {
-        String url;
-        Long chunkSize;
     }
 
     @Value

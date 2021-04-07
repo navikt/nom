@@ -31,3 +31,10 @@ spring:
 server.servlet.session.timeout: 7d
 
 server.servlet.session.cookie.name: JSESSIONID_NOMUI
+
+nom:
+  libs:
+    utils:
+      common:
+        app:
+          load-properties: true

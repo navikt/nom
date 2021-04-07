@@ -2,7 +2,6 @@ app:
   pdl:
     baseUrl: ${PDL_BASEURL}
   dvh:
-    topic: nom.dvhsource-v1
     tdvUsername: ${tdvuser}
     tdvPassword: ${tdvpass}
     ressurs:
@@ -31,3 +30,10 @@ spring:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
           subjects: ${ACCEPTED_SUBJECTS}
+
+nom:
+  libs:
+    utils:
+      common:
+        app:
+          load-properties: true

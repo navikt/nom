@@ -8,6 +8,15 @@ app:
   hendelse:
     topic: nom.hendelse-v1
 
+nom:
+  libs:
+    utils:
+      common:
+        kafka:
+          load-properties: true
+        app:
+          load-properties: true
+
 authentication:
   aad:
     issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}

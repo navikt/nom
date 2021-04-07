@@ -10,7 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 public class PropertiesAutoConfig {
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(value = "nom.libs.utils.common.app.load-properties", matchIfMissing = true)
+    @ConditionalOnProperty(value = "nom.libs.utils.common.app.load-properties")
     @PropertySource(value = "common-app.yaml", factory = YamlPropertySourceFactory.class)
     public static class CommonAppConfig {
 
@@ -18,7 +18,7 @@ public class PropertiesAutoConfig {
 
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnBean(KafkaTemplate.class)
-    @ConditionalOnProperty(value = "nom.libs.utils.common.kafka.load-properties", matchIfMissing = true)
+    @ConditionalOnProperty(value = "nom.libs.utils.common.kafka.load-properties")
     @PropertySource(value = "common-kafka.yaml", factory = YamlPropertySourceFactory.class)
     public static class CommonKafkaConfig {
 
