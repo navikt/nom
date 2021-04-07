@@ -26,7 +26,7 @@
         <spring-cloud.version>2020.0.2</spring-cloud.version>
         <spring.graphql-version>11.0.0</spring.graphql-version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
-        <checker-qual.version>3.11.0</checker-qual.version>
+        <checker-qual.version>3.12.0</checker-qual.version>
         <bouncycastle.version>1.68</bouncycastle.version>
         <graphql.extended.scalaras-version>15.0.0</graphql.extended.scalaras-version>
         <token-support.version>1.3.4</token-support.version>
