@@ -1,7 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "prettier"
   ],
   "extends": [
     "eslint:recommended",
@@ -38,11 +39,6 @@
     "getter-return": "warn",
     "guard-for-in": "error",
     "id-match": "error",
-    "indent": ["warn", 2, {
-      "SwitchCase": 1,
-      "MemberExpression":  1,
-      "ignoredNodes": ["JSXElement *", "JSXElement"]
-    }],
     "new-parens": "warn",
     "no-array-constructor": "warn",
     "no-bitwise": "error",
