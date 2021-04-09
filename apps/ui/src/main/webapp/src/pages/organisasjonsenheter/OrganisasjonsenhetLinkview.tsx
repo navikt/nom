@@ -38,7 +38,6 @@ function transformResult(graphQlData: any): OrgEnhetData {
       return out;
     }
   );
-  console.log(graphQlData);
 
   const lederData = graphQlData.organisasjonsenhet[0].leder[0];
 
