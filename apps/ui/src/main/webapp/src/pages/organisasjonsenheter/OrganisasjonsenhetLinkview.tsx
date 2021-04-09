@@ -69,7 +69,6 @@ function transformResult(graphQlData: any): OrgEnhetData {
 }
 
 function LeaderBox(props: { ressurs: Ressurs }): JSX.Element {
-  props.ressurs.person= {navn: {fornavn: "Alfred", mellomnavn: "Ugla", etternavn: "Hansen"}};
   return (
     <div>
       <span>- Leder: </span>
