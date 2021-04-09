@@ -40,6 +40,13 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                 ressurs{
                     navIdent
                     personIdent
+                    person {
+                      navn {
+                        fornavn
+                        mellomnavn
+                        etternavn
+                      }
+                    }
                 }
             }
             koblinger {
