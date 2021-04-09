@@ -36,7 +36,13 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                   agressoId
                 }
               }
-              koblinger {
+              leder{
+                ressurs{
+                    navIdent
+                    personIdent
+                }
+            }
+            koblinger {
                   ressurs {
                       navIdent
                       personIdent
