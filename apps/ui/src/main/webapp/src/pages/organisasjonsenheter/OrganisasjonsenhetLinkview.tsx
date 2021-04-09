@@ -96,7 +96,22 @@ function LocalTable(props: { orgenhetData }): JSX.Element {
     .sti[0] as any;
   const orgenheterUnder: OrgEnhetFelter[] = props.orgenhetData.koblinger
     .underEnheter as any;
-  const ressurserUnder: Ressurs[] = props.orgenhetData.koblinger.ressurser;
+
+  const ressurserUnderTmp: Ressurs[] = props.orgenhetData.koblinger.ressurser;
+  const ressurserUnder: Ressurs[] = [];
+
+  // må filtrere vekk duplikate identer fram til react key kan inneholde informasjon som kan skille radene fra hverandre
+  const ressursIdMap = {};
+  ressurserUnderTmp.forEach((it) => {
+    if (!ressursIdMap[it.id]) {
+      ressurserUnder.push(it);
+      ressursIdMap[it.id] = true;
+    } else {
+      console.warn(
+        `Ressurs ${it.id} har mer enn én forekomst i enhet med nr ${props.orgenhetData.data.enhetNr}`
+      );
+    }
+  });
 
   const leder: Ressurs = props.orgenhetData.leder;
 
@@ -178,7 +193,6 @@ function LocalTable(props: { orgenhetData }): JSX.Element {
         </h3>
         <LeaderBox ressurs={leder}></LeaderBox>
       </div>
-
 
       {orgenhetOver ? (
         <div className="Organisasjonsenheter__linkview__overenhetlink">
