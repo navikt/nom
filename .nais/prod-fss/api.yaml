@@ -54,6 +54,9 @@ spec:
     inbound:
       rules:
         - application: nom-ui
+        - application: team-catalog-backend
+          namespace: teamdatajegerne
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-dvh.prod-fss-pub.nais.io
