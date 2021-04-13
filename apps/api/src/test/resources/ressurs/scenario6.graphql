@@ -1,0 +1,10 @@
+query {
+    ressurs(where: {navIdent: "testNavIdent"}) {
+        navIdent
+        lederFor {
+            organisasjonsenhet {
+                agressoId
+            }
+        }
+    }
+}

@@ -33,9 +33,11 @@ type Organisering {
 }
 
 type Ressurs {
+    nomId: String!
     navIdent: String!
     personIdent: String!
     koblinger: [RessursKobling!]!
+    lederFor: [LederOrganisasjonsenhet!]!
     person: Person
 }
 
@@ -49,8 +51,12 @@ type Navn {
     etternavn: String!
 }
 
-type OrganisasjonsenhetsLeder{
+type OrganisasjonsenhetsLeder {
     ressurs: Ressurs!
+}
+
+type LederOrganisasjonsenhet {
+    organisasjonsenhet: Organisasjonsenhet!
 }
 
 type OrganisasjonsenhetsKobling {

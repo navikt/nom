@@ -53,6 +53,15 @@ public class DvhRepository {
                 .orElse(Collections.emptyList());
     }
 
+    public List<DvhOrganisasjonsenhet> getEnheterByLeder(String lederNavIdent) {
+        return lederByEnhetNr.values().stream().flatMap(Collection::stream)
+                .filter(l -> l.getNavIdent().equals(lederNavIdent))
+                .map(DvhLeder::getOrgEnhetNr)
+                .map(enheterByNumber::get)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     public void saveOrganisasjonsenheter(Map<String, DvhOrganisasjonsenhet> orgenheter) {
         enheterByNumber = orgenheter;
     }

@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
@@ -167,6 +168,20 @@ class RessursTest extends RessursTestBase {
         assertTrue(ressurs.hasNonNull("navIdent"));
         assertTrue(ressurs.hasNonNull("personIdent"));
         assertFalse(ressurs.hasNonNull("person"));
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Hente enheter ressurs er leder for")
+    void scenario35() {
+        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse(""));
+        dvhRestConsumer.loadFromDvh();
+
+        val response = postForResource("ressurs/scenario6.graphql", false);
+
+        val lederFor = response.getList("$.data.ressurs[0].lederFor", JsonNode.class);
+        assertThat(lederFor.size()).isEqualTo(1);
+        assertThat(lederFor.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
     }
 
     @Test
