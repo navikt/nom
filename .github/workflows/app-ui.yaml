@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v2.1.5
         with:
           node-version: 15
-      - uses: actions/cache@v2.1.4
+      - uses: actions/cache@v2.1.5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-cache-${{ hashFiles('apps/ui/src/main/webapp/package-lock.json') }}
@@ -48,7 +48,7 @@ jobs:
           cp -r webapp/build/ resources/
           mv resources/build resources/public
       - name: Cache Depdendencies
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
