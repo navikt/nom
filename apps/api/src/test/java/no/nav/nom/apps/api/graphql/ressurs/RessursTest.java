@@ -1,11 +1,12 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import no.nav.nom.contract.nom.hendelse.HendelseTo.Endringstype;
 import no.nav.nom.contract.nom.hendelse.Hendelsestyper;
@@ -43,9 +44,38 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario1.graphql", false);
 
-        val outputRessurs = response.getList("$.data.ressurs", Ressurs.class).get(0);
+        val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
         assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
         assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Sender inn ressurs fra kafka og leser inn med graphql navIdent og personIdent parameter bulk")
+    void scenario112() {
+        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("1"), createRessursHendelse("2"));
+
+        val response = postForResource("ressurs/scenario12.graphql", false);
+
+        val outputRessurs = response.getList("$.data.ressurser", RessursResult.class);
+        assertThat(outputRessurs).hasSize(4);
+        RessursResult navIdent = get(outputRessurs, "testNavIdent1");
+        assertEquals(navIdent.getId(), "testNavIdent1");
+        assertEquals(navIdent.getCode(), ResultCode.OK);
+        RessursResult navIdentNotFound = get(outputRessurs, "notFoundNavIdent");
+        assertEquals(navIdentNotFound.getId(), "notFoundNavIdent");
+        assertEquals(navIdentNotFound.getCode(), ResultCode.NOT_FOUND);
+
+        RessursResult personIdent = get(outputRessurs, "testPersonIdent2");
+        assertEquals(personIdent.getId(), "testPersonIdent2");
+        assertEquals(personIdent.getCode(), ResultCode.OK);
+        RessursResult personIdentNotFound = get(outputRessurs, "notFoundPersonIdent");
+        assertEquals(personIdentNotFound.getId(), "notFoundPersonIdent");
+        assertEquals(personIdentNotFound.getCode(), ResultCode.NOT_FOUND);
+    }
+
+    private RessursResult get(List<RessursResult> list, String ident) {
+        return list.stream().filter(o -> ident.equals(o.getId())).findFirst().orElseThrow();
     }
 
     @Test
@@ -57,7 +87,7 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario2.graphql", false);
 
-        val outputRessurs = response.getList("$.data.ressurs", Ressurs.class).get(0);
+        val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
         assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
         assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
     }
@@ -70,7 +100,7 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario3.graphql", false);
 
-        val outputRessurs = response.getList("$.data.ressurs", Ressurs.class);
+        val outputRessurs = response.getList("$.data.ressurser", Ressurs.class);
         assertEquals(3, outputRessurs.size());
     }
 
@@ -83,7 +113,7 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario42.graphql", false);
 
-        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
+        val ressurs = response.get("$.data.ressurs", JsonNode.class);
         val actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
         assertEquals("testId2", actualOrganisasjonsEnhetId);
     }
@@ -96,7 +126,7 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario42.graphql", false);
 
-        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
+        val ressurs = response.get("$.data.ressurs", JsonNode.class);
         assertTrue(ressurs.get("koblinger").isEmpty());
     }
 
@@ -109,11 +139,11 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario5.graphql", false);
 
-        val ressurser = response.getList("$.data.ressurs", JsonNode.class);
+        val ressurser = response.getList("$.data.ressurser", JsonNode.class);
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("personIdent").asText(), ressurser.get(0).get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("personIdent").asText(), ressurser.get(1).get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
@@ -125,11 +155,11 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario5.graphql", false);
 
-        val ressurser = response.getList("$.data.ressurs", JsonNode.class);
+        val ressurser = response.getList("$.data.ressurser", JsonNode.class);
         assertEquals(2, ressurser.size());
 
-        pdlUtils.assertNavn(ressurser.get(0).get("personIdent").asText(), ressurser.get(0).get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("personIdent").asText(), ressurser.get(1).get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
 
     @Test
@@ -145,9 +175,8 @@ class RessursTest extends RessursTestBase {
         val errors = response.getList("$.errors", JsonNode.class);
         assertEquals(2, errors.size());
 
-        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
-        assertTrue(ressurs.hasNonNull("navIdent"));
-        assertTrue(ressurs.hasNonNull("personIdent"));
+        val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
+        assertTrue(ressurs.hasNonNull("id"));
         assertFalse(ressurs.hasNonNull("person"));
     }
 
@@ -164,9 +193,8 @@ class RessursTest extends RessursTestBase {
         val errors = response.getList("$.errors", JsonNode.class);
         assertEquals(2, errors.size());
 
-        val ressurs = response.getList("$.data.ressurs", JsonNode.class).get(0);
-        assertTrue(ressurs.hasNonNull("navIdent"));
-        assertTrue(ressurs.hasNonNull("personIdent"));
+        val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
+        assertTrue(ressurs.hasNonNull("id"));
         assertFalse(ressurs.hasNonNull("person"));
     }
 
@@ -179,7 +207,7 @@ class RessursTest extends RessursTestBase {
 
         val response = postForResource("ressurs/scenario6.graphql", false);
 
-        val lederFor = response.getList("$.data.ressurs[0].lederFor", JsonNode.class);
+        val lederFor = response.get("$.data.ressurs.lederFor", JsonNode.class);
         assertThat(lederFor.size()).isEqualTo(1);
         assertThat(lederFor.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
     }

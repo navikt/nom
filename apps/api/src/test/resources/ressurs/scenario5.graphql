@@ -1,12 +1,14 @@
 query {
-    ressurs {
-        navIdent
-        personIdent
-        person{
-            navn{
-                fornavn
-                mellomnavn
-                etternavn
+    ressurser {
+        id
+        ressurs {
+            personIdent
+            person{
+                navn{
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
             }
         }
     }

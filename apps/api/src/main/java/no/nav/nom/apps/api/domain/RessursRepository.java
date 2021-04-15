@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.domain;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
@@ -15,6 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -38,6 +38,14 @@ public class RessursRepository {
 
     public Optional<Ressurs> findByNavIdent(String navIdent) {
         return Optional.ofNullable(alleRessurserByNavIdent.get(navIdent));
+    }
+
+    public List<Ressurs> findByPersonIdentIn(List<String> idents) {
+        return idents.stream().map(alleRessurserByPersonIdent::get).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    public List<Ressurs> findByNavIdentIn(List<String> navIdents) {
+        return navIdents.stream().map(alleRessurserByNavIdent::get).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public List<Ressurs> findAllByIdsIn(Set<UUID> uuids) {

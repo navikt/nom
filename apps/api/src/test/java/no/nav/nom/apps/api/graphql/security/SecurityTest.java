@@ -20,16 +20,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @DisplayName("GraphQL.Sikkerhet")
 class SecurityTest extends SecurityTestBase {
 
-    private static final String organiseringResource = "organisasjonsenhet/scenario41.graphql";
-    private static final String ressursResource = "ressurs/scenario42.graphql";
+    private static final String organiseringResource = "organisasjonsenhet/scenario1.graphql";
+    private static final String organiseringerResource = "organisasjonsenhet/scenario2.graphql";
+    private static final String ressursResource = "ressurs/scenario1.graphql";
+    private static final String ressurserResource = "ressurs/scenario3.graphql";
 
 
     @Test
     @SneakyThrows
     @DisplayName("Gitt manglende token, får man Unauthenticated error i responsen")
     public void scenario11() {
-        postAndAssertResponse(organiseringResource, "");
-        postAndAssertResponse(ressursResource, "");
+        testToken("");
     }
 
     @Test
@@ -45,8 +46,7 @@ class SecurityTest extends SecurityTestBase {
         val signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("annenKey").build(), claims.build());
         signedJWT.sign(signer);
 
-        postAndAssertResponse(organiseringResource, signedJWT.serialize());
-        postAndAssertResponse(ressursResource, signedJWT.serialize());
+        testToken(signedJWT.serialize());
     }
 
     @Test
@@ -57,8 +57,7 @@ class SecurityTest extends SecurityTestBase {
         claims.issuer("annenIssuer");
         val token = securityTestUtils.createToken(claims);
 
-        postAndAssertResponse(organiseringResource, token);
-        postAndAssertResponse(ressursResource, token);
+        testToken(token);
     }
 
     @Test
@@ -69,8 +68,7 @@ class SecurityTest extends SecurityTestBase {
         claims.audience("ugyldigAudience");
         val token = securityTestUtils.createToken(claims);
 
-        postAndAssertResponse(organiseringResource, token);
-        postAndAssertResponse(ressursResource, token);
+        testToken(token);
     }
 
     @Test
@@ -81,8 +79,7 @@ class SecurityTest extends SecurityTestBase {
         claims.expirationTime(Date.from(Instant.now().minusSeconds(60 * 60)));
         val token = securityTestUtils.createToken(claims);
 
-        postAndAssertResponse(organiseringResource, token);
-        postAndAssertResponse(ressursResource, token);
+        testToken(token);
     }
 
     @Test
@@ -93,15 +90,26 @@ class SecurityTest extends SecurityTestBase {
         claims.notBeforeTime(Date.from(Instant.now().plusSeconds(60 * 60)));
         val token = securityTestUtils.createToken(claims);
 
-        postAndAssertResponse(organiseringResource, token);
-        postAndAssertResponse(ressursResource, token);
+        testToken(token);
+    }
+
+    private void testToken(String token) {
+        // if response is array, data is null, if it is an object data contains the field which is null for some reason
+        postAndAssertResponse(organiseringResource, token, "organisasjonsenhet");
+        postAndAssertResponse(organiseringerResource, token, null);
+        postAndAssertResponse(ressursResource, token, "ressurs");
+        postAndAssertResponse(ressurserResource, token, null);
     }
 
     @SneakyThrows
-    private void postAndAssertResponse(String resource, String token) {
+    private void postAndAssertResponse(String resource, String token, String path) {
         val response = graphQLTestTemplate.withBearerAuth(token).postForResource(resource);
         assertThat(response, hasErrors());
-        response.assertThatDataField().isNull();
+        if (path == null) {
+            response.assertThatDataField().isNull();
+        } else {
+            response.assertThatField("$.data." + path).isNull();
+        }
         //response.assertThatListOfErrors().hasSize(1);
     }
 

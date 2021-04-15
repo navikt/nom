@@ -1,0 +1,6 @@
+query {
+    ressurser(where: {navIdenter: ["testNavIdent1","notFoundNavIdent"], personIdenter: ["testPersonIdent2","notFoundPersonIdent"]}) {
+        id
+        code
+    }
+}

@@ -7,8 +7,10 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,8 +39,22 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).getList("$.data.organisasjonsenhet", Organisasjonsenhet.class);
-        assertEquals(1, outputEnhet.size());
+        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", Organisasjonsenhet.class);
+        assertEquals(outputEnhet.getAgressoId(), "testId1");
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql med id parameter bulk")
+    void scenario112() {
+        kafkaUtils.sendHendelseFromKafkaMock();
+        dvhRestConsumer.loadFromDvh();
+
+        val outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        assertEquals(outputEnhet.get(0).getId(), "testId1");
+        assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
+        assertEquals(outputEnhet.get(1).getId(), "notFoundIdent");
+        assertEquals(outputEnhet.get(1).getCode(), ResultCode.NOT_FOUND);
     }
 
     @Test
@@ -49,7 +65,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(3, response.getList("$.data.organisasjonsenhet", Organisasjonsenhet.class).size());
+        assertEquals(3, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
     }
 
     @Test
@@ -60,7 +76,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario3.graphql", false);
-        val enhetResponse = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val enhetResponse = response.get("$.data.organisasjonsenhet", JsonNode.class);
 
         val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
                 .collect(Collectors.toMap(
@@ -79,7 +95,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario33.graphql", false);
-        val enhetResponse = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val enhetResponse = response.get("$.data.organisasjonsenhet", JsonNode.class);
 
         val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
                 .collect(Collectors.toMap(
@@ -101,7 +117,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario4.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
         }).get(0);
 
@@ -118,7 +134,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario32.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
         });
 
@@ -137,7 +153,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val lederNavn = outputEnhetJson.get("leder")
                 .get(0).get("ressurs").get("person").get("navn");
         pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);
@@ -154,7 +170,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrganisasjonsenhetsKobling>>() {
         });
 
@@ -177,7 +193,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();
     }
 
@@ -192,7 +208,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
 
-        val outputEnhetJson = response.getList("$.data.organisasjonsenhet", JsonNode.class).get(0);
+        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val lederNavn = outputEnhetJson.get("koblinger")
                 .get(0).get("ressurs").get("person").get("navn");
         pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);

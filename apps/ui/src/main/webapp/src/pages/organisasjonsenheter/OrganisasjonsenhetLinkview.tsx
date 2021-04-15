@@ -7,7 +7,8 @@ import AlertStripe from "nav-frontend-alertstriper";
 import { createRessursQuery } from "../../api/graphql_queries";
 
 function transformResult(graphQlData: any): OrgEnhetData {
-  const underEnheter = graphQlData.organisasjonsenhet[0].organiseringer.filter(
+  const organisasjonsenhet = graphQlData.organisasjonsenhet;
+  const underEnheter = organisasjonsenhet.organiseringer.filter(
     (it) => it.retning === "under"
   );
 
@@ -19,11 +20,11 @@ function transformResult(graphQlData: any): OrgEnhetData {
     };
   });
 
-  const overenhet = graphQlData.organisasjonsenhet[0].organiseringer.filter(
+  const overenhet = organisasjonsenhet.organiseringer.filter(
     (it) => it.retning === "over"
   )[0];
 
-  const ressurser: Ressurs[] = graphQlData.organisasjonsenhet[0].koblinger.map(
+  const ressurser: Ressurs[] = organisasjonsenhet.koblinger.map(
     (it) => {
       const out: Record<string, any> = {
         id: it.ressurs.navIdent,
@@ -39,12 +40,12 @@ function transformResult(graphQlData: any): OrgEnhetData {
     }
   );
 
-  const lederData = graphQlData.organisasjonsenhet[0].leder[0];
+  const lederData = organisasjonsenhet.leder[0];
 
   return {
     data: {
-      enhetNavn: graphQlData.organisasjonsenhet[0].navn,
-      enhetNr: graphQlData.organisasjonsenhet[0].agressoId,
+      enhetNavn: organisasjonsenhet.navn,
+      enhetNr: organisasjonsenhet.agressoId,
       enhetType: "type (todo)",
     },
     koblinger: {

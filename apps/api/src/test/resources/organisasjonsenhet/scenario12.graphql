@@ -1,0 +1,6 @@
+query {
+    organisasjonsenheter(where: {agressoIder: ["testId1","notFoundIdent"]}) {
+        id
+        code
+    }
+}
