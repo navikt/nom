@@ -65,7 +65,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(3, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
+        assertEquals(4, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
     }
 
     @Test
@@ -84,7 +84,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
 
         assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
-        assertEquals("testId3", organiserteEnheter.get("under").getAgressoId());
+        assertEquals("testId4", organiserteEnheter.get("under").getAgressoId());
     }
 
     @Test

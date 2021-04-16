@@ -214,6 +214,34 @@ class RessursTest extends RessursTestBase {
 
     @Test
     @SneakyThrows
+    @DisplayName("Hente leder for ressurs")
+    void scenario36() {
+        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("1"), createRessursHendelse("2"));
+        dvhRestConsumer.loadFromDvh();
+
+        val response = postForResource("ressurs/scenario7.graphql", false);
+
+        val ledere = response.get("$.data.ressurs.ledere", JsonNode.class);
+        assertThat(ledere.size()).isEqualTo(1);
+        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Hente leder for ressurs som er leder av sin enhet")
+    void scenario37() {
+        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("4"));
+        dvhRestConsumer.loadFromDvh();
+
+        val response = postForResource("ressurs/scenario71.graphql", false);
+
+        val ledere = response.get("$.data.ressurs.ledere", JsonNode.class);
+        assertThat(ledere.size()).isEqualTo(1);
+        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+    }
+
+    @Test
+    @SneakyThrows
     @DisplayName("Ressurs hendelser sendt på kafka")
     void scenario23() {
         kafkaUtils.sendHendelseFromKafkaMock();

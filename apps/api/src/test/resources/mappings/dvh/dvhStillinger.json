@@ -41,6 +41,22 @@
             "STILLING_I_BUNN": 1.0,
             "PERMISJON": "JOBBER",
             "LAST_UPDATE": "2018-10-26T09:26:12.000Z"
+          },
+          {
+            "RESOURCE_ID": "estNavIdent4",
+            "NAV_ID": "testNavIdent4",
+            "FRA_DATO": "2021-01-01",
+            "TIL_DATO": "2099-12-31",
+            "ANSETTELSESTYPE_BESK": "Fast",
+            "PARTTIME_PCT": 100,
+            "ORGENHET": "testId4",
+            "ORGENHET_BESK": "Økonomi Pensjon Utbetaling 3",
+            "ORGENHET_I_BUNN": "5222204",
+            "LEDER_I_BUNN": "199999",
+            "LEDER_PAA_STILLING": "199999",
+            "STILLING_I_BUNN": 1.0,
+            "PERMISJON": "JOBBER",
+            "LAST_UPDATE": "2018-10-26T09:26:12.000Z"
           }
         ]
     },
