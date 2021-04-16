@@ -14,7 +14,6 @@ import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.libs.utils.common.util.DateUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,13 +40,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                         return ledere.stream();
                     }
                     // Om ressurs er leder for sin enhet henter vi leder fra nivå over
-                    return dvhRepository.getOrganiseringerByAgressoId(agressoId).stream()
-                            .map(DvhOrganisering::getOverenhetNummer)
-                            .map(dvhRepository::getEnhetByAgressoId)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .map(o -> lederFor(o.getAgressoId(), ressurs.getNavIdent()))
-                            .flatMap(Collection::stream);
+                    return lederForRecursive(agressoId, ressurs.getNavIdent()).stream();
                 })
                 .map(RessursLeder::new)
                 .collect(Collectors.toList());
@@ -55,6 +48,22 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
         return DataFetcherResult.<List<RessursLeder>>newResult()
                 .data(result)
                 .build();
+    }
+
+    private List<Ressurs> lederForRecursive(String agressoId, String excludeNavIdent) {
+        return dvhRepository.getOrganiseringerByAgressoId(agressoId).stream()
+                .map(DvhOrganisering::getOverenhetNummer)
+                .map(dvhRepository::getEnhetByAgressoId)
+                .filter(Optional::isPresent)
+                .map(Optional::get).findFirst()
+                .map(o -> {
+                    var ledere = lederFor(o.getAgressoId(), excludeNavIdent);
+                    if (!ledere.isEmpty()) {
+                        return ledere;
+                    }
+                    return lederForRecursive(o.getAgressoId(), excludeNavIdent);
+                })
+                .orElse(List.of());
     }
 
     private List<Ressurs> lederFor(String agressoId, String excludeNavIdent) {
