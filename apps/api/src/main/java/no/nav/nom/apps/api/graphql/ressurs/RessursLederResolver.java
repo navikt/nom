@@ -58,7 +58,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                 .map(Optional::get).findFirst()
                 .map(o -> {
                     var ledere = lederFor(o.getAgressoId(), excludeNavIdent);
-                    if (!ledere.isEmpty()) {
+                    if (!ledere.isEmpty() || agressoId.equals(o.getAgressoId())) {
                         return ledere;
                     }
                     return lederForRecursive(o.getAgressoId(), excludeNavIdent);
