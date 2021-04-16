@@ -65,7 +65,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(4, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
+        assertEquals(5, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
     }
 
     @Test
