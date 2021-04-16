@@ -52,6 +52,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
 
     private List<Ressurs> lederForRecursive(String agressoId, String excludeNavIdent) {
         return dvhRepository.getOrganiseringerByAgressoId(agressoId).stream()
+                .filter(o -> o.getUnderenhetNummer().equals(agressoId))
                 .map(DvhOrganisering::getOverenhetNummer)
                 .map(dvhRepository::getEnhetByAgressoId)
                 .filter(Optional::isPresent)
