@@ -1,0 +1,20 @@
+{
+  "NOM_ANSATTE_BUCKETS_v1Result": [
+    {
+      "NAV_IDENT": "O123456",
+      "FNR": "12345678901",
+      "FORNAVN": "Navn 1",
+      "ETTERNAVN": "ENavn 1",
+      "EPOST": "epost1@nav.no",
+      "REMEDY_START_DATO": "2008-05-23",
+      "REMEDY_SLUTT_DATO": "2099-12-31",
+      "AGRESSO_SLUTT_DATO": "2099-12-31",
+      "ANSATT_PER_IDAG": "JA",
+      "ANSETTELSESTYPE_BESK": "Fast",
+      "ANSATT_TYPE": "NAV Statlig",
+      "ANSATT_RESSURS_KODE": "F",
+      "REMEDY_PERMISJON": "NEI",
+      "BUCKET_NUM": 16
+    }
+  ]
+}

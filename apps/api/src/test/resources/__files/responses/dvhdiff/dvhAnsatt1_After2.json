@@ -1,0 +1,69 @@
+{
+      "NOM_ANSATTE_BUCKETS_v1Result": [
+        {
+          "NAV_IDENT": "O123456",
+          "FNR": "12345678901",
+          "FORNAVN": "Navn 1",
+          "ETTERNAVN": "ENavn 1",
+          "EPOST": "epost1@nav.no",
+          "REMEDY_START_DATO": "2008-05-23",
+          "REMEDY_SLUTT_DATO": "2099-12-31",
+          "AGRESSO_SLUTT_DATO": "2099-12-31",
+          "ANSATT_PER_IDAG": "JA",
+          "ANSETTELSESTYPE_BESK": "Fast",
+          "ANSATT_TYPE": "NAV Statlig",
+          "ANSATT_RESSURS_KODE": "F",
+          "REMEDY_PERMISJON": "NEI",
+          "BUCKET_NUM": 16
+        },
+        {
+          "NAV_IDENT": "O123457",
+          "FNR": "12345678902",
+          "FORNAVN": "Navn 2",
+          "ETTERNAVN": "ENavn 2",
+          "EPOST": "epost2@nav.no",
+          "REMEDY_START_DATO": "2008-05-26",
+          "REMEDY_SLUTT_DATO": "2099-12-31",
+          "AGRESSO_SLUTT_DATO": "2099-12-31",
+          "ANSATT_PER_IDAG": "JA",
+          "ANSETTELSESTYPE_BESK": "Fast",
+          "ANSATT_TYPE": "NAV Statlig",
+          "ANSATT_RESSURS_KODE": "F",
+          "REMEDY_PERMISJON": "NEI",
+          "BUCKET_NUM": 2
+        },
+        {
+          "NAV_IDENT": "O123458",
+          "FNR": "12345678903",
+          "FORNAVN": "Navn 3",
+          "ETTERNAVN": "ENavn 3",
+          "EPOST": "epost3@nav.no",
+          "REMEDY_START_DATO": "2008-05-28",
+          "REMEDY_SLUTT_DATO": "2019-01-29",
+          "AGRESSO_SLUTT_DATO": "2010-11-13",
+          "ANSATT_PER_IDAG": "NEI",
+          "ANSETTELSESTYPE_BESK": null,
+          "ANSATT_TYPE": "NAV Statlig",
+          "ANSATT_RESSURS_KODE": null,
+          "REMEDY_PERMISJON": "NEI",
+          "BUCKET_NUM": 13
+        },
+        {
+          "NAV_IDENT": "O123459",
+          "FNR": "92345678904",
+          "FORNAVN": "Navn 4",
+          "ETTERNAVN": "ENavn 4",
+          "EPOST": "epost4@nav.no",
+          "REMEDY_START_DATO": "2008-05-30",
+          "REMEDY_SLUTT_DATO": "2099-12-31",
+          "AGRESSO_SLUTT_DATO": "2099-12-31",
+          "ANSATT_PER_IDAG": "JA",
+          "ANSETTELSESTYPE_BESK": "Kommunalt ansatt",
+          "ANSATT_TYPE": "NAV Kommunalt",
+          "ANSATT_RESSURS_KODE": "N",
+          "REMEDY_PERMISJON": "JA",
+          "BUCKET_NUM": 6
+        }
+
+      ]
+    }

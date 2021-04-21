@@ -77,7 +77,7 @@ public class DvhRestConsumer {
 
         StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
                 .map(DvhRessurs::new)
-                .forEach(dvhRessurs -> hendelseService.opprettRessurs(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
+                .forEach(dvhRessurs -> hendelseService.handterRessursIderFraDvh(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
     }
 
     private void loadKoblingerFromDvh() {

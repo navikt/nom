@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
@@ -41,8 +42,9 @@ public class Ressurs {
 
     private String getLast(String property) {
         return hendelser.stream()
-                .map(e -> e.getData().get(property).asText())
+                .map(e -> e.getData().get(property))
                 .filter(Objects::nonNull)
+                .map(JsonNode::asText)
                 .reduce((a, b) -> b)
                 .orElseThrow();
     }

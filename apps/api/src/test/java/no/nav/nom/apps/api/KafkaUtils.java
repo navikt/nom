@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,11 @@ public class KafkaUtils {
         hendelseListener.onMessage(createConsumerRecords(Stream.of(objects)
                 .map(this::toJson).map(e -> createConsumerRecord("", e))
                 .collect(Collectors.toList())), getConsumer());
+    }
+
+    public void sendHendelseFromKafkaMock(List<ProducerRecord<String, String>> records) {
+        val tmp = records.stream().map(it -> createConsumerRecord(it.key(),it.value())).collect(Collectors.toList());
+        hendelseListener.onMessage(createConsumerRecords(tmp), getConsumer());
     }
 
     private <K, V> Consumer<K, V> getConsumer() {
