@@ -34,7 +34,7 @@
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <wiremock-extension.version>0.2.0.RELEASE</wiremock-extension.version>
 
-        <azure-msal4j.version>1.9.1</azure-msal4j.version>
+        <azure-msal4j.version>1.10.0</azure-msal4j.version>
         <ms-graph.version>3.3.0</ms-graph.version>
         <jna.version>5.8.0</jna.version>
         <stax2-api.version>4.2.1</stax2-api.version>
