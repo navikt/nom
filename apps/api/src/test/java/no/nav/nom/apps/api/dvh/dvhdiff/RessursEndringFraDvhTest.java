@@ -2,25 +2,21 @@ package no.nav.nom.apps.api.dvh.dvhdiff;
 
 import lombok.val;
 import no.nav.nom.apps.api.domain.Ressurs;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("dvh-diffing")
 public class RessursEndringFraDvhTest extends DvhTestBase {
-
-    @Autowired
-    private DvhRestConsumer dvhRestConsumer;
-
 
     @Test
     @DisplayName("Ressurser fra datavarehus blir tilgjengelige i ressurs repo")
@@ -62,7 +58,6 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After2.json");
         loadFromDvhAndUpdateRepo();
         val fnrAfter = ressursRepository.findByNavIdent("O123459").get().getPersonIdent();
-
 
         assertThat(fnrPre).isNotEqualTo(fnrAfter);
         assertThat(fnrAfter).isEqualTo("92345678904");
@@ -106,7 +101,6 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
     }
 
-
     // test helpers
 
     private void stubRessurser(String fileName) {
@@ -117,21 +111,11 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         ));
     }
 
-    private void loadFromDvhAndUpdateRepo() {
-        dvhRestConsumer.loadFromDvh();
-        var records = getRecordsFromKafka();
-        kafkaUtils.sendHendelseFromKafkaMock(records);
-    }
-
-    private void simulateSyncedWithKafka() {
-        kafkaUtils.sendHendelseFromKafkaMock();
-    }
-
     private int hashRessurs(Ressurs r) {
         return r.getId().hashCode() ^ r.getNavIdent().hashCode() ^ r.getPersonIdent().hashCode();
     }
 
-    private Collection<Integer> hashedRessurser(Collection<Ressurs> ressurser){
+    private Collection<Integer> hashedRessurser(Collection<Ressurs> ressurser) {
         return ressurser
                 .stream().map(this::hashRessurs).collect(Collectors.toCollection(ArrayList::new));
     }

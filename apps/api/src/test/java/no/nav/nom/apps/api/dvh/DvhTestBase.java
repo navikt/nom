@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.dvh;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.domain.OrgenhetRepository;
 import no.nav.nom.apps.api.domain.RessursRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class DvhTestBase extends TestBase {
 
     @Autowired
+    protected DvhRestConsumer dvhRestConsumer;
+
+    @Autowired
     protected RessursRepository ressursRepository;
+
+    @Autowired
+    protected OrgenhetRepository orgenhetRepository;
 
     @Autowired
     protected KafkaUtils kafkaUtils;
@@ -26,5 +33,16 @@ public abstract class DvhTestBase extends TestBase {
         dvhRepository.clearRepository();
         ressursRepository.clearRepository();
     }
+
+    protected void loadFromDvhAndUpdateRepo() {
+        dvhRestConsumer.loadFromDvh();
+        var records = getRecordsFromKafka();
+        kafkaUtils.sendHendelseFromKafkaMock(records);
+    }
+
+    protected void simulateSyncedWithKafka() {
+        kafkaUtils.sendHendelseFromKafkaMock();
+    }
+
 
 }

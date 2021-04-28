@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum Hendelsestyper {
     OPERASJON_V1("no.nav.nom.hendelser:Operasjon:v1"),
     RESSURS_V1("no.nav.nom.hendelser:Ressurs:v1"),
-    ENHET_V1("no.nav.nom.hendelser:Enhet:v1");
+    ORGENHET_V1("no.nav.nom.hendelser:Organisasjonsenhet:v1");
 
     String key;
 }

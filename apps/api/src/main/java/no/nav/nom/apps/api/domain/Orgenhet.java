@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
@@ -24,10 +25,11 @@ import static java.util.stream.Collectors.toUnmodifiableList;
  * ID: Y             |---123-->
  */
 @Value
-public class Organisasjonsenhet {
+public class Orgenhet {
+
     List<HendelseTo> hendelser;
 
-    public Organisasjonsenhet(List<HendelseTo> hendelser) {
+    public Orgenhet(List<HendelseTo> hendelser) {
         this.hendelser = hendelser.stream()
                 .sorted(comparing(HendelseTo::getOpprettet))
                 .collect(toUnmodifiableList());
@@ -41,37 +43,34 @@ public class Organisasjonsenhet {
                 .orElseThrow();
     }
 
+    public String getAgressoId() {
+        return getLast("agressoId").orElseThrow();
+    }
+
     public String getNavn() {
-        return hendelser.stream()
-                .map(e -> e.getData().get("navn").asText())
-                .filter(Objects::nonNull)
-                .reduce((a, b) -> b)
-                .orElseThrow(); // Regner med påkrevd, hvis ikke så får man ta Optional<String>
+        return getLast("navn").orElseThrow();
     }
 
     public LocalDate getGyldigFom() {
-        return hendelser.stream()
-                .map(e -> e.getData().get("gyldigFom").asText())
-                .filter(Objects::nonNull)
-                .reduce((a, b) -> b)
-                .map(LocalDate::parse)
-                .orElseThrow(); // Regner med påkrevd, hvis ikke så får man ta Optional<String>
+        return LocalDate.parse(getLast("gyldigFom").orElseThrow());
     }
 
     public Optional<LocalDate> getGyldigTom() {
-        return hendelser.stream()
-                // Kun ta med de som har spesifisert et json element med gyldigTom.
-                // Dette er for å støtte at man kan ha: Tom=2021.01.01   Tom=Null
-                .filter(e -> e.getData().has("gyldigTom"))
-                .map(e -> e.getData().get("gyldigTom").asText())
-                .reduce((a, b) -> b)
-                .map(LocalDate::parse);
+        return getLast("gyldigTom").map(LocalDate::parse);
     }
 
-    public Organisasjonsenhet append(List<HendelseTo> appended) {
+    private Optional<String> getLast(String property) {
+        return hendelser.stream()
+                .map(e -> e.getData().get(property))
+                .filter(Objects::nonNull)
+                .map(JsonNode::asText)
+                .reduce((a, b) -> b);
+    }
+
+    public Orgenhet append(List<HendelseTo> appended) {
         val newHendelser = new ArrayList<HendelseTo>(hendelser.size() + appended.size());
         newHendelser.addAll(hendelser);
         newHendelser.addAll(appended);
-        return new Organisasjonsenhet(newHendelser);
+        return new Orgenhet(newHendelser);
     }
 }
