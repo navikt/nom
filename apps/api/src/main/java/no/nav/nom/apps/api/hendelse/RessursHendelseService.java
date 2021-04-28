@@ -16,7 +16,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HendelseService {
+public class RessursHendelseService {
 
     private final ObjectMapper om;
     private final RessursRepository ressursRepository;
@@ -31,33 +31,33 @@ public class HendelseService {
         val nidOnlyPresent = navIdentOptional.isPresent() && !bothIdsPresent;
         val pidOnlyPresent = personIdentOptional.isPresent() && !bothIdsPresent;
 
-        if(bothIdsPresent){
+        if (bothIdsPresent) {
             val ressursByNid = navIdentOptional.get();
             val ressursByPid = personIdentOptional.get();
             val alreadySaved = ressursByNid == ressursByPid;
             if (!alreadySaved) {
                 log.warn("NavIdent {} for personIdent {} er i konflikt med eksisternde ressurs", navIdent, personIdent);
             }
-        } else if (nidOnlyPresent){
+        } else if (nidOnlyPresent) {
             val fid = navIdentOptional.get().getId();
-            val hendelse = createEndreTilNyttPersonnummerHendelse(fid, navIdent, personIdent);
+            val hendelse = createEndreTilNyttPersonnummerHendelse(fid, personIdent);
             hendelseProducer.produceHendelse(hendelse);
-        } else if (pidOnlyPresent){
+        } else if (pidOnlyPresent) {
             val ressursByPid = personIdentOptional.get();
             val eksisterendePid = ressursByPid.getPersonIdent();
             val eksisterendeNid = ressursByPid.getNavIdent();
             log.warn("NavIdent {} for personIdent {} i DVH er i konflikt med eksisterende ressurs med navident {} og personIdent {}",
                     navIdent, personIdent, eksisterendeNid, eksisterendePid);
-        } else{
-            val hendelse = createOpprettetRessursHendelse(navIdent, personIdent);
+        } else {
+            val hendelse = createOpprettetHendelse(navIdent, personIdent);
             hendelseProducer.produceHendelse(hendelse);
         }
     }
 
-    private HendelseTo createEndreTilNyttPersonnummerHendelse(UUID fid, String navIdent, String personIdent) {
+    private HendelseTo createEndreTilNyttPersonnummerHendelse(UUID fid, String personIdent) {
         var data = om.createObjectNode();
         data.put("fid", fid.toString());
-        data.put("personIdent",personIdent);
+        data.put("personIdent", personIdent);
 
         return HendelseTo.builder()
                 .id(UUID.randomUUID())
@@ -69,7 +69,7 @@ public class HendelseService {
                 .build();
     }
 
-    private HendelseTo createOpprettetRessursHendelse(String navIdent, String personIdent) {
+    private HendelseTo createOpprettetHendelse(String navIdent, String personIdent) {
         var data = om.createObjectNode();
         data.put("fid", UUID.randomUUID().toString());
         data.put("navIdent", navIdent);

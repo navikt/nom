@@ -19,16 +19,28 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Value
 @Service
-public class OrganisasjonsenhetRepository {
+public class OrgenhetRepository {
 
-    ConcurrentMap<UUID, Organisasjonsenhet> alleOrgEnhetById = new ConcurrentHashMap<>();
+    ConcurrentMap<UUID, Orgenhet> alleOrgEnhetById = new ConcurrentHashMap<>();
+    ConcurrentMap<String, Orgenhet> alleOrgEnhetByAgressoId = new ConcurrentHashMap<>();
     AtomicInteger enheterGauge;
 
-    public Optional<Organisasjonsenhet> findById(UUID uuid) {
+    public Optional<Orgenhet> findById(UUID uuid) {
         return Optional.ofNullable(alleOrgEnhetById.get(uuid));
     }
 
-    public List<Organisasjonsenhet> findAllByIdsIn(Set<UUID> uuids) {
+    public Optional<Orgenhet> findByAgressoId(String agressoId) {
+        return Optional.ofNullable(alleOrgEnhetByAgressoId.get(agressoId));
+    }
+
+    public List<Orgenhet> findAllByAgressoIdsIn(Set<String> uuids) {
+        return uuids.stream()
+                .map(alleOrgEnhetByAgressoId::get)
+                .filter(Objects::nonNull)
+                .collect(toUnmodifiableList());
+    }
+
+    public List<Orgenhet> findAllByIdsIn(Set<UUID> uuids) {
         return uuids.stream()
                 .map(alleOrgEnhetById::get)
                 .filter(Objects::nonNull)
@@ -42,12 +54,17 @@ public class OrganisasjonsenhetRepository {
                     findById(key).ifPresentOrElse(current -> {
                         val newOrgEnhet = current.append(value);
                         add(newOrgEnhet);
-                    }, () -> add(new Organisasjonsenhet(value)));
+                    }, () -> add(new Orgenhet(value)));
                 });
     }
 
-    private void add(Organisasjonsenhet enhet) {
+    private void add(Orgenhet enhet) {
+        var prev = alleOrgEnhetById.get(enhet.getId());
+        if (prev != null) {
+            alleOrgEnhetByAgressoId.remove(prev.getAgressoId());
+        }
         alleOrgEnhetById.put(enhet.getId(), enhet);
+        alleOrgEnhetByAgressoId.put(enhet.getAgressoId(), enhet);
         enheterGauge.set(alleOrgEnhetById.size());
     }
 }

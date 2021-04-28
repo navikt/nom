@@ -5,15 +5,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import no.nav.nom.apps.api.hendelse.HendelseListener;
-import no.nav.nom.apps.api.hendelse.HendelseService;
+import no.nav.nom.apps.api.hendelse.OrgenhetHendelseService;
+import no.nav.nom.apps.api.hendelse.RessursHendelseService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.ReadinessState;
@@ -49,7 +50,8 @@ public class DvhRestConsumer {
     private final HendelseListener hendelseListener;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final ApplicationEventPublisher appEventPublisher;
-    private final HendelseService hendelseService;
+    private final RessursHendelseService ressursHendelseService;
+    private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
 
     @Scheduled(fixedDelay = ONE_HOUR)
@@ -77,7 +79,7 @@ public class DvhRestConsumer {
 
         StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
                 .map(DvhRessurs::new)
-                .forEach(dvhRessurs -> hendelseService.handterRessursIderFraDvh(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
+                .forEach(dvhRessurs -> ressursHendelseService.handterRessursIderFraDvh(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
     }
 
     private void loadKoblingerFromDvh() {
@@ -117,6 +119,10 @@ public class DvhRestConsumer {
                         }
                     }
                 });
+
+        if (leaderElection.isLeader()) {
+            orgenheter.values().forEach(orgenhetHendelseService::handterOrgenhetFraDvh);
+        }
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
         dvhRepository.saveLedere(ledere);

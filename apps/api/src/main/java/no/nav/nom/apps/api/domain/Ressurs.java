@@ -8,6 +8,7 @@ import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Comparator.comparing;
@@ -33,20 +34,19 @@ public class Ressurs {
     }
 
     public String getPersonIdent() {
-        return getLast("personIdent"); // Regner med påkrevd, hvis ikke så får man ta Optional<String>
+        return getLast("personIdent").orElseThrow();
     }
 
     public String getNavIdent() {
-        return getLast("navIdent"); // Regner med påkrevd, hvis ikke så får man ta Optional<String>
+        return getLast("navIdent").orElseThrow();
     }
 
-    private String getLast(String property) {
+    private Optional<String> getLast(String property) {
         return hendelser.stream()
                 .map(e -> e.getData().get(property))
                 .filter(Objects::nonNull)
                 .map(JsonNode::asText)
-                .reduce((a, b) -> b)
-                .orElseThrow();
+                .reduce((a, b) -> b);
     }
 
     public Ressurs append(List<HendelseTo> appended) {
