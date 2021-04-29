@@ -27,7 +27,7 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: EventSource.v1
+  name: event.source.v1
   namespace: nom
   labels:
     team: nom

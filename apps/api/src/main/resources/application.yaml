@@ -6,7 +6,7 @@ app:
   pdl:
     tema: GEN
   hendelse:
-    topic: nom.EventSource.v1
+    topic: nom.event.source.v1
 
 nom:
   libs:
