@@ -77,7 +77,7 @@ public class DvhRepository {
                 .filter((entry) -> {
                     val enhet = getEnhetByAgressoId(entry.getKey());
                     val ledere = new ArrayList<>(entry.getValue());
-                    entry.getValue().forEach(l -> {
+                    ledere.forEach(l -> {
                         val ressurs = ressursRepository.findByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
                             log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
@@ -85,7 +85,7 @@ public class DvhRepository {
                             log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet mangler");
                         } else if(ressurs.isEmpty()){
                             log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
-                            ledere.remove(l);
+                            entry.getValue().remove(l);
                         }
                     });
                     return enhet.isPresent() && !ledere.isEmpty();
