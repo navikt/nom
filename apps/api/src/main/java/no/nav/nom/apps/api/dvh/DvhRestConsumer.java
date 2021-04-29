@@ -41,7 +41,7 @@ import java.util.stream.StreamSupport;
 public class DvhRestConsumer {
 
     public static final String CACHE = "cache-source";
-    private final long LOAD_INTERVAL = 3 * 60 * 1000;
+    private final long LOAD_INTERVAL = 30 * 60 * 1000;
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
