@@ -19,7 +19,7 @@ public class MetricConfig {
     public Counter kafkaHendelseProducedCounter() {
         return Counter
                 .builder("kafka.messages.produced.count")
-                .tag("topic", "nom.hendelse-v1")
+                .tag("topic", "nom.EventSource.v1")
                 .register(meterRegistry);
     }
 
@@ -27,7 +27,7 @@ public class MetricConfig {
     public Counter kafkaHendelseReadCounter() {
         return Counter
                 .builder("kafka.messages.read.count")
-                .tag("topic", "nom.hendelse-v1")
+                .tag("topic", "nom.EventSource.v1")
                 .register(meterRegistry);
     }
 

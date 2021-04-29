@@ -27,16 +27,13 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: hendelse-v1
+  name: EventSource.v1
   namespace: nom
   labels:
     team: nom
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafka-pool}}
   config:
-    cleanupPolicy: compact
     minimumInSyncReplicas: 1
     partitions: 1
     replication: 3
