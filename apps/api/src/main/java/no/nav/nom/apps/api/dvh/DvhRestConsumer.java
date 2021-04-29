@@ -41,7 +41,7 @@ import java.util.stream.StreamSupport;
 public class DvhRestConsumer {
 
     public static final String CACHE = "cache-source";
-    private final long ONE_HOUR = 60 * 60 * 1000;
+    private final long LOAD_INTERVAL = 3 * 60 * 1000;
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
@@ -54,7 +54,7 @@ public class DvhRestConsumer {
     private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
 
-    @Scheduled(fixedDelay = ONE_HOUR)
+    @Scheduled(fixedDelay = LOAD_INTERVAL)
     @SneakyThrows
     public void loadFromDvh() {
         while (!hendelseListener.getInitialLoadStatus()) {
