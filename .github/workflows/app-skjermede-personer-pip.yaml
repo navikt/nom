@@ -10,8 +10,8 @@ on:
       - '.nais/*/skjermede-personer-pip.yaml'
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/skjermede-personer-pip:latest
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-skjermede-personer-pip:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-skjermede-personer-pip:latest
 
 jobs:
   build-jar-docker:
