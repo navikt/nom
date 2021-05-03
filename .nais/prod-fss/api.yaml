@@ -57,9 +57,6 @@ spec:
         - application: team-catalog-backend
           namespace: teamdatajegerne
           cluster: prod-fss
-        - application: team-catalog-backend
-          namespace: nom
-          cluster: prod-fss
         - application: veilarbveileder
           namespace: pto
           cluster: prod-fss
