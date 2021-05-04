@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import TableSorter from "tabell";
 import { useFetchRessurs } from "../../api/graphql_fetch_hooks";
 import { GqlRessurs } from "../../common/gqltypes";
+import { fulltNavnForRessurs } from "../../common/navnutils";
 import Contentbox from "../../components/contentbox/Contentbox";
 import NomUiHeader from "../../components/header/NomUiHeader";
 
@@ -44,20 +45,14 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider {
 
   out.navIdent = ressurs.navIdent;
 
-  if (ressurs?.person?.navn) {
-    const navn = ressurs.person.navn;
-    out.fulltNavn = navn.fornavn + " " + navn.mellomnavn + " " + navn.etternavn;
-  }
+  out.fulltNavn = fulltNavnForRessurs(ressurs);
 
   if (ressurs?.ledere[0]) {
     const leder = ressurs.ledere[0].ressurs;
-
-    out.leder = { navIdent: leder.navIdent, fulltNavn: "[ukjent]" };
-    if (leder?.person?.navn) {
-      const navn = leder.person.navn;
-      out.leder.fulltNavn =
-        navn.fornavn + " " + navn.mellomnavn + " " + navn.etternavn;
-    }
+    out.leder = {
+      navIdent: leder.navIdent,
+      fulltNavn: fulltNavnForRessurs(leder),
+    };
   }
 
   if (ressurs.koblinger.length !== 0) {
