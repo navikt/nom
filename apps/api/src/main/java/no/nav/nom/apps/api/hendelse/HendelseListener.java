@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.KafkaOffsetPostProcessor;
-import no.nav.nom.apps.api.domain.OrganisasjonsenhetRepository;
+import no.nav.nom.apps.api.domain.OrgenhetRepository;
 import no.nav.nom.apps.api.domain.RessursRepository;
 import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import no.nav.nom.contract.nom.hendelse.Hendelsestyper;
@@ -43,7 +43,7 @@ public class HendelseListener implements ConsumerSeekAware {
     private final KafkaOffsetPostProcessor kafkaOffsetPostProcessor;
     private final Counter kafkaHendelseReadCounter;
 
-    private final OrganisasjonsenhetRepository organisasjonsenhetRepository;
+    private final OrgenhetRepository orgenhetRepository;
     private final RessursRepository ressursRepository;
 
     @Timed(value = KAFKA_CONSUMER_TIMED, extraTags = {KEY, "hendelse"}, percentiles = {.99, .75, .50})
@@ -54,7 +54,7 @@ public class HendelseListener implements ConsumerSeekAware {
                 .collect(Collectors.groupingBy(HendelseTo::getType));
 
         ressursRepository.save(hendelser.getOrDefault(Hendelsestyper.RESSURS_V1.getKey(), List.of()));
-        organisasjonsenhetRepository.save(hendelser.getOrDefault(Hendelsestyper.ENHET_V1.getKey(), List.of()));
+        orgenhetRepository.save(hendelser.getOrDefault(Hendelsestyper.ORGENHET_V1.getKey(), List.of()));
 
         KafkaUtils.verifyUpToDate(consumer, properties.getHendelse().getTopic(), initialLoadComplete);
         kafkaHendelseReadCounter.increment(hendelser.values().stream().mapToLong(Collection::size).sum());

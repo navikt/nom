@@ -69,8 +69,8 @@ public class RessursRepository {
     private void add(Ressurs ressurs) {
         var prev = alleRessurserById.get(ressurs.getId());
         if (prev != null) {
-            alleRessurserByPersonIdent.remove(ressurs.getPersonIdent());
-            alleRessurserByNavIdent.remove(ressurs.getNavIdent());
+            alleRessurserByPersonIdent.remove(prev.getPersonIdent());
+            alleRessurserByNavIdent.remove(prev.getNavIdent());
         }
 
         alleRessurserById.put(ressurs.getId(), ressurs);

@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +76,8 @@ public class DvhRepository {
         this.lederByEnhetNr = lederByEnhetNr.entrySet().stream()
                 .filter((entry) -> {
                     val enhet = getEnhetByAgressoId(entry.getKey());
-                    entry.getValue().forEach(l -> {
+                    val ledere = new ArrayList<>(entry.getValue());
+                    ledere.forEach(l -> {
                         val ressurs = ressursRepository.findByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
                             log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
@@ -86,7 +88,7 @@ public class DvhRepository {
                             entry.getValue().remove(l);
                         }
                     });
-                    return enhet.isPresent() && !entry.getValue().isEmpty();
+                    return enhet.isPresent() && !ledere.isEmpty();
                 })
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
     }

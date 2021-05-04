@@ -7,10 +7,11 @@ import java.time.LocalDate;
 
 @Value
 public class DvhOrganisasjonsenhet {
-    private String agressoId;
-    private String navn;
-    private LocalDate gyldigFom;
-    private LocalDate gyldigTom;
+
+    String agressoId;
+    String navn;
+    LocalDate gyldigFom;
+    LocalDate gyldigTom;
 
     public DvhOrganisasjonsenhet(JsonNode node) {
         this.agressoId = node.get("orgnode_kode").asText();

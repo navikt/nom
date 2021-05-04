@@ -11,7 +11,6 @@ import org.springframework.kafka.core.ConsumerFactory;
 
 import static no.nav.nom.libs.utils.common.kafka.KafkaContainerUtils.DEFAULT_SPRING_KAFKA_FACTORY_NAME;
 
-
 @EnableKafka
 @Profile("kafka")
 @Configuration(proxyBeanMethods = false)

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -247,7 +248,8 @@ class RessursTest extends RessursTestBase {
         kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
-        var records = getRecordsFromKafka();
+        var records = getRecordsFromKafka().stream()
+                .filter(rec -> rec.value().contains(Hendelsestyper.RESSURS_V1.getKey())).collect(Collectors.toList());
         assertThat(records).hasSize(4);
 
         var hendelseOneJson = records.get(0).value();
