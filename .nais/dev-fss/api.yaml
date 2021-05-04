@@ -9,10 +9,10 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,kafka
-    - name: NOM_DVH_BASEURL
-      value: https://nom-dvh.dev-fss-pub.nais.io
-    - name: NOM_DVH_CLIENT_ID
-      value: 8db514b3-62dc-4ff8-895a-039067aa4a33
+    - name: NOM_PROXY_BASEURL
+      value: https://nom-proxy.dev-fss-pub.nais.io
+    - name: NOM_PROXY_CLIENT_ID
+      value: dev-fss.nom.nom-proxy
     - name: VAULT_USER_SECRET_PATH
       value: serviceuser/dev/srvnom-api
   image: {{image}}
@@ -60,4 +60,4 @@ spec:
           cluster: dev-fss
     outbound:
       external:
-        - host: nom-dvh.dev-fss-pub.nais.io
+        - host: nom-proxy.dev-fss-pub.nais.io

@@ -5,9 +5,9 @@
 Integrasjonspunkt for konsumenter utenfor NOM og NOM-Ui.
 Eksponerer GraphQL for å hente informasjon fra NOM.
 
-== NOM-DVH
+== NOM-PROXY
 
-Står for kommunkasjonen mellom datavarehus og NOM.
+Står for kommunkasjonen mellom NOM og onprem services som datavarehus og AD.
 DVH eksponerer noen endepunkter via tdv der hvor de gir oss opplysninger rundt enheter og ressurser.
 Disse opplysningene er igjen hentet fra eksterne kilder som Agresso, Norg, +++.
 På sikt, er det tenkt at NOM blir master for en del av disse opplysningene og at DVH får det fra oss i stede for alle disse andre spredte kildene.

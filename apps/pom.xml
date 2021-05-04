@@ -16,7 +16,7 @@
 
     <modules>
         <module>api</module>
-        <module>dvh</module>
+        <module>proxy</module>
         <module>nom-ressurser</module>
         <module>ui</module>
     </modules>

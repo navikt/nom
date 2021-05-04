@@ -1,5 +1,5 @@
 app:
-  dvh:
+  proxy:
     baseUrl: http://localhost:${wiremock.server.port}
   pdl:
     tema: GEN

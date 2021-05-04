@@ -1,0 +1,67 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nom-proxy
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  env:
+    - name: STACK
+      value: preprod
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash,k8s,kafka
+    - name: APP_DVH_BASE_URL
+      value: https://tdv-u.adeo.no
+    - name: ACCEPTED_SUBJECTS
+      value: cb62b1c3-62b7-4e5c-839a-357f117108fb
+    - name: STS_BASEURL
+      value: https://security-token-service.dev.adeo.no
+    - name: PDL_BASEURL
+      value: https://pdl-api.dev.intern.nav.no
+  envFrom:
+    - secret: nom-tdv-cred
+    - secret: nom-api-serviceuser
+  image: {{image}}
+  port: 8080
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: dev-gcp
+  webproxy: true
+  ingresses:
+    - https://nom-proxy.dev.intern.nav.no
+    - https://nom-proxy.dev-fss-pub.nais.io
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 4
+    failureThreshold: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+  prometheus:
+    enabled: true
+    path: internal/prometheus
+  vault:
+    enabled: true

@@ -131,9 +131,9 @@ public class DvhRestConsumer {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getDvh().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
 
-        return restTemplate.exchange(appProperties.getDvh().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
     private void putOrganisering(Map<String, List<DvhOrganisering>> organiseringerByEnhet, DvhOrganisering organisering) {

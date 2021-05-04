@@ -15,7 +15,6 @@ import no.nav.nom.contract.nom.api.graphql.Person;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;
 import org.dataloader.MappedBatchLoaderWithContext;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,7 +48,7 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
     @SneakyThrows
     public Map<String, DataFetcherResult<Person>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
         val headers = new HttpHeaders();
-        val token = tokenRepository.getAadToken(appProperties.getDvh().getAadClientId());
+        val token = tokenRepository.getAadToken(appProperties.getProxy().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
         headers.add("Tema", appProperties.getPdl().getTema());
@@ -71,7 +70,7 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
         body.getVariables().put("identer", personidenter);
 
         try {
-            val result = restTemplate.exchange(appProperties.getDvh().getBaseUrl() + "/proxy/pdl", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
+            val result = restTemplate.exchange(appProperties.getProxy().getBaseUrl() + "/proxy/pdl", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
 
             if (result.getBody().hasNonNull("data")) {
                 val navnResult = result.getBody().get("data").get("hentPersonBolk");

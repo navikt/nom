@@ -12,12 +12,12 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties("app")
 public class AppProperties {
 
-    private final Dvh dvh;
+    private final Proxy proxy;
     private final Pdl pdl;
     private final Hendelse hendelse;
 
     @Value
-    public static class Dvh {
+    public static class Proxy {
         String baseUrl;
         String aadClientId;
     }

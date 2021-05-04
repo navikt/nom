@@ -1,7 +1,7 @@
 app:
-  dvh:
-    baseUrl: ${NOM_DVH_BASEURL}
-    aadClientId: ${NOM_DVH_CLIENT_ID}/.default
+  proxy:
+    baseUrl: ${NOM_PROXY_BASEURL}
+    aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
   pdl:
     tema: GEN
   hendelse:
