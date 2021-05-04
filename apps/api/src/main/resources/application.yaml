@@ -1,6 +1,5 @@
 app:
   dvh:
-    topic: nom.dvhsource-v1
     baseUrl: ${NOM_DVH_BASEURL}
     aadClientId: ${NOM_DVH_CLIENT_ID}/.default
   pdl:

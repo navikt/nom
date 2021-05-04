@@ -18,11 +18,8 @@ public class AppProperties {
 
     @Value
     public static class Dvh {
-
         String baseUrl;
-        String topic;
         String aadClientId;
-
     }
 
     @Value
