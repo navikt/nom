@@ -105,3 +105,23 @@ export function useGetOrganisasjonsEnhet(
 
   return [out, flipToggle];
 }
+
+// -- HOOK
+
+export function useGetGraphql(query: string): [LookupState, () => void] {
+  const [out, setOut] = useState<LookupState>(lookups.createPending());
+  const [toggle, flipToggle] = useReducer((toggle: boolean) => !toggle, false);
+
+  React.useEffect(() => {
+    setOut(lookups.createPending());
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    doPostGraphql(signal, setOut, query);
+    return function (): void {
+      abortController.abort();
+    };
+  }, [query, toggle]);
+
+  return [out, flipToggle];
+}

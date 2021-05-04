@@ -9,6 +9,7 @@ import Root from "./pages/root/Root";
 import * as serviceWorker from "./serviceWorker";
 
 import "./index.css";
+import MedarbeidereLinkview from "./pages/medarbeidere/MedarbeidereLinkview";
 
 function AppRouter(): JSX.Element {
   return (
@@ -30,16 +31,15 @@ function AppRouter(): JSX.Element {
       </Route>
       <Route exact path="/organisasjonsenheter">
         <Redirect to="/organisasjonsenheter/NAV" />
-        <Organisasjonsenheter />
       </Route>
       <Route exact path="/organisasjonsenheter/:id">
         <Organisasjonsenheter />
       </Route>
       <Route exact path="/medarbeidere">
-        <Medarbeidere />
+        <MedarbeidereLinkview />
       </Route>
       <Route exact path="/medarbeidere/:id">
-        <Medarbeidere />
+        <MedarbeidereLinkview />
       </Route>
       <Route>
         {/* default..  */}

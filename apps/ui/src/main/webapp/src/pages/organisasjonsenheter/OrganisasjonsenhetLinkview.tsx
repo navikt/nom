@@ -4,15 +4,17 @@ import TableSorter from "tabell";
 import { LookupState } from "../../api/utils_api_hook";
 import { OrgEnhetFelter, Ressurs, OrgEnhetData } from "../../common/types";
 import AlertStripe from "nav-frontend-alertstriper";
-import { createRessursQuery } from "../../api/graphql_queries";
+import Contentbox from "../../components/contentbox/Contentbox";
+import { GqlOrganisasjonsenhet, GqlResponse } from "../../common/gqltypes";
 
 function transformResult(graphQlData: any): OrgEnhetData {
-  const organisasjonsenhet = graphQlData.organisasjonsenhet;
-  const underEnheter = organisasjonsenhet.organiseringer.filter(
+  const organisasjonsenhet: GqlOrganisasjonsenhet =
+    graphQlData.organisasjonsenhet;
+  const underEnheterTmp = organisasjonsenhet.organiseringer.filter(
     (it) => it.retning === "under"
   );
 
-  const underEnheter2: OrgEnhetFelter[] = underEnheter.map((it) => {
+  const underEnheter: OrgEnhetFelter[] = underEnheterTmp.map((it) => {
     return {
       enhetNavn: it.organisasjonsenhet.navn,
       enhetNr: it.organisasjonsenhet.agressoId,
@@ -20,25 +22,46 @@ function transformResult(graphQlData: any): OrgEnhetData {
     };
   });
 
-  const overenhet = organisasjonsenhet.organiseringer.filter(
-    (it) => it.retning === "over"
-  )[0];
+  const enhetHierarkiListe = (function hierarkiToList(orgenhet: any): any {
+    const out: any[] = [];
+    let currentOverenhetList = orgenhet.organiseringer.filter(
+      (it) => it.retning === "over"
+    );
 
-  const ressurser: Ressurs[] = organisasjonsenhet.koblinger.map(
-    (it) => {
-      const out: Record<string, any> = {
-        id: it.ressurs.navIdent,
-        pnr: it.ressurs.personIdent.substr(0, 5) + "....",
-      };
-      const navnOk = it.ressurs.person && it.ressurs.person.navn ? true : false;
-      if (navnOk) {
-        out.fornavn = it.ressurs.person.navn.fornavn;
-        out.mellomnavn = it.ressurs.person.navn.mellomnavn;
-        out.etternavn = it.ressurs.person.navn.etternavn;
-      }
-      return out;
+    while (
+      currentOverenhetList[0] &&
+      currentOverenhetList[0].organisasjonsenhet &&
+      currentOverenhetList[0].organisasjonsenhet.organiseringer
+    ) {
+      out.push({
+        navn: currentOverenhetList[0].organisasjonsenhet.navn,
+        agressoId: currentOverenhetList[0].organisasjonsenhet.agressoId,
+      });
+      currentOverenhetList = currentOverenhetList[0].organisasjonsenhet.organiseringer.filter(
+        (it) => it.retning === "over"
+      );
     }
-  );
+
+    return out;
+  })(organisasjonsenhet);
+
+  const ressurser: Ressurs[] = organisasjonsenhet.koblinger.map((it) => {
+    const out: Ressurs = {
+      id: it.ressurs.navIdent,
+      pnr: it.ressurs.personIdent.substr(0, 5) + "....",
+    };
+    const navnOk = it.ressurs.person && it.ressurs.person.navn ? true : false;
+    if (navnOk) {
+      out.person = {
+        navn: {
+          fornavn: it.ressurs.person.navn.fornavn,
+          mellomnavn: it.ressurs.person.navn.mellomnavn,
+          etternavn: it.ressurs.person.navn.etternavn,
+        },
+      };
+    }
+    return out as Ressurs;
+  });
 
   const lederData = organisasjonsenhet.leder[0];
 
@@ -49,16 +72,17 @@ function transformResult(graphQlData: any): OrgEnhetData {
       enhetType: "type (todo)",
     },
     koblinger: {
-      sti: overenhet
-        ? [
-            {
-              enhetNavn: overenhet.organisasjonsenhet.navn,
-              enhetNr: overenhet.organisasjonsenhet.agressoId,
-              enhetType: "Type (TODO)",
-            },
-          ]
-        : [],
-      underEnheter: underEnheter2,
+      sti:
+        enhetHierarkiListe.length !== 0
+          ? enhetHierarkiListe.map((it) => {
+              return {
+                enhetNavn: it.navn,
+                enhetNr: it.agressoId,
+                enhetType: "Type (TODO)",
+              };
+            })
+          : [],
+      underEnheter: underEnheter,
       ressurser: ressurser,
     },
     leder: {
@@ -72,11 +96,6 @@ function transformResult(graphQlData: any): OrgEnhetData {
 function LeaderBox(props: { ressurs: Ressurs }): JSX.Element {
   return (
     <div>
-      <span>- Leder: </span>
-      <span>
-        <Link to={"/medarbeidere/" + props.ressurs.id}>{props.ressurs.id}</Link>
-        ,{" "}
-      </span>
       <span>
         {props.ressurs.person ? (
           <span>
@@ -88,13 +107,19 @@ function LeaderBox(props: { ressurs: Ressurs }): JSX.Element {
           <span>...</span>
         )}
       </span>
+      {", "}
+      <span>
+        <Link to={"/medarbeidere/" + props.ressurs.id}>
+          ({props.ressurs.id})
+        </Link>
+        ,{" "}
+      </span>
     </div>
   );
 }
 
 function LocalTable(props: { orgenhetData }): JSX.Element {
-  const orgenhetOver: OrgEnhetFelter | null = props.orgenhetData.koblinger
-    .sti[0] as any;
+  const sti = props.orgenhetData.koblinger.sti;
   const orgenheterUnder: OrgEnhetFelter[] = props.orgenhetData.koblinger
     .underEnheter as any;
 
@@ -116,115 +141,136 @@ function LocalTable(props: { orgenhetData }): JSX.Element {
 
   const leder: Ressurs = props.orgenhetData.leder;
 
-  const [selectedView, setSelectedView] = React.useState<
-    "underenheter" | "ressurser"
-  >("underenheter");
+  const lederVisning = (
+    <Contentbox label="Leder">
+      <LeaderBox ressurs={leder}></LeaderBox>
+    </Contentbox>
+  );
+
+  const infoVisning = (
+    <Contentbox label="Info">
+      <div className="OrganisasjonsenhetLinkView__Infovisning">
+        <label>Enhetsnavn: </label>
+        <div>{props.orgenhetData.data.enhetNavn}</div>
+        <label>Enhet agresso-nr</label>
+        <div>{props.orgenhetData.data.enhetNr}</div>
+        <label>Enhet type</label>
+        <div>{props.orgenhetData.data.enhetType}</div>
+      </div>
+    </Contentbox>
+  );
+
+  const stiReversed = [...sti].reverse();
+
+  const hierarkiVisning = (
+    <Contentbox label="Hierarki over">
+      {sti.length !== 0
+        ? stiReversed.map((it, k) => (
+            <div
+              key={it.enhetNr}
+              className="Organisasjonsenheter__linkview__overenhetlink"
+            >
+              <span>{" - ".repeat(k)}</span>
+              <Link to={"/organisasjonsenheter/" + it.enhetNr}>
+                {it.enhetNavn}
+              </Link>{" "}
+              [nr: {it.enhetNr}]
+            </div>
+          ))
+        : null}
+    </Contentbox>
+  );
 
   const ressurserTable = (
-    <TableSorter
-      items={ressurserUnder.map((it) => {
-        return { key: it.id, ...it };
-      })}
-      columns={[
-        {
-          id: "id",
-          label: "NavIdent",
-          type: "string",
-          renderCell: function (item, value): JSX.Element {
-            return <Link to={"/medarbeidere/" + item.id}>{item.id}</Link>;
-          },
-        },
-        { id: "pnr", label: "Personnummer", type: "string" },
-        { id: "fornavn", label: "Fornavn", type: "string" },
-        { id: "mellomnavn", label: "Mellomnavn", type: "string" },
-        { id: "etternavn", label: "Etternavn", type: "string" },
-      ]}
-      itemsPerPage={50}
-      animatable={false}
-      searchable={false}
-      selectable={false}
-      sortable={true}
-      sort={{ column: "id", order: "ascending" }}
-      striped={false}
-      summary={false}
-      compact={true}
-    ></TableSorter>
+    <Contentbox label={"Ressurser (" + ressurserUnder.length + ")"}>
+      {0 !== ressurserUnder.length ? (
+        <TableSorter
+          key={props.orgenhetData.agressoId}
+          items={ressurserUnder.map((it) => {
+            return { key: it.id, ...it };
+          })}
+          columns={[
+            {
+              id: "id",
+              label: "NavIdent",
+              type: "string",
+              renderCell: function (item, value): JSX.Element {
+                return <Link to={"/medarbeidere/" + item.id}>{item.id}</Link>;
+              },
+            },
+            { id: "pnr", label: "Personnummer", type: "string" },
+            { id: "fornavn", label: "Fornavn", type: "string" },
+            { id: "mellomnavn", label: "Mellomnavn", type: "string" },
+            { id: "etternavn", label: "Etternavn", type: "string" },
+          ]}
+          itemsPerPage={50}
+          animatable={false}
+          searchable={false}
+          selectable={false}
+          sortable={true}
+          sort={{ column: "id", order: "ascending" }}
+          striped={false}
+          summary={false}
+          compact={true}
+        ></TableSorter>
+      ) : null}
+    </Contentbox>
   );
 
   const enheterTable = (
-    <TableSorter
-      items={orgenheterUnder.map((it) => {
-        return { key: it.enhetNr, ...it };
-      })}
-      columns={[
-        {
-          id: "enhetNavn",
-          label: "Navn",
-          type: "string",
-          renderCell: function (item, value): JSX.Element {
-            const it = (item as any) as OrgEnhetFelter;
-            return (
-              <Link to={"/organisasjonsenheter/" + it.enhetNr}>{value}</Link>
-            );
-          },
-        },
-        { id: "enhetNr", label: "Nr", type: "string" },
-        { id: "enhetType", label: "Type", type: "string" },
-      ]}
-      itemsPerPage={50}
-      animatable={false}
-      searchable={false}
-      selectable={false}
-      sortable={true}
-      sort={{ column: "enhetNavn", order: "ascending" }}
-      striped={false}
-      summary={false}
-      compact={true}
-    />
+    <Contentbox label={"Underenheter (" + orgenheterUnder.length + ")"}>
+      {orgenheterUnder.length !== 0 ? (
+        <TableSorter
+          key={props.orgenhetData.agressoId}
+          items={orgenheterUnder.map((it) => {
+            return { key: it.enhetNr, ...it };
+          })}
+          columns={[
+            {
+              id: "enhetNavn",
+              label: "Navn",
+              type: "string",
+              renderCell: function (item, value): JSX.Element {
+                const it = (item as any) as OrgEnhetFelter;
+                return (
+                  <Link to={"/organisasjonsenheter/" + it.enhetNr}>
+                    {value}
+                  </Link>
+                );
+              },
+            },
+            { id: "enhetNr", label: "Nr", type: "string" },
+            { id: "enhetType", label: "Type", type: "string" },
+          ]}
+          itemsPerPage={50}
+          animatable={false}
+          searchable={false}
+          selectable={false}
+          sortable={true}
+          sort={{ column: "enhetNavn", order: "ascending" }}
+          striped={false}
+          summary={false}
+          compact={true}
+        />
+      ) : null}
+    </Contentbox>
   );
 
   return (
     <div className="Organisasjonsenheter__linkview">
       <div className="Organisasjonsenheter__linkview__titleview">
-        Enhet navn / nummer:
-        <h3>
-          {props.orgenhetData.data.enhetNavn +
-            " / " +
-            props.orgenhetData.data.enhetNr}
-        </h3>
-        <LeaderBox ressurs={leder}></LeaderBox>
+        <i>Enhet navn / nummer:</i>
+        <h1>
+          {props.orgenhetData.data.enhetNavn}
+          {" / "}
+          {props.orgenhetData.data.enhetNr}
+        </h1>
       </div>
-
-      {orgenhetOver ? (
-        <div className="Organisasjonsenheter__linkview__overenhetlink">
-          <h4>Overenhet:</h4>-{" "}
-          <Link to={"/organisasjonsenheter/" + orgenhetOver.enhetNr}>
-            {orgenhetOver.enhetNavn}
-          </Link>
-        </div>
-      ) : null}
-
-      <hr />
-      <p>
-        <span>
-          Visning: {selectedView}{" "}
-          <button
-            onClick={() => setSelectedView("underenheter")}
-            disabled={selectedView === "underenheter"}
-          >
-            Vis underenheter ({orgenheterUnder.length})
-          </button>
-          <button
-            onClick={() => setSelectedView("ressurser")}
-            disabled={selectedView === "ressurser"}
-          >
-            Vis ressurser ({ressurserUnder.length})
-          </button>
-          <span></span>
-        </span>
-      </p>
-      {selectedView === "ressurser" ? ressurserTable : null}
-      {selectedView === "underenheter" ? enheterTable : null}
+      {hierarkiVisning}
+      {infoVisning}
+      {lederVisning}
+      {enheterTable}
+      {ressurserTable}
     </div>
   );
 }
@@ -244,6 +290,7 @@ export default function OrganisasjonsenhetLinkview(props: {
           <AlertStripe type="info">
             <p>Feil i graphql spørring, se console log</p>
           </AlertStripe>
+
           <LocalTable orgenhetData={orgenhetData}></LocalTable>
         </div>
       );

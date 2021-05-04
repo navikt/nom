@@ -7,13 +7,13 @@ export interface OrgEnhetFelter {
 export interface OrgEnhetKoblinger {
   sti: OrgEnhetFelter[];
   underEnheter: OrgEnhetFelter[];
-  ressurser: Ressurs[]
+  ressurser: Ressurs[];
 }
 
 export interface OrgEnhetData {
   data: OrgEnhetFelter;
   koblinger: OrgEnhetKoblinger;
-  leder: Ressurs
+  leder: Ressurs;
 }
 
 export interface OrganisasjonsEnhet {
@@ -28,9 +28,9 @@ export interface Ressurs {
   pnr: string;
   person?: {
     navn: {
-      fornavn?: string,
-      mellomnavn?: string,
-      etternavn?: string,
-    }
-  }
+      fornavn?: string;
+      mellomnavn?: string;
+      etternavn?: string;
+    };
+  };
 }

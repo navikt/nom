@@ -1,12 +1,22 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetOrganisasjonsEnhet } from "../../api/graphql_fetch_hooks";
+import { useGetGraphql } from "../../api/graphql_fetch_hooks";
 import NomUiHeader from "../../components/header/NomUiHeader";
+import { createOrganisasjonsenhetQuery } from "../../api/graphql_queries";
 
 export default function Graphql(): JSX.Element {
   const { id } = useParams<any>();
+  const txtareaRef = React.useRef<any>();
+  const [txt, setTxt] = React.useState(createOrganisasjonsenhetQuery("NAV"));
 
-  const [res, refresh] = useGetOrganisasjonsEnhet(id);
+  function handleClick(): any {
+    if (txtareaRef.current) {
+      // alert(txtareaRef.current.value);
+      setTxt(txtareaRef.current.value);
+    }
+  }
+
+  const [res, refresh] = useGetGraphql(txt);
 
   let out: any = <div></div>;
 
@@ -18,7 +28,8 @@ export default function Graphql(): JSX.Element {
       out = res.error.message;
       break;
     case "RESOLVED":
-      out = JSON.stringify(res.result, null, 1);
+    case "RESOLVEDWITHERRORS":
+      out = JSON.stringify(res, null, 1);
       break;
     case "WAITING":
       out = "Waiting";
@@ -27,12 +38,17 @@ export default function Graphql(): JSX.Element {
     <div className="Graphql">
       <NomUiHeader />
       <p>
-        In progress. Eksempler på nummer man kan teste er:
-        <Link to="/graphql/0106022">X</Link>,
-        <Link to="/graphql/1571000">Y</Link>,
-        <Link to="/graphql/0118000">Z</Link>
+        <button onClick={handleClick}>click</button>
+        <br />
+        <div className="Graphql__textpanels">
+          <textarea
+            spellCheck={false}
+            ref={txtareaRef}
+            defaultValue={createOrganisasjonsenhetQuery("NAV")}
+          ></textarea>
+          <pre className="Graphql__jsondump">{out}</pre>
+        </div>
       </p>
-      <pre className="Graphql__jsondump">{out}</pre>
     </div>
   );
 }

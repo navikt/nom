@@ -24,6 +24,9 @@ export default function Medarbeidere(props: any): JSX.Element {
       break;
     case "RESOLVEDWITHERRORS":
       out = JSON.stringify(res, null, 1);
+      break;
+    default:
+      throw new Error("Should not happen");
   }
   return (
     <div className="Medarbeidere">
