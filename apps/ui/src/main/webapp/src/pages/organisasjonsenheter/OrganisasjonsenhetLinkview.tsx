@@ -2,10 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import TableSorter from "tabell";
 import { LookupState } from "../../api/utils_api_hook";
-import { OrgEnhetFelter, Ressurs, OrgEnhetData } from "../../common/types";
+import {
+  OrgEnhetFelter,
+  Ressurs,
+  OrgEnhetData,
+  RessursFlat,
+} from "../../common/types";
 import AlertStripe from "nav-frontend-alertstriper";
 import Contentbox from "../../components/contentbox/Contentbox";
-import { GqlOrganisasjonsenhet, GqlResponse } from "../../common/gqltypes";
+import { GqlOrganisasjonsenhet, GqlRessurs } from "../../common/gqltypes";
 
 function transformResult(graphQlData: any): OrgEnhetData {
   const organisasjonsenhet: GqlOrganisasjonsenhet =
@@ -46,20 +51,36 @@ function transformResult(graphQlData: any): OrgEnhetData {
   })(organisasjonsenhet);
 
   const ressurser: Ressurs[] = organisasjonsenhet.koblinger.map((it) => {
+    const gqlRes: GqlRessurs = it.ressurs;
     const out: Ressurs = {
-      id: it.ressurs.navIdent,
-      pnr: it.ressurs.personIdent.substr(0, 5) + "....",
+      id: gqlRes.navIdent,
+      pnr: gqlRes.personIdent.substr(0, 5) + "....",
     };
-    const navnOk = it.ressurs.person && it.ressurs.person.navn ? true : false;
-    if (navnOk) {
-      out.person = {
-        navn: {
-          fornavn: it.ressurs.person.navn.fornavn,
-          mellomnavn: it.ressurs.person.navn.mellomnavn,
-          etternavn: it.ressurs.person.navn.etternavn,
-        },
-      };
-    }
+    out.person = {
+      navn: {
+        fornavn: gqlRes.person?.navn.fornavn ?? "[ukjent]",
+        mellomnavn: gqlRes.person?.navn.mellomnavn ?? "",
+        etternavn: gqlRes.person?.navn.etternavn ?? "[ukjent]",
+      },
+    };
+    // if (navnOk) {
+    //   out.person = {
+    //     navn: {
+    //       fornavn: gqlRes.person.navn.fornavn,
+    //       mellomnavn: gqlRes.person.navn.mellomnavn,
+    //       etternavn: gqlRes.person.navn.etternavn,
+    //     },
+    //   };
+    // } else {
+    //   out.person = {
+    //     navn: {
+    //       fornavn: "[ukjent]",
+    //       mellomnavn: "[ukjent]",
+    //       etternavn: "[ukjent]",
+    //     },
+    //   };
+    //   console.warn({ ressursManglerNavn: gqlRes, replacementRessurs: out });
+    // }
     return out as Ressurs;
   });
 
@@ -186,8 +207,15 @@ function LocalTable(props: { orgenhetData }): JSX.Element {
       {0 !== ressurserUnder.length ? (
         <TableSorter
           key={props.orgenhetData.agressoId}
-          items={ressurserUnder.map((it) => {
-            return { key: it.id, ...it };
+          items={ressurserUnder.map((it: Ressurs) => {
+            const resFlat: RessursFlat = {
+              id: it.id,
+              pnr: it.pnr,
+              fornavn: it.person?.navn.fornavn ?? "",
+              mellomnavn: it.person?.navn.mellomnavn ?? "",
+              etternavn: it.person?.navn.etternavn ?? "",
+            };
+            return { key: resFlat.id, ...resFlat };
           })}
           columns={[
             {
@@ -199,13 +227,13 @@ function LocalTable(props: { orgenhetData }): JSX.Element {
               },
             },
             { id: "pnr", label: "Personnummer", type: "string" },
-            { id: "person.navn.fornavn", label: "Fornavn", type: "string" },
+            { id: "fornavn", label: "Fornavn", type: "string" },
             {
-              id: "person.navn.mellomnavn",
+              id: "mellomnavn",
               label: "Mellomnavn",
               type: "string",
             },
-            { id: "person.navn.etternavn", label: "Etternavn", type: "string" },
+            { id: "etternavn", label: "Etternavn", type: "string" },
           ]}
           itemsPerPage={50}
           animatable={false}

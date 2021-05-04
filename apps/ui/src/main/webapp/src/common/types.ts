@@ -34,3 +34,11 @@ export interface Ressurs {
     };
   };
 }
+
+export interface RessursFlat {
+  id: string;
+  pnr: string;
+  fornavn?: string;
+  mellomnavn?: string;
+  etternavn?: string;
+}
