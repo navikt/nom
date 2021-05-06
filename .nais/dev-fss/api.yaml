@@ -58,6 +58,9 @@ spec:
         - application: veilarbveileder
           namespace: pto
           cluster: dev-fss
+        - application: salesforce
+          namespace: teamcrm
+          cluster: dev-external
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
