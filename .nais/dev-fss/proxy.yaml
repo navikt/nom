@@ -65,3 +65,6 @@ spec:
     path: internal/prometheus
   vault:
     enabled: true
+    paths:
+      - kvPath: /serviceuser/data/dev/srvnomad
+        mountPath: /var/run/secrets/nais.io/srvnomad
