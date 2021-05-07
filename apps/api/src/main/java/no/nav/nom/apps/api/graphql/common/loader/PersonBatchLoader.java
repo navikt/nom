@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common;
+package no.nav.nom.apps.api.graphql.common.loader;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.GraphQLException;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
+import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.contract.nom.api.graphql.Person;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;

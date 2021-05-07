@@ -68,6 +68,7 @@ type Ressurs {
     lederFor: [LederOrganisasjonsenhet!]!
     ledere: [RessursLeder!]!
     person: Person
+    epost: String
 }
 
 type RessursLeder {

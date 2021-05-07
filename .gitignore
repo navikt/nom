@@ -81,3 +81,5 @@ local.properties
 apps/ui/src/main/resources/public/**
 apps/ui/**/node_modules/
 apps/ui/**/build/
+
+*LocalOnly*

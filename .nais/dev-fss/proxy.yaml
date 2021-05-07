@@ -19,6 +19,10 @@ spec:
       value: https://security-token-service.dev.adeo.no
     - name: PDL_BASEURL
       value: https://pdl-api.dev.intern.nav.no
+    - name: LDAP_URL
+      value: ldaps://ldapgw.preprod.local:636
+    - name: LDAP_BASE
+      value: DC=preprod,DC=local
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser

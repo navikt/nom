@@ -7,6 +7,10 @@ app:
     tdvPassword: test-stilling-pass
     ressurs:
       chunkSize: 3
+  ldap:
+    username: ldapuser
+    password: ldappwd
+
 authentication:
   sts:
     issuerBaseUrl: http://localhost:${wiremock.server.port}/
@@ -21,3 +25,13 @@ spring:
           issuer-uri: http://localhost:${wiremock.server.port}/aad
           accepted-audience: test
           subjects: testSubject
+  ldap:
+    base: DC=adeo,DC=no
+    urls: ""
+    embedded:
+      base-dn: ${spring.ldap.base}
+      credential:
+        username: uid=${app.ldap.username}
+        password: ${app.ldap.password}
+      validation:
+        enabled: false

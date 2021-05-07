@@ -12,10 +12,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 
 public class ApiTestBase extends TestBase {
     @Autowired
-    TestRestTemplate restTemplate;
+    protected TestRestTemplate restTemplate;
 
     @Autowired
-    SecurityTestUtils securityTestUtils;
+    protected SecurityTestUtils securityTestUtils;
 
     @Autowired
     RSAKey rsaKey;

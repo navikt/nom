@@ -1,0 +1,9 @@
+query {
+    ressurser {
+        id
+        ressurs {
+            personIdent
+            epost
+        }
+    }
+}

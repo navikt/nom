@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -23,9 +24,18 @@ public class PropertyUtils {
     }
 
     public static void readVaultSrvProps() {
+        readVaultSrvProps(Map.of());
+    }
+
+    public static void readVaultSrvProps(Map<String, String> additionalUsers) {
         listSecretFiles();
-        fileToProp("/var/run/secrets/nais.io/srv/username", "app.username");
-        fileToProp("/var/run/secrets/nais.io/srv/password", "app.password");
+        readVaultUser("srv", "app");
+        additionalUsers.forEach(PropertyUtils::readVaultUser);
+    }
+
+    public static void readVaultUser(final String mountPath, final String userPrefix) {
+        fileToProp("/var/run/secrets/nais.io/" + mountPath + "/username", userPrefix + ".username");
+        fileToProp("/var/run/secrets/nais.io/" + mountPath + "/password", userPrefix + ".password");
     }
 
     private static void listSecretFiles() {

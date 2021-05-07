@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
@@ -11,11 +12,13 @@ import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import no.nav.nom.contract.nom.hendelse.HendelseTo.Endringstype;
 import no.nav.nom.contract.nom.hendelse.Hendelsestyper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,72 +134,97 @@ class RessursTest extends RessursTestBase {
         assertTrue(ressurs.get("koblinger").isEmpty());
     }
 
+    @Nested
+    @WireMockStubs
+    class Navn {
+
+        @Test
+        @SneakyThrows
+        @DisplayName("Kan hente fulle navn fra PDL")
+        void scenario31() {
+            kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
+            pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
+
+            val response = postForResource("ressurs/scenario5.graphql", false);
+
+            val ressurser = response.getList("$.data.ressurser", JsonNode.class);
+            assertEquals(2, ressurser.size());
+
+            pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+            pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("Kan hente navn uten mellomnavn fra PDL")
+        void scenario32() {
+            kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
+            pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
+
+            val response = postForResource("ressurs/scenario5.graphql", false);
+
+            val ressurser = response.getList("$.data.ressurser", JsonNode.class);
+            assertEquals(2, ressurser.size());
+
+            pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+            pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("Hente navn hvor PDL er utilgjengelig")
+        void scenario33() {
+            kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
+            pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
+            stubFor(post("/proxy/pdl").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
+
+            val response = postForResource("ressurs/scenario5.graphql", true);
+
+            val errors = response.getList("$.errors", JsonNode.class);
+            assertEquals(2, errors.size());
+
+            val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
+            assertTrue(ressurs.hasNonNull("id"));
+            assertFalse(ressurs.hasNonNull("person"));
+        }
+
+        @Test
+        @SneakyThrows
+        @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
+        void scenario34() {
+            kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
+            pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
+            pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
+
+            val response = postForResource("ressurs/scenario5.graphql", true);
+
+            val errors = response.getList("$.errors", JsonNode.class);
+            assertEquals(2, errors.size());
+
+            val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
+            assertTrue(ressurs.hasNonNull("id"));
+            assertFalse(ressurs.hasNonNull("person"));
+        }
+    }
+
     @Test
     @SneakyThrows
-    @DisplayName("Kan hente fulle navn fra PDL")
-    void scenario31() {
-        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
+    @DisplayName("Kan hente email fra AD")
+    void scenario745() {
+        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("3"));
 
-        val response = postForResource("ressurs/scenario5.graphql", false);
+        val response = postForResource("ressurs/scenario8.graphql", true);
 
         val ressurser = response.getList("$.data.ressurser", JsonNode.class);
-        assertEquals(2, ressurser.size());
+        assertEquals(3, ressurser.size());
+        ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Kan hente navn uten mellomnavn fra PDL")
-    void scenario32() {
-        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
-        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-
-        val response = postForResource("ressurs/scenario5.graphql", false);
-
-        val ressurser = response.getList("$.data.ressurser", JsonNode.class);
-        assertEquals(2, ressurser.size());
-
-        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Hente navn hvor PDL er utilgjengelig")
-    void scenario33() {
-        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
-        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-        stubFor(post("/proxy/pdl").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
-
-        val response = postForResource("ressurs/scenario5.graphql", true);
+        assertThat(ressurser.get(0).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent1@domain.no");
+        assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
+        assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         val errors = response.getList("$.errors", JsonNode.class);
-        assertEquals(2, errors.size());
-
-        val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
-        assertTrue(ressurs.hasNonNull("id"));
-        assertFalse(ressurs.hasNonNull("person"));
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
-    void scenario34() {
-        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
-        pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
-        pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
-
-        val response = postForResource("ressurs/scenario5.graphql", true);
-
-        val errors = response.getList("$.errors", JsonNode.class);
-        assertEquals(2, errors.size());
-
-        val ressurs = response.getList("$.data.ressurser", JsonNode.class).get(0);
-        assertTrue(ressurs.hasNonNull("id"));
-        assertFalse(ressurs.hasNonNull("person"));
+        assertEquals(1, errors.size());
     }
 
     @Test

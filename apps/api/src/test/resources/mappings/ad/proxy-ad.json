@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/proxy/ad"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "ressurser": [
+        {
+          "navIdent": "testNavIdent1",
+          "email": "testNavIdent1@domain.no",
+          "status": "OK"
+        },
+        {
+          "navIdent": "testNavIdent2",
+          "email": "testNavIdent2@domain.no",
+          "status": "OK"
+        },
+        {
+          "navIdent": "testNavIdent3",
+          "email": null,
+          "status": "IKKE_FUNNET"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
