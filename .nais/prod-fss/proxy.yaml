@@ -69,5 +69,5 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /serviceuser/data/dev/srvnomad
+      - kvPath: /serviceuser/data/prod/srvnomad
         mountPath: /var/run/secrets/nais.io/srvnomad
