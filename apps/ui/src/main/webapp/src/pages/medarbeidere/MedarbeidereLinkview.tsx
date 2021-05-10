@@ -11,6 +11,7 @@ import NomUiHeader from "../../components/header/NomUiHeader";
 export interface Medarbeider {
   navIdent: string;
   fulltNavn: string;
+  epost: string;
   leder?: {
     navIdent: string;
     fulltNavn: string;
@@ -33,6 +34,7 @@ export interface Medarbeider {
 const templateMedarbeider: Medarbeider = {
   navIdent: "[ukjent]",
   fulltNavn: "[ukjent]",
+  epost: "[ukjent]",
   leder: undefined,
   ansattKategori: "[ukjent]",
   enheter: [],
@@ -46,6 +48,8 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider {
   out.navIdent = ressurs.navIdent;
 
   out.fulltNavn = fulltNavnForRessurs(ressurs);
+
+  out.epost = ressurs.epost;
 
   if (ressurs?.ledere[0]) {
     const leder = ressurs.ledere[0].ressurs;
@@ -101,6 +105,8 @@ function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
       <span id="fulltNavnHeader">{props.medarbeider.fulltNavn}</span>
       <label htmlFor="ansattTypeHeader">Kategori: </label>
       <span id="ansattTypeHeader">{props.medarbeider.ansattKategori}</span>
+      <label htmlFor="ansattEpost">Kategori: </label>
+      <span id="ansattEpost">{props.medarbeider.epost}</span>
 
       {props.medarbeider.leder ? (
         <Fragment>
@@ -218,7 +224,7 @@ export default function MedarbeiderePage(): JSX.Element {
       out = <MedarbeiderRender medarbeider={translateGqlToMedarbeider(res)} />;
       break;
     case "WAITING":
-      out = "Waiting";
+      out = "Venter på navident i adresselinjen";
       break;
     case "RESOLVEDWITHERRORS":
       out = (

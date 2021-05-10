@@ -6,6 +6,7 @@ export interface GqlRessurs {
   lederFor: GqlLederOrganisasjonsenhet[];
   ledere: GqlRessursLeder[];
   person: GqlPerson;
+  epost: string;
 }
 
 export interface GqlRessursKobling {

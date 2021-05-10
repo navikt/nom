@@ -4,6 +4,7 @@ export function createRessursQuery(id: string | null): string {
           ressurs(${whereClause}) {
             navIdent
             personIdent
+            epost
             person {
               navn {
                 fornavn
