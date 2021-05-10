@@ -177,7 +177,6 @@ function MedarbeiderRender(props: {
   medarbeider: Medarbeider | null;
 }): JSX.Element {
   const medarbeider = props.medarbeider;
-  console.log({ x: props });
 
   if (!medarbeider) {
     return <div>Ugyldig navident</div>;
