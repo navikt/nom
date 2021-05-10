@@ -12,9 +12,14 @@ import AlertStripe from "nav-frontend-alertstriper";
 import Contentbox from "../../components/contentbox/Contentbox";
 import { GqlOrganisasjonsenhet, GqlRessurs } from "../../common/gqltypes";
 
-function transformResult(graphQlData: any): OrgEnhetData {
+function transformResult(graphQlData: any): OrgEnhetData | null {
   const organisasjonsenhet: GqlOrganisasjonsenhet =
     graphQlData.organisasjonsenhet;
+
+  if (!organisasjonsenhet) {
+    return null;
+  }
+
   const underEnheterTmp = organisasjonsenhet.organiseringer.filter(
     (it) => it.retning === "under"
   );
@@ -63,24 +68,6 @@ function transformResult(graphQlData: any): OrgEnhetData {
         etternavn: gqlRes.person?.navn.etternavn ?? "[ukjent]",
       },
     };
-    // if (navnOk) {
-    //   out.person = {
-    //     navn: {
-    //       fornavn: gqlRes.person.navn.fornavn,
-    //       mellomnavn: gqlRes.person.navn.mellomnavn,
-    //       etternavn: gqlRes.person.navn.etternavn,
-    //     },
-    //   };
-    // } else {
-    //   out.person = {
-    //     navn: {
-    //       fornavn: "[ukjent]",
-    //       mellomnavn: "[ukjent]",
-    //       etternavn: "[ukjent]",
-    //     },
-    //   };
-    //   console.warn({ ressursManglerNavn: gqlRes, replacementRessurs: out });
-    // }
     return out as Ressurs;
   });
 
@@ -140,6 +127,10 @@ function LeaderBox(props: { ressurs: Ressurs }): JSX.Element {
 }
 
 function LocalTable(props: { orgenhetData }): JSX.Element {
+  if (!props.orgenhetData) {
+    return <div>Fant ikke enhet</div>;
+  }
+
   const sti = props.orgenhetData.koblinger.sti;
   const orgenheterUnder: OrgEnhetFelter[] = props.orgenhetData.koblinger
     .underEnheter as any;
@@ -322,7 +313,6 @@ export default function OrganisasjonsenhetLinkview(props: {
           <AlertStripe type="info">
             <p>Feil i graphql spørring, se console log</p>
           </AlertStripe>
-
           <LocalTable orgenhetData={orgenhetData}></LocalTable>
         </div>
       );

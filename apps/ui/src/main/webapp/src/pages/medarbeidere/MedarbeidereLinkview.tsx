@@ -41,9 +41,12 @@ const templateMedarbeider: Medarbeider = {
   enheterLederFor: [],
 };
 
-function translateGqlToMedarbeider(gqlResponse: any): Medarbeider {
+function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   const out: Medarbeider = { ...templateMedarbeider };
   const ressurs: GqlRessurs = gqlResponse.result.ressurs;
+  if (!ressurs) {
+    return null;
+  }
 
   out.navIdent = ressurs.navIdent;
 
@@ -105,7 +108,7 @@ function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
       <span id="fulltNavnHeader">{props.medarbeider.fulltNavn}</span>
       <label htmlFor="ansattTypeHeader">Kategori: </label>
       <span id="ansattTypeHeader">{props.medarbeider.ansattKategori}</span>
-      <label htmlFor="ansattEpost">Kategori: </label>
+      <label htmlFor="ansattEpost">Epost: </label>
       <span id="ansattEpost">{props.medarbeider.epost}</span>
 
       {props.medarbeider.leder ? (
@@ -170,8 +173,15 @@ function OrgenhetListview(props: {
   );
 }
 
-function MedarbeiderRender(props: { medarbeider: Medarbeider }): JSX.Element {
+function MedarbeiderRender(props: {
+  medarbeider: Medarbeider | null;
+}): JSX.Element {
   const medarbeider = props.medarbeider;
+  console.log({ x: props });
+
+  if (!medarbeider) {
+    return <div>Ugyldig navident</div>;
+  }
 
   return (
     <div>
