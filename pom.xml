@@ -20,7 +20,7 @@
     <properties>
         <asciidoc.version>2.1.0</asciidoc.version>
         <java.version>15</java.version>
-        <javassist.version>3.27.0-GA</javassist.version>
+        <javassist.version>3.28.0-GA</javassist.version>
         <ow2-asm.version>9.1</ow2-asm.version>
         <spring-cloud.version>2020.0.2</spring-cloud.version>
         <spring.graphql-version>11.0.0</spring.graphql-version>
