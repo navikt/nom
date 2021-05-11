@@ -36,7 +36,7 @@ public class RessursHendelseService {
             val ressursByPid = personIdentOptional.get();
             val alreadySaved = ressursByNid == ressursByPid;
             if (!alreadySaved) {
-                log.warn("NavIdent {} for personIdent {} er i konflikt med eksisternde ressurs", navIdent, personIdent);
+                log.warn("NavIdent {} er i konflikt med eksisterende ressurs", navIdent);
             }
         } else if (nidOnlyPresent) {
             val fid = navIdentOptional.get().getId();
@@ -44,10 +44,9 @@ public class RessursHendelseService {
             hendelseProducer.produceHendelse(hendelse);
         } else if (pidOnlyPresent) {
             val ressursByPid = personIdentOptional.get();
-            val eksisterendePid = ressursByPid.getPersonIdent();
             val eksisterendeNid = ressursByPid.getNavIdent();
-            log.warn("NavIdent {} for personIdent {} i DVH er i konflikt med eksisterende ressurs med navident {} og personIdent {}",
-                    navIdent, personIdent, eksisterendeNid, eksisterendePid);
+            log.warn("NavIdent {} i DVH er i konflikt med eksisterende ressurs med navident {}",
+                    navIdent, eksisterendeNid);
         } else {
             val hendelse = createOpprettetHendelse(navIdent, personIdent);
             hendelseProducer.produceHendelse(hendelse);
