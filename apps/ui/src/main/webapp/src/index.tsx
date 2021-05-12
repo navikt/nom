@@ -10,6 +10,11 @@ import * as serviceWorker from "./serviceWorker";
 
 import "./index.css";
 import MedarbeidereLinkview from "./pages/medarbeidere/MedarbeidereLinkview";
+import Bestillinger from "./pages/bestillinger/Bestillinger";
+import Bestillingsgodkjenning from "./pages/bestillingsgodkjenning/Bestillingsgodkjenning";
+import Nybruker from "./pages/bestillinger/nybruker/Nybruker";
+import Nompagewrap from "./components/nompagewrap/Nompagewrap";
+import Nyenhet from "./pages/bestillinger/nyenhet/Nyenhet";
 
 function AppRouter(): JSX.Element {
   return (
@@ -41,6 +46,30 @@ function AppRouter(): JSX.Element {
       <Route exact path="/medarbeidere/:id">
         <MedarbeidereLinkview />
       </Route>
+      <Route exact path="/bestillinger">
+        <Bestillinger />
+      </Route>
+      <Route exact path="/bestillinger/nybruker">
+        <Nybruker />
+      </Route>
+      <Route exact path="/bestillinger/nyenhet">
+        <Nyenhet />
+      </Route>
+      <Route exact path="/bestillinger/flytteenhet">
+        <Nompagewrap pagetitle="Flytte enhet">...TODO</Nompagewrap>
+      </Route>
+      <Route exact path="/bestillinger/splitteenhet">
+        <Nompagewrap pagetitle="Splitte enhet">...TODO</Nompagewrap>
+      </Route>
+      <Route exact path="/bestillinger/sammenslaaenheter">
+        <Nompagewrap pagetitle="Sammenslå enheter">...TODO</Nompagewrap>
+      </Route>
+      <Route exact path="/bestillinger/kategoriserenhet">
+        <Nompagewrap pagetitle="Kategoriser enhet">...TODO</Nompagewrap>
+      </Route>
+      <Route exact path="/bestillingsgodkjenning">
+        <Bestillingsgodkjenning />
+      </Route>
       <Route>
         {/* default..  */}
         <Redirect to="/" />
@@ -62,4 +91,3 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
-

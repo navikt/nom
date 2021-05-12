@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router";
 import { useFetchRessurs } from "../../api/graphql_fetch_hooks";
 import NomUiHeader from "../../components/header/NomUiHeader";
+import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 
 export default function Medarbeidere(props: any): JSX.Element {
   const { id } = useParams<any>();
@@ -29,14 +30,16 @@ export default function Medarbeidere(props: any): JSX.Element {
       throw new Error("Should not happen");
   }
   return (
-    <div className="Medarbeidere">
-      <NomUiHeader />
-      <p>
-        Bruk ID i adresselinjen for å se på forskjellige medarbeidere (f.eks
-        /medarbeidere/X123456)
-      </p>
+    <Nompagewrap pagetitle="Medarbeidere">
+      <div className="Medarbeidere">
+        {/* <NomUiHeader /> */}
+        <p>
+          Bruk ID i adresselinjen for å se på forskjellige medarbeidere (f.eks
+          /medarbeidere/X123456)
+        </p>
 
-      <pre className="Graphql__jsondump">{out}</pre>
-    </div>
+        <pre className="Graphql__jsondump">{out}</pre>
+      </div>
+    </Nompagewrap>
   );
 }

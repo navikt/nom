@@ -7,6 +7,7 @@ import { GqlRessurs } from "../../common/gqltypes";
 import { fulltNavnForRessurs } from "../../common/navnutils";
 import Contentbox from "../../components/contentbox/Contentbox";
 import NomUiHeader from "../../components/header/NomUiHeader";
+import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 
 export interface Medarbeider {
   navIdent: string;
@@ -247,13 +248,13 @@ export default function MedarbeiderePage(): JSX.Element {
       throw new Error("Should not happen");
   }
   return (
-    <div>
-      <NomUiHeader />
+    <Nompagewrap pagetitle="Medarbeidere">
+      {/* <NomUiHeader /> */}
       <p>
         Bruk ID i adresselinjen for å se på forskjellige medarbeidere (f.eks
         /medarbeidere/X123456)
       </p>
       <div className="MedarbeidereLinkview">{out}</div>
-    </div>
+    </Nompagewrap>
   );
 }
