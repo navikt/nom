@@ -4,7 +4,7 @@ import graphql.kickstart.execution.context.GraphQLContext;
 import graphql.kickstart.servlet.context.GraphQLServletContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.graphql.common.loader.EpostBatchLoader;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 
-import static no.nav.nom.apps.api.graphql.common.loader.EpostBatchLoader.EPOST_DATALOADER;
+import static no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader.AD_RESSURS_DATALOADER;
 import static no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader.PERSON_DATALOADER;
 
 @Component
@@ -24,7 +24,7 @@ import static no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader.PERSON
 class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
 
     private final PersonBatchLoader personBatchLoader;
-    private final EpostBatchLoader epostBatchLoader;
+    private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
 
     @Override
     public GraphQLContext build(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
@@ -44,10 +44,10 @@ class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
     private DataLoaderRegistry buildDataLoaderRegistry() {
         DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
         val personDataloader = DataLoader.newMappedDataLoader(personBatchLoader);
-        val epostDataloader = DataLoader.newMappedDataLoader(epostBatchLoader);
+        val adRessursDataloader = DataLoader.newMappedDataLoader(adRessursBatchLoader);
 
         dataLoaderRegistry.register(PERSON_DATALOADER, personDataloader);
-        dataLoaderRegistry.register(EPOST_DATALOADER, epostDataloader);
+        dataLoaderRegistry.register(AD_RESSURS_DATALOADER, adRessursDataloader);
         return dataLoaderRegistry;
     }
 }

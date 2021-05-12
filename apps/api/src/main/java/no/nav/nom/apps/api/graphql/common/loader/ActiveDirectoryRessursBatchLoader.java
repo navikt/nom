@@ -29,21 +29,21 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EpostBatchLoader implements MappedBatchLoaderWithContext<String, DataFetcherResult<String>> {
+public class ActiveDirectoryRessursBatchLoader implements MappedBatchLoaderWithContext<String, DataFetcherResult<AdRessurs>> {
 
-    public static String EPOST_DATALOADER = "EmailDataLoader";
+    public static String AD_RESSURS_DATALOADER = "ADRessursDataLoader";
 
     private final TokenRepository tokenRepository;
     private final AppProperties appProperties;
     private final RestTemplate restTemplate;
 
     @Override
-    public CompletionStage<Map<String, DataFetcherResult<String>>> load(Set<String> set, BatchLoaderEnvironment batchEnvironment) {
-        return CompletableFuture.supplyAsync(() -> getEposterBatch(set, batchEnvironment));
+    public CompletionStage<Map<String, DataFetcherResult<AdRessurs>>> load(Set<String> set, BatchLoaderEnvironment batchEnvironment) {
+        return CompletableFuture.supplyAsync(() -> getAdRessurserBatch(set, batchEnvironment));
     }
 
     @SneakyThrows
-    public Map<String, DataFetcherResult<String>> getEposterBatch(Set<String> navIdenter, BatchLoaderEnvironment batchEnvironment) {
+    public Map<String, DataFetcherResult<AdRessurs>> getAdRessurserBatch(Set<String> navIdenter, BatchLoaderEnvironment batchEnvironment) {
         var headers = new HttpHeaders();
         var token = tokenRepository.getAadToken(appProperties.getProxy().getAadClientId());
         headers.setBearerAuth(token);
@@ -64,18 +64,18 @@ public class EpostBatchLoader implements MappedBatchLoaderWithContext<String, Da
         }
     }
 
-    private DataFetcherResult<String> convert(AdRessurs ressurs, DataFetchingEnvironment env) {
+    private DataFetcherResult<AdRessurs> convert(AdRessurs ressurs, DataFetchingEnvironment env) {
         if (ressurs.getStatus() == AdStatus.OK) {
-            return DataFetcherResult.<String>newResult()
-                    .data(ressurs.getEmail())
+            return DataFetcherResult.<AdRessurs>newResult()
+                    .data(ressurs)
                     .build();
         }
         log.warn("Manglende data fra AD", new GraphQLException("Manglende data fra AD for ident=" + ressurs.getNavIdent()));
         return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på denne navIdent", env);
     }
 
-    private DataFetcherResult<String> convertToError(ErrorCode errorCode, String message, DataFetchingEnvironment env) {
-        return DataFetcherResult.<String>newResult()
+    private DataFetcherResult<AdRessurs> convertToError(ErrorCode errorCode, String message, DataFetchingEnvironment env) {
+        return DataFetcherResult.<AdRessurs>newResult()
                 .error(errorCode.construct(env, message))
                 .build();
     }
