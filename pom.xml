@@ -34,7 +34,7 @@
         <wiremock-extension.version>0.2.0.RELEASE</wiremock-extension.version>
 
         <azure-msal4j.version>1.10.0</azure-msal4j.version>
-        <ms-graph.version>3.4.0</ms-graph.version>
+        <ms-graph.version>3.5.0</ms-graph.version>
         <jna.version>5.8.0</jna.version>
         <stax2-api.version>4.2.1</stax2-api.version>
         <guava.version>30.1.1-jre</guava.version>
