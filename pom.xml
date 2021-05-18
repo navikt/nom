@@ -23,7 +23,7 @@
         <javassist.version>3.28.0-GA</javassist.version>
         <ow2-asm.version>9.1</ow2-asm.version>
         <spring-cloud.version>2020.0.2</spring-cloud.version>
-        <spring.graphql-version>11.0.0</spring.graphql-version>
+        <spring.graphql-version>11.1.0</spring.graphql-version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <checker-qual.version>3.13.0</checker-qual.version>
         <bouncycastle.version>1.68</bouncycastle.version>
