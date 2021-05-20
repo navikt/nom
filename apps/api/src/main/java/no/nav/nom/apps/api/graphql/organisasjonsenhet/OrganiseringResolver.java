@@ -40,7 +40,7 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
                 .retning(retning)
                 .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.getOverenhetNummer() : organisering.getUnderenhetNummer())
                 .gyldigFom(organisering.getGyldigFom())
-                .gyldigTom(organisering.getGyldigFom())
+                .gyldigTom(organisering.getGyldigTom())
                 .build();
     }
 }
