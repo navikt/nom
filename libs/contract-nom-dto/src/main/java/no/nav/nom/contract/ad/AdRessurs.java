@@ -10,6 +10,7 @@ public class AdRessurs {
 
     String navIdent;
     String email;
+    String displayName;
     @Default
     AdStatus status = AdStatus.OK;
 

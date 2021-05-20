@@ -16,7 +16,9 @@ objectclass: organizationalPerson
 objectclass: inetOrgPerson
 uid: 1234
 cn: John Doe
-sn: John
+displayName: John Doe
+givenName: John
+sn: Doe
 password: secret
 mail: john.doe@adeo.no
 sAMAccountName: A123456
@@ -28,7 +30,9 @@ objectclass: organizationalPerson
 objectclass: inetOrgPerson
 uid: 1235
 cn: Jane Doe
-sn: Jane
+displayName: Jane Doe
+givenName: Jane
+sn: Doe
 password: secret
 mail: jane.doe@adeo.no
 sAMAccountName: A123457

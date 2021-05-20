@@ -13,16 +13,19 @@
         {
           "navIdent": "testNavIdent1",
           "email": "testNavIdent1@domain.no",
+          "displayName": "Visning 1",
           "status": "OK"
         },
         {
           "navIdent": "testNavIdent2",
           "email": "testNavIdent2@domain.no",
+          "displayName": "Visning 2",
           "status": "OK"
         },
         {
           "navIdent": "testNavIdent3",
           "email": null,
+          "displayName": null,
           "status": "IKKE_FUNNET"
         }
       ]

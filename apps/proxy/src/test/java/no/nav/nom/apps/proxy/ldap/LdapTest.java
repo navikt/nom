@@ -41,6 +41,7 @@ public class LdapTest extends ApiTestBase {
 
         var john = find(result.getBody().getRessurser(), r -> r.getNavIdent().equals("A123456"));
         assertThat(john.getEmail()).isEqualTo("john.doe@adeo.no");
+        assertThat(john.getDisplayName()).isEqualTo("John Doe");
         assertThat(john.getStatus()).isEqualTo(AdStatus.OK);
         var jane = find(result.getBody().getRessurser(), r -> r.getNavIdent().equals("A123457"));
         assertThat(jane.getEmail()).isEqualTo("jane.doe@adeo.no");

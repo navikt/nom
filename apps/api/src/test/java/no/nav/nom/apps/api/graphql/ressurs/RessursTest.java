@@ -209,7 +209,7 @@ class RessursTest extends RessursTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Kan hente email fra AD")
+    @DisplayName("Kan hente email og visningsnavn fra AD")
     void scenario745() {
         kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("3"));
 
@@ -220,11 +220,13 @@ class RessursTest extends RessursTestBase {
         ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
         assertThat(ressurser.get(0).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent1@domain.no");
+        assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 1");
         assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
+        assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 2");
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         val errors = response.getList("$.errors", JsonNode.class);
-        assertEquals(1, errors.size());
+        assertEquals(2, errors.size());
     }
 
     @Test

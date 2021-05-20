@@ -19,4 +19,9 @@ public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
     public CompletableFuture<DataFetcherResult<String>> epost(Ressurs ressurs, DataFetchingEnvironment env) {
         return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getEmail);
     }
+
+    public CompletableFuture<DataFetcherResult<String>> visningsNavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getDisplayName);
+    }
+
 }

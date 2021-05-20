@@ -69,10 +69,7 @@ type Ressurs {
     ledere: [RessursLeder!]!
     person: Person
     epost: String
-}
-
-type RessursLeder {
-    ressurs: Ressurs!
+    visningsNavn: String
 }
 
 type Person {
@@ -83,6 +80,10 @@ type Navn {
     fornavn: String!
     mellomnavn: String
     etternavn: String!
+}
+
+type RessursLeder {
+    ressurs: Ressurs!
 }
 
 type OrganisasjonsenhetsLeder {

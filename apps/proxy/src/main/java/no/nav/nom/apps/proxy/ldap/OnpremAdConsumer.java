@@ -24,6 +24,7 @@ public class OnpremAdConsumer {
 
     private static final String MAIL_ATTR = "mail";
     private static final String IDENT_ATTR = "sAMAccountName";
+    private static final String DISPLAY_NAME_ATTR = "displayName";
 
     private final LdapTemplate ldapTemplate;
 
@@ -35,10 +36,10 @@ public class OnpremAdConsumer {
         LdapQuery query = query()
                 .searchScope(SearchScope.SUBTREE)
                 .timeLimit(3000)
-                .attributes(MAIL_ATTR, IDENT_ATTR)
+                .attributes(MAIL_ATTR, IDENT_ATTR, DISPLAY_NAME_ATTR)
                 .where("objectClass").is("user")
                 .and(buildQuery(query(), navIdenter));
-        var result = new ArrayList<>(ldapTemplate.search(query, new JsonNodeMapper()));
+        var result = new ArrayList<>(ldapTemplate.search(query, new Mapper()));
 
         var missingIdenter = new ArrayList<>(navIdenter);
         result.forEach(i -> missingIdenter.remove(i.getNavIdent()));
@@ -52,13 +53,14 @@ public class OnpremAdConsumer {
                 (cc, s) -> cc.or(IDENT_ATTR).is(s), ContainerCriteria::or);
     }
 
-    private static class JsonNodeMapper extends AbstractContextMapper<AdRessurs> {
+    private static class Mapper extends AbstractContextMapper<AdRessurs> {
 
         @Override
         protected AdRessurs doMapFromContext(DirContextOperations ctx) {
             return AdRessurs.builder()
                     .email(ctx.getStringAttribute(MAIL_ATTR))
                     .navIdent(ctx.getStringAttribute(IDENT_ATTR))
+                    .displayName(ctx.getStringAttribute(DISPLAY_NAME_ATTR))
                     .build();
         }
     }
