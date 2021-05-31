@@ -3,6 +3,7 @@ package no.nav.nom.apps.api;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.libs.test.RsaStub;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 @ActiveProfiles({"test", "log-console-error"})
-@WireMockStubs
+@WireMockStubs(RsaStub.class)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class TestBase {
@@ -46,4 +47,5 @@ public abstract class TestBase {
                 .map(e -> (ProducerRecord<String, String>) e)
                 .collect(toUnmodifiableList());
     }
+
 }

@@ -10,8 +10,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static java.util.Collections.emptyList;
-
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ProceedingJoinPoint.class, MeterRegistry.class})
 @AutoConfigureAfter(MetricsAutoConfiguration.class)
@@ -19,11 +17,11 @@ public class MetricsAspectsAutoConfig {
 
     @Bean
     TimedAspect timedAspect(MeterRegistry meterRegistry) {
-        return new TimedAspect(meterRegistry, (e) -> emptyList());
+        return new TimedAspect(meterRegistry);
     }
 
     @Bean
     CountedAspect countedAspect(MeterRegistry meterRegistry) {
-        return new CountedAspect(meterRegistry, (e) -> emptyList());
+        return new CountedAspect(meterRegistry);
     }
 }

@@ -1,14 +1,13 @@
 package no.nav.nom.apps.ui.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.ui.TestBase;
 import no.nav.nom.apps.ui.azure.AadConsumer;
-import no.nav.nom.apps.ui.common.SecurityTestUtils;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -39,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public abstract class ApiTestBase extends TestBase {
+
     protected static final String USER_SUBJECT = "b252dd03-6a19-4601-b749-ba4cea4008d2";
     protected static final String BASE = "http:\\/\\/localhost:\\d.*\\/";                                             // Pga Wiremock variabel port
     protected static final String AUTHENTICATION_ENDPOINT = BASE + "oauth2\\/authorization\\/aad";                    // Spring Security
@@ -55,9 +55,6 @@ public abstract class ApiTestBase extends TestBase {
     @Autowired
     protected SecurityTestUtils securityUtils;
 
-    @Autowired
-    protected RSAKey rsaKey;
-
     protected String sessionCookieValue;
     protected String xsrfCookieValue;
 
@@ -65,7 +62,6 @@ public abstract class ApiTestBase extends TestBase {
     public void beforeEach() {
         sessionCookieValue = null;
         xsrfCookieValue = null;
-        stubFor(get("/aad/discovery/v2.0/keys").willReturn(aResponse().withBody(String.format("{\"keys\":[%s]}", rsaKey.toPublicJWK().toString()))));
     }
 
     protected void logInWith(JWTClaimsSet.Builder accessTokenClaims, JWTClaimsSet.Builder idTokenClaims, String refreshToken) {
@@ -91,13 +87,13 @@ public abstract class ApiTestBase extends TestBase {
     }
 
     protected JWTClaimsSet.Builder validIdToken() {
-        return securityUtils.validJwtClaims()
+        return validAccessToken()
                 .subject(USER_SUBJECT) // AAD gir en id på subject
                 .claim("name", "Alice Wonderland");
     }
 
     protected JWTClaimsSet.Builder validAccessToken() {
-        return securityUtils.validJwtClaims();
+        return securityUtils.validJwtClaims("alice", "client-id");
     }
 
     protected String refreshToken() {
@@ -201,6 +197,7 @@ public abstract class ApiTestBase extends TestBase {
 
     @Value
     public static class TokenResponse {
+
         String accessToken;
         String idToken;
         String refreshToken;

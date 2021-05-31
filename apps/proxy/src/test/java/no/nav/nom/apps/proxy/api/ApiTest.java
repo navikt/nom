@@ -24,11 +24,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class ApiTest extends ApiTestBase {
+
     private static final String PDL_URL = "/proxy/pdl";
 
     @Test
     @DisplayName("Tester at pdl proxy ruter kallet videre riktig")
-    public void scenario11(){
+    public void scenario11() {
         val bodyRequest = UUID.randomUUID().toString();
         val bodyResponse = UUID.randomUUID().toString();
         val tema = "temaa";
@@ -37,7 +38,6 @@ public class ApiTest extends ApiTestBase {
 
         claims.audience("dvh").subject("proxy");
         val tokenSts = securityTestUtils.createToken(claims);
-
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -51,7 +51,7 @@ public class ApiTest extends ApiTestBase {
                 .withHeader("Nav-Consumer-Token", containing(tokenSts))
                 .withHeader("Authorization", containing(tokenSts))
                 .withRequestBody(equalTo(bodyRequest))
-                .willReturn(aResponse().withBody("{\"result\":\""+bodyResponse+"\"}").withHeader("Content-Type", "application/json"))
+                .willReturn(aResponse().withBody("{\"result\":\"" + bodyResponse + "\"}").withHeader("Content-Type", "application/json"))
         );
 
         val result = restTemplate.exchange(URI.create(PDL_URL), HttpMethod.POST, new HttpEntity<>(bodyRequest, headers), JsonNode.class);

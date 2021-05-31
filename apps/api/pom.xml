@@ -85,17 +85,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <!-- Pga spring-cloud-contract-wiremock kjøres opp samtidig som context, må vi ha denne for å
-            starte wiremock FØR spring. Dette er fordi det gjøres kall mot "AzureAD" i bootstrap -->
-            <groupId>com.thomaskasene.wiremock</groupId>
-            <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-test</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 

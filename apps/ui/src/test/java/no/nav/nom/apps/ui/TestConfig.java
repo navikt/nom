@@ -1,10 +1,7 @@
 package no.nav.nom.apps.ui;
 
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.apache.http.NoHttpResponseException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateCustomizer;
@@ -15,18 +12,8 @@ import java.net.SocketException;
 import java.util.Set;
 
 @SpringBootApplication
-@Import(UiStarter.class)
+@Import({SecurityTestUtils.class, UiStarter.class})
 public class TestConfig {
-    public static final String RSA_KEY_ID = "keyId";
-
-    @Bean
-    @SneakyThrows
-    RSAKey rsaKey() {
-        return new RSAKeyGenerator(2048)
-                .keyUse(KeyUse.SIGNATURE)
-                .keyID(RSA_KEY_ID)
-                .generate();
-    }
 
     /**
      * Pga Connection-reuse så ender det opp med å måtte gå flere runder,
