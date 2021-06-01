@@ -9,6 +9,10 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,kafka
+    - name: PDL_BASEURL
+      value: https://pdl-api.dev-fss-pub.nais.io
+    - name: PDL_CLIENT_ID
+      value: dev-fss.pdl.pdl-api
     - name: NOM_PROXY_BASEURL
       value: https://nom-proxy.dev-fss-pub.nais.io
     - name: NOM_PROXY_CLIENT_ID

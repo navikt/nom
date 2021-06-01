@@ -1,6 +1,4 @@
 app:
-  pdl:
-    baseUrl: ${PDL_BASEURL}
   dvh:
     tdvUsername: ${tdvuser}
     tdvPassword: ${tdvpass}

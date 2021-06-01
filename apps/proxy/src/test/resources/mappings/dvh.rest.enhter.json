@@ -1,7 +1,11 @@
 {
   "request": {
     "method": "GET",
-    "url": "/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1"
+    "url": "/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1",
+    "basicAuthCredentials": {
+      "username": "test-stilling-user",
+      "password": "test-stilling-pass"
+    }
   },
   "response": {
     "status": 200,

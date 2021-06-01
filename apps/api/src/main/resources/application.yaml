@@ -4,6 +4,8 @@ app:
     aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
   pdl:
     tema: GEN
+    baseUrl: ${PDL_BASEURL}
+    aadClientId: api://${PDL_CLIENT_ID}/.default
   hendelse:
     topic: nom.event.source.v1
 
@@ -20,9 +22,7 @@ authentication:
   aad:
     issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
     clientId: ${AZURE_APP_CLIENT_ID}
-    clientAssertionType: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     jwk: ${AZURE_APP_JWK}
-    grantType: client_credentials
 
 graphql:
   playground:

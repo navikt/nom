@@ -31,11 +31,23 @@ public class TokenRepository {
     private final AuthenticationProperties authenticationProperties;
     private final RestTemplate restTemplate;
     private final Map<String, SignedJWT> cachedAadTokensByScope = new ConcurrentHashMap<>(2);
+    private final Map<String, SignedJWT> cachedAadTokensByUserAndScope = new ConcurrentHashMap<>(2);
+
+    private static final String AAD_GRANT_TYPE_OBO = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+    private static final String AAD_GRANT_TYPE = "client_credentials";
+    private static final String AAD_TOKEN_USE = "on_behalf_of";
+    private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
     @SneakyThrows
     public String getAadToken(String scope) {
         val signedJwt = cachedAadTokensByScope.get(scope);
         return (isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope)).serialize();
+    }
+
+    @SneakyThrows
+    public String getOnbehalfofTokenFor(String assertion, String scope) {
+        val signedJwt = cachedAadTokensByUserAndScope.get(scope);
+        return (isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope)).serialize();
     }
 
     @SneakyThrows
@@ -47,9 +59,9 @@ public class TokenRepository {
             val aadBodyMap = new LinkedMultiValueMap<String, String>();
             aadBodyMap.add("scope", scope);
             aadBodyMap.add("client_id", authenticationProperties.getAad().getClientId());
-            aadBodyMap.add("client_assertion_type", authenticationProperties.getAad().getClientAssertionType());
+            aadBodyMap.add("client_assertion_type", AAD_CLIENT_ASSERTION_TYPE);
             aadBodyMap.add("client_assertion", generateClientAssertionToken());
-            aadBodyMap.add("grant_type", authenticationProperties.getAad().getGrantType());
+            aadBodyMap.add("grant_type", AAD_GRANT_TYPE);
 
             val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
             val token = SignedJWT.parse(result.get("access_token").asText());
@@ -57,6 +69,30 @@ public class TokenRepository {
             return token;
         }
         return cachedAadTokensByScope.get(scope);
+    }
+
+    @SneakyThrows
+    private synchronized SignedJWT refreshOnbehalfofTokenFor(String assertion, String scope) {
+        var cacheKey = assertion + scope;
+        if (!isValidToken(cachedAadTokensByUserAndScope.get(cacheKey))) {
+            val aadHeaders = new HttpHeaders();
+            aadHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            val aadBodyMap = new LinkedMultiValueMap<String, String>();
+            aadBodyMap.add("scope", scope);
+            aadBodyMap.add("client_id", authenticationProperties.getAad().getClientId());
+            aadBodyMap.add("client_assertion_type", AAD_CLIENT_ASSERTION_TYPE);
+            aadBodyMap.add("client_assertion", generateClientAssertionToken());
+            aadBodyMap.add("assertion", assertion);
+            aadBodyMap.add("grant_type", AAD_GRANT_TYPE_OBO);
+            aadBodyMap.add("requested_token_use", AAD_TOKEN_USE);
+
+            val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+            val token = SignedJWT.parse(result.get("access_token").asText());
+            cachedAadTokensByUserAndScope.put(cacheKey, token);
+            return token;
+        }
+        return cachedAadTokensByUserAndScope.get(cacheKey);
     }
 
     @SneakyThrows

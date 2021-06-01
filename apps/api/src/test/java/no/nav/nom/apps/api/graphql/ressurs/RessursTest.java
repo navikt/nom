@@ -176,7 +176,7 @@ class RessursTest extends RessursTestBase {
         void scenario33() {
             kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"), createRessursHendelse("4"));
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-            stubFor(post("/proxy/pdl").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
+            stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
             val response = postForResource("ressurs/scenario5.graphql", true);
 

@@ -3,6 +3,8 @@ app:
     baseUrl: http://localhost:${wiremock.server.port}
   pdl:
     tema: GEN
+    baseUrl: http://localhost:${wiremock.server.port}
+
 
 authentication:
   aad:

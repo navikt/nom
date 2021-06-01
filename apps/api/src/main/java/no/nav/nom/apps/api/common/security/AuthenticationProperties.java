@@ -18,8 +18,6 @@ public class AuthenticationProperties {
     public static class Aad {
         String issuerBaseUrl;
         String clientId;
-        String clientAssertionType;
         String jwk;
-        String grantType;
     }
 }

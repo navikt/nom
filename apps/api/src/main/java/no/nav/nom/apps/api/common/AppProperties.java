@@ -25,6 +25,8 @@ public class AppProperties {
     @Value
     public static class Pdl {
         String tema;
+        String aadClientId;
+        String baseUrl;
     }
 
     @Value
