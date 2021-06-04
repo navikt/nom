@@ -14,7 +14,7 @@ spec:
     - name: APP_DVH_BASE_URL
       value: https://tdv-u.adeo.no
     - name: ACCEPTED_SUBJECTS
-      value: cb62b1c3-62b7-4e5c-839a-357f117108fb, 016cee62-1830-4f4d-9579-a0fbc794e59c
+      value: cb62b1c3-62b7-4e5c-839a-357f117108fb, f28d78e8-e787-4ff5-b1d7-49f49e225cdc
     - name: STS_BASEURL
       value: https://security-token-service.dev.adeo.no
     - name: PDL_BASEURL
