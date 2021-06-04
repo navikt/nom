@@ -13,6 +13,8 @@ spec:
       value: log-logstash
     - name: NOM_API_CLIENT_ID
       value: 17487989-d874-4b22-ab20-3fd7b99785d6
+    - name: NOM_API_BASE_URL
+      value: http://nom-api
   ingresses:
     - https://nom-ui.dev.intern.nav.no
   replicas:

@@ -5,7 +5,7 @@ app:
     issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
   nom-api:
     client-id: ${NOM_API_CLIENT_ID}
-    base-url: http://nom-api
+    base-url: ${NOM_API_BASE_URL}
     graphQL-url: ${app.nom-api.base-url}/graphql
 
 spring:

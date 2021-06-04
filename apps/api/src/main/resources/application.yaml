@@ -7,7 +7,7 @@ app:
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
   hendelse:
-    topic: nom.event.source.v1
+    topic: ${EVENT_SOURCE_TOPIC:nom.event.source.v1}
 
 nom:
   libs:

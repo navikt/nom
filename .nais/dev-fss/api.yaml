@@ -17,8 +17,6 @@ spec:
       value: https://nom-proxy.dev-fss-pub.nais.io
     - name: NOM_PROXY_CLIENT_ID
       value: dev-fss.nom.nom-proxy
-    - name: VAULT_USER_SECRET_PATH
-      value: serviceuser/dev/srvnom-api
   image: {{image}}
   port: 8080
   ingresses:

@@ -6,7 +6,7 @@ on:
       - 'master'
       - 'dev/*'
     paths:
-      - '.nais/topics/*'
+      - '.nais/topics/topics.yaml'
 
 jobs:
   deploy-kafka-topics-dev:
