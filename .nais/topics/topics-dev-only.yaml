@@ -15,5 +15,5 @@ spec:
     retentionHours: -1
   acl:
     - team: nom
-      application: nom-api-sandbox
+      application: nom-sandbox-api
       access: readwrite
