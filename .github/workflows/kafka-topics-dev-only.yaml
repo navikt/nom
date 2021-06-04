@@ -1,4 +1,4 @@
-name: Update Kafka Topics
+name: Update Kafka Dev Only Topics
 
 on:
   push:
