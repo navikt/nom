@@ -39,3 +39,4 @@ I application-local må proxy.host og port settes. F.eks.
 Til slutt, kjør ApiStarter med proxy profil i tillegg
 
     -Dspring.profiles.active=local,proxy
+
