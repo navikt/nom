@@ -59,7 +59,7 @@ jobs:
           RESOURCE: .nais/dev-fss/api.yaml
 
   deploy-dev-sandbox:
-    name: Deploy to NAIS dev-gcp
+    name: Deploy to NAIS dev-gcp sandbox
     needs: build-jar-docker
     runs-on: ubuntu-latest
     steps:
