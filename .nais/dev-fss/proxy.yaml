@@ -38,6 +38,9 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: dev-gcp
+        - application: nom-sandbox-api
+          namespace: nom
+          cluster: dev-gcp
   webproxy: true
   ingresses:
     - https://nom-proxy.dev.intern.nav.no
