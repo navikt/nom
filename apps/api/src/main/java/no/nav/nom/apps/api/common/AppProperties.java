@@ -18,7 +18,7 @@ public class AppProperties {
     private final String appName;
 
     public boolean isSandbox() {
-        return appName.equals("nom-sandbox-ap");
+        return appName.equals("nom-sandbox-api");
     }
 
     @Value
