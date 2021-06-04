@@ -1,4 +1,5 @@
 app:
+  appName: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
     aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default

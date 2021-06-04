@@ -15,6 +15,11 @@ public class AppProperties {
     private final Proxy proxy;
     private final Pdl pdl;
     private final Hendelse hendelse;
+    private final String appName;
+
+    public boolean isSandbox() {
+        return appName.equals("nom-sandbox-ap");
+    }
 
     @Value
     public static class Proxy {
