@@ -45,5 +45,6 @@ public class AppProperties {
     @Value
     public static class Enheter {
         String url;
+        String urlV2;
     }
 }

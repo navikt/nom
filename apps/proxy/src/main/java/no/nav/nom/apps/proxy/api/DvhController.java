@@ -5,7 +5,6 @@ import lombok.val;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,17 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
 public class DvhController extends AbstractController {
-
-    private final String INVALID_SUBJECT = "Subject tokenet gjelder for er ikke godkjent";
-
-    @Value("${spring.security.oauth2.resourceserver.jwt.subjects}")
-    private final List<String> AUTHORIZED_SUBJECTS;
 
     @Autowired //Lombok constructor injection funker ikke med qualifier.
     @Qualifier("restTemplateDvh")
@@ -55,6 +47,14 @@ public class DvhController extends AbstractController {
 
     @GetMapping("/enheter")
     public String getEnheter(@AuthenticationPrincipal Jwt jwt) {
+        assertJwt(jwt);
+
+        return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrl(),
+                HttpMethod.GET, null, String.class).getBody();
+    }
+
+    @GetMapping("/enheter/v2")
+    public String getEnheterV2(@AuthenticationPrincipal Jwt jwt) {
         assertJwt(jwt);
 
         return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrl(),
