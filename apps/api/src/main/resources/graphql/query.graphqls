@@ -51,6 +51,7 @@ type Organisasjonsenhet {
     organiseringer (retning: Retning) : [Organisering!]!
     leder: [OrganisasjonsenhetsLeder!]!
     koblinger: [OrganisasjonsenhetsKobling!]!
+    type: Kode
 }
 
 type Organisering {
@@ -109,4 +110,11 @@ type RessursKobling {
 enum Retning {
     over,
     under,
+}
+
+type Kode {
+    kode: String!
+    navn: String!
+    gyldigFom: Date
+    gyldigTom: Date
 }

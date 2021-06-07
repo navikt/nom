@@ -38,6 +38,7 @@ export interface GqlOrganisasjonsenhet {
   organiseringer: GqlOrganisering[];
   leder: GqlOrganisasjonsenhetsLeder[];
   koblinger: GqlOrganisasjonsenhetsKobling[];
+  type?: Kode
 }
 
 export interface GqlOrganisering {
@@ -55,6 +56,13 @@ export interface GqlOrganisasjonsenhetsKobling {
   ressurs: GqlRessurs;
   gyldigFom: string;
   gyldigTom: string;
+}
+
+export interface Kode {
+  kode: string;
+  navn: string;
+  gyldigFom?: string;
+  gyldigTom?: string;
 }
 
 export interface GqlResponse {

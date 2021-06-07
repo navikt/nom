@@ -1,0 +1,70 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/proxy/enheter/v2"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "NOM_HRORG_HIERARKI2_v2Response": [
+        {
+          "LEDER_NAVIDENT": "testNavIdent",
+          "ORGNODE_KODE": "testId1",
+          "ORGNODE_KODE_OVER": null,
+          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NAVN_OVER": "testNavnOver",
+          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_STATUS": "N",
+          "agresso_orgnode_type": "11"
+        },
+        {
+          "LEDER_NAVIDENT": "testNavIdent1",
+          "ORGNODE_KODE": "testId2",
+          "ORGNODE_KODE_OVER": "testId1",
+          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_STATUS": "N",
+          "agresso_orgnode_type": null
+        },
+        {
+          "LEDER_NAVIDENT": null,
+          "ORGNODE_KODE": "testId3",
+          "ORGNODE_KODE_OVER": "testId1",
+          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_STATUS": "N",
+          "agresso_orgnode_type": "54"
+        },
+        {
+          "LEDER_NAVIDENT": "testNavIdent4",
+          "ORGNODE_KODE": "testId4",
+          "ORGNODE_KODE_OVER": "testId2",
+          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_STATUS": "N",
+          "agresso_orgnode_type": "54"
+        },
+        {
+          "LEDER_NAVIDENT": "testNavIdent4",
+          "ORGNODE_KODE": "testId5",
+          "ORGNODE_KODE_OVER": "testId4",
+          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_STATUS": "N",
+          "agresso_orgnode_type": "54"
+        }
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

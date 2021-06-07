@@ -12,4 +12,5 @@ public class Organisasjonsenhet {
     String navn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
+    Kode type;
 }

@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 /**
  * Trenger man egentlig periodiserte enheter?
@@ -31,8 +30,7 @@ public class Orgenhet {
 
     public Orgenhet(List<HendelseTo> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(HendelseTo::getOpprettet))
-                .collect(toUnmodifiableList());
+                .sorted(comparing(HendelseTo::getOpprettet)).toList();
     }
 
     public UUID getId() {

@@ -51,7 +51,7 @@ public class DvhRepository {
     }
 
     public List<DvhKobling> getKoblingerByAgressoId(String enhetId) {
-        return koblinger.stream().filter(x -> x.getAgressoId().equals(enhetId)).collect(Collectors.toUnmodifiableList());
+        return koblinger.stream().filter(x -> x.getAgressoId().equals(enhetId)).toList();
     }
 
     public List<DvhLeder> getLederByAgressoId(String enhetNr) {

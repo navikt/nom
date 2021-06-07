@@ -53,6 +53,10 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
               organisasjonsenhet{
                 navn
                 agressoId
+                type {
+                  kode
+                  navn
+                }
                 organiseringer(retning: over) {
                   retning
                   organisasjonsenhet{
@@ -122,6 +126,10 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                   }
                 }
               }
+            }
+            type {
+              kode
+              navn
             }
           }
       }`;

@@ -57,7 +57,7 @@ public class DvhController extends AbstractController {
     public String getEnheterV2(@AuthenticationPrincipal Jwt jwt) {
         assertJwt(jwt);
 
-        return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrl(),
+        return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrlV2(),
                 HttpMethod.GET, null, String.class).getBody();
     }
 

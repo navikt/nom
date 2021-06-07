@@ -6,11 +6,11 @@ import lombok.Value;
 @Value
 public class DvhLeder {
 
-    private String navIdent;
-    private String orgEnhetNr;
+    String navIdent;
+    String orgEnhetNr;
 
     public DvhLeder(JsonNode node) {
-        this.navIdent = node.get("leder_nav_id").asText();
-        this.orgEnhetNr = node.get("orgnode_kode").asText();
+        this.navIdent = node.get("LEDER_NAVIDENT").asText();
+        this.orgEnhetNr = node.get("ORGNODE_KODE").asText();
     }
 }

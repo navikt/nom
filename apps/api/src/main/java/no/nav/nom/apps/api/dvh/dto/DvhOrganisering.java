@@ -8,14 +8,14 @@ import java.time.LocalDate;
 @Value
 public class DvhOrganisering {
 
-    private String overenhetNummer;
-    private String underenhetNummer;
-    private LocalDate gyldigFom;
-    private LocalDate gyldigTom;
+    String overenhetNummer;
+    String underenhetNummer;
+    LocalDate gyldigFom;
+    LocalDate gyldigTom;
 
     public DvhOrganisering(JsonNode node) {
-        overenhetNummer = node.get("orgnode_kode_over").asText();
-        underenhetNummer = node.get("orgnode_kode").asText();
+        overenhetNummer = node.get("ORGNODE_KODE_OVER").asText();
+        underenhetNummer = node.get("ORGNODE_KODE").asText();
 
         gyldigFom = LocalDate.now().minusDays(1);
         gyldigTom = null;

@@ -93,12 +93,12 @@ public class DvhRestConsumer {
     }
 
     private void loadOrgenhetFromDvh() {
-        val jsonOrgenheter = dvhExchange("/proxy/enheter");
+        val jsonOrgenheter = dvhExchange("/proxy/enheter/v2");
         val orgenheter = new HashMap<String, DvhOrganisasjonsenhet>(1000);
         val ledere = new HashMap<String, List<DvhLeder>>(1000);
         val organiseringerByEnhet = new ConcurrentHashMap<String, List<DvhOrganisering>>(1000);
 
-        StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI_v1Result").spliterator(), false)
+        StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
                 .forEach(e -> {
                     if (validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
@@ -150,31 +150,31 @@ public class DvhRestConsumer {
     }
 
     private boolean validateEnhet(JsonNode e) {
-        val validate = e.hasNonNull("orgnode_kode") && e.hasNonNull("orgnode_navn");
+        val validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN");
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig enhet fra dvh, orgnode_kode: " + getAsText(e, "orgnode_kode") + ", orgnode_navn: " + getAsText(e, "orgnode_navn"));
+            log.warn("Ugyldig enhet fra dvh, ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE") + ", ORGNODE_NAVN: " + getAsText(e, "ORGNODE_NAVN"));
             return false;
         }
     }
 
     private boolean validateOrganisering(JsonNode e) {
-        val validate = e.hasNonNull("orgnode_kode_over") && e.hasNonNull("orgnode_kode");
+        val validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE");
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig organisering fra dvh, orgnode_kode_over: " + getAsText(e, "orgnode_kode_over") + ", orgnode_kode: " + getAsText(e, "orgnode_kode"));
+            log.warn("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: " + getAsText(e, "ORGNODE_KODE_OVER") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
             return false;
         }
     }
 
     private boolean validateLeder(JsonNode e) {
-        val validate = e.hasNonNull("leder_nav_id") && e.hasNonNull("orgnode_kode");
+        val validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE");
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig leder fra dvh, leder_nav_id: " + getAsText(e, "leder_nav_id") + ", orgnode_kode: " + getAsText(e, "orgnode_kode"));
+            log.warn("Ugyldig leder fra dvh, LEDER_NAVIDENT: " + getAsText(e, "LEDER_NAVIDENT") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
             return false;
         }
     }

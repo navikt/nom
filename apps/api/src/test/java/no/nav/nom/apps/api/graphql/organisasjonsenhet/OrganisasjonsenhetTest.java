@@ -41,6 +41,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", Organisasjonsenhet.class);
         assertEquals(outputEnhet.getAgressoId(), "testId1");
+        assertEquals(outputEnhet.getType().getKode(), "NAY");
+        assertEquals(outputEnhet.getType().getNavn(), "Arbeid og ytelser");
     }
 
     @Test

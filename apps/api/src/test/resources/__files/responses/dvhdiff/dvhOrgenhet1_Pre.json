@@ -1,59 +1,54 @@
 {
-  "NOM_HRORG_HIERARKI_v1Result": [
+  "NOM_HRORG_HIERARKI2_v2Response": [
     {
-      "orgnode_kode": "testId1",
-      "orgnode_niva": "testNivå",
-      "orgnode_navn": "testNavn",
-      "leder_resource_id": "estNavIdent",
-      "leder_user_id": "estNavIdent",
-      "leder_nav_id": "testNavIdent",
-      "orgnode_kode_over": null,
-      "orgnode_niva_over": "ORGNIV3",
-      "orgnode_status": "N"
+      "ORGNODE_KODE": "testId1",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": "testNavIdent",
+      "ORGNODE_KODE_OVER": null,
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "N",
+      "agresso_orgnode_type": "31"
     },
     {
-      "orgnode_kode": "testId2",
-      "orgnode_niva": "testNivå",
-      "orgnode_navn": "testNavn",
-      "leder_resource_id": null,
-      "leder_user_id": "estNavIdent1",
-      "leder_nav_id": "testNavIdent1",
-      "orgnode_kode_over": "testId1",
-      "orgnode_niva_over": "ORGNIV3",
-      "orgnode_status": "N"
+      "ORGNODE_KODE": "testId2",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": "testNavIdent1",
+      "ORGNODE_KODE_OVER": "testId1",
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "N",
+      "agresso_orgnode_type": "31"
     },
     {
-      "orgnode_kode": "testId3",
-      "orgnode_niva": "testNivå",
-      "orgnode_navn": "testNavn",
-      "leder_resource_id": "108639",
-      "leder_user_id": "108639",
-      "leder_nav_id": null,
-      "orgnode_kode_over": "testId1",
-      "orgnode_niva_over": "ORGNIV3",
-      "orgnode_status": "N"
+      "ORGNODE_KODE": "testId3",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": null,
+      "ORGNODE_KODE_OVER": "testId1",
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "N",
+      "agresso_orgnode_type": "31"
     },
     {
-      "orgnode_kode": "testId4",
-      "orgnode_niva": "testNivå",
-      "orgnode_navn": "testNavn",
-      "leder_resource_id": null,
-      "leder_user_id": null,
-      "leder_nav_id": "testNavIdent4",
-      "orgnode_kode_over": "testId2",
-      "orgnode_niva_over": "ORGNIV3",
-      "orgnode_status": "N"
+      "ORGNODE_KODE": "testId4",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": "testNavIdent4",
+      "ORGNODE_KODE_OVER": "testId2",
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "N",
+      "agresso_orgnode_type": "31"
     },
     {
-      "orgnode_kode": "testId5",
-      "orgnode_niva": "testNivå",
-      "orgnode_navn": "testNavn",
-      "leder_resource_id": null,
-      "leder_user_id": null,
-      "leder_nav_id": "testNavIdent4",
-      "orgnode_kode_over": "testId4",
-      "orgnode_niva_over": "ORGNIV3",
-      "orgnode_status": "N"
+      "ORGNODE_KODE": "testId5",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": "testNavIdent4",
+      "ORGNODE_KODE_OVER": "testId4",
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "N",
+      "agresso_orgnode_type": "31"
     }
   ]
 }
