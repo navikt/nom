@@ -1,0 +1,14 @@
+{
+  "NOM_HRORG_HIERARKI2_v2Response": [
+    {
+      "ORGNODE_KODE": "testId1",
+      "ORGNODE_NIVA": "testNivå",
+      "ORGNODE_NAVN": "testNavn",
+      "LEDER_NAVIDENT": "testNavIdent",
+      "ORGNODE_KODE_OVER": null,
+      "ORGNODE_NIVA_over": "ORGNIV3",
+      "ORGNODE_STATUS": "P",
+      "agresso_orgnode_type": "31"
+    }
+  ]
+}

@@ -99,6 +99,7 @@ public class DvhRestConsumer {
         val organiseringerByEnhet = new ConcurrentHashMap<String, List<DvhOrganisering>>(1000);
 
         StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
+                .filter(this::determineEnhetActive)
                 .forEach(e -> {
                     if (validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
@@ -147,6 +148,11 @@ public class DvhRestConsumer {
         } else {
             organiseringerByEnhet.put(organisering.getUnderenhetNummer(), new LinkedList<>(List.of(organisering)));
         }
+    }
+
+    private boolean determineEnhetActive(JsonNode e) {
+        val enhetIsActive = e.get("ORGNODE_STATUS").asText().equals("N");
+        return enhetIsActive;
     }
 
     private boolean validateEnhet(JsonNode e) {
