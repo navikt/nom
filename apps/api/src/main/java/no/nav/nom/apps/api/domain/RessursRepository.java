@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Value
 @Service
@@ -27,6 +26,7 @@ public class RessursRepository {
     ConcurrentMap<String, Ressurs> alleRessurserByPersonIdent = new ConcurrentHashMap<>();
     ConcurrentMap<String, Ressurs> alleRessurserByNavIdent = new ConcurrentHashMap<>();
     AtomicInteger ressurserGauge;
+    AtomicInteger ressurserHendelserGauge;
 
     public Optional<Ressurs> findById(UUID uuid) {
         return Optional.ofNullable(alleRessurserById.get(uuid));
@@ -52,7 +52,7 @@ public class RessursRepository {
         return uuids.stream()
                 .map(alleRessurserById::get)
                 .filter(Objects::nonNull)
-                .collect(toUnmodifiableList());
+                .toList();
     }
 
     public void save(List<HendelseTo> hendelser) {
@@ -64,6 +64,7 @@ public class RessursRepository {
                         add(newRessurs);
                     }, () -> add(new Ressurs(value)));
                 });
+        ressurserHendelserGauge.addAndGet(hendelser.size());
     }
 
     private void add(Ressurs ressurs) {
@@ -88,5 +89,10 @@ public class RessursRepository {
         alleRessurserByPersonIdent.clear();
         alleRessurserByNavIdent.clear();
         ressurserGauge.set(0);
+        ressurserHendelserGauge.set(0);
+    }
+
+    public int countHendelser() {
+        return ressurserHendelserGauge.get();
     }
 }

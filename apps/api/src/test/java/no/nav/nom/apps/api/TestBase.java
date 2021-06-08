@@ -17,8 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ActiveProfiles({"test", "log-console-error"})
@@ -39,13 +40,25 @@ public abstract class TestBase {
         Mockito.reset(kafkaTemplate);
     }
 
-    @SuppressWarnings("unchecked")
     protected List<ProducerRecord<String, String>> getRecordsFromKafka() {
+        return getRecordsFromKafka(false);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<ProducerRecord<String, String>> getRecordsFromKafka(boolean clearMock) {
         val captor = ArgumentCaptor.forClass(ProducerRecord.class);
         verify(kafkaTemplate, atLeastOnce()).send(captor.capture());
-        return captor.getAllValues().stream()
-                .map(e -> (ProducerRecord<String, String>) e)
-                .collect(toUnmodifiableList());
+        val res = captor.getAllValues().stream()
+                .map(e -> (ProducerRecord<String, String>) e).toList();
+        if (clearMock) {
+            Mockito.reset(kafkaTemplate);
+        }
+        return res;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void verifyZeroKafkaMessages() {
+        verify(kafkaTemplate, never()).send(any(ProducerRecord.class));
     }
 
 }

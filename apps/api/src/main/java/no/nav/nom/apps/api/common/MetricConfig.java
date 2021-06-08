@@ -37,7 +37,17 @@ public class MetricConfig {
     }
 
     @Bean
+    public AtomicInteger ressurserHendelserGauge() {
+        return meterRegistry.gauge("nom.hendelser", Tags.of("type", "ressurser.hendelser"), new AtomicInteger(0));
+    }
+
+    @Bean
     public AtomicInteger enheterGauge() {
         return meterRegistry.gauge("nom.hendelser", Tags.of("type", "enheter"), new AtomicInteger(0));
+    }
+
+    @Bean
+    public AtomicInteger enheterHendelserGauge() {
+        return meterRegistry.gauge("nom.hendelser", Tags.of("type", "enheter.hendelser"), new AtomicInteger(0));
     }
 }

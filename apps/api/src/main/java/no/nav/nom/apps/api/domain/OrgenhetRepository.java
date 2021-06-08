@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Value
 @Service
@@ -24,6 +23,7 @@ public class OrgenhetRepository {
     ConcurrentMap<UUID, Orgenhet> alleOrgEnhetById = new ConcurrentHashMap<>();
     ConcurrentMap<String, Orgenhet> alleOrgEnhetByAgressoId = new ConcurrentHashMap<>();
     AtomicInteger enheterGauge;
+    AtomicInteger enheterHendelserGauge;
 
     public Optional<Orgenhet> findById(UUID uuid) {
         return Optional.ofNullable(alleOrgEnhetById.get(uuid));
@@ -37,14 +37,14 @@ public class OrgenhetRepository {
         return uuids.stream()
                 .map(alleOrgEnhetByAgressoId::get)
                 .filter(Objects::nonNull)
-                .collect(toUnmodifiableList());
+                .toList();
     }
 
     public List<Orgenhet> findAllByIdsIn(Set<UUID> uuids) {
         return uuids.stream()
                 .map(alleOrgEnhetById::get)
                 .filter(Objects::nonNull)
-                .collect(toUnmodifiableList());
+                .toList();
     }
 
     public void save(List<HendelseTo> hendelser) {
@@ -56,6 +56,7 @@ public class OrgenhetRepository {
                         add(newOrgEnhet);
                     }, () -> add(new Orgenhet(value)));
                 });
+        enheterHendelserGauge.addAndGet(hendelser.size());
     }
 
     private void add(Orgenhet enhet) {
@@ -66,5 +67,16 @@ public class OrgenhetRepository {
         alleOrgEnhetById.put(enhet.getId(), enhet);
         alleOrgEnhetByAgressoId.put(enhet.getAgressoId(), enhet);
         enheterGauge.set(alleOrgEnhetById.size());
+    }
+
+    public void clearRepository() {
+        alleOrgEnhetById.clear();
+        alleOrgEnhetByAgressoId.clear();
+        enheterGauge.set(0);
+        enheterHendelserGauge.set(0);
+    }
+
+    public int countHendelser() {
+        return enheterHendelserGauge.get();
     }
 }

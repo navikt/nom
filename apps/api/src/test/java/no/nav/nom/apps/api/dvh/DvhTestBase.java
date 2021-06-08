@@ -32,17 +32,17 @@ public abstract class DvhTestBase extends TestBase {
     protected void clearRepository() {
         dvhRepository.clearRepository();
         ressursRepository.clearRepository();
+        orgenhetRepository.clearRepository();
     }
 
     protected void loadFromDvhAndUpdateRepo() {
         dvhRestConsumer.loadFromDvh();
-        var records = getRecordsFromKafka();
+        var records = getRecordsFromKafka(true);
         kafkaUtils.sendHendelseFromKafkaMock(records);
     }
 
     protected void simulateSyncedWithKafka() {
         kafkaUtils.sendHendelseFromKafkaMock();
     }
-
 
 }

@@ -41,9 +41,8 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         loadFromDvhAndUpdateRepo();
 
         val alleRessurser = this.ressursRepository.getAlleRessurser();
-        val alleHendelser = getRecordsFromKafka();
         assertThat(alleRessurser.size()).isEqualTo(5);
-        assertThat(alleHendelser.size()).isEqualTo(6);
+        assertThat(ressursRepository.countHendelser()).isEqualTo(6);
     }
 
     @Test
@@ -73,7 +72,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         val hashedRessursDataPre = hashedRessurser(ressursRepository.getAlleRessurser());
 
         stubRessurser("responses/dvhdiff/dvhAnsatt2_SingleEndretNavIdent.json");
-        loadFromDvhAndUpdateRepo();
+        verifyZeroKafkaMessages();
         val hashedRessursDataPost = hashedRessurser(ressursRepository.getAlleRessurser());
 
         val antallRessurserIRepo = ressursRepository.getAlleRessurser().size();
@@ -92,7 +91,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         val hashedRessursDataPre = hashedRessurser(ressursRepository.getAlleRessurser());
 
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After3.json");
-        loadFromDvhAndUpdateRepo();
+        verifyZeroKafkaMessages();
         val hashedRessursDataPost = hashedRessurser(ressursRepository.getAlleRessurser());
 
         val antallRessurserIRepo = ressursRepository.getAlleRessurser().size();
