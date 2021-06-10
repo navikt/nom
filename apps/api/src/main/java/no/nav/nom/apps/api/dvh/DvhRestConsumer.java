@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.hendelse.OrgenhetHendelseService;
 import no.nav.nom.apps.api.hendelse.RessursHendelseService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
+import org.springframework.boot.availability.LivenessState;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpEntity;
@@ -60,9 +61,20 @@ public class DvhRestConsumer {
         while (!hendelseListener.getInitialLoadStatus()) {
             Thread.sleep(2000);
         }
-        loadRessurserFromDvh();
-        loadOrgenhetFromDvh();
-        loadKoblingerFromDvh();
+        try {
+            loadRessurserFromDvh();
+            loadOrgenhetFromDvh();
+            loadKoblingerFromDvh();
+        } catch (Exception e) {
+            boolean firstLoad = !initialLoadComplete.get();
+            if (firstLoad) {
+                log.error("Failure loading data from DVH - setting LivenessState.BROKEN", e);
+                AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.BROKEN);
+            } else {
+                log.error("Failure loading data from DVH", e);
+            }
+            return;
+        }
 
         if (!initialLoadComplete.get()) {
             initialLoadComplete.set(true);
