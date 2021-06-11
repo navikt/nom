@@ -8,7 +8,7 @@
     "@navikt/fnrvalidator": "^1.1.4",
     "classnames": "^2.3.1",
     "cra-build-watch": "^3.4.0",
-    "is-svg": "^4.2.2",
+    "is-svg": "^4.3.1",
     "lodash.throttle": "^4.1.1",
     "nav-frontend-alertstriper": "^3.1.2",
     "nav-frontend-alertstriper-style": "^2.1.1",
