@@ -31,7 +31,7 @@
     "nav-frontend-tabs": "^1.0.3",
     "nav-frontend-tabs-style": "^1.0.3",
     "nav-frontend-typografi": "^3.0.4",
-    "nav-frontend-typografi-style": "^1.0.35",
+    "nav-frontend-typografi-style": "^1.1.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-collapse": "^5.1.0",
