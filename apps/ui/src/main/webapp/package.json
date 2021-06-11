@@ -53,7 +53,7 @@
     "@types/node": "^14.14.35",
     "@types/react": "^17.0.3",
     "@types/react-collapse": "^5.0.0",
-    "@types/react-dom": "^17.0.3",
+    "@types/react-dom": "^17.0.7",
     "@types/react-router": "^5.1.12",
     "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
