@@ -11,6 +11,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/apps/ui/src/main/webapp"
     schedule:
       interval: "daily"
