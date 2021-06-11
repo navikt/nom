@@ -48,7 +48,7 @@
     "@navikt/fnrvalidator": "github:navikt/fnrvalidator",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.13.0",
-    "@testing-library/react": "^11.2.5",
+    "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
