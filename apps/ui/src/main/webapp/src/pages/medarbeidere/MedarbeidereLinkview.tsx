@@ -1,13 +1,13 @@
-import { AlertStripeInfo } from "nav-frontend-alertstriper";
-import React, { Fragment } from "react";
-import { Link, useParams } from "react-router-dom";
+import {AlertStripeInfo} from "nav-frontend-alertstriper";
+import React, {Fragment} from "react";
+import {Link, useParams} from "react-router-dom";
 import TableSorter from "tabell";
-import { useFetchRessurs } from "../../api/graphql_fetch_hooks";
-import { GqlRessurs } from "../../common/gqltypes";
-import { fulltNavnForRessurs } from "../../common/navnutils";
+import {useFetchRessurs} from "../../api/graphql_fetch_hooks";
+import {GqlRessurs} from "../../common/gqltypes";
+import {fulltNavnForRessurs} from "../../common/navnutils";
 import Contentbox from "../../components/contentbox/Contentbox";
-import NomUiHeader from "../../components/header/NomUiHeader";
 import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
+import {ItemLink} from '../../components/navfrontend/ItemLink';
 
 export interface Medarbeider {
   navIdent: string;
@@ -43,7 +43,7 @@ const templateMedarbeider: Medarbeider = {
 };
 
 function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
-  const out: Medarbeider = { ...templateMedarbeider };
+  const out: Medarbeider = {...templateMedarbeider};
   const ressurs: GqlRessurs = gqlResponse.result.ressurs;
   if (!ressurs) {
     return null;
@@ -100,7 +100,7 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   return out;
 }
 
-function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
+function Infopanel(props: {medarbeider: Medarbeider}): JSX.Element {
   return (
     <div className="MedarbeidereLinkview__Infopanel">
       <label htmlFor="navIdentHeader">Nav-ident: </label>
@@ -137,7 +137,7 @@ function OrgenhetListview(props: {
   return (
     <TableSorter
       items={props.orgenheter.map((it) => {
-        return { key: it.agressoId, ...it };
+        return {key: it.agressoId, ...it};
       })}
       columns={[
         {
@@ -150,27 +150,21 @@ function OrgenhetListview(props: {
           id: "id",
           label: "AgressoId",
           type: "string",
-          renderCell: function (item, value): JSX.Element {
-            return (
-              <Link to={"/organisasjonsenheter/" + item.agressoId}>
-                {item.agressoId}
-              </Link>
-            );
-          },
+          renderCell: (item, value) => <ItemLink url={"/organisasjonsenheter/" + item.agressoId} label={item.agressoId}/>
         },
-        { id: "enhetNavn", label: "Enhet navn", type: "string" },
-        { id: "enhetType", label: "Enhet type", type: "string" },
+        {id: "enhetNavn", label: "Enhet navn", type: "string"},
+        {id: "enhetType", label: "Enhet type", type: "string"},
       ]}
       itemsPerPage={50}
       animatable={false}
       searchable={false}
       selectable={false}
       sortable={true}
-      sort={{ column: "id", order: "ascending" }}
+      sort={{column: "id", order: "asc"}}
       striped={false}
       summary={false}
       compact={true}
-    ></TableSorter>
+    />
   );
 }
 
@@ -199,7 +193,7 @@ function MedarbeiderRender(props: {
           label={"Enhetstilhørighet (" + medarbeider.enheter.length + ")"}
         >
           {0 !== medarbeider.enheter.length ? (
-            <OrgenhetListview orgenheter={medarbeider.enheter} />
+            <OrgenhetListview orgenheter={medarbeider.enheter}/>
           ) : null}
         </Contentbox>
 
@@ -209,7 +203,7 @@ function MedarbeiderRender(props: {
           }
         >
           {0 !== medarbeider.enheterLederFor.length ? (
-            <OrgenhetListview orgenheter={medarbeider.enheterLederFor} />
+            <OrgenhetListview orgenheter={medarbeider.enheterLederFor}/>
           ) : null}
         </Contentbox>
       </div>
@@ -218,7 +212,7 @@ function MedarbeiderRender(props: {
 }
 
 export default function MedarbeiderePage(): JSX.Element {
-  const { id } = useParams<any>();
+  const {id} = useParams<any>();
   const [res, refresh] = useFetchRessurs(id);
 
   let out: any = <div></div>;
@@ -231,7 +225,7 @@ export default function MedarbeiderePage(): JSX.Element {
       out = res.error.message;
       break;
     case "RESOLVED":
-      out = <MedarbeiderRender medarbeider={translateGqlToMedarbeider(res)} />;
+      out = <MedarbeiderRender medarbeider={translateGqlToMedarbeider(res)}/>;
       break;
     case "WAITING":
       out = "Venter på navident i adresselinjen";
@@ -240,7 +234,7 @@ export default function MedarbeiderePage(): JSX.Element {
       out = (
         <Fragment>
           <AlertStripeInfo>Graphql feil. Se console log.</AlertStripeInfo>
-          <MedarbeiderRender medarbeider={translateGqlToMedarbeider(res)} />
+          <MedarbeiderRender medarbeider={translateGqlToMedarbeider(res)}/>
         </Fragment>
       );
       break;

@@ -6,6 +6,7 @@ import {OrgEnhetData, OrgEnhetFelter, Ressurs, RessursFlat,} from "../../common/
 import AlertStripe from "nav-frontend-alertstriper";
 import Contentbox from "../../components/contentbox/Contentbox";
 import {GqlOrganisasjonsenhet, GqlRessurs} from "../../common/gqltypes";
+import {ItemLink} from '../../components/navfrontend/ItemLink';
 
 const nullText = '[null]';
 
@@ -209,9 +210,7 @@ function LocalTable(props: {orgenhetData?: OrgEnhetData}): JSX.Element {
               id: "id",
               label: "NavIdent",
               type: "string",
-              renderCell: function (item, value): JSX.Element {
-                return <Link to={"/medarbeidere/" + item.id}>{item.id}</Link>;
-              },
+              renderCell: (item, value) => <ItemLink url={"/medarbeidere/" + item.id} label={item.id}/>
             },
             {id: "pnr", label: "Personnummer", type: "string"},
             {id: "fornavn", label: "Fornavn", type: "string"},
@@ -227,7 +226,7 @@ function LocalTable(props: {orgenhetData?: OrgEnhetData}): JSX.Element {
           searchable={false}
           selectable={false}
           sortable={true}
-          sort={{column: "id", order: "ascending"}}
+          sort={{column: "id", order: "asc"}}
           striped={false}
           summary={false}
           compact={true}
@@ -248,14 +247,7 @@ function LocalTable(props: {orgenhetData?: OrgEnhetData}): JSX.Element {
               id: "enhetNavn",
               label: "Navn",
               type: "string",
-              renderCell: function (item, value): JSX.Element {
-                const it = (item as any) as OrgEnhetFelter;
-                return (
-                  <Link to={"/organisasjonsenheter/" + it.enhetNr}>
-                    {value}
-                  </Link>
-                );
-              },
+              renderCell: (item, value) => <ItemLink url={"/organisasjonsenheter/" + item.enhetNr} label={value}/>
             },
             {id: "enhetNr", label: "Nr", type: "string"},
             {id: "enhetType", label: "Type", type: "string"},
@@ -265,7 +257,7 @@ function LocalTable(props: {orgenhetData?: OrgEnhetData}): JSX.Element {
           searchable={false}
           selectable={false}
           sortable={true}
-          sort={{column: "enhetNavn", order: "ascending"}}
+          sort={{column: "enhetNavn", order: "asc"}}
           striped={false}
           summary={false}
           compact={true}
