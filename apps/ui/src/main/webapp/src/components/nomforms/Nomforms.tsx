@@ -12,6 +12,10 @@ export interface FieldDefs {
   rules?: Omit<RegisterOptions<FieldValues, FieldPath<FieldValues>>, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>
 }
 
+export interface FieldProps extends FieldDefs {
+  onChange?: (val: string) => void
+}
+
 export type FormSpec<T> = {
   [K in keyof T]: FieldDefs & {id: K}
 };
@@ -37,14 +41,17 @@ export function Controlled(props: FieldDefs & {children: (props: ControlledProps
   );
 }
 
-export function LabeledTextfield(props: FieldDefs): JSX.Element {
+export function LabeledTextfield(props: FieldProps): JSX.Element {
   return <Controlled {...props}>
     {({field, error}) =>
       <Input
         id={props.id}
         label={props.label} description={props.description}
         feil={getFeilmelding(error)}
-        onChange={field.onChange}
+        onChange={e => {
+          field.onChange(e);
+          props.onChange && props.onChange(e.target.value);
+        }}
         onBlur={field.onBlur}
         value={field.value}
       />
@@ -53,7 +60,7 @@ export function LabeledTextfield(props: FieldDefs): JSX.Element {
 }
 
 
-export function LabeledTextarea(props: FieldDefs): JSX.Element {
+export function LabeledTextarea(props: FieldProps): JSX.Element {
   return <Controlled {...props}>
     {({field, error}) =>
       <Textarea
@@ -68,7 +75,7 @@ export function LabeledTextarea(props: FieldDefs): JSX.Element {
   </Controlled>;
 }
 
-export function LabeledDatefield(props: FieldDefs): JSX.Element {
+export function LabeledDatefield(props: FieldProps): JSX.Element {
   return (
     <Controlled {...props}>
       {({field, error}) =>

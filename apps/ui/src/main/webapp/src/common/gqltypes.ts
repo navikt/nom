@@ -5,7 +5,8 @@ export interface GqlRessurs {
   koblinger: GqlRessursKobling[];
   lederFor: GqlLederOrganisasjonsenhet[];
   ledere: GqlRessursLeder[];
-  person: GqlPerson;
+  person?: GqlPerson;
+  visningsnavn?: string;
   epost: string;
 }
 
@@ -26,7 +27,7 @@ export interface GqlPerson {
 
 export interface GqlNavn {
   fornavn: string;
-  mellomnavn: string;
+  mellomnavn?: string;
   etternavn: string;
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {FormSpec, LabeledDatefield, LabeledTextarea, LabeledTextfield} from "../../../components/nomforms/Nomforms";
 import {Feilmeldinger, validateFnr,} from "../../../components/nomforms/NomFormValidering";
 import Nompagewrap from "../../../components/nompagewrap/Nompagewrap";
@@ -6,8 +6,10 @@ import {Hovedknapp, Knapp} from 'nav-frontend-knapper';
 import {SkjemaGruppe} from 'nav-frontend-skjema';
 import {FormProvider, useForm} from 'react-hook-form';
 import moment, {HTML5_FMT} from "moment";
-import {ApolloError, gql, useMutation} from '@apollo/client';
+import {ApolloError, gql, useMutation, useQuery} from '@apollo/client';
 import AlertStripe from 'nav-frontend-alertstriper';
+import {GqlRessurs} from '../../../common/gqltypes';
+import {fulltNavnForRessurs} from '../../../common/navnutils';
 
 interface NyBruker {
   fnr: string,
@@ -33,6 +35,24 @@ const opprettBruker = gql`
             nomId
             requestId
             requestSetId
+        }
+    }
+`;
+
+interface LookupRessursNavnResult {
+  lookupRessursNavn: GqlRessurs
+}
+
+const lookupFnr = gql`
+    query lookupReesursNavn($fnr: String!) {
+        ressurs(where: {personIdent: $fnr}) {
+            person {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+            }
         }
     }
 `;
@@ -88,11 +108,22 @@ const ResultInfo = ({data, error}: {data?: BestillingResponse, error?: ApolloErr
 );
 
 export default function Nybruker(): JSX.Element {
+  const [fnrLookup, setFnrLookup] = useState<string | undefined>();
+  const {data: ressursLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
+    variables: {fnr: fnrLookup || ''},
+    skip: !fnrLookup || fnrLookup.length !== 11
+  });
   const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
 
   const methods = useForm<NyBruker>({});
-  const reset = (): void => methods.reset(defaultValues);
 
+  useEffect(() => {
+    if (ressursLookupData?.lookupRessursNavn?.person?.navn.fornavn) {
+      methods.setValue(spec.fnr.id, fulltNavnForRessurs(ressursLookupData?.lookupRessursNavn));
+    }
+  }, [fnrLookup]);
+
+  const reset = (): void => methods.reset(defaultValues);
   const submit = (variables: NyBruker): Promise<any> => {
     return opprett({variables}).then(reset);
   };
@@ -102,7 +133,7 @@ export default function Nybruker(): JSX.Element {
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(submit)}>
           <SkjemaGruppe style={{maxWidth: '600px'}}>
-            <LabeledTextfield {...spec.fnr} />
+            <LabeledTextfield {...spec.fnr} onChange={(val) => setFnrLookup(val)}/>
             <LabeledTextfield {...spec.visningsnavn} />
             <LabeledTextfield {...spec.tlf} />
             <LabeledTextarea {...spec.beskrivelse} />
@@ -116,7 +147,7 @@ export default function Nybruker(): JSX.Element {
         </form>
       </FormProvider>
 
-      <ResultInfo data={data?.opprettRessurs} error={error}/>
+      <ResultInfo data={data?.opprettRessurs} error={error || ressursLookupError}/>
     </Nompagewrap>
   );
 }
