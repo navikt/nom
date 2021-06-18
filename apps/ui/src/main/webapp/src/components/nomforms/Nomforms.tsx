@@ -13,7 +13,7 @@ export interface FieldDefs {
 }
 
 export type FormSpec<T> = {
-  [K in keyof T]: FieldDefs
+  [K in keyof T]: FieldDefs & {id: K}
 };
 
 type ControlledProps = {
@@ -70,22 +70,19 @@ export function LabeledTextarea(props: FieldDefs): JSX.Element {
 
 export function LabeledDatefield(props: FieldDefs): JSX.Element {
   return (
-    <div className={'skjemaelement'}>
-      <Controlled {...props}>
-        {({field, error}) =>
-          <Input
-            type="date"
-            id={props.id}
-            label={props.label}
-            data-date-format="YYYY-MM-DD"
-            feil={getFeilmelding(error)}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            value={field.value}
-          />
-        }
-      </Controlled>
-    </div>
+    <Controlled {...props}>
+      {({field, error}) =>
+        <Input
+          type="date"
+          id={props.id}
+          label={props.label}
+          feil={getFeilmelding(error)}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          value={field.value}
+        />
+      }
+    </Controlled>
   );
 }
 

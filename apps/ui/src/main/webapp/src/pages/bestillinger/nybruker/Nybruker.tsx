@@ -6,7 +6,7 @@ import {Hovedknapp, Knapp} from 'nav-frontend-knapper';
 import {SkjemaGruppe} from 'nav-frontend-skjema';
 import {FormProvider, useForm} from 'react-hook-form';
 import moment, {HTML5_FMT} from "moment";
-import {gql, useMutation} from '@apollo/client';
+import {ApolloError, gql, useMutation} from '@apollo/client';
 import AlertStripe from 'nav-frontend-alertstriper';
 
 interface NyBruker {
@@ -79,11 +79,19 @@ const defaultValues = Object.keys(spec).reduce((defaults, key) => {
   return defaults;
 }, {} as NyBruker);
 
+const ResultInfo = ({data, error}: {data?: BestillingResponse, error?: ApolloError}) => (
+  <div style={{marginTop: '16px', maxWidth: '600px'}}>
+    {data && <AlertStripe type={data.requestId ? 'suksess' : 'feil'}>
+      {error?.message ?? `Bruker ${data.nomId} opprettet i request ${data.requestId}`}
+    </AlertStripe>}
+  </div>
+);
+
 export default function Nybruker(): JSX.Element {
   const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
 
-  const formHook = useForm<NyBruker>({});
-  const reset = (): void => formHook.reset(defaultValues);
+  const methods = useForm<NyBruker>({});
+  const reset = (): void => methods.reset(defaultValues);
 
   const submit = (variables: NyBruker): Promise<any> => {
     return opprett({variables}).then(reset);
@@ -91,8 +99,8 @@ export default function Nybruker(): JSX.Element {
 
   return (
     <Nompagewrap pagetitle="Ny bruker">
-      <FormProvider {...formHook}>
-        <form onSubmit={formHook.handleSubmit(submit)}>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(submit)}>
           <SkjemaGruppe style={{maxWidth: '600px'}}>
             <LabeledTextfield {...spec.fnr} />
             <LabeledTextfield {...spec.visningsnavn} />
@@ -101,18 +109,14 @@ export default function Nybruker(): JSX.Element {
             <LabeledDatefield {...spec.gyldigfom}/>
           </SkjemaGruppe>
 
-          <Feilmeldinger errors={formHook.formState.errors} spec={spec}/>
+          <Feilmeldinger errors={methods.formState.errors} spec={spec}/>
 
-          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={formHook.formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
+          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={methods.formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
           <Knapp htmlType="reset" onClick={reset}>reset</Knapp>
         </form>
       </FormProvider>
 
-      <div style={{marginTop: '16px', maxWidth: '600px'}}>
-        {data && <AlertStripe type={data.opprettRessurs.requestId ? 'suksess' : 'feil'}>
-          {error?.message ?? `Bruker ${data.opprettRessurs.nomId} opprettet i request ${data.opprettRessurs.requestId}`}
-        </AlertStripe>}
-      </div>
+      <ResultInfo data={data?.opprettRessurs} error={error}/>
     </Nompagewrap>
   );
 }

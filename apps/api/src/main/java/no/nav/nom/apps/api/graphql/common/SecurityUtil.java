@@ -19,7 +19,7 @@ public class SecurityUtil {
         }
         if (env.getOperationDefinition().getOperation() == Operation.MUTATION && !context.isSandbox()) {
             return Optional.of(DataFetcherResult.<T>newResult()
-                    .error(ErrorCode.DISABLED_FEATURE.construct(env, "All mutatuons are only supported in sandbox for now"))
+                    .error(ErrorCode.DISABLED_FEATURE.construct(env, "All mutations are only supported in sandbox for now"))
                     .build());
         }
         return Optional.empty();
