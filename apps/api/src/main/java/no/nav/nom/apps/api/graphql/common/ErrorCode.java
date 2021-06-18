@@ -17,7 +17,8 @@ public enum ErrorCode {
     UNAUTHORIZED(ErrorType.ExecutionAborted, "unauthorized"),
     NOT_FOUND(ErrorType.ExecutionAborted, "not_found"),
     BAD_REQUEST(ErrorType.ValidationError, "bad_request"),
-    SERVER_ERROR(ErrorType.DataFetchingException, "server_error");
+    SERVER_ERROR(ErrorType.DataFetchingException, "server_error"),
+    DISABLED_FEATURE(ErrorType.OperationNotSupported, "disabled");
 
     private final ErrorClassification type;
     private final String text;

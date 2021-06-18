@@ -2,19 +2,20 @@ import {fnr} from '@navikt/fnrvalidator';
 import {DeepMap, FieldError, FieldValues} from 'react-hook-form';
 import {Feiloppsummering, SkjemaGruppe} from 'nav-frontend-skjema';
 import React from 'react';
+import {FormSpec} from './Nomforms';
 
 
 const feilmelding = {
   required: 'Feltet er påkrevd'
 };
 
-export const getFeilmelding = (e?: FieldError, oppsumering = false): string => {
+export const getFeilmelding = (e?: FieldError, prefix?: string): string => {
   if (!e) {
     return '';
   }
   const message = e.message || feilmelding[e.type] || 'Mangler feilmelding for type: ' + e.type;
-  if (oppsumering) {
-    return `${(e.ref as any)?.props.label}: ${message}`;
+  if (prefix) {
+    return `${prefix}: ${message}`;
   }
   return message;
 };
@@ -24,7 +25,7 @@ export const validateFnr = (value: string): string | boolean => {
   return res.status === 'valid' ? true : res.reasons.join(', ');
 };
 
-export const Feilmeldinger = ({errors}: {errors: DeepMap<FieldValues, FieldError>}): JSX.Element => {
+export const Feilmeldinger = <T extends FieldValues>({errors, spec}: {errors: DeepMap<T, FieldError>, spec: FormSpec<T>}): JSX.Element => {
   return (
     <div style={{marginBottom: '16px'}}>
       {!!Object.keys(errors).length && (
@@ -32,7 +33,11 @@ export const Feilmeldinger = ({errors}: {errors: DeepMap<FieldValues, FieldError
           <Feiloppsummering
             tittel="For å gå videre må du rette opp følgende:"
             feil={Object.values(errors)
-            .map(e => ({skjemaelementId: e.ref.props.id, feilmelding: getFeilmelding(e, true)}))}
+            .map(e => {
+              const fieldId = e.ref?.name;
+              const specElement = spec[fieldId];
+              return ({skjemaelementId: fieldId, feilmelding: getFeilmelding(e, specElement?.label)});
+            })}
           />
         </SkjemaGruppe>
       )}

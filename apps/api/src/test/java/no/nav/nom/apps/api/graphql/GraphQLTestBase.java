@@ -57,10 +57,17 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @SneakyThrows
     protected GraphQLResponse postForResource(String resource, boolean hasErrors) {
+        return postForResource(resource, hasErrors, Map.of());
+    }
+
+    @SneakyThrows
+    protected GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
-        val response = graphQLTestTemplate.withBearerAuth(token).postForResource(resource);
+        val varNode = (ObjectNode) om.readTree(om.writeValueAsString(vars));
+
+        val response = graphQLTestTemplate.withBearerAuth(token).perform(resource, varNode);
         if (!hasErrors) {
             assertThat(response, hasNoErrors());
         } else {

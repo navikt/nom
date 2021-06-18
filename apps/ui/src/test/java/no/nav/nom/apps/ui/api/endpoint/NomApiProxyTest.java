@@ -51,6 +51,6 @@ class NomApiProxyTest extends ApiTestBase {
     private RequestEntity<String> postWith(HttpHeaders headers) {
         return RequestEntity.post(URI.create(URL))
                 .headers(headers)
-                .body("{ \"Hello\":\"World\"}");
+                .body("query { \"Hello\":\"World\"}");
     }
 }

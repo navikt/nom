@@ -4,6 +4,7 @@ import graphql.kickstart.execution.context.GraphQLContext;
 import graphql.kickstart.servlet.context.GraphQLServletContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import org.dataloader.DataLoader;
@@ -25,10 +26,11 @@ class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
 
     private final PersonBatchLoader personBatchLoader;
     private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
+    private final AppProperties appProperties;
 
     @Override
     public GraphQLContext build(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        return new CustomGraphQLContext(SecurityContextHolder.getContext().getAuthentication(), buildDataLoaderRegistry());
+        return new CustomGraphQLContext(SecurityContextHolder.getContext().getAuthentication(), buildDataLoaderRegistry(), appProperties.isSandbox());
     }
 
     @Override

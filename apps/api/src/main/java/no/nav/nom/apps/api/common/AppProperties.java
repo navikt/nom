@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -15,7 +16,8 @@ public class AppProperties {
     private final Proxy proxy;
     private final Pdl pdl;
     private final Hendelse hendelse;
-    private final String appName;
+    @Setter
+    private String appName;
 
     public boolean isSandbox() {
         return appName.equals("nom-sandbox-api");

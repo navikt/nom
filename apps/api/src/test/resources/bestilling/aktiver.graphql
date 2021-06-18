@@ -1,0 +1,3 @@
+mutation opprettRessurs($requestSetId: ID!, $when: DateTime) {
+    activateRequestSet(requestSetId: $requestSetId, when: $when)
+}

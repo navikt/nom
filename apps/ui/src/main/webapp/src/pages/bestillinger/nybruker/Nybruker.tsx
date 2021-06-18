@@ -1,37 +1,71 @@
 import React from "react";
-import {FieldDefs, LabeledDatefield, LabeledTextfield} from "../../../components/nomforms/Nomforms";
+import {FormSpec, LabeledDatefield, LabeledTextarea, LabeledTextfield} from "../../../components/nomforms/Nomforms";
 import {Feilmeldinger, validateFnr,} from "../../../components/nomforms/NomFormValidering";
 import Nompagewrap from "../../../components/nompagewrap/Nompagewrap";
 import {Hovedknapp, Knapp} from 'nav-frontend-knapper';
 import {SkjemaGruppe} from 'nav-frontend-skjema';
 import {FormProvider, useForm} from 'react-hook-form';
 import moment, {HTML5_FMT} from "moment";
+import {gql, useMutation} from '@apollo/client';
+import AlertStripe from 'nav-frontend-alertstriper';
 
 interface NyBruker {
-  pnr: string,
-  visnavn: string,
-  beskr: string,
+  fnr: string,
+  visningsnavn: string,
+  tlf: string,
+  beskrivelse: string,
   gyldigfom: string,
 }
 
-const spec: { [K in keyof NyBruker]: FieldDefs } = {
-  pnr: {
+interface BestillingResponse {
+  nomId
+  requestId
+  requestSetId
+}
+
+const opprettBruker = gql`
+    mutation opprett($fnr: String!, $visningsnavn: String, $beskrivelse: String) {
+        opprettRessurs(request: {
+            metadata: {aktivering: IMMEDIATE, beskrivelse: $beskrivelse},
+            fnr: $fnr,
+            visningsnavn: $visningsnavn
+        }) {
+            nomId
+            requestId
+            requestSetId
+        }
+    }
+`;
+
+const spec: FormSpec<NyBruker> = {
+  fnr: {
     label: "Personnummer",
-    id: "pnr",
+    id: "fnr",
     defaultValue: '',
     rules: {
       validate: validateFnr
     }
   },
-  visnavn: {
+  visningsnavn: {
     label: "Visningsnavn",
-    id: "visnvn",
+    id: "visningsnavn",
     defaultValue: '',
   },
-  beskr: {
-    label: "Beskrivelse",
-    id: "beskr",
+  tlf: {
+    label: "Telefonnummer",
+    id: "tlf",
     defaultValue: '',
+    rules: {
+      required: false
+    }
+  },
+  beskrivelse: {
+    label: "Beskrivelse",
+    id: "beskrivelse",
+    defaultValue: '',
+    rules: {
+      required: false
+    }
   },
   gyldigfom: {
     label: "Gyldig fra og med",
@@ -46,29 +80,39 @@ const defaultValues = Object.keys(spec).reduce((defaults, key) => {
 }, {} as NyBruker);
 
 export default function Nybruker(): JSX.Element {
-  const onSubmit = (val: any): void => {
-    alert("TODO. Håndtere bestilling, " + JSON.stringify(val));
-  };
+  const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
 
-  const formHook = useForm<NyBruker>();
+  const formHook = useForm<NyBruker>({});
+  const reset = (): void => formHook.reset(defaultValues);
+
+  const submit = (variables: NyBruker): Promise<any> => {
+    return opprett({variables}).then(reset);
+  };
 
   return (
     <Nompagewrap pagetitle="Ny bruker">
       <FormProvider {...formHook}>
-        <form onSubmit={formHook.handleSubmit(onSubmit)}>
+        <form onSubmit={formHook.handleSubmit(submit)}>
           <SkjemaGruppe style={{maxWidth: '600px'}}>
-            <LabeledTextfield {...spec.pnr} />
-            <LabeledTextfield {...spec.visnavn} />
-            <LabeledTextfield {...spec.beskr} />
+            <LabeledTextfield {...spec.fnr} />
+            <LabeledTextfield {...spec.visningsnavn} />
+            <LabeledTextfield {...spec.tlf} />
+            <LabeledTextarea {...spec.beskrivelse} />
             <LabeledDatefield {...spec.gyldigfom}/>
           </SkjemaGruppe>
 
-          <Feilmeldinger errors={formHook.formState.errors}/>
+          <Feilmeldinger errors={formHook.formState.errors} spec={spec}/>
 
-          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}}>Legg inn bestilling</Hovedknapp>
-          <Knapp htmlType="reset" onClick={() => formHook.reset(defaultValues)}>reset</Knapp>
+          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={formHook.formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
+          <Knapp htmlType="reset" onClick={reset}>reset</Knapp>
         </form>
       </FormProvider>
+
+      <div style={{marginTop: '16px', maxWidth: '600px'}}>
+        {data && <AlertStripe type={data.opprettRessurs.requestId ? 'suksess' : 'feil'}>
+          {error?.message ?? `Bruker ${data.opprettRessurs.nomId} opprettet i request ${data.opprettRessurs.requestId}`}
+        </AlertStripe>}
+      </div>
     </Nompagewrap>
   );
 }

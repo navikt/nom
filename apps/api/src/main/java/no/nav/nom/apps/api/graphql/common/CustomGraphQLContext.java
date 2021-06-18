@@ -15,6 +15,7 @@ import javax.security.auth.Subject;
 public class CustomGraphQLContext implements GraphQLContext {
     private final Authentication authentication;
     private final DataLoaderRegistry dataLoaderRegistry;
+    private final boolean sandbox;
 
     @Override
     public Optional<Subject> getSubject() {

@@ -1,0 +1,85 @@
+
+type Organisasjonsenhet {
+    agressoId: ID!
+    navn: String!
+    gyldigFom: Date!
+    gyldigTom: Date
+    organiseringer (retning: Retning) : [Organisering!]!
+    leder: [OrganisasjonsenhetsLeder!]!
+    koblinger: [OrganisasjonsenhetsKobling!]!
+    type: Kode
+}
+
+type Organisering {
+    retning: Retning!
+    organisasjonsenhet : Organisasjonsenhet!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type Ressurs {
+    nomId: String!
+    navIdent: String!
+    personIdent: String!
+    koblinger: [RessursKobling!]!
+    lederFor: [LederOrganisasjonsenhet!]!
+    ledere: [RessursLeder!]!
+    person: Person
+    epost: String
+    visningsNavn: String
+}
+
+type Person {
+    navn: Navn!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
+}
+
+type RessursLeder {
+    ressurs: Ressurs!
+}
+
+type OrganisasjonsenhetsLeder {
+    ressurs: Ressurs!
+}
+
+type LederOrganisasjonsenhet {
+    organisasjonsenhet: Organisasjonsenhet!
+}
+
+type OrganisasjonsenhetsKobling {
+    ressurs: Ressurs!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+type RessursKobling {
+    organisasjonsenhet: Organisasjonsenhet!
+    gyldigFom: Date!
+    gyldigTom: Date
+}
+
+enum Retning {
+    over,
+    under,
+}
+
+type Kode {
+    kode: String!
+    navn: String!
+    gyldigFom: Date
+    gyldigTom: Date
+}
+
+type RequestSet {
+    requestSetId: ID!
+    requestIds: [ID!]!
+
+    beskrivelse: String
+    sistEndret: DateTime!
+    activateTime: DateTime
+}
