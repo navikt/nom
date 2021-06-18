@@ -25,7 +25,7 @@ public class RequestSetResolver implements GraphQLQueryResolver {
 
     public DataFetcherResult<List<RequestSet>> requestSets(List<UUID> requstSetIds, DataFetchingEnvironment env) {
         return SecurityUtil.<List<RequestSet>>checkAuth(env).orElseGet(() -> {
-            var sets = repository.get(requstSetIds);
+            var sets = requstSetIds.isEmpty() ? repository.all() : repository.get(requstSetIds);
             return build(sets);
         });
     }

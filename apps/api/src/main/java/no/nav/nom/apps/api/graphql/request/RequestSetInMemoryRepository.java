@@ -19,6 +19,10 @@ public class RequestSetInMemoryRepository {
         return find(requestSets, r -> r.getRequestSetId().equals(requestSetId));
     }
 
+    public List<RequestSet> all() {
+        return requestSets;
+    }
+
     public List<RequestSet> get(Collection<UUID> requestSetIds) {
         return requestSets.stream().filter(r -> requestSetIds.contains(r.getRequestSetId())).toList();
     }
