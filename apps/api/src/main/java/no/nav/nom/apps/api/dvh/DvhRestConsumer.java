@@ -112,6 +112,7 @@ public class DvhRestConsumer {
 
         StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
                 .filter(this::determineEnhetActive)
+                .filter(this::determineEnhetNotIgnored)
                 .forEach(e -> {
                     if (validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
@@ -140,6 +141,14 @@ public class DvhRestConsumer {
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
         dvhRepository.saveLedere(ledere);
         dvhRepository.saveOrganiseringer(organiseringerByEnhet);
+    }
+
+    private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
+        // 'deltar i rekruttering' og 'nav ventelønn' er kun for intern bruk i agresso.
+        val orgnodeKode = jsonNode.get("ORGNODE_KODE").asText();
+        val deltarIRekruttering = orgnodeKode.matches("0+");
+        val navVenteloenn = orgnodeKode.equals("9999920");
+        return !(deltarIRekruttering || navVenteloenn);
     }
 
     private JsonNode dvhExchange(String urlPath) {

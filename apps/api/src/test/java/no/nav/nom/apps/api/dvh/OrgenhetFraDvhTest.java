@@ -19,6 +19,16 @@ public class OrgenhetFraDvhTest extends DvhTestBase {
         assertThat(alle).hasSize(0);
     }
 
+    @Test
+    @DisplayName("Nav ventelønn og deltar i rekruttering ignoreres")
+    void test2() {
+        simulateSyncedWithKafka();
+        stubEnheter("responses/dvhdiff/dvhOrgenhet3_Pre.json");
+        loadFromDvhAndUpdateRepo();
+
+        var alle = this.orgenhetRepository.getAlleOrgEnhetById().values();
+        assertThat(alle).hasSize(2);
+    }
 
     private void stubEnheter(String fileName) {
         stubFor(get("/proxy/enheter/v2").willReturn(aResponse()
