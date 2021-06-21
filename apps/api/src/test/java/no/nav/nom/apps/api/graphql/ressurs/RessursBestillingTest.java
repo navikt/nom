@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.graphql.BestillingTestBase;
-import no.nav.nom.apps.api.graphql.request.dto.BestillingRequestMetadata.Aktivering;
+import no.nav.nom.apps.api.graphql.request.dto.BestillingMetadata.Aktivering;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.DisplayName;
@@ -26,8 +26,9 @@ public class RessursBestillingTest extends BestillingTestBase {
             var response = postForResource("bestilling/opprettressurs.graphql", false, Map.of());
 
             assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
-            assertThat(response.get("$.data.opprettRessurs.requestId")).isNotNull();
-            assertThat(response.get("$.data.opprettRessurs.requestSetId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.navIdent")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestSetId")).isNotNull();
         }
 
         @Test
@@ -36,8 +37,9 @@ public class RessursBestillingTest extends BestillingTestBase {
             var response = postForResource("bestilling/opprettressurs.graphql", false, Map.of("aktivering", Aktivering.IMMEDIATE));
 
             assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
-            assertThat(response.get("$.data.opprettRessurs.requestId")).isNotNull();
-            assertThat(response.get("$.data.opprettRessurs.requestSetId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.navIdent")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestSetId")).isNotNull();
         }
 
         @Test
@@ -46,20 +48,21 @@ public class RessursBestillingTest extends BestillingTestBase {
             var response = postForResource("bestilling/opprettressurs.graphql", false, Map.of("aktivering", Aktivering.FOR_APPROVAL));
 
             assertThat(response.get("$.data.opprettRessurs.nomId")).isNull();
-            assertThat(response.get("$.data.opprettRessurs.requestId")).isNotNull();
-            assertThat(response.get("$.data.opprettRessurs.requestSetId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.navIdent")).isNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestId")).isNotNull();
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestSetId")).isNotNull();
         }
 
         @Test
         @DisplayName("Chain 2")
         void sce4() {
             var response = postForResource("bestilling/opprettressurs.graphql", false, Map.of("aktivering", Aktivering.FOR_APPROVAL));
-            assertThat(response.get("$.data.opprettRessurs.requestId")).isNotNull();
-            var requestSetId = response.get("$.data.opprettRessurs.requestSetId");
+            assertThat(response.get("$.data.opprettRessurs.bestilling.requestId")).isNotNull();
+            var requestSetId = response.get("$.data.opprettRessurs.bestilling.requestSetId");
 
             var response2 = postForResource("bestilling/opprettressurs.graphql", false, Map.of("aktivering", Aktivering.FOR_APPROVAL, "requestSetId", requestSetId));
-            assertThat(response2.get("$.data.opprettRessurs.requestId")).isNotNull();
-            assertThat(response2.get("$.data.opprettRessurs.requestSetId")).isEqualTo(requestSetId);
+            assertThat(response2.get("$.data.opprettRessurs.bestilling.requestId")).isNotNull();
+            assertThat(response2.get("$.data.opprettRessurs.bestilling.requestSetId")).isEqualTo(requestSetId);
         }
     }
 
@@ -67,7 +70,7 @@ public class RessursBestillingTest extends BestillingTestBase {
     @DisplayName("Aktiver")
     void aktiver() {
         var response = postForResource("bestilling/opprettressurs.graphql", false, Map.of("aktivering", Aktivering.FOR_APPROVAL));
-        var requestSetId = response.get("$.data.opprettRessurs.requestSetId");
+        var requestSetId = response.get("$.data.opprettRessurs.bestilling.requestSetId");
         var response2 = postForResource("bestilling/aktiver.graphql", false, Map.of("requestSetId", requestSetId));
         assertThat(response2.get("$.data.activateRequestSet")).isEqualTo(ResultCode.OK.name());
     }

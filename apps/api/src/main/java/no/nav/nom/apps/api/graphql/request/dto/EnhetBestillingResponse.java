@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EnhetBestillingResponse {
 
-    UUID requestId;
-    UUID requestSetId;
     UUID nomId;
+    Bestilling bestilling;
+
 }

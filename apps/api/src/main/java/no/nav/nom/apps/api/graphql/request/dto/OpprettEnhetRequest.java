@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpprettEnhetRequest {
 
-    BestillingRequestMetadata metadata;
+    BestillingMetadata metadata;
     String agressoId;
     String navn;
 }

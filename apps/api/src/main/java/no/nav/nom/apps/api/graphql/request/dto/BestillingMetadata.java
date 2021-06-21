@@ -4,14 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.With;
 
 import java.util.UUID;
 
 @Data
 @Builder
+@With
 @AllArgsConstructor
 @NoArgsConstructor
-public class BestillingRequestMetadata {
+public class BestillingMetadata {
 
     UUID requestSetId;
     Aktivering aktivering;
@@ -19,11 +21,19 @@ public class BestillingRequestMetadata {
 
     // GraphQL default on enum seems to not work
     public boolean isImmediate() {
-        return aktivering != Aktivering.FOR_APPROVAL;
+        return getAktivering() == Aktivering.IMMEDIATE;
+    }
+
+    public Aktivering getAktivering() {
+        return aktivering == null ? Aktivering.IMMEDIATE : aktivering;
     }
 
     public enum Aktivering {
         IMMEDIATE,
         FOR_APPROVAL
+    }
+
+    public BestillingMetadata copy() {
+        return withAktivering(getAktivering());
     }
 }

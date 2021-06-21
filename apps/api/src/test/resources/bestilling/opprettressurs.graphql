@@ -1,7 +1,10 @@
 mutation opprettRessurs($requestSetId: ID, $aktivering: Bestillingsaktiving) {
-    opprettRessurs(request: {metadata: {requestSetId: $requestSetId, aktivering: $aktivering} fnr: "12312312312", visningsnavn: "Navn Navnesen"}) {
+    opprettRessurs(request: {metadata: {requestSetId: $requestSetId, aktivering: $aktivering} personIdent: "12312312312", visningsnavn: "Navn Navnesen"}) {
         nomId
-        requestId
-        requestSetId
+        navIdent
+        bestilling {
+            requestId
+            requestSetId
+        }
     }
 }

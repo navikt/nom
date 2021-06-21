@@ -6,8 +6,8 @@ type Mutation {
 
     # RequestSets
 
-#    removeRequestFromRequestSet(requestSetId: ID!, requestId: ID!): ResultCode!
-#    editRequestSet(requestSetId: ID!, metadata: EditRequestSetRequest!): ResultCode!
+    #    removeRequestFromRequestSet(requestSetId: ID!, requestId: ID!): ResultCode!
+    #    editRequestSet(requestSetId: ID!, metadata: EditRequestSetRequest!): ResultCode!
     activateRequestSet(requestSetId: ID!, when: DateTime): ResultCode!
 }
 
@@ -22,7 +22,7 @@ input BestillingRequestMetadata {
 
 input OpprettRessursRequest  {
     metadata: BestillingRequestMetadata!
-    fnr: String!
+    personIdent: String!
     visningsnavn: String
 }
 
@@ -38,24 +38,38 @@ input EditRequestSetRequest {
 
 # Responses
 
-interface BestillingResponse {
-    requestId: ID!
-    requestSetId: ID!
+type EnhetBestillingResponse  {
+    nomId: ID
+    bestilling: Bestilling!
 }
 
-type EnhetBestillingResponse implements BestillingResponse {
-    requestId: ID!
-    requestSetId: ID!
+type RessursBestillingResponse {
     nomId: ID
-}
-
-type RessursBestillingResponse implements BestillingResponse {
-    requestId: ID!
-    requestSetId: ID!
-    nomId: ID
+    navIdent: ID
+    bestilling: Bestilling!
 }
 
 enum Bestillingsaktiving {
     IMMEDIATE
     FOR_APPROVAL
+}
+
+type Bestilling {
+    requestId: ID!
+    requestSetId: ID!
+    metadata: BestillingMetadata
+    type: BestillingType
+    # define explicitly?
+    data: JSON
+}
+
+enum BestillingType {
+    OPPRETT_ENHET,
+    OPPRETT_RESSURS
+}
+
+type BestillingMetadata {
+    requestSetId: ID!
+    aktivering: Bestillingsaktiving!
+    beskrivelse: String
 }

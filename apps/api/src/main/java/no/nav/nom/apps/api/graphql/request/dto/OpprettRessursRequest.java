@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpprettRessursRequest {
 
-    BestillingRequestMetadata metadata;
-    String fnr;
+    BestillingMetadata metadata;
+    String personIdent;
     String visningsnavn;
 }

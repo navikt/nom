@@ -17,4 +17,9 @@ class GraphQLConfig {
     GraphQLScalarType dateTime() {
         return LocalDateTimeCoercing.createScalar();
     }
+
+    @Bean
+    GraphQLScalarType json() {
+        return ExtendedScalars.Json;
+    }
 }

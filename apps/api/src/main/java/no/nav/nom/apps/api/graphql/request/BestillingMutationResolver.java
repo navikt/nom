@@ -1,13 +1,18 @@
 package no.nav.nom.apps.api.graphql.request;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.graphql.request.dto.BestillingRequestMetadata;
-import no.nav.nom.apps.api.graphql.request.dto.BestillingRequestMetadata.Aktivering;
+import no.nav.nom.apps.api.graphql.request.dto.Bestilling;
+import no.nav.nom.apps.api.graphql.request.dto.Bestilling.BestillingType;
+import no.nav.nom.apps.api.graphql.request.dto.BestillingMetadata;
+import no.nav.nom.apps.api.graphql.request.dto.BestillingMetadata.Aktivering;
 import no.nav.nom.apps.api.graphql.request.dto.EnhetBestillingResponse;
 import no.nav.nom.apps.api.graphql.request.dto.OpprettEnhetRequest;
 import no.nav.nom.apps.api.graphql.request.dto.OpprettRessursRequest;
@@ -18,8 +23,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -27,29 +34,47 @@ import java.util.UUID;
 public class BestillingMutationResolver implements GraphQLMutationResolver {
 
     private final RequestSetInMemoryRepository repository;
+    private final ObjectMapper om;
+    private final AtomicInteger idCounter = new AtomicInteger(500000);
 
     public DataFetcherResult<RessursBestillingResponse> opprettRessurs(OpprettRessursRequest request, DataFetchingEnvironment env) {
         return SecurityUtil.<RessursBestillingResponse>checkAuth(env).orElseGet(() -> {
-            Request r = new Request(UUID.randomUUID(), request);
             RequestSet requestSet = getRequestSet(request.getMetadata());
-            requestSet.getRequests().add(r);
+            Bestilling r = Bestilling.builder()
+                    .type(BestillingType.OPPRETT_RESSURS)
+                    .requestId(UUID.randomUUID())
+                    .requestSetId(requestSet.getRequestSetId())
+                    .metadata(request.getMetadata().copy())
+                    .data(toJson(Map.of("personIdent", request.getPersonIdent(), "visningsnavn", request.getVisningsnavn())))
+                    .build();
+            requestSet.getBestillinger().add(r);
 
-            return build(new RessursBestillingResponse(r.getRequestId(), requestSet.getRequestSetId(),
-                    request.getMetadata().isImmediate() ? UUID.randomUUID() : null)
-            );
+            var nomId = request.getMetadata().isImmediate() ? UUID.randomUUID() : null;
+            var navIdent = request.getMetadata().isImmediate() ? "X%d".formatted(idCounter.getAndIncrement()) : null;
+            return build(new RessursBestillingResponse(nomId, navIdent, r));
         });
     }
 
     public DataFetcherResult<EnhetBestillingResponse> opprettEnhet(OpprettEnhetRequest request, DataFetchingEnvironment env) {
         return SecurityUtil.<EnhetBestillingResponse>checkAuth(env).orElseGet(() -> {
-            Request r = new Request(UUID.randomUUID(), request);
             RequestSet requestSet = getRequestSet(request.getMetadata());
-            requestSet.getRequests().add(r);
+            Bestilling r = Bestilling.builder()
+                    .type(BestillingType.OPPRETT_ENHET)
+                    .requestId(UUID.randomUUID())
+                    .requestSetId(requestSet.getRequestSetId())
+                    .metadata(request.getMetadata().copy())
+                    .data(toJson(Map.of("agressoId", request.getAgressoId(), "navn", request.getNavn())))
+                    .build();
+            requestSet.getBestillinger().add(r);
 
-            return build(new EnhetBestillingResponse(r.getRequestId(), requestSet.getRequestSetId(),
-                    request.getMetadata().isImmediate() ? UUID.randomUUID() : null
-            ));
+            var nomId = request.getMetadata().isImmediate() ? UUID.randomUUID() : null;
+            return build(new EnhetBestillingResponse(nomId, r));
         });
+    }
+
+    @SneakyThrows
+    private ObjectNode toJson(Map<?, ?> dataMap) {
+        return om.valueToTree(dataMap);
     }
 
     public DataFetcherResult<ResultCode> activateRequestSet(UUID requestSetId, LocalDateTime when, DataFetchingEnvironment env) {
@@ -66,7 +91,7 @@ public class BestillingMutationResolver implements GraphQLMutationResolver {
         repository.getReady().forEach(rs -> log.info("RUNNING {}", rs));
     }
 
-    private RequestSet getRequestSet(BestillingRequestMetadata metadata) {
+    private RequestSet getRequestSet(BestillingMetadata metadata) {
         RequestSet requestSet = null;
         if (metadata.getRequestSetId() != null) {
             requestSet = repository.get(metadata.getRequestSetId());
