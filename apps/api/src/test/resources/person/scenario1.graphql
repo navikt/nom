@@ -1,0 +1,14 @@
+query($fnr: String!) {
+    person(where: {personIdent: $fnr})  {
+        personIdent
+        navIdent
+        nomId
+        person {
+            navn {
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+    }
+}

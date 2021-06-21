@@ -6,6 +6,7 @@ type Query {
     organisasjonsenheter(where: OrganisasjonsenheterSearch): [OrganisasjonsenhetResult!]!
     ressurs(where: RessursSearch): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
+    person(where: PersonSearch): PersonResult
 
     requestSet(requestSetId: ID!): RequestSet
     requestSets(requestSetId: [ID!]!): [RequestSet!]!
@@ -27,6 +28,17 @@ input RessursSearch {
 input RessurserSearch {
     navIdenter: [String!]
     personIdenter: [String!]
+}
+
+input PersonSearch {
+    personIdent: String!
+}
+
+type PersonResult {
+    personIdent: String!
+    nomId: String
+    navIdent: String
+    person: Person
 }
 
 type OrganisasjonsenhetResult {
