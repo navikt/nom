@@ -113,7 +113,8 @@ export default function Nybruker(): JSX.Element {
   const [fnrLookup, setFnrLookup] = useState<string | undefined>();
   const {data: personLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
     variables: {fnr: fnrLookup || ''},
-    skip: !fnrLookup || fnrLookup.length !== 11
+    skip: !fnrLookup || fnrLookup.length !== 11,
+    errorPolicy: 'all'
   });
   const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
 
@@ -129,8 +130,12 @@ export default function Nybruker(): JSX.Element {
     }
     if (personLookupData?.person.navIdent) {
       setError(spec.fnr.id, {message: `Personident er allerede registrert i NOM på ident ${personLookupData.person.navIdent}`, type: 'FINNES_ALLEREDE'});
+    } else if (personLookupData?.person.personIdent && !personLookupData.person.person?.navn.fornavn) {
+      setError(spec.fnr.id, {message: `Fant ikke personident hos PDL`, type: 'IKKE_FUNNET'});
+    } else {
+      clearErrors(spec.fnr.id);
     }
-  }, [personLookupData, setError, setValue]);
+  }, [personLookupData, setError, setValue, clearErrors]);
 
   const doReset = (): void => reset(defaultValues);
   const submit = (variables: NyBruker): Promise<any> => opprett({variables}).then(doReset);
