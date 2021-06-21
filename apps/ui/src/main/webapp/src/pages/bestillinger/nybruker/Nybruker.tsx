@@ -101,8 +101,8 @@ const defaultValues = Object.keys(spec).reduce((defaults, key) => {
 
 const ResultInfo = ({data, error}: {data?: BestillingResponse, error?: ApolloError}): JSX.Element => (
   <div style={{marginTop: '16px', maxWidth: '600px'}}>
-    {data && <AlertStripe type={data.requestId ? 'suksess' : 'feil'}>
-      {error?.message ?? `Bruker ${data.nomId} opprettet i request ${data.requestId}`}
+    {(data || error) && <AlertStripe type={data?.requestId ? 'suksess' : 'feil'}>
+      {error?.message || `Bruker ${data?.nomId} opprettet i request ${data?.requestSetId}/${data?.requestId}`}
     </AlertStripe>}
   </div>
 );
