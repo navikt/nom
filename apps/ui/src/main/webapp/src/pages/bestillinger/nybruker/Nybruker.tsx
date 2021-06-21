@@ -40,12 +40,15 @@ const opprettBruker = gql`
 `;
 
 interface LookupRessursNavnResult {
-  lookupRessursNavn: GqlRessurs
+  person: GqlRessurs
 }
 
 const lookupFnr = gql`
-    query lookupReesursNavn($fnr: String!) {
-        ressurs(where: {personIdent: $fnr}) {
+    query lookupPersonNavn($fnr: String!) {
+        person(where: {personIdent: $fnr}) {
+            nomId
+            personIdent
+            navIdent
             person {
                 navn {
                     fornavn
@@ -59,7 +62,7 @@ const lookupFnr = gql`
 
 const spec: FormSpec<NyBruker> = {
   fnr: {
-    label: "Personnummer",
+    label: "Personident",
     id: "fnr",
     defaultValue: '',
     rules: {
@@ -101,37 +104,41 @@ const defaultValues = Object.keys(spec).reduce((defaults, key) => {
 
 const ResultInfo = ({data, error}: {data?: BestillingResponse, error?: ApolloError}): JSX.Element => (
   <div style={{marginTop: '16px', maxWidth: '600px'}}>
-    {(data || error) && <AlertStripe type={data?.requestId ? 'suksess' : 'feil'}>
-      {error?.message || `Bruker ${data?.nomId} opprettet i request ${data?.requestSetId}/${data?.requestId}`}
-    </AlertStripe>}
+    {data && <AlertStripe type='suksess'>Bruker {data?.nomId} opprettet i request {data?.requestSetId}/{data?.requestId}</AlertStripe>}
+    {error && <AlertStripe type={'feil'}>{error?.message}</AlertStripe>}
   </div>
 );
 
 export default function Nybruker(): JSX.Element {
   const [fnrLookup, setFnrLookup] = useState<string | undefined>();
-  const {data: ressursLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
+  const {data: personLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
     variables: {fnr: fnrLookup || ''},
     skip: !fnrLookup || fnrLookup.length !== 11
   });
   const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
 
-  const methods = useForm<NyBruker>({});
+  const methods = useForm<NyBruker>({reValidateMode: 'onBlur'});
+  const {reset, setValue, setError, clearErrors, formState, handleSubmit} = methods;
 
   useEffect(() => {
-    if (ressursLookupData?.lookupRessursNavn?.person?.navn.fornavn) {
-      methods.setValue(spec.fnr.id, fulltNavnForRessurs(ressursLookupData?.lookupRessursNavn));
+    if (personLookupData?.person?.person?.navn.fornavn) {
+      setValue(spec.visningsnavn.id, fulltNavnForRessurs(personLookupData?.person));
+      clearErrors(spec.visningsnavn.id);
+    } else {
+      setValue(spec.visningsnavn.id, '');
     }
-  }, [fnrLookup]);
+    if (personLookupData?.person.navIdent) {
+      setError(spec.fnr.id, {message: `Personident er allerede registrert i NOM på ident ${personLookupData.person.navIdent}`, type: 'FINNES_ALLEREDE'});
+    }
+  }, [personLookupData, setError, setValue]);
 
-  const reset = (): void => methods.reset(defaultValues);
-  const submit = (variables: NyBruker): Promise<any> => {
-    return opprett({variables}).then(reset);
-  };
+  const doReset = (): void => reset(defaultValues);
+  const submit = (variables: NyBruker): Promise<any> => opprett({variables}).then(doReset);
 
   return (
     <Nompagewrap pagetitle="Ny bruker">
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(submit)}>
+        <form onSubmit={handleSubmit(submit)}>
           <SkjemaGruppe style={{maxWidth: '600px'}}>
             <LabeledTextfield {...spec.fnr} onChange={(val) => setFnrLookup(val)}/>
             <LabeledTextfield {...spec.visningsnavn} />
@@ -140,13 +147,12 @@ export default function Nybruker(): JSX.Element {
             <LabeledDatefield {...spec.gyldigfom}/>
           </SkjemaGruppe>
 
-          <Feilmeldinger errors={methods.formState.errors} spec={spec}/>
+          <Feilmeldinger errors={formState.errors} spec={spec}/>
 
-          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={methods.formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
-          <Knapp htmlType="reset" onClick={reset}>reset</Knapp>
+          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
+          <Knapp htmlType="reset" onClick={doReset}>reset</Knapp>
         </form>
       </FormProvider>
-
       <ResultInfo data={data?.opprettRessurs} error={error || ressursLookupError}/>
     </Nompagewrap>
   );
