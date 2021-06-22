@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class BestillingMetadata {
 
-    UUID requestSetId;
+    UUID bestillingSetId;
     Aktivering aktivering;
     String beskrivelse;
 

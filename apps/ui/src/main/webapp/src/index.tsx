@@ -16,6 +16,7 @@ import Nompagewrap from "./components/nompagewrap/Nompagewrap";
 import Nyenhet from "./pages/bestillinger/nyenhet/Nyenhet";
 import {ApolloProvider} from '@apollo/client';
 import {apolloClient} from './api/apollo_client';
+import {BestillingList} from './pages/bestillinger/list/BestillingList';
 
 function AppRouter(): JSX.Element {
   return (
@@ -67,6 +68,9 @@ function AppRouter(): JSX.Element {
       </Route>
       <Route exact path="/bestillinger/kategoriserenhet">
         <Nompagewrap pagetitle="Kategoriser enhet">...TODO</Nompagewrap>
+      </Route>
+      <Route exact path="/bestillinger/list">
+        <BestillingList/>
       </Route>
       <Route exact path="/bestillingsgodkjenning">
         <Bestillingsgodkjenning/>

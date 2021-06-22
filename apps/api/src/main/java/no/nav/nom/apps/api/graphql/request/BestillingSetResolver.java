@@ -10,22 +10,24 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Component
 @RequiredArgsConstructor
-public class RequestSetResolver implements GraphQLQueryResolver {
+public class BestillingSetResolver implements GraphQLQueryResolver {
 
-    private final RequestSetInMemoryRepository repository;
+    private final BestillingSetInMemoryRepository repository;
 
-    public DataFetcherResult<RequestSet> requestSet(UUID requstSetId, DataFetchingEnvironment env) {
-        return SecurityUtil.<RequestSet>checkAuth(env).orElseGet(() -> {
+    public DataFetcherResult<BestillingSet> bestillingSet(UUID requstSetId, DataFetchingEnvironment env) {
+        return SecurityUtil.<BestillingSet>checkAuth(env).orElseGet(() -> {
             var set = repository.get(requstSetId);
             return build(set);
         });
     }
 
-    public DataFetcherResult<List<RequestSet>> requestSets(List<UUID> requstSetIds, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<RequestSet>>checkAuth(env).orElseGet(() -> {
-            var sets = requstSetIds.isEmpty() ? repository.all() : repository.get(requstSetIds);
+    public DataFetcherResult<List<BestillingSet>> bestillingSets(List<UUID> requstSetIds, DataFetchingEnvironment env) {
+        return SecurityUtil.<List<BestillingSet>>checkAuth(env).orElseGet(() -> {
+            var sets = isEmpty(requstSetIds) ? repository.all() : repository.get(requstSetIds);
             return build(sets);
         });
     }

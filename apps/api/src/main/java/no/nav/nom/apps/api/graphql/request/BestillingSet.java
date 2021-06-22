@@ -12,16 +12,13 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestSet {
+public class BestillingSet {
 
-    UUID requestSetId;
+    UUID bestillingSetId;
     List<Bestilling> bestillinger;
 
     String beskrivelse;
     LocalDateTime sistEndret;
     LocalDateTime activateTime;
 
-    public List<UUID> getRequestIds() {
-        return bestillinger.stream().map(Bestilling::getRequestId).toList();
-    }
 }

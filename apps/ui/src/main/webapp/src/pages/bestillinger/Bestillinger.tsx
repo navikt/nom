@@ -1,8 +1,6 @@
-import React, { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { LinkCard } from "../../components/contentcard/Contentcard";
+import React from "react";
+import {LinkCard} from "../../components/contentcard/Contentcard";
 import ContentcardArea from "../../components/contentcard/ContentcardArea";
-import NomUiHeader from "../../components/header/NomUiHeader";
 import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 
 export default function Bestillinger(props: any): JSX.Element {
@@ -21,6 +19,10 @@ export default function Bestillinger(props: any): JSX.Element {
         <LinkCard
           title="Sammenslå enheter"
           uri={"/bestillinger/sammenslaaenheter"}
+        />
+        <LinkCard
+          title="Se pågående bestillinger"
+          uri={"/bestillinger/list"}
         />
       </ContentcardArea>
     </Nompagewrap>

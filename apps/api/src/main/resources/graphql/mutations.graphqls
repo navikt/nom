@@ -4,18 +4,18 @@ type Mutation {
     opprettRessurs(request: OpprettRessursRequest!): RessursBestillingResponse!
     opprettEnhet(request: OpprettEnhetRequest!): EnhetBestillingResponse!
 
-    # RequestSets
+    # BestillingSets
 
-    #    removeRequestFromRequestSet(requestSetId: ID!, requestId: ID!): ResultCode!
-    #    editRequestSet(requestSetId: ID!, metadata: EditRequestSetRequest!): ResultCode!
-    activateRequestSet(requestSetId: ID!, when: DateTime): ResultCode!
+    #    removeRequestFromBestillingSet(bestillingSetId: ID!, bestillingId: ID!): ResultCode!
+    #    editBestillingSet(bestillingSetId: ID!, metadata: EditBestillingSetRequest!): ResultCode!
+    activateBestillingSet(bestillingSetId: ID!, when: DateTime): ResultCode!
 }
 
 # Requests
 
 input BestillingRequestMetadata {
     # Request set/Endringspakke, valgfri, bruk for å legge til eksisterende pakke
-    requestSetId: ID
+    bestillingSetId: ID
     aktivering: Bestillingsaktiving = IMMEDIATE
     beskrivelse: String
 }
@@ -32,7 +32,7 @@ input OpprettEnhetRequest {
     navn: String!
 }
 
-input EditRequestSetRequest {
+input EditBestillingSetRequest {
     beskrivelse: String
 }
 
@@ -54,22 +54,13 @@ enum Bestillingsaktiving {
     FOR_APPROVAL
 }
 
-type Bestilling {
-    requestId: ID!
-    requestSetId: ID!
-    metadata: BestillingMetadata
-    type: BestillingType
-    # define explicitly?
-    data: JSON
-}
-
 enum BestillingType {
     OPPRETT_ENHET,
     OPPRETT_RESSURS
 }
 
 type BestillingMetadata {
-    requestSetId: ID!
+    bestillingSetId: ID!
     aktivering: Bestillingsaktiving!
     beskrivelse: String
 }

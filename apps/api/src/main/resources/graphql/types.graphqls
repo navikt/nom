@@ -75,11 +75,20 @@ type Kode {
     gyldigTom: Date
 }
 
-type RequestSet {
-    requestSetId: ID!
-    requestIds: [ID!]!
+type BestillingSet {
+    bestillingSetId: ID!
+    bestillinger: [Bestilling!]!
 
     beskrivelse: String
     sistEndret: DateTime!
     activateTime: DateTime
+}
+
+type Bestilling {
+    bestillingId: ID!
+    bestillingSetId: ID!
+    metadata: BestillingMetadata
+    type: BestillingType
+    # define explicitly?
+    data: JSON
 }

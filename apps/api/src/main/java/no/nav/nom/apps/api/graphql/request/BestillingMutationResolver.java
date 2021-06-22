@@ -33,21 +33,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class BestillingMutationResolver implements GraphQLMutationResolver {
 
-    private final RequestSetInMemoryRepository repository;
+    private final BestillingSetInMemoryRepository repository;
     private final ObjectMapper om;
     private final AtomicInteger idCounter = new AtomicInteger(500000);
 
     public DataFetcherResult<RessursBestillingResponse> opprettRessurs(OpprettRessursRequest request, DataFetchingEnvironment env) {
         return SecurityUtil.<RessursBestillingResponse>checkAuth(env).orElseGet(() -> {
-            RequestSet requestSet = getRequestSet(request.getMetadata());
+            BestillingSet bestillingSet = getBestillingSet(request.getMetadata());
             Bestilling r = Bestilling.builder()
                     .type(BestillingType.OPPRETT_RESSURS)
-                    .requestId(UUID.randomUUID())
-                    .requestSetId(requestSet.getRequestSetId())
+                    .bestillingId(UUID.randomUUID())
+                    .bestillingSetId(bestillingSet.getBestillingSetId())
                     .metadata(request.getMetadata().copy())
                     .data(toJson(Map.of("personIdent", request.getPersonIdent(), "visningsnavn", request.getVisningsnavn())))
                     .build();
-            requestSet.getBestillinger().add(r);
+            bestillingSet.getBestillinger().add(r);
 
             var nomId = request.getMetadata().isImmediate() ? UUID.randomUUID() : null;
             var navIdent = request.getMetadata().isImmediate() ? "X%d".formatted(idCounter.getAndIncrement()) : null;
@@ -57,15 +57,15 @@ public class BestillingMutationResolver implements GraphQLMutationResolver {
 
     public DataFetcherResult<EnhetBestillingResponse> opprettEnhet(OpprettEnhetRequest request, DataFetchingEnvironment env) {
         return SecurityUtil.<EnhetBestillingResponse>checkAuth(env).orElseGet(() -> {
-            RequestSet requestSet = getRequestSet(request.getMetadata());
+            BestillingSet bestillingSet = getBestillingSet(request.getMetadata());
             Bestilling r = Bestilling.builder()
                     .type(BestillingType.OPPRETT_ENHET)
-                    .requestId(UUID.randomUUID())
-                    .requestSetId(requestSet.getRequestSetId())
+                    .bestillingId(UUID.randomUUID())
+                    .bestillingSetId(bestillingSet.getBestillingSetId())
                     .metadata(request.getMetadata().copy())
                     .data(toJson(Map.of("agressoId", request.getAgressoId(), "navn", request.getNavn())))
                     .build();
-            requestSet.getBestillinger().add(r);
+            bestillingSet.getBestillinger().add(r);
 
             var nomId = request.getMetadata().isImmediate() ? UUID.randomUUID() : null;
             return build(new EnhetBestillingResponse(nomId, r));
@@ -77,31 +77,31 @@ public class BestillingMutationResolver implements GraphQLMutationResolver {
         return om.valueToTree(dataMap);
     }
 
-    public DataFetcherResult<ResultCode> activateRequestSet(UUID requestSetId, LocalDateTime when, DataFetchingEnvironment env) {
+    public DataFetcherResult<ResultCode> activateBestillingSet(UUID bestillingSetId, LocalDateTime when, DataFetchingEnvironment env) {
         return SecurityUtil.<ResultCode>checkAuth(env).orElseGet(() -> {
-            var requestSet = repository.get(requestSetId);
-            requestSet.setActivateTime(Optional.ofNullable(when).orElse(LocalDateTime.now()));
+            var bestillingSet = repository.get(bestillingSetId);
+            bestillingSet.setActivateTime(Optional.ofNullable(when).orElse(LocalDateTime.now()));
 
             return build(ResultCode.OK);
         });
     }
 
     @Scheduled(initialDelayString = "PT3M", fixedRateString = "PT1M")
-    public void activateReadyRequestSets() {
+    public void activateReadyBestillingSets() {
         repository.getReady().forEach(rs -> log.info("RUNNING {}", rs));
     }
 
-    private RequestSet getRequestSet(BestillingMetadata metadata) {
-        RequestSet requestSet = null;
-        if (metadata.getRequestSetId() != null) {
-            requestSet = repository.get(metadata.getRequestSetId());
+    private BestillingSet getBestillingSet(BestillingMetadata metadata) {
+        BestillingSet bestillingSet = null;
+        if (metadata.getBestillingSetId() != null) {
+            bestillingSet = repository.get(metadata.getBestillingSetId());
         }
-        if (requestSet == null) {
+        if (bestillingSet == null) {
             var aktiveringTid = metadata.getAktivering() == Aktivering.IMMEDIATE ? LocalDateTime.now() : null;
-            requestSet = new RequestSet(UUID.randomUUID(), new ArrayList<>(), "", LocalDateTime.now(), aktiveringTid);
-            repository.add(requestSet);
+            bestillingSet = new BestillingSet(UUID.randomUUID(), new ArrayList<>(), "", LocalDateTime.now(), aktiveringTid);
+            repository.add(bestillingSet);
         }
-        return requestSet;
+        return bestillingSet;
     }
 
     private <T> DataFetcherResult<T> build(T data) {

@@ -9,8 +9,8 @@ type Query {
     ressurser(where: RessurserSearch): [RessursResult!]!
     person(where: PersonSearch): PersonResult
 
-    requestSet(requestSetId: ID!): RequestSet
-    requestSets(requestSetId: [ID!]!): [RequestSet!]!
+    bestillingSet(bestillingSetId: ID!): BestillingSet
+    bestillingSets(bestillingSetId: [ID!]): [BestillingSet!]!
 }
 
 input OrganisasjonsenhetSearch {

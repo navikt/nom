@@ -10,6 +10,7 @@ import {ApolloError, gql, useMutation, useQuery} from '@apollo/client';
 import AlertStripe from 'nav-frontend-alertstriper';
 import {GqlRessurs} from '../../../common/gqltypes';
 import {fulltNavnForRessurs} from '../../../common/navnutils';
+import {Bestilling} from '../list/BestillingList';
 
 interface NyBruker {
   fnr: string,
@@ -19,22 +20,28 @@ interface NyBruker {
   gyldigfom: string,
 }
 
-interface BestillingResponse {
-  nomId
-  requestId
-  requestSetId
+interface RessursBestillingResponse {
+  nomId: string
+  navIdent: string
+  bestilling: Bestilling
 }
 
 const opprettBruker = gql`
     mutation opprett($fnr: String!, $visningsnavn: String, $beskrivelse: String) {
         opprettRessurs(request: {
             metadata: {aktivering: IMMEDIATE, beskrivelse: $beskrivelse},
-            fnr: $fnr,
+            personIdent: $fnr,
             visningsnavn: $visningsnavn
         }) {
             nomId
-            requestId
-            requestSetId
+            navIdent
+            bestilling {
+                bestillingSetId
+                bestillingId
+                type
+                data
+            }
+
         }
     }
 `;
@@ -102,9 +109,9 @@ const defaultValues = Object.keys(spec).reduce((defaults, key) => {
   return defaults;
 }, {} as NyBruker);
 
-const ResultInfo = ({data, error}: {data?: BestillingResponse, error?: ApolloError}): JSX.Element => (
+const ResultInfo = ({data, error}: {data?: RessursBestillingResponse, error?: ApolloError}): JSX.Element => (
   <div style={{marginTop: '16px', maxWidth: '600px'}}>
-    {data && <AlertStripe type='suksess'>Bruker {data?.nomId} opprettet i request {data?.requestSetId}/{data?.requestId}</AlertStripe>}
+    {data && <AlertStripe type="suksess">Bruker {data?.nomId}/{data?.navIdent} opprettet i request {data?.bestilling.bestillingSetId}/{data?.bestilling.bestillingId}</AlertStripe>}
     {error && <AlertStripe type={'feil'}>{error?.message}</AlertStripe>}
   </div>
 );
@@ -116,7 +123,7 @@ export default function Nybruker(): JSX.Element {
     skip: !fnrLookup || fnrLookup.length !== 11,
     errorPolicy: 'all'
   });
-  const [opprett, {data, error}] = useMutation<{opprettRessurs: BestillingResponse}, NyBruker>(opprettBruker);
+  const [opprett, {data, error}] = useMutation<{opprettRessurs: RessursBestillingResponse}, NyBruker>(opprettBruker);
 
   const methods = useForm<NyBruker>({reValidateMode: 'onBlur'});
   const {reset, setValue, setError, clearErrors, formState, handleSubmit} = methods;

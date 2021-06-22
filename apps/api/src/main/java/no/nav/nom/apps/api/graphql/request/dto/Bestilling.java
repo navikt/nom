@@ -14,8 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Bestilling {
 
-    UUID requestId;
-    UUID requestSetId;
+    UUID bestillingId;
+    UUID bestillingSetId;
     BestillingMetadata metadata;
     BestillingType type;
     ObjectNode data;
