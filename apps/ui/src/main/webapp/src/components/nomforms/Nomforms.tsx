@@ -8,16 +8,17 @@ export interface FieldDefs {
   label: string;
   id: string;
   description?: string;
-  defaultValue: string;
+  defaultValue?: any;
   rules?: Omit<RegisterOptions<FieldValues, FieldPath<FieldValues>>, 'valueAsNumber' | 'valueAsDate' | 'setValueAs'>
 }
 
 export interface FieldProps extends FieldDefs {
   onChange?: (val: string) => void
+  disabled?: boolean
 }
 
 export type FormSpec<T> = {
-  [K in keyof T]: FieldDefs & {id: K}
+  [K in keyof T]-?: FieldDefs & {id: K}
 };
 
 type ControlledProps = {
@@ -54,6 +55,7 @@ export function LabeledTextfield(props: FieldProps): JSX.Element {
         }}
         onBlur={field.onBlur}
         value={field.value}
+        disabled={props.disabled}
       />
     }
   </Controlled>;

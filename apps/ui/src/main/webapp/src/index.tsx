@@ -17,6 +17,7 @@ import Nyenhet from "./pages/bestillinger/nyenhet/Nyenhet";
 import {ApolloProvider} from '@apollo/client';
 import {apolloClient} from './api/apollo_client';
 import {BestillingList} from './pages/bestillinger/list/BestillingList';
+import {BestillingContext, useBestillingContext} from "./pages/bestillinger/BestillingContext";
 
 function AppRouter(): JSX.Element {
   return (
@@ -83,11 +84,19 @@ function AppRouter(): JSX.Element {
   );
 }
 
+function Main(): JSX.Element {
+  return (
+    <BestillingContext.Provider value={useBestillingContext()}>
+      <AppRouter/>
+    </BestillingContext.Provider>
+  );
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <ApolloProvider client={apolloClient}>
-        <AppRouter/>
+        <Main/>
       </ApolloProvider>
     </BrowserRouter>
   </React.StrictMode>,

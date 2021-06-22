@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {FormSpec, LabeledDatefield, LabeledTextarea, LabeledTextfield} from "../../../components/nomforms/Nomforms";
 import {Feilmeldinger, validateFnr,} from "../../../components/nomforms/NomFormValidering";
 import Nompagewrap from "../../../components/nompagewrap/Nompagewrap";
@@ -11,13 +11,15 @@ import AlertStripe from 'nav-frontend-alertstriper';
 import {GqlRessurs} from '../../../common/gqltypes';
 import {fulltNavnForRessurs} from '../../../common/navnutils';
 import {Bestilling} from '../list/BestillingList';
+import {BestillingContext} from '../BestillingContext';
 
 interface NyBruker {
-  fnr: string,
-  visningsnavn: string,
-  tlf: string,
-  beskrivelse: string,
-  gyldigfom: string,
+  fnr: string
+  visningsnavn: string
+  tlf: string
+  beskrivelse: string
+  gyldigfom: string
+  bestillingSetId?: string
 }
 
 interface RessursBestillingResponse {
@@ -27,9 +29,9 @@ interface RessursBestillingResponse {
 }
 
 const opprettBruker = gql`
-    mutation opprett($fnr: String!, $visningsnavn: String, $beskrivelse: String) {
+    mutation opprett($fnr: String!, $visningsnavn: String, $beskrivelse: String, $bestillingSetId: ID) {
         opprettRessurs(request: {
-            metadata: {aktivering: IMMEDIATE, beskrivelse: $beskrivelse},
+            metadata: {aktivering: IMMEDIATE, beskrivelse: $beskrivelse, bestillingSetId: $bestillingSetId},
             personIdent: $fnr,
             visningsnavn: $visningsnavn
         }) {
@@ -102,6 +104,14 @@ const spec: FormSpec<NyBruker> = {
     id: "gyldigfom",
     defaultValue: moment().format(HTML5_FMT.DATE),
   },
+  bestillingSetId: {
+    label: "Bestilling set",
+    id: "bestillingSetId",
+    defaultValue: undefined,
+    rules: {
+      required: false
+    }
+  },
 };
 
 const defaultValues = Object.keys(spec).reduce((defaults, key) => {
@@ -117,6 +127,7 @@ const ResultInfo = ({data, error}: {data?: RessursBestillingResponse, error?: Ap
 );
 
 export default function Nybruker(): JSX.Element {
+  const bestillingContext = useContext(BestillingContext);
   const [fnrLookup, setFnrLookup] = useState<string | undefined>();
   const {data: personLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
     variables: {fnr: fnrLookup || ''},
@@ -125,7 +136,7 @@ export default function Nybruker(): JSX.Element {
   });
   const [opprett, {data, error}] = useMutation<{opprettRessurs: RessursBestillingResponse}, NyBruker>(opprettBruker);
 
-  const methods = useForm<NyBruker>({reValidateMode: 'onBlur'});
+  const methods = useForm<NyBruker>({defaultValues: {...defaultValues, bestillingSetId: bestillingContext.bestillingContext.bestillingSetId}, reValidateMode: 'onBlur'});
   const {reset, setValue, setError, clearErrors, formState, handleSubmit} = methods;
 
   useEffect(() => {
@@ -157,6 +168,16 @@ export default function Nybruker(): JSX.Element {
             <LabeledTextfield {...spec.tlf} />
             <LabeledTextarea {...spec.beskrivelse} />
             <LabeledDatefield {...spec.gyldigfom}/>
+
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
+              <LabeledTextfield {...spec.bestillingSetId} disabled/>
+              <div style={{marginBottom: '1em'}}>
+                <Knapp mini htmlType={'button'} onClick={() => {
+                  setValue(spec.bestillingSetId.id, '');
+                  bestillingContext.update({bestillingSetId: undefined});
+                }} type={'fare'}>Fjern bestilling set</Knapp>
+              </div>
+            </div>
           </SkjemaGruppe>
 
           <Feilmeldinger errors={formState.errors} spec={spec}/>
