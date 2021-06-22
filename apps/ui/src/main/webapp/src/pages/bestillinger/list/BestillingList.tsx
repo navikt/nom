@@ -2,6 +2,8 @@ import Nompagewrap from '../../../components/nompagewrap/Nompagewrap';
 import React from 'react';
 import Contentbox from '../../../components/contentbox/Contentbox';
 import {gql, useQuery} from '@apollo/client';
+import TableSorter from "tabell";
+import moment from 'moment';
 
 const bestillingQuery = gql`
     query bestillinger {
@@ -52,14 +54,63 @@ export interface BestillingSet {
 
 
 export const BestillingList = (): JSX.Element => {
-  const {data} = useQuery<Bestilling[]>(bestillingQuery);
+    const {data} = useQuery<{bestillingSets: BestillingSet[]}>(bestillingQuery);
 
+    return (
+      <Nompagewrap pagetitle="Bestillinger">
+        <div style={{margin: '1em'}}>
+          <Contentbox label={'Totalt antall'}>
+            <div>{data?.bestillingSets.length}</div>
+          </Contentbox>
 
-  return (
-    <Nompagewrap pagetitle="Bestillinger">
-      <Contentbox label={'Totalt antall'}>
-        <div>{data?.length}</div>
-      </Contentbox>
-    </Nompagewrap>
-  );
-};
+          {data?.bestillingSets.map(set => (
+            <Contentbox key={set.bestillingSetId} label={`Bestilling Set ${set.bestillingSetId}`}>
+              <div style={{margin: '1em'}}>
+                <div>Bestillinger: {set.bestillinger.length}</div>
+                <div>Beskrivelse: {set.beskrivelse}</div>
+                <div>Sist endrett: {moment(set.sistEndret).format('lll')}</div>
+                <div>Aktivering tid: {set.activateTime ? moment(set.activateTime).format('lll') : ''}</div>
+              </div>
+              <TableSorter items={set.bestillinger.map(b => ({...b, key: b.bestillingId}))}
+                           columns={[
+                             {
+                               id: 'key',
+                               label: 'ID',
+                               type: 'string'
+                             },
+                             {
+                               id: 'type',
+                               label: 'Type',
+                               type: 'string'
+                             },
+                             {
+                               id: 'beskrivelse',
+                               label: 'Beskrivelse',
+                               type: 'string',
+                               renderCell: (item: Bestilling) => <span>{item.metadata.beskrivelse}</span>
+                             },
+                             {
+                               id: 'aktivering',
+                               label: 'Aktivering',
+                               type: 'string',
+                               renderCell: (item: Bestilling) => <span>{item.metadata.aktivering}</span>
+                             },
+                             {
+                               id: 'data',
+                               label: 'Data',
+                               type: 'string',
+                               renderCell: (_, value) => <pre>{JSON.stringify(value, null, 1)}</pre>
+                             },
+                           ]}
+                           itemsPerPage={10}
+                           compact
+                           searchable={false}
+              />
+            </Contentbox>
+          ))}
+
+        </div>
+      </Nompagewrap>
+    );
+  }
+;
