@@ -3,7 +3,7 @@ name: Build, Deploy API
 on:
   push:
     branches:
-      - 'sandbbx/*'
+      - 'sandbox/*'
     paths:
       - 'apps/api/**'
       - '.nais/*/api.yaml'
