@@ -65,10 +65,10 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: dev-external
-        - name: journalforing-frontend-q1
+        - application: journalforing-frontend-q1
           namespace: isa
           cluster: dev-fss
-        - name: journalforing-frontend-q2
+        - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
     outbound:
