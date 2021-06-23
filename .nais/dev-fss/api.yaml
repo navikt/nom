@@ -65,6 +65,12 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: dev-external
+        - name: journalforing-frontend-q1
+          namespace: isa
+          cluster: dev-fss
+        - name: journalforing-frontend-q2
+          namespace: isa
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io

@@ -61,6 +61,9 @@ spec:
         - application: veilarbveileder
           namespace: pto
           cluster: prod-fss
+        - name: journalforing-frontend
+          namespace: isa
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
