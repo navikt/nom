@@ -8,11 +8,22 @@ export const defaultBestillingContext: BestillingContextType = {
   bestillingSetId: undefined
 };
 
+const defaultValue = {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const defaultValue = {bestillingContext: defaultBestillingContext, update: (newContext: Partial<BestillingContextType>) => {}};
+  bestillingContext: defaultBestillingContext, update: (newContext: Partial<BestillingContextType>) => {
+  }
+};
 export const BestillingContext = React.createContext(defaultValue);
 
-export const useBestillingContext = () => {
+type BestillingContextHookType = {
+  bestillingContext: BestillingContextType,
+  update: (newContext: Partial<BestillingContextType>) => void
+};
+
+export const useBestillingContext = (): BestillingContextHookType => {
   const [bestillingContext, setBestillingContext] = useState(defaultBestillingContext);
-  return {bestillingContext, update: (newContext: Partial<BestillingContextType>) => setBestillingContext({...bestillingContext, ...newContext})};
+  return {
+    bestillingContext,
+    update: (newContext: Partial<BestillingContextType>) => setBestillingContext({...bestillingContext, ...newContext})
+  };
 };
