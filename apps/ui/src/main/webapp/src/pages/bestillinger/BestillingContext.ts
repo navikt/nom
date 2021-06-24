@@ -10,7 +10,7 @@ export const defaultBestillingContext: BestillingContextType = {
 
 const defaultValue = {
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-  bestillingContext: defaultBestillingContext, update: (newContext: Partial<BestillingContextType>) => {
+  bestillingContext: defaultBestillingContext, update: (newContext: Partial<BestillingContextType>): void => {
   }
 };
 export const BestillingContext = React.createContext(defaultValue);
