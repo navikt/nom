@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import org.dataloader.DataLoader;
+import org.dataloader.DataLoaderOptions;
 import org.dataloader.DataLoaderRegistry;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import static no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader.PERSON
 @RequiredArgsConstructor
 class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
 
+    private static final int MAX_BATCH_SIZE = 100;
     private final PersonBatchLoader personBatchLoader;
     private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
     private final AppProperties appProperties;
@@ -45,8 +47,9 @@ class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
 
     private DataLoaderRegistry buildDataLoaderRegistry() {
         DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
-        val personDataloader = DataLoader.newMappedDataLoader(personBatchLoader);
-        val adRessursDataloader = DataLoader.newMappedDataLoader(adRessursBatchLoader);
+        DataLoaderOptions options = new DataLoaderOptions().setMaxBatchSize(MAX_BATCH_SIZE);
+        val personDataloader = DataLoader.newMappedDataLoader(personBatchLoader, options);
+        val adRessursDataloader = DataLoader.newMappedDataLoader(adRessursBatchLoader, options);
 
         dataLoaderRegistry.register(PERSON_DATALOADER, personDataloader);
         dataLoaderRegistry.register(AD_RESSURS_DATALOADER, adRessursDataloader);
