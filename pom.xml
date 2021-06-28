@@ -21,7 +21,7 @@
         <asciidoc.version>2.1.0</asciidoc.version>
         <java.version>16</java.version>
         <javassist.version>3.28.0-GA</javassist.version>
-        <ow2-asm.version>9.1</ow2-asm.version>
+        <ow2-asm.version>9.2</ow2-asm.version>
         <spring-cloud.version>2020.0.3</spring-cloud.version>
         <spring.graphql-version>11.1.0</spring.graphql-version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
