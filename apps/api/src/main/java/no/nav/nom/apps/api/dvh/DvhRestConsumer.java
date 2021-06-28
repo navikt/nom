@@ -181,7 +181,7 @@ public class DvhRestConsumer {
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig enhet fra dvh, ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE") + ", ORGNODE_NAVN: " + getAsText(e, "ORGNODE_NAVN"));
+            log.info("Ugyldig enhet fra dvh, ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE") + ", ORGNODE_NAVN: " + getAsText(e, "ORGNODE_NAVN"));
             return false;
         }
     }
@@ -191,7 +191,7 @@ public class DvhRestConsumer {
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: " + getAsText(e, "ORGNODE_KODE_OVER") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
+            log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: " + getAsText(e, "ORGNODE_KODE_OVER") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
             return false;
         }
     }
@@ -201,7 +201,7 @@ public class DvhRestConsumer {
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig leder fra dvh, LEDER_NAVIDENT: " + getAsText(e, "LEDER_NAVIDENT") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
+            log.info("Ugyldig leder fra dvh, LEDER_NAVIDENT: " + getAsText(e, "LEDER_NAVIDENT") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
             return false;
         }
     }
@@ -212,7 +212,7 @@ public class DvhRestConsumer {
         if (validate) {
             return true;
         } else {
-            log.warn("Ugyldig kobling fra dvh, NAV_ID: " + getAsText(e, "NAV_ID") + ", ORGENHET: " + getAsText(e, "ORGENHET")
+            log.info("Ugyldig kobling fra dvh, NAV_ID: " + getAsText(e, "NAV_ID") + ", ORGENHET: " + getAsText(e, "ORGENHET")
                     + ", FRA_DATO: " + getAsText(e, "FRA_DATO"));
             return false;
         }
