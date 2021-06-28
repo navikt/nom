@@ -80,11 +80,11 @@ public class DvhRepository {
                     ledere.forEach(l -> {
                         val ressurs = ressursRepository.findByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
+                            log.info("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
                         } else if(enhet.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet mangler");
+                            log.info("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet mangler");
                         } else if(ressurs.isEmpty()){
-                            log.warn("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
+                            log.info("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
                             entry.getValue().remove(l);
                         }
                     });
@@ -102,11 +102,11 @@ public class DvhRepository {
                                         val overEnhet = getEnhetByAgressoId(o.getOverenhetNummer());
                                         val underEnhet = getEnhetByAgressoId(o.getUnderenhetNummer());
                                         if (overEnhet.isEmpty() && underEnhet.isEmpty()) {
-                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Over- og underenhet mangler");
+                                            log.info("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Over- og underenhet mangler");
                                         } else if (overEnhet.isEmpty()) {
-                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Overenhet mangler");
+                                            log.info("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Overenhet mangler");
                                         } else if (underEnhet.isEmpty()) {
-                                            log.warn("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Underenhet mangler");
+                                            log.info("Organisering relasjon mislyktes, overenhet: " + o.getOverenhetNummer() + ", underenhet: " + o.getUnderenhetNummer() + ", " + "Underenhet mangler");
                                         } else {
                                             return true;
                                         }
@@ -126,11 +126,11 @@ public class DvhRepository {
                         val organisasjonsenhet = getEnhetByAgressoId(k.getAgressoId()).orElse(null);
                         val dvhRessurs = ressursRepository.findByNavIdent(k.getNavIdent()).orElse(null);
                         if (organisasjonsenhet == null && dvhRessurs == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
+                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet mangler");
+                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet mangler");
                         } else if (dvhRessurs == null) {
-                            log.warn("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
+                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
                         } else {
                             return true;
                         }
@@ -148,7 +148,6 @@ public class DvhRepository {
 
     public List<DvhKobling> getKoblingerByNavIdent(String navIdent) {
         return getAllKoblinger().stream()
-                .filter(s -> s.getNavIdent().equals(navIdent))
-                .collect(Collectors.toUnmodifiableList());
+                .filter(s -> s.getNavIdent().equals(navIdent)).toList();
     }
 }
