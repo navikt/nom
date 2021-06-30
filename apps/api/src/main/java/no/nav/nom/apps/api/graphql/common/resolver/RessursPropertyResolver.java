@@ -24,4 +24,12 @@ public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
         return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getDisplayName);
     }
 
+    public CompletableFuture<DataFetcherResult<String>> fornavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getGivenName);
+    }
+
+    public CompletableFuture<DataFetcherResult<String>> etternavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getSurname);
+    }
+
 }

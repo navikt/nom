@@ -11,6 +11,8 @@ public class AdRessurs {
     String navIdent;
     String email;
     String displayName;
+    String givenName;
+    String surname;
     @Default
     AdStatus status = AdStatus.OK;
 
