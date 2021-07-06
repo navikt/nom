@@ -20,7 +20,7 @@ public class RessursHendelseService {
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
 
-        val bulkSize = 10000;
+        val bulkSize = 1000;
         for(int i = 0; i<dvhRessurs.size(); i+=bulkSize){
             val selection = dvhRessurs.subList(i, Math.min(i + bulkSize, dvhRessurs.size()));
             val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(DvhRessurs::getNavIdent).toList());

@@ -71,3 +71,4 @@ spec:
         databases:
           - name: nom-api-db
             envVarPrefix: DATABASE
+        tier: db-n1-standard-1
