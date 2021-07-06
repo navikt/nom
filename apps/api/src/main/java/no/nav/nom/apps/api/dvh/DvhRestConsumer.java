@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class DvhRestConsumer {
 
     public static final String CACHE = "cache-source";
     // increase while db is slow
-    private final long LOAD_INTERVAL = 12 * 60 * 60 * 1000;
+    private final long LOAD_INTERVAL = 2 * 60 * 1000;
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
@@ -56,6 +57,7 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedRate = LOAD_INTERVAL)
     @SneakyThrows
+    @Transactional
     public void loadFromDvh() {
         try {
             loadRessurserFromDvh();
