@@ -71,4 +71,4 @@ spec:
         databases:
           - name: nom-api-db
             envVarPrefix: DATABASE
-        tier: db-n1-standard-1
+        tier: db-custom-1-3840
