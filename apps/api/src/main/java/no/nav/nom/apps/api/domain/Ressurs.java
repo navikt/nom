@@ -2,43 +2,40 @@ package no.nav.nom.apps.api.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
-import lombok.val;
-import no.nav.nom.contract.nom.hendelse.HendelseTo;
+import no.nav.nom.apps.api.repository.Hendelse;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
-@Value
 public class Ressurs {
 
-    List<HendelseTo> hendelser;
+    public final static String NAVIDENT_FIELD = "navIdent";
+    public final static String PERSONIDENT_FIELD = "personIdent";
 
-    public Ressurs(List<HendelseTo> hendelser) {
+    private final List<Hendelse> hendelser;
+
+    public Ressurs(List<Hendelse> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(HendelseTo::getOpprettet))
-                .collect(toUnmodifiableList());
+                .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
     }
 
     public UUID getId() {
         return hendelser.stream()
                 .findFirst()
-                .map(e -> e.getData().get("fid").asText())
-                .map(UUID::fromString)
+                .map(Hendelse::getFunksjonellId)
                 .orElseThrow();
     }
 
     public String getPersonIdent() {
-        return getLast("personIdent").orElseThrow();
+        return getLast(PERSONIDENT_FIELD).orElseThrow();
     }
 
     public String getNavIdent() {
-        return getLast("navIdent").orElseThrow();
+        return getLast(NAVIDENT_FIELD).orElseThrow();
     }
 
     private Optional<String> getLast(String property) {
@@ -47,12 +44,5 @@ public class Ressurs {
                 .filter(Objects::nonNull)
                 .map(JsonNode::asText)
                 .reduce((a, b) -> b);
-    }
-
-    public Ressurs append(List<HendelseTo> appended) {
-        val newHendelser = new ArrayList<HendelseTo>(hendelser.size() + appended.size());
-        newHendelser.addAll(hendelser);
-        newHendelser.addAll(appended);
-        return new Ressurs(newHendelser);
     }
 }

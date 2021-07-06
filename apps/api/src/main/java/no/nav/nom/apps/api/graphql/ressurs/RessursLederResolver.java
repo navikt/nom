@@ -3,12 +3,12 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLResolver;
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.domain.RessursRepository;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
+import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.libs.utils.common.util.DateUtil;
@@ -25,7 +25,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.distinctByKey;
 public class RessursLederResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
-    private final RessursRepository ressursRepository;
+    private final RessursService ressursService;
 
     public DataFetcherResult<List<RessursLeder>> ledere(Ressurs ressurs) {
         final List<RessursLeder> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
@@ -71,7 +71,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
         return dvhRepository.getLederByAgressoId(agressoId)
                 .stream()
                 .map(DvhLeder::getNavIdent)
-                .map(ressursRepository::findByNavIdent)
+                .map(ressursService::findByNavIdent)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(r -> !r.getNavIdent().equals(excludeNavIdent))

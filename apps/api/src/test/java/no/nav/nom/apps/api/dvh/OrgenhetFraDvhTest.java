@@ -11,22 +11,20 @@ public class OrgenhetFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("Orgenhet fra datavarehus med ikke-aktiv status ignoreres")
     void test1() {
-        simulateSyncedWithKafka();
         stubEnheter("responses/dvhdiff/dvhOrgenhet2_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        var alle = this.orgenhetRepository.getAlleOrgEnhetById().values();
+        var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(0);
     }
 
     @Test
     @DisplayName("Nav ventelønn og deltar i rekruttering ignoreres")
     void test2() {
-        simulateSyncedWithKafka();
         stubEnheter("responses/dvhdiff/dvhOrgenhet3_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        var alle = this.orgenhetRepository.getAlleOrgEnhetById().values();
+        var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(2);
     }
 

@@ -15,7 +15,6 @@ public class AppProperties {
 
     private final Proxy proxy;
     private final Pdl pdl;
-    private final Hendelse hendelse;
     @Setter
     private String appName;
 
@@ -34,13 +33,5 @@ public class AppProperties {
         String tema;
         String aadClientId;
         String baseUrl;
-    }
-
-    @Value
-    public static class Hendelse {
-
-        String topic;
-        String aadClientId;
-
     }
 }

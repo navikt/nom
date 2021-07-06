@@ -21,42 +21,36 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("Ressurser fra datavarehus blir tilgjengelige i ressurs repo")
     public void test1() {
-        simulateSyncedWithKafka();
         stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        val alleRessurserAntall = this.ressursRepository.getAlleRessurser().size();
+        val alleRessurserAntall = ressursService.getAll().size();
         assertThat(alleRessurserAntall).isEqualTo(4);
     }
 
     @Test
     @DisplayName("1 ny ressurs og 1 endring av personnummer gir riktig antall på hendelser og ressurser")
     public void test2() {
-        simulateSyncedWithKafka();
-
         stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After1.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        val alleRessurser = this.ressursRepository.getAlleRessurser();
+        val alleRessurser = ressursService.getAll();
         assertThat(alleRessurser.size()).isEqualTo(5);
-        assertThat(ressursRepository.countHendelser()).isEqualTo(6);
     }
 
     @Test
     @DisplayName("endring av personnummer i dvh snapshot blir oppdaget")
     public void test3() {
-        simulateSyncedWithKafka();
-
         stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvhAndUpdateRepo();
-        val fnrPre = ressursRepository.findByNavIdent("O123459").get().getPersonIdent();
+        loadFromDvh();
+        val fnrPre = ressursService.findByNavIdent("O123459").get().getPersonIdent();
 
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After2.json");
-        loadFromDvhAndUpdateRepo();
-        val fnrAfter = ressursRepository.findByNavIdent("O123459").get().getPersonIdent();
+        loadFromDvh();
+        val fnrAfter = ressursService.findByNavIdent("O123459").get().getPersonIdent();
 
         assertThat(fnrPre).isNotEqualTo(fnrAfter);
         assertThat(fnrAfter).isEqualTo("92345678904");
@@ -65,17 +59,15 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("ny navident på eksisterende personnummer har ingen effekt")
     public void test4() {
-        simulateSyncedWithKafka();
-
         stubRessurser("responses/dvhdiff/dvhAnsatt2_SinglePre.json");
-        loadFromDvhAndUpdateRepo();
-        val hashedRessursDataPre = hashedRessurser(ressursRepository.getAlleRessurser());
+        loadFromDvh();
+        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
 
         stubRessurser("responses/dvhdiff/dvhAnsatt2_SingleEndretNavIdent.json");
-        verifyZeroKafkaMessages();
-        val hashedRessursDataPost = hashedRessurser(ressursRepository.getAlleRessurser());
+        loadFromDvh();
+        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
 
-        val antallRessurserIRepo = ressursRepository.getAlleRessurser().size();
+        val antallRessurserIRepo = ressursService.getAll().size();
 
         assertThat(antallRessurserIRepo).isEqualTo(1);
         assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
@@ -84,20 +76,50 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("navident/rad fjernet fra dvh har ingen effekt")
     public void test5() {
-        simulateSyncedWithKafka();
-
         stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvhAndUpdateRepo();
-        val hashedRessursDataPre = hashedRessurser(ressursRepository.getAlleRessurser());
+        loadFromDvh();
+        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
 
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After3.json");
-        verifyZeroKafkaMessages();
-        val hashedRessursDataPost = hashedRessurser(ressursRepository.getAlleRessurser());
+        loadFromDvh();
+        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
 
-        val antallRessurserIRepo = ressursRepository.getAlleRessurser().size();
+        val antallRessurserIRepo = ressursService.getAll().size();;
 
         assertThat(antallRessurserIRepo).isEqualTo(4);
         assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
+    }
+
+    @Test
+    @DisplayName("Duplikat rader i responsen blir behandlet")
+    public void test6(){
+        stubRessurser("responses/dvh/dvhAnsatt3_duplikaterader.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavIdent("O123456").isPresent()).isTrue();
+        assertThat(ressursService.getAll().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Navidenter mappet til ulike personidenter blir filtrert bort")
+    public void test7(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammeNavidentForskjelligPnr.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavIdent("O123456").isEmpty()).isTrue();
+        assertThat(ressursService.getAll().size()).isEqualTo(0);
+
+    }
+
+    @Test
+    @DisplayName("Personidenter mappet til ulike navIdenter blir filtrert bort")
+    public void test8(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByPersonIdent("12345678901").isEmpty()).isTrue();
+        assertThat(ressursService.getAll().size()).isEqualTo(0);
+
     }
 
     // test helpers

@@ -5,7 +5,7 @@ Forslag til intern hendelsesmodell.
 == Grunnprinsipper og terminologier
 
 === Endringstyper
-En endringstype er den opprinnelige handlingen som ble gjort av en bruker.
+En hendelseType er den opprinnelige handlingen som ble gjort av en bruker.
 
 Når man snakker om endringstyper og hendelser, så vil alltids endringstyper være i fortid.
 Dette er fordi hendelsen er et resultat av noe som har skjedd og en logg på dette.
@@ -137,7 +137,7 @@ Note:
   "id": "bca0f4ca-5c62-4e0d-a991-78dfb7ce85c1",
   "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
   "type": "no.nav.nom:Operasjon:v1",
-  "endringstype": null,
+  "hendelseType": null,
   "opprettet": "2021-02-03T13:37:00Z",
   "data": {
     "fid": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
@@ -158,7 +158,7 @@ Note:
   "id": "39af382a-8ab0-4fbd-9ec1-baeab6ec9ec6",
   "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
   "type": "no.nav.nom:Enhet:v1",
-  "endringstype": "OPPRETTET",
+  "hendelseType": "OPPRETTET",
   "opprettet": "2021-02-03T13:37:00Z",
   "data": {
     "fid": "1edf5b33-a3f1-4388-9200-17fb6ea0a11b",
@@ -176,7 +176,7 @@ Note:
   "id": "7e586831-6c98-4e5a-a953-fcdc5e0d2359",
   "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
   "type": "no.nav.nom:Operasjon:v1",
-  "endringstype": null,
+  "hendelseType": null,
   "opprettet": "2021-03-03T13:37:00Z",
   "data": {
     "fid": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
@@ -195,7 +195,7 @@ Note:
   "id": "b65d953c-c666-4fe7-af47-aaf28a994b2e",
   "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
   "type": "no.nav.nom:Enhet:v1",
-  "endringstype": "KORRIGERT",
+  "hendelseType": "KORRIGERT",
   "opprettet": "2021-03-03T13:37:00Z",
   "data": {
     "fid": "1edf5b33-a3f1-4388-9200-17fb6ea0a11b",
@@ -220,14 +220,14 @@ I GraphQL blir det noe ala:
         "reqId": "0eb9f6bc-f65e-4958-b895-309d511b6a50",
         "opprettetAv": "G141145",
         "opprettet": "2021-02-03T13:37:00Z",
-        "endringstype": "OPPRETTET"
+        "hendelseType": "OPPRETTET"
       },
       {
         "hendelseId": "b65d953c-c666-4fe7-af47-aaf28a994b2e",
         "reqId": "417b9f12-f931-45cc-9ab9-ec6131aafe9c",
         "opprettetAv": "G141145",
         "opprettet": "2021-03-03T13:37:00Z",
-        "endringstype": "KORRIGERT"
+        "hendelseType": "KORRIGERT"
       }
     ]
   }

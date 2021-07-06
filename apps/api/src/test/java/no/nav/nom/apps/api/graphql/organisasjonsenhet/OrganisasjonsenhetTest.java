@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.repository.Hendelse;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
-import no.nav.nom.contract.nom.hendelse.HendelseTo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +34,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql med id parameter")
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", Organisasjonsenhet.class);
@@ -47,9 +46,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql med id parameter bulk")
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter bulk")
     void scenario112() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
@@ -61,9 +59,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Sender organisasjonsenhet inn fra kafka og leser fra graphql uten id parameter")
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql uten id parameter")
     void scenario12() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
@@ -72,9 +69,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, leser og validerer organiseringene")
+    @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario3.graphql", false);
@@ -91,9 +87,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Sender inn organisasjonsenheter organisert i hierarki fra kafka, filtrerer på retning")
+    @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario33.graphql", false);
@@ -112,8 +107,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
     void scenario31() {
-        HendelseTo hendelse = createRessursHendelse("");
-        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
+        Hendelse hendelse = createRessursHendelse("");
+        saveHendelser(hendelse);
 
         dvhRestConsumer.loadFromDvh();
 
@@ -131,7 +126,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario32.graphql", false);
@@ -147,10 +141,10 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
     void scenario34() {
-        HendelseTo hendelse = createRessursHendelse("");
+        Hendelse hendelse = createRessursHendelse("");
 
         pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
-        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
+        saveHendelser(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
@@ -166,8 +160,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        HendelseTo hendelse = createRessursHendelse("");
-        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
+        Hendelse hendelse = createRessursHendelse("");
+        saveHendelser(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
@@ -190,7 +184,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        kafkaUtils.sendHendelseFromKafkaMock();
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
@@ -203,9 +196,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        HendelseTo hendelse = createRessursHendelse("");
+        Hendelse hendelse = createRessursHendelse("");
         pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
-        kafkaUtils.sendHendelseFromKafkaMock(hendelse);
+        saveHendelser(hendelse);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);

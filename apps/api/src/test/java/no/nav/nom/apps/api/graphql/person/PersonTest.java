@@ -18,7 +18,7 @@ public class PersonTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som er ressurs")
     void scenario1() {
-        kafkaUtils.sendHendelseFromKafkaMock(createRessursHendelse("3"));
+        saveHendelser(createRessursHendelse("3"));
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3");
 
         val response = postForResource("person/scenario1.graphql", false, Map.of("fnr", "testPersonIdent3"));

@@ -13,5 +13,4 @@ public class DvhRessurs {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
     }
-
 }

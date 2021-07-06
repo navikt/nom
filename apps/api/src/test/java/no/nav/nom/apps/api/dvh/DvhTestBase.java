@@ -1,10 +1,9 @@
 package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.domain.OrgenhetRepository;
-import no.nav.nom.apps.api.domain.RessursRepository;
+import no.nav.nom.apps.api.domain.OrgenhetService;
+import no.nav.nom.apps.api.domain.RessursService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,13 +13,10 @@ public abstract class DvhTestBase extends TestBase {
     protected DvhRestConsumer dvhRestConsumer;
 
     @Autowired
-    protected RessursRepository ressursRepository;
+    protected RessursService ressursService;
 
     @Autowired
-    protected OrgenhetRepository orgenhetRepository;
-
-    @Autowired
-    protected KafkaUtils kafkaUtils;
+    protected OrgenhetService orgenhetService;
 
     @Autowired
     protected ObjectMapper om;
@@ -31,18 +27,9 @@ public abstract class DvhTestBase extends TestBase {
     @AfterEach
     protected void clearRepository() {
         dvhRepository.clearRepository();
-        ressursRepository.clearRepository();
-        orgenhetRepository.clearRepository();
     }
 
-    protected void loadFromDvhAndUpdateRepo() {
+    protected void loadFromDvh() {
         dvhRestConsumer.loadFromDvh();
-        var records = getRecordsFromKafka(true);
-        kafkaUtils.sendHendelseFromKafkaMock(records);
     }
-
-    protected void simulateSyncedWithKafka() {
-        kafkaUtils.sendHendelseFromKafkaMock();
-    }
-
 }

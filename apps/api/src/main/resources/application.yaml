@@ -7,15 +7,13 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
-  hendelse:
-    topic: ${EVENT_SOURCE_TOPIC:nom.event.source.v1}
 
 nom:
   libs:
     utils:
       common:
         kafka:
-          load-properties: true
+          load-properties: false
         app:
           load-properties: true
 
@@ -39,13 +37,17 @@ graphql:
     cors:
       allowed-origins: "*"
 
-
-spring.kafka.consumer.max-poll-records: 1000
-
 # Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
 management.endpoints.web.exposure.include: health,prometheus
 
 spring:
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
   security:
     oauth2:
       resourceserver:

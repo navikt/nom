@@ -3,16 +3,17 @@ package no.nav.nom.apps.api.dvh;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.domain.RessursRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.domain.RessursService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,7 +29,7 @@ public class DvhRepository {
     private Map<String, List<DvhLeder>> lederByEnhetNr;
     private Map<String, List<DvhOrganisering>> organiseringerByAgressoId;
     private List<DvhKobling> koblinger;
-    private final RessursRepository ressursRepository;
+    private final RessursService ressursService;
 
     public Optional<DvhOrganisasjonsenhet> getEnhetByAgressoId(String agressoId) {
         return Optional.ofNullable(enheterByNumber.get(agressoId));
@@ -78,7 +79,7 @@ public class DvhRepository {
                     val enhet = getEnhetByAgressoId(entry.getKey());
                     val ledere = new ArrayList<>(entry.getValue());
                     ledere.forEach(l -> {
-                        val ressurs = ressursRepository.findByNavIdent(l.getNavIdent());
+                        val ressurs = ressursService.findByNavIdent(l.getNavIdent());
                         if(enhet.isEmpty() && ressurs.isEmpty()){
                             log.info("Leder relasjon mislyktes, enhet: "+entry.getKey()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
                         } else if(enhet.isEmpty()){
@@ -120,11 +121,17 @@ public class DvhRepository {
     }
 
     public void saveKoblinger(List<DvhKobling> koblinger) {
-        this.koblinger = Collections.synchronizedList(
-                koblinger.stream()
-                .filter(k -> {
+
+        val list = Collections.synchronizedList(new LinkedList<DvhKobling>());
+
+        val bulkSize = 10000;
+        for(int i = 0; i<koblinger.size(); i+=bulkSize){
+            val selection = koblinger.subList(i, Math.min(i + bulkSize, koblinger.size()));
+            val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(DvhKobling::getNavIdent).toList());
+
+            selection.forEach(k -> {
                         val organisasjonsenhet = getEnhetByAgressoId(k.getAgressoId()).orElse(null);
-                        val dvhRessurs = ressursRepository.findByNavIdent(k.getNavIdent()).orElse(null);
+                        val dvhRessurs = ressursByNavIdent.get(k.getNavIdent());
                         if (organisasjonsenhet == null && dvhRessurs == null) {
                             log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {
@@ -132,12 +139,13 @@ public class DvhRepository {
                         } else if (dvhRessurs == null) {
                             log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
                         } else {
-                            return true;
+                            list.add(k);
                         }
-                    return false;
-                })
-                .collect(Collectors.toList())
-        );
+                    }
+            );
+        }
+
+        this.koblinger = list;
     }
 
     public void clearRepository() {
@@ -148,6 +156,7 @@ public class DvhRepository {
 
     public List<DvhKobling> getKoblingerByNavIdent(String navIdent) {
         return getAllKoblinger().stream()
-                .filter(s -> s.getNavIdent().equals(navIdent)).toList();
+                .filter(s -> s.getNavIdent().equals(navIdent))
+                .toList();
     }
 }

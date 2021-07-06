@@ -5,7 +5,7 @@ import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.domain.RessursRepository;
+import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PersonResolver implements GraphQLQueryResolver {
 
-    private final RessursRepository ressursRepository;
+    private final RessursService ressursService;
 
     public DataFetcherResult<PersonResult> person(ObjectNode objectNode, DataFetchingEnvironment env) {
         return SecurityUtil.<PersonResult>checkAuth(env).orElseGet(() -> {
@@ -27,7 +27,7 @@ public class PersonResolver implements GraphQLQueryResolver {
                         .build();
             }
             String personIdent = personIdentOptional.get();
-            var ressursResult = ressursRepository.findByPersonIdent(personIdent);
+            var ressursResult = ressursService.findByPersonIdent(personIdent);
 
             var personResult = PersonResult.builder().personIdent(personIdent);
             ressursResult.ifPresent(res -> personResult.nomId(res.getId()).navIdent(res.getNavIdent()));

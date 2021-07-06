@@ -2,11 +2,9 @@ package no.nav.nom.apps.api.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
-import lombok.val;
-import no.nav.nom.contract.nom.hendelse.HendelseTo;
+import no.nav.nom.apps.api.repository.Hendelse;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,18 +24,20 @@ import static java.util.Comparator.comparing;
 @Value
 public class Orgenhet {
 
-    List<HendelseTo> hendelser;
+    public final static String AGRESSO_ID_FIELD = "agressoId";
+    public final static String NAVN_FIELD = "navn";
 
-    public Orgenhet(List<HendelseTo> hendelser) {
+    List<Hendelse> hendelser;
+
+    public Orgenhet(List<Hendelse> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(HendelseTo::getOpprettet)).toList();
+                .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
     }
 
     public UUID getId() {
         return hendelser.stream()
                 .findFirst()
-                .map(e -> e.getData().get("fid").asText())
-                .map(UUID::fromString)
+                .map(Hendelse::getFunksjonellId)
                 .orElseThrow();
     }
 
@@ -63,12 +63,5 @@ public class Orgenhet {
                 .filter(Objects::nonNull)
                 .map(JsonNode::asText)
                 .reduce((a, b) -> b);
-    }
-
-    public Orgenhet append(List<HendelseTo> appended) {
-        val newHendelser = new ArrayList<HendelseTo>(hendelser.size() + appended.size());
-        newHendelser.addAll(hendelser);
-        newHendelser.addAll(appended);
-        return new Orgenhet(newHendelser);
     }
 }

@@ -8,7 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash,kafka
+      value: log-logstash
     - name: PDL_BASEURL
       value: https://pdl-api.dev-fss-pub.nais.io
     - name: PDL_CLIENT_ID
@@ -47,8 +47,6 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
-  kafka:
-    pool: nav-dev
   azure:
     application:
       enabled: true
@@ -74,3 +72,9 @@ spec:
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        databases:
+          - name: nom-api-db
+            envVarPrefix: DATABASE

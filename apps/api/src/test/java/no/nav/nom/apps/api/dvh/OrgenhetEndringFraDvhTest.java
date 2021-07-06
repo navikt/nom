@@ -4,7 +4,6 @@ import no.nav.nom.apps.api.domain.Orgenhet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -17,11 +16,10 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("Orgenhet fra datavarehus blir tilgjengelige i orgenhet repo")
     void test1() {
-        simulateSyncedWithKafka();
         stubEnheter("responses/dvhdiff/dvhOrgenhet1_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        var alle = this.orgenhetRepository.getAlleOrgEnhetById().values();
+        var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(5);
         alle.forEach(org -> assertThat(org.getNavn()).isEqualTo("testNavn"));
     }
@@ -29,13 +27,12 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
     @Test
     @DisplayName("Orgenhet fra datavarehus oppdaterer navn, manglende enheter røres ikke")
     void test2() {
-        simulateSyncedWithKafka();
         stubEnheter("responses/dvhdiff/dvhOrgenhet1_Pre.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
         stubEnheter("responses/dvhdiff/dvhOrgenhet1_Post.json");
-        loadFromDvhAndUpdateRepo();
+        loadFromDvh();
 
-        var alle = new ArrayList<>(this.orgenhetRepository.getAlleOrgEnhetById().values());
+        var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(6);
         alle.sort(Comparator.comparing(Orgenhet::getAgressoId));
 

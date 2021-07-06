@@ -221,32 +221,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>integration-test</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.dkanejs.maven.plugins</groupId>
-                        <artifactId>docker-compose-maven-plugin</artifactId>
-                        <version>${docker-compose-plugin.verson}</version>
-                        <executions>
-                            <execution>
-                                <id>up</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>up</goal>
-                                </goals>
-                                <configuration>
-                                    <composeFile>${maven.multiModuleProjectDirectory}/docker-compose.yml</composeFile>
-                                    <detachedMode>true</detachedMode>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>

@@ -5,17 +5,17 @@ networks:
     driver: bridge
 
 services:
-  postgres-enheter:
+  postgres-api:
     image: 'postgres:alpine'
     ports:
       - '5432:5432'
     environment:
       POSTGRES_PASSWORD: 'password'
-      POSTGRES_DB: 'postgres-enheter'
+      POSTGRES_DB: 'postgres-api'
   postgres-ressurs:
     image: 'postgres:alpine'
     ports:
-     - '5433:5432'
+      - '5433:5432'
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-ressurs'

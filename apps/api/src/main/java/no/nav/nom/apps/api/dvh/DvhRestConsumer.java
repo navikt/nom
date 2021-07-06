@@ -12,9 +12,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
-import no.nav.nom.apps.api.hendelse.HendelseListener;
-import no.nav.nom.apps.api.hendelse.OrgenhetHendelseService;
-import no.nav.nom.apps.api.hendelse.RessursHendelseService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -27,6 +24,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,25 +41,22 @@ import java.util.stream.StreamSupport;
 public class DvhRestConsumer {
 
     public static final String CACHE = "cache-source";
-    private final long LOAD_INTERVAL = 30 * 60 * 1000;
+    // increase while db is slow
+    private final long LOAD_INTERVAL = 12 * 60 * 60 * 1000;
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
-    private final HendelseListener hendelseListener;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final ApplicationEventPublisher appEventPublisher;
     private final RessursHendelseService ressursHendelseService;
     private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
 
-    @Scheduled(fixedDelay = LOAD_INTERVAL)
+    @Scheduled(fixedRate = LOAD_INTERVAL)
     @SneakyThrows
     public void loadFromDvh() {
-        while (!hendelseListener.getInitialLoadStatus()) {
-            Thread.sleep(2000);
-        }
         try {
             loadRessurserFromDvh();
             loadOrgenhetFromDvh();
@@ -83,15 +79,27 @@ public class DvhRestConsumer {
         }
     }
 
+    @SneakyThrows
     private void loadRessurserFromDvh() {
         if (!leaderElection.isLeader()) {
             return;
         }
         var jsonRessurser = dvhExchange("/proxy/ressurser");
 
-        StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
+        val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
                 .map(DvhRessurs::new)
-                .forEach(dvhRessurs -> ressursHendelseService.handterRessursIderFraDvh(dvhRessurs.getNavIdent(), dvhRessurs.getPersonIdent()));
+                .distinct()
+                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
+                .values().stream()
+                .filter(l -> l.size() == 1)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
+                .values().stream()
+                .filter(l -> l.size() == 1)
+                .flatMap(Collection::stream)
+                .toList();
+        
+        ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
     }
 
     private void loadKoblingerFromDvh() {
@@ -135,7 +143,7 @@ public class DvhRestConsumer {
                 });
 
         if (leaderElection.isLeader()) {
-            orgenheter.values().forEach(orgenhetHendelseService::handterOrgenhetFraDvh);
+            orgenhetHendelseService.handterOrgenhetFraDvh(orgenheter.values().stream().toList());
         }
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
@@ -172,8 +180,7 @@ public class DvhRestConsumer {
     }
 
     private boolean determineEnhetActive(JsonNode e) {
-        val enhetIsActive = e.get("ORGNODE_STATUS").asText().equals("N");
-        return enhetIsActive;
+        return e.get("ORGNODE_STATUS").asText().equals("N");
     }
 
     private boolean validateEnhet(JsonNode e) {

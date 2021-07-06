@@ -6,14 +6,13 @@ import com.graphql.spring.boot.test.GraphQLResponse;
 import com.graphql.spring.boot.test.GraphQLTestTemplate;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.KafkaUtils;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.domain.RessursRepository;
+import no.nav.nom.apps.api.domain.Ressurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.pdlutils.PdlUtils;
-import no.nav.nom.contract.nom.hendelse.HendelseTo;
-import no.nav.nom.contract.nom.hendelse.HendelseTo.Endringstype;
-import no.nav.nom.contract.nom.hendelse.Hendelsestyper;
+import no.nav.nom.apps.api.repository.Hendelse;
+import no.nav.nom.apps.api.repository.Hendelse.HendelseType;
+import no.nav.nom.apps.api.repository.Hendelse.DataType;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +32,6 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     private DvhRepository dvhRepository;
-    @Autowired
-    protected RessursRepository ressursRepository;
-
-    @Autowired
-    protected KafkaUtils kafkaUtils;
 
     @Autowired
     protected SecurityTestUtils securityTestUtils;
@@ -51,7 +45,6 @@ public abstract class GraphQLTestBase extends TestBase {
     @AfterEach
     protected void clearRepository() {
         dvhRepository.clearRepository();
-        ressursRepository.clearRepository();
         pdlUtils.reset();
     }
 
@@ -76,34 +69,35 @@ public abstract class GraphQLTestBase extends TestBase {
         return response;
     }
 
-    protected HendelseTo createRessursHendelse(String suffix) {
-        return createRessursHendelse(UUID.randomUUID().toString(), "testNavIdent" + suffix, "testPersonIdent" + suffix);
+    protected Hendelse createRessursHendelse(String suffix) {
+        return createRessursHendelse(UUID.randomUUID(), "testNavIdent" + suffix, "testPersonIdent" + suffix);
     }
 
-    protected HendelseTo createRessursHendelse(String nomId, String navIdent, String fnr) {
+    protected Hendelse createRessursHendelse(UUID fid, String navIdent, String fnr) {
         return createHendelse(Map.of(
-                "fid", nomId,
-                "navIdent", navIdent,
-                "personIdent", fnr
-        ), Endringstype.OPPRETTET, Hendelsestyper.RESSURS_V1);
+                Ressurs.NAVIDENT_FIELD, navIdent,
+                Ressurs.PERSONIDENT_FIELD, fnr
+        ), HendelseType.OPPRETTET, DataType.RESSURS_V1, fid);
     }
 
-    protected HendelseTo createHendelse(Map<String, Object> data, Endringstype endringstype, Hendelsestyper hendelsestyper) {
-        return HendelseTo.builder()
-                .id(UUID.randomUUID())
-                .reqId(UUID.randomUUID())
-                .type(hendelsestyper.getKey())
+    protected Hendelse createHendelse(Map<String, Object> data, HendelseType hendelseType, DataType dataType, UUID fid) {
+        return Hendelse.builder()
+                .hendelseID(UUID.randomUUID())
+                .funksjonellId(fid)
+                .foresporselId(UUID.randomUUID())
+                .tidligereId(null)
+                .dataType(dataType)
+                .hendelseType(hendelseType)
                 .data(om.convertValue(data, ObjectNode.class))
-                .opprettet(LocalDateTime.now())
-                .endringstype(endringstype)
+                .opprettetTidspunkt(LocalDateTime.now())
                 .build();
     }
 
-    protected String getPersonIdent(HendelseTo hendelse) {
-        return hendelse.getData().get("personIdent").asText();
+    protected String getPersonIdent(Hendelse hendelse) {
+        return hendelse.getData().get(Ressurs.PERSONIDENT_FIELD).asText();
     }
 
-    protected String getNavIdent(HendelseTo hendelse) {
-        return hendelse.getData().get("navIdent").asText();
+    protected String getNavIdent(Hendelse hendelse) {
+        return hendelse.getData().get(Ressurs.NAVIDENT_FIELD).asText();
     }
 }
