@@ -43,7 +43,7 @@ public class DvhRestConsumer {
 
     public static final String CACHE = "cache-source";
     // increase while db is slow
-    private final long LOAD_INTERVAL = 60 * 1000;
+    private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
@@ -56,7 +56,6 @@ public class DvhRestConsumer {
     private final LeaderElection leaderElection;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    @Transactional
     public void loadFromDvh() {
         try {
             loadRessurserFromDvh();
