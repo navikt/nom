@@ -29,6 +29,7 @@ function Sidepanel(): JSX.Element {
       <Link to="/medarbeidere">Medarbeidere</Link>
       <Link to="/bestillinger">Bestillinger</Link>
       <Link to="/bestillingsgodkjenning">Godkjenning</Link>
+      {/* <Link to="/enhetstyper">Enhetstyper</Link> */}
       <hr />
       <Link to="/graphql">Graphql</Link>
     </SidepanelStickyContent>
@@ -37,7 +38,7 @@ function Sidepanel(): JSX.Element {
 
 function Loginbox(): JSX.Element {
   const [res] = useFetchLoggedInName();
-  const [res2, setRes2] = useLocalstorageState("loginName","");
+  const [res2, setRes2] = useLocalstorageState("loginName", "");
   let loginName = res2 ?? "???";
   if (res.lookupState === "RESOLVED") {
     loginName = res.result;

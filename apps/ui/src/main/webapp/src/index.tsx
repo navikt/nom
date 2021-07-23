@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {BrowserRouter, Redirect, Route, Switch} from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import About from "./pages/about/About";
 import Graphql from "./pages/graphql/Graphql";
 import Organisasjonsenheter from "./pages/organisasjonsenheter/Organisasjonsenheter";
@@ -14,49 +14,53 @@ import Bestillingsgodkjenning from "./pages/bestillingsgodkjenning/Bestillingsgo
 import Nybruker from "./pages/bestillinger/nybruker/Nybruker";
 import Nompagewrap from "./components/nompagewrap/Nompagewrap";
 import Nyenhet from "./pages/bestillinger/nyenhet/Nyenhet";
-import {ApolloProvider} from '@apollo/client';
-import {apolloClient} from './api/apollo_client';
-import {BestillingList} from './pages/bestillinger/list/BestillingList';
-import {BestillingContext, useBestillingContext} from "./pages/bestillinger/BestillingContext";
+import { ApolloProvider } from "@apollo/client";
+import { apolloClient } from "./api/apollo_client";
+import { BestillingList } from "./pages/bestillinger/list/BestillingList";
+import {
+  BestillingContext,
+  useBestillingContext,
+} from "./pages/bestillinger/BestillingContext";
+import Enhetstyper from "./pages/enhetstyper/Enhetstyper";
 
 function AppRouter(): JSX.Element {
   return (
     <Switch>
       <Route exact path="/index.html">
-        <Redirect to="/"/>
+        <Redirect to="/" />
       </Route>
       <Route exact path="/">
-        <Root/>
+        <Root />
       </Route>
       <Route exact path="/about">
-        <About/>
+        <About />
       </Route>
       <Route exact path="/graphql">
-        <Redirect to="/graphql/4121803"/>
+        <Redirect to="/graphql/4121803" />
       </Route>
       <Route exact path="/graphql/:id">
-        <Graphql/>
+        <Graphql />
       </Route>
       <Route exact path="/organisasjonsenheter">
-        <Redirect to="/organisasjonsenheter/NAV"/>
+        <Redirect to="/organisasjonsenheter/NAV" />
       </Route>
       <Route exact path="/organisasjonsenheter/:id">
-        <Organisasjonsenheter/>
+        <Organisasjonsenheter />
       </Route>
       <Route exact path="/medarbeidere">
-        <MedarbeidereLinkview/>
+        <MedarbeidereLinkview />
       </Route>
       <Route exact path="/medarbeidere/:id">
-        <MedarbeidereLinkview/>
+        <MedarbeidereLinkview />
       </Route>
       <Route exact path="/bestillinger">
-        <Bestillinger/>
+        <Bestillinger />
       </Route>
       <Route exact path="/bestillinger/nybruker">
-        <Nybruker/>
+        <Nybruker />
       </Route>
       <Route exact path="/bestillinger/nyenhet">
-        <Nyenhet/>
+        <Nyenhet />
       </Route>
       <Route exact path="/bestillinger/flytteenhet">
         <Nompagewrap pagetitle="Flytte enhet">...TODO</Nompagewrap>
@@ -71,14 +75,17 @@ function AppRouter(): JSX.Element {
         <Nompagewrap pagetitle="Kategoriser enhet">...TODO</Nompagewrap>
       </Route>
       <Route exact path="/bestillinger/list">
-        <BestillingList/>
+        <BestillingList />
       </Route>
       <Route exact path="/bestillingsgodkjenning">
-        <Bestillingsgodkjenning/>
+        <Bestillingsgodkjenning />
+      </Route>
+      <Route exact path="/enhetstyper">
+        <Enhetstyper />
       </Route>
       <Route>
         {/* default..  */}
-        <Redirect to="/"/>
+        <Redirect to="/" />
       </Route>
     </Switch>
   );
@@ -87,7 +94,7 @@ function AppRouter(): JSX.Element {
 function Main(): JSX.Element {
   return (
     <BestillingContext.Provider value={useBestillingContext()}>
-      <AppRouter/>
+      <AppRouter />
     </BestillingContext.Provider>
   );
 }
@@ -96,7 +103,7 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <ApolloProvider client={apolloClient}>
-        <Main/>
+        <Main />
       </ApolloProvider>
     </BrowserRouter>
   </React.StrictMode>,
