@@ -35,6 +35,14 @@ public class RessursService {
         );
     }
 
+    public List<Ressurs> matchByNavident(String navident) {
+        return hendelseRepository
+                .findHendelserByJsonMatch(Ressurs.NAVIDENT_FIELD, navident.toLowerCase())
+                .stream().collect(Collectors.groupingBy(Hendelse::getFunksjonellId))
+                .values().stream().map(this::convert)
+                .collect(Collectors.toList());
+    }
+
     public Optional<Ressurs> findByPersonIdent(String personIdent){
         return Optional.ofNullable(
                 convert(hendelseRepository.findHendelseByJson(Ressurs.PERSONIDENT_FIELD, personIdent))

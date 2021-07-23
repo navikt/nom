@@ -38,6 +38,16 @@ public class OrgenhetService {
         );
     }
 
+    public List<Orgenhet> matchBy(String field, String fieldValue) {
+        return hendelseRepository
+                .findHendelserByJsonMatch(field, fieldValue.toLowerCase())
+                .stream()
+                .collect(Collectors.groupingBy(Hendelse::getFunksjonellId))
+                .values().stream()
+                .map(this::convert)
+                .collect(Collectors.toList());
+    }
+
     public Map<String, Orgenhet> findByAgressoIdBulk(List<String> agressoIder) {
         return hendelseRepository.findHendelseByJsonBulk(AGRESSO_ID_FIELD, agressoIder).stream()
                 .collect(Collectors.groupingBy(Hendelse::getFunksjonellId))

@@ -25,4 +25,8 @@ public interface HendelseRepository extends JpaRepository<Hendelse, UUID> {
                     "WHERE b.data ->> :jsonFieldKey IN (:jsonFieldValue)",
             nativeQuery = true)
     List<Hendelse> findHendelseByJsonBulk(String jsonFieldKey, List<String> jsonFieldValue);
+
+    @Query(value = "SELECT * FROM T_HENDELSER WHERE lower(data ->> :jsonFieldKey) like :jsonFieldValue%",
+            nativeQuery = true)
+    List<Hendelse> findHendelserByJsonMatch(String jsonFieldKey, String jsonFieldValue);
 }
