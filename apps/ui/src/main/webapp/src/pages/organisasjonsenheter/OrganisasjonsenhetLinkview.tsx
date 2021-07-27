@@ -7,6 +7,7 @@ import AlertStripe from "nav-frontend-alertstriper";
 import Contentbox from "../../components/contentbox/Contentbox";
 import {GqlOrganisasjonsenhet, GqlRessurs} from "../../common/gqltypes";
 import {ItemLink} from '../../components/navfrontend/ItemLink';
+import LabeledItemsgrid from "../../components/labeleditemsgrid/Labeleditemsgrid";
 
 const nullText = '[null]';
 
@@ -159,14 +160,14 @@ function LocalTable(props: {orgenhetData?: OrgEnhetData}): JSX.Element {
 
   const infoVisning = (
     <Contentbox label="Info">
-      <div className="OrganisasjonsenhetLinkView__Infovisning">
+      <LabeledItemsgrid>
         <label>Enhetsnavn: </label>
         <div>{props.orgenhetData.data.enhetNavn}</div>
         <label>Enhet agresso-nr</label>
         <div>{props.orgenhetData.data.enhetNr}</div>
         <label>Enhet type</label>
         <div>{props.orgenhetData.data.enhetType}</div>
-      </div>
+      </LabeledItemsgrid>
     </Contentbox>
   );
 

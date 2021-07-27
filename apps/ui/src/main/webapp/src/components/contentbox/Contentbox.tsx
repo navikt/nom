@@ -7,7 +7,7 @@ export default function Contentbox(props: {
   return (
     <div className="Contentbox">
       <span className="Contentbox__label">{props.label}</span>
-      <div className="Contentbox__children">{props.children}</div>
+      {props.children && <div className="Contentbox__children">{props.children}</div>}
     </div>
   );
 }

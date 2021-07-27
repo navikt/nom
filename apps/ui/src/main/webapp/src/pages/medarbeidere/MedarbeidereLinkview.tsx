@@ -8,6 +8,7 @@ import {fulltNavnForRessurs} from "../../common/navnutils";
 import Contentbox from "../../components/contentbox/Contentbox";
 import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 import {ItemLink} from '../../components/navfrontend/ItemLink';
+import LabeledItemsgrid from "../../components/labeleditemsgrid/Labeleditemsgrid";
 
 export interface Medarbeider {
   navIdent: string;
@@ -102,7 +103,7 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
 
 function Infopanel(props: {medarbeider: Medarbeider}): JSX.Element {
   return (
-    <div className="MedarbeidereLinkview__Infopanel">
+    <LabeledItemsgrid>
       <label htmlFor="navIdentHeader">Nav-ident: </label>
       <span id="navIdentHeader">{props.medarbeider.navIdent}</span>
       <label htmlFor="fulltNavnHeader">Navn: </label>
@@ -123,7 +124,7 @@ function Infopanel(props: {medarbeider: Medarbeider}): JSX.Element {
           </span>
         </Fragment>
       ) : null}
-    </div>
+    </LabeledItemsgrid>
   );
 }
 

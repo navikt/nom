@@ -1,0 +1,17 @@
+.Labeleditemsgrid {
+  display: grid;
+  padding: 0.2rem;
+  grid-template-columns: minmax(6rem, min-content) 4fr;
+  row-gap: 1rem;
+  label {
+    font-style: italic;
+    color: #393939;
+  }
+  :nth-child(2n) {
+    &:before {
+      content: "-";
+      padding: 0rem 2rem 0 0.5rem;
+      // color: hsl(0, 0%, 95%);
+    }
+  }
+}
