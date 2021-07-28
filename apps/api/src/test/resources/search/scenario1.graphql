@@ -1,0 +1,15 @@
+query {
+    search(term:"testNavIdent") {
+        ... on Ressurs {
+            navIdent
+            personIdent
+            person {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+            }
+        }
+    }
+}

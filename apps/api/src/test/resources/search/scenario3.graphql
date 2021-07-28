@@ -1,0 +1,14 @@
+query {
+    search(term: "testnavn") {
+        ... on Organisasjonsenhet {
+            agressoId
+            navn
+            gyldigFom
+            gyldigTom
+            type {
+                kode
+                navn
+            }
+        }
+    }
+}

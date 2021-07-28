@@ -10,10 +10,8 @@ import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
