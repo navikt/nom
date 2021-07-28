@@ -48,8 +48,7 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
             navn
             gyldigFom
             gyldigTom
-            organiseringer {
-              retning
+            underenheter: organiseringer(retning: under) {
               organisasjonsenhet{
                 navn
                 agressoId
@@ -57,6 +56,13 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
                   kode
                   navn
                 }
+              }
+            }
+            overenheter: organiseringer(retning: over) {
+              retning
+              organisasjonsenhet{
+                navn
+                agressoId
                 organiseringer(retning: over) {
                   retning
                   organisasjonsenhet{
