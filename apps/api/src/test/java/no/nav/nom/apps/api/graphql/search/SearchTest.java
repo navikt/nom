@@ -19,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 
 @DisplayName("GraphQL.Search")
@@ -40,7 +41,7 @@ public class SearchTest extends GraphQLTestBase {
         assertThat(searchResults, hasSize(2));
 
         val navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
-        assertThat(navidenter, contains("testNavIdent1", "testNavIdent2"));
+        assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
     }
 
     @Test
