@@ -7,8 +7,7 @@ function LinkWithoutVisited(props: {
 }): JSX.Element {
   return (
     <Link
-      className="Contentcard__Linkwithoutvisited {
-      "
+      className="Contentcard__Linkwithoutvisited Contentcard__Linkcentered"
       to={props.to}
     >
       {props.children}
@@ -29,11 +28,11 @@ export function LinkCard(props: {
 }): JSX.Element {
   return (
     <Contentcard>
-      <div className="Contentcard__Genericcenter">
-        <h2>
+      {/* <div className="Contentcard__Genericcenter"> */}
+        <h2 className="Contentcard__centeredtext">
           <LinkWithoutVisited to={props.uri}>{props.title}</LinkWithoutVisited>
         </h2>
-      </div>
+      {/* </div> */}
       {props.children}
     </Contentcard>
   );
