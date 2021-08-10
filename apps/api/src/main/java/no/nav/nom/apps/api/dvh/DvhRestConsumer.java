@@ -108,19 +108,6 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-        val dvhRessurs2 = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
-                .map(DvhRessurs::new)
-                .distinct()
-                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
-                .values().stream()
-                .filter(l -> l.size() == 1)
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
-                .values().stream()
-                .filter(l -> l.size() == 1)
-                .flatMap(Collection::stream)
-                .toList();
-
         ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
     }
 
