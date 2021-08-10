@@ -13,6 +13,6 @@ public class DvhRessurs {
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
-        remedyAktiv = node.get("REMEDY_AKTIV").asText().equals("JA");
+        remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
     }
 }
