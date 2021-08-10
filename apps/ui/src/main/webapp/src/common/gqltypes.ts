@@ -37,7 +37,7 @@ export interface GqlOrganisasjonsenhet {
   gyldigFom: string;
   gyldigTom: string;
   organiseringer: GqlOrganisering[];
-  ledere: GqlOrganisasjonsenhetsLeder[];
+  leder: GqlOrganisasjonsenhetsLeder[];
   koblinger: GqlOrganisasjonsenhetsKobling[];
   type?: Kode;
 }

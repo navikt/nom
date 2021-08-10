@@ -83,7 +83,9 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
     return out as Ressurs;
   });
 
-  const ledereData = organisasjonsenhet.ledere;
+  console.log({organisasjonsenhet});
+
+  const ledereData = organisasjonsenhet.leder ?? [];
 
   return {
     data: {
