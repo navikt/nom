@@ -12,6 +12,7 @@ import AlertStripe from "nav-frontend-alertstriper";
 import Contentbox from "../../components/contentbox/Contentbox";
 import {
   GqlOrganisasjonsenhet,
+  GqlOrganisasjonsenhetsLeder,
   GqlOrganisering,
   GqlRessurs,
 } from "../../common/gqltypes";
@@ -82,7 +83,7 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
     return out as Ressurs;
   });
 
-  const lederData = organisasjonsenhet.leder[0];
+  const ledereData = organisasjonsenhet.ledere;
 
   return {
     data: {
@@ -104,11 +105,14 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
       underEnheter: underEnheter,
       ressurser: ressurser,
     },
-    leder: {
-      id: lederData ? lederData.ressurs.navIdent : "ukjent",
-      pnr: lederData ? lederData.ressurs.personIdent : "ukjent",
-      person: lederData ? lederData.ressurs.person : undefined,
-    },
+    ledere: ledereData.map((it) => {
+      const res = it.ressurs;
+      return {
+        id: res.navIdent,
+        pnr: res.personIdent,
+        person: res.person,
+      };
+    }),
   };
 }
 
@@ -162,11 +166,13 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
     }
   });
 
-  const leder: Ressurs = props.orgenhetData.leder;
+  const ledere: Ressurs[] = props.orgenhetData.ledere;
 
   const lederVisning = (
     <Contentbox label="Leder">
-      <LeaderBox ressurs={leder} />
+      {ledere.map((it) => (
+        <LeaderBox key={it.id} ressurs={it} />
+      ))}
     </Contentbox>
   );
 

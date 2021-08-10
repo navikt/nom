@@ -13,7 +13,7 @@ export interface OrgEnhetKoblinger {
 export interface OrgEnhetData {
   data: OrgEnhetFelter;
   koblinger: OrgEnhetKoblinger;
-  leder: Ressurs;
+  ledere: Ressurs[];
 }
 
 export interface OrganisasjonsEnhet {
