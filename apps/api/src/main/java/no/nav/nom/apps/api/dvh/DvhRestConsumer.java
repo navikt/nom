@@ -22,10 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -91,6 +90,29 @@ public class DvhRestConsumer {
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
                 .values().stream()
+                .peek(l -> {
+                    if(l.size() > 1){
+                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
+                        if(l.size() > 1){
+                            val personIdent = l.get(0).getPersonIdent();
+                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
+                            log.warn("Forkastet lesing av ansatt med personident "+personIdent+" har flere aktive navidenter: "+navIdenter);
+                            l.clear();
+                        }
+                    }
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
+                .values().stream()
+                .filter(l -> l.size() == 1)
+                .flatMap(Collection::stream)
+                .toList();
+
+        val dvhRessurs2 = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
+                .map(DvhRessurs::new)
+                .distinct()
+                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
+                .values().stream()
                 .filter(l -> l.size() == 1)
                 .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
@@ -98,7 +120,7 @@ public class DvhRestConsumer {
                 .filter(l -> l.size() == 1)
                 .flatMap(Collection::stream)
                 .toList();
-        
+
         ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
     }
 
