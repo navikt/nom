@@ -2,6 +2,7 @@ import { gql, useQuery } from "@apollo/client";
 import React from "react";
 import { GqlOrganisasjonsenhet, GqlRessurs } from "../../common/gqltypes";
 import { Link } from "react-router-dom";
+import { agressoIdDataToUrl } from "../../common/url_utils";
 
 const query = gql`
   query search($term: String!) {
@@ -13,6 +14,7 @@ const query = gql`
       ... on Organisasjonsenhet {
         navn
         agressoId
+        orgNiv
       }
     }
   }
@@ -58,7 +60,7 @@ function SearchboxLine(
         <div {...lineProps}>
           <Link
             {...lineLinkProps}
-            to={"/organisasjonsenheter/" + orgenhet.agressoId}
+            to={"/organisasjonsenheter/" + agressoIdDataToUrl(orgenhet.agressoId,orgenhet.orgNiv)}
           >
             Orgenhet: {orgenhet.navn}
           </Link>

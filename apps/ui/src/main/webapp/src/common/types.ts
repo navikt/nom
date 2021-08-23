@@ -1,5 +1,6 @@
 export interface OrgEnhetFelter {
   enhetNr: string;
+  enhetNiva: string;
   enhetNavn: string;
   enhetType: string;
 }

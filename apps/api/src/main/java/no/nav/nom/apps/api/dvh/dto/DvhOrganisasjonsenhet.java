@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public class DvhOrganisasjonsenhet {
 
     String agressoId;
+    String orgNiv;
     String navn;
     String agressoOrgType;
     LocalDate gyldigFom;
@@ -16,6 +17,7 @@ public class DvhOrganisasjonsenhet {
 
     public DvhOrganisasjonsenhet(JsonNode node) {
         this.agressoId = node.get("ORGNODE_KODE").asText();
+        this.orgNiv = node.get("ORGNODE_NIVA").asText();
         this.navn = node.get("ORGNODE_NAVN").asText();
         this.agressoOrgType = node.get("agresso_orgnode_type").asText();
         gyldigFom = LocalDate.now().minusDays(1);

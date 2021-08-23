@@ -6,12 +6,10 @@ import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.contract.nom.api.graphql.LederOrganisasjonsenhet;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +22,7 @@ public class RessursLederForResolver implements GraphQLResolver<Ressurs> {
                 .stream()
                 .map(ConverterUtils::convert)
                 .map(LederOrganisasjonsenhet::new)
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
 
         return DataFetcherResult.<List<LederOrganisasjonsenhet>>newResult()
                 .data(result)

@@ -3,9 +3,12 @@ AZURE_APP_WELL_KNOWN_URL: <dummy - Se dokumentasjon>
 AZURE_APP_CERTIFICATE_KEY_ID: <dummy - Se dokumentasjon>
 AZURE_APP_TENANT_ID: <dummy - Se dokumentasjon>
 AZURE_APP_CLIENT_SECRET: <dummy - Se dokumentasjon>
+
 NOM_API_CLIENT_ID: <dummy - Se dokumentasjon>
 
 app:
   nom-api:
     base-url: https://nom-api.dev.intern.nav.no
     graphQL-url: ${app.nom-api.base-url}/graphql
+
+server.port: 8081

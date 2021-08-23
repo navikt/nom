@@ -18,6 +18,7 @@ import {
 } from "../../common/gqltypes";
 import { ItemLink } from "../../components/navfrontend/ItemLink";
 import LabeledItemsgrid from "../../components/labeleditemsgrid/Labeleditemsgrid";
+import { agressoIdDataToUrl, agressoNivaToNumberStr } from "../../common/url_utils";
 
 const nullText = "[null]";
 
@@ -40,6 +41,7 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
     return {
       enhetNavn: it.organisasjonsenhet.navn,
       enhetNr: it.organisasjonsenhet.agressoId,
+      enhetNiva: it.organisasjonsenhet.orgNiv,
       enhetType: it.organisasjonsenhet.type?.navn || nullText,
     };
   });
@@ -57,6 +59,7 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
       out.push({
         navn: currentOverenhetList[0].organisasjonsenhet.navn,
         agressoId: currentOverenhetList[0].organisasjonsenhet.agressoId,
+        orgNiv: currentOverenhetList[0].organisasjonsenhet.orgNiv
       });
       currentOverenhetList =
         currentOverenhetList[0].organisasjonsenhet.organiseringer.filter(
@@ -89,15 +92,17 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
     data: {
       enhetNavn: organisasjonsenhet.navn,
       enhetNr: organisasjonsenhet.agressoId,
+      enhetNiva: organisasjonsenhet.orgNiv,
       enhetType: organisasjonsenhet.type?.navn || nullText,
     },
     koblinger: {
       sti:
         enhetHierarkiListe.length !== 0
-          ? enhetHierarkiListe.map((it) => {
+          ? enhetHierarkiListe.map((it: any) => {
               return {
                 enhetNavn: it.navn,
                 enhetNr: it.agressoId,
+                enhetNiva: it.orgNiv,
                 enhetType: it.type?.navn || nullText,
               };
             })
@@ -183,6 +188,8 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
         <div>{props.orgenhetData.data.enhetNavn}</div>
         <label>Enhet agresso-nr</label>
         <div>{props.orgenhetData.data.enhetNr}</div>
+        <label>Enhet nivå</label>
+        <div>{props.orgenhetData.data.enhetNiva}</div>
         <label>Enhet type</label>
         <div>{props.orgenhetData.data.enhetType}</div>
       </LabeledItemsgrid>
@@ -194,16 +201,16 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
   const hierarkiVisning = (
     <Contentbox label="Hierarki over">
       {sti.length !== 0
-        ? stiReversed.map((it, k) => (
+        ? stiReversed.map((item, k) => (
             <div
-              key={it.enhetNr}
+              key={item.enhetNr}
               className="Organisasjonsenheter__linkview__overenhetlink"
             >
               <span>{" - ".repeat(k)}</span>
-              <Link to={"/organisasjonsenheter/" + it.enhetNr}>
-                {it.enhetNavn}
+              <Link to={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}>
+                {item.enhetNavn}
               </Link>{" "}
-              [nr: {it.enhetNr}]
+              (  niv: {agressoNivaToNumberStr(item.enhetNiva)}, nr: {item.enhetNr}, )
             </div>
           ))
         : null}
@@ -270,12 +277,13 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
               type: "string",
               renderCell: (item, value) => (
                 <ItemLink
-                  url={"/organisasjonsenheter/" + item.enhetNr}
+                  url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}
                   label={value}
                 />
               ),
             },
             { id: "enhetNr", label: "Nr", type: "string" },
+            { id: "enhetNiva", label: "Nivå", type: "string"},
             { id: "enhetType", label: "Type", type: "string" },
           ]}
           itemsPerPage={50}

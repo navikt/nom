@@ -18,10 +18,12 @@ union SearchResult = Ressurs | Organisasjonsenhet
 
 input OrganisasjonsenhetSearch {
     agressoId: String
+    orgNiv: String
 }
 
 input OrganisasjonsenheterSearch {
     agressoIder: [String!]
+    orgNiv: String
 }
 
 input RessursSearch {
@@ -48,6 +50,7 @@ type PersonResult {
 type OrganisasjonsenhetResult {
     code: ResultCode!
     id: String!
+    orgNiv: String
     organisasjonsenhet: Organisasjonsenhet
 }
 

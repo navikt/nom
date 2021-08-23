@@ -16,7 +16,7 @@
           "ORGNODE_KODE_OVER": null,
           "ORGNODE_NAVN": "testNavn",
           "ORGNODE_NAVN_OVER": "testNavnOver",
-          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA": "ORGENHET",
           "ORGNODE_NIVA_OVER": "ORGNIV3",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "11"
@@ -24,9 +24,9 @@
         {
           "LEDER_NAVIDENT": "testNavIdent1",
           "ORGNODE_KODE": "testId2",
-          "ORGNODE_KODE_OVER": "testId1",
+          "ORGNODE_KODE_OVER": "testId3",
           "ORGNODE_NAVN": "testNavn",
-          "ORGNODE_NIVA": "testNivå",
+          "ORGNODE_NIVA": "ORGENHET",
           "ORGNODE_NIVA_OVER": "ORGNIV3",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": null
@@ -34,20 +34,20 @@
         {
           "LEDER_NAVIDENT": null,
           "ORGNODE_KODE": "testId3",
-          "ORGNODE_KODE_OVER": "testId1",
+          "ORGNODE_KODE_OVER": "testId4",
           "ORGNODE_NAVN": "testNavn",
-          "ORGNODE_NIVA": "testNivå",
-          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_NIVA": "ORGNIV3",
+          "ORGNODE_NIVA_OVER": "ORGNIV2",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         },
         {
-          "LEDER_NAVIDENT": "testNavIdent4",
+          "LEDER_NAVIDENT": "testNavIdent1",
           "ORGNODE_KODE": "testId4",
-          "ORGNODE_KODE_OVER": "testId2",
+          "ORGNODE_KODE_OVER": "testId6",
           "ORGNODE_NAVN": "testNavn",
-          "ORGNODE_NIVA": "testNivå",
-          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_NIVA": "ORGNIV2",
+          "ORGNODE_NIVA_OVER": "ORGNIV1",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         },
@@ -56,8 +56,8 @@
           "ORGNODE_KODE": "testId5",
           "ORGNODE_KODE_OVER": "testId4",
           "ORGNODE_NAVN": "testNavn",
-          "ORGNODE_NIVA": "testNivå",
-          "ORGNODE_NIVA_OVER": "ORGNIV3",
+          "ORGNODE_NIVA": "ORGENHET",
+          "ORGNODE_NIVA_OVER": "ORGNIV2",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         }

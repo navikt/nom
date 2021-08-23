@@ -25,9 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -123,9 +121,9 @@ public class DvhRestConsumer {
 
     private void loadOrgenhetFromDvh() {
         val jsonOrgenheter = dvhExchange("/proxy/enheter/v2");
-        val orgenheter = new HashMap<String, DvhOrganisasjonsenhet>(1000);
-        val ledere = new HashMap<String, List<DvhLeder>>(1000);
-        val organiseringerByEnhet = new ConcurrentHashMap<String, List<DvhOrganisering>>(1000);
+        val orgenheter = new ConcurrentHashMap<String, Map<String, DvhOrganisasjonsenhet>>();
+        val ledere = new LinkedList<DvhLeder>();
+        val organiseringer = new LinkedList<DvhOrganisering>();
 
         StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
                 .filter(this::determineEnhetActive)
@@ -133,31 +131,33 @@ public class DvhRestConsumer {
                 .forEach(e -> {
                     if (validateEnhet(e)) {
                         val orgenhet = new DvhOrganisasjonsenhet(e);
-                        orgenheter.put(orgenhet.getAgressoId(), orgenhet);
+                        if(!orgenheter.containsKey(orgenhet.getOrgNiv())){
+                            orgenheter.put(orgenhet.getOrgNiv(), new ConcurrentHashMap<>(1));
+                        }
+
+                        orgenheter.get(orgenhet.getOrgNiv()).put(orgenhet.getAgressoId(), orgenhet);
+
                     }
 
                     if (validateOrganisering(e)) {
-                        val organisering = new DvhOrganisering(e);
-                        putOrganisering(organiseringerByEnhet, organisering);
+                        organiseringer.add(new DvhOrganisering(e));
                     }
 
                     if (validateLeder(e)) {
-                        val leder = new DvhLeder(e);
-                        if (ledere.containsKey(leder.getOrgEnhetNr())) {
-                            ledere.get(leder.getOrgEnhetNr()).add(leder);
-                        } else {
-                            ledere.put(leder.getOrgEnhetNr(), new LinkedList<>(List.of(leder)));
-                        }
+                        ledere.add(new DvhLeder(e));
                     }
                 });
 
         if (leaderElection.isLeader()) {
-            orgenhetHendelseService.handterOrgenhetFraDvh(orgenheter.values().stream().toList());
+            orgenhetHendelseService.handterOrgenhetFraDvh(orgenheter.values().stream()
+                    .flatMap(map -> map.values().stream())
+                    .collect(Collectors.toList())
+            );
         }
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
         dvhRepository.saveLedere(ledere);
-        dvhRepository.saveOrganiseringer(organiseringerByEnhet);
+        dvhRepository.saveOrganiseringer(organiseringer);
     }
 
     private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
@@ -175,25 +175,12 @@ public class DvhRestConsumer {
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
-    private void putOrganisering(Map<String, List<DvhOrganisering>> organiseringerByEnhet, DvhOrganisering organisering) {
-        if (organiseringerByEnhet.containsKey(organisering.getOverenhetNummer())) {
-            organiseringerByEnhet.get(organisering.getOverenhetNummer()).add(organisering);
-        } else {
-            organiseringerByEnhet.put(organisering.getOverenhetNummer(), new LinkedList<>(List.of(organisering)));
-        }
-        if (organiseringerByEnhet.containsKey(organisering.getUnderenhetNummer())) {
-            organiseringerByEnhet.get(organisering.getUnderenhetNummer()).add(organisering);
-        } else {
-            organiseringerByEnhet.put(organisering.getUnderenhetNummer(), new LinkedList<>(List.of(organisering)));
-        }
-    }
-
     private boolean determineEnhetActive(JsonNode e) {
         return e.get("ORGNODE_STATUS").asText().equals("N");
     }
 
     private boolean validateEnhet(JsonNode e) {
-        val validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN");
+        val validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN") && e.hasNonNull("ORGNODE_NIVA");
         if (validate) {
             return true;
         } else {
@@ -203,7 +190,8 @@ public class DvhRestConsumer {
     }
 
     private boolean validateOrganisering(JsonNode e) {
-        val validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE");
+        val validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE") &&
+                e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
         if (validate) {
             return true;
         } else {
@@ -213,7 +201,7 @@ public class DvhRestConsumer {
     }
 
     private boolean validateLeder(JsonNode e) {
-        val validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE");
+        val validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NIVA");
         if (validate) {
             return true;
         } else {

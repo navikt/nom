@@ -8,9 +8,11 @@ public class DvhLeder {
 
     String navIdent;
     String orgEnhetNr;
+    String orgNiv;
 
     public DvhLeder(JsonNode node) {
         this.navIdent = node.get("LEDER_NAVIDENT").asText();
         this.orgEnhetNr = node.get("ORGNODE_KODE").asText();
+        this.orgNiv = node.get("ORGNODE_NIVA").asText();
     }
 }

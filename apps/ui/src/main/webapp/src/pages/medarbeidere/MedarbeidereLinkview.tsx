@@ -9,6 +9,7 @@ import Contentbox from "../../components/contentbox/Contentbox";
 import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 import { ItemLink } from "../../components/navfrontend/ItemLink";
 import LabeledItemsgrid from "../../components/labeleditemsgrid/Labeleditemsgrid";
+import { agressoIdDataToUrl } from "../../common/url_utils";
 
 export interface Medarbeider {
   navIdent: string;
@@ -21,12 +22,14 @@ export interface Medarbeider {
   ansattKategori: "Statlig" | "Kommunal" | "Ekstern" | "[ukjent]";
   enheter: {
     agressoId: string;
+    agressoNiva: string;
     enhetNavn: string;
     enhetType: "AgressoEnhet";
     ansattForhold: "Ansatt" | "Leder";
   }[];
   enheterLederFor: {
     agressoId: string;
+    agressoNiva: string;
     enhetNavn: string;
     enhetType: "AgressoEnhet";
     ansattForhold: "Ansatt" | "Leder";
@@ -67,12 +70,14 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   if (ressurs.koblinger.length !== 0) {
     const tmp: {
       agressoId: string;
+      agressoNiva: string;
       enhetNavn: string;
       enhetType: "AgressoEnhet";
       ansattForhold: "Ansatt" | "Leder";
     }[] = ressurs.koblinger.map((it) => {
       return {
         agressoId: it.organisasjonsenhet.agressoId,
+        agressoNiva: it.organisasjonsenhet.orgNiv,
         enhetNavn: it.organisasjonsenhet.navn,
         enhetType: "AgressoEnhet",
         ansattForhold: "Ansatt",
@@ -84,12 +89,14 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   if (ressurs.lederFor && ressurs.lederFor.length !== 0) {
     const tmp: {
       agressoId: string;
+      agressoNiva: string;
       enhetNavn: string;
       enhetType: "AgressoEnhet";
       ansattForhold: "Ansatt" | "Leder";
     }[] = ressurs.lederFor.map((it) => {
       return {
         agressoId: it.organisasjonsenhet.agressoId,
+        agressoNiva: it.organisasjonsenhet.orgNiv,
         enhetNavn: it.organisasjonsenhet.navn,
         enhetType: "AgressoEnhet",
         ansattForhold: "Leder",
@@ -136,10 +143,12 @@ function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
 function OrgenhetListview(props: {
   orgenheter: {
     agressoId: string;
+    agressoNiva: string;
     enhetNavn: string;
     enhetType: "AgressoEnhet";
   }[];
 }): JSX.Element {
+  
   return (
     <TableSorter
       items={props.orgenheter.map((it) => {
@@ -153,17 +162,22 @@ function OrgenhetListview(props: {
           renderCell: (item, value) => <b>{value}</b>,
         },
         {
-          id: "id",
-          label: "AgressoId",
+          id: "enhetNavn",
+          label: "Enhet navn",
           type: "string",
           renderCell: (item, value) => (
             <ItemLink
-              url={"/organisasjonsenheter/" + item.agressoId}
-              label={item.agressoId}
+              url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.agressoId, item.agressoNiva)}
+              label={item.enhetNavn}
             />
           ),
         },
-        { id: "enhetNavn", label: "Enhet navn", type: "string" },
+        {
+          id: "agressoId",
+          label: "AgressoId",
+          type: "string",
+        },
+        { id: "agressoNiva", label: "Enhet nivå", type: "string" },
         { id: "enhetType", label: "Enhet type", type: "string" },
       ]}
       itemsPerPage={50}

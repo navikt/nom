@@ -1,3 +1,5 @@
+import { agressoUrlToData } from "../common/url_utils";
+
 export function createRessursQuery(id: string | null): string {
   const whereClause = id ? `where: {navIdent: "${id}"}` : "where: null";
   return `query {
@@ -28,23 +30,36 @@ export function createRessursQuery(id: string | null): string {
               organisasjonsenhet{
                 navn
                 agressoId
+                orgNiv
               }
             }
             lederFor {
               organisasjonsenhet{
                 navn
                 agressoId
+                orgNiv
               }
             }
           }
       }`;
 }
 
-export function createOrganisasjonsenhetQuery(id: string | null): string {
-  const whereClause = id ? `where: {agressoId: "${id}"}` : "where: null";
+export function createOrganisasjonsenhetQuery(
+  agressoIdUrl: string | null
+): string {
+  function agressoUrlToWhereClause(agrIdUrl: string): any {
+    const agressoData = agressoUrlToData(agrIdUrl);
+    return `where: {agressoId: "${agressoData.agressoId}", orgNiv: "${agressoData.agressoNiva}"}`;
+  }
+
+  const whereClause = agressoIdUrl
+    ? `${agressoUrlToWhereClause(agressoIdUrl)}`
+    : "where: null";
+
   return `query {
           organisasjonsenhet(${whereClause}) {
             agressoId
+            orgNiv
             navn
             gyldigFom
             gyldigTom
@@ -52,6 +67,7 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
               organisasjonsenhet{
                 navn
                 agressoId
+                orgNiv
                 type {
                   kode
                   navn
@@ -63,36 +79,43 @@ export function createOrganisasjonsenhetQuery(id: string | null): string {
               organisasjonsenhet{
                 navn
                 agressoId
+                orgNiv
                 organiseringer(retning: over) {
                   retning
                   organisasjonsenhet{
                     navn
                     agressoId
+                    orgNiv
                     organiseringer(retning: over) {
                       retning
                       organisasjonsenhet{
                         navn
                         agressoId
+                        orgNiv
                         organiseringer(retning: over) {
                           retning
                           organisasjonsenhet{
                             navn
                             agressoId
+                            orgNiv
                             organiseringer(retning: over) {
                               retning
                               organisasjonsenhet{
                                 navn
                                 agressoId
+                                orgNiv
                                 organiseringer(retning: over) {
                                   retning
                                   organisasjonsenhet{
                                     navn
                                     agressoId
+                                    orgNiv
                                     organiseringer(retning: over) {
                                       retning
                                       organisasjonsenhet{
                                         navn
                                         agressoId
+                                        orgNiv
                                       }
                                     }
                                   }

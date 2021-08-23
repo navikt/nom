@@ -23,7 +23,7 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
     private final RessursService ressursService;
 
     public DataFetcherResult<List<OrganisasjonsenhetsKobling>> koblinger(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        final List<OrganisasjonsenhetsKobling> result = dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId()).stream()
+        final List<OrganisasjonsenhetsKobling> result = dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
                 .map(dvh -> {
                     val ressurs = ressursService.findByNavIdent(dvh.getNavIdent()).get();
                     return OrganisasjonsenhetsKobling.builder()
