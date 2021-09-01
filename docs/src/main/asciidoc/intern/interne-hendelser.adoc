@@ -119,11 +119,11 @@ Dette vil være et edge case, men greit å være obs på det.
 
 === Utforming av hendelser
 
-==== Wrapper
+==== Data Access Object
 
 [source,java]
 ----
-include::../../../../../libs/contract-nom-dto/src/main/java/no/nav/nom/contract/nom/hendelse/Hendelse.java[tag=class]
+include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/repository/Hendelse.java[tag:class]
 ----
 
 Note:

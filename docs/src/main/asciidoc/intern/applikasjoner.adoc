@@ -2,7 +2,7 @@
 
 == NOM-Api
 
-Integrasjonspunkt for konsumenter utenfor NOM og NOM-Ui.
+Integrasjonspunkt for konsumenter utenfor NOM, og NOM-Ui.
 Eksponerer GraphQL for å hente informasjon fra NOM.
 
 == NOM-PROXY
@@ -11,6 +11,8 @@ Står for kommunkasjonen mellom NOM og onprem services som datavarehus og AD.
 DVH eksponerer noen endepunkter via tdv der hvor de gir oss opplysninger rundt enheter og ressurser.
 Disse opplysningene er igjen hentet fra eksterne kilder som Agresso, Norg, +++.
 På sikt, er det tenkt at NOM blir master for en del av disse opplysningene og at DVH får det fra oss i stede for alle disse andre spredte kildene.
+
+Endepunktene NOM proxy eksponerer blir konsumert (polling) av enten NOM-Ressurser eller NOM-API, der førstnevnte bruker et offset basert endepunkt, mens sistnevnte bruker snapshots og gjør en diff-jobb selv for å trekke ut hvilke
 
 Informasjon hentes fra DVH via feeds som baserer seg på et offset, f.eks 10101920, der hvor man etterspør alle rader etter dette.
 Dataen blir så lagret på Kafka for at vi kan benytte i andre applikasjoner.
@@ -37,16 +39,18 @@ Proxy benyttes for å støtte accessPolicies mellom applikasjoner, pluss at man 
 
 === Lokal utvikling mot miljø
 
-* Kopier teksten i filen `apps/ui/src/main/resources/application-local-template.yaml` til en ny fil `application-local.yaml` i samme mappe
-* Sett inn oppdaterte AAD credentials i `application-local.yaml`. Hentes i clusteret, gjerne med et script.
-* Start ui lokalt, med profiles `log-console,local,dev`
-* start port forwarding mot nom-api med `kubectl port-forward $podarg -n nom 8081:8080`, hvor `$podarg` er på formen
-`pods/nom-api-xxxxxxxxxx-xxxxx` og må være peke på en aktiv pod i dev-gcp.
-** her kan det være lurt å pakke inn port forwarding i en loop, da den ellers må restartes manuelt med jamne mellomrom.
-* kjør `npm install` i apps/ui/src/main/webapp/
-* kjør `npm run build:watchall` i samme mappe.
-* Gå til localhost:8080 i nettleser
-* Manuell refresh i nettleser skal nå ta inn endringer i react webappen.
+Man må være tilkoblet naisdevice for å kunne kjøre lokalutvikling mot miljø.
+
+* NOM-UI frackend må startes først:
+** Kopier teksten i filen `apps/ui/src/main/resources/application-local-template.yaml` til en ny fil `application-local.yaml` i samme mappe
+** Sett inn oppdaterte AAD credentials i `application-local.yaml`. Hentes i clusteret, gjerne med et script.
+** Start ui lokalt, med profiles `log-console,local,dev`
+** Hvis UI f.eks kjører på port 8080, gå til https://localhost:8080/login og logg inn med trygdeetaten bruker, enten din egen eller bruker generert i https://ida.intern.nav.no
+** UI Frackend vil nå gjøre API kall direkte mot miljø via naisdevice.
+* Deretter kan react-dev server kjøres opp
+** kjør `npm install` i apps/ui/src/main/webapp/
+** kjør `npm run start` i samme mappe
+** api kall gjort mot react dev server proxies videre til frackend
 
 
 Se fulle navn i hva som benyttes i vanlig property filen til nom-ui (altså som kommer fra Kubernetes i miljø).
