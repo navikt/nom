@@ -23,7 +23,26 @@ Nye setninger lages på hver sin linje ettersom endringer i git da ikke blir hel
 
 == Teststrategi
 
+I NOM jobber vi mot automatiserte tester så langt det går. Dette fordi manuell testing er kjedelig, tidkrevende og har høy risiko for feil.
+
+Her har vi da hovedfokus på integrasjons testing. Som er tester for å validere vårt eget system i et mer isolert miljø.
+
+Vårt mål med testene våre er:
+- Selvtillit for at koden vår fungerer.
+- Gi oss rask tilbakemelding som er å stole på.
+- Gjøre vedlikehold letter ved å vite at vi ikke ødelegger eksistende funksjonalitet.
+
+Som også understøtter vår praksis med trunk based development.
+
+Har satt opp en base-klasse slik at spring -context kun kjøres opp én gang for alle testene.
+
+Rammeverk:
+- Springboot test rammeverk
+- Wiremock (stubbing)
+- Docker (Containere for database)
+
 https://engineering.atspotify.com/2018/01/11/testing-of-microservices/[Spotify]
+
 
 == Arbeidsmetodikk
 
