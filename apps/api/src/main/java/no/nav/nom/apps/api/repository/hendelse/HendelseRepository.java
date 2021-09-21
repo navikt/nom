@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.repository;
+package no.nav.nom.apps.api.repository.hendelse;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

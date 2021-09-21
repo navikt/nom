@@ -11,4 +11,4 @@ app:
     base-url: https://nom-api.dev.intern.nav.no
     graphQL-url: ${app.nom-api.base-url}/graphql
 
-server.port: 8081
+server.port: 8080

@@ -39,12 +39,12 @@ public class PdlUtils {
         }
     }
 
-    private void mockPdlResponse() {
+    private void mockPdlResponse(String response) {
         stubFor(post("/graphql")
                 .withHeader("Tema", equalTo(appProperties.getPdl().getTema()))
                 .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody(buildResponse())));
+                .withBody(response)));
     }
 
     public void addPersonToPdlResponse(boolean mellomnavn, String... personIdenter) {
@@ -62,7 +62,22 @@ public class PdlUtils {
             pdlEntryByIdent.put(p, entry);
         });
 
-        mockPdlResponse();
+        mockPdlResponse(buildResponse());
+    }
+
+    @SneakyThrows
+    public void mockSinglePersonResponse(String personIdent){
+        val resultBuilder = new StringBuilder();
+        resultBuilder.append("{\"data\": {\"hentPerson\": { \"navn\": [");
+        resultBuilder.append(objectMapper.writeValueAsString(
+                NavnDto.builder()
+                        .fornavn("fornavn")
+                        .mellomnavn("mellomnavn")
+                        .etternavn("etternavn")
+                        .build()
+        ));
+        mockPdlResponse(resultBuilder.append("]}}}").toString());
+
     }
 
     public void addErrorToPdlResponse(String personIdent, String code) {
@@ -73,7 +88,7 @@ public class PdlUtils {
                 .build();
         pdlEntryByIdent.put(personIdent, entry);
 
-        mockPdlResponse();
+        mockPdlResponse(buildResponse());
     }
 
     @SneakyThrows

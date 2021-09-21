@@ -190,24 +190,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-                <version>0.3.1</version>
-                <executions>
-                    <execution>
-                        <id>get main root parent pom directory</id>
-                        <goals>
-                            <goal>highest-basedir</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <property>myDirectory</property>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>io.snyk</groupId>
                 <artifactId>snyk-maven-plugin</artifactId>
                 <version>${snyk-plugin.version}</version>

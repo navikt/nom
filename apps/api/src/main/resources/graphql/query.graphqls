@@ -10,8 +10,8 @@ type Query {
     ressurser(where: RessurserSearch): [RessursResult!]!
     person(where: PersonSearch): PersonResult
 
-    bestillingSet(bestillingSetId: ID!): BestillingSet
-    bestillingSets(bestillingSetId: [ID!]): [BestillingSet!]!
+    ordre(ordreId: ID!): Ordre
+    ordreBulk(ordreId: [ID!]): [Ordre!]!
 }
 
 union SearchResult = Ressurs | Organisasjonsenhet

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.repository.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;

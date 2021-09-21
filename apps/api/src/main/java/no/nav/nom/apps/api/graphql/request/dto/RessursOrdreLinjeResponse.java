@@ -11,9 +11,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RessursBestillingResponse {
-
+public class RessursOrdreLinjeResponse {
     UUID nomId;
     String navIdent;
-    Bestilling bestilling;
+    OrdreLinje ordreLinje;
 }

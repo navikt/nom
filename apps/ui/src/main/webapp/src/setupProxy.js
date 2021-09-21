@@ -1,6 +1,6 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
-const BACKEND_PORT = "8081";
+const BACKEND_PORT = "8080";
 
 module.exports = function (app) {
   app.use(

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.repository;
+package no.nav.nom.apps.api.repository.hendelse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -42,8 +42,8 @@ public class Hendelse {
     private UUID funksjonellId;
 
     @Type(type = "pg-uuid")
-    @Column(name = "FORESPORSEL_ID", nullable = false, updatable = false)
-    private UUID foresporselId;
+    @Column(name = "ORDRE_ID", nullable = false, updatable = false)
+    private UUID ordreId;
 
     @Type(type = "pg-uuid")
     @Column(name = "TIDLIGERE_ID", updatable = false)

@@ -4,16 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.With;
 
 import java.util.UUID;
 
 @Data
 @Builder
+@With
 @AllArgsConstructor
 @NoArgsConstructor
-public class EnhetBestillingResponse {
-
-    UUID nomId;
-    Bestilling bestilling;
-
+public class OrdreMetadata {
+    UUID ordreId;
+    String beskrivelse;
 }

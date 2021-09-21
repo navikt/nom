@@ -1,0 +1,8 @@
+mutation ordreRessurs($ordreId: ID) {
+    ordreRessurs(request: {metadata: {ordreId: $ordreId}, personIdent: "12312312312", visningsnavn: "Navn Navnesen"}) {
+        ordreLinje {
+            ordreLinjeId
+            ordreId
+        }
+    }
+}
