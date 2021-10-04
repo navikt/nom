@@ -10,8 +10,11 @@ import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.contract.nom.api.graphql.Person;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -20,8 +23,11 @@ public class PersonResolver implements GraphQLQueryResolver {
 
     private final RessursService ressursService;
 
+    @Value("${app.graphql.preauth.query.person}")
+    private List<String> preauth;
+
     public DataFetcherResult<PersonResult> person(ObjectNode objectNode, DataFetchingEnvironment env) {
-        /*return SecurityUtil.<PersonResult>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<PersonResult>checkAuth(env, preauth).orElseGet(() -> {
             var personIdentOptional = Optional.ofNullable(objectNode).map(n -> n.findValue("personIdent").asText());
             if (personIdentOptional.isEmpty()) {
                 return DataFetcherResult.<PersonResult>newResult()
@@ -37,10 +43,6 @@ public class PersonResolver implements GraphQLQueryResolver {
             return DataFetcherResult.<PersonResult>newResult()
                     .data(personResult.build())
                     .build();
-        });*/
-
-        return DataFetcherResult.<PersonResult>newResult()
-                .error(ErrorCode.UNAUTHENTICATED.construct(env, "Missing or invalid token"))
-                .build();
+        });
     }
 }

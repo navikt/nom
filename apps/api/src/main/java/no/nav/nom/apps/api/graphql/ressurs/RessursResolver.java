@@ -27,7 +27,7 @@ class RessursResolver implements GraphQLQueryResolver {
     private final RessursService ressursService;
 
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<Ressurs>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {
             Optional<no.nav.nom.apps.api.domain.Ressurs> result;
             if (objectNode == null) {
                 result = Optional.empty();
@@ -44,7 +44,7 @@ class RessursResolver implements GraphQLQueryResolver {
     }
 
     public DataFetcherResult<List<RessursResult>> ressurser(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<RessursResult>>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<List<RessursResult>>checkAuth(env, null).orElseGet(() -> {
             var result = new ArrayList<Result>();
             List<String> navIdenter = toStringList(objectNode, "navIdenter");
             List<String> personIdenter = toStringList(objectNode, "personIdenter");

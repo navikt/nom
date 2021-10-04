@@ -21,14 +21,14 @@ public class OrdreResolver implements GraphQLQueryResolver {
     private final OrdreRepository ordreRepository;
 
     public DataFetcherResult<Ordre> ordre(UUID ordreId, DataFetchingEnvironment env) {
-        return SecurityUtil.<Ordre>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<Ordre>checkAuth(env, null).orElseGet(() -> {
             var set = ordreRepository.getById(ordreId);
             return build(ConverterUtils.convert(set));
         });
     }
 
     public DataFetcherResult<List<Ordre>> ordreBulk(List<UUID> requstSetIds, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<Ordre>>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<List<Ordre>>checkAuth(env, null).orElseGet(() -> {
             var sets = (isEmpty(requstSetIds) ? ordreRepository.findAll() : ordreRepository.findAllById(requstSetIds))
                     .stream()
                     .map(ConverterUtils::convert)

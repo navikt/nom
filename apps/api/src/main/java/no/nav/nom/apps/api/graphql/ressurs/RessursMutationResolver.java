@@ -13,8 +13,10 @@ import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Person;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -26,8 +28,11 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
     private final RessursService ressursService;
     private final PdlConsumer pdlConsumer;
 
+    @Value("${app.graphql.preauth.mutation.ressurs}")
+    private List<String> preauth;
+
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(String personIdent, Optional<String> forbokstav, DataFetchingEnvironment env) {
-        return SecurityUtil.<OpprettRessursResponse>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<OpprettRessursResponse>checkAuth(env, preauth).orElseGet(() -> {
             val result = DataFetcherResult.<OpprettRessursResponse>newResult();
             try {
                 val person = pdlConsumer.hentPerson(personIdent);

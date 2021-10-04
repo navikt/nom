@@ -29,7 +29,7 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<Organisasjonsenhet>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<Organisasjonsenhet>checkAuth(env, null).orElseGet(() -> {
             Optional<DvhOrganisasjonsenhet> result;
             if (objectNode != null && objectNode.hasNonNull("agressoId") && objectNode.hasNonNull("orgNiv")) {
                 val orgNiv = objectNode.findValue("orgNiv").asText();
@@ -45,7 +45,7 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     }
 
     public DataFetcherResult<List<OrganisasjonsenhetResult>> organisasjonsenheter(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env, null).orElseGet(() -> {
             Collection<DvhOrganisasjonsenhet> result;
             val agressoIder = toStringList(objectNode, "agressoIder");
             val orgNiv = objectNode != null && objectNode.hasNonNull("orgNiv") ? objectNode.get("orgNiv").asText() : null;

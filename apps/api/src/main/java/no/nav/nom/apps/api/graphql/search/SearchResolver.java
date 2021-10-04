@@ -28,7 +28,7 @@ public class SearchResolver implements GraphQLQueryResolver {
     private final OrgenhetService orgenhetService;
 
     public DataFetcherResult<List<Object>> search(String term, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<Object>>checkAuth(env).orElseGet(() -> {
+        return SecurityUtil.<List<Object>>checkAuth(env, null).orElseGet(() -> {
             var matchedOrgenhetIds = Stream.concat(
                     orgenhetService.matchBy(AGRESSO_ID_FIELD, term).stream(),
                     orgenhetService.matchBy(NAVN_FIELD, term.toLowerCase()).stream()

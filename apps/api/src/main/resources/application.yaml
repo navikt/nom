@@ -7,6 +7,12 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
+  graphql:
+    preauth:
+      query:
+        person:
+      mutation:
+        ressurs:
 
 nom:
   libs:
