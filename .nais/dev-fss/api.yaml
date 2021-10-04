@@ -69,6 +69,9 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
+        - application: amt-tiltak
+          namespace: amt
+          cluster: dev-gcp
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
