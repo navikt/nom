@@ -1,6 +1,6 @@
 type Mutation {
 
-    opprettRessurs(personIdent: String!): OpprettRessursResponse
+    opprettRessurs(personIdent: String!, forbokstav: String): OpprettRessursResponse
 
     # OrdreLinje
     ordreRessurs(request: OpprettRessursRequest!): OrdreLinjeResponse!

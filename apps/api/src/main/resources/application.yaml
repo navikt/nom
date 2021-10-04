@@ -26,10 +26,12 @@ authentication:
 graphql:
   playground:
     tabs:
-      - name: HentEnhet
+      - name: Enhet
         query: classpath:playground/organisasjonsenhet.graphql
-      - name: HentRessurs
+      - name: Ressurs
         query: classpath:playground/ressurs.graphql
+      - name: Person
+        query: classpath:playground/person.graphql
   servlet:
     mapping: /graphql
     enabled: true

@@ -1,16 +1,20 @@
 # Henter alle organisasjonsenheter
 query HentAlleOrganisasjonsenheter {
-    organisasjonsenhet {
-        agressoId
-        navn
-        gyldigFom
-        gyldigTom
+    organisasjonsenheter {
+        id
+        orgNiv
+        organisasjonsenhet{
+            orgNiv
+            agressoId
+            navn
+        }
+        code
     }
 }
 
 # Henter organisasjonsenhet med gitt id:
-query HentOrganisasjonsenhetMedId {
-    organisasjonsenhet(where: {agressoId: "test"}) {
+query HentOrganisasjonsenhetMedId($agressoId: String!, $orgNiv: String!) {
+    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
         agressoId
         navn
         gyldigFom
@@ -19,8 +23,8 @@ query HentOrganisasjonsenhetMedId {
 }
 
 # Henter organisasjonsenhet med organiseringer:
-query HentOrganisasjonsenhetOgOrganisering {
-    organisasjonsenhet(where: {agressoId: "test"}) {
+query HentOrganisasjonsenhetOgOrganisering($agressoId: String!, $orgNiv: String!) {
+    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
         agressoId
         navn
         gyldigFom
@@ -53,8 +57,8 @@ query HentOrganisasjonsenhetOgOrganisering {
 }
 
 # Henter organisasjonsenhet med leder:
-query HentOrganisasjonsenhetOgLeder {
-    organisasjonsenhet(where: {agressoId: "test"}) {
+query HentOrganisasjonsenhetOgLeder($agressoId: String!, $orgNiv: String!) {
+    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
         agressoId
         navn
         gyldigFom

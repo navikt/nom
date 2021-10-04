@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.graphql;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import graphql.GraphQLException;
 import graphql.kickstart.execution.GraphQLRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -16,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class PdlConsumer {
@@ -24,7 +25,7 @@ public class PdlConsumer {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate;
 
-    public Person hentPerson(String personIdent){
+    public Optional<Person> hentPerson(String personIdent){
         val headers = new HttpHeaders();
         val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -45,10 +46,11 @@ public class PdlConsumer {
 
 
             val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
-            if (result.getBody().hasNonNull("data")) {
+            if (result.getBody().get("data").hasNonNull("hentPerson")) {
                 val navnResult = result.getBody().get("data").get("hentPerson").get("navn").get(0);
                 val mellomnavn = navnResult.hasNonNull("mellomnavn") ? navnResult.get("mellomnavn").asText() : null;
-                return Person.builder()
+                return Optional.of(
+                        Person.builder()
                         .navn(
                                 RessursNavn.builder()
                                         .fornavn(navnResult.get("fornavn").asText())
@@ -56,9 +58,10 @@ public class PdlConsumer {
                                         .etternavn(navnResult.get("etternavn").asText())
                                         .build()
                         )
-                        .build();
+                        .build()
+                );
             }
-            throw new GraphQLException(result.getBody().get("errors").toPrettyString());
 
+            return Optional.empty();
     }
 }
