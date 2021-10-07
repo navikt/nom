@@ -72,6 +72,9 @@ spec:
         - application: amt-tiltak
           namespace: amt
           cluster: dev-gcp
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
