@@ -73,7 +73,7 @@ spec:
           namespace: amt
           cluster: dev-gcp
         - application: ida
-          namespace: traktor
+          namespace: default
           cluster: prod-fss
     outbound:
       external:
