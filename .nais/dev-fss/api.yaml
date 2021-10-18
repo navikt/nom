@@ -72,6 +72,9 @@ spec:
         - application: amt-tiltak
           namespace: amt
           cluster: dev-gcp
+        - application: remedy-identrutina
+          namespace: default
+          cluster: dev-fss
         - application: ida
           namespace: default
           cluster: prod-fss
