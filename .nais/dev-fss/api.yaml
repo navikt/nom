@@ -17,6 +17,8 @@ spec:
       value: https://nom-proxy.dev-fss-pub.nais.io
     - name: NOM_PROXY_CLIENT_ID
       value: dev-fss.nom.nom-proxy
+    - name: GRAPHQL_PREAUTH_QUERY_PERSON
+      value: 92ab93bd-0782-40c0-902b-7758c8878cb4
   image: {{image}}
   port: 8080
   ingresses:

@@ -10,7 +10,7 @@ app:
   graphql:
     preauth:
       query:
-        person:
+        person: ${GRAPHQL_PREAUTH_QUERY_PERSON}
       mutation:
         ressurs:
 
