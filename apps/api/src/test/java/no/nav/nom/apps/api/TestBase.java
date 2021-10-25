@@ -2,8 +2,8 @@ package no.nav.nom.apps.api;
 
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.repository.Hendelse;
-import no.nav.nom.apps.api.repository.HendelseRepository;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
 import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.BeforeEach;

@@ -3,10 +3,12 @@ package no.nav.nom.apps.api.domain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.repository.Hendelse;
-import no.nav.nom.apps.api.repository.HendelseRepository;
-import no.nav.nom.apps.api.repository.Hendelse.DataType;
+import no.nav.nom.apps.api.repository.NavIdentService;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,7 @@ public class RessursService {
 
     private final ObjectMapper objectMapper;
     private final HendelseRepository hendelseRepository;
+    private final NavIdentService navIdentService;
 
     public Optional<Ressurs> findByFid(UUID fid){
         return Optional.ofNullable(
@@ -81,7 +84,7 @@ public class RessursService {
         val hendelse = Hendelse.builder()
                 .hendelseID(UUID.randomUUID())
                 .funksjonellId(fid)
-                .foresporselId(UUID.randomUUID())
+                .ordreId(UUID.randomUUID())
                 .tidligereId(null)
                 .dataType(DataType.RESSURS_V1)
                 .hendelseType(Hendelse.HendelseType.ENDRET)
@@ -102,7 +105,7 @@ public class RessursService {
                             return Hendelse.builder()
                                     .hendelseID(UUID.randomUUID())
                                     .funksjonellId(h.getKey())
-                                    .foresporselId(UUID.randomUUID())
+                                    .ordreId(UUID.randomUUID())
                                     .tidligereId(null)
                                     .dataType(DataType.RESSURS_V1)
                                     .hendelseType(Hendelse.HendelseType.ENDRET)
@@ -113,23 +116,27 @@ public class RessursService {
         );
     }
 
-    public void createOpprettetHendelse(String navIdent, String personIdent) {
-        var data = objectMapper.createObjectNode();
-        data.put(Ressurs.NAVIDENT_FIELD, navIdent);
-        data.put(Ressurs.PERSONIDENT_FIELD, personIdent);
+    @Transactional
+    public Ressurs createOpprettetHendelse(String personIdent, String navIdentBokstav) {
+        return findByPersonIdent(personIdent).orElseGet(() -> {
+            var data = objectMapper.createObjectNode();
 
-        val hendelse = Hendelse.builder()
-                .hendelseID(UUID.randomUUID())
-                .funksjonellId(UUID.randomUUID())
-                .foresporselId(UUID.randomUUID())
-                .tidligereId(null)
-                .dataType(DataType.RESSURS_V1)
-                .hendelseType(Hendelse.HendelseType.OPPRETTET)
-                .data(data)
-                .opprettetTidspunkt(LocalDateTime.now())
-                .build();
+            data.put(Ressurs.NAVIDENT_FIELD, navIdentService.generateNavIdent(navIdentBokstav));
+            data.put(Ressurs.PERSONIDENT_FIELD, personIdent);
 
-        hendelseRepository.save(hendelse);
+            val hendelse = Hendelse.builder()
+                    .hendelseID(UUID.randomUUID())
+                    .funksjonellId(UUID.randomUUID())
+                    .ordreId(UUID.randomUUID())
+                    .tidligereId(null)
+                    .dataType(DataType.RESSURS_V1)
+                    .hendelseType(Hendelse.HendelseType.OPPRETTET)
+                    .data(data)
+                    .opprettetTidspunkt(LocalDateTime.now())
+                    .build();
+
+            return convert(List.of(hendelseRepository.save(hendelse)));
+        });
     }
 
     public void createOpprettetHendelser(Map<String, String> personIdentByNavident) {
@@ -141,7 +148,7 @@ public class RessursService {
                     return Hendelse.builder()
                             .hendelseID(UUID.randomUUID())
                             .funksjonellId(UUID.randomUUID())
-                            .foresporselId(UUID.randomUUID())
+                            .ordreId(UUID.randomUUID())
                             .tidligereId(null)
                             .dataType(DataType.RESSURS_V1)
                             .hendelseType(Hendelse.HendelseType.OPPRETTET)

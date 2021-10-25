@@ -7,6 +7,12 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
+  graphql:
+    preauth:
+      query:
+        person: ${GRAPHQL_PREAUTH_QUERY_PERSON}
+      mutation:
+        ressurs:
 
 nom:
   libs:
@@ -26,10 +32,12 @@ authentication:
 graphql:
   playground:
     tabs:
-      - name: HentEnhet
+      - name: Enhet
         query: classpath:playground/organisasjonsenhet.graphql
-      - name: HentRessurs
+      - name: Ressurs
         query: classpath:playground/ressurs.graphql
+      - name: Person
+        query: classpath:playground/person.graphql
   servlet:
     mapping: /graphql
     enabled: true

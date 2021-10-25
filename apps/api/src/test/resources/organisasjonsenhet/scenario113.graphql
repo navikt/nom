@@ -1,0 +1,7 @@
+query {
+    organisasjonsenheter(where: {orgNiv: "ORGNIV2"}) {
+        id
+        orgNiv
+        code
+    }
+}

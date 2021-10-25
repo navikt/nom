@@ -1,6 +1,7 @@
 
 type Organisasjonsenhet {
     agressoId: ID!
+    orgNiv: String!
     navn: String!
     gyldigFom: Date!
     gyldigTom: Date
@@ -77,20 +78,19 @@ type Kode {
     gyldigTom: Date
 }
 
-type BestillingSet {
-    bestillingSetId: ID!
-    bestillinger: [Bestilling!]!
+type Ordre {
+    ordreId: ID!
+    ordreLinjer: [OrdreLinje!]!
 
     beskrivelse: String
-    sistEndret: DateTime!
-    activateTime: DateTime
+    endretTidspunkt: DateTime!
 }
 
-type Bestilling {
-    bestillingId: ID!
-    bestillingSetId: ID!
-    metadata: BestillingMetadata
-    type: BestillingType
+type OrdreLinje {
+    ordreLinjeId: ID!
+    ordreId: ID!
+    metadata: OrdreLinjeMetadata
+    type: OrdreLinjeType
     # define explicitly?
     data: JSON
 }

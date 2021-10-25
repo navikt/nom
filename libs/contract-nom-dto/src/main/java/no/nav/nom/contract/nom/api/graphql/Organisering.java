@@ -11,6 +11,7 @@ public class Organisering {
     String id;
     OrganiseringRetning retning;
     String orgEnhetNr;
+    String orgNiv;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 }

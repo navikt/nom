@@ -1,10 +1,11 @@
-package no.nav.nom.apps.api.repository;
+package no.nav.nom.apps.api.repository.hendelse;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -29,4 +30,8 @@ public interface HendelseRepository extends JpaRepository<Hendelse, UUID> {
     @Query(value = "SELECT * FROM T_HENDELSER WHERE lower(data ->> :jsonFieldKey) like :jsonFieldValue%",
             nativeQuery = true)
     List<Hendelse> findHendelserByJsonMatch(String jsonFieldKey, String jsonFieldValue);
+
+    @Query(value = "SELECT * FROM T_HENDELSER WHERE data ->> 'navIdent' like %:seq",
+            nativeQuery = true)
+    Optional<Hendelse> navIdentSeqIsPresent(String seq);
 }

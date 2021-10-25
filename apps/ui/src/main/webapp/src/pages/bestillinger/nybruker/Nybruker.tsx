@@ -1,60 +1,67 @@
-import React, {useContext, useEffect, useState} from "react";
-import {FormSpec, LabeledDatefield, LabeledTextarea, LabeledTextfield} from "../../../components/nomforms/Nomforms";
-import {Feilmeldinger, validateFnr,} from "../../../components/nomforms/NomFormValidering";
+import React, { useContext, useEffect, useState } from "react";
+import {
+    FormSpec,
+    LabeledDatefield,
+    LabeledTextarea,
+    LabeledTextfield,
+} from "../../../components/nomforms/Nomforms";
+import {
+    Feilmeldinger,
+    validateFnr,
+} from "../../../components/nomforms/NomFormValidering";
 import Nompagewrap from "../../../components/nompagewrap/Nompagewrap";
-import {Hovedknapp, Knapp} from 'nav-frontend-knapper';
-import {SkjemaGruppe} from 'nav-frontend-skjema';
-import {FormProvider, useForm} from 'react-hook-form';
-import moment, {HTML5_FMT} from "moment";
-import {ApolloError, gql, useMutation, useQuery} from '@apollo/client';
-import AlertStripe from 'nav-frontend-alertstriper';
-import {GqlRessurs} from '../../../common/gqltypes';
-import {fulltNavnForRessurs} from '../../../common/navnutils';
-import {Bestilling} from '../list/BestillingList';
-import {BestillingContext} from '../BestillingContext';
+import { Hovedknapp, Knapp } from "nav-frontend-knapper";
+import { SkjemaGruppe } from "nav-frontend-skjema";
+import { FormProvider, useForm } from "react-hook-form";
+import moment, { HTML5_FMT } from "moment";
+import { ApolloError, gql, useMutation, useQuery } from "@apollo/client";
+import AlertStripe from "nav-frontend-alertstriper";
+import { GqlRessurs } from "../../../common/gqltypes";
+import { fulltNavnForRessurs } from "../../../common/navnutils";
 
 interface NyBruker {
-  fnr: string
-  visningsnavn: string
-  tlf: string
-  beskrivelse: string
-  gyldigfom: string
-  bestillingSetId?: string
+    fnr: string;
+    visningsnavn: string;
+    tlf: string;
+    beskrivelse: string;
+    gyldigfom: string;
 }
 
-interface RessursBestillingResponse {
-  nomId: string
-  navIdent: string
-  bestilling: Bestilling
+interface RessursOrdreResponse {
+    nomId: string;
+    navIdent: string;
+    person: {
+        navn: {
+            fornavn: string;
+            mellomnavn: string;
+            etternavn: string;
+        };
+    };
 }
 
 const opprettBruker = gql`
-    mutation opprett($fnr: String!, $visningsnavn: String, $beskrivelse: String, $bestillingSetId: ID) {
-        opprettRessurs(request: {
-            metadata: {aktivering: IMMEDIATE, beskrivelse: $beskrivelse, bestillingSetId: $bestillingSetId},
-            personIdent: $fnr,
-            visningsnavn: $visningsnavn
-        }) {
-            nomId
+    mutation opprett($fnr: String!) {
+        opprettRessurs(personIdent: $fnr) {
             navIdent
-            bestilling {
-                bestillingSetId
-                bestillingId
-                type
-                data
+            nomId
+            person {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
             }
-
         }
     }
 `;
 
 interface LookupRessursNavnResult {
-  person: GqlRessurs
+    person: GqlRessurs;
 }
 
 const lookupFnr = gql`
     query lookupPersonNavn($fnr: String!) {
-        person(where: {personIdent: $fnr}) {
+        person(where: { personIdent: $fnr }) {
             nomId
             personIdent
             navIdent
@@ -70,123 +77,162 @@ const lookupFnr = gql`
 `;
 
 const spec: FormSpec<NyBruker> = {
-  fnr: {
-    label: "Personident",
-    id: "fnr",
-    defaultValue: '',
-    rules: {
-      validate: validateFnr
+    fnr: {
+        label: "Personident",
+        id: "fnr",
+        defaultValue: "",
+        rules: {
+            validate: validateFnr,
+        },
+    },
+    visningsnavn: {
+        label: "Visningsnavn",
+        id: "visningsnavn",
+        defaultValue: "",
+    },
+    tlf: {
+        label: "Telefonnummer",
+        id: "tlf",
+        defaultValue: "foreløpig kun et  dummy-felt",
+        rules: {
+            required: false,
+        },
+    },
+    beskrivelse: {
+        label: "Beskrivelse",
+        id: "beskrivelse",
+        defaultValue: "foreløpig kun et dummy-felt",
+        rules: {
+            required: false,
+        },
+    },
+    gyldigfom: {
+        label: "Gyldig fra og med",
+        id: "gyldigfom",
+        defaultValue: moment().format(HTML5_FMT.DATE),
     }
-  },
-  visningsnavn: {
-    label: "Visningsnavn",
-    id: "visningsnavn",
-    defaultValue: '',
-  },
-  tlf: {
-    label: "Telefonnummer",
-    id: "tlf",
-    defaultValue: '',
-    rules: {
-      required: false
-    }
-  },
-  beskrivelse: {
-    label: "Beskrivelse",
-    id: "beskrivelse",
-    defaultValue: '',
-    rules: {
-      required: false
-    }
-  },
-  gyldigfom: {
-    label: "Gyldig fra og med",
-    id: "gyldigfom",
-    defaultValue: moment().format(HTML5_FMT.DATE),
-  },
-  bestillingSetId: {
-    label: "Bestilling set",
-    id: "bestillingSetId",
-    defaultValue: undefined,
-    rules: {
-      required: false
-    }
-  },
 };
 
 const defaultValues = Object.keys(spec).reduce((defaults, key) => {
-  defaults[key] = spec[key].defaultValue;
-  return defaults;
+    defaults[key] = spec[key].defaultValue;
+    return defaults;
 }, {} as NyBruker);
 
-const ResultInfo = ({data, error}: {data?: RessursBestillingResponse, error?: ApolloError}): JSX.Element => (
-  <div style={{marginTop: '16px', maxWidth: '600px'}}>
-    {data && <AlertStripe type="suksess">Bruker {data?.nomId}/{data?.navIdent} opprettet i request {data?.bestilling.bestillingSetId}/{data?.bestilling.bestillingId}</AlertStripe>}
-    {error && <AlertStripe type={'feil'}>{error?.message}</AlertStripe>}
-  </div>
+const ResultInfo = ({
+                        data,
+                        error,
+                    }: {
+    data?: RessursOrdreResponse;
+    error?: ApolloError;
+}): JSX.Element => (
+    <div style={{ marginTop: "16px", maxWidth: "600px" }}>
+        {data && (
+            <AlertStripe type="suksess">
+                Bruker {data?.nomId}/{data?.navIdent} opprettet i request{" "}
+            </AlertStripe>
+        )}
+        {error && <AlertStripe type={"feil"}>{error?.message}</AlertStripe>}
+    </div>
 );
 
 export default function Nybruker(): JSX.Element {
-  const bestillingContext = useContext(BestillingContext);
-  const [fnrLookup, setFnrLookup] = useState<string | undefined>();
-  const {data: personLookupData, error: ressursLookupError} = useQuery<LookupRessursNavnResult, {fnr: string}>(lookupFnr, {
-    variables: {fnr: fnrLookup || ''},
-    skip: !fnrLookup || fnrLookup.length !== 11,
-    errorPolicy: 'all'
-  });
-  const [opprett, {data, error}] = useMutation<{opprettRessurs: RessursBestillingResponse}, NyBruker>(opprettBruker);
+    const [fnrLookup, setFnrLookup] = useState<string | undefined>();
+    const { data: personLookupData, error: ressursLookupError } = useQuery<
+        LookupRessursNavnResult,
+        { fnr: string }
+        >(lookupFnr, {
+        variables: { fnr: fnrLookup || "" },
+        skip: !fnrLookup || fnrLookup.length !== 11,
+        errorPolicy: "all",
+    });
 
-  const methods = useForm<NyBruker>({defaultValues: {...defaultValues, bestillingSetId: bestillingContext.bestillingContext.bestillingSetId}, reValidateMode: 'onBlur'});
-  const {reset, setValue, setError, clearErrors, formState, handleSubmit} = methods;
+    const [opprett, { data, error }] = useMutation<
+        { opprettRessurs: RessursOrdreResponse },
+        NyBruker
+        >(opprettBruker);
 
-  useEffect(() => {
-    if (personLookupData?.person?.person?.navn.fornavn) {
-      setValue(spec.visningsnavn.id, fulltNavnForRessurs(personLookupData?.person));
-      clearErrors(spec.visningsnavn.id);
-    } else {
-      setValue(spec.visningsnavn.id, '');
-    }
-    if (personLookupData?.person.navIdent) {
-      setError(spec.fnr.id, {message: `Personident er allerede registrert i NOM på ident ${personLookupData.person.navIdent}`, type: 'FINNES_ALLEREDE'});
-    } else if (personLookupData?.person.personIdent && !personLookupData.person.person?.navn.fornavn) {
-      setError(spec.fnr.id, {message: `Fant ikke personident hos PDL`, type: 'IKKE_FUNNET'});
-    } else {
-      clearErrors(spec.fnr.id);
-    }
-  }, [personLookupData, setError, setValue, clearErrors]);
+    const methods = useForm<NyBruker>({
+        defaultValues: {
+            ...defaultValues,
+        },
+        reValidateMode: "onBlur",
+    });
+    const { reset, setValue, setError, clearErrors, formState, handleSubmit } =
+        methods;
 
-  const doReset = (): void => reset(defaultValues);
-  const submit = (variables: NyBruker): Promise<any> => opprett({variables}).then(doReset);
+    useEffect(() => {
+        if (personLookupData?.person?.person?.navn.fornavn) {
+            setValue(
+                spec.visningsnavn.id,
+                fulltNavnForRessurs(personLookupData?.person)
+            );
+            clearErrors(spec.visningsnavn.id);
+        } else {
+            setValue(spec.visningsnavn.id, "");
+        }
+        if (personLookupData?.person.navIdent) {
+            setError(spec.fnr.id, {
+                message: `Personident er allerede registrert i NOM på ident ${personLookupData.person.navIdent}`,
+                type: "FINNES_ALLEREDE",
+            });
+        } else if (
+            personLookupData?.person.personIdent &&
+            !personLookupData.person.person?.navn.fornavn
+        ) {
+            setError(spec.fnr.id, {
+                message: `Fant ikke personident hos PDL`,
+                type: "IKKE_FUNNET",
+            });
+        } else {
+            clearErrors(spec.fnr.id);
+        }
+    }, [personLookupData, setError, setValue, clearErrors]);
 
-  return (
-    <Nompagewrap pagetitle="Ny bruker">
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(submit)}>
-          <SkjemaGruppe style={{maxWidth: '600px'}}>
-            <LabeledTextfield {...spec.fnr} onChange={(val) => setFnrLookup(val)}/>
-            <LabeledTextfield {...spec.visningsnavn} />
-            <LabeledTextfield {...spec.tlf} />
-            <LabeledTextarea {...spec.beskrivelse} />
-            <LabeledDatefield {...spec.gyldigfom}/>
+    const doReset = (): void => reset(defaultValues);
+    const submit = (variables: NyBruker): Promise<any> =>
+        opprett({ variables }).then(doReset);
 
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
-              <LabeledTextfield {...spec.bestillingSetId} disabled/>
-              <div style={{marginBottom: '1em'}}>
-                <Knapp mini htmlType={'button'} onClick={() => {
-                  setValue(spec.bestillingSetId.id, '');
-                  bestillingContext.update({bestillingSetId: undefined});
-                }} type={'fare'}>Fjern bestilling set</Knapp>
-              </div>
-            </div>
-          </SkjemaGruppe>
+    return (
+        <Nompagewrap pagetitle="Ny bruker">
+            <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(submit)}>
+                    <SkjemaGruppe style={{ maxWidth: "600px" }}>
+                        <LabeledTextfield
+                            {...spec.fnr}
+                            onChange={(val) => setFnrLookup(val)}
+                        />
+                        <LabeledTextfield {...spec.visningsnavn} />
+                        <LabeledTextfield {...spec.tlf} />
+                        <LabeledTextarea {...spec.beskrivelse} />
+                        <LabeledDatefield {...spec.gyldigfom} />
 
-          <Feilmeldinger errors={formState.errors} spec={spec}/>
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-end",
+                            }}
+                        ></div>
+                    </SkjemaGruppe>
 
-          <Hovedknapp htmlType="submit" style={{marginRight: '6px'}} disabled={formState.isSubmitting}>Legg inn bestilling</Hovedknapp>
-          <Knapp htmlType="reset" onClick={doReset}>reset</Knapp>
-        </form>
-      </FormProvider>
-      <ResultInfo data={data?.opprettRessurs} error={error || ressursLookupError}/>
-    </Nompagewrap>
-  );
+                    <Feilmeldinger errors={formState.errors} spec={spec} />
+
+                    <Hovedknapp
+                        htmlType="submit"
+                        style={{ marginRight: "6px" }}
+                        disabled={formState.isSubmitting}
+                    >
+                        Legg inn bestilling
+                    </Hovedknapp>
+                    <Knapp htmlType="reset" onClick={doReset}>
+                        reset
+                    </Knapp>
+                </form>
+            </FormProvider>
+            <ResultInfo
+                data={data?.opprettRessurs}
+                error={error || ressursLookupError}
+            />
+        </Nompagewrap>
+    );
 }

@@ -24,7 +24,7 @@ public class LederResolver implements GraphQLResolver<Organisasjonsenhet> {
     private final RessursService ressursService;
 
     public DataFetcherResult<List<OrganisasjonsenhetsLeder>> leder(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        val lederRessurser = dvhRepository.getLederByAgressoId(orgEnhet.getAgressoId()).stream()
+        val lederRessurser = dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
                 .map(l -> OrganisasjonsenhetsLeder.builder()
                         .ressurs(
                                 ressursService.findByNavIdent(l.getNavIdent())

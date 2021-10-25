@@ -1,8 +1,7 @@
 package no.nav.nom.apps.api.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.Value;
-import no.nav.nom.apps.api.repository.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 
 import java.util.List;
 import java.util.Objects;

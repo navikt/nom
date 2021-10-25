@@ -33,13 +33,14 @@ export interface GqlNavn {
 
 export interface GqlOrganisasjonsenhet {
   agressoId: string;
+  orgNiv: string;
   navn: string;
   gyldigFom: string;
   gyldigTom: string;
   organiseringer: GqlOrganisering[];
   leder: GqlOrganisasjonsenhetsLeder[];
   koblinger: GqlOrganisasjonsenhetsKobling[];
-  type?: Kode
+  type?: Kode;
 }
 
 export interface GqlOrganisering {

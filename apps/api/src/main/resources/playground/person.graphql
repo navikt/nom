@@ -1,0 +1,14 @@
+# Dette kallet er bare ment for identrutinen inntil videre.
+query hentPerson($personIdent: String!){
+    person(where: {personIdent: $personIdent}) {
+        navIdent
+        personIdent
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+    }
+}

@@ -12,15 +12,18 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Bestilling {
+public class OrdreLinje {
 
-    UUID bestillingId;
-    UUID bestillingSetId;
-    BestillingMetadata metadata;
-    BestillingType type;
+    UUID ordreLinjeId;
+    UUID ordreId;
+    OrdreMetadata metadata;
+    OrdreLinjeType type;
     ObjectNode data;
 
-    public enum BestillingType {
+    public enum OrdreLinjeType {
+        //OPPRETT,
+        //ENDRE,
+        //ANNULER
         OPPRETT_RESSURS,
         OPPRETT_ENHET
     }

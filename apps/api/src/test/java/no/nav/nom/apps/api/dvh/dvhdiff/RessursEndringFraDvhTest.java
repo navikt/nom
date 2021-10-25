@@ -118,8 +118,16 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         loadFromDvh();
 
         assertThat(ressursService.findByPersonIdent("12345678901").isEmpty()).isTrue();
-        assertThat(ressursService.getAll().size()).isEqualTo(0);
+        assertThat(ressursService.findByPersonIdent("12345678933").isEmpty()).isTrue();
+    }
 
+    @Test
+    @DisplayName("Personidenter med flere navidenter, så velges den som er aktiv i remedy")
+    public void test9(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavIdent("B123456").isPresent()).isTrue();
     }
 
     // test helpers

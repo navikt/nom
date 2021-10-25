@@ -38,3 +38,4 @@ nom:
       common:
         app:
           load-properties: true
+          

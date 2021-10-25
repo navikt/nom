@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.repository.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
@@ -59,6 +59,33 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     @Test
     @SneakyThrows
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå")
+    void scenario113() {
+        dvhRestConsumer.loadFromDvh();
+
+        val outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        assertEquals(outputEnhet.get(0).getId(), "testId4");
+        assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
+        assertEquals(outputEnhet.get(0).getOrgNiv(), "ORGNIV2");
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
+    void scenario114() {
+        dvhRestConsumer.loadFromDvh();
+
+        val outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        assertEquals(outputEnhet.get(0).getId(), "testId4");
+        assertEquals(outputEnhet.get(0).getOrgNiv(), "ORGNIV2");
+        assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
+        assertEquals(outputEnhet.get(1).getId(), "notFoundId");
+        assertEquals(outputEnhet.get(1).getOrgNiv(), "ORGNIV2");
+        assertEquals(outputEnhet.get(1).getCode(), ResultCode.NOT_FOUND);
+    }
+
+    @Test
+    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql uten id parameter")
     void scenario12() {
         dvhRestConsumer.loadFromDvh();
@@ -81,8 +108,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                         o -> o.get("retning").asText(),
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
 
-        assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
-        assertEquals("testId4", organiserteEnheter.get("under").getAgressoId());
+        assertEquals("testId4", organiserteEnheter.get("over").getAgressoId());
+        assertEquals("testId2", organiserteEnheter.get("under").getAgressoId());
     }
 
     @Test
@@ -100,7 +127,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
 
         assertThat(organiserteEnheter).hasSize(1);
-        assertEquals("testId1", organiserteEnheter.get("over").getAgressoId());
+        assertEquals("testId3", organiserteEnheter.get("over").getAgressoId());
     }
 
     @Test

@@ -10,9 +10,9 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.domain.Ressurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.pdlutils.PdlUtils;
-import no.nav.nom.apps.api.repository.Hendelse;
-import no.nav.nom.apps.api.repository.Hendelse.HendelseType;
-import no.nav.nom.apps.api.repository.Hendelse.DataType;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse.HendelseType;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +84,7 @@ public abstract class GraphQLTestBase extends TestBase {
         return Hendelse.builder()
                 .hendelseID(UUID.randomUUID())
                 .funksjonellId(fid)
-                .foresporselId(UUID.randomUUID())
+                .ordreId(UUID.randomUUID())
                 .tidligereId(null)
                 .dataType(dataType)
                 .hendelseType(hendelseType)

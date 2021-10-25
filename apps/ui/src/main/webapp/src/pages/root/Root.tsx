@@ -1,12 +1,10 @@
 import React, { Fragment } from "react";
-import { Link } from "react-router-dom";
 import {
-  Contentcard,
   LinkCard,
 } from "../../components/contentcard/Contentcard";
 import ContentcardArea from "../../components/contentcard/ContentcardArea";
-import NomUiHeader from "../../components/header/NomUiHeader";
 import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
+import Searchbox from "../../components/searchbox/Searchbox";
 
 const links = [
   { label: "Organisasjonsenheter", uri: "organisasjonsenheter" },
@@ -19,7 +17,7 @@ export default function Root(props: any): JSX.Element {
   return (
     <Nompagewrap pagetitle="Hovedside">
       <div className="Root">
-        {/* <NomUiHeader /> */}
+        <Searchbox />
         <ContentcardArea>
           {links.map((it) => (
             <Fragment key={it.uri}>

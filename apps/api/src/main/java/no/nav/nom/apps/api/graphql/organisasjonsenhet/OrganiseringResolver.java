@@ -22,7 +22,7 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
     private final DvhRepository dvhRepository;
 
     public DataFetcherResult<List<Organisering>> organiseringer(Organisasjonsenhet orgEnhet, OrganiseringRetning retning) {
-        val dvhOrganiseringer = dvhRepository.getOrganiseringerByAgressoId(orgEnhet.getAgressoId()).stream()
+        val dvhOrganiseringer = dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
                 .map(o -> convert(o, orgEnhet))
                 .filter(o -> retning == null || o.getRetning() == retning)
                 .collect(toUnmodifiableList());
@@ -33,12 +33,13 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
     }
 
     private Organisering convert(DvhOrganisering organisering, Organisasjonsenhet orgEnhet) {
-        val retning = organisering.getOverenhetNummer().equals(orgEnhet.getAgressoId()) ? OrganiseringRetning.under : OrganiseringRetning.over;
+        val retning = organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) ? OrganiseringRetning.under : OrganiseringRetning.over;
 
         return Organisering.builder()
                 .id("")
                 .retning(retning)
-                .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.getOverenhetNummer() : organisering.getUnderenhetNummer())
+                .orgEnhetNr(retning == OrganiseringRetning.over ? organisering.getAgressoIdOver() : organisering.getAgressoIdUnder())
+                .orgNiv(retning == OrganiseringRetning.over ? organisering.getOrgNivOver() : organisering.getOrgNivUnder())
                 .gyldigFom(organisering.getGyldigFom())
                 .gyldigTom(organisering.getGyldigTom())
                 .build();

@@ -11,6 +11,7 @@ public class DvhKobling {
 
     private String navIdent;
     private String agressoId;
+    private String orgNiv = "ORGENHET";
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 

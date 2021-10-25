@@ -1,21 +1,18 @@
+# Query som henter alle ressurser:
+query HentAlleRessurser{
+    ressurser {
+        id
+        ressurs{
+            navIdent
+            personIdent
+        }
+        code
+    }
+}
+
 # Query som henter ressurser med navIdent som parameter:
-query HentRessursMedNavIdent {
-    ressurs(where: {navIdent: "testNavIdent"}) {
-        navIdent
-        personIdent
-    }
-}
-
-# Query som henter ressurser med personIdent som parameter:
-query HentRessursMedPersonIdent{
-    ressurs(where: {personIdent: "testPersonIdent"}) {
-        navIdent
-        personIdent
-    }
-}
-
-query HentRessursMedNavn{
-    ressurs(where: {navIdent: "testNavIdent"}) {
+query HentRessursMedNavIdent($navIdent: String!) {
+    ressurs(where: {navIdent: $navIdent}) {
         navIdent
         personIdent
         person{
@@ -28,8 +25,24 @@ query HentRessursMedNavn{
     }
 }
 
-query HentRessursOgKoblinger {
-    ressurs(where: {navIdent: "testNavIdent"}) {
+# Query som henter ressurser med personIdent som parameter:
+query HentRessursMedPersonIdent($personIdent: String!){
+    ressurs(where: {personIdent: $personIdent}) {
+        navIdent
+        personIdent
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+    }
+}
+
+query HentRessursFullpakke($navIdent: String!) {
+    ressurs(where: {navIdent: $navIdent}) {
+        nomId
         navIdent
         personIdent
         koblinger{
@@ -55,13 +68,42 @@ query HentRessursOgKoblinger {
             gyldigFom
             gyldigTom
         }
+        lederFor{
+            organisasjonsenhet{
+                agressoId
+                orgNiv
+            }
+        }
+        ledere{
+            ressurs{
+                navIdent
+            }
+        }
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+        epost
+        visningsNavn
+        fornavn
+        etternavn
     }
 }
 
-# Query som henter alle ressurser:
-query HentAlleRessurser{
-    ressurs {
+mutation opprettRessurs($personIdent: String!) {
+    opprettRessurs(personIdent: $personIdent) {
+        nomId
         navIdent
         personIdent
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
     }
 }

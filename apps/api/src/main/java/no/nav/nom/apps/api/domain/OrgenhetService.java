@@ -3,9 +3,9 @@ package no.nav.nom.apps.api.domain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.repository.Hendelse;
-import no.nav.nom.apps.api.repository.Hendelse.DataType;
-import no.nav.nom.apps.api.repository.HendelseRepository;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
+import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -73,7 +73,7 @@ public class OrgenhetService {
         val hendelse = Hendelse.builder()
                 .hendelseID(UUID.randomUUID())
                 .funksjonellId(fid)
-                .foresporselId(UUID.randomUUID())
+                .ordreId(UUID.randomUUID())
                 .tidligereId(null)
                 .dataType(DataType.ORGENHET_V1)
                 .hendelseType(Hendelse.HendelseType.ENDRET)
@@ -94,7 +94,7 @@ public class OrgenhetService {
                     return Hendelse.builder()
                             .hendelseID(UUID.randomUUID())
                             .funksjonellId(h.getKey())
-                            .foresporselId(UUID.randomUUID())
+                            .ordreId(UUID.randomUUID())
                             .tidligereId(null)
                             .dataType(DataType.ORGENHET_V1)
                             .hendelseType(Hendelse.HendelseType.ENDRET)
@@ -114,7 +114,7 @@ public class OrgenhetService {
         val hendelse = Hendelse.builder()
                 .hendelseID(UUID.randomUUID())
                 .funksjonellId(UUID.randomUUID())
-                .foresporselId(UUID.randomUUID())
+                .ordreId(UUID.randomUUID())
                 .tidligereId(null)
                 .dataType(DataType.ORGENHET_V1)
                 .hendelseType(Hendelse.HendelseType.OPPRETTET)
@@ -136,7 +136,7 @@ public class OrgenhetService {
                     return Hendelse.builder()
                             .hendelseID(UUID.randomUUID())
                             .funksjonellId(UUID.randomUUID())
-                            .foresporselId(UUID.randomUUID())
+                            .ordreId(UUID.randomUUID())
                             .tidligereId(null)
                             .dataType(DataType.ORGENHET_V1)
                             .hendelseType(Hendelse.HendelseType.OPPRETTET)

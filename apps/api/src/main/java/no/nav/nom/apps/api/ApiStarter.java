@@ -13,5 +13,6 @@ public class ApiStarter {
     public static void main(String[] args) {
         PropertyUtils.initDefaultProperties("nom-api");
         SpringApplication.run(ApiStarter.class, args);
+        
     }
 }

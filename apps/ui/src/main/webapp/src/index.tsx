@@ -36,13 +36,10 @@ function AppRouter(): JSX.Element {
         <About />
       </Route>
       <Route exact path="/graphql">
-        <Redirect to="/graphql/4121803" />
-      </Route>
-      <Route exact path="/graphql/:id">
         <Graphql />
       </Route>
       <Route exact path="/organisasjonsenheter">
-        <Redirect to="/organisasjonsenheter/NAV" />
+        <Redirect to="/organisasjonsenheter/0_NAV" />
       </Route>
       <Route exact path="/organisasjonsenheter/:id">
         <Organisasjonsenheter />

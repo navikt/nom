@@ -1,0 +1,76 @@
+.Searchbox {
+  display: grid;
+  grid-template-columns: 1fr repeat(auto-fill, min-content);
+  border: solid 0.1rem lightgray;
+}
+
+.Searchbox__select {
+  // width: 80%;
+  padding: 1rem;
+}
+
+.Searchbox__popover {
+  min-height: 5rem;
+  // position: absolute;
+  background-color: lightyellow;
+}
+
+.Searchbox__popover2 {
+  min-height: 5rem;
+  position: absolute;
+  background-color: lightyellow;
+}
+
+.Searchbox3 {
+  // width: 100%;
+  position: relative;
+  margin: 2rem;
+}
+
+.Searchbox3__dropdown__container {
+  width: 100%;
+}
+
+.Searchbox3__dropdown {
+  min-height: 1rem;
+  max-height: 50vh;
+  overflow-y: scroll;
+  position: absolute;
+  background-color: white;
+  width: 100%;
+  padding: 0.5rem;
+  border: solid black 0.1rem;
+  display: grid;
+  row-gap: 0.5rem;
+  align-items: center;
+}
+
+.Searchbox3__bar {
+  display: grid;
+  grid-template-columns: 1fr repeat(5, min-content);
+  min-height: 2rem;
+  // width: 100%;
+}
+
+.Searchbox3__label {
+  border: solid 0.01rem lightgray;
+  padding: 0.2rem;
+  height: 100%;
+  // min-width: 5rem;
+  display: grid;
+  align-content: center;
+  grid-auto-flow: column;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.Searchbox3__searchboxline {
+  border-top: solid 0.1rem lightgray;
+  padding: 0.5rem;
+}
+
+.Searchbox__closebutton {
+  margin-left: auto;
+  padding: 0rem;
+  min-width: 2rem;
+}

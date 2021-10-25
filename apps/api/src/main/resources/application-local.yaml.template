@@ -1,0 +1,33 @@
+# Oppdater disse med nyeste verdier fra dev-miljø for å kjøre lokalt
+
+AZURE_APP_CLIENT_ID: 'placeholder'
+AZURE_APP_WELL_KNOWN_URL: 'placeholder'
+AZURE_APP_CERTIFICATE_KEY_ID: 'placeholder'
+AZURE_APP_TENANT_ID: 'placeholder'
+AZURE_APP_CLIENT_SECRET: 'placeholder'
+AZURE_APP_JWK: 'placeholder'
+
+
+NAIS_APP_NAME: 'nom-api'
+
+NOM_PROXY_BASEURL: https://nom-proxy.dev-fss-pub.nais.io
+NOM_PROXY_CLIENT_ID: dev-fss.nom.nom-proxy
+
+PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
+PDL_CLIENT_ID: dev-fss.pdl.pdl-api
+
+
+# DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
+
+DATABASE_HOST: localhost
+DATABASE_PORT: 5432
+DATABASE_DATABASE: postgres-api
+DATABASE_USERNAME: postgres
+DATABASE_PASSWORD: password
+
+
+proxy:
+  host: 127.0.0.1
+  port: 8866
+
+server.port: 8081

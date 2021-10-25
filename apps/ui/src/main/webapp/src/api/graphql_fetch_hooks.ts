@@ -60,12 +60,9 @@ async function doPostGraphql(
 export function useFetchRessurs(id: string | null): [LookupState, () => void] {
   const [out, setOut] = useState<LookupState>(lookups.createPending());
   const [toggle, flipToggle] = useReducer((toggle: boolean) => !toggle, false);
-  if (!id) {
-    return [lookups.createWaiting(), flipToggle];
-  }
 
   React.useEffect(() => {
-    if (id === null) {
+    if (!id) {
       return;
     }
     setOut(lookups.createPending());
@@ -77,6 +74,10 @@ export function useFetchRessurs(id: string | null): [LookupState, () => void] {
       abortController.abort();
     };
   }, [id, toggle]);
+
+  if (!id) {
+    return [lookups.createWaiting(), flipToggle];
+  }
 
   return [out, flipToggle];
 }

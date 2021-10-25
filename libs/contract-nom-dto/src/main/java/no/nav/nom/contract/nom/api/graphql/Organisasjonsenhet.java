@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Builder
 public class Organisasjonsenhet {
     String agressoId;
+    String orgNiv;
     String navn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;

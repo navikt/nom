@@ -7,6 +7,8 @@ import graphql.com.google.common.collect.Streams;
 import no.nav.nom.apps.api.domain.OrgType;
 import no.nav.nom.apps.api.domain.OrgTyper;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.graphql.request.Ordre;
+import no.nav.nom.apps.api.graphql.request.dto.OrdreLinje;
 import no.nav.nom.contract.nom.api.graphql.Kode;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -19,6 +21,7 @@ public class ConverterUtils {
     public static Organisasjonsenhet convert(DvhOrganisasjonsenhet orgEnht) {
         return Organisasjonsenhet.builder()
                 .agressoId(orgEnht.getAgressoId())
+                .orgNiv(orgEnht.getOrgNiv())
                 .navn(orgEnht.getNavn())
                 .gyldigFom(orgEnht.getGyldigFom())
                 .gyldigTom(orgEnht.getGyldigTom())
@@ -32,6 +35,14 @@ public class ConverterUtils {
                 .navIdent(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
                 .build();
+    }
+
+    public static Ordre convert(no.nav.nom.apps.api.repository.ordre.Ordre ordre){
+        return null;
+    }
+
+    public static List<OrdreLinje> convert(JsonNode ordreLinje){
+        return null;
     }
 
     public static List<String> toStringList(ObjectNode objectNode, String fieldName) {
