@@ -30,6 +30,7 @@ type Ressurs {
     visningsNavn: String
     fornavn: String
     etternavn: String
+    telefon: [Telefon!]!
 }
 
 type Person {
@@ -93,4 +94,14 @@ type OrdreLinje {
     type: OrdreLinjeType
     # define explicitly?
     data: JSON
+}
+
+type Telefon {
+    nummer: String!
+    type: TelefonType!
+    beskrivelse: String
+}
+
+enum TelefonType {
+    NAV_TJENESTE_TELEFON
 }
