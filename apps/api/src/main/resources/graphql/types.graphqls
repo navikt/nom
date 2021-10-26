@@ -103,5 +103,6 @@ type Telefon {
 }
 
 enum TelefonType {
-    NAV_TJENESTE_TELEFON
+    NAV_TJENESTE_TELEFON,
+    PRIVAT_TELEFON
 }
