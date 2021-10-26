@@ -78,7 +78,7 @@ spec:
           namespace: default
           cluster: dev-fss
         - application: ida
-          namespace: default
+          namespace: traktor
           cluster: prod-fss
     outbound:
       external:
