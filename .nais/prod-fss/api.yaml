@@ -66,7 +66,7 @@ spec:
           cluster: prod-fss
         - application: okonomiportal
           namespace: okonomi
-          cluster: prod-fss
+          cluster: prod-gcp
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
