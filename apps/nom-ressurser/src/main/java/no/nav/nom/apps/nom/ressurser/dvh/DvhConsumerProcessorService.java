@@ -79,21 +79,21 @@ public class DvhConsumerProcessorService {
 
         if (DvhConstants.KOMMUNAL.equals(dvhRessursDTO.getAnsattType())) {
             return "JA".equals(dvhRessursDTO.getPermisjon())
-                    ? getPersistedSluttDato(dvhRessursDTO.getNavident())
+                    ? getPersistedSluttDato(dvhRessursDTO.getPersonIdent())
                     : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
         }
 
         return dvhRessursDTO.getAgressoSluttDato() != null && !D2099.equals(dvhRessursDTO.getAgressoSluttDato())
                 ? dvhRessursDTO.getAgressoSluttDato() : "JA".equals(dvhRessursDTO.getPermisjon())
-                ? getPersistedSluttDato(dvhRessursDTO.getNavident()) : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
+                ? getPersistedSluttDato(dvhRessursDTO.getPersonIdent()) : getDateOrNull(dvhRessursDTO.getRemedySluttDato());
     }
 
     private LocalDate getDateOrNull(final LocalDate dato) {
         return !D2099.equals(dato) ? dato : null;
     }
 
-    private LocalDate getPersistedSluttDato(final String navident) {
-        return ressursRepository.getGyldigRessursByNavident(navident).map(Ressurs::getSluttdato).orElse(null);
+    private LocalDate getPersistedSluttDato(final String personIdent) {
+        return ressursRepository.getGyldigRessursByPersonident(personIdent).map(Ressurs::getSluttdato).orElse(null);
     }
 
     private Ressurstype convertedRessursType(final String ressurstypeKode, final String ansattType) {

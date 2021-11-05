@@ -98,7 +98,7 @@ public class DvhConsumerProcessorServiceTest {
         dvhRessursDTO.setPermisjon("JA");
         dvhRessursDTO.setAgressoSluttDato(null);
 
-        when(ressursRepository.getGyldigRessursByNavident(anyString())).thenReturn(Optional.of(Ressurs.builder().sluttdato(null).build()));
+        when(ressursRepository.getGyldigRessursByPersonident(anyString())).thenReturn(Optional.of(Ressurs.builder().sluttdato(null).build()));
         dvhConsumerProcessorService.processRessurser(Collections.singletonList(dvhRessursDTO));
 
         val arg = ArgumentCaptor.forClass(Ressurs.class);
