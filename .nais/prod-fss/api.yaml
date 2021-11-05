@@ -64,6 +64,9 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: prod-fss
+        - application: okonomiportal
+          namespace: okonomi
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
