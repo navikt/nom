@@ -80,9 +80,6 @@ spec:
         - application: ida
           namespace: traktor
           cluster: prod-fss
-        - application: okonomiportal
-          namespace: okonomi
-          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
