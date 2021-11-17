@@ -13,6 +13,11 @@ app:
     enheter:
       url: ${app.dvh.base-url}/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1
       urlV2: ${app.dvh.base-url}/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2
+  tel:
+    telUsername: ${teluser}
+    telPassword: ${telpass}
+    url: ${APP_TEL_BASE_URL}
+
 authentication:
   sts:
     issuerBaseUrl: ${STS_BASEURL}

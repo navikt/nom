@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/tel",
+    "basicAuthCredentials": {
+      "username": "test-tel-user",
+      "password": "test-tel-pass"
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "test": null
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

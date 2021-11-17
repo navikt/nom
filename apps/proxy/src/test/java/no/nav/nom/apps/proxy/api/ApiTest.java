@@ -32,4 +32,17 @@ public class ApiTest extends ApiTestBase {
 
     }
 
+    @Test
+    @DisplayName("Tester tel kall")
+    public void scenario31(){
+        val claims = securityTestUtils.validJwtClaims();
+        val token = securityTestUtils.createToken(claims);
+
+        val headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create("/proxy/tel"), HttpMethod.GET, new HttpEntity<>(null, headers), JsonNode.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+    }
+
 }

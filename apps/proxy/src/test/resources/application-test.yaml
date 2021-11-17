@@ -10,6 +10,10 @@ app:
   ldap:
     username: ldapuser
     password: ldappwd
+  tel:
+    telUsername: test-tel-user
+    telPassword: test-tel-pass
+    url: http://localhost:${wiremock.server.port}/tel
 
 authentication:
   sts:

@@ -12,8 +12,17 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @AllArgsConstructor
 @ConfigurationProperties("app")
 public class AppProperties {
+
     private final Dvh dvh;
     private final Pdl pdl;
+    private final Tel tel;
+
+    @Value
+    public static class Tel {
+        String telUsername;
+        String telPassword;
+        String url;
+    }
 
     @Value
     public static class Dvh {
