@@ -80,6 +80,9 @@ spec:
         - application: ida
           namespace: traktor
           cluster: prod-fss
+        - application: jfr-arena-q2
+          namespace: isa
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
