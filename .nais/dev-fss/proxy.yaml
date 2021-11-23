@@ -43,6 +43,9 @@ spec:
         - application: nom-sandbox-api
           namespace: nom
           cluster: dev-gcp
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
   webproxy: true
   ingresses:
     - https://nom-proxy.dev.intern.nav.no
