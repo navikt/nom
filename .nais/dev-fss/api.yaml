@@ -86,6 +86,9 @@ spec:
         - application: henvendelse-migrering
           namespace: oppgavehandtering
           cluster: dev-fss
+        - application: oppgavestyring-backend
+          namespace: oppgavehandtering
+          cluster: dev-gcp
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io

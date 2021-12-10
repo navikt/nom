@@ -64,6 +64,9 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: prod-fss
+        - application: henvendelse-migrering # midlertidig behov ifm en-gangs migrering
+          namespace: oppgavehandtering
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
