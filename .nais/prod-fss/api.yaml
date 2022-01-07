@@ -67,6 +67,9 @@ spec:
         - application: henvendelse-migrering # midlertidig behov ifm en-gangs migrering
           namespace: oppgavehandtering
           cluster: prod-fss
+        - application: sparkel-vilkarsproving
+          namespace: tbd
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io

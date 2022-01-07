@@ -89,6 +89,9 @@ spec:
         - application: oppgavestyring-backend
           namespace: oppgavehandtering
           cluster: dev-gcp
+        - application: sparkel-vilkarsproving
+          namespace: tbd
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
