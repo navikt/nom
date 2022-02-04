@@ -70,6 +70,9 @@ spec:
         - application: sparkel-vilkarsproving
           namespace: tbd
           cluster: prod-fss
+        - application: amt-tiltak
+          namespace: amt
+          cluster: prod-gcp
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
