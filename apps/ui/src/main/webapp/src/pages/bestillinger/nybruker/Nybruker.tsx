@@ -215,7 +215,11 @@ export default function Nybruker(): JSX.Element {
                         ></div>
                     </SkjemaGruppe>
 
-                    <Feilmeldinger errors={formState.errors} spec={spec} />
+                    {/* <Feilmeldinger errors={formState.errors} spec={spec} /> */}
+                    {formState.errors && <div>
+                        errors:
+                        <pre>{JSON.stringify(formState.errors,null,2)}</pre>
+                    </div>}
 
                     <Hovedknapp
                         htmlType="submit"

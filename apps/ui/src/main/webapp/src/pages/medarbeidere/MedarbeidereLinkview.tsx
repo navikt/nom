@@ -1,6 +1,6 @@
 import { AlertStripeInfo } from "nav-frontend-alertstriper";
 import React, { Fragment } from "react";
-import { Link, useParams } from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import TableSorter from "tabell";
 import { useFetchRessurs } from "../../api/graphql_fetch_hooks";
 import { GqlRessurs } from "../../common/gqltypes";
@@ -15,6 +15,11 @@ export interface Medarbeider {
   navIdent: string;
   fulltNavn: string;
   epost: string;
+  telefon: {
+    nummer: string;
+    type: string;
+    beskrivelse: string;
+  }[]
   ledere: {
     navIdent: string;
     fulltNavn: string;
@@ -40,6 +45,7 @@ const templateMedarbeider: Medarbeider = {
   navIdent: "[ukjent]",
   fulltNavn: "[ukjent]",
   epost: "[ukjent]",
+  telefon: [],
   ledere: [],
   ansattKategori: "[ukjent]",
   enheter: [],
@@ -58,6 +64,8 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   out.fulltNavn = fulltNavnForRessurs(ressurs);
 
   out.epost = ressurs.epost;
+
+  out.telefon = ressurs.telefon;
 
   out.ledere = ressurs.ledere.map((it) => {
     const lederRes = it.ressurs;
@@ -108,7 +116,33 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   return out;
 }
 
+function TelDisplay(props:  {telArr: {nummer: string, type: string, beskrivelse: string}[]}): JSX.Element {
+    const lines: string[] = [];
+    for(let k = 0; k<props.telArr.length; k+=1){
+        const tlf = props.telArr[0];
+        let tlfInfo = "[ukjent]";
+        if(tlf){
+            const nrTmp = tlf.nummer.startsWith("47") ? tlf.nummer.substring(2) : tlf.nummer;
+            let nrAcc = "";
+            for(let k = 0; k <nrTmp.length; k+=2){
+                nrAcc += nrTmp.substring(k,k+2) + " ";
+            }
+            const nr = nrAcc.substring(0,nrAcc.length-1);
+            const tpTmp = tlf.type.startsWith("NAV_") ? tlf.type.substring(4) : tlf.type;
+            const tp = tpTmp.toLocaleLowerCase().replaceAll("_","");
+            tlfInfo = nr + " (" + tp + ") ";
+            lines.push(tlfInfo);
+        }
+    }
+
+    return <span>
+        {lines.map(it => <span key={it}>{it} <br/> </span>)}
+    </span>;
+}
+
+
 function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
+
   return (
     <LabeledItemsgrid>
       <label htmlFor="navIdentHeader">Nav-ident: </label>
@@ -119,6 +153,8 @@ function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
       <span id="ansattTypeHeader">{props.medarbeider.ansattKategori}</span>
       <label htmlFor="ansattEpost">Epost: </label>
       <span id="ansattEpost">{props.medarbeider.epost}</span>
+      <label htmlFor={"ansattTlf"}>Telefon: </label>
+      <span id={"ansattTlf"}><TelDisplay telArr={props.medarbeider.telefon}/></span>
 
       {props.medarbeider.ledere.length !== 0
         ? props.medarbeider.ledere.map((it) => {
@@ -148,7 +184,9 @@ function OrgenhetListview(props: {
     enhetType: "AgressoEnhet";
   }[];
 }): JSX.Element {
-  
+
+  const history = useNavigate();
+
   return (
     <TableSorter
       items={props.orgenheter.map((it) => {
@@ -167,6 +205,7 @@ function OrgenhetListview(props: {
           type: "string",
           renderCell: (item, value) => (
             <ItemLink
+              history={history}
               url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.agressoId, item.agressoNiva)}
               label={item.enhetNavn}
             />
@@ -185,7 +224,7 @@ function OrgenhetListview(props: {
       searchable={false}
       selectable={false}
       sortable={true}
-      sort={{ column: "id", order: "asc" }}
+      sort={{ column: "enhetNavn", order: "asc" }}
       striped={false}
       summary={false}
       compact={true}

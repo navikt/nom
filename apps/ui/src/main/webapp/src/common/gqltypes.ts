@@ -8,6 +8,7 @@ export interface GqlRessurs {
   person?: GqlPerson;
   visningsnavn?: string;
   epost: string;
+  telefon: GqlTelefon[];
 }
 
 export interface GqlRessursKobling {
@@ -74,4 +75,10 @@ export interface GqlResponse {
     | GqlOrganisasjonsenhet
     | GqlOrganisasjonsenhet[];
   error?: any;
+}
+
+export interface GqlTelefon {
+  nummer: string;
+  type: string;
+  beskrivelse: string;
 }

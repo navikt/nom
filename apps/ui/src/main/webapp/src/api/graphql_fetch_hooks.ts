@@ -45,7 +45,7 @@ async function doPostGraphql(
       return; // abortController
     }
     console.error(err);
-    setOut(lookups.createError(err.message));
+    setOut(lookups.createError((err as any).message));
   }
 }
 
@@ -57,7 +57,7 @@ async function doPostGraphql(
 
 // -- HOOK
 
-export function useFetchRessurs(id: string | null): [LookupState, () => void] {
+export function useFetchRessurs(id: string | undefined): [LookupState, () => void] {
   const [out, setOut] = useState<LookupState>(lookups.createPending());
   const [toggle, flipToggle] = useReducer((toggle: boolean) => !toggle, false);
 
@@ -85,7 +85,7 @@ export function useFetchRessurs(id: string | null): [LookupState, () => void] {
 // -- HOOK
 
 export function useGetOrganisasjonsEnhet(
-  id: string | null
+  id: string | undefined
 ): [LookupState, () => void] {
   const [out, setOut] = useState<LookupState>(lookups.createPending());
   const [toggle, flipToggle] = useReducer((toggle: boolean) => !toggle, false);

@@ -14,6 +14,11 @@ export function createRessursQuery(id: string | null): string {
                 etternavn
               }
             }
+            telefon {
+              nummer 
+              beskrivelse 
+              type
+            }
             ledere {
               ressurs{
                 navIdent
@@ -23,6 +28,11 @@ export function createRessursQuery(id: string | null): string {
                     mellomnavn
                     etternavn
                   }
+                }
+                telefon {
+                  nummer 
+                  beskrivelse 
+                  type
                 }
               }
             }
@@ -45,7 +55,7 @@ export function createRessursQuery(id: string | null): string {
 }
 
 export function createOrganisasjonsenhetQuery(
-  agressoIdUrl: string | null
+  agressoIdUrl: string | undefined
 ): string {
   function agressoUrlToWhereClause(agrIdUrl: string): any {
     const agressoData = agressoUrlToData(agrIdUrl);
@@ -141,6 +151,11 @@ export function createOrganisasjonsenhetQuery(
                     etternavn
                   }
                 }
+                telefon {
+                  nummer 
+                  beskrivelse 
+                  type
+                }
               }
             }
             koblinger {
@@ -153,6 +168,11 @@ export function createOrganisasjonsenhetQuery(
                     mellomnavn
                     etternavn
                   }
+                }
+                telefon {
+                  nummer 
+                  beskrivelse 
+                  type
                 }
               }
             }

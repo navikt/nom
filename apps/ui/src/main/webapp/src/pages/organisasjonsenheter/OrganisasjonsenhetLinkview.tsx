@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import TableSorter from "tabell";
 import { LookupState } from "../../api/utils_api_hook";
 import {
@@ -198,6 +198,8 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
 
   const stiReversed = [...sti].reverse();
 
+  const history = useNavigate();
+
   const hierarkiVisning = (
     <Contentbox label="Hierarki over">
       {sti.length !== 0
@@ -237,7 +239,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
               label: "NavIdent",
               type: "string",
               renderCell: (item, value) => (
-                <ItemLink url={"/medarbeidere/" + item.id} label={item.id} />
+                <ItemLink history={history} url={"/medarbeidere/" + item.id} label={item.id} />
               ),
             },
             { id: "pnr", label: "Personnummer", type: "string" },
@@ -276,10 +278,11 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
               label: "Navn",
               type: "string",
               renderCell: (item, value) => (
-                <ItemLink
-                  url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}
-                  label={value}
-                />
+                  <ItemLink
+                        history={history}
+                        url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}
+                        label={value}
+                    />
               ),
             },
             { id: "enhetNr", label: "Nr", type: "string" },

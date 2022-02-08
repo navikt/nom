@@ -30,7 +30,7 @@ async function doFetchGet(
       return; // abortController
     }
     console.error(err);
-    setOut(lookups.createError(err.message));
+    setOut(lookups.createError((err as any).message));
   }
 }
 

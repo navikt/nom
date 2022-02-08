@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 import About from "./pages/about/About";
 import Graphql from "./pages/graphql/Graphql";
 import Organisasjonsenheter from "./pages/organisasjonsenheter/Organisasjonsenheter";
@@ -25,73 +25,39 @@ import Enhetstyper from "./pages/enhetstyper/Enhetstyper";
 
 function AppRouter(): JSX.Element {
   return (
-    <Switch>
-      <Route exact path="/index.html">
-        <Redirect to="/" />
-      </Route>
-      <Route exact path="/">
-        <Root />
-      </Route>
-      <Route exact path="/about">
-        <About />
-      </Route>
-      <Route exact path="/graphql">
-        <Graphql />
-      </Route>
-      <Route exact path="/organisasjonsenheter">
-        <Redirect to="/organisasjonsenheter/0_NAV" />
-      </Route>
-      <Route exact path="/organisasjonsenheter/:id">
-        <Organisasjonsenheter />
-      </Route>
-      <Route exact path="/medarbeidere">
-        <MedarbeidereLinkview />
-      </Route>
-      <Route exact path="/medarbeidere/:id">
-        <MedarbeidereLinkview />
-      </Route>
-      <Route exact path="/bestillinger">
-        <Bestillinger />
-      </Route>
-      <Route exact path="/bestillinger/nybruker">
-        <Nybruker />
-      </Route>
-      <Route exact path="/bestillinger/nyenhet">
-        <Nyenhet />
-      </Route>
-      <Route exact path="/bestillinger/flytteenhet">
-        <Nompagewrap pagetitle="Flytte enhet">...TODO</Nompagewrap>
-      </Route>
-      <Route exact path="/bestillinger/splitteenhet">
-        <Nompagewrap pagetitle="Splitte enhet">...TODO</Nompagewrap>
-      </Route>
-      <Route exact path="/bestillinger/sammenslaaenheter">
-        <Nompagewrap pagetitle="Sammenslå enheter">...TODO</Nompagewrap>
-      </Route>
-      <Route exact path="/bestillinger/kategoriserenhet">
-        <Nompagewrap pagetitle="Kategoriser enhet">...TODO</Nompagewrap>
-      </Route>
-      <Route exact path="/bestillinger/list">
-        <BestillingList />
-      </Route>
-      <Route exact path="/bestillingsgodkjenning">
-        <Bestillingsgodkjenning />
-      </Route>
-      <Route exact path="/enhetstyper">
-        <Enhetstyper />
-      </Route>
-      <Route>
-        {/* default..  */}
-        <Redirect to="/" />
-      </Route>
-    </Switch>
+      <Routes>
+        <Route path="/index.html" element={<Navigate to={"/"}/>}/>
+        <Route path="/" element={<Root/>}/>
+        <Route path="/about" element={<About/>}/>
+        <Route path="/graphql" element={<Graphql/>}/>
+        <Route path="/organisasjonsenheter" element={<Navigate to="/organisasjonsenheter/0_NAV"/>}>
+        </Route>
+        <Route path="/organisasjonsenheter/:id" element={<Organisasjonsenheter/>}/>
+        <Route path="/medarbeidere" element={<MedarbeidereLinkview/>}/>
+        <Route path="/medarbeidere/:id" element={<MedarbeidereLinkview/>}/>
+        <Route path="/bestillinger" element={<Bestillinger/>}/>
+        <Route path="/bestillinger/nybruker" element={<Nybruker/>}/>
+        <Route path="/bestillinger/nyenhet" element={<Nyenhet/>}/>
+        <Route path="/bestillinger/flytteenhet" element={<Nompagewrap pagetitle="Flytte enhet">...TODO</Nompagewrap>}/>
+        <Route path="/bestillinger/splitteenhet"
+               element={<Nompagewrap pagetitle="Splitte enhet">...TODO</Nompagewrap>}/>
+        <Route path="/bestillinger/sammenslaaenheter"
+               element={<Nompagewrap pagetitle="Sammenslå enheter">...TODO</Nompagewrap>}/>
+        <Route path="/bestillinger/kategoriserenhet"
+               element={<Nompagewrap pagetitle="Kategoriser enhet">...TODO</Nompagewrap>}/>
+        <Route path="/bestillinger/list" element={<BestillingList/>}/>
+        <Route path="/bestillingsgodkjenning" element={<Bestillingsgodkjenning/>}/>
+        <Route path="/enhetstyper" element={<Enhetstyper/>}/>
+        <Route element={<Navigate to="/"/>}/>
+      </Routes>
   );
 }
 
 function Main(): JSX.Element {
   return (
     <BestillingContext.Provider value={useBestillingContext()}>
-      <AppRouter />
+       <AppRouter />
+        {/* <Root />*/}
     </BestillingContext.Provider>
   );
 }

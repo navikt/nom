@@ -1,5 +1,4 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
 import useFetchLoggedInName from "../../api/useFetchLoggedInName";
 
 export default function NomLogin(props: any): JSX.Element {
