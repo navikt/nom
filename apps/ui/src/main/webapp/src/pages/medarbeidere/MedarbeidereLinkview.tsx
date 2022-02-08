@@ -119,7 +119,7 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
 function TelDisplay(props:  {telArr: {nummer: string, type: string, beskrivelse: string}[]}): JSX.Element {
     const lines: string[] = [];
     for(let k = 0; k<props.telArr.length; k+=1){
-        const tlf = props.telArr[0];
+        const tlf = props.telArr[k];
         let tlfInfo = "[ukjent]";
         if(tlf){
             const nrTmp = tlf.nummer.startsWith("47") ? tlf.nummer.substring(2) : tlf.nummer;
