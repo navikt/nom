@@ -1,4 +1,4 @@
-FROM navikt/java:16
+FROM navikt/java:17
 LABEL maintainer="Team Registre"
 
 ARG JAR_PATH

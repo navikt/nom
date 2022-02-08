@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: 16
+          java-version: 17
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token
