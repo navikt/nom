@@ -61,4 +61,12 @@ public class DvhController extends AbstractController {
                 HttpMethod.GET, null, String.class).getBody();
     }
 
+    @GetMapping("/dvhTlf")
+    public String getTlf(@AuthenticationPrincipal Jwt jwt) {
+        assertJwt(jwt);
+        return restTemplateDvh.exchange(appProperties.getDvh().getTelDvh().getUrl(),
+                HttpMethod.GET, null, String.class).getBody();
+
+    }
+
 }

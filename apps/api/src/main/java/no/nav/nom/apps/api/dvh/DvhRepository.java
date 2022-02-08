@@ -8,6 +8,9 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.contract.nom.api.graphql.Telefon;
+import no.nav.nom.contract.nom.api.graphql.TelefonType;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -29,6 +32,7 @@ public class DvhRepository {
     private List<DvhOrganisering> organiseringer;
     private List<DvhKobling> koblinger;
     private final RessursService ressursService;
+    private List<DvhTelefon> navidentTelefonNrMap;
 
     public Optional<DvhOrganisasjonsenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
@@ -142,6 +146,10 @@ public class DvhRepository {
         this.koblinger = list;
     }
 
+    public void saveTlf(List<DvhTelefon> tlfList){
+        this.navidentTelefonNrMap = tlfList;
+    }
+
     public void clearRepository() {
         enheterByNivaByAgressoId.clear();
         organiseringer.clear();
@@ -152,5 +160,22 @@ public class DvhRepository {
         return getAllKoblinger().stream()
                 .filter(s -> s.getNavIdent().equals(navIdent))
                 .toList();
+    }
+
+    public List<Telefon> getTelefonNrListByNavIdent(String navIdent) {
+        val lst = this.navidentTelefonNrMap.stream().filter(it -> it.getNavIdent().equals(navIdent));
+        return lst.map(it -> {
+            TelefonType telefonType = null;
+            switch(it.getType()){
+                case TJENESTETELEFON -> {
+                    telefonType = TelefonType.NAV_TJENESTE_TELEFON;
+                }
+                default -> {
+                    log.warn("Uklar");
+                    telefonType = TelefonType.PRIVAT_TELEFON;
+                }
+            }
+            return new Telefon(it.getNummer(),telefonType,"");
+        }).toList();
     }
 }

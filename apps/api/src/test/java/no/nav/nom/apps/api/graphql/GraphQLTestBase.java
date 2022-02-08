@@ -55,7 +55,7 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @SneakyThrows
     protected GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
-        val claims = securityTestUtils.validJwtClaims();
+        val claims = validJwtWithAzpClaim();
         val token = securityTestUtils.createToken(claims);
 
         val varNode = (ObjectNode) om.readTree(om.writeValueAsString(vars));

@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -58,6 +59,7 @@ public class DvhRestConsumer {
             loadRessurserFromDvh();
             loadOrgenhetFromDvh();
             loadKoblingerFromDvh();
+            loadTlfFromDvh();
         } catch (Exception e) {
             boolean firstLoad = !initialLoadComplete.get();
             if (firstLoad) {
@@ -117,6 +119,20 @@ public class DvhRestConsumer {
                 .collect(Collectors.toList());
 
         dvhRepository.saveKoblinger(koblinger);
+    }
+
+    private void loadTlfFromDvh() {
+        val jsonTlfNr = dvhExchange("/proxy/dvhTlf");
+        val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(),false)
+                .filter(this::validateTlf)
+                .map(DvhTelefon::new)
+                .collect(Collectors.toList());
+        log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
+        dvhRepository.saveTlf(tlfRader);
+    }
+
+    private boolean validateTlf(JsonNode jsonNode) {
+        return jsonNode.get("issecretnumber").isNull();
     }
 
     private void loadOrgenhetFromDvh() {

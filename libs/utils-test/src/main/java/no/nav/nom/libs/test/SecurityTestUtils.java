@@ -36,7 +36,6 @@ public class SecurityTestUtils {
         return new JWTClaimsSet.Builder()
                 .subject(subject)
                 .audience(audience)
-                .claim("azp", subject)
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))

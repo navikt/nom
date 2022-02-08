@@ -32,6 +32,8 @@ public class AppProperties {
         Stilling stilling;
         Ressurser ressurser;
         Enheter enheter;
+        TelDvh telDvh;
+
     }
 
 
@@ -55,5 +57,10 @@ public class AppProperties {
     public static class Enheter {
         String url;
         String urlV2;
+    }
+
+    @Value
+    public static class TelDvh {
+        String url;
     }
 }

@@ -22,7 +22,7 @@ public abstract class DvhTestBase extends TestBase {
     protected ObjectMapper om;
 
     @Autowired
-    private DvhRepository dvhRepository;
+    protected DvhRepository dvhRepository;
 
     @AfterEach
     protected void clearRepository() {

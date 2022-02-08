@@ -1,9 +1,12 @@
 package no.nav.nom.apps.api;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
+import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +38,9 @@ public abstract class TestBase {
     }
 
     @Autowired
+    private SecurityTestUtils securityTestUtils;
+
+    @Autowired
     private DvhRepository dvhRepository;
 
     @Autowired
@@ -60,5 +66,12 @@ public abstract class TestBase {
                     "spring.datasource.password=" + postgreSQLContainer.getPassword()
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
+    }
+
+    protected JWTClaimsSet.Builder validJwtWithAzpClaim(){
+        val jwtClaimsBuilder = securityTestUtils.validJwtClaims();
+        val subject = jwtClaimsBuilder.getClaims().get("sub");
+        return securityTestUtils.validJwtClaims()
+                .claim("azp", subject);
     }
 }
