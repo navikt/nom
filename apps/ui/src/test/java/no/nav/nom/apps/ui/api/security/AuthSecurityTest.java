@@ -33,8 +33,8 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @DisplayName("Auth Security")
 class AuthSecurityTest extends SecurityTestBase {
-    private static final String STEP2_REDIRECT_URL_PATTERN = BASE + "oauth2\\/v2.0\\/authorize\\?.*";               // Spring Security
-    private static final String STEP2_AAD_REDIRECT_URL_PATTERN = BASE + "login\\/oauth2\\/code\\/aad";              // Ligger configurert i property
+    private static final String STEP2_REDIRECT_URL_PATTERN = BASE + "oauth2/v2.0/authorize?.*";               // Spring Security
+    private static final String STEP2_AAD_REDIRECT_URL_PATTERN = BASE + "login/oauth2/code/aad";              // Ligger configurert i property
 
     @Test
     @SneakyThrows
@@ -88,7 +88,7 @@ class AuthSecurityTest extends SecurityTestBase {
         val bodyAsUrlDecoded = URLDecoder.decode(step3CodeRequest.get(0).getBodyAsString(), Charset.defaultCharset()); // Sendes som en vanlig url query params men i body.
         assertThat(bodyAsUrlDecoded, containsString("grant_type=authorization_code"));
         assertThat(bodyAsUrlDecoded, containsString("code=codeFromAad"));
-        assertThat(bodyAsUrlDecoded, matchesRegex(".*redirect_uri=http://localhost:\\d.*\\/login\\/oauth2\\/code\\/aad"));
+        assertThat(bodyAsUrlDecoded, matchesRegex(".*redirect_uri=http://localhost:\\d.*/login/oauth2/code/aad"));
 
 
         // Step4: Autentisert, kan nå gjøre kall til sikrede endepunkter

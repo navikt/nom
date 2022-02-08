@@ -40,8 +40,8 @@ import static org.hamcrest.Matchers.notNullValue;
 public abstract class ApiTestBase extends TestBase {
 
     protected static final String USER_SUBJECT = "b252dd03-6a19-4601-b749-ba4cea4008d2";
-    protected static final String BASE = "http:\\/\\/localhost:\\d.*\\/";                                             // Pga Wiremock variabel port
-    protected static final String AUTHENTICATION_ENDPOINT = BASE + "oauth2\\/authorization\\/aad";                    // Spring Security
+    protected static final String BASE = "http://localhost:\\d.*";                                             // Pga Wiremock variabel port
+    protected static final String AUTHENTICATION_ENDPOINT = BASE + "/oauth2/authorization/aad";                    // Spring Security
 
     @Autowired
     protected TestRestTemplate template;
@@ -74,7 +74,8 @@ public abstract class ApiTestBase extends TestBase {
         stubAadUserInfo(idTokenClaims.getClaims().get("sub").toString());
 
         val step3Request = transferSessionCookie(step2);
-        val step3 = template.exchange(constructUrlForStep3WithStep2State(step2), HttpMethod.GET, step3Request, String.class);
+        val step3Url = constructUrlForStep3WithStep2State(step2);
+        val step3 = template.exchange(step3Url, HttpMethod.GET, step3Request, String.class);
         sessionCookieValue = getSessionCookieId(step3);
         xsrfCookieValue = getCookieValue(step3, "XSRF-TOKEN");
     }
@@ -129,10 +130,15 @@ public abstract class ApiTestBase extends TestBase {
     }
 
     protected String getCookieValue(ResponseEntity<?> entity, String key) {
-        return entity.getHeaders().get("Set-Cookie").stream()
-                .filter(e -> e.startsWith(key))
-                .findFirst()
-                .orElseThrow();
+
+        val setCookieList = entity.getHeaders().get("Set-Cookie");
+        for(val cookie: setCookieList){
+            val correctCookie = cookie.startsWith(key);
+            if(correctCookie) {
+                return cookie;
+            }
+        }
+        throw new RuntimeException("Cookie with key " + key + " not found, cookies were: " + setCookieList.toString());
     }
 
     public void stubAadForAuthCode(JWTClaimsSet.Builder accessToken, JWTClaimsSet.Builder idToken, String refreshToken) {
