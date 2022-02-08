@@ -38,6 +38,6 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
-          java-version: 16
+          java-version: 17
       - name: Snyk monitor Maven
         run: mvn snyk:monitor -Dsnyk-api-token=${{ secrets.SNYK_TOKEN }} --batch-mode
