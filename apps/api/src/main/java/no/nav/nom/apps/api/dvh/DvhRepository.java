@@ -162,20 +162,8 @@ public class DvhRepository {
                 .toList();
     }
 
-    public List<Telefon> getTelefonNrListByNavIdent(String navIdent) {
+    public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
         val lst = this.navidentTelefonNrMap.stream().filter(it -> it.getNavIdent().equals(navIdent));
-        return lst.map(it -> {
-            TelefonType telefonType = null;
-            switch(it.getType()){
-                case TJENESTETELEFON -> {
-                    telefonType = TelefonType.NAV_TJENESTE_TELEFON;
-                }
-                default -> {
-                    log.warn("Uklar");
-                    telefonType = TelefonType.PRIVAT_TELEFON;
-                }
-            }
-            return new Telefon(it.getNummer(),telefonType,"");
-        }).toList();
+        return lst.toList();
     }
 }
