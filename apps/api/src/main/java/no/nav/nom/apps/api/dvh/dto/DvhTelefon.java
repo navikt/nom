@@ -25,9 +25,9 @@ public class DvhTelefon {
         val userref1 = node.get("userreference1").asText();
 
         if(userref1.startsWith("PK-")){
-            this.type = DvhTelefonType.TJENESTETELEFON;
-        }else if(userref1.startsWith("PT-")){
             this.type = DvhTelefonType.KONTORTELEFON;
+        }else if(userref1.startsWith("PT-")){
+            this.type = DvhTelefonType.TJENESTETELEFON;
         }else{
             // TODO, håndtere bedre?
             this.type = null;
