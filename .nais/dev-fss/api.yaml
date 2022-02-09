@@ -57,6 +57,7 @@ spec:
     inbound:
       rules:
         - application: nom-ui
+        - application: team-catalog-frackend
         - application: team-catalog-backend
           cluster: dev-fss
         - application: veilarbveileder
