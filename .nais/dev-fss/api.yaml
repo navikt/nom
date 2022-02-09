@@ -58,6 +58,7 @@ spec:
       rules:
         - application: nom-ui
         - application: team-catalog-frackend
+          namespace: org
         - application: team-catalog-backend
           cluster: dev-fss
         - application: veilarbveileder
