@@ -18,7 +18,6 @@ public class NomRessurser {
         readVaultSrvProps();
         System.setProperty("kafka-transaction-uuid", UUID.randomUUID().toString().substring(0, 8));
         SpringApplication.run(NomRessurser.class);
-
     }
 }
 
