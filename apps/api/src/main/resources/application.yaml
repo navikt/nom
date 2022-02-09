@@ -38,6 +38,9 @@ graphql:
         query: classpath:playground/ressurs.graphql
       - name: Person
         query: classpath:playground/person.graphql
+    enabled: true
+  voyager:
+    enabled: true
   servlet:
     mapping: /graphql
     enabled: true
