@@ -132,7 +132,14 @@ public class DvhRestConsumer {
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
-        return jsonNode.get("issecretnumber").isNull();
+
+        val isSecretNumberNode = jsonNode.get("issecretnumber");
+        val userRef1 = jsonNode.get("userreference1");
+
+        return isSecretNumberNode.isNull()
+                && (userRef1.asText().startsWith("PT-")
+                || userRef1.asText().startsWith("PK-")
+        );
     }
 
     private void loadOrgenhetFromDvh() {

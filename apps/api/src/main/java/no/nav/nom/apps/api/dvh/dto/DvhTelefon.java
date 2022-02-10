@@ -3,10 +3,12 @@ package no.nav.nom.apps.api.dvh.dto;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.contract.nom.api.graphql.TelefonType;
 
 @Data
+@Slf4j
 public class DvhTelefon {
     String navIdent;
     String nummer;
@@ -30,6 +32,7 @@ public class DvhTelefon {
             this.type = DvhTelefonType.TJENESTETELEFON;
         }else{
             // TODO, håndtere bedre?
+            log.error("DvhTelefon.type satt til null! " + node.get("userreference1").asText() );
             this.type = null;
         }
 
