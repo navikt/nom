@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 
 @Component
@@ -26,12 +27,19 @@ public class RessursTelefonResolver implements GraphQLResolver<Ressurs> {
 
         List<DvhTelefon> tlfList = dvhRepository.getTelefonNrListByNavIdent(ressurs.getNavIdent());
 
-            return DataFetcherResult.<List<Telefon>>newResult()
-                    .data(tlfList.stream().map(this::telefonFromDvhTelefon).toList())
-                    .build();
+        return DataFetcherResult.<List<Telefon>>newResult()
+                .data(tlfList.stream()
+                        .map(tlf -> telefonFromDvhTelefon(tlf, ressurs))
+                        .filter(Objects::nonNull)
+                        .toList())
+                .build();
     }
 
-    private Telefon telefonFromDvhTelefon(DvhTelefon it){
+    private Telefon telefonFromDvhTelefon(DvhTelefon it, Ressurs resKontekst){
+        if(it == null){
+            log.warn("DvhTelefon var <null> for ident " + resKontekst.getNavIdent());
+            return null;
+        }
             TelefonType telefonType = null;
             switch(it.getType()){
                 case TJENESTETELEFON -> {
