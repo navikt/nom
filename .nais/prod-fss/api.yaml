@@ -56,6 +56,8 @@ spec:
     inbound:
       rules:
         - application: nom-ui
+        - application: team-catalog-frackend
+          namespace: org
         - application: team-catalog-backend
           cluster: prod-fss
         - application: veilarbveileder
