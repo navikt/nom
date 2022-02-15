@@ -94,6 +94,12 @@ spec:
         - application: sparkel-vilkarsproving
           namespace: tbd
           cluster: dev-fss
+        - application: modiapersonoversikt-api-q0
+          namespace: personoversikt
+          cluster: dev-fss
+        - application: modiapersonoversikt-api-q1
+          namespace: personoversikt
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io

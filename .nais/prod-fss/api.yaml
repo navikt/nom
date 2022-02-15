@@ -75,6 +75,9 @@ spec:
         - application: amt-tiltak
           namespace: amt
           cluster: prod-fss
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
