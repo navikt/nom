@@ -74,7 +74,7 @@ spec:
           cluster: prod-fss
         - application: amt-tiltak
           namespace: amt
-          cluster: prod-fss
+          cluster: prod-gcp
         - application: modiapersonoversikt-api
           namespace: personoversikt
           cluster: prod-fss
