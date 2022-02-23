@@ -18,7 +18,9 @@ spec:
     - name: NOM_PROXY_CLIENT_ID
       value: dev-fss.nom.nom-proxy
     - name: GRAPHQL_PREAUTH_QUERY_PERSON
-      value: 92ab93bd-0782-40c0-902b-7758c8878cb4, 744e4092-4215-4e02-87df-a61aaf1b95b5
+      value: 92ab93bd-0782-40c0-902b-7758c8878cb4
+    - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
+      value: 744e4092-4215-4e02-87df-a61aaf1b95b5
   image: {{image}}
   port: 8080
   ingresses:
