@@ -11,7 +11,7 @@ spec:
       channel: '#org_preprod_alerts'
   alerts:
     - alert: NOM-UI applikasjon nede
-      expr: up{app="nom-ui", job="kubernetes-pods"} == 0
+      expr: 'kube_deployment_status_replicas_unavailable{deployment="nom-ui"} > 0'
       for: 3m
       description: "{{ $labels.app }} er nede"
       action: "`kubectl describe pod {{ $labels.kubernetes_pod_name }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }} -c {{ $labels.app }}` for logger"
