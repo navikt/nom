@@ -19,6 +19,8 @@ spec:
       value: prod-fss.nom.nom-proxy
     - name: GRAPHQL_PREAUTH_QUERY_PERSON
       value: NOONE
+    - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
+      value: NOONE
   image: {{image}}
   port: 8080
   ingresses:
