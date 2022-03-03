@@ -18,7 +18,6 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
 * Enhet har fått ny overenhet
 * Enheter sammenslått
 * Enhet splittet opp
-* Enhet flyttet geografisk
 * Enhet detaljer endret
 
 === Ansatt
