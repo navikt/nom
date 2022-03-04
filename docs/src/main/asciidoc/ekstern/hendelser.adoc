@@ -24,8 +24,6 @@ Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
 
 * Ansatt har begynt
 * Ansatt har sluttet
-* Ansatt har fått ny tilgang/rettighet
-* Ansatt har mistet tilgang/rettighet
 * Ansatt detaljer endret
 
 === Ansatt + Orgenhet
