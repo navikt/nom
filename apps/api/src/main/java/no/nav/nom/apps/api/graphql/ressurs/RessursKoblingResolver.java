@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
+import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursKobling;
 import org.springframework.stereotype.Component;
@@ -19,14 +20,15 @@ import java.util.stream.Collectors;
 public class RessursKoblingResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
+    private final OrgenhetService orgenhetService;
 
     public DataFetcherResult<List<RessursKobling>> koblinger(Ressurs ressurs, DataFetchingEnvironment env) {
         final List<RessursKobling> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
                 .stream()
                 .map(dvh -> {
-                    val orgenhet = dvhRepository.getEnhetByAgressoIdAndNiva(dvh.getAgressoId(), dvh.getOrgNiv()).get();
+                    val orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(dvh.getAgressoId(), dvh.getOrgNiv(), null).get();
                     return RessursKobling.builder()
-                            .organisasjonsenhet(ConverterUtils.convert(orgenhet))
+                            .organisasjonsenhet(orgenhetService.convertToGraphQlResponse(orgenhet))
                             .gyldigFom(dvh.getGyldigFom())
                             .gyldigTom(dvh.getGyldigTom())
                             .build();

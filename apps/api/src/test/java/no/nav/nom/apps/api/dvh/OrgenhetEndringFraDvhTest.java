@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
-import no.nav.nom.apps.api.domain.Orgenhet;
+import no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
 
         var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(6);
-        alle.sort(Comparator.comparing(Orgenhet::getAgressoId));
+        alle.sort(Comparator.comparing(EventBasedOrgenhet::getAgressoId));
 
         assertThat(alle.get(0).getNavn()).isEqualTo("testNavn");
         assertThat(alle.get(1).getNavn()).isEqualTo("testNavn");

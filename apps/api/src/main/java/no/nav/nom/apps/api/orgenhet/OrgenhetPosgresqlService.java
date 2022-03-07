@@ -1,14 +1,18 @@
-package no.nav.nom.apps.api.domain;
+package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
 import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
+import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,29 +20,29 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.domain.Orgenhet.AGRESSO_ID_FIELD;
-import static no.nav.nom.apps.api.domain.Orgenhet.NAVN_FIELD;
+import static no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet.AGRESSO_ID_FIELD;
+import static no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet.NAVN_FIELD;
 
 @Service
 @RequiredArgsConstructor
-public class OrgenhetService {
+public class OrgenhetPosgresqlService implements OrgenhetService {
 
     private final HendelseRepository hendelseRepository;
     private final ObjectMapper objectMapper;
 
-    public Optional<Orgenhet> findById(UUID uuid) {
+    public Optional<EventBasedOrgenhet> findById(UUID uuid) {
         return Optional.ofNullable(
                 convert(hendelseRepository.findAllByFunksjonellId(uuid))
         );
     }
 
-    public Optional<Orgenhet> findByAgressoId(String agressoId) {
+    public Optional<EventBasedOrgenhet> findByAgressoId(String agressoId) {
         return Optional.ofNullable(
                 convert(hendelseRepository.findHendelseByJson(AGRESSO_ID_FIELD, agressoId))
         );
     }
 
-    public List<Orgenhet> matchBy(String field, String fieldValue) {
+    public List<EventBasedOrgenhet> matchBy(String field, String fieldValue) {
         return hendelseRepository
                 .findHendelserByJsonMatch(field, fieldValue.toLowerCase())
                 .stream()
@@ -48,15 +52,15 @@ public class OrgenhetService {
                 .collect(Collectors.toList());
     }
 
-    public Map<String, Orgenhet> findByAgressoIdBulk(List<String> agressoIder) {
+    public Map<String, EventBasedOrgenhet> findByAgressoIdBulk(List<String> agressoIder) {
         return hendelseRepository.findHendelseByJsonBulk(AGRESSO_ID_FIELD, agressoIder).stream()
                 .collect(Collectors.groupingBy(Hendelse::getFunksjonellId))
                 .values().stream()
                 .map(this::convert)
-                .collect(Collectors.toUnmodifiableMap(Orgenhet::getAgressoId, Function.identity()));
+                .collect(Collectors.toUnmodifiableMap(EventBasedOrgenhet::getAgressoId, Function.identity()));
     }
 
-    public List<Orgenhet> getAll(){
+    public List<EventBasedOrgenhet> getAll(){
         return hendelseRepository.findAllByDataType(DataType.ORGENHET_V1).stream()
                 .collect(Collectors.groupingBy(Hendelse::getFunksjonellId))
                 .values()
@@ -147,7 +151,37 @@ public class OrgenhetService {
         );
     }
 
-    private Orgenhet convert(List<Hendelse> hendelser){
-        return hendelser == null || hendelser.isEmpty() ? null : new Orgenhet(hendelser);
+    private EventBasedOrgenhet convert(List<Hendelse> hendelser){
+        return hendelser == null || hendelser.isEmpty() ? null : new EventBasedOrgenhet(hendelser);
+    }
+
+    @Override
+    public Organisasjonsenhet convertToGraphQlResponse(Orgenhet orgenhet) {
+        return null;
+    }
+
+    @Override
+    public Optional<Orgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Orgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
+        return null;
+    }
+
+    @Override
+    public Collection<Orgenhet> getAllEnheter() {
+        return null;
+    }
+
+    @Override
+    public List<Orgenhet> matchByAgressoId(String agressoId) {
+        return null;
+    }
+
+    @Override
+    public List<Orgenhet> matchByNavn(String navn) {
+        return null;
     }
 }

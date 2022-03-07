@@ -1,19 +1,22 @@
-package no.nav.nom.apps.api.dvh.dto;
+package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import org.apache.tomcat.jni.Local;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Value
-public class DvhOrganisasjonsenhet {
+public class DvhOrganisasjonsenhet implements Orgenhet {
 
     String agressoId;
     String orgNiv;
     String navn;
     String agressoOrgType;
     LocalDate gyldigFom;
-    LocalDate gyldigTom;
+    Optional<LocalDate> gyldigTom;
 
     public DvhOrganisasjonsenhet(JsonNode node) {
         this.agressoId = node.get("ORGNODE_KODE").asText();
@@ -21,7 +24,7 @@ public class DvhOrganisasjonsenhet {
         this.navn = node.get("ORGNODE_NAVN").asText();
         this.agressoOrgType = node.get("agresso_orgnode_type").asText();
         gyldigFom = LocalDate.now().minusDays(1);
-        gyldigTom = null;
+        gyldigTom = Optional.empty();
 
         //this.gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA").asText());
         //val gyldigTomText = node.get("GYLDIG_TIL");

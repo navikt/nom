@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.domain.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetPosgresqlService;
 import no.nav.nom.apps.api.domain.RessursService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ public abstract class DvhTestBase extends TestBase {
     protected RessursService ressursService;
 
     @Autowired
-    protected OrgenhetService orgenhetService;
+    protected OrgenhetPosgresqlService orgenhetService;
 
     @Autowired
     protected ObjectMapper om;

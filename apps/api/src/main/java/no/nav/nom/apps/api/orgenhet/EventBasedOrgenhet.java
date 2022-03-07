@@ -1,7 +1,8 @@
-package no.nav.nom.apps.api.domain;
+package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 
 import java.time.LocalDate;
@@ -22,14 +23,14 @@ import static java.util.Comparator.comparing;
  * ID: Y             |---123-->
  */
 @Value
-public class Orgenhet {
+public class EventBasedOrgenhet implements Orgenhet {
 
     public final static String AGRESSO_ID_FIELD = "agressoId";
     public final static String NAVN_FIELD = "navn";
 
     List<Hendelse> hendelser;
 
-    public Orgenhet(List<Hendelse> hendelser) {
+    public EventBasedOrgenhet(List<Hendelse> hendelser) {
         this.hendelser = hendelser.stream()
                 .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
     }
@@ -41,12 +42,19 @@ public class Orgenhet {
                 .orElseThrow();
     }
 
+    @Override
     public String getAgressoId() {
         return getLast("agressoId").orElseThrow();
     }
 
+    @Override
     public String getNavn() {
         return getLast("navn").orElseThrow();
+    }
+
+    @Override
+    public String getOrgNiv() {
+        return null;
     }
 
     public LocalDate getGyldigFom() {

@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.contract.nom.api.graphql.Telefon;
-import no.nav.nom.contract.nom.api.graphql.TelefonType;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -27,22 +25,22 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class DvhRepository {
 
-    private Map<String, Map<String, DvhOrganisasjonsenhet>> enheterByNivaByAgressoId;
+    private Map<String, Map<String, Orgenhet>> enheterByNivaByAgressoId;
     private List<DvhLeder> ledere;
     private List<DvhOrganisering> organiseringer;
     private List<DvhKobling> koblinger;
     private final RessursService ressursService;
     private List<DvhTelefon> navidentTelefonNrMap;
 
-    public Optional<DvhOrganisasjonsenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
+    public Optional<Orgenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
     }
 
-    public List<DvhOrganisasjonsenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
+    public List<Orgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
         return getAllEnheter().stream().filter(e -> agressoIds.contains(e.getAgressoId())).toList();
     }
 
-    public Collection<DvhOrganisasjonsenhet> getAllEnheter() {
+    public Collection<Orgenhet> getAllEnheter() {
         return enheterByNivaByAgressoId.values().stream()
                 .flatMap(map -> map.values().stream())
                 .collect(Collectors.toList());
@@ -70,7 +68,7 @@ public class DvhRepository {
                 .toList();
     }
 
-    public List<DvhOrganisasjonsenhet> getEnheterByLeder(String lederNavIdent) {
+    public List<Orgenhet> getEnheterByLeder(String lederNavIdent) {
         return ledere.stream()
                 .filter(l -> l.getNavIdent().equals(lederNavIdent))
                 .map(l -> getEnhetByAgressoIdAndNiva(l.getOrgEnhetNr(), l.getOrgNiv()).orElse(null))
@@ -78,7 +76,7 @@ public class DvhRepository {
                 .toList();
     }
 
-    public void saveOrganisasjonsenheter(Map<String, Map<String, DvhOrganisasjonsenhet>> orgenheter) {
+    public void saveOrganisasjonsenheter(Map<String, Map<String, Orgenhet>> orgenheter) {
         enheterByNivaByAgressoId = orgenheter;
     }
 

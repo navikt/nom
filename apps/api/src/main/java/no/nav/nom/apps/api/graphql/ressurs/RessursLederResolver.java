@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.libs.utils.common.util.DateUtil;
@@ -24,6 +25,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
     private final RessursService ressursService;
+    private final OrgenhetService orgenhetService;
 
     public DataFetcherResult<List<RessursLeder>> ledere(Ressurs ressurs) {
         final List<RessursLeder> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
@@ -52,7 +54,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
     private List<Ressurs> lederForRecursive(String agressoId, String orgNiv, String excludeNavIdent) {
         return dvhRepository.getOrganiseringer(agressoId, orgNiv).stream()
                 .filter(o -> o.getAgressoIdUnder().equals(agressoId) && o.getOrgNivUnder().equals(orgNiv))
-                .map(o -> dvhRepository.getEnhetByAgressoIdAndNiva(o.getAgressoIdOver(), o.getOrgNivOver()))
+                .map(o -> orgenhetService.getEnhetByAgressoIdNivaAndName(o.getAgressoIdOver(), o.getOrgNivOver(), null))
                 .filter(Optional::isPresent)
                 .map(Optional::get).findFirst()
                 .map(o -> {

@@ -3,8 +3,8 @@ package no.nav.nom.apps.api.dvh;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.domain.OrgenhetService;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetPosgresqlService;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,14 +17,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgenhetHendelseService {
 
-    private final OrgenhetService orgenhetService;
+    private final OrgenhetPosgresqlService orgenhetService;
 
-    public void handterOrgenhetFraDvh(List<DvhOrganisasjonsenhet> o) {
+    public void handterOrgenhetFraDvh(List<Orgenhet> o) {
 
         val bulkSize = 10000;
         for (int i = 0; i < o.size(); i += bulkSize) {
             val selection = o.subList(i, Math.min(i + bulkSize, o.size()));
-            val orgenhetByAgressoId = orgenhetService.findByAgressoIdBulk(selection.stream().map(DvhOrganisasjonsenhet::getAgressoId).toList());
+            val orgenhetByAgressoId = orgenhetService.findByAgressoIdBulk(selection.stream().map(Orgenhet::getAgressoId).toList());
 
             val opprettInserts = new HashMap<String, String>();
             val endreinserts = new HashMap<UUID, Map<String, String>>();

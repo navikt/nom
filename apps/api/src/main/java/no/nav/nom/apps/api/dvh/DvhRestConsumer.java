@@ -9,10 +9,11 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.orgenhet.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -144,7 +145,7 @@ public class DvhRestConsumer {
 
     private void loadOrgenhetFromDvh() {
         val jsonOrgenheter = dvhExchange("/proxy/enheter/v2");
-        val orgenheter = new ConcurrentHashMap<String, Map<String, DvhOrganisasjonsenhet>>();
+        val orgenheter = new ConcurrentHashMap<String, Map<String, Orgenhet>>();
         val ledere = new LinkedList<DvhLeder>();
         val organiseringer = new LinkedList<DvhOrganisering>();
 
