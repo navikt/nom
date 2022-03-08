@@ -6,12 +6,11 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ class RessursResolver implements GraphQLQueryResolver {
 
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
         return SecurityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {
-            Optional<no.nav.nom.apps.api.domain.Ressurs> result;
+            Optional<RessursI> result;
             if (objectNode == null) {
                 result = Optional.empty();
             } else {
@@ -39,7 +38,7 @@ class RessursResolver implements GraphQLQueryResolver {
             }
 
             return DataFetcherResult.<Ressurs>newResult()
-                    .data(result.map(ConverterUtils::convert).orElse(null))
+                    .data(result.map(ressursService::convertToGraphQlResponse).orElse(null))
                     .build();
         });
     }
@@ -58,7 +57,7 @@ class RessursResolver implements GraphQLQueryResolver {
 
             return DataFetcherResult.<List<RessursResult>>newResult()
                     .data(result.stream()
-                            .map(r -> new RessursResult(r.getRessursResponse(), r.getId()))
+                            .map(r -> new RessursResult(r.getRessursResponse() != null ? ressursService.convertToGraphQlResponse(r.getRessursResponse()) : null, r.getId()))
                             .collect(Collectors.toList())
                     )
                     .build();
@@ -69,10 +68,10 @@ class RessursResolver implements GraphQLQueryResolver {
     private static class Result {
 
         String id;
-        no.nav.nom.apps.api.domain.Ressurs ressurs;
+        RessursI ressurs;
 
-        public Ressurs getRessursResponse() {
-            return ressurs == null ? null : ConverterUtils.convert(ressurs);
+        public RessursI getRessursResponse() {
+            return ressurs;
         }
     }
 

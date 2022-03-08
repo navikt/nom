@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhet;
+package no.nav.nom.apps.api.orgenhet.implementations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet.AGRESSO_ID_FIELD;
-import static no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet.NAVN_FIELD;
+import static no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet.AGRESSO_ID_FIELD;
+import static no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet.NAVN_FIELD;
 
 @Service
 @RequiredArgsConstructor

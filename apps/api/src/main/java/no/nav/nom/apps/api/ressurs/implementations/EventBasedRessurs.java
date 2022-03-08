@@ -1,7 +1,8 @@
-package no.nav.nom.apps.api.domain;
+package no.nav.nom.apps.api.ressurs.implementations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,18 +11,19 @@ import java.util.UUID;
 
 import static java.util.Comparator.comparing;
 
-public class Ressurs {
+public class EventBasedRessurs implements RessursI {
 
     public final static String NAVIDENT_FIELD = "navIdent";
     public final static String PERSONIDENT_FIELD = "personIdent";
 
     private final List<Hendelse> hendelser;
 
-    public Ressurs(List<Hendelse> hendelser) {
+    public EventBasedRessurs(List<Hendelse> hendelser) {
         this.hendelser = hendelser.stream()
                 .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
     }
 
+    @Override
     public UUID getId() {
         return hendelser.stream()
                 .findFirst()
@@ -29,10 +31,12 @@ public class Ressurs {
                 .orElseThrow();
     }
 
+    @Override
     public String getPersonIdent() {
         return getLast(PERSONIDENT_FIELD).orElseThrow();
     }
 
+    @Override
     public String getNavIdent() {
         return getLast(NAVIDENT_FIELD).orElseThrow();
     }

@@ -4,11 +4,11 @@ import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class SearchResolver implements GraphQLQueryResolver {
 
             var result = Stream.concat(
                     orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(orgenhetService::convertToGraphQlResponse),
-                    ressursService.matchByNavident(term).stream().map(ConverterUtils::convert)
+                    ressursService.matchByNavident(term).stream().map(ressursService::convertToGraphQlResponse)
             ).collect(Collectors.toList());
 
             return DataFetcherResult.<List<Object>>newResult()

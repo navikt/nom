@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
-import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
                 .map(dvh -> {
                     val ressurs = ressursService.findByNavIdent(dvh.getNavIdent()).get();
                     return OrganisasjonsenhetsKobling.builder()
-                            .ressurs(ConverterUtils.convert(ressurs))
+                            .ressurs(ressursService.convertToGraphQlResponse(ressurs))
                             .gyldigFom(dvh.getGyldigFom())
                             .gyldigTom(dvh.getGyldigTom())
                             .build();

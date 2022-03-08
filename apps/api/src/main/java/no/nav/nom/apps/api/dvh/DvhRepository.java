@@ -6,9 +6,9 @@ import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;

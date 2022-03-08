@@ -7,7 +7,7 @@ import com.graphql.spring.boot.test.GraphQLTestTemplate;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.domain.Ressurs;
+import no.nav.nom.apps.api.ressurs.implementations.EventBasedRessurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
@@ -75,8 +75,8 @@ public abstract class GraphQLTestBase extends TestBase {
 
     protected Hendelse createRessursHendelse(UUID fid, String navIdent, String fnr) {
         return createHendelse(Map.of(
-                Ressurs.NAVIDENT_FIELD, navIdent,
-                Ressurs.PERSONIDENT_FIELD, fnr
+                EventBasedRessurs.NAVIDENT_FIELD, navIdent,
+                EventBasedRessurs.PERSONIDENT_FIELD, fnr
         ), HendelseType.OPPRETTET, DataType.RESSURS_V1, fid);
     }
 
@@ -94,10 +94,10 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
     protected String getPersonIdent(Hendelse hendelse) {
-        return hendelse.getData().get(Ressurs.PERSONIDENT_FIELD).asText();
+        return hendelse.getData().get(EventBasedRessurs.PERSONIDENT_FIELD).asText();
     }
 
     protected String getNavIdent(Hendelse hendelse) {
-        return hendelse.getData().get(Ressurs.NAVIDENT_FIELD).asText();
+        return hendelse.getData().get(EventBasedRessurs.NAVIDENT_FIELD).asText();
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhet;
+package no.nav.nom.apps.api.orgenhet.implementations;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.domain.OrgType;

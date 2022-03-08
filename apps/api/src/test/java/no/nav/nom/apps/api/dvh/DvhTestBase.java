@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.orgenhet.OrgenhetPosgresqlService;
-import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetPosgresqlService;
+import no.nav.nom.apps.api.ressurs.implementations.RessursPostgresqlService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,7 +13,7 @@ public abstract class DvhTestBase extends TestBase {
     protected DvhRestConsumer dvhRestConsumer;
 
     @Autowired
-    protected RessursService ressursService;
+    protected RessursPostgresqlService ressursService;
 
     @Autowired
     protected OrgenhetPosgresqlService orgenhetService;

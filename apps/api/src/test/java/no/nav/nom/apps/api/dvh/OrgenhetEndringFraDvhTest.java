@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
-import no.nav.nom.apps.api.orgenhet.EventBasedOrgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

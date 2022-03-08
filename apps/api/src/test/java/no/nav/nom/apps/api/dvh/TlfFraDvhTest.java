@@ -1,11 +1,9 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.val;
-import no.nav.nom.apps.api.domain.RessursService;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;

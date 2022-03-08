@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.common.ConverterUtils;
-import no.nav.nom.apps.api.domain.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class LederResolver implements GraphQLResolver<Organisasjonsenhet> {
                 .map(l -> OrganisasjonsenhetsLeder.builder()
                         .ressurs(
                                 ressursService.findByNavIdent(l.getNavIdent())
-                                        .map(ConverterUtils::convert)
+                                        .map(ressursService::convertToGraphQlResponse)
                                         .orElseThrow()
                         )
                         .build()

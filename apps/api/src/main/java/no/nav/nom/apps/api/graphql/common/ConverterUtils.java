@@ -6,20 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.com.google.common.collect.Streams;
 import no.nav.nom.apps.api.graphql.request.Ordre;
 import no.nav.nom.apps.api.graphql.request.dto.OrdreLinje;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConverterUtils {
-
-    public static Ressurs convert(no.nav.nom.apps.api.domain.Ressurs ressurs) {
-        return Ressurs.builder()
-                .nomId(ressurs.getId())
-                .navIdent(ressurs.getNavIdent())
-                .personIdent(ressurs.getPersonIdent())
-                .build();
-    }
 
     public static Ordre convert(no.nav.nom.apps.api.repository.ordre.Ordre ordre){
         return null;

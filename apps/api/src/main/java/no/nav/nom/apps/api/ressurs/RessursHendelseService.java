@@ -1,10 +1,10 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.ressurs;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.RessursPostgresqlService;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RessursHendelseService {
 
-    private final RessursService ressursService;
+    private final RessursPostgresqlService ressursService;
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
 

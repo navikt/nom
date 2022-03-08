@@ -6,11 +6,11 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.domain.Ressurs;
-import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Person;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                             val navIdentForbokstav = (forbokstav.isPresent() ? forbokstav.filter(c -> c.length() == 1).orElseThrow(() -> new IllegalArgumentException("Ugyldig input i forbokstav: " + forbokstav.get())) :
                                     person.orElseThrow(() -> new NoSuchElementException("Ingen resultat fra PDL med gitt personident")).getNavn().getEtternavn().substring(0, 1)).toUpperCase();
 
-                            return ressursService.createOpprettetHendelse(personIdent, navIdentForbokstav);
+                            return ressursService.opprettRessurs(personIdent, null, navIdentForbokstav);
                         });
 
                 if(person.isEmpty()) {
@@ -59,7 +59,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
         });
     }
 
-    private OpprettRessursResponse convert(Ressurs ressurs, Person person){
+    private OpprettRessursResponse convert(RessursI ressurs, Person person){
         return OpprettRessursResponse.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())

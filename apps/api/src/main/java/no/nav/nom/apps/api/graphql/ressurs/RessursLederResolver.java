@@ -5,9 +5,8 @@ import graphql.kickstart.tools.GraphQLResolver;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
-import no.nav.nom.apps.api.domain.RessursService;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.libs.utils.common.util.DateUtil;
@@ -75,7 +74,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(r -> !r.getNavIdent().equals(excludeNavIdent))
-                .map(ConverterUtils::convert)
+                .map(ressursService::convertToGraphQlResponse)
                 .collect(Collectors.toList());
     }
 

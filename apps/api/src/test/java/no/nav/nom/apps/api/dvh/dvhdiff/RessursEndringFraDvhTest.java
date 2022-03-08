@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.dvh.dvhdiff;
 
 import lombok.val;
-import no.nav.nom.apps.api.domain.Ressurs;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -140,11 +140,11 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         ));
     }
 
-    private int hashRessurs(Ressurs r) {
+    private int hashRessurs(RessursI r) {
         return r.getId().hashCode() ^ r.getNavIdent().hashCode() ^ r.getPersonIdent().hashCode();
     }
 
-    private Collection<Integer> hashedRessurser(Collection<Ressurs> ressurser) {
+    private Collection<Integer> hashedRessurser(Collection<RessursI> ressurser) {
         return ressurser
                 .stream().map(this::hashRessurs).collect(Collectors.toCollection(ArrayList::new));
     }
