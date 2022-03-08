@@ -1,18 +1,29 @@
-package no.nav.nom.apps.api.ressurs.implementations;
+package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
+
+import java.util.UUID;
 
 @Value
-public class DvhRessurs {
+public class DvhRessurs implements RessursI {
 
     String navIdent;
     String personIdent;
+    String remedyAnsattType;
     Boolean remedyAktiv;
 
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
         remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
+        remedyAnsattType = node.get("ANSATT_TYPE").asText();
+
+    }
+
+    @Override
+    public UUID getId() {
+        return null;
     }
 }

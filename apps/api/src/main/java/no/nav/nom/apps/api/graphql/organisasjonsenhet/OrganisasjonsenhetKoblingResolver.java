@@ -6,8 +6,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organisasjonsenhet> {
 
     private final DvhRepository dvhRepository;
-    private final RessursService ressursService;
+    private final IRessursService ressursService;
 
     public DataFetcherResult<List<OrganisasjonsenhetsKobling>> koblinger(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
         final List<OrganisasjonsenhetsKobling> result = dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import static no.nav.nom.apps.api.graphql.common.ConverterUtils.toStringList;
 @RequiredArgsConstructor
 class RessursResolver implements GraphQLQueryResolver {
 
-    private final RessursService ressursService;
+    private final IRessursService ressursService;
 
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
         return SecurityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {

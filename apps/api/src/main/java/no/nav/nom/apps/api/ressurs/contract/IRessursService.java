@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface RessursService {
+public interface IRessursService {
     Optional<RessursI> findByPersonIdent(String personIdent);
     Optional<RessursI> findByNavIdent(String navIdent);
     Map<String, RessursI> findByPersonIdentBulk(List<String> personIdenter);

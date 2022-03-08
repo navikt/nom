@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Person;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RessursMutationResolver implements GraphQLMutationResolver {
 
-    private final RessursService ressursService;
+    private final IRessursService ressursService;
     private final PdlConsumer pdlConsumer;
 
     @Value("${app.graphql.preauth.mutation.ressurs}")

@@ -7,7 +7,7 @@ import com.graphql.spring.boot.test.GraphQLTestTemplate;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.ressurs.implementations.EventBasedRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;

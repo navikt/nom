@@ -9,11 +9,9 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,13 +24,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class DvhRepository {
 
-    private final RessursService ressursService;
-
     private Map<String, Map<String, Orgenhet>> enheterByNivaByAgressoId;
     private List<DvhLeder> ledere;
     private List<DvhOrganisering> organiseringer;
     private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
+    private Map<String, RessursI> ressursByNavIdent;
 
     public Optional<Orgenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
@@ -69,20 +66,7 @@ public class DvhRepository {
     }
 
     public void saveLedere(List<DvhLeder> ledere) {
-        this.ledere = ledere.stream()
-                .filter(l -> {
-                    val enhet = getEnhetByAgressoIdAndNiva(l.getOrgEnhetNr(), l.getOrgNiv());
-                    val ressurs = ressursService.findByNavIdent(l.getNavIdent());
-                    if(enhet.isEmpty() && ressurs.isEmpty()){
-                        log.info("Leder relasjon mislyktes, enhet: "+l.getOrgEnhetNr()+", navIdent: "+l.getNavIdent()+", "+"Enhet og ressurs mangler");
-                    } else if(enhet.isEmpty()){
-                        log.info("Leder relasjon mislyktes, enhet: "+l.getOrgEnhetNr()+", navIdent: "+l.getNavIdent()+", "+"Enhet mangler");
-                    } else if(ressurs.isEmpty()){
-                        log.info("Leder relasjon mislyktes, enhet: "+l.getOrgEnhetNr()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
-                    }
-                    return enhet.isPresent() && ressurs.isPresent();
-                })
-                .toList();
+        this.ledere = ledere;
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> organiseringer) {
@@ -105,31 +89,7 @@ public class DvhRepository {
     }
 
     public void saveKoblinger(List<Kobling> koblinger) {
-
-        val list = Collections.synchronizedList(new LinkedList<Kobling>());
-
-        val bulkSize = 10000;
-        for(int i = 0; i<koblinger.size(); i+=bulkSize){
-            val selection = koblinger.subList(i, Math.min(i + bulkSize, koblinger.size()));
-            val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(Kobling::getNavIdent).toList());
-
-            selection.forEach(k -> {
-                        val organisasjonsenhet = getEnhetByAgressoIdAndNiva(k.getAgressoId(), k.getOrgNiv()).orElse(null);
-                        val dvhRessurs = ressursByNavIdent.get(k.getNavIdent());
-                        if (organisasjonsenhet == null && dvhRessurs == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
-                        } else if (organisasjonsenhet == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet mangler");
-                        } else if (dvhRessurs == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
-                        } else {
-                            list.add(k);
-                        }
-                    }
-            );
-        }
-
-        this.koblinger = list;
+        this.koblinger = koblinger;
     }
 
     public void saveTlf(List<DvhTelefon> tlfList){
@@ -145,5 +105,9 @@ public class DvhRepository {
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
         val lst = this.navidentTelefonNrMap.stream().filter(it -> it.getNavIdent().equals(navIdent));
         return lst.toList();
+    }
+
+    public void setRessursByNavIdent(Map<String, RessursI> ressursByNavIdent){
+        this.ressursByNavIdent = ressursByNavIdent;
     }
 }

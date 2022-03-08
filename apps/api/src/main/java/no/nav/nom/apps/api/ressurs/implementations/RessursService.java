@@ -8,7 +8,9 @@ import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessursInterface;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +25,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class RessursPostgresqlService implements RessursService {
+public class RessursService implements IRessursService {
 
     private final ObjectMapper objectMapper;
     private final HendelseRepository hendelseRepository;
     private final NavIdentService navIdentService;
+    private final DvhRessursInterface dvhRessursInterface;
 
     public Optional<RessursI> findByFid(UUID fid){
         return Optional.ofNullable(
@@ -178,6 +181,7 @@ public class RessursPostgresqlService implements RessursService {
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
+                .ressursType(dvhRessursInterface.getRessursTypeGraphQlResponse(ressurs.getNavIdent()))
                 .build();
     }
 }

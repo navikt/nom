@@ -11,7 +11,8 @@ import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.OrgenhetHendelseService;
-import no.nav.nom.apps.api.ressurs.implementations.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.implementations.DvhOrganisasjonsenhet;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -50,6 +52,7 @@ public class DvhRestConsumer {
 
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
+    private final DvhService dvhService;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
@@ -113,6 +116,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
+        dvhRepository.setRessursByNavIdent(dvhRessurs.stream().collect(Collectors.toMap(RessursI::getNavIdent, Function.identity())));
         ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
     }
 
@@ -123,7 +127,7 @@ public class DvhRestConsumer {
                 .map(DvhKobling::new)
                 .collect(Collectors.toList());
 
-        dvhRepository.saveKoblinger(koblinger);
+        dvhService.saveKoblinger(koblinger);
     }
 
     private void loadTlfFromDvh() {
@@ -184,7 +188,7 @@ public class DvhRestConsumer {
         }
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
-        dvhRepository.saveLedere(ledere);
+        dvhService.saveLedere(ledere);
         dvhRepository.saveOrganiseringer(organiseringer);
     }
 

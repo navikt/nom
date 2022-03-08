@@ -6,8 +6,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 public class LederResolver implements GraphQLResolver<Organisasjonsenhet> {
 
     private final DvhRepository dvhRepository;
-    private final RessursService ressursService;
+    private final IRessursService ressursService;
 
     public DataFetcherResult<List<OrganisasjonsenhetsLeder>> leder(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
         val lederRessurser = dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()

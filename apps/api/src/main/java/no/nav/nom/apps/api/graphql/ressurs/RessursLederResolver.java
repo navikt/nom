@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.contract.RessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.libs.utils.common.util.DateUtil;
@@ -24,7 +24,7 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.distinctByKey;
 public class RessursLederResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
-    private final RessursService ressursService;
+    private final IRessursService ressursService;
     private final OrgenhetService orgenhetService;
     private final KoblingService koblingService;
 

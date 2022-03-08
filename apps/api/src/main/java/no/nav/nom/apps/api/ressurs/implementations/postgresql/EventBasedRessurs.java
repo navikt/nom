@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.implementations;
+package no.nav.nom.apps.api.ressurs.implementations.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
