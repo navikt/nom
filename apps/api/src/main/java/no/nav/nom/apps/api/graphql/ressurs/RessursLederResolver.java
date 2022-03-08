@@ -5,6 +5,7 @@ import graphql.kickstart.tools.GraphQLResolver;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.kobling.contract.KoblingService;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -25,11 +26,12 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
     private final DvhRepository dvhRepository;
     private final RessursService ressursService;
     private final OrgenhetService orgenhetService;
+    private final KoblingService koblingService;
 
     public DataFetcherResult<List<RessursLeder>> ledere(Ressurs ressurs) {
-        final List<RessursLeder> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
+        final List<RessursLeder> result = koblingService.getKoblingerByNavIdent(ressurs.getNavIdent())
                 .stream()
-                .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom()))
+                .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom().orElse(null)))
                 .filter(distinctByKey(k -> k.getAgressoId()+k.getOrgNiv()))
                 .flatMap(kobling -> {
                     String agressoId = kobling.getAgressoId();

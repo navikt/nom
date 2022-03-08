@@ -1,17 +1,17 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.dto.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.apps.api.ressurs.contract.RessursService;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,29 +21,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Getter
 @Component
 @AllArgsConstructor
 public class DvhRepository {
 
+    private final RessursService ressursService;
+
     private Map<String, Map<String, Orgenhet>> enheterByNivaByAgressoId;
     private List<DvhLeder> ledere;
     private List<DvhOrganisering> organiseringer;
-    private List<DvhKobling> koblinger;
-    private final RessursService ressursService;
+    private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
 
     public Optional<Orgenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
-    }
-
-    public List<Orgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
-        return getAllEnheter().stream().filter(e -> agressoIds.contains(e.getAgressoId())).toList();
-    }
-
-    public Collection<Orgenhet> getAllEnheter() {
-        return enheterByNivaByAgressoId.values().stream()
-                .flatMap(map -> map.values().stream())
-                .collect(Collectors.toList());
     }
 
     public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv) {
@@ -52,11 +44,7 @@ public class DvhRepository {
                 .toList();
     }
 
-    public Collection<DvhKobling> getAllKoblinger() {
-        return koblinger;
-    }
-
-    public List<DvhKobling> getKoblingerByAgressoId(String agressoId, String orgNiv) {
+    public List<Kobling> getKoblingerByAgressoId(String agressoId, String orgNiv) {
         return koblinger.stream()
                 .filter(x -> x.getAgressoId().equals(agressoId) && x.getOrgNiv().equals(orgNiv))
                 .toList();
@@ -116,14 +104,14 @@ public class DvhRepository {
                 .collect(Collectors.toList());
     }
 
-    public void saveKoblinger(List<DvhKobling> koblinger) {
+    public void saveKoblinger(List<Kobling> koblinger) {
 
-        val list = Collections.synchronizedList(new LinkedList<DvhKobling>());
+        val list = Collections.synchronizedList(new LinkedList<Kobling>());
 
         val bulkSize = 10000;
         for(int i = 0; i<koblinger.size(); i+=bulkSize){
             val selection = koblinger.subList(i, Math.min(i + bulkSize, koblinger.size()));
-            val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(DvhKobling::getNavIdent).toList());
+            val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(Kobling::getNavIdent).toList());
 
             selection.forEach(k -> {
                         val organisasjonsenhet = getEnhetByAgressoIdAndNiva(k.getAgressoId(), k.getOrgNiv()).orElse(null);
@@ -152,12 +140,6 @@ public class DvhRepository {
         enheterByNivaByAgressoId.clear();
         organiseringer.clear();
         koblinger.clear();
-    }
-
-    public List<DvhKobling> getKoblingerByNavIdent(String navIdent) {
-        return getAllKoblinger().stream()
-                .filter(s -> s.getNavIdent().equals(navIdent))
-                .toList();
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.domain;
+package no.nav.nom.apps.api.orgenhet;
 
 import lombok.Builder;
 import lombok.Value;

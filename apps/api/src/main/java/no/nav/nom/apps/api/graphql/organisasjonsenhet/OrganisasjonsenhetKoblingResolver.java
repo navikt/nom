@@ -29,7 +29,7 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
                     return OrganisasjonsenhetsKobling.builder()
                             .ressurs(ressursService.convertToGraphQlResponse(ressurs))
                             .gyldigFom(dvh.getGyldigFom())
-                            .gyldigTom(dvh.getGyldigTom())
+                            .gyldigTom(dvh.getGyldigTom().orElse(null))
                             .build();
                 })
                 .collect(Collectors.toUnmodifiableList());

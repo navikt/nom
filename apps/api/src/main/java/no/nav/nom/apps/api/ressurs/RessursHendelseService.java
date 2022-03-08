@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.ressurs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.RessursPostgresqlService;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.orgenhet.implementations;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.domain.OrgType;
-import no.nav.nom.apps.api.domain.OrgTyper;
+import no.nav.nom.apps.api.orgenhet.OrgType;
+import no.nav.nom.apps.api.orgenhet.OrgTyper;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Primary
 @Service
@@ -24,29 +25,31 @@ public class OrgenhetDvhService implements OrgenhetService {
 
     @Override
     public Optional<Orgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
-        return dvhRepository.getEnhetByAgressoIdAndNiva(agressoId, orgNiv);
+        return Optional.ofNullable(dvhRepository.getEnheterByNivaByAgressoId().containsKey(orgNiv) ? dvhRepository.getEnheterByNivaByAgressoId().get(orgNiv).get(agressoId) : null);
     }
 
     @Override
     public List<Orgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
-        return dvhRepository.findEnheterByAgressoIdIn(agressoIds);
+        return getAllEnheter().stream().filter(e -> agressoIds.contains(e.getAgressoId())).toList();
     }
 
     @Override
     public Collection<Orgenhet> getAllEnheter() {
-        return dvhRepository.getAllEnheter();
+        return dvhRepository.getEnheterByNivaByAgressoId().values().stream()
+                .flatMap(map -> map.values().stream())
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Orgenhet> matchByAgressoId(String agressoId) {
-        return dvhRepository.getAllEnheter().stream()
+        return getAllEnheter().stream()
                 .filter(e -> e.getAgressoId().toUpperCase().startsWith(agressoId.toUpperCase()))
                 .toList();
     }
 
     @Override
     public List<Orgenhet> matchByNavn(String navn) {
-        return dvhRepository.getAllEnheter().stream()
+        return getAllEnheter().stream()
                 .filter(e -> e.getNavn().toUpperCase().startsWith(navn.toUpperCase()))
                 .toList();    }
 

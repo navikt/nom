@@ -5,8 +5,7 @@ import graphql.kickstart.tools.GraphQLResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
+import no.nav.nom.apps.api.kobling.contract.KoblingService;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursKobling;
@@ -19,21 +18,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RessursKoblingResolver implements GraphQLResolver<Ressurs> {
 
-    private final DvhRepository dvhRepository;
     private final OrgenhetService orgenhetService;
+    private final KoblingService koblingService;
 
     public DataFetcherResult<List<RessursKobling>> koblinger(Ressurs ressurs, DataFetchingEnvironment env) {
-        final List<RessursKobling> result = dvhRepository.getKoblingerByNavIdent(ressurs.getNavIdent())
+        final List<RessursKobling> result = koblingService.getKoblingerByNavIdent(ressurs.getNavIdent())
                 .stream()
                 .map(dvh -> {
                     val orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(dvh.getAgressoId(), dvh.getOrgNiv(), null).get();
                     return RessursKobling.builder()
                             .organisasjonsenhet(orgenhetService.convertToGraphQlResponse(orgenhet))
                             .gyldigFom(dvh.getGyldigFom())
-                            .gyldigTom(dvh.getGyldigTom())
+                            .gyldigTom(dvh.getGyldigTom().orElse(null))
                             .build();
-                })
-                .collect(Collectors.toUnmodifiableList());
+                }).toList();
 
         return DataFetcherResult.<List<RessursKobling>>newResult()
                 .data(result)

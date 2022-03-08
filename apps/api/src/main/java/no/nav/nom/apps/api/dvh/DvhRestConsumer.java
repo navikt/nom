@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.apps.api.dvh.dto.DvhKobling;
+import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.dvh.dto.DvhRessurs;
+import no.nav.nom.apps.api.orgenhet.OrgenhetHendelseService;
+import no.nav.nom.apps.api.ressurs.implementations.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.implementations.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
@@ -29,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -115,7 +118,7 @@ public class DvhRestConsumer {
 
     private void loadKoblingerFromDvh() {
         val jsonStillinger = dvhExchange("/proxy/stillinger");
-        val koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
+        List<Kobling> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
                 .map(DvhKobling::new)
                 .collect(Collectors.toList());

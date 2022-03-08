@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh.dto;
+package no.nav.nom.apps.api.ressurs.implementations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;

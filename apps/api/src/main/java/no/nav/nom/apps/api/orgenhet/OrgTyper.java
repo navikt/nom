@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.domain;
+package no.nav.nom.apps.api.orgenhet;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.util.Assert;

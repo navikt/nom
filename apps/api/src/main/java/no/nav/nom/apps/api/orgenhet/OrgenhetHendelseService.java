@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.orgenhet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
