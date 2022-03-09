@@ -181,7 +181,7 @@ public class RessursService implements IRessursService {
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
-                .ressursType(dvhRessursInterface.getRessursTypeGraphQlResponse(ressurs.getNavIdent()))
+                .ressurstyper(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
                 .build();
     }
 }

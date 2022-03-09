@@ -11,5 +11,6 @@ public class UiStarter {
     public static void main(String[] args) {
         System.setProperty("app.name", "nom-api");
         SpringApplication.run(UiStarter.class, args);
+        
     }
 }

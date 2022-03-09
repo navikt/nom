@@ -31,7 +31,7 @@ type Ressurs {
     fornavn: String
     etternavn: String
     telefon: [Telefon!]!
-    ressursType: [RessursType!]!
+    ressurstyper: [Ressurstype!]!
 }
 
 type Person {
@@ -109,7 +109,7 @@ enum TelefonType {
     PRIVAT_TELEFON
 }
 
-enum RessursType {
+enum Ressurstype {
     NAV_STATLIG,
     NAV_KOMMUNAL,
     EKSTERN

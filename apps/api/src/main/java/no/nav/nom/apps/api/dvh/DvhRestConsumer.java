@@ -88,9 +88,6 @@ public class DvhRestConsumer {
 
     @SneakyThrows
     private void loadRessurserFromDvh() {
-        if (!leaderElection.isLeader()) {
-            return;
-        }
         var jsonRessurser = dvhExchange("/proxy/ressurser");
 
         val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
@@ -117,7 +114,9 @@ public class DvhRestConsumer {
                 .toList();
 
         dvhRepository.setRessursByNavIdent(dvhRessurs.stream().collect(Collectors.toMap(RessursI::getNavIdent, Function.identity())));
-        ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
+        if (leaderElection.isLeader()) {
+            ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
+        }
     }
 
     private void loadKoblingerFromDvh() {

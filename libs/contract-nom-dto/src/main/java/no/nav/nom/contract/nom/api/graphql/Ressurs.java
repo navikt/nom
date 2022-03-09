@@ -12,6 +12,6 @@ public class Ressurs {
     UUID nomId;
     String navIdent;
     String personIdent;
-    List<RessursType> ressursType;
+    List<Ressurstype> ressurstyper;
 }
 

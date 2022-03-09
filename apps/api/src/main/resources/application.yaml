@@ -48,7 +48,7 @@ graphql:
     cors:
       allowed-origins: "*"
     actuator-metrics: true
-    tracing-enabled: true
+    tracing-enabled: false
 
 # Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
 management.endpoints.web.exposure.include: health,prometheus
