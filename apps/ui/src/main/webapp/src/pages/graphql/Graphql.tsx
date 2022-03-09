@@ -7,7 +7,7 @@ import Nompagewrap from "../../components/nompagewrap/Nompagewrap";
 import { useLocalstorageState } from "../../common/uselocalstorage";
 
 const graphQlSchemaUri =
-  "https://github.com/navikt/nom/blob/master/apps/api" +
+  "https://github.com/navikt/nom/blob/main/apps/api" +
   "/src/main/resources/graphql/query.graphqls";
 
 const defaultQuery = `query {

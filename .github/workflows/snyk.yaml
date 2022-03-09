@@ -3,7 +3,7 @@ name: Snyk
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
     paths:
       - '**/pom.xml'
       - 'pom.xml'

@@ -2,7 +2,7 @@ name: Deploy NOM-API alerts to NAIS
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - '.nais/alerts/dev/api-alerts.yaml'
       - '.nais/alerts/prod/api-alerts.yaml'

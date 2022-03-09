@@ -3,7 +3,7 @@ name: Update Kafka Dev Only Topics
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
       - 'dev/*'
     paths:
       - '.nais/topics/topics-dev-only.yaml'

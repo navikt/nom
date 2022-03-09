@@ -3,7 +3,7 @@ name: Update Kafka Topics
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
       - 'dev/*'
     paths:
       - '.nais/topics/topics.yaml'
@@ -23,7 +23,7 @@ jobs:
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4

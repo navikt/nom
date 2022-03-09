@@ -2,7 +2,7 @@ name: Deploy NOM-RESSURSER alerts to NAIS
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - '.nais/alerts/dev/nom-ressurser-alerts.yaml'
       - '.nais/alerts/prod/nom-ressurser-alerts.yaml'
