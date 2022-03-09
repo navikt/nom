@@ -2,6 +2,7 @@ app:
   dvh:
     tdvUsername: ${tdvuser}
     tdvPassword: ${tdvpass}
+    baseUrl: ${app.dvh.base-url}
     ressurs:
       url: ${app.dvh.base-url}/json/Hr/Nom/Nom_Ansatte
       chunkSize: 5000

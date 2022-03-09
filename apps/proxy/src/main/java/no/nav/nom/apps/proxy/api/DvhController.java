@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
@@ -24,6 +26,12 @@ public class DvhController extends AbstractController {
     private RestTemplate restTemplateDvh;
 
     private final AppProperties appProperties;
+
+    @GetMapping("/dvh/**")
+    public String dvhProxyEndpoint(HttpServletRequest request){
+        return restTemplateDvh.exchange(appProperties.getDvh().getBaseUrl() + request.getRequestURI(),
+                HttpMethod.GET, null, String.class).getBody();
+    }
 
     @GetMapping("/stillinger")
     public String getStillinger(@AuthenticationPrincipal Jwt jwt) {

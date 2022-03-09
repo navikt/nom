@@ -28,6 +28,7 @@ public class AppProperties {
     public static class Dvh {
         String tdvUsername;
         String tdvPassword;
+        String baseUrl;
 
         Stilling stilling;
         Ressurser ressurser;
