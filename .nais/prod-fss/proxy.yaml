@@ -14,7 +14,7 @@ spec:
     - name: APP_DVH_BASE_URL
       value: https://tdv-p.adeo.no
     - name: ACCEPTED_SUBJECTS
-      value: 476401e7-5eec-4fd8-8390-a89c6f14cd08
+      value: 476401e7-5eec-4fd8-8390-a89c6f14cd08, 8cdd56f3-6ba5-4460-986a-0b3e535baf20
     - name: STS_BASEURL
       value: https://security-token-service.nais.adeo.no
     - name: PDL_BASEURL
@@ -35,6 +35,9 @@ spec:
     inbound:
       rules:
         - application: nom-api
+          namespace: nom
+          cluster: prod-gcp
+        - application: nom-api-qa
           namespace: nom
           cluster: prod-gcp
   webproxy: true
