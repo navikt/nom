@@ -1,4 +1,4 @@
-= NOM
+= NOM - NAV Organisasjonsmaster
 :sectnums:
 :sectanchors:
 :toc: left
