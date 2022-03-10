@@ -1,10 +1,12 @@
-= NOM
+= NOM - NAV Organisasjonsmaster
 :sectnums:
 :sectanchors:
 :toc: left
 :toclevels: 2
 :toc-title: Innhold
 :icons: font
+
+*Mye er utdatert. Under arbeid. Vil bli oppdatert iløpet av mars.*
 
 NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
 
