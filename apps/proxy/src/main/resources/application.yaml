@@ -3,7 +3,6 @@ app:
     tdvUsername: ${tdvuser}
     tdvPassword: ${tdvpass}
     baseUrl: ${DVH_BASE_URL}
-    baseUrlNs: ${DVH_BASE_URL_NS}
     ressurs:
       url: ${DVH_BASE_URL}/json/Hr/Nom/Nom_Ansatte
       chunkSize: 5000
