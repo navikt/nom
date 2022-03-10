@@ -80,6 +80,9 @@ spec:
         - application: modiapersonoversikt-api
           namespace: personoversikt
           cluster: prod-fss
+        - application: pdl-fullmakt
+          namespace: pdl
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
