@@ -102,6 +102,9 @@ spec:
         - application: modiapersonoversikt-api-q1
           namespace: personoversikt
           cluster: dev-fss
+        - application: testnav-nom-proxy-trygdeetaten
+          namespace: dolly
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
