@@ -9,7 +9,7 @@ export interface GqlRessurs {
   visningsnavn?: string;
   epost: string;
   telefon: GqlTelefon[];
-  ressurstyper: string[];
+  ressurstype: string[];
 }
 
 export interface GqlRessursKobling {

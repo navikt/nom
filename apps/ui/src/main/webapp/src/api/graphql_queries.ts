@@ -7,7 +7,7 @@ export function createRessursQuery(id: string | null): string {
             navIdent
             personIdent
             epost
-            ressurstyper
+            ressurstype
             person {
               navn {
                 fornavn

@@ -31,7 +31,7 @@ type Ressurs {
     fornavn: String
     etternavn: String
     telefon: [Telefon!]!
-    ressurstyper: [Ressurstype!]!
+    ressurstype: [Ressurstype!]!
 }
 
 type Person {
