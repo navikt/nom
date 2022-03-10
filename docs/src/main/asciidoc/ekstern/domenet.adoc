@@ -1,27 +1,59 @@
 = Domenet
 
+Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager]
+
 == Organisasjonsenhet
 [cols="3"]
 |===
-| https://data.adeo.no/begrep/BEGREP-207[Datakatalogen] | Oppslag: Kommer | Hendelser: Kommer
+| https://jira.adeo.no/browse/BEGREP-207[Begrepsdefinisjon] | Oppslag: Kommer | Hendelser: Kommer
 |===
 
 *Beskrivelse:* +
-Delmengde av en organisasjon som etableres som følge av forhandlinger i medbestemmelsesapparatet, og som består av leder, og kan ha ressurser og underliggende organisasjonsenheter.
-Begrepet brukes om alle nivåer i hierakiet.
-En organisasjonsenhet skiller seg fra team, produktområder og arbeidskø.
+Delmengde av en organisasjon som etableres som følge av forhandlinger i medbestemmelsesapparatet. Den har en leder, kan ha ressurser og underliggende organisasjonsenheter.
+Begrepet brukes om alle nivåer i hierakiet. For enkelthetsskyld er organisasjonsenhet også forkortet til _enhet_ flere steder i dokumentasjonen.
+
+Team og produktområder er i dag ikke definert som organisasjonsenheter. 
+Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke organisasjonsenheter selv om enkelte løsninger i NAV beskriver de som enheter.
 
 *Eksempler:* +
-NAV Økonomi Stønad er en organisasjonsenhet og har overenhet NAV (organisasjon), og har en underenhet som heter økonomi stønad som også er en organisasjonsenhet.
+_NAV Familie- og pensjonsytelser Drammen_ er en organisasjonsenhet og har overliggende organisasjonsenhet _Familie- og pensjonsytelser_, og har flere underliggende organisasjonsenheter.
 
 [%header,cols=4*]
 |===
-|Felt           |Påkrevd    |Beskrivelse                                    |Eksempel
-|Id             |Ja         |Generert UUID som tilegnes organisasjonsenhet  |123e4567-e89b-12d3-a456-426614174000
-|Navn           |Ja         |Navnet på en organisasjonsenhet                |NAV Søndre Nordstrand
-|Gyldig fom     |Ja         |Dagen organisasjonsenheten blir gyldig     |2009-01-22
-|Gyldig tom     |Nei        |Dagen organisasjonsenheten blir ugyldig        |2020-02-14, NULL hvis ikke satt.
+|Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel
+|id             |Ja         |Generert UUID som tilegnes organisasjonsenhet                       |123e4567-e89b-12d3-a456-426614174000
+|navn           |Ja         |Navnet på en organisasjonsenhet                                     |NAV Søndre Nordstrand
+|gyldigFom      |Ja         |Virkningsdato for når organisasjonsenheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22
+|gyldigTom      |Nei        |Siste dag organisasjonsenheten var virksom.                         |2020-02-14, NULL hvis ikke satt.
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | TODO
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | TODO
+|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |TODO
+|leder          |Ja         |Ressursen som er leder for enheten.                                       |TODO
+|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor
+|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. |TODO
 |===
+
+.
+
+.
+
+.
+
+.
+
+.
+
+
+== ALT UNDER HER ER HELT UTDATERT ==
+
+.
+
+.
+
+.
+
+.
+
 
 == Organisering
 [cols="3"]
