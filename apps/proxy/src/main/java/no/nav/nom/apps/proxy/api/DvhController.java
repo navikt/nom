@@ -1,6 +1,7 @@
 package no.nav.nom.apps.proxy.api;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 
+@Slf4j
 @RestController
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
@@ -27,9 +29,13 @@ public class DvhController extends AbstractController {
 
     private final AppProperties appProperties;
 
-    @GetMapping("/dvh/**")
+    private final String PROXY_PATH = "/dvh";
+
+    @GetMapping(PROXY_PATH+"/**")
     public String dvhProxyEndpoint(HttpServletRequest request){
-        return restTemplateDvh.exchange(appProperties.getDvh().getBaseUrl() + request.getRequestURI(),
+        log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+appProperties.getDvh().getBaseUrl() + request.getRequestURI().substring(PROXY_PATH.length()));
+
+        return restTemplateDvh.exchange(appProperties.getDvh().getBaseUrl() + request.getRequestURI().substring(PROXY_PATH.length()),
                 HttpMethod.GET, null, String.class).getBody();
     }
 
