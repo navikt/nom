@@ -11,8 +11,10 @@ spec:
       value: prod
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,k8s,kafka
-    - name: APP_DVH_BASE_URL
+    - name: DVH_BASE_URL
       value: https://tdv-p.adeo.no
+    - name: DVH_BASE_URL_NS
+      value: https://tdv-ns.adeo.no:9402
     - name: ACCEPTED_SUBJECTS
       value: 476401e7-5eec-4fd8-8390-a89c6f14cd08, 624438e9-8605-4225-81db-4b47dc629766
     - name: STS_BASEURL

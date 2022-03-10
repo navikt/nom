@@ -11,8 +11,10 @@ spec:
       value: preprod
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash,k8s,kafka
-    - name: APP_DVH_BASE_URL
+    - name: DVH_BASE_URL
       value: https://tdv-u.adeo.no
+    - name: DVH_BASE_URL_NS
+      value: https://tdv-ns.adeo.no:9402
     - name: APP_TEL_URL
       value: http://jiraint-q1.adeo.no/si/telenor/
     - name: ACCEPTED_SUBJECTS

@@ -29,6 +29,7 @@ public class AppProperties {
         String tdvUsername;
         String tdvPassword;
         String baseUrl;
+        String baseUrlNs;
 
         Stilling stilling;
         Ressurser ressurser;

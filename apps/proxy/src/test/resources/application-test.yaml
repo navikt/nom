@@ -1,8 +1,10 @@
+DVH_BASE_URL: http://localhost:${wiremock.server.port}
+DVH_BASE_URL_NS: ${DVH_BASE_URL}
+
 app:
   pdl:
     baseUrl: http://localhost:${wiremock.server.port}/
   dvh:
-    base-url: http://localhost:${wiremock.server.port}
     tdvUsername: test-stilling-user
     tdvPassword: test-stilling-pass
     ressurs:
