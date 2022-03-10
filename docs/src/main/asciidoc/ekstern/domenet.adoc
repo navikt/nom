@@ -25,12 +25,12 @@ _NAV Familie- og pensjonsytelser Drammen_ er en organisasjonsenhet og har overli
 |navn           |Ja         |Navnet på en organisasjonsenhet                                     |NAV Søndre Nordstrand
 |gyldigFom      |Ja         |Virkningsdato for når organisasjonsenheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22
 |gyldigTom      |Nei        |Siste dag organisasjonsenheten var virksom.                         |2020-02-14, NULL hvis ikke satt.
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | TODO
-|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | TODO
-|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |TODO
-|leder          |Ja         |Ressursen som er leder for enheten.                                       |TODO
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360
+|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Organiseringer-objekter
+|leder          |Ja         |Ressursen som er leder for enheten.                                       |Ressurs-objekt
 |type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor
-|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. |TODO
+|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. |
 |===
 
 .
