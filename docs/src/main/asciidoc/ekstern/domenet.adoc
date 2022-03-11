@@ -36,7 +36,7 @@ _NAV Halden Stab_ er en organisasjonsenhet og har overliggende organisasjonsenhe
 
 
 == Ressurs
-[%header,cols="25%,5%,50%,20%"]
+[cols="3"]
 |===
 | https://jira.adeo.no/browse/BEGREP-14[Begrepsdefinisjon] | Oppslag: Kommer | Hendelser: Kommer
 |===
@@ -54,7 +54,7 @@ Omfatter:
 * Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
 
 
-[%header,cols=4*]
+[%header,cols="25%,5%,50%,20%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                                            |Eksempel
 |nomId          |Ja         |Generert UUID som representerer ressursen                                              |       
