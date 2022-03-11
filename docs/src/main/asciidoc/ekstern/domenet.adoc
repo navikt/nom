@@ -18,7 +18,7 @@ Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke organisasjonsenheter se
 *Eksempler:* +
 _NAV Familie- og pensjonsytelser Drammen_ er en organisasjonsenhet og har overliggende organisasjonsenhet _Familie- og pensjonsytelser_, og har flere underliggende organisasjonsenheter.
 
-[%header,cols=4*]
+[%header,cols="25%,5%,50%,20%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel
 |id             |Ja         |Generert UUID som tilegnes organisasjonsenhet                       |123e4567-e89b-12d3-a456-426614174000
@@ -73,6 +73,31 @@ Omfatter:
 |===
 
 
+
+== Organisering
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
+|===
+
+*Beskrivelse:* +
+Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
+En organisering omfatter 2 enheter og typen organisering mellom dem.
+En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan bare ha én overenhet.
+
+[%header,cols=4*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
+|ID             |Ja         |Generert UUID som tilegnes organiseringen                  |7457a63b-c130-46a3-8278-deb23e2a526f
+|Retning        |Ja         |Overenhet eller underenhet                                 |"over:"/"under:"
+|Organisasjonsenhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
+|Gyldig fom     |Ja         |Dagen organiseringen blir gyldig                 |2009-01-22
+|Gyldig tom     |Nei        |Dagen organiseringen blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
+|===
+
+
+
+
 .
 
 .
@@ -95,26 +120,6 @@ Omfatter:
 .
 
 
-== Organisering
-[cols="3"]
-|===
-| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
-|===
-
-*Beskrivelse:* +
-Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
-En organisering omfatter 2 enheter og typen organisering mellom dem.
-En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan bare ha én overenhet.
-
-[%header,cols=4*]
-|===
-|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|ID             |Ja         |Generert UUID som tilegnes organiseringen                  |7457a63b-c130-46a3-8278-deb23e2a526f
-|Retning        |Ja         |Overenhet eller underenhet                                 |"over:"/"under:"
-|Organisasjonsenhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
-|Gyldig fom     |Ja         |Dagen organiseringen blir gyldig                 |2009-01-22
-|Gyldig tom     |Nei        |Dagen organiseringen blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
-|===
 
 
 
