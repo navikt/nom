@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/get-proxy-test-mapping?testParamOne=1&testParamTwo=2",
+    "basicAuthCredentials": {
+      "username": "test-stilling-user",
+      "password": "test-stilling-pass"
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "test": null
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

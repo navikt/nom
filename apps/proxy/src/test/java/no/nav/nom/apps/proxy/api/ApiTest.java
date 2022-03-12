@@ -46,7 +46,7 @@ public class ApiTest extends ApiTestBase {
     }
 
     @Test
-    @DisplayName("Tester tel kadll")
+    @DisplayName("Tester generelt proxy kall")
     public void scenario32(){
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
@@ -55,6 +55,19 @@ public class ApiTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create("/proxy/dvh/get-proxy-test-mapping"), HttpMethod.GET, new HttpEntity<>(null, headers), JsonNode.class);
+        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+    }
+
+    @Test
+    @DisplayName("Tester generelt proxy kall med query parametre")
+    public void scenario33(){
+        val claims = securityTestUtils.validJwtClaims();
+        val token = securityTestUtils.createToken(claims);
+
+        val headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        val result = restTemplate.exchange(URI.create("/proxy/dvh/get-proxy-test-mapping?testParamOne=1&testParamTwo=2"), HttpMethod.GET, new HttpEntity<>(null, headers), JsonNode.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
     }
 

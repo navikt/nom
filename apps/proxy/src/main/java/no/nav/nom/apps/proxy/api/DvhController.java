@@ -33,7 +33,8 @@ public class DvhController extends AbstractController {
 
     @GetMapping(PROXY_PATH+"/**")
     public String dvhProxyEndpoint(HttpServletRequest request){
-        val target = appProperties.getDvh().getBaseUrl() + request.getRequestURI().replaceFirst("/proxy"+PROXY_PATH, "");
+        var target = appProperties.getDvh().getBaseUrl() + request.getRequestURI().replaceFirst("/proxy"+PROXY_PATH, "");
+        target = request.getQueryString() == null || request.getQueryString().isEmpty() ? target : target + "?" + request.getQueryString();
         log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+target);
         return restTemplateDvh.exchange(target,
                 HttpMethod.GET, null, String.class).getBody();
