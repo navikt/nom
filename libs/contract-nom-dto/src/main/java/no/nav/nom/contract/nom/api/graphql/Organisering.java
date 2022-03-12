@@ -12,6 +12,7 @@ public class Organisering {
     OrganiseringRetning retning;
     String orgEnhetNr;
     String orgNiv;
+    String orgEnhetNavn;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 }

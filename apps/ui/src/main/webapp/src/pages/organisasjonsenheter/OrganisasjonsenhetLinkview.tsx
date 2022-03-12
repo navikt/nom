@@ -43,6 +43,8 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
       enhetNr: it.organisasjonsenhet.agressoId,
       enhetNiva: it.organisasjonsenhet.orgNiv,
       enhetType: it.organisasjonsenhet.type?.navn || nullText,
+      gyldigFom: it.organisasjonsenhet.gyldigFom,
+      gyldigTom: it.organisasjonsenhet.gyldigTom || nullText
     };
   });
 
@@ -94,6 +96,8 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
       enhetNr: organisasjonsenhet.agressoId,
       enhetNiva: organisasjonsenhet.orgNiv,
       enhetType: organisasjonsenhet.type?.navn || nullText,
+      gyldigFom: organisasjonsenhet.gyldigFom,
+      gyldigTom: organisasjonsenhet.gyldigTom || nullText
     },
     koblinger: {
       sti:
@@ -192,6 +196,10 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
         <div>{props.orgenhetData.data.enhetNiva}</div>
         <label>Enhet type</label>
         <div>{props.orgenhetData.data.enhetType}</div>
+        <label>Gyldig Fom</label>
+        <div>{props.orgenhetData.data.gyldigFom}</div>
+        <label>Gyldig Tom</label>
+        <div>{props.orgenhetData.data.gyldigTom}</div>
       </LabeledItemsgrid>
     </Contentbox>
   );
@@ -209,7 +217,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
               className="Organisasjonsenheter__linkview__overenhetlink"
             >
               <span>{" - ".repeat(k)}</span>
-              <Link to={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}>
+              <Link to={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva, item.enhetNavn)}>
                 {item.enhetNavn}
               </Link>{" "}
               (  niv: {agressoNivaToNumberStr(item.enhetNiva)}, nr: {item.enhetNr}, )
@@ -280,7 +288,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
               renderCell: (item, value) => (
                   <ItemLink
                         history={history}
-                        url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva)}
+                        url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.enhetNr, item.enhetNiva, item.enhetNavn)}
                         label={value}
                     />
               ),
@@ -288,6 +296,8 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
             { id: "enhetNr", label: "Nr", type: "string" },
             { id: "enhetNiva", label: "Nivå", type: "string"},
             { id: "enhetType", label: "Type", type: "string" },
+            { id: "gyldigFom", label: "Gyldig Fom", type: "string" },
+            { id: "gyldigTom", label: "Gyldig Tom", type: "string" },
           ]}
           itemsPerPage={50}
           animatable={false}

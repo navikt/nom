@@ -1,10 +1,10 @@
-package no.nav.nom.apps.api.orgenhet.implementations;
+package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
 import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
@@ -20,12 +20,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet.AGRESSO_ID_FIELD;
-import static no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet.NAVN_FIELD;
+import static no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet.AGRESSO_ID_FIELD;
+import static no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet.NAVN_FIELD;
 
 @Service
 @RequiredArgsConstructor
-public class OrgenhetPosgresqlService implements OrgenhetService {
+public class OrgenhetPosgresqlInterface implements IOrgenhetService {
 
     private final HendelseRepository hendelseRepository;
     private final ObjectMapper objectMapper;
@@ -156,32 +156,32 @@ public class OrgenhetPosgresqlService implements OrgenhetService {
     }
 
     @Override
-    public Organisasjonsenhet convertToGraphQlResponse(Orgenhet orgenhet) {
+    public Organisasjonsenhet convertToGraphQlResponse(IOrgenhet orgenhet) {
         return null;
     }
 
     @Override
-    public Optional<Orgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
+    public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         return Optional.empty();
     }
 
     @Override
-    public List<Orgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
+    public List<IOrgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
         return null;
     }
 
     @Override
-    public Collection<Orgenhet> getAllEnheter() {
+    public Collection<IOrgenhet> getAllEnheter() {
         return null;
     }
 
     @Override
-    public List<Orgenhet> matchByAgressoId(String agressoId) {
+    public List<IOrgenhet> matchByAgressoId(String agressoId) {
         return null;
     }
 
     @Override
-    public List<Orgenhet> matchByNavn(String navn) {
+    public List<IOrgenhet> matchByNavn(String navn) {
         return null;
     }
 }

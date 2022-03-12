@@ -30,7 +30,7 @@ function AppRouter(): JSX.Element {
         <Route path="/" element={<Root/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="/graphql" element={<Graphql/>}/>
-        <Route path="/organisasjonsenheter" element={<Navigate to="/organisasjonsenheter/0_NAV"/>}>
+        <Route path="/organisasjonsenheter" element={<Navigate to="/organisasjonsenheter/0_NAV_NAV"/>}>
         </Route>
         <Route path="/organisasjonsenheter/:id" element={<Organisasjonsenheter/>}/>
         <Route path="/medarbeidere" element={<MedarbeidereLinkview/>}/>

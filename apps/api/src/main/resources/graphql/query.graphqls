@@ -19,6 +19,7 @@ union SearchResult = Ressurs | Organisasjonsenhet
 input OrganisasjonsenhetSearch {
     agressoId: String
     orgNiv: String
+    navn: String
 }
 
 input OrganisasjonsenheterSearch {

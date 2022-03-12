@@ -29,7 +29,7 @@ public class OrgenhetFraDvhTest extends DvhTestBase {
     }
 
     private void stubEnheter(String fileName) {
-        stubFor(get("/proxy/enheter/v2").willReturn(aResponse()
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json;charset=UTF-8")
                 .withBodyFile(fileName)

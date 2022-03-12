@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/proxy/ressurser"
+    "url": "/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1"
   },
   "response": {
     "status": 200,

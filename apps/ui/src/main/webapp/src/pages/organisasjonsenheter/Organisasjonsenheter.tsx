@@ -46,7 +46,7 @@ export default function Organisasjonsenheter(props: any): JSX.Element {
         <p>
           Bruk ID i adresselinjen for å se på forskjellige enheter (f.eks
           /organisasjonsenheter/R02), eller gå til
-          <Link to="/organisasjonsenheter/NAV"> toppen av hierarkiet</Link>,
+          <Link to="/organisasjonsenheter/0_NAV_NAV"> toppen av hierarkiet</Link>,
           <br />
           <button onClick={toggleView}>Bytt visning (nå: {view})</button>
         </p>

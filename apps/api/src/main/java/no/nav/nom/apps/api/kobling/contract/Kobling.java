@@ -6,6 +6,7 @@ import java.util.Optional;
 public interface Kobling {
     String getAgressoId();
     String getOrgNiv();
+    String getOrgenhetNavn();
     String getNavIdent();
     LocalDate getGyldigFom();
     Optional<LocalDate> getGyldigTom();

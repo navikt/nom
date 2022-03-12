@@ -60,7 +60,7 @@ function SearchboxLine(
         <div {...lineProps}>
           <Link
             {...lineLinkProps}
-            to={"/organisasjonsenheter/" + agressoIdDataToUrl(orgenhet.agressoId,orgenhet.orgNiv)}
+            to={"/organisasjonsenheter/" + agressoIdDataToUrl(orgenhet.agressoId,orgenhet.orgNiv, orgenhet.navn)}
           >
             Orgenhet: {orgenhet.navn}
           </Link>

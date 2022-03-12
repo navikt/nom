@@ -1,8 +1,9 @@
-package no.nav.nom.apps.api.orgenhet.implementations;
+package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
-import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.OrgenhetType;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ import static java.util.Comparator.comparing;
  * ID: Y             |---123-->
  */
 @Value
-public class EventBasedOrgenhet implements Orgenhet {
+public class EventBasedOrgenhet implements IOrgenhet {
 
     public final static String AGRESSO_ID_FIELD = "agressoId";
     public final static String NAVN_FIELD = "navn";
@@ -54,6 +55,11 @@ public class EventBasedOrgenhet implements Orgenhet {
 
     @Override
     public String getOrgNiv() {
+        return null;
+    }
+
+    @Override
+    public OrgenhetType getOrgenhetType() {
         return null;
     }
 

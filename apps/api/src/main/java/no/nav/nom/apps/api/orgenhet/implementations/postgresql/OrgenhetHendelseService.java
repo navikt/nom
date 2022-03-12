@@ -1,10 +1,10 @@
-package no.nav.nom.apps.api.orgenhet;
+package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetPosgresqlService;
-import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetPosgresqlInterface;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -17,14 +17,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgenhetHendelseService {
 
-    private final OrgenhetPosgresqlService orgenhetService;
+    private final OrgenhetPosgresqlInterface orgenhetService;
 
-    public void handterOrgenhetFraDvh(List<Orgenhet> o) {
+    public void handterOrgenhetFraDvh(List<IOrgenhet> o) {
 
         val bulkSize = 10000;
         for (int i = 0; i < o.size(); i += bulkSize) {
             val selection = o.subList(i, Math.min(i + bulkSize, o.size()));
-            val orgenhetByAgressoId = orgenhetService.findByAgressoIdBulk(selection.stream().map(Orgenhet::getAgressoId).toList());
+            val orgenhetByAgressoId = orgenhetService.findByAgressoIdBulk(selection.stream().map(IOrgenhet::getAgressoId).toList());
 
             val opprettInserts = new HashMap<String, String>();
             val endreinserts = new HashMap<UUID, Map<String, String>>();

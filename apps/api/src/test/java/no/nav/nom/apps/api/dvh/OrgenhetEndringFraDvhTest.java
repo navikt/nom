@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
-import no.nav.nom.apps.api.orgenhet.implementations.EventBasedOrgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +45,7 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
     }
 
     private void stubEnheter(String fileName) {
-        stubFor(get("/proxy/enheter/v2").willReturn(aResponse()
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json;charset=UTF-8")
                 .withBodyFile(fileName)

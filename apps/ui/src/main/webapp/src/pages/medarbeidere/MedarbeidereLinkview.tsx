@@ -212,7 +212,7 @@ function OrgenhetListview(props: {
           renderCell: (item, value) => (
             <ItemLink
               history={history}
-              url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.agressoId, item.agressoNiva)}
+              url={"/organisasjonsenheter/" + agressoIdDataToUrl(item.agressoId, item.agressoNiva, item.enhetNavn)}
               label={item.enhetNavn}
             />
           ),

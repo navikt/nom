@@ -7,8 +7,8 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import org.springframework.stereotype.Component;
@@ -25,15 +25,16 @@ import static no.nav.nom.apps.api.graphql.common.ConverterUtils.toStringList;
 @RequiredArgsConstructor
 class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
 
-    private final OrgenhetService orgenhetService;
+    private final IOrgenhetService orgenhetService;
 
     public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
         return SecurityUtil.<Organisasjonsenhet>checkAuth(env, null).orElseGet(() -> {
-            Optional<Orgenhet> result;
+            Optional<IOrgenhet> result;
             if (objectNode != null && objectNode.hasNonNull("agressoId") && objectNode.hasNonNull("orgNiv")) {
                 val orgNiv = objectNode.findValue("orgNiv").asText();
                 val agressoId = objectNode.findValue("agressoId").asText();
-                result = orgenhetService.getEnhetByAgressoIdNivaAndName(agressoId, orgNiv, null);
+                val enhetNavn = objectNode.hasNonNull("navn") ? objectNode.findValue("navn").asText() : null;
+                result = orgenhetService.getEnhetByAgressoIdNivaAndName(agressoId, orgNiv, enhetNavn);
             } else {
                 result = Optional.empty();
             }
@@ -45,7 +46,7 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
 
     public DataFetcherResult<List<OrganisasjonsenhetResult>> organisasjonsenheter(ObjectNode objectNode, DataFetchingEnvironment env) {
         return SecurityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env, null).orElseGet(() -> {
-            Collection<Orgenhet> result;
+            Collection<IOrgenhet> result;
             val agressoIder = toStringList(objectNode, "agressoIder");
             val orgNiv = objectNode != null && objectNode.hasNonNull("orgNiv") ? objectNode.get("orgNiv").asText() : null;
             if (objectNode == null || agressoIder.isEmpty()) {

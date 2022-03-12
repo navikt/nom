@@ -41,7 +41,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
 
     private void stubTlfFromString(String payload) {
-        stubFor(get("/proxy/dvhTlf").willReturn(aResponse()
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1").willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json;charset=UTF-8")
                 .withBody(payload)
@@ -49,7 +49,7 @@ public class TlfFraDvhTest extends DvhTestBase {
     }
 
     private void stubResourcesFromString(String payload) {
-        stubFor(get("/proxy/ressurser").willReturn(aResponse()
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json;charset=UTF-8")
                 .withBody(payload)

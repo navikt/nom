@@ -60,7 +60,7 @@ export function createOrganisasjonsenhetQuery(
 ): string {
   function agressoUrlToWhereClause(agrIdUrl: string): any {
     const agressoData = agressoUrlToData(agrIdUrl);
-    return `where: {agressoId: "${agressoData.agressoId}", orgNiv: "${agressoData.agressoNiva}"}`;
+    return `where: {agressoId: "${agressoData.agressoId}", orgNiv: "${agressoData.agressoNiva}", navn: "${agressoData.enhetNavn}"}`;
   }
 
   const whereClause = agressoIdUrl
@@ -79,6 +79,8 @@ export function createOrganisasjonsenhetQuery(
                 navn
                 agressoId
                 orgNiv
+                gyldigFom
+                gyldigTom
                 type {
                   kode
                   navn

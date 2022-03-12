@@ -133,7 +133,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     // test helpers
 
     private void stubRessurser(String fileName) {
-        stubFor(get("/proxy/ressurser").willReturn(aResponse()
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json;charset=UTF-8")
                 .withBodyFile(fileName)

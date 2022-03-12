@@ -29,30 +29,35 @@ export function agressoNivaToNumberStr(niva: string): string {
 
 export function agressoIdDataToUrl(
   agressoId: string,
-  agressoNiva: string
+  agressoNiva: string,
+  navn: string
 ): string {
   const niva = agressoNivaToNumberStr(agressoNiva);
   const nivaStr = niva ? niva + "_" : "";
-  const agressoIdDataToUrlTmp = nivaStr + agressoId;
+  const agressoIdDataToUrlTmp = nivaStr + agressoId + "_"+navn.replaceAll(" ", "&");
   return agressoIdDataToUrlTmp;
 }
 
 export function agressoUrlToData(agressoIdUrl: string): {
   agressoId: string;
   agressoNiva: string;
+  enhetNavn: string;
 } {
   const out = {
     agressoId: "",
     agressoNiva: "",
+    enhetNavn: ""
   };
 
   const arr = agressoIdUrl.split("_");
-  if (arr.length !== 2) {
+  if (arr.length !== 3) {
     out.agressoNiva = "ORGENHET";
     out.agressoId = arr[0];
+    out.enhetNavn = arr[1].replaceAll("&", " ");
   } else {
     out.agressoNiva = agressoNumberStrToNiva(arr[0]);
     out.agressoId = arr[1];
+    out.enhetNavn = arr[2].replaceAll("&", " ");
   }
 
   return out;

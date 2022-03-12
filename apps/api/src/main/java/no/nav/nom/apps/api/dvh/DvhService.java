@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.ressurs.implementations.RessursService;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class DvhService {
     private final DvhRepository dvhRepository;
     private final RessursService ressursService;
 
-    public void saveKoblinger(List<Kobling> koblinger) {
+    public void saveKoblinger(List<DvhKobling> koblinger) {
 
         val list = Collections.synchronizedList(new LinkedList<Kobling>());
 
@@ -39,6 +40,7 @@ public class DvhService {
                         } else if (dvhRessurs == null) {
                             log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
                         } else {
+                            k.setOrgenhetNavn(organisasjonsenhet.getNavn());
                             list.add(k);
                         }
                     }
@@ -60,7 +62,11 @@ public class DvhService {
                         } else if(ressurs.isEmpty()){
                             log.info("Leder relasjon mislyktes, enhet: "+l.getOrgEnhetNr()+", navIdent: "+l.getNavIdent()+", "+"Ressurs mangler");
                         }
-                        return enhet.isPresent() && ressurs.isPresent();
+                        if(enhet.isPresent() && ressurs.isPresent()){
+                            l.setOrgenhetNavn(enhet.get().getNavn());
+                            return true;
+                        }
+                        return false;
                     })
                     .toList()
         );

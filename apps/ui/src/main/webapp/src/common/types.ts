@@ -3,6 +3,8 @@ export interface OrgEnhetFelter {
   enhetNiva: string;
   enhetNavn: string;
   enhetType: string;
+  gyldigFom: string;
+  gyldigTom: string;
 }
 
 export interface OrgEnhetKoblinger {

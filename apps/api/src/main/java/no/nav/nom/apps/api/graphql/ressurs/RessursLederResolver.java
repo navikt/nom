@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
-import no.nav.nom.apps.api.orgenhet.contract.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
@@ -25,7 +25,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
 
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
-    private final OrgenhetService orgenhetService;
+    private final IOrgenhetService orgenhetService;
     private final KoblingService koblingService;
 
     public DataFetcherResult<List<RessursLeder>> ledere(Ressurs ressurs) {
@@ -36,13 +36,14 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                 .flatMap(kobling -> {
                     String agressoId = kobling.getAgressoId();
                     String orgNiv = kobling.getOrgNiv();
+                    String orgenhetNavn = kobling.getOrgenhetNavn();
                     var ledere = lederFor(agressoId, orgNiv, ressurs.getNavIdent());
 
                     if (!ledere.isEmpty()) {
                         return ledere.stream();
                     }
                     // Om ressurs er leder for sin enhet henter vi leder fra nivå over
-                    return lederForRecursive(agressoId, orgNiv, ressurs.getNavIdent()).stream();
+                    return lederForRecursive(agressoId, orgNiv, orgenhetNavn, ressurs.getNavIdent()).stream();
                 })
                 .map(RessursLeder::new)
                 .collect(Collectors.toList());
@@ -52,8 +53,8 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                 .build();
     }
 
-    private List<Ressurs> lederForRecursive(String agressoId, String orgNiv, String excludeNavIdent) {
-        return dvhRepository.getOrganiseringer(agressoId, orgNiv).stream()
+    private List<Ressurs> lederForRecursive(String agressoId, String orgNiv, String orgenhetNavn, String excludeNavIdent) {
+        return dvhRepository.getOrganiseringer(agressoId, orgNiv, orgenhetNavn).stream()
                 .filter(o -> o.getAgressoIdUnder().equals(agressoId) && o.getOrgNivUnder().equals(orgNiv))
                 .map(o -> orgenhetService.getEnhetByAgressoIdNivaAndName(o.getAgressoIdOver(), o.getOrgNivOver(), null))
                 .filter(Optional::isPresent)
@@ -63,7 +64,7 @@ public class RessursLederResolver implements GraphQLResolver<Ressurs> {
                     if (!ledere.isEmpty() || agressoId.equals(o.getAgressoId())) {
                         return ledere;
                     }
-                    return lederForRecursive(o.getAgressoId(), o.getOrgNiv(), excludeNavIdent);
+                    return lederForRecursive(o.getAgressoId(), o.getOrgNiv(), o.getNavn(), excludeNavIdent);
                 })
                 .orElse(List.of());
     }

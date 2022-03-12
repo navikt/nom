@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/proxy/stillinger"
+    "url": "/proxy/dvh/json/Hr/NOM2/stilling2nom"
   },
   "response": {
     "status": 200,

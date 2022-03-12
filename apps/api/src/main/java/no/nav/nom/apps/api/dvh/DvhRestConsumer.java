@@ -10,19 +10,19 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.OrgenhetHendelseService;
+import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.kobling.contract.Kobling;
-import no.nav.nom.apps.api.orgenhet.implementations.DvhOrganisasjonsenhet;
-import no.nav.nom.apps.api.orgenhet.contract.Orgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v1.DvhOrganisasjonsenhet;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +30,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,23 +61,27 @@ public class DvhRestConsumer {
     private final RessursHendelseService ressursHendelseService;
     private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
+    private final Environment environment;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void loadFromDvh() {
-        try {
-            loadRessurserFromDvh();
-            loadOrgenhetFromDvh();
-            loadKoblingerFromDvh();
-            loadTlfFromDvh();
-        } catch (Exception e) {
-            boolean firstLoad = !initialLoadComplete.get();
-            if (firstLoad) {
-                log.error("Failure loading data from DVH - setting LivenessState.BROKEN", e);
-                AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.BROKEN);
-            } else {
-                log.error("Failure loading data from DVH", e);
+        val qaEnv = Arrays.stream(environment.getActiveProfiles()).toList().contains("qa");
+        if(!qaEnv) {
+            try {
+                loadRessurserFromDvh();
+                loadOrgenhetFromDvh();
+                loadKoblingerFromDvh();
+                loadTlfFromDvh();
+            } catch (Exception e) {
+                boolean firstLoad = !initialLoadComplete.get();
+                if (firstLoad) {
+                    log.error("Failure loading data from DVH - setting LivenessState.BROKEN", e);
+                    AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.BROKEN);
+                } else {
+                    log.error("Failure loading data from DVH", e);
+                }
+                return;
             }
-            return;
         }
 
         if (!initialLoadComplete.get()) {
@@ -88,7 +93,7 @@ public class DvhRestConsumer {
 
     @SneakyThrows
     private void loadRessurserFromDvh() {
-        var jsonRessurser = dvhExchange("/proxy/ressurser");
+        var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1");
 
         val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
                 .map(DvhRessurs::new)
@@ -120,8 +125,8 @@ public class DvhRestConsumer {
     }
 
     private void loadKoblingerFromDvh() {
-        val jsonStillinger = dvhExchange("/proxy/stillinger");
-        List<Kobling> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
+        val jsonStillinger = dvhExchange("/proxy/dvh/json/Hr/NOM2/stilling2nom");
+        List<DvhKobling> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
                 .map(DvhKobling::new)
                 .collect(Collectors.toList());
@@ -130,7 +135,7 @@ public class DvhRestConsumer {
     }
 
     private void loadTlfFromDvh() {
-        val jsonTlfNr = dvhExchange("/proxy/dvhTlf");
+        val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
         val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(),false)
                 .filter(this::validateTlf)
                 .map(DvhTelefon::new)
@@ -151,8 +156,8 @@ public class DvhRestConsumer {
     }
 
     private void loadOrgenhetFromDvh() {
-        val jsonOrgenheter = dvhExchange("/proxy/enheter/v2");
-        val orgenheter = new ConcurrentHashMap<String, Map<String, Orgenhet>>();
+        val jsonOrgenheter = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2");
+        val orgenheter = new ConcurrentHashMap<String, Map<String, IOrgenhet>>();
         val ledere = new LinkedList<DvhLeder>();
         val organiseringer = new LinkedList<DvhOrganisering>();
 
