@@ -188,10 +188,10 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
   const infoVisning = (
     <Contentbox label="Info">
       <LabeledItemsgrid>
-        <label>Enhetsnavn: </label>
-        <div>{props.orgenhetData.data.enhetNavn}</div>
         <label>Enhet agresso-nr</label>
         <div>{props.orgenhetData.data.enhetNr}</div>
+        <label>Enhetsnavn: </label>
+        <div>{props.orgenhetData.data.enhetNavn}</div>
         <label>Enhet nivå</label>
         <div>{props.orgenhetData.data.enhetNiva}</div>
         <label>Enhet type</label>
@@ -281,6 +281,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
             return { key: it.enhetNr, ...it };
           })}
           columns={[
+            { id: "enhetNr", label: "Nr", type: "string" },
             {
               id: "enhetNavn",
               label: "Navn",
@@ -293,7 +294,6 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
                     />
               ),
             },
-            { id: "enhetNr", label: "Nr", type: "string" },
             { id: "enhetNiva", label: "Nivå", type: "string"},
             { id: "enhetType", label: "Type", type: "string" },
             { id: "gyldigFom", label: "Gyldig Fom", type: "string" },
@@ -304,7 +304,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
           searchable={false}
           selectable={false}
           sortable={true}
-          sort={{ column: "enhetNavn", order: "asc" }}
+          sort={{ column: "enhetNr", order: "desc" }}
           striped={false}
           summary={false}
           compact={true}
