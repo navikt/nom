@@ -54,7 +54,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public LocalDate getGyldigFom() {
-        return getLastDay(gyldigFom);
+        return getFirstDay(gyldigFom);
     }
 
     @Override
@@ -66,9 +66,14 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         );
     }
 
-    private LocalDate getLastDay(String YYYYMM){
-        LocalDate convertedDate = LocalDate.parse(YYYYMM+"01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+    private LocalDate getLastDay(String yyyyMM){
+        LocalDate convertedDate = getFirstDay(yyyyMM);
         return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
+    }
+
+    private LocalDate getFirstDay(String yyyyMM){
+        return LocalDate.parse(yyyyMM+"01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+
     }
 
     private Optional<LocalDate> getDate(LocalDate date){
