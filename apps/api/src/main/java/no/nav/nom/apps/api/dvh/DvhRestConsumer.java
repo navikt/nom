@@ -66,11 +66,12 @@ public class DvhRestConsumer {
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void loadFromDvh() {
         val qaEnv = Arrays.stream(environment.getActiveProfiles()).toList().contains("qa");
-        if(!qaEnv) {
             try {
                 loadRessurserFromDvh();
-                loadOrgenhetFromDvh();
-                loadKoblingerFromDvh();
+                if(!qaEnv) {
+                    loadOrgenhetFromDvh();
+                    loadKoblingerFromDvh();
+                }
                 loadTlfFromDvh();
             } catch (Exception e) {
                 boolean firstLoad = !initialLoadComplete.get();
@@ -82,7 +83,6 @@ public class DvhRestConsumer {
                 }
                 return;
             }
-        }
 
         if (!initialLoadComplete.get()) {
             initialLoadComplete.set(true);
