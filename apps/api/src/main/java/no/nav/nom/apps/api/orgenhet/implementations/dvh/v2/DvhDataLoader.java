@@ -46,7 +46,9 @@ public class DvhDataLoader {
                             log.warn("Enhet med gyldigFom > gyldigTom "+e);
                         }
                         if(e.getOrgenhetStatus().equals("P") || e.getOrgenhetStatus().equals("N")) {
-                            return true;
+                            if(!e.getOrgenhetStatus().equals("P") && e.getStillingMaksDato() != null) {
+                                return true;
+                            }
                         }
                         log.error("Mottatt enhet ugyldig status "+e);
                         return false;
