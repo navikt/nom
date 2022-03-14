@@ -39,19 +39,18 @@ public class DvhDataLoader {
             StreamSupport.stream(response.spliterator(), false)
                     .map(DvhOrgenhetV2::new)
                     .filter(e -> {
-                        if(e.getGyldigFom() == null) log.warn("Manglende gyldigFra dato "+e);
-                        if(e.getOrgenhetStatus().equals("P") && e.getGyldigTom().isEmpty())
-                            log.warn("Parkert enhet uten gyldigTil dato! "+e);
-                        if(e.getGyldigTom().isPresent() && e.getGyldigFom().isAfter(e.getGyldigTom().get())){
-                            log.warn("Enhet med gyldigFom > gyldigTom "+e);
-                        }
                         if(e.getOrgenhetStatus().equals("P") || e.getOrgenhetStatus().equals("N")) {
                             if(e.getOrgenhetStatus().equals("P") && e.getStillingMaksDato() == null) {
                                 return false;
                             }
+                            if(e.getGyldigFom() == null) log.warn("Manglende gyldigFra dato "+e);
+                            if(e.getOrgenhetStatus().equals("P") && e.getGyldigTom().isEmpty())
+                                log.warn("Parkert enhet uten gyldigTil dato! "+e);
+                            if(e.getGyldigTom().isPresent() && e.getGyldigFom().isAfter(e.getGyldigTom().get())){
+                                log.warn("Enhet med gyldigFom > gyldigTom "+e);
+                            }
                             return true;
                         }
-                        log.error("Mottatt enhet ugyldig status "+e);
                         return false;
                     })
                     .toList()
