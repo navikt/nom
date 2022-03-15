@@ -19,7 +19,7 @@ import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
-@Profile("!test")
+@Profile("!test && qa")
 @RequiredArgsConstructor
 public class DvhDataLoader {
 
