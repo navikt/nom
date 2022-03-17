@@ -28,7 +28,8 @@ public class GraphQLFieldConsumptionCounter {
 
     public void count(DataFetchingEnvironment env){
         val operationName = Optional.ofNullable(env.getOperationDefinition().getName()).orElse("unknown");
-        count(env.getField().getName(), env.getField().getSelectionSet(), operationName, securityUtil.getAzpName(env));
+        val consumer = securityUtil.getAzpName(env).orElse(securityUtil.getAzp(env).orElse("unknown"));
+        count(env.getField().getName(), env.getField().getSelectionSet(), operationName, consumer);
     }
 
     public void count(String path, SelectionSet selectionSet, String operationName, String consumer){

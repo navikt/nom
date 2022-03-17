@@ -34,13 +34,23 @@ public class SecurityUtil {
         return Optional.empty();
     }
 
-    public String getAzpName(DataFetchingEnvironment env){
+    public Optional<String> getAzpName(DataFetchingEnvironment env){
         if(securityEnabled) {
             CustomGraphQLContext context = env.getContext();
             val azp_name = ((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp_name");
 
-            return azp_name != null ? azp_name.toString() : "Unknown";
+            return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
         }
-        return "Unkown";
+        return Optional.empty();
+    }
+
+    public Optional<String> getAzp(DataFetchingEnvironment env){
+        if(securityEnabled) {
+            CustomGraphQLContext context = env.getContext();
+            val azp_name = ((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp");
+
+            return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
+        }
+        return Optional.empty();
     }
 }
