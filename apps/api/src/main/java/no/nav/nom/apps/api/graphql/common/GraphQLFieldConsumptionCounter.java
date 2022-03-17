@@ -32,7 +32,7 @@ public class GraphQLFieldConsumptionCounter {
         count(env.getField().getName(), env.getField().getSelectionSet(), operationName, consumer);
     }
 
-    public void count(String path, SelectionSet selectionSet, String operationName, String consumer){
+    public void count(String path, SelectionSet selectionSet, String consumer){
         selectionSet.getSelections().forEach(s -> {
             Field field = (Field) s;
             if(field.getSelectionSet() != null) {
@@ -40,7 +40,6 @@ public class GraphQLFieldConsumptionCounter {
             }
             else {
                 val tagsAndValues = new LinkedHashMap<String, String>();
-                tagsAndValues.put("operation", operationName);
                 tagsAndValues.put("path", path+"."+field.getName());
                 tagsAndValues.put("consumer", consumer);
                 tagsAndValues.put("field", field.getName());
