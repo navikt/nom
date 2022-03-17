@@ -1,5 +1,84 @@
 = Applikasjoner
 
+=== Rammeverk og Versjoner
+
+back-end::
+* Java 17
+* Spring
+- boot     (Parent pom  2.6.3 -> 2.6.4)
+- cloud
+- webflux
+- graphql
+* Azure AD
+* GCP Postgresql 12   (13 er default på GCP nå, 14 er også ute)
+* Kafka
+front-end::
+* node 16   (Gallium)
+* es5 typescript
+* React 17
+* nav-frontend (Ikke nye 'Aksel')
+
+==== Node modules versioner
+
+  npm outdated
+
+per 17.03.2022
+----
+Package                           Current   Wanted   Latest
+@apollo/client                      3.5.8   3.5.10   3.5.10
+@babel/core                        7.17.0   7.17.7   7.17.7
+@svgr/webpack                       5.5.0    5.5.0    6.2.1
+@testing-library/react             12.1.2   12.1.4   12.1.4
+@types/jest                        27.4.0   27.4.1   27.4.1
+@types/node                       17.0.15  17.0.21  17.0.21
+@types/react                      17.0.39  17.0.40  17.0.40
+@types/react-dom                  17.0.11  17.0.13  17.0.13
+@typescript-eslint/eslint-plugin   4.33.0   4.33.0   5.15.0
+@typescript-eslint/parser          4.33.0   4.33.0   5.15.0
+http-proxy-middleware               2.0.3    2.0.4    2.0.4
+prettier                            2.5.1    2.6.0    2.6.0
+react-hook-form                    7.26.1   7.28.0   7.28.0
+react-router-dom                    6.2.1    6.2.2    6.2.2
+tabell                              1.6.8    1.6.8    2.3.4
+typescript                          4.5.5    4.6.2    4.6.2
+
+----
+
+==== Maven depenency versioner
+
+  mvn versions:display-property-updates
+
+per 17.03.2022
+----
+The following version properties are referencing the newest available version:
+  ${com.google.code.findbugs.jsr305} ............................ 3.0.2
+  ${javassist.version} ...................................... 3.28.0-GA
+  ${maven.dependency.plugin-version} ............................ 3.3.0
+  ${org.jboss.logging-version} ............................ 2.2.1.Final
+  ${ow2-asm.version} .............................................. 9.2
+  ${stax2-api.version} .......................................... 4.2.1
+  ${versions.maven.plugin-version} ............................. 2.10.0
+
+The following version property updates are available:
+  ${azure-msal4j.version} ............................ 1.11.0 -> 1.11.2
+  ${bouncycastle.version} ................................ 1.69 -> 1.70
+  ${checker-qual.version} ............................ 3.21.2 -> 3.21.3
+  ${graphql.java-version} ................. 17.3 -> 230521-nf-execution
+  ${guava.version} ............................. 30.1.1-jre -> 31.1-jre
+  ${jna.version} ...................................... 5.9.0 -> 5.10.0
+  ${ms-graph.version} ................................ 5.13.0 -> 5.17.0
+  ${nimbus.jose.jwt-version} ........................... 9.15.2 -> 9.21
+  ${org.jetbrains.annotations} ....................... 21.0.1 -> 23.0.0
+  ${org.osgi.core-version} ............................. 4.3.1 -> 6.0.0
+  ${snyk-plugin.version} ............................... 2.0.0 -> 2.1.1
+  ${spring-cloud.version} ........................ 2020.0.3 -> 2021.0.1
+----
+==== Dependabot
+Prosjektet er også satt opp med github dependabot. Denne lager automatisker PR'er til repoet for å utføre oppdateringer. +
+https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates +
+
+WARNING: Disse følges ikke opp per i dag
+
 == NOM-Api
 
 Integrasjonspunkt for konsumenter utenfor NOM, og NOM-Ui.

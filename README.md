@@ -22,3 +22,27 @@ Kryss gjerne av for lagre passord.
 På 'Advanced' tabben må 'Host Address' være ip adressen til maskinen din. Eksempelvis 192.168.39.139. Altså ip adressen til docker host. Dette kan ikke være localhost referanse, for det vil bare peke på ip adressen som pgAdmin docker container har fått. 
 
 pgAdmin har fått en docker volume for config oppsett slik at denne konfigurasjonen persisteres mellom hvar gang men kjører opp lokalmiljøet.
+
+
+### Bygg og test på MAC med Colima og uten Docker Client 
+
+`org.testcontainers` klarer ikke ut av boksen å benytte Colima docker.
+
+Lag filen: ~/.testcontainers.properties
+```
+docker.host=unix\:///Users/g155033/.colima/docker.sock
+docker.tls.verify=0
+```
+host referansen finner du med:
+`docker context ls`
+
+Eks:
+```
+❯ docker context ls                                                                    
+NAME       DESCRIPTION                               DOCKER ENDPOINT                             KUBERNETES ENDPOINT                        ORCHESTRATOR
+colima *   colima                                    unix:///Users/g155033/.colima/docker.sock
+default    Current DOCKER_HOST based configuration   unix:///var/run/docker.sock                 https://apiserver.prod-fss.nais.io (org)   swarm
+```
+
+Til slutt må Ryuk skrus av siden den vil ha elevated rettigheter for å rydde bort testcontainere. Sett følgende environment variable:
+`TESTCONTAINERS_RYUK_DISABLED=true`

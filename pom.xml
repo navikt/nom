@@ -32,16 +32,26 @@
         <vault-jdbc.version>1.3.9</vault-jdbc.version>
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <wiremock-extension.version>0.2.0.RELEASE</wiremock-extension.version>
-
+        <hibernate.types.53-version>2.14.0</hibernate.types.53-version>
+        <org.osgi.core-version>4.3.1</org.osgi.core-version>
         <azure-msal4j.version>1.11.0</azure-msal4j.version>
         <ms-graph.version>5.13.0</ms-graph.version>
         <jna.version>5.9.0</jna.version>
         <stax2-api.version>4.2.1</stax2-api.version>
         <guava.version>30.1.1-jre</guava.version>
+        <org.jboss.logging-version>2.2.1.Final</org.jboss.logging-version>
+        <com.google.code.findbugs.jsr305>3.0.2</com.google.code.findbugs.jsr305>
+        <org.jetbrains.annotations>21.0.1</org.jetbrains.annotations>
+        <graphql.java-version>17.3</graphql.java-version>
+        <nimbus.jose.jwt-version>9.15.2</nimbus.jose.jwt-version>
+
+        <org.testcontainers.prostgresql>1.16.3</org.testcontainers.prostgresql>
 
         <snyk-plugin.version>2.0.0</snyk-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
         <docker-compose-plugin.verson>4.0.0</docker-compose-plugin.verson>
+        <maven.dependency.plugin-version>3.3.0</maven.dependency.plugin-version>
+        <versions.maven.plugin-version>2.10.0</versions.maven.plugin-version>
 
         <snyk-api-token>placeholder</snyk-api-token>
     </properties>
@@ -144,43 +154,43 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>4.3.1</version>
+                <version>${org.osgi.core-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-processor</artifactId>
-                <version>2.2.1.Final</version>
+                <version>${org.jboss.logging-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-annotations</artifactId>
-                <version>2.2.1.Final</version>
+                <version>${org.jboss.logging-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
-                <version>3.0.2</version>
+                <version>${com.google.code.findbugs.jsr305}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
-                <version>21.0.1</version>
+                <version>${org.jetbrains.annotations}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.graphql-java</groupId>
                 <artifactId>graphql-java</artifactId>
-                <version>17.3</version>
+                <version>${graphql.java-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
-                <version>9.15.2</version>
+                <version>${nimbus.jose.jwt-version}</version>
             </dependency>
 <!--   ^        Lagt inn pga dårlig dependency management i spring versjon 2.6.3-->
 
@@ -233,6 +243,18 @@
                         <exclude>**/IT*</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven.dependency.plugin-version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions.maven.plugin-version}</version>
             </plugin>
 
             <plugin>
