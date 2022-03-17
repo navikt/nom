@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class GraphQLFieldConsumptionCounter {
@@ -26,7 +27,8 @@ public class GraphQLFieldConsumptionCounter {
 
 
     public void count(DataFetchingEnvironment env){
-        count(env.getField().getName(), env.getField().getSelectionSet(), env.getOperationDefinition().getName(), securityUtil.getAzpName(env));
+        val operationName = Optional.ofNullable(env.getOperationDefinition().getName()).orElse("unknown");
+        count(env.getField().getName(), env.getField().getSelectionSet(), operationName, securityUtil.getAzpName(env));
     }
 
     public void count(String path, SelectionSet selectionSet, String operationName, String consumer){
