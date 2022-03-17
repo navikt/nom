@@ -55,6 +55,9 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      claims:
+        extra:
+          - azp_name
   accessPolicy:
     inbound:
       rules:

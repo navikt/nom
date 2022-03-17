@@ -19,16 +19,17 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 public class OrdreResolver implements GraphQLQueryResolver {
 
     private final OrdreRepository ordreRepository;
+    private final SecurityUtil securityUtil;
 
     public DataFetcherResult<Ordre> ordre(UUID ordreId, DataFetchingEnvironment env) {
-        return SecurityUtil.<Ordre>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<Ordre>checkAuth(env, null).orElseGet(() -> {
             var set = ordreRepository.getById(ordreId);
             return build(ConverterUtils.convert(set));
         });
     }
 
     public DataFetcherResult<List<Ordre>> ordreBulk(List<UUID> requstSetIds, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<Ordre>>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<List<Ordre>>checkAuth(env, null).orElseGet(() -> {
             var sets = (isEmpty(requstSetIds) ? ordreRepository.findAll() : ordreRepository.findAllById(requstSetIds))
                     .stream()
                     .map(ConverterUtils::convert)

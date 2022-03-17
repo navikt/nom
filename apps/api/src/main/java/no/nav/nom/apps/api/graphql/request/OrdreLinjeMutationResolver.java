@@ -31,11 +31,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
 
     private final OrdreRepository ordreRepository;
+    private final SecurityUtil securityUtil;
     private final ObjectMapper om;
     private final AtomicInteger idCounter = new AtomicInteger(500000);
 
     public DataFetcherResult<OrdreLinjeResponse> ordreRessurs(OpprettRessursRequest request, DataFetchingEnvironment env) {
-        return SecurityUtil.<OrdreLinjeResponse>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<OrdreLinjeResponse>checkAuth(env, null).orElseGet(() -> {
             Ordre ordre = getOrdre(request.getMetadata());
             OrdreLinje r = OrdreLinje.builder()
                     .type(OrdreLinjeType.OPPRETT_RESSURS)
@@ -56,7 +57,7 @@ public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
     }
 
     public DataFetcherResult<OrdreLinjeResponse> opprettEnhet(OpprettEnhetRequest request, DataFetchingEnvironment env) {
-        return SecurityUtil.<OrdreLinjeResponse>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<OrdreLinjeResponse>checkAuth(env, null).orElseGet(() -> {
             Ordre ordre = getOrdre(request.getMetadata());
             OrdreLinje r = OrdreLinje.builder()
                     .type(OrdreLinjeType.OPPRETT_ENHET)
@@ -82,7 +83,7 @@ public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
     }
 
     public DataFetcherResult<ResultCode> godkjennOrdre(UUID ordreId, DataFetchingEnvironment env) {
-        return SecurityUtil.<ResultCode>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<ResultCode>checkAuth(env, null).orElseGet(() -> {
             /*var ordre = ordreRepository.getById(ordreId);
             ordre.setGodkjentTidspunkt(LocalDateTime.now());
             ordre.setGodkjentAv(UUID.randomUUID());*/

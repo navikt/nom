@@ -2,26 +2,45 @@ package no.nav.nom.apps.api.graphql.common;
 
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import lombok.experimental.UtilityClass;
+import lombok.val;
+import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@UtilityClass
+@Component
 public class SecurityUtil {
 
-    public static <T> Optional<DataFetcherResult<T>> checkAuth(DataFetchingEnvironment env, List<String> preAuth) {
-        CustomGraphQLContext context = env.getContext();
+    private final boolean securityEnabled;
 
-        if(context.isAuthenticated()) {
-            if (preAuth == null || preAuth.contains(((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp"))) {
-                return Optional.empty();
+    public SecurityUtil(Environment environment){
+        securityEnabled = !Arrays.stream(environment.getActiveProfiles()).toList().contains("local");
+    }
+
+    public <T> Optional<DataFetcherResult<T>> checkAuth(DataFetchingEnvironment env, List<String> preAuth) {
+        if(securityEnabled) {
+            CustomGraphQLContext context = env.getContext();
+
+            if (!context.isAuthenticated() || (preAuth != null && !preAuth.contains(((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp")))) {
+                return Optional.of(DataFetcherResult.<T>newResult()
+                        .error(ErrorCode.UNAUTHENTICATED.construct(env, "Missing or invalid token"))
+                        .build());
             }
         }
 
-        return Optional.of(DataFetcherResult.<T>newResult()
-                .error(ErrorCode.UNAUTHENTICATED.construct(env, "Missing or invalid token"))
-                .build());
+        return Optional.empty();
+    }
+
+    public String getAzpName(DataFetchingEnvironment env){
+        if(securityEnabled) {
+            CustomGraphQLContext context = env.getContext();
+            val azp_name = ((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp_name");
+
+            return azp_name != null ? azp_name.toString() : "Unknown";
+        }
+        return "Unkown";
     }
 }

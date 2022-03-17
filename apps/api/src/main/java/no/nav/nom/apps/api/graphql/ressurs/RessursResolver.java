@@ -6,6 +6,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
@@ -25,9 +26,12 @@ import static no.nav.nom.apps.api.graphql.common.ConverterUtils.toStringList;
 class RessursResolver implements GraphQLQueryResolver {
 
     private final IRessursService ressursService;
+    private final SecurityUtil securityUtil;
+    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {
+            graphQLFieldConsumptionCounter.count(env);
             Optional<RessursI> result;
             if (objectNode == null) {
                 result = Optional.empty();
@@ -44,7 +48,8 @@ class RessursResolver implements GraphQLQueryResolver {
     }
 
     public DataFetcherResult<List<RessursResult>> ressurser(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<RessursResult>>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<List<RessursResult>>checkAuth(env, null).orElseGet(() -> {
+            graphQLFieldConsumptionCounter.count(env);
             var result = new ArrayList<Result>();
             List<String> navIdenter = toStringList(objectNode, "navIdenter");
             List<String> personIdenter = toStringList(objectNode, "personIdenter");

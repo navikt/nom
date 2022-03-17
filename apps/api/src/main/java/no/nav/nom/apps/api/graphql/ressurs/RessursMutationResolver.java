@@ -27,12 +27,13 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
 
     private final IRessursService ressursService;
     private final PdlConsumer pdlConsumer;
+    private final SecurityUtil securityUtil;
 
     @Value("${app.graphql.preauth.mutation.ressurs}")
     private List<String> preauth;
 
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(String personIdent, Optional<String> forbokstav, DataFetchingEnvironment env) {
-        return SecurityUtil.<OpprettRessursResponse>checkAuth(env, preauth).orElseGet(() -> {
+        return securityUtil.<OpprettRessursResponse>checkAuth(env, preauth).orElseGet(() -> {
             val result = DataFetcherResult.<OpprettRessursResponse>newResult();
             try {
                 val person = pdlConsumer.hentPerson(personIdent);

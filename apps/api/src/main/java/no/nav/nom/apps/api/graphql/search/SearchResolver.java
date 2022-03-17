@@ -20,9 +20,10 @@ public class SearchResolver implements GraphQLQueryResolver {
 
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
+    private final SecurityUtil securityUtil;
 
     public DataFetcherResult<List<Object>> search(String term, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<Object>>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<List<Object>>checkAuth(env, null).orElseGet(() -> {
             var matchedOrgenhetIds = Stream.concat(
                     orgenhetService.matchByAgressoId(term).stream(),
                     orgenhetService.matchByNavn(term).stream()

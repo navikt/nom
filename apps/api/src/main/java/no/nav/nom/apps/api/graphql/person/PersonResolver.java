@@ -5,6 +5,7 @@ import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
@@ -19,12 +20,16 @@ import java.util.Optional;
 public class PersonResolver implements GraphQLQueryResolver {
 
     private final IRessursService ressursService;
+    private final SecurityUtil securityUtil;
+    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
+
 
     @Value("${app.graphql.preauth.query.person}")
     private List<String> preauth;
 
     public DataFetcherResult<PersonResult> person(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<PersonResult>checkAuth(env, preauth).orElseGet(() -> {
+        return securityUtil.<PersonResult>checkAuth(env, preauth).orElseGet(() -> {
+            graphQLFieldConsumptionCounter.count(env);
             var personIdentOptional = Optional.ofNullable(objectNode).map(n -> n.findValue("personIdent").asText());
             if (personIdentOptional.isEmpty()) {
                 return DataFetcherResult.<PersonResult>newResult()

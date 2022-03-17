@@ -6,6 +6,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
@@ -26,9 +27,12 @@ import static no.nav.nom.apps.api.graphql.common.ConverterUtils.toStringList;
 class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
 
     private final IOrgenhetService orgenhetService;
+    private final SecurityUtil securityUtil;
+    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
     public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<Organisasjonsenhet>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<Organisasjonsenhet>checkAuth(env, null).orElseGet(() -> {
+            graphQLFieldConsumptionCounter.count(env);
             Optional<IOrgenhet> result;
             if (objectNode != null && objectNode.hasNonNull("agressoId") && objectNode.hasNonNull("orgNiv")) {
                 val orgNiv = objectNode.findValue("orgNiv").asText();
@@ -45,7 +49,8 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
     }
 
     public DataFetcherResult<List<OrganisasjonsenhetResult>> organisasjonsenheter(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return SecurityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env, null).orElseGet(() -> {
+        return securityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env, null).orElseGet(() -> {
+            graphQLFieldConsumptionCounter.count(env);
             Collection<IOrgenhet> result;
             val agressoIder = toStringList(objectNode, "agressoIder");
             val orgNiv = objectNode != null && objectNode.hasNonNull("orgNiv") ? objectNode.get("orgNiv").asText() : null;
