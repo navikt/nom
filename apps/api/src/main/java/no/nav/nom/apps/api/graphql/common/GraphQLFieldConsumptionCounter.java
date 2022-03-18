@@ -25,46 +25,26 @@ public class GraphQLFieldConsumptionCounter {
 
 
     public void count(DataFetchingEnvironment env){
-        val consumer = securityUtil.getAzpName(env).orElse(securityUtil.getAzp(env).orElse("unknown"));
+        val consumer = securityUtil.getAzpName(env).orElse("unknown");
         val operationName = env.getOperationDefinition().getName();
         count(null, env.getField(), consumer, operationName != null && !operationName.isEmpty() ? operationName : "unknown");
     }
 
     public void count(String path, Field field, String consumer, String operationName){
+        var currentPath = path != null && !path.isEmpty() ? path+"."+field.getName() : field.getName();
         val tagsAndValues = new LinkedHashMap<String, String>();
         if(field.getSelectionSet() != null) {
-            field.getSelectionSet().getSelections().forEach(s -> count(path, (Field) s, consumer, operationName));
+            field.getSelectionSet().getSelections().forEach(s -> count(currentPath, (Field) s, consumer, operationName));
             tagsAndValues.put("type", "complex-object");
         }
         else {
             tagsAndValues.put("type", "simple");
         }
         tagsAndValues.put("field", field.getName());
-        tagsAndValues.put("path", path != null && !path.isEmpty() ? path+"."+field.getName() : field.getName());
+        tagsAndValues.put("path", currentPath);
         tagsAndValues.put("consumer", consumer);
         tagsAndValues.put("operationName", operationName);
         incrementCounter("graphql_query_field_counter", tagsAndValues);
-
-
-
-
-
-        /*selectionSet.getSelections().forEach(s -> {
-            Field field = (Field) s;
-            val tagsAndValues = new LinkedHashMap<String, String>();
-            if(field.getSelectionSet() != null) {
-                count(path+"."+field.getName(), field.getSelectionSet(), consumer);
-                tagsAndValues.put("type", "complex-object");
-            }
-            else {
-                tagsAndValues.put("type", "simple");
-            }
-            tagsAndValues.put("field", field.getName());
-            tagsAndValues.put("path", path+"."+field.getName());
-            tagsAndValues.put("consumer", consumer);
-            incrementCounter("graphql_query_field", tagsAndValues);
-
-        });*/
     }
 
     private void incrementCounter(String counterName, LinkedHashMap<String, String> tagsAndValues){
