@@ -1,0 +1,24 @@
+name: nom-ui2
+ingresses:
+  - https://nom-ui2.intern.nav.no
+env:
+  - name: NOM_API_URL
+    value: https://nom-api.intern.nav.no
+  - name: NOM_API_SCOPE
+    value: api://prod-gcp.nom.nom-api/.default
+  - name: DEFAULT_BASE_URL
+    value: https://nom-ui2.intern.nav.no
+  - name: NODE_ENV
+    value: production
+azure:
+  application:
+    tenant: nav.no
+    replyURLs:
+      - https://nom-ui2.dev.intern.nav.no/login/aad/callback
+
+
+accessPolicy:
+  outbound:
+    - application: nom-api
+    - namespace: nom
+    - cluster: prod-gcp

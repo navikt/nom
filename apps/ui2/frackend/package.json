@@ -1,0 +1,29 @@
+{
+  "name": "team-catalog-frackend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest"
+  },
+  "author": "NAV",
+  "license": "MIT",
+  "dependencies": {
+    "@elastic/ecs-morgan-format": "^1.1.0",
+    "axios": "^0.25.0",
+    "cors": "^2.8.5",
+    "dotenv": "^14.3.2",
+    "express": "^4.17.2",
+    "express-rate-limit": "^6.3.0",
+    "express-session": "^1.17.2",
+    "http-proxy-middleware": "^2.0.2",
+    "morgan": "^1.10.0",
+    "node-jose": "^2.0.0",
+    "openid-client": "^5.1.4",
+    "passport": "^0.5.2",
+    "path": "^0.12.7",
+    "uuid": "^8.3.2"
+  }
+}
