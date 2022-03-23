@@ -62,8 +62,7 @@ function StandardDropdown() {
 export function Pagewrap(props: any) {
   return (
     <>
-      {/* <Header system-meny className="w-full"> */}
-      <Header system-meny className="w-full">
+      <Header className="w-full">
         <Header.Title as="div" className={flexStyle}>
           <NavLink to="/" className={whiteStyle}>
             <Home />
