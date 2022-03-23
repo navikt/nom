@@ -8,22 +8,28 @@ import MainPage from "./pages/MainPage";
 import ResourcePage from "./pages/ResourcePage";
 import { FormTestPage } from './pages/FormTestPage';
 import { Notfound } from './pages/Notfound';
+import {ApolloProvider} from "@apollo/client";
+import {apolloClient} from "./api/apolloclient";
+import {NomApiGraphqlTestPage} from "./pages/NomApiGraphqlTestPage";
 
 const AppRoutes = (): JSX.Element => (
     <Routes>
-      <Route path="/" element={<MainPage />} />
-      <Route path="/resource" element={<ResourcePage />} />
-      <Route path="/formtestpage" element={<FormTestPage />} />
-      <Route path={"*"} element={<Notfound />} />
+        <Route path="/" element={<MainPage/>}/>
+        <Route path="/resource" element={<ResourcePage/>}/>
+        <Route path="/formtestpage" element={<FormTestPage/>}/>
+        <Route path={"/nomapigraphqltest"} element={<NomApiGraphqlTestPage/>}/>
+        <Route path={"*"} element={<Notfound/>}/>
     </Routes>
 );
 
 
 ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById('root')
+    <React.StrictMode>
+        <BrowserRouter>
+            <ApolloProvider client={apolloClient}>
+                <AppRoutes/>
+            </ApolloProvider>
+        </BrowserRouter>
+    </React.StrictMode>,
+    document.getElementById('root')
 )

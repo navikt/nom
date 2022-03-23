@@ -52,6 +52,7 @@ function StandardDropdown() {
           <DropdownLinkItem to="/ressurs">Ressurs</DropdownLinkItem>
           <DropdownLinkItem to="/organisasjon">Organisasjon</DropdownLinkItem>
           <DropdownLinkItem to="/formtestpage">Form test</DropdownLinkItem>
+          <DropdownLinkItem to="/nomapigraphqltest">Graphql api test</DropdownLinkItem>
         </DropdownLinkGroup>
       </Dropdown.Menu>
     </Dropdown>
