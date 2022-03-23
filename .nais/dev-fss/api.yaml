@@ -62,6 +62,9 @@ spec:
     inbound:
       rules:
         - application: nom-ui
+        - application: nom-ui2
+          namespace: org
+          cluster: dev-gcp
         - application: team-catalog-frackend
           namespace: org
         - application: team-catalog-backend
