@@ -182,6 +182,7 @@ public class RessursService implements IRessursService {
                 .navIdent(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
                 .ressurstype(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
+                .sluttdato(dvhRessursInterface.getSluttdatoForPersonident(ressurs.getPersonIdent()))
                 .build();
     }
 }

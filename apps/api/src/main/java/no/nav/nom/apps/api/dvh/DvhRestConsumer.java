@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v1.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.LegacyRessursLoader;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -62,6 +63,7 @@ public class DvhRestConsumer {
     private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
     private final Environment environment;
+    private final LegacyRessursLoader legacyRessursLoader;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void loadFromDvh() {
@@ -73,6 +75,7 @@ public class DvhRestConsumer {
                     loadKoblingerFromDvh();
                 }
                 loadTlfFromDvh();
+                legacyRessursLoader.load();
             } catch (Exception e) {
                 boolean firstLoad = !initialLoadComplete.get();
                 if (firstLoad) {
