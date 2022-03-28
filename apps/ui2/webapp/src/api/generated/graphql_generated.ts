@@ -168,6 +168,7 @@ export type OrganisasjonsenhetResult = {
 
 export type OrganisasjonsenhetSearch = {
   agressoId?: InputMaybe<Scalars['String']>;
+  navn?: InputMaybe<Scalars['String']>;
   orgNiv?: InputMaybe<Scalars['String']>;
 };
 
@@ -277,6 +278,7 @@ export type Ressurs = {
   nomId: Scalars['String'];
   person?: Maybe<Person>;
   personIdent: Scalars['String'];
+  ressurstype: Array<Ressurstype>;
   telefon: Array<Telefon>;
   visningsNavn?: Maybe<Scalars['String']>;
 };
@@ -309,6 +311,12 @@ export type RessurserSearch = {
   navIdenter?: InputMaybe<Array<Scalars['String']>>;
   personIdenter?: InputMaybe<Array<Scalars['String']>>;
 };
+
+export enum Ressurstype {
+  Ekstern = 'EKSTERN',
+  NavKommunal = 'NAV_KOMMUNAL',
+  NavStatlig = 'NAV_STATLIG'
+}
 
 export enum ResultCode {
   Error = 'ERROR',
@@ -350,6 +358,13 @@ export type HentRessursQueryVariables = Exact<{
 
 
 export type HentRessursQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', fornavn?: string | null, etternavn?: string | null } | null };
+
+export type HentRessursMedNavIdentQueryVariables = Exact<{
+  navIdent?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, telefon: Array<{ __typename?: 'Telefon', nummer: string }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -460,6 +475,7 @@ export type ResolversTypes = {
   RessursResult: ResolverTypeWrapper<RessursResult>;
   RessursSearch: RessursSearch;
   RessurserSearch: RessurserSearch;
+  Ressurstype: Ressurstype;
   ResultCode: ResultCode;
   Retning: Retning;
   SearchResult: ResolversTypes['Organisasjonsenhet'] | ResolversTypes['Ressurs'];
@@ -660,6 +676,7 @@ export type RessursResolvers<ContextType = any, ParentType extends ResolversPare
   nomId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   person?: Resolver<Maybe<ResolversTypes['Person']>, ParentType, ContextType>;
   personIdent?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  ressurstype?: Resolver<Array<ResolversTypes['Ressurstype']>, ParentType, ContextType>;
   telefon?: Resolver<Array<ResolversTypes['Telefon']>, ParentType, ContextType>;
   visningsNavn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -899,6 +916,48 @@ export function useHentRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type HentRessursQueryHookResult = ReturnType<typeof useHentRessursQuery>;
 export type HentRessursLazyQueryHookResult = ReturnType<typeof useHentRessursLazyQuery>;
 export type HentRessursQueryResult = Apollo.QueryResult<HentRessursQuery, HentRessursQueryVariables>;
+export const HentRessursMedNavIdentDocument = gql`
+    query HentRessursMedNavIdent($navIdent: String) {
+  ressurs(where: {navIdent: $navIdent}) {
+    navIdent
+    personIdent
+    fornavn
+    etternavn
+    epost
+    telefon {
+      nummer
+    }
+  }
+}
+    `;
+
+/**
+ * __useHentRessursMedNavIdentQuery__
+ *
+ * To run a query within a React component, call `useHentRessursMedNavIdentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentRessursMedNavIdentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHentRessursMedNavIdentQuery({
+ *   variables: {
+ *      navIdent: // value for 'navIdent'
+ *   },
+ * });
+ */
+export function useHentRessursMedNavIdentQuery(baseOptions?: Apollo.QueryHookOptions<HentRessursMedNavIdentQuery, HentRessursMedNavIdentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HentRessursMedNavIdentQuery, HentRessursMedNavIdentQueryVariables>(HentRessursMedNavIdentDocument, options);
+      }
+export function useHentRessursMedNavIdentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentRessursMedNavIdentQuery, HentRessursMedNavIdentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HentRessursMedNavIdentQuery, HentRessursMedNavIdentQueryVariables>(HentRessursMedNavIdentDocument, options);
+        }
+export type HentRessursMedNavIdentQueryHookResult = ReturnType<typeof useHentRessursMedNavIdentQuery>;
+export type HentRessursMedNavIdentLazyQueryHookResult = ReturnType<typeof useHentRessursMedNavIdentLazyQuery>;
+export type HentRessursMedNavIdentQueryResult = Apollo.QueryResult<HentRessursMedNavIdentQuery, HentRessursMedNavIdentQueryVariables>;
 export const HentAlleOrganisasjonsenheterDocument = gql`
     query HentAlleOrganisasjonsenheter {
   organisasjonsenheter {

@@ -14,12 +14,11 @@ const Quote = styled("blockquote")((props) => ({
 
 const MainPage = () => {
   return (
-    <Pagewrap>
       <Quote size={20}>
         Nom prosjekt
         <div className={styleClassRed}>Et prosjekt i gang.</div>
       </Quote>
-    </Pagewrap>
+
   );
 };
 

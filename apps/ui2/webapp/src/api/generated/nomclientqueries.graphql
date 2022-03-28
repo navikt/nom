@@ -114,6 +114,20 @@ query hentRessurs($navIdent: String) {
   }
 }
 
+query HentRessursMedNavIdent($navIdent: String) {
+    ressurs(where: {navIdent: $navIdent}) {
+        navIdent
+        personIdent
+        fornavn
+        etternavn
+    		epost
+    		telefon{
+          	nummer
+          	
+        }
+    }
+}
+
 query HentAlleOrganisasjonsenheter {
   organisasjonsenheter {
     id
