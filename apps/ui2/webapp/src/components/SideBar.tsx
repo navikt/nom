@@ -12,9 +12,8 @@ const Link = (props: {linkTo: string, text: string}) => {
 }
 
 const SideBar = () => {
-
     return (
-        <div className={css({width: '330px'})}>
+        <div className={css({width: '330px', marginTop: '2rem'})}>
             <div className={css({width: '100%'})}>
                 <Link linkTo="/" text="Lenke" />
                 <p>Organisasjonsenheter</p>

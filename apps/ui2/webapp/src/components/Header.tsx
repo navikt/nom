@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { Link } from "react-router-dom";
 import { navLogo } from "./Images";
 
 export const headerHeight = '90px'
@@ -30,7 +31,7 @@ const logoStyle = css({
 const Header = () => {
   return (
     <div className={headerStyle}>
-      <img src={navLogo} alt="logo" className={logoStyle} />
+      <Link to="/"><img src={navLogo} alt="logo" className={logoStyle} /></Link>
       <span className={titleStyle}>NOM</span>
     </div>
   )

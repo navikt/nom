@@ -2,9 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import MainPage from "./pages/MainPage";
-import ResourcePage from "./pages/ResourcePage";
 import { FormTestPage } from "./pages/FormTestPage";
 import { NotfoundPage } from "./pages/NotfoundPage";
 import { ApolloProvider } from "@apollo/client";
@@ -19,12 +18,12 @@ const layoutStyle = css({
   backgroundColor: "#F1F1F1",
   minHeight: `calc(100vh - ${headerHeight})`,
   display: "flex",
-  paddingTop: "50px",
   paddingLeft: "10px",
 });
 
 const contentStyle = css({
-  paddingLeft: "40px",
+  margin: "2rem 2rem 0 2rem",
+  width: "100%"
 });
 
 const AppRoutes = () => (

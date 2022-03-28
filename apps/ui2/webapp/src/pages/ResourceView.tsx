@@ -1,5 +1,6 @@
 import * as Gq from "../api/generated/graphql_generated"
 import { useParams } from "react-router";
+import PageTitle from "../components/PageTitle";
 
 const ResourceView = () => {
   const { id } = useParams<any>();
@@ -7,7 +8,7 @@ const ResourceView = () => {
 
   return (
       <div>  
-        <h1>Ressurs</h1>
+        <PageTitle title="Ressurs" />
         {query.loading && <div>...laster graphql data fra nom-api</div>}
         {query.data && 
             <div>
