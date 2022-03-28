@@ -304,7 +304,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
           searchable={false}
           selectable={false}
           sortable={true}
-          sort={{ column: "enhetNr", order: "desc" }}
+          sort={{ column: "enhetNr", order: "asc" }}
           striped={false}
           summary={false}
           compact={true}

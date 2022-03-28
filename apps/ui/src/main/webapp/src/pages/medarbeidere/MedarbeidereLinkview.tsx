@@ -20,7 +20,8 @@ export interface Medarbeider {
     nummer: string;
     type: string;
     beskrivelse: string;
-  }[]
+  }[];
+  sluttdato: string;
   ledere: {
     navIdent: string;
     fulltNavn: string;
@@ -48,6 +49,7 @@ const templateMedarbeider: Medarbeider = {
   epost: "[ukjent]",
   telefon: [],
   ressurstype: [],
+  sluttdato: "[ukjent]",
   ledere: [],
   ansattKategori: "[ukjent]",
   enheter: [],
@@ -70,6 +72,8 @@ function translateGqlToMedarbeider(gqlResponse: any): Medarbeider | null {
   out.telefon = ressurs.telefon;
 
   out.ressurstype = ressurs.ressurstype;
+
+  out.sluttdato = ressurs.sluttdato;
 
   out.ledere = ressurs.ledere.map((it) => {
     const lederRes = it.ressurs;
@@ -161,6 +165,8 @@ function Infopanel(props: { medarbeider: Medarbeider }): JSX.Element {
       <span id="ressurstype">{props.medarbeider.ressurstype}</span>
       <label htmlFor={"ansattTlf"}>Telefon: </label>
       <span id={"ansattTlf"}><TelDisplay telArr={props.medarbeider.telefon}/></span>
+      <label htmlFor="sluttdato">Sluttdato: </label>
+      <span id="sluddato">{props.medarbeider.sluttdato}</span>
 
       {props.medarbeider.ledere.length !== 0
         ? props.medarbeider.ledere.map((it) => {

@@ -6,6 +6,7 @@ import com.graphql.spring.boot.test.GraphQLResponse;
 import com.graphql.spring.boot.test.GraphQLTestTemplate;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -41,6 +42,9 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     protected PdlUtils pdlUtils;
+
+    @Autowired
+    protected DvhLegacyRessursUtils dvhLegacyRessursUtils;
 
     @AfterEach
     protected void clearRepository() {

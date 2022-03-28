@@ -2,5 +2,6 @@ query {
     ressurs(where: {navIdent: "testNavIdent"}) {
         navIdent
         personIdent
+        sluttdato
     }
 }

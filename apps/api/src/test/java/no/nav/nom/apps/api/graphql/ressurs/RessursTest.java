@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -126,6 +128,35 @@ class RessursTest extends RessursTestBase {
 
         val ressurs = response.get("$.data.ressurs", JsonNode.class);
         assertTrue(ressurs.get("koblinger").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kan hente sluttdato når satt")
+    void scenario31() {
+        Hendelse hendelse = createRessursHendelse("");
+        saveHendelser(hendelse);
+        val sluttdato = LocalDate.now();
+
+        dvhLegacyRessursUtils.addToResponse(DvhLegacyRessursUtils.LegacyResponseObject.builder()
+                .personIdent(getPersonIdent(hendelse))
+                .navIdent(getNavIdent(hendelse))
+                .agressoRessursType("F")
+                .remedyRessursType("NAV STATLIG")
+                .remedySluttdato(LocalDate.parse("2099-12-31"))
+                .agressoSluttdato(sluttdato)
+                .remedyPermisjon("NEI")
+                .forventetSluttdato(sluttdato)
+                .build()
+        );
+        dvhLegacyRessursUtils.mockResponse();
+
+        val response = postForResource("ressurs/scenario1.graphql", false);
+
+        val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
+        assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
+        assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
+        assertEquals(sluttdato, outputRessurs.getSluttdato());
     }
 
     @Nested

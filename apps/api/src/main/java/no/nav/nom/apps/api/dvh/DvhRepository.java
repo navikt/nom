@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class DvhRepository {
     private List<DvhTelefon> navidentTelefonNrMap;
     private Map<String, RessursI> ressursByNavIdent;
     private List<DvhOrgenhetV2> orgenhetV2;
+    private final Map<String, LocalDate> sluttdatoByPersonIdent = new HashMap<>();
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
@@ -106,6 +108,7 @@ public class DvhRepository {
         enheterByNivaByAgressoId.clear();
         organiseringer.clear();
         koblinger.clear();
+        sluttdatoByPersonIdent.clear();
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {

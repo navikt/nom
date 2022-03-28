@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurstype;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +36,9 @@ public class DvhRessursInterface {
                 .orElse(null);
 
         return ressurstype != null ? List.of(ressurstype) : List.of();
+    }
+
+    public LocalDate getSluttdatoForPersonident(String personIdent){
+        return dvhRepository.getSluttdatoByPersonIdent().getOrDefault(personIdent, null);
     }
 }
