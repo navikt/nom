@@ -4,5 +4,5 @@ import lombok.Value;
 
 @Value
 public class PdlPersonRequest {
-    String personIdent;
+    String personident;
 }
