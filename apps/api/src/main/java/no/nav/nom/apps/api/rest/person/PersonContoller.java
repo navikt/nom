@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.contract.nom.api.graphql.Person;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +18,7 @@ public class PersonContoller {
     private final PdlConsumer pdlConsumer;
 
 
-    @GetMapping("/{personIdent}")
+    @PostMapping("/getPerson")
     public PdlPersonDTO getPerson(@RequestBody PdlPersonRequest request){
         return pdlConsumer.hentPerson(request.getPersonIdent()).map(this::convert).orElse(null);
     }
