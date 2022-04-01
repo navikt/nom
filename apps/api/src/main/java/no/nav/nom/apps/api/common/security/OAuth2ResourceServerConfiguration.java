@@ -23,7 +23,7 @@ public class OAuth2ResourceServerConfiguration extends WebSecurityConfigurerAdap
         Begrunnelse for å bruke dette i stede for å ta http.mvcMatchers("/internal/**").permitAll()
         er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
          */
-        web.ignoring().mvcMatchers("/internal/**", "/playground/**", "/voyager/**");
+        web.ignoring().mvcMatchers("/internal/**", "/playground/**", "/voyager/**", "/vendor/**");
     }
 
     @Override
