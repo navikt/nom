@@ -25,7 +25,7 @@ public class PersonTest extends GraphQLTestBase {
 
         val person = response.get("$.data.person", JsonNode.class);
         assertThat(person.get("personIdent").textValue()).isEqualTo("testPersonIdent3");
-        assertThat(person.get("nomId").textValue()).isNotNull();
+        //assertThat(person.get("nomId").textValue()).isNotNull();
         assertThat(person.get("navIdent").textValue()).isNotNull();
 
         pdlUtils.assertNavn(person.get("personIdent").textValue(), person.get("person").get("navn"));
@@ -41,7 +41,7 @@ public class PersonTest extends GraphQLTestBase {
 
         val person = response.get("$.data.person", JsonNode.class);
         assertThat(person.get("personIdent").textValue()).isEqualTo("testPersonIdent3");
-        assertThat(person.get("nomId").textValue()).isNull();
+//        assertThat(person.get("nomId").textValue()).isNull();
         assertThat(person.get("navIdent").textValue()).isNull();
 
         pdlUtils.assertNavn(person.get("personIdent").textValue(), person.get("person").get("navn"));

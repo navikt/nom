@@ -20,7 +20,7 @@ public class RessursMutationTest extends RessursTestBase {
         pdlUtils.mockSinglePersonResponse(personIdent);
 
         var response = postForResource("ressurs/opprettRessurs.graphql", false, Map.of("personIdent", personIdent));
-        assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
+        //assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
         assertThat(response.get("$.data.opprettRessurs.navIdent")).isEqualTo("E000000");
         assertThat(response.get("$.data.opprettRessurs.personIdent")).isEqualTo(personIdent);
 
