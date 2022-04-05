@@ -44,7 +44,6 @@ type OrdreLinjeResponse  {
 }
 
 type OpprettRessursResponse {
-    nomId: String!
     navIdent: String!
     personIdent: String!
     person: Person

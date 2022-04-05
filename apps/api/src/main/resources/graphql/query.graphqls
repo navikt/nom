@@ -43,7 +43,6 @@ input PersonSearch {
 
 type PersonResult {
     personIdent: String!
-    nomId: String
     navIdent: String
     person: Person
 }
