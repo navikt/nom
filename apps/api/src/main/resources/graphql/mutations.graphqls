@@ -2,6 +2,8 @@ type Mutation {
 
     opprettRessurs(personIdent: String!, forbokstav: String): OpprettRessursResponse
 
+    opprettRessurs2(request: OpprettRessursRequest2): OpprettRessursResponse2
+
     # OrdreLinje
     ordreRessurs(request: OpprettRessursRequest!): OrdreLinjeResponse!
     opprettEnhet(request: OpprettEnhetRequest!): OrdreLinjeResponse!
@@ -22,9 +24,14 @@ input OrdreLinjeRequestMetadata {
 }
 
 input OpprettRessursRequest  {
-    metadata: OrdreLinjeRequestMetadata!
     personIdent: String!
     visningsnavn: String
+}
+
+input OpprettRessursRequest2 {
+    personident: String!
+    fornavn: String!
+    etternavn: String!
 }
 
 input OpprettEnhetRequest {
@@ -47,6 +54,14 @@ type OpprettRessursResponse {
     navIdent: String!
     personIdent: String!
     person: Person
+}
+
+type OpprettRessursResponse2 {
+    navident: String!
+    personident: String!
+    person: Person
+    fornavn: String!
+    etternavn: String!
 }
 
 enum OrdreLinjesaktiving {

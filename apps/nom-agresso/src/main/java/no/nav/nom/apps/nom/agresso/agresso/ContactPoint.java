@@ -14,7 +14,6 @@ public class ContactPoint{
 
     @Value
     @Builder
-    @NoArgsConstructor
     @RequiredArgsConstructor
     public static class Address{
         String place = "MÅ ENDRES";
