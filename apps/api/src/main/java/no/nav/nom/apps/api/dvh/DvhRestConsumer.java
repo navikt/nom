@@ -148,11 +148,10 @@ public class DvhRestConsumer {
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
-
-        val isSecretNumberNode = jsonNode.get("issecretnumber");
+        val isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
         val userRef1 = jsonNode.get("userreference1");
 
-        return isSecretNumberNode.isNull()
+        return isSecretNumber
                 && (userRef1.asText().startsWith("PT-")
                 || userRef1.asText().startsWith("PK-")
         );

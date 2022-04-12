@@ -157,7 +157,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2021-05-28T00:00:00.000Z",
                   "lastetdato": "2022-01-18T15:58:23.000Z",
                   "res_mobil_tlf_kontroll": "112 20 033"
@@ -170,7 +170,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "11330022"
@@ -183,7 +183,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "21 00 21 02"
@@ -196,7 +196,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-21T00:00:00.000Z",
                   "lastetdato": "2020-10-21T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "223 30 011"
@@ -209,7 +209,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-26T00:00:00.000Z",
                   "lastetdato": "2020-10-26T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "3300 2200"
