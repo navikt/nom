@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
@@ -134,8 +134,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
     void scenario31() {
-        Hendelse hendelse = createRessursHendelse("");
-        saveHendelser(hendelse);
+        RessursI ressurs = createRessursHendelse("");
+
 
         dvhRestConsumer.loadFromDvh();
 
@@ -145,8 +145,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
         }).get(0);
 
-        assertEquals(getNavIdent(hendelse), outputLeder.getRessurs().getNavIdent());
-        assertEquals(getPersonIdent(hendelse), outputLeder.getRessurs().getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputLeder.getRessurs().getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
@@ -168,10 +168,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
     void scenario34() {
-        Hendelse hendelse = createRessursHendelse("");
+        RessursI ressurs = createRessursHendelse("");
 
-        pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
-        saveHendelser(hendelse);
+        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
@@ -179,7 +178,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val lederNavn = outputEnhetJson.get("leder")
                 .get(0).get("ressurs").get("person").get("navn");
-        pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);
+        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
     }
 
 
@@ -187,8 +186,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        Hendelse hendelse = createRessursHendelse("");
-        saveHendelser(hendelse);
+        RessursI ressurs = createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
@@ -203,8 +201,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
 
         val outputRessurs = outputKoblinger.get(0).getRessurs();
-        assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
-        assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -223,9 +221,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        Hendelse hendelse = createRessursHendelse("");
-        pdlUtils.addPersonToPdlResponse(true, getPersonIdent(hendelse));
-        saveHendelser(hendelse);
+        RessursI ressurs = createRessursHendelse("");
+        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
@@ -233,7 +230,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         val lederNavn = outputEnhetJson.get("koblinger")
                 .get(0).get("ressurs").get("person").get("navn");
-        pdlUtils.assertNavn(getPersonIdent(hendelse), lederNavn);
+        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
     }
 }
 

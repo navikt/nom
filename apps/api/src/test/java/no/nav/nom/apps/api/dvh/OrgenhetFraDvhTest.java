@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class OrgenhetFraDvhTest extends DvhTestBase {
 
-    @Test
+    /*@Test
     @DisplayName("Orgenhet fra datavarehus med ikke-aktiv status ignoreres")
     void test1() {
         stubEnheter("responses/dvhdiff/dvhOrgenhet2_Pre.json");
@@ -26,7 +26,7 @@ public class OrgenhetFraDvhTest extends DvhTestBase {
 
         var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(2);
-    }
+    }*/
 
     private void stubEnheter(String fileName) {
         stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse()

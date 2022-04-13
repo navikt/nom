@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.repository.ordre;
+package no.nav.nom.apps.api.postgresql;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface OrdreRepository extends JpaRepository<Ordre, UUID> {
+public interface GenericStorage extends JpaRepository<GenericStorageElement, UUID> {
 
 }

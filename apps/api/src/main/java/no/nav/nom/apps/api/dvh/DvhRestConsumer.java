@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -60,7 +59,6 @@ public class DvhRestConsumer {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final ApplicationEventPublisher appEventPublisher;
     private final RessursHendelseService ressursHendelseService;
-    private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
     private final Environment environment;
     private final LegacyRessursLoader legacyRessursLoader;
@@ -69,13 +67,18 @@ public class DvhRestConsumer {
     public void loadFromDvh() {
         val qaEnv = Arrays.stream(environment.getActiveProfiles()).toList().contains("qa");
             try {
+                log.info("Laster ressurser fra dvh");
                 loadRessurserFromDvh();
                 if(!qaEnv) {
+                    log.info("Laster orgenheter fra dvh");
                     loadOrgenhetFromDvh();
+                    log.info("Laster koblinger fra dvh");
                     loadKoblingerFromDvh();
                 }
-                loadTlfFromDvh();
+                log.info("Laster legacy ressurser fra dvh");
                 legacyRessursLoader.load();
+                log.info("Laster tlf fra dvh");
+                loadTlfFromDvh();
             } catch (Exception e) {
                 boolean firstLoad = !initialLoadComplete.get();
                 if (firstLoad) {
@@ -186,12 +189,12 @@ public class DvhRestConsumer {
                     }
                 });
 
-        if (leaderElection.isLeader()) {
+        /*if (leaderElection.isLeader()) {
             orgenhetHendelseService.handterOrgenhetFraDvh(orgenheter.values().stream()
                     .flatMap(map -> map.values().stream())
                     .collect(Collectors.toList())
             );
-        }
+        }*/
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
         dvhService.saveLedere(ledere);
@@ -208,7 +211,7 @@ public class DvhRestConsumer {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

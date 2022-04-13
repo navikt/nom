@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetPosgresqlInterface;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
-@Service
+//@Service
 @RequiredArgsConstructor
 public class OrgenhetHendelseService {
 
@@ -21,7 +20,7 @@ public class OrgenhetHendelseService {
 
     public void handterOrgenhetFraDvh(List<IOrgenhet> o) {
 
-        val bulkSize = 10000;
+        /*val bulkSize = 10000;
         for (int i = 0; i < o.size(); i += bulkSize) {
             val selection = o.subList(i, Math.min(i + bulkSize, o.size()));
             val orgenhetByAgressoId = orgenhetService.findByAgressoIdBulk(selection.stream().map(IOrgenhet::getAgressoId).toList());
@@ -48,6 +47,6 @@ public class OrgenhetHendelseService {
 
             orgenhetService.createEndreHendelser(endreinserts);
             orgenhetService.createOpprettHendelser(opprettInserts);
-        }
+        }*/
     }
 }

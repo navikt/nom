@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class OrgenhetEndringFraDvhTest extends DvhTestBase {
 
-    @Test
+    /*@Test
     @DisplayName("Orgenhet fra datavarehus blir tilgjengelige i orgenhet repo")
     void test1() {
         stubEnheter("responses/dvhdiff/dvhOrgenhet1_Pre.json");
@@ -22,9 +22,9 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
         var alle = orgenhetService.getAll();
         assertThat(alle).hasSize(5);
         alle.forEach(org -> assertThat(org.getNavn()).isEqualTo("testNavn"));
-    }
+    }*/
 
-    @Test
+    /*@Test
     @DisplayName("Orgenhet fra datavarehus oppdaterer navn, manglende enheter røres ikke")
     void test2() {
         stubEnheter("responses/dvhdiff/dvhOrgenhet1_Pre.json");
@@ -42,7 +42,7 @@ public class OrgenhetEndringFraDvhTest extends DvhTestBase {
         assertThat(alle.get(3).getNavn()).isEqualTo("testNavn3");
         assertThat(alle.get(4).getNavn()).isEqualTo("testNavn");
         assertThat(alle.get(5).getNavn()).isEqualTo("testNavn");
-    }
+    }*/
 
     private void stubEnheter(String fileName) {
         stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse()

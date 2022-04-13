@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RessursMutationTest extends RessursTestBase {
 
 
-    @Test
+    //@Test
     @DisplayName("Opprett ressurs")
     void scenario11() {
         val personIdent = "12345678901";

@@ -33,6 +33,7 @@ public class DvhDataLoader {
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void load(){
+        log.info("Laster orgenhet v2 fra dvh");
         val response = dvhExchange().get("orgenhetStatus2nomResponse").get("orgenhetStatus2nomResult");
 
         dvhRepository.saveOrgenhetV2(
@@ -60,7 +61,7 @@ public class DvhDataLoader {
 
     private JsonNode dvhExchange() {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + HISTORISK_ENEHT_PATH, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

@@ -13,13 +13,14 @@ public class DvhRessurs implements RessursI {
     String personIdent;
     String remedyAnsattType;
     Boolean remedyAktiv;
+    JsonNode rawData;
 
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
         remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
         remedyAnsattType = node.get("ANSATT_TYPE").asText();
-
+        this.rawData = node;
     }
 
     @Override

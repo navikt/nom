@@ -1,17 +1,20 @@
-package no.nav.nom.apps.api.repository;
+package no.nav.nom.apps.api.postgresql;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 
+/*
+    FORELØPIG IKKE I BRUK.
+*/
 @Service
 @RequiredArgsConstructor
 public class NavIdentService {
 
     private final EntityManager entityManager;
-    private final HendelseRepository hendelseRepository;
+    private final RessursHendelseRepository ressursHendelseRepository;
 
     public String generateNavIdent(String navIdentBokstav){
         var seq = "";
@@ -20,7 +23,7 @@ public class NavIdentService {
             while (seq.length() < 6) {
                 seq = "0" + seq;
             }
-        }while(hendelseRepository.navIdentSeqIsPresent(seq).isPresent());
+        }while(ressursHendelseRepository.navIdentSeqIsPresent(seq).isPresent());
         return navIdentBokstav.toUpperCase() + seq;
     }
 

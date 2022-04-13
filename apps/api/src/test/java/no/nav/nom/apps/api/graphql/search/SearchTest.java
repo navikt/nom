@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,9 @@ public class SearchTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Søk på navident")
     public void scenario1() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
         val response = postForResource("search/scenario1.graphql", false);
@@ -75,7 +78,9 @@ public class SearchTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadFromDvh();
 

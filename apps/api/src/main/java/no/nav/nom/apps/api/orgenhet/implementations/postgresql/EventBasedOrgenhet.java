@@ -2,9 +2,9 @@ package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
+import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.OrgenhetType;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,17 +29,17 @@ public class EventBasedOrgenhet implements IOrgenhet {
     public final static String AGRESSO_ID_FIELD = "agressoId";
     public final static String NAVN_FIELD = "navn";
 
-    List<Hendelse> hendelser;
+    List<IHendelse> hendelser;
 
-    public EventBasedOrgenhet(List<Hendelse> hendelser) {
+    public EventBasedOrgenhet(List<IHendelse> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
+                .sorted(comparing(h -> h.getHendelseMetadata().getOpprettetTidspunkt())).toList();
     }
 
     public UUID getId() {
         return hendelser.stream()
                 .findFirst()
-                .map(Hendelse::getFunksjonellId)
+                .map(IHendelse::getFid)
                 .orElseThrow();
     }
 
@@ -73,7 +73,7 @@ public class EventBasedOrgenhet implements IOrgenhet {
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
-                .map(e -> e.getData().get(property))
+                .map(e -> e.getHendelseData().get(property))
                 .filter(Objects::nonNull)
                 .map(JsonNode::asText)
                 .reduce((a, b) -> b);

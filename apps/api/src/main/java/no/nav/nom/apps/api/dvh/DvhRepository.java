@@ -122,15 +122,12 @@ public class DvhRepository {
 
     public void saveOrgenhetV2(List<DvhOrgenhetV2> orgenheter){
         DvhOrgenhetV2 fakeNAV = new DvhOrgenhetV2("NAV", "ORGNIV0", "NAV", null, "200012", "209912", "N", null);
-        organiseringer = orgenheter.stream()
-                .map(o -> fakeOverenhet(o, fakeNAV))
-                .toList();
 
         val removedDuplicates = orgenheter.stream()
-                .collect(Collectors.groupingBy(e -> e.getAgressoId()+e.getOrgNiv()+e.getNavn(), Collectors.toList()))
+                .collect(Collectors.groupingBy(e -> e.getAgressoId() + e.getOrgNiv() + e.getNavn(), Collectors.toList()))
                 .values().stream()
                 .map(l -> l.size() == 1 ? l.get(0) : l.stream().max(Comparator.comparing(DvhOrgenhetV2::getGyldigFom)).stream().findFirst().get())
-                .collect(Collectors.toList());
+                .toList();
 
         organiseringer = removedDuplicates.stream()
                 .map(o -> fakeOverenhet(o, fakeNAV))

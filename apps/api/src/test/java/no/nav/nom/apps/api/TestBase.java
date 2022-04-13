@@ -4,8 +4,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
-import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
+import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
@@ -20,8 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import java.util.List;
 
 @ActiveProfiles({"test", "log-console-error"})
 @WireMockStubs(RsaStub.class)
@@ -44,17 +41,13 @@ public abstract class TestBase {
     private DvhRepository dvhRepository;
 
     @Autowired
-    private HendelseRepository hendelseRepository;
+    private GenericStorage genericStorage;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void reset() {
         dvhRepository.clearRepository();
-        hendelseRepository.deleteAll();
-    }
-
-    protected void saveHendelser(Hendelse... hendelser){
-        hendelseRepository.saveAll(List.of(hendelser));
+        genericStorage.deleteAll();
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

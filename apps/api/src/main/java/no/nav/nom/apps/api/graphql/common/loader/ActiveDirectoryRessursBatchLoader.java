@@ -46,7 +46,7 @@ public class ActiveDirectoryRessursBatchLoader implements MappedBatchLoaderWithC
     public Map<String, DataFetcherResult<AdRessurs>> getAdRessurserBatch(Set<String> navIdenter, BatchLoaderEnvironment batchEnvironment) {
         var headers = new HttpHeaders();
         var token = tokenRepository.getAadToken(appProperties.getProxy().getAadClientId());
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(token.serialize());
 
         try {
             var result = restTemplate.exchange(appProperties.getProxy().getBaseUrl() + "/proxy/ad", HttpMethod.POST, new HttpEntity<>(navIdenter, headers), AdRessurser.class);

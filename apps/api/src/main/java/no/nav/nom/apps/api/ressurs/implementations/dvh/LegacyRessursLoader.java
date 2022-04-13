@@ -11,7 +11,6 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,8 +26,6 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class LegacyRessursLoader {
-    //private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
-
 
     private final String LEGACY_RESSURS_PATH = "/proxy/dvh/json/Hr/Nom/Nom_Ansatte";
     private final long incrementValue = 5000L;
@@ -40,27 +37,31 @@ public class LegacyRessursLoader {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate;
 
-    //@Scheduled(fixedDelay = LOAD_INTERVAL)
     public void load(){
         List<LegacyRessurs> tempResult;
 
         do {
-            log.info("Leser inn legacy ressurs fra sekvens {} til sekvens {}", currentOffset, currentOffset + incrementValue);
-            tempResult = StreamSupport.stream(dvhExchange().get("Nom_AnsatteResponse").get("Nom_AnsatteResult").spliterator(), false)
-                    .map(LegacyRessurs::new)
-                    .toList();
+            try {
+                log.info("Leser inn legacy ressurs fra sekvens {} til sekvens {}", currentOffset, currentOffset + incrementValue);
+                tempResult = StreamSupport.stream(dvhExchange().get("Nom_AnsatteResponse").get("Nom_AnsatteResult").spliterator(), false)
+                        .map(LegacyRessurs::new)
+                        .toList();
 
-            dvhRepository.getSluttdatoByPersonIdent().putAll(
-                    tempResult.stream()
-                    .filter(Predicate.not(LegacyRessurs::hasPermisjon))
-                    .collect(Collectors.groupingBy(LegacyRessurs::getPersonIdent)).values().stream()
-                    .map(l -> l.stream().max(Comparator.comparing(LegacyRessurs::getOffset)).get())
-                    .filter(r -> r.getSluttdato() != null)
-                    .collect(Collectors.toMap(LegacyRessurs::getPersonIdent, LegacyRessurs::getSluttdato))
-            );
+                dvhRepository.getSluttdatoByPersonIdent().putAll(
+                        tempResult.stream()
+                                .filter(Predicate.not(LegacyRessurs::hasPermisjon))
+                                .collect(Collectors.groupingBy(LegacyRessurs::getPersonIdent)).values().stream()
+                                .map(l -> l.stream().max(Comparator.comparing(LegacyRessurs::getOffset)).get())
+                                .filter(r -> r.getSluttdato() != null)
+                                .collect(Collectors.toMap(LegacyRessurs::getPersonIdent, LegacyRessurs::getSluttdato))
+                );
 
-            currentOffset = tempResult.stream().map(LegacyRessurs::getOffset).max(Comparator.comparing(Long::valueOf)).orElse(currentOffset);
-
+                currentOffset = tempResult.stream().map(LegacyRessurs::getOffset).max(Comparator.comparing(Long::valueOf)).orElse(currentOffset);
+            }
+            catch (Exception e){
+                log.error("Lasting av legacyressurs feilet", e);
+                return;
+            }
         } while (tempResult.size() > 0);
     }
 
@@ -74,7 +75,7 @@ public class LegacyRessursLoader {
                 .toString();
 
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + url, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

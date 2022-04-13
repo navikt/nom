@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.repository.ordre;
+package no.nav.nom.apps.api.ordre;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
