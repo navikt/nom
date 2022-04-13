@@ -12,7 +12,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
     - name: NOM_API_CLIENT_ID
-      value: 09035a8b-1c89-4417-ba32-4ea8916c9700
+      value: 3e962532-1cd2-4bb4-8222-515c83df854a
     - name: NOM_API_BASE_URL
       value: http://nom-api
   ingresses:
