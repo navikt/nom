@@ -19,5 +19,6 @@
         <module>proxy</module>
         <module>nom-ressurser</module>
         <module>ui</module>
+        <module>nom-agresso</module>
     </modules>
 </project>
