@@ -106,6 +106,13 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
   }
 }
 
+query HentAlleRessurser{
+    ressurser {
+      ressurs{
+        navIdent
+      }
+    }
+}
 
 query hentRessurs($navIdent: String) {
   ressurs(where: {navIdent: $navIdent}){
@@ -121,9 +128,18 @@ query HentRessursMedNavIdent($navIdent: String) {
         fornavn
         etternavn
     		epost
-    		telefon{
-          	nummer
-          	
+        visningsNavn
+    		ledere{
+            ressurs{
+                navIdent
+                visningsNavn
+            }
+        }
+        koblinger{
+            organisasjonsenhet{
+                agressoId
+                navn
+            }
         }
     }
 }
@@ -139,4 +155,27 @@ query HentAlleOrganisasjonsenheter {
     }
     code
   }
+}
+
+query hentPerson($personIdent: String!){
+    person(where: {personIdent: $personIdent}) {
+        navIdent
+        personIdent
+        person{
+            navn{
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
+    }
+}
+
+query searchRessurs($term: String!) {
+    search(term: $term) {
+        ...on Ressurs {
+          navIdent
+          visningsNavn
+        }
+    }
 }

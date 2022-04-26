@@ -2,10 +2,10 @@ import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { navLogo } from "./Images";
 
-export const headerHeight = '90px'
+export const headerHeight2 = '90px'
 
 const headerStyle = css({
-  height: headerHeight,
+  height: headerHeight2,
   width: '100%',
   backgroundColor: '"FFFFFFF"',
   display: 'flex',
