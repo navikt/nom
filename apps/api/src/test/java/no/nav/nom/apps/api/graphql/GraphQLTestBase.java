@@ -8,6 +8,8 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -16,6 +18,7 @@ import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
@@ -59,6 +62,8 @@ public abstract class GraphQLTestBase extends TestBase {
     @SneakyThrows
     protected GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
         val claims = validJwtWithAzpClaim();
+        claims.claim("azp_name","test");
+        claims.claim("NAVident", "A321321");
         val token = securityTestUtils.createToken(claims);
 
         val varNode = (ObjectNode) om.readTree(om.writeValueAsString(vars));
@@ -73,6 +78,11 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
     protected RessursI createRessursHendelse(String suffix) {
-        return ressursService.opprettRessurs("testPersonIdent" + suffix, "testNavIdent" + suffix, null);
+        val metadata = HendelseMetadataSerialize.builder()
+                .opprettetAv(new HendelseMetadata.OpprettetAv("test","test"))
+                .rawInputData(om.createObjectNode().put("suffix",suffix))
+                .opprettetTidspunkt(LocalDateTime.now())
+                .build();
+        return ressursService.opprettRessurs("testPersonIdent" + suffix, "testNavIdent" + suffix, null, metadata);
     }
 }

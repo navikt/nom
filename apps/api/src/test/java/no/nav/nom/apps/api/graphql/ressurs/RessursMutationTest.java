@@ -32,22 +32,5 @@ public class RessursMutationTest extends RessursTestBase {
     }
 
 
-    @Test
-    @DisplayName("Opprett ressurs2")
-    void scenario12() {
-        val personIdent = "12345678901____X";
-        pdlUtils.mockSinglePersonResponse(personIdent);
 
-        var response = postForResource("ressurs/opprettRessurs2.graphql", false, Map.of("request", Map.of(
-                "personident", personIdent,  "fornavn", "Vidar", "etternavn","Vislesen"
-        )));
-        //assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
-        assertThat(response.get("$.data.opprettRessurs2.navident")).isEqualTo("Z999999");
-        assertThat(response.get("$.data.opprettRessurs2.personident")).isEqualTo(personIdent);
-
-        assertThat(response.get("$.data.opprettRessurs2.person.navn.fornavn")).isEqualTo("fornavn");
-        assertThat(response.get("$.data.opprettRessurs2.person.navn.mellomnavn")).isEqualTo("mellomnavn");
-        assertThat(response.get("$.data.opprettRessurs2.person.navn.etternavn")).isEqualTo("etternavn");
-
-    }
 }
