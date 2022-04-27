@@ -6,7 +6,7 @@
 :toc-title: Innhold
 :icons: font
 
-*Mye er utdatert. Under arbeid. Vil bli oppdatert iløpet av mars.*
+*Mye er utdatert. Under arbeid. Vil bli oppdatert iløpet av april.*
 
 NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
 
