@@ -1,0 +1,113 @@
+{
+               "additionalInformation": {
+                              "graduationYear": 0,
+                              "hasOvertime": true,
+                              "relatedPersonId": "910000"
+               },
+               "birthDate": "1984-08-18T00:00:00.000",
+               "companyId": "HR",
+               "dateFrom": "2022-04-22T00:00:00",
+               "dateTo": "2099-12-31T00:00:00.000",
+               "languageCode": "NO",
+               "name": "Morten API Test",
+               "nameInformation": {
+                              "aliasName": "K910000",
+                              "firstName": "Morten API",
+                              "surname": "Test"
+               },
+               "paymentInformation": {
+                              "bankAccount": "00000000019",
+                              "payMethod": "AM",
+                              "supplierGroupId": "01",
+                              "supplierId": "910000",
+               },
+               "personalInformation": {
+                              "gender": "M",
+                              "nationalIdentityNo": "00000000019"
+               },
+               "personId": "910000",
+               "personnelType": "F",
+               "status": "N",
+               "contactPoints": [{
+                              "address": {
+                                             "countryCode": "NO",
+                                             "place": "SPIKKESTAD",
+                                             "postcode": "3430",
+                                             "streetAddress": "Aspelund 8"
+                              },
+                              "contactPointType": "1"
+               }],
+               "relatedValues": [{
+                                             "status": "N",
+                                             "relationId": "M0",
+                                             "relatedValue": "5224300",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "C1",
+                                             "relatedValue": "522400",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "20",
+                                             "relatedValue": "000000",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "C8",
+                                             "relatedValue": "TLON",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "AL",
+                                             "relatedValue": "060501110000",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "ZA",
+                                             "relatedValue": "060501180000",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "B1",
+                                             "relatedValue": "000000",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "MQ",
+                                             "relatedValue": "BB",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              },
+                              {
+                                             "status": "N",
+                                             "relationId": "Y7",
+                                             "relatedValue": "SPK_A",
+                                             "percentage": 100,
+                                             "dateFrom": "2022-04-22T00:00:00",
+                                             "dateTo": "2099-12-31T00:00:00.000"
+                              }
+               ]
+}

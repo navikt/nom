@@ -14,7 +14,7 @@ spec:
     - name: DVH_BASE_URL
       value: https://tdv-p.adeo.no
     - name: ACCEPTED_SUBJECTS
-      value: 476401e7-5eec-4fd8-8390-a89c6f14cd08, 624438e9-8605-4225-81db-4b47dc629766
+      value: b0feafdc-2283-45e3-8a16-cb00bcced3e0, 624438e9-8605-4225-81db-4b47dc629766
     - name: STS_BASEURL
       value: https://security-token-service.nais.adeo.no
     - name: PDL_BASEURL

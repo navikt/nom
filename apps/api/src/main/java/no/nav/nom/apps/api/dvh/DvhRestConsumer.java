@@ -10,13 +10,13 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v1.DvhOrganisasjonsenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.LegacyRessursLoader;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -59,19 +59,25 @@ public class DvhRestConsumer {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final ApplicationEventPublisher appEventPublisher;
     private final RessursHendelseService ressursHendelseService;
-    private final OrgenhetHendelseService orgenhetHendelseService;
     private final LeaderElection leaderElection;
     private final Environment environment;
+    private final LegacyRessursLoader legacyRessursLoader;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void loadFromDvh() {
         val qaEnv = Arrays.stream(environment.getActiveProfiles()).toList().contains("qa");
             try {
+                log.info("Laster ressurser fra dvh");
                 loadRessurserFromDvh();
                 if(!qaEnv) {
+                    log.info("Laster orgenheter fra dvh");
                     loadOrgenhetFromDvh();
+                    log.info("Laster koblinger fra dvh");
                     loadKoblingerFromDvh();
                 }
+                log.info("Laster legacy ressurser fra dvh");
+                legacyRessursLoader.load();
+                log.info("Laster tlf fra dvh");
                 loadTlfFromDvh();
             } catch (Exception e) {
                 boolean firstLoad = !initialLoadComplete.get();
@@ -145,11 +151,10 @@ public class DvhRestConsumer {
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
-
-        val isSecretNumberNode = jsonNode.get("issecretnumber");
+        val isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
         val userRef1 = jsonNode.get("userreference1");
 
-        return isSecretNumberNode.isNull()
+        return isSecretNumber
                 && (userRef1.asText().startsWith("PT-")
                 || userRef1.asText().startsWith("PK-")
         );
@@ -184,12 +189,12 @@ public class DvhRestConsumer {
                     }
                 });
 
-        if (leaderElection.isLeader()) {
+        /*if (leaderElection.isLeader()) {
             orgenhetHendelseService.handterOrgenhetFraDvh(orgenheter.values().stream()
                     .flatMap(map -> map.values().stream())
                     .collect(Collectors.toList())
             );
-        }
+        }*/
 
         dvhRepository.saveOrganisasjonsenheter(orgenheter);
         dvhService.saveLedere(ledere);
@@ -206,7 +211,7 @@ public class DvhRestConsumer {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

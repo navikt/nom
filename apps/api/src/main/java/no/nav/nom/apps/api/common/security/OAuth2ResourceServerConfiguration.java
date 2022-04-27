@@ -2,10 +2,12 @@ package no.nav.nom.apps.api.common.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class OAuth2ResourceServerConfiguration extends WebSecurityConfigurerAdap
         Begrunnelse for å bruke dette i stede for å ta http.mvcMatchers("/internal/**").permitAll()
         er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
          */
-        web.ignoring().mvcMatchers("/internal/**", "/playground/**", "/voyager/**");
+        web.ignoring().mvcMatchers("/internal/**", "/playground/**", "/voyager/**", "/vendor/**");
     }
 
     @Override
@@ -33,9 +35,11 @@ public class OAuth2ResourceServerConfiguration extends WebSecurityConfigurerAdap
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .anyRequest()
-                .permitAll()
+                .antMatchers("/graphql").permitAll()
+                .anyRequest().fullyAuthenticated()
                 .and()
-                .addFilterBefore(jwtFilter, RequestHeaderAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, RequestHeaderAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }
 }

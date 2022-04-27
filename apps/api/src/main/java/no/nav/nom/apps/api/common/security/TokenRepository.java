@@ -39,9 +39,9 @@ public class TokenRepository {
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
     @SneakyThrows
-    public String getAadToken(String scope) {
+    public SignedJWT getAadToken(String scope) {
         val signedJwt = cachedAadTokensByScope.get(scope);
-        return (isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope)).serialize();
+        return isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope);
     }
 
     @SneakyThrows

@@ -8,6 +8,7 @@ export function createRessursQuery(id: string | null): string {
             personIdent
             epost
             ressurstype
+            sluttdato
             person {
               navn {
                 fornavn

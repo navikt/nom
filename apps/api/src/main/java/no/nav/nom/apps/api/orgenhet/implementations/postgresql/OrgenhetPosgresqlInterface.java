@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse.DataType;
-import no.nav.nom.apps.api.repository.hendelse.HendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +20,10 @@ import java.util.stream.Collectors;
 import static no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet.AGRESSO_ID_FIELD;
 import static no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet.NAVN_FIELD;
 
-@Service
+//@Service
 @RequiredArgsConstructor
-public class OrgenhetPosgresqlInterface implements IOrgenhetService {
-
+public class OrgenhetPosgresqlInterface {//implements IOrgenhetService {
+    /*
     private final HendelseRepository hendelseRepository;
     private final ObjectMapper objectMapper;
 
@@ -85,7 +82,7 @@ public class OrgenhetPosgresqlInterface implements IOrgenhetService {
                 .opprettetTidspunkt(LocalDateTime.now())
                 .build();
 
-        hendelseRepository.save(hendelse);
+        //hendelseRepository.save(hendelse);
     }
 
     public void createEndreHendelser(Map<UUID, Map<String, String>> endringerByFid) {
@@ -126,7 +123,7 @@ public class OrgenhetPosgresqlInterface implements IOrgenhetService {
                 .opprettetTidspunkt(LocalDateTime.now())
                 .build();
 
-        hendelseRepository.save(hendelse);
+        //hendelseRepository.save(hendelse);
     }
 
     public void createOpprettHendelser(Map<String, String> navnByAgressoId) {
@@ -184,4 +181,5 @@ public class OrgenhetPosgresqlInterface implements IOrgenhetService {
     public List<IOrgenhet> matchByNavn(String navn) {
         return null;
     }
+    */
 }

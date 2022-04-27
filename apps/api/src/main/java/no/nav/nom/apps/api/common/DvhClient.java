@@ -17,7 +17,7 @@ public class DvhClient {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()));
+        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }

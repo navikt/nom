@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ConverterUtils {
 
-    public static Ordre convert(no.nav.nom.apps.api.repository.ordre.Ordre ordre){
+    public static Ordre convert(no.nav.nom.apps.api.ordre.Ordre ordre){
         return null;
     }
 

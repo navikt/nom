@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class DvhRepository {
     private List<DvhTelefon> navidentTelefonNrMap;
     private Map<String, RessursI> ressursByNavIdent;
     private List<DvhOrgenhetV2> orgenhetV2;
+    private final Map<String, LocalDate> sluttdatoByPersonIdent = new HashMap<>();
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndNiva(String agressoId, String orgNiv) {
         return Optional.ofNullable(enheterByNivaByAgressoId.containsKey(orgNiv) ? enheterByNivaByAgressoId.get(orgNiv).get(agressoId) : null);
@@ -106,6 +108,7 @@ public class DvhRepository {
         enheterByNivaByAgressoId.clear();
         organiseringer.clear();
         koblinger.clear();
+        sluttdatoByPersonIdent.clear();
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
@@ -119,15 +122,12 @@ public class DvhRepository {
 
     public void saveOrgenhetV2(List<DvhOrgenhetV2> orgenheter){
         DvhOrgenhetV2 fakeNAV = new DvhOrgenhetV2("NAV", "ORGNIV0", "NAV", null, "200012", "209912", "N", null);
-        organiseringer = orgenheter.stream()
-                .map(o -> fakeOverenhet(o, fakeNAV))
-                .toList();
 
         val removedDuplicates = orgenheter.stream()
-                .collect(Collectors.groupingBy(e -> e.getAgressoId()+e.getOrgNiv()+e.getNavn(), Collectors.toList()))
+                .collect(Collectors.groupingBy(e -> e.getAgressoId() + e.getOrgNiv() + e.getNavn(), Collectors.toList()))
                 .values().stream()
                 .map(l -> l.size() == 1 ? l.get(0) : l.stream().max(Comparator.comparing(DvhOrgenhetV2::getGyldigFom)).stream().findFirst().get())
-                .collect(Collectors.toList());
+                .toList();
 
         organiseringer = removedDuplicates.stream()
                 .map(o -> fakeOverenhet(o, fakeNAV))

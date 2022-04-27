@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs.implementations.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 
 import java.util.List;
@@ -13,21 +13,21 @@ import static java.util.Comparator.comparing;
 
 public class EventBasedRessurs implements RessursI {
 
-    public final static String NAVIDENT_FIELD = "navIdent";
-    public final static String PERSONIDENT_FIELD = "personIdent";
+    public final static String NAVIDENT_FIELD = "navident";
+    public final static String PERSONIDENT_FIELD = "personident";
 
-    private final List<Hendelse> hendelser;
+    private final List<IHendelse> hendelser;
 
-    public EventBasedRessurs(List<Hendelse> hendelser) {
+    public EventBasedRessurs(List<IHendelse> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(Hendelse::getOpprettetTidspunkt)).toList();
+                .sorted(comparing(h -> h.getHendelseMetadata().getOpprettetTidspunkt())).toList();
     }
 
     @Override
     public UUID getId() {
         return hendelser.stream()
                 .findFirst()
-                .map(Hendelse::getFunksjonellId)
+                .map(IHendelse::getFid)
                 .orElseThrow();
     }
 
@@ -43,7 +43,7 @@ public class EventBasedRessurs implements RessursI {
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
-                .map(e -> e.getData().get(property))
+                .map(e -> e.getHendelseData().get(property))
                 .filter(Objects::nonNull)
                 .map(JsonNode::asText)
                 .reduce((a, b) -> b);

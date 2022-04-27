@@ -10,6 +10,7 @@ export interface GqlRessurs {
   epost: string;
   telefon: GqlTelefon[];
   ressurstype: string[];
+  sluttdato: string;
 }
 
 export interface GqlRessursKobling {

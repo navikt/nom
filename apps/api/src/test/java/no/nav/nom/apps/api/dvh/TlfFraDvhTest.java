@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.dvh;
 
 import lombok.val;
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,15 @@ public class TlfFraDvhTest extends DvhTestBase {
 
         var tlfList1 = this.dvhRepository.getTelefonNrListByNavIdent("A123123");
         assertThat(tlfList1.get(0).getNummer()).isEqualTo("4711220033");
+
+        var tlfList2 = this.dvhRepository.getTelefonNrListByNavIdent("A503999");
+        Assertions.assertTrue(tlfList2.isEmpty());
+
+        var tlfList3 = this.dvhRepository.getTelefonNrListByNavIdent("J509999");
+        Assertions.assertTrue(tlfList2.isEmpty());
+
+        var tlfList4 = this.dvhRepository.getTelefonNrListByNavIdent("J501111");
+        Assertions.assertTrue(tlfList2.isEmpty());
     }
 
 
@@ -157,7 +167,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2021-05-28T00:00:00.000Z",
                   "lastetdato": "2022-01-18T15:58:23.000Z",
                   "res_mobil_tlf_kontroll": "112 20 033"
@@ -170,7 +180,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "11330022"
@@ -183,7 +193,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-20T00:00:00.000Z",
                   "lastetdato": "2020-10-20T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "21 00 21 02"
@@ -196,7 +206,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total B (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
-                  "issecretnumber": null,
+                  "issecretnumber": "false",
                   "validfromdate": "2020-10-21T00:00:00.000Z",
                   "lastetdato": "2020-10-21T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "223 30 011"
@@ -209,7 +219,45 @@ public class TlfFraDvhTest extends DvhTestBase {
                   "typename": "Bedrift Total A (50 GB)",
                   "typeaccesstype": "MOBILE",
                   "status": "ACTIVE",
+                  "issecretnumber": "false",
+                  "validfromdate": "2020-10-26T00:00:00.000Z",
+                  "lastetdato": "2020-10-26T00:00:00.000Z",
+                  "res_mobil_tlf_kontroll": "3300 2200"
+                },
+                {
+                  "msisdn": "4733002999",
+                  "navident": "A503999",
+                  "userreference1": "PT-A503020",
+                  "typeid": "53175",
+                  "typename": "Bedrift Total A (50 GB)",
+                  "typeaccesstype": "MOBILE",
+                  "status": "ACTIVE",
+                  "issecretnumber": "true",
+                  "validfromdate": "2020-10-26T00:00:00.000Z",
+                  "lastetdato": "2020-10-26T00:00:00.000Z",
+                  "res_mobil_tlf_kontroll": "3300 2200"
+                },
+                {
+                  "msisdn": "4733008888",
+                  "navident": "J509999",
+                  "userreference1": "PT-A503020",
+                  "typeid": "53175",
+                  "typename": "Bedrift Total A (50 GB)",
+                  "typeaccesstype": "MOBILE",
+                  "status": "ACTIVE",
                   "issecretnumber": null,
+                  "validfromdate": "2020-10-26T00:00:00.000Z",
+                  "lastetdato": "2020-10-26T00:00:00.000Z",
+                  "res_mobil_tlf_kontroll": "3300 2200"
+                },
+                {
+                  "msisdn": "4733001111",
+                  "navident": "J501111",
+                  "userreference1": "PT-A503020",
+                  "typeid": "53175",
+                  "typename": "Bedrift Total A (50 GB)",
+                  "typeaccesstype": "MOBILE",
+                  "status": "ACTIVE",
                   "validfromdate": "2020-10-26T00:00:00.000Z",
                   "lastetdato": "2020-10-26T00:00:00.000Z",
                   "res_mobil_tlf_kontroll": "3300 2200"

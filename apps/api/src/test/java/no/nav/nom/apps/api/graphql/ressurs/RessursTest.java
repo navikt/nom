@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.repository.hendelse.Hendelse;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
@@ -37,21 +39,21 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        Hendelse hendelse = createRessursHendelse("");
-        saveHendelser(hendelse);
+        RessursI ressurs = createRessursHendelse("");
 
         val response = postForResource("ressurs/scenario1.graphql", false);
 
         val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
-        assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
-        assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Leser inn med graphql navIdent og personIdent parameter bulk")
     void scenario112() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
 
         val response = postForResource("ressurs/scenario12.graphql", false);
 
@@ -80,21 +82,23 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        Hendelse hendelse = createRessursHendelse("");
-        saveHendelser(hendelse);
+        RessursI ressurs = createRessursHendelse("");
 
         val response = postForResource("ressurs/scenario2.graphql", false);
 
         val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
-        assertEquals(getNavIdent(hendelse), outputRessurs.getNavIdent());
-        assertEquals(getPersonIdent(hendelse), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Leser inn med graphql uten parameter")
     void scenario13() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("3"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+        createRessursHendelse("3");
+
 
         val response = postForResource("ressurs/scenario3.graphql", false);
 
@@ -106,7 +110,7 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        saveHendelser(createRessursHendelse("2"));
+        createRessursHendelse("2");
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario42.graphql", false);
@@ -120,12 +124,40 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        saveHendelser(createRessursHendelse("2"));
+        createRessursHendelse("2");
 
         val response = postForResource("ressurs/scenario42.graphql", false);
 
         val ressurs = response.get("$.data.ressurs", JsonNode.class);
         assertTrue(ressurs.get("koblinger").isEmpty());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Kan hente sluttdato når satt")
+    void scenario31() {
+        RessursI ressurs = createRessursHendelse("");
+        val sluttdato = LocalDate.now();
+
+        dvhLegacyRessursUtils.addToResponse(DvhLegacyRessursUtils.LegacyResponseObject.builder()
+                .personIdent(ressurs.getPersonIdent())
+                .navIdent(ressurs.getNavIdent())
+                .agressoRessursType("F")
+                .remedyRessursType("NAV STATLIG")
+                .remedySluttdato(LocalDate.parse("2099-12-31"))
+                .agressoSluttdato(sluttdato)
+                .remedyPermisjon("NEI")
+                .forventetSluttdato(sluttdato)
+                .build()
+        );
+        dvhLegacyRessursUtils.mockResponse();
+
+        val response = postForResource("ressurs/scenario1.graphql", false);
+
+        val outputRessurs = response.get("$.data.ressurs", Ressurs.class);
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(sluttdato, outputRessurs.getSluttdato());
     }
 
     @Nested
@@ -136,7 +168,9 @@ class RessursTest extends RessursTestBase {
         @SneakyThrows
         @DisplayName("Kan hente fulle navn fra PDL")
         void scenario31() {
-            saveHendelser(createRessursHendelse("3"), createRessursHendelse("4"));
+            createRessursHendelse("3");
+            createRessursHendelse("4");
+
             pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
             val response = postForResource("ressurs/scenario5.graphql", false);
@@ -152,7 +186,9 @@ class RessursTest extends RessursTestBase {
         @SneakyThrows
         @DisplayName("Kan hente navn uten mellomnavn fra PDL")
         void scenario32() {
-            saveHendelser(createRessursHendelse("3"), createRessursHendelse("4"));
+            createRessursHendelse("3");
+            createRessursHendelse("4");
+
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
             val response = postForResource("ressurs/scenario5.graphql", false);
@@ -168,7 +204,9 @@ class RessursTest extends RessursTestBase {
         @SneakyThrows
         @DisplayName("Hente navn hvor PDL er utilgjengelig")
         void scenario33() {
-            saveHendelser(createRessursHendelse("3"), createRessursHendelse("4"));
+            createRessursHendelse("3");
+            createRessursHendelse("4");
+
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
             stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
@@ -186,7 +224,9 @@ class RessursTest extends RessursTestBase {
         @SneakyThrows
         @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
         void scenario34() {
-            saveHendelser(createRessursHendelse("3"), createRessursHendelse("4"));
+            createRessursHendelse("3");
+            createRessursHendelse("4");
+
             pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
             pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
 
@@ -205,7 +245,10 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kan hente email og visningsnavn fra AD")
     void scenario745() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("3"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+        createRessursHendelse("3");
+
 
         val response = postForResource("ressurs/scenario8.graphql", true);
 
@@ -227,7 +270,7 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
-        saveHendelser(createRessursHendelse(""));
+        createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario6.graphql", false);
@@ -241,7 +284,9 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Hente leder for ressurs")
     void scenario36() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario7.graphql", false);
@@ -255,7 +300,10 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Hente leder for ressurs som er leder av sin enhet")
     void scenario37() {
-        saveHendelser(createRessursHendelse("1"), createRessursHendelse("2"), createRessursHendelse("4"));
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+        createRessursHendelse("4");
+
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario71.graphql", false);

@@ -19,7 +19,6 @@ type Organisering {
 }
 
 type Ressurs {
-    nomId: String!
     navIdent: String!
     personIdent: String!
     koblinger: [RessursKobling!]!
@@ -32,6 +31,7 @@ type Ressurs {
     etternavn: String
     telefon: [Telefon!]!
     ressurstype: [Ressurstype!]!
+    sluttdato: Date @deprecated(reason: "Dårlig datakvalitet, kontakt #nom for mer informasjon før bruk")
 }
 
 type Person {

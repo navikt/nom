@@ -15,7 +15,6 @@ import no.nav.nom.apps.api.graphql.request.dto.OrdreMetadata;
 import no.nav.nom.apps.api.graphql.request.dto.OrdreLinjeResponse;
 import no.nav.nom.apps.api.graphql.request.dto.OpprettEnhetRequest;
 import no.nav.nom.apps.api.graphql.request.dto.OpprettRessursRequest;
-import no.nav.nom.apps.api.repository.ordre.OrdreRepository;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
 
-    private final OrdreRepository ordreRepository;
+    //private final OrdreRepository ordreRepository;
     private final SecurityUtil securityUtil;
     private final ObjectMapper om;
     private final AtomicInteger idCounter = new AtomicInteger(500000);
@@ -94,7 +93,7 @@ public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
     }
 
     private Ordre getOrdre(OrdreMetadata metadata) {
-        if (metadata.getOrdreId() != null) {
+        /*if (metadata.getOrdreId() != null) {
             return ordreRepository.findById(metadata.getOrdreId()).map(
                     o -> Ordre.builder()
                             .ordreId(o.getOrdreId())
@@ -106,7 +105,7 @@ public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
                             .endretTidspunkt(LocalDateTime.now())
                             .build()
             ).orElse(null);
-        }
+        }*/
 
         return null;
     }

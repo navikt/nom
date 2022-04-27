@@ -29,7 +29,7 @@ public class PdlConsumer {
         val headers = new HttpHeaders();
         val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token);
+        headers.setBearerAuth(token.serialize());
         headers.add("Tema", appProperties.getPdl().getTema());
 
         val body = new GraphQLRequest();
