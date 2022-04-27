@@ -1,32 +1,35 @@
-import { css } from "@emotion/css"
-import { Heading } from "@navikt/ds-react"
+import { css } from "@emotion/css";
+import { Heading } from "@navikt/ds-react";
+import ContentWrapper from "./ContentWrapper";
+import { nomLogo } from "./Images";
 
 const bannerStyles = css({
-    background: '#CCF1D6',
-    width: '100%',
-    height: '230px',
-    paddingTop: '60px',
-    paddingLeft: '110px'
-})
+  background: "#002252",
+  width: "100%",
+  height: "230px",
+  color: "#FFFFFF",
+  display: "flex",
+  marginRight: '2.5rem'
+});
 
-const subHeaderStyles = css({
-    font: 'Source Sans Pro',
-    fontSize: '18px',
-    fontStyle: 'normal',
-    fontWeight: '400',
-    lineHeight: '22px',
-    letterSpacing: '0px',
+const headerStyles = css({
+    display: 'flex', 
+    alignItems: 'flex-end',
+    marginLeft: '10px',
 })
 
 
 const Banner = () => {
-
-    return (
-        <div className={bannerStyles}>
-            <Heading size="xlarge">NAV Organisasjonsmaster</Heading>
-            <p className={subHeaderStyles}>Kort tekst om hva Org.master er</p>
+  return (
+    <div className={bannerStyles}>
+      <ContentWrapper>
+        <div className={css({ display: 'flex', marginTop: '25px'})}> 
+            <img src={nomLogo} alt="nom logo"/>
+            <Heading size="xlarge" className={headerStyles}>NAV Organisasjonsmaster</Heading>
         </div>
-    )
-}
+      </ContentWrapper>
+    </div>
+  );
+};
 
-export default Banner
+export default Banner;
