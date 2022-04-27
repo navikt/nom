@@ -46,6 +46,7 @@ export type Mutation = {
   godkjennOrdre: ResultCode;
   opprettEnhet: OrdreLinjeResponse;
   opprettRessurs?: Maybe<OpprettRessursResponse>;
+  opprettRessurs2?: Maybe<OpprettRessursResponse2>;
   /** OrdreLinje */
   ordreRessurs: OrdreLinjeResponse;
 };
@@ -67,6 +68,11 @@ export type MutationOpprettRessursArgs = {
 };
 
 
+export type MutationOpprettRessurs2Args = {
+  request?: InputMaybe<OpprettRessursRequest2>;
+};
+
+
 export type MutationOrdreRessursArgs = {
   request: OpprettRessursRequest;
 };
@@ -85,9 +91,14 @@ export type OpprettEnhetRequest = {
 };
 
 export type OpprettRessursRequest = {
-  metadata: OrdreLinjeRequestMetadata;
   personIdent: Scalars['String'];
   visningsnavn?: InputMaybe<Scalars['String']>;
+};
+
+export type OpprettRessursRequest2 = {
+  etternavn: Scalars['String'];
+  fornavn: Scalars['String'];
+  personident: Scalars['String'];
 };
 
 export type OpprettRessursResponse = {
@@ -95,6 +106,15 @@ export type OpprettRessursResponse = {
   navIdent: Scalars['String'];
   person?: Maybe<Person>;
   personIdent: Scalars['String'];
+};
+
+export type OpprettRessursResponse2 = {
+  __typename?: 'OpprettRessursResponse2';
+  etternavn: Scalars['String'];
+  fornavn: Scalars['String'];
+  navident: Scalars['String'];
+  person?: Maybe<Person>;
+  personident: Scalars['String'];
 };
 
 export type Ordre = {
@@ -343,6 +363,13 @@ export enum TelefonType {
   PrivatTelefon = 'PRIVAT_TELEFON'
 }
 
+export type OpprettRessurs2MutationVariables = Exact<{
+  request?: InputMaybe<OpprettRessursRequest2>;
+}>;
+
+
+export type OpprettRessurs2Mutation = { __typename?: 'Mutation', opprettRessurs2?: { __typename?: 'OpprettRessursResponse2', navident: string, personident: string, person?: { __typename?: 'Person', navn: { __typename?: 'Navn', fornavn: string, mellomnavn?: string | null, etternavn: string } } | null } | null };
+
 export type HentOrganiasjonsEnheterMedHierarkiQueryVariables = Exact<{
   aid?: InputMaybe<Scalars['String']>;
   oniv?: InputMaybe<Scalars['String']>;
@@ -469,7 +496,9 @@ export type ResolversTypes = {
   Navn: ResolverTypeWrapper<Navn>;
   OpprettEnhetRequest: OpprettEnhetRequest;
   OpprettRessursRequest: OpprettRessursRequest;
+  OpprettRessursRequest2: OpprettRessursRequest2;
   OpprettRessursResponse: ResolverTypeWrapper<OpprettRessursResponse>;
+  OpprettRessursResponse2: ResolverTypeWrapper<OpprettRessursResponse2>;
   Ordre: ResolverTypeWrapper<Ordre>;
   OrdreLinje: ResolverTypeWrapper<OrdreLinje>;
   OrdreLinjeMetadata: ResolverTypeWrapper<OrdreLinjeMetadata>;
@@ -515,7 +544,9 @@ export type ResolversParentTypes = {
   Navn: Navn;
   OpprettEnhetRequest: OpprettEnhetRequest;
   OpprettRessursRequest: OpprettRessursRequest;
+  OpprettRessursRequest2: OpprettRessursRequest2;
   OpprettRessursResponse: OpprettRessursResponse;
+  OpprettRessursResponse2: OpprettRessursResponse2;
   Ordre: Ordre;
   OrdreLinje: OrdreLinje;
   OrdreLinjeMetadata: OrdreLinjeMetadata;
@@ -572,6 +603,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   godkjennOrdre?: Resolver<ResolversTypes['ResultCode'], ParentType, ContextType, RequireFields<MutationGodkjennOrdreArgs, 'ordreId'>>;
   opprettEnhet?: Resolver<ResolversTypes['OrdreLinjeResponse'], ParentType, ContextType, RequireFields<MutationOpprettEnhetArgs, 'request'>>;
   opprettRessurs?: Resolver<Maybe<ResolversTypes['OpprettRessursResponse']>, ParentType, ContextType, RequireFields<MutationOpprettRessursArgs, 'personIdent'>>;
+  opprettRessurs2?: Resolver<Maybe<ResolversTypes['OpprettRessursResponse2']>, ParentType, ContextType, Partial<MutationOpprettRessurs2Args>>;
   ordreRessurs?: Resolver<ResolversTypes['OrdreLinjeResponse'], ParentType, ContextType, RequireFields<MutationOrdreRessursArgs, 'request'>>;
 };
 
@@ -586,6 +618,15 @@ export type OpprettRessursResponseResolvers<ContextType = any, ParentType extend
   navIdent?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   person?: Resolver<Maybe<ResolversTypes['Person']>, ParentType, ContextType>;
   personIdent?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OpprettRessursResponse2Resolvers<ContextType = any, ParentType extends ResolversParentTypes['OpprettRessursResponse2'] = ResolversParentTypes['OpprettRessursResponse2']> = {
+  etternavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fornavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  navident?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  person?: Resolver<Maybe<ResolversTypes['Person']>, ParentType, ContextType>;
+  personident?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -737,6 +778,7 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Navn?: NavnResolvers<ContextType>;
   OpprettRessursResponse?: OpprettRessursResponseResolvers<ContextType>;
+  OpprettRessursResponse2?: OpprettRessursResponse2Resolvers<ContextType>;
   Ordre?: OrdreResolvers<ContextType>;
   OrdreLinje?: OrdreLinjeResolvers<ContextType>;
   OrdreLinjeMetadata?: OrdreLinjeMetadataResolvers<ContextType>;
@@ -759,6 +801,47 @@ export type Resolvers<ContextType = any> = {
 
 
 
+export const OpprettRessurs2Document = gql`
+    mutation opprettRessurs2($request: OpprettRessursRequest2) {
+  opprettRessurs2(request: $request) {
+    navident
+    personident
+    person {
+      navn {
+        fornavn
+        mellomnavn
+        etternavn
+      }
+    }
+  }
+}
+    `;
+export type OpprettRessurs2MutationFn = Apollo.MutationFunction<OpprettRessurs2Mutation, OpprettRessurs2MutationVariables>;
+
+/**
+ * __useOpprettRessurs2Mutation__
+ *
+ * To run a mutation, you first call `useOpprettRessurs2Mutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useOpprettRessurs2Mutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [opprettRessurs2Mutation, { data, loading, error }] = useOpprettRessurs2Mutation({
+ *   variables: {
+ *      request: // value for 'request'
+ *   },
+ * });
+ */
+export function useOpprettRessurs2Mutation(baseOptions?: Apollo.MutationHookOptions<OpprettRessurs2Mutation, OpprettRessurs2MutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<OpprettRessurs2Mutation, OpprettRessurs2MutationVariables>(OpprettRessurs2Document, options);
+      }
+export type OpprettRessurs2MutationHookResult = ReturnType<typeof useOpprettRessurs2Mutation>;
+export type OpprettRessurs2MutationResult = Apollo.MutationResult<OpprettRessurs2Mutation>;
+export type OpprettRessurs2MutationOptions = Apollo.BaseMutationOptions<OpprettRessurs2Mutation, OpprettRessurs2MutationVariables>;
 export const HentOrganiasjonsEnheterMedHierarkiDocument = gql`
     query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
   organisasjonsenhet(where: {agressoId: $aid, orgNiv: $oniv}) {

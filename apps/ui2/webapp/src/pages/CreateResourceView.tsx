@@ -21,7 +21,23 @@ const CreateResourceView = () => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate()
   const [searchStr, setSearchStr] = useState<string | undefined>()
+  const [requestBody, setRequestBody] = useState<Gq.OpprettRessursRequest2 | undefined>()
+
   const query = Gq.useHentPersonQuery({ variables: { personIdent: searchStr || ''}, skip: !searchStr})
+  const [createResource, createResourceStatus] = Gq.useOpprettRessurs2Mutation()
+  
+
+  //Ikke ferdig - Mangler feilhåndtering og onCompleted funksjon
+  const handleCreateResource = (values: Gq.OpprettRessursRequest2) => {
+      console.log(values, "Values")
+      if (!searchStr) return 
+      setRequestBody({personident: searchStr, fornavn: values.fornavn, etternavn: values.etternavn})
+      createResource({ 
+          variables: { request: {personident: searchStr, fornavn: values.fornavn, etternavn: values.etternavn}}, 
+          onCompleted: (data) => console.log('Skal redirectes til kvitteringsside...', data),
+          onError: () => console.log('ERROR')
+      })
+  }
   
   useEffect(() => {
     if (query.data?.person?.navIdent) 
@@ -54,13 +70,16 @@ const CreateResourceView = () => {
           {!query.loading && !query.data && query.error && (<p>{query.error.message}</p>)}
 
           {/* Er ansatt i NAV - redirect til ressursvisning*/}
-          {/* {!query.loading && query.data && query.data.person?.navIdent && history.pushState({alreadyExists: true}, '', '/ressurs/' + query.data.person?.navIdent)} */}
+          {!query.loading && query.data && query.data.person?.navIdent && history.pushState({alreadyExists: true}, '', '/ressurs/' + query.data.person?.navIdent)}
 
           {/* Finnes ikke i NAV fra før */}
           {!query.loading && query.data && !query.data.person?.navIdent && query.data.person?.person && (
             <>
               <PersonDetailCard cardTitle="Opplysninger fra folkeregisteret" person={query.data.person}/>
-              <ResourceFormCard cardTitle="NOM opplysninger/Andre opplysninger/Opplysninger til NOM "/>
+              <ResourceFormCard 
+                cardTitle="NOM opplysninger/Andre opplysninger/Opplysninger til NOM "
+                handleCreate={(values: any) => handleCreateResource(values)}
+              />
 
             </>
           )}

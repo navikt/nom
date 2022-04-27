@@ -1,13 +1,12 @@
 import { css } from "@emotion/css";
 import { Alert, Button, Radio, RadioGroup, TextField } from "@navikt/ds-react";
 import { useForm } from "react-hook-form";
+import { OpprettRessursRequest2 } from "../../api/generated/graphql_generated";
 import Card from "../Card";
 import CustomRadio from "../CustomRadio";
 import { radioStyles } from "../Styles";
 
-type ResourceFormProps = {
-  cardTitle: string
-};
+
 
 const rowMarginTop = '20px'
 
@@ -18,14 +17,17 @@ const rowStyles = css({
     justifyContent: 'space-between',
 })
 
-
+type ResourceFormProps = {
+  cardTitle: string
+  handleCreate: (values: any) => void
+}
 
 const ResourceFormCard = (props: ResourceFormProps) => {
-  const { cardTitle } = props
+  const { cardTitle, handleCreate } = props
   const { register, handleSubmit } = useForm()
 
   return (
-    <form onSubmit={() => console.log("SUBMIT")}>
+    <form onSubmit={handleSubmit((form: any) => handleCreate(form))}>
       <Card title={cardTitle}>
           <div className={css({ marginTop: rowMarginTop})}>
               <Alert variant="info">
@@ -65,7 +67,7 @@ const ResourceFormCard = (props: ResourceFormProps) => {
       </Card>
 
       <div className={css({ display: 'flex', marginTop: '15px'})}>
-        <Button type="submit" variant="primary" className={css({ marginRight: '10px'})} disabled>Opprett ressurs</Button>
+        <Button type="submit" variant="primary" className={css({ marginRight: '10px'})}>Opprett ressurs</Button>
         <Button type="button" variant="secondary" disabled>Avbryt</Button>
       </div>
     </form>
