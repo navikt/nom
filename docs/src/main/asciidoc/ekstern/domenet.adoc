@@ -18,19 +18,19 @@ Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke organisasjonsenheter se
 *Eksempler:* +
 _NAV Halden Stab_ er en organisasjonsenhet og har overliggende organisasjonsenhet _NAV Halden_. Denne har flere underliggende organisasjonsenheter.
 
-[%header,cols="25%,5%,50%,20%"]
+[%header,cols="25%,5%,40%,20%,10%"]
 |===
-|Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel
-|id             |Ja         |Generert UUID som tilegnes organisasjonsenhet                       |123e4567-e89b-12d3-a456-426614174000
-|navn           |Ja         |Navnet på en organisasjonsenhet                                     |NAV Halden Stab
-|gyldigFom      |Ja         |Virkningsdato for når organisasjonsenheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22
-|gyldigTom      |Nei        |Siste dag organisasjonsenheten var virksom.                         |2020-02-14, NULL hvis ikke satt.
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2
-|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360
-|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Se Organiseringer-objektet
-|leder          |Ja         |Ressursen som er leder for enheten.                                       |Se Ressurs-objektet
-|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor
-|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. |
+|Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
+|id             |Ja         |Generert UUID som tilegnes organisasjonsenhet                       |123e4567-e89b-12d3-a456-426614174000          |Mastret
+|navn           |Ja         |Navnet på en organisasjonsenhet                                     |NAV Halden Stab          | 
+|gyldigFom      |Ja         |Virkningsdato for når organisasjonsenheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | 
+|gyldigTom      |Nei        |Siste dag organisasjonsenheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | 
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2          | 
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | 
+|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Se Organiseringer-objektet         | 
+|leder          |Ja         |Ressursen som er leder for enheten.                                       |Se Ressurs-objektet         | 
+|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         | 
+|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. | 
 |===
 
 
