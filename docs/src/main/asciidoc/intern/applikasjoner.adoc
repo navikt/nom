@@ -30,7 +30,7 @@ icon:exclamation[role=yellow] Spring boot (log4shell) for å ta vekk 'låste' ve
 Mangler rundt riktig bruk av nais plattform. Veien ut til GCP, secret management, zero trust
 
 ****
-icon:check[role=green] OK
+icon:exclamation[role=yellow] Kjører i FSS
 ****
 
 === Lokalutvikling
@@ -84,7 +84,7 @@ back-end::
 * Kafka
 front-end::
 * node 16   (Gallium)
-* es5 typescript
+* typescript 4.5
 * React 17
 * nav-frontend (Ikke nye 'Aksel')
 
@@ -149,7 +149,7 @@ vite                         2.8.6    2.9.6    2.9.6
 
   mvn versions:display-property-updates
 
-per 17.03.2022
+per 27.04.2022
 ----
 The following version properties are referencing the newest available version:
   ${com.google.code.findbugs.jsr305} ............................ 3.0.2
