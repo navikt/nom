@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.contract;
 
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface IRessursService {
     Map<String, RessursI> findByPersonIdentBulk(List<String> personIdenter);
     Map<String, RessursI> findByNavIdentBulk(List<String> navIdenter);
     List<RessursI> getAll();
-    RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav);
+    RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
     Ressurs convertToGraphQlResponse(RessursI ressurs);
     List<RessursI> matchByNavident(String navident);
 }

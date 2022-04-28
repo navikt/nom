@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.hendelse.contract.HendelseDataType;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.postgresql.NavIdentService;
@@ -83,14 +84,14 @@ public class EventBasedRessursService {
     }
 
     @Transactional
-    public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav) {
+    public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
         return findByPersonIdent(personIdent).orElseGet(() -> {
             var data = objectMapper.createObjectNode();
 
             data.put(EventBasedRessurs.NAVIDENT_FIELD, navIdent != null ? navIdent : navIdentService.generateNavIdent(navIdentForbokstav));
             data.put(EventBasedRessurs.PERSONIDENT_FIELD, personIdent);
 
-            val event = hendelseService.createOpprettHendelse(data, null, HendelseDataType.RESSURS_V1);
+            val event = hendelseService.createOpprettHendelse(data, hendelseMetadata, HendelseDataType.RESSURS_V1);
             repository.save(hendelseService.convert(event));
 
             return findByFid(event.getFid()).orElse(null);

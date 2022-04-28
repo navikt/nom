@@ -1,4 +1,3 @@
-= Intern NOM Dok
 :sectnums:
 :sectanchors:
 :toc: left
@@ -6,7 +5,9 @@
 :toc-title: Innhold
 :icons: font
 
+= Intern NOM Dok
 
+^Edit^ ^me:^ ^https://github.com/navikt/nom/tree/main/docs/src/main/asciidoc/intern^
 
 == Dokumentasjon
 

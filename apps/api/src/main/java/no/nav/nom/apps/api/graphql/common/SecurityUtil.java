@@ -1,12 +1,16 @@
 package no.nav.nom.apps.api.graphql.common;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.val;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -52,5 +56,17 @@ public class SecurityUtil {
             return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
         }
         return Optional.empty();
+    }
+
+    public HendelseMetadataSerialize metadataFromEnv(DataFetchingEnvironment env, JsonNode rawData){
+        CustomGraphQLContext context = env.getContext();
+        val azp_name = ((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("azp_name").toString();
+        val navident = ((JwtAuthenticationToken) context.getAuthentication()).getTokenAttributes().get("NAVident").toString();
+
+        return HendelseMetadataSerialize.builder()
+                .opprettetAv(new HendelseMetadata.OpprettetAv(azp_name,navident))
+                .opprettetTidspunkt(LocalDateTime.now())
+                .rawInputData(rawData)
+                .build();
     }
 }

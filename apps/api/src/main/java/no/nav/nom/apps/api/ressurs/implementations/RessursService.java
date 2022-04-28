@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.implementations;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.common.security.AuthenticationProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessursInterface;
@@ -59,8 +60,8 @@ public class RessursService implements IRessursService {
 
     @Override
     @Transactional
-    public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav) {
-        return eventBasedRessursService.opprettRessurs(personIdent, navIdent, navIdentForbokstav);
+    public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
+        return eventBasedRessursService.opprettRessurs(personIdent, navIdent, navIdentForbokstav, hendelseMetadata);
     }
 
     @Override
