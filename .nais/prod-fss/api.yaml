@@ -90,6 +90,9 @@ spec:
         - application: pdl-fullmakt
           namespace: pdl
           cluster: prod-fss
+        - application: oppgavestatistikk
+          namespace: oppgavehandtering
+          cluster: prod-fss
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
