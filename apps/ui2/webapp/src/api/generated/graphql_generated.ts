@@ -368,7 +368,7 @@ export type OpprettRessurs2MutationVariables = Exact<{
 }>;
 
 
-export type OpprettRessurs2Mutation = { __typename?: 'Mutation', opprettRessurs2?: { __typename?: 'OpprettRessursResponse2', navident: string, personident: string, person?: { __typename?: 'Person', navn: { __typename?: 'Navn', fornavn: string, mellomnavn?: string | null, etternavn: string } } | null } | null };
+export type OpprettRessurs2Mutation = { __typename?: 'Mutation', opprettRessurs2?: { __typename?: 'OpprettRessursResponse2', navident: string, personident: string, fornavn: string, etternavn: string, person?: { __typename?: 'Person', navn: { __typename?: 'Navn', fornavn: string, mellomnavn?: string | null, etternavn: string } } | null } | null };
 
 export type HentOrganiasjonsEnheterMedHierarkiQueryVariables = Exact<{
   aid?: InputMaybe<Scalars['String']>;
@@ -806,6 +806,8 @@ export const OpprettRessurs2Document = gql`
   opprettRessurs2(request: $request) {
     navident
     personident
+    fornavn
+    etternavn
     person {
       navn {
         fornavn

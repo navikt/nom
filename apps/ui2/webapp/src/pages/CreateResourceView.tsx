@@ -35,7 +35,7 @@ const CreateResourceView = () => {
       createResource({ 
           variables: { request: {personident: searchStr, fornavn: values.fornavn, etternavn: values.etternavn}}, 
           onCompleted: (data) => console.log('Skal redirectes til kvitteringsside...', data),
-          onError: () => console.log('ERROR')
+          onError: (error) => console.log('ERROR', error)
       })
   }
   

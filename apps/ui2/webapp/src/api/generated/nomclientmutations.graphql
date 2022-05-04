@@ -3,6 +3,8 @@ mutation opprettRessurs2($request: OpprettRessursRequest2) {
     opprettRessurs2(request: $request) {
         navident
         personident
+        fornavn
+        etternavn
         person{
             navn{
                 fornavn
