@@ -2,35 +2,35 @@
 
 Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager]
 
-== Organisasjonsenhet
+== Org.enhet
 [cols="3"]
 |===
 | https://jira.adeo.no/browse/BEGREP-207[Begrepsdefinisjon] | Oppslag: Kommer | Hendelser: Kommer
 |===
 
 *Beskrivelse:* +
-Delmengde av en organisasjon som etableres som følge av forhandlinger i medbestemmelsesapparatet. Den har en leder, kan ha ressurser og underliggende organisasjonsenheter.
-Begrepet brukes om alle nivåer i hierakiet. For enkelthetsskyld er organisasjonsenhet også forkortet til _enhet_ flere steder i dokumentasjonen.
+Delmengde av en organisasjon som etableres som følge av forhandlinger i Medbestemmelsesapparatet. Den har en leder, kan ha ressurser og underliggende org.enheter.
+Begrepet brukes om alle nivåer i hierakiet. For enkelthetsskyld er org.enhet også forkortet til _enhet_ flere steder i dokumentasjonen.
 
-Team og produktområder er i dag ikke definert som organisasjonsenheter. 
-Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke organisasjonsenheter selv om enkelte løsninger i NAV beskriver de som enheter.
+Team og produktområder er i dag ikke definert som org.enheter. 
+Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke org.enheter selv om enkelte løsninger i NAV beskriver de som enheter.
 
 *Eksempler:* +
-_NAV Halden Stab_ er en organisasjonsenhet og har overliggende organisasjonsenhet _NAV Halden_. Denne har flere underliggende organisasjonsenheter.
+_NAV Halden Stab_ er en org.enhet og har overliggende org.enhet _NAV Halden_. Denne har igjen flere underliggende org.enheter.
 
 [%header,cols="25%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
-|id             |Ja         |Generert UUID som tilegnes organisasjonsenhet                       |123e4567-e89b-12d3-a456-426614174000          |Mastret
-|navn           |Ja         |Navnet på en organisasjonsenhet                                     |NAV Halden Stab          | 
-|gyldigFom      |Ja         |Virkningsdato for når organisasjonsenheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | 
-|gyldigTom      |Nei        |Siste dag organisasjonsenheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | 
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2          | 
-|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | 
-|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Se Organiseringer-objektet         | 
-|leder          |Ja         |Ressursen som er leder for enheten.                                       |Se Ressurs-objektet         | 
-|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         | 
-|koblinger      |Ja         |Liste over alle ressurser knyttet til enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. | 
+|id             |Ja         |Generert UUID som tilegnes org.enhet                       |123e4567-e89b-12d3-a456-426614174000          |NOM
+|navn           |Ja         |Navnet på en org.enhet                                     |NAV Halden Stab          | Unit4 via DVH
+|gyldigFom      |Ja         |Virkningsdato for når org.enheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | tobe
+|gyldigTom      |Nei        |Siste dag org.enheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | tobe
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2          | Unit4 via DVH
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
+|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Se Organiseringer-objektet         | Unit4 via DVH
+|leder          |Ja         |Ressursen som er leder for enheten.                                       |Se Ressurs-objektet         | Unit4 via DVH
+|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
+|koblinger      |Ja         |Liste over alle ressurser knyttet til org.enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. | Unit4 via DVH
 |===
 
 
