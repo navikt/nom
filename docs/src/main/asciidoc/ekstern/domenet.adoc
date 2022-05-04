@@ -18,7 +18,7 @@ Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke org.enheter selv om enk
 *Eksempler:* +
 _NAV Halden Stab_ er en org.enhet og har overliggende org.enhet _NAV Halden_. Denne har igjen flere underliggende org.enheter.
 
-[%header,cols="25%,5%,40%,20%,10%"]
+[%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
 |id             |Ja         |Generert UUID som tilegnes org.enhet                       |123e4567-e89b-12d3-a456-426614174000          |NOM
@@ -54,22 +54,22 @@ Omfatter:
 * Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
 
 
-[%header,cols="25%,5%,50%,20%"]
+[%header,cols="5%,5%,40%,20%,10%"]
 |===
-|Felt           |Påkrevd    |Beskrivelse                                                                            |Eksempel
-|nomId          |Ja         |Generert UUID som representerer ressursen                                              |       
-|navIdent       |Ja         |Intern identifikator som tildeles alle ressurser i NAV                                 |Z123456
-|personIdent    |Ja         |11-sifret fødselsnummer eller DNR for personen.                                        |1234567890
-|ressurstype    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN
-|person         |Nei        |Inneholder folkeregisterrert navn for ressursen                                        |
-|epost          |Nei        |Personlig NAV-epostadresse                                                             |
-|visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn |
-|fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       |
-|etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     |
-|telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt
-|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en enhet og jobber i en annen kan det være flere. |
-|lederFor       |Ja         |Liste over organisasjonsenheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   |
-|koblinger      |Ja         |Ressursens kobling til organisasjonseneter. Alle aktive ressurser må ha en knytning til en enhet. Hvis en ressurs er ansatt i en enhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. Enheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt
+|Felt           |Påkrevd    |Beskrivelse                                                                            |Eksempel |Kilde
+|nomId          |Ja         |Generert UUID som representerer ressursen                                              |  |NOM     
+|navIdent       |Ja         |Intern identifikator som tildeles alle ressurser i NAV                                 |Z123456  |Remedy via DVH
+|personIdent    |Ja         |11-sifret fødselsnummer eller DNR for personen.                                        |1234567890 |Remedy via DVH
+|ressurstype    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |Remedy via DVH
+|person         |Nei        |Inneholder folkeregisterrert navn for ressursen                                        | |Folkereg. via PDL
+|epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via ?
+|visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
+|fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
+|etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
+|telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
+|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en enhet og jobber i en annen kan det være flere. | |Unit4 via DVH
+|lederFor       |Ja         |Liste over organisasjonsenheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
+|koblinger      |Ja         |Ressursens kobling til organisasjonseneter. Alle aktive ressurser må ha en knytning til en enhet. Hvis en ressurs er ansatt i en enhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. Enheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt |Unit4 via DVH
 |===
 
 
