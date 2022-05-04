@@ -62,7 +62,7 @@ Omfatter:
 |personIdent    |Ja         |11-sifret fødselsnummer eller DNR for personen.                                        |1234567890 |Remedy via DVH
 |ressurstype    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |Remedy via DVH
 |person         |Nei        |Inneholder folkeregisterrert navn for ressursen                                        | |Folkereg. via PDL
-|epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via ?
+|epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via AD
 |visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
 |fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
