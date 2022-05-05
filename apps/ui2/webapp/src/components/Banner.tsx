@@ -15,7 +15,7 @@ const bannerStyles = css({
 const headerStyles = css({
     display: 'flex', 
     alignItems: 'flex-end',
-    marginLeft: '10px',
+    marginLeft: '20px',
 })
 
 
