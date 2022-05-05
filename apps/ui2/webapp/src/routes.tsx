@@ -4,6 +4,7 @@ import { FormTestPage } from "./pages/FormTestPage";
 import MainPage from "./pages/MainPage";
 import { NomApiGraphqlTestPage } from "./pages/NomApiGraphqlTestPage";
 import { NotfoundPage } from "./pages/NotfoundPage";
+import OrganisasjonHierarkiPage from "./pages/OrganisasjonHierarkiPage";
 import ResourceView from "./pages/ResourceView";
 
 const AppRoutes = () => (
@@ -11,6 +12,7 @@ const AppRoutes = () => (
     <Route path="/" element={<MainPage />} />
     <Route path="/ressurs/:id" element={<ResourceView />} />
     <Route path="/ressurs/create" element={<CreateResourceView />} />
+    <Route path="/org" element={<OrganisasjonHierarkiPage />} />
     <Route path="/formtestpage" element={<FormTestPage />} />
     <Route path={"/nomapigraphqltest"} element={<NomApiGraphqlTestPage />} />
     <Route path={"*"} element={<NotfoundPage />} />
