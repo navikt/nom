@@ -118,6 +118,9 @@ spec:
         - application: oppgavestatistikk
           namespace: oppgavehandtering
           cluster: dev-fss
+        - application: abac-test
+          namespace: teamabac
+          cluster: dev-fss
     outbound:
       external:
         - host: nom-proxy.dev-fss-pub.nais.io
