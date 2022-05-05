@@ -152,6 +152,12 @@ query HentAlleOrganisasjonsenheter {
       orgNiv
       agressoId
       navn
+      leder{
+          ressurs{
+              navIdent
+              personIdent
+          }
+      }
     }
     code
   }

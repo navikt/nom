@@ -400,7 +400,7 @@ export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HentAlleOrganisasjonsenheterQuery = { __typename?: 'Query', organisasjonsenheter: Array<{ __typename?: 'OrganisasjonsenhetResult', id: string, orgNiv?: string | null, code: ResultCode, organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', orgNiv: string, agressoId: string, navn: string } | null }> };
+export type HentAlleOrganisasjonsenheterQuery = { __typename?: 'Query', organisasjonsenheter: Array<{ __typename?: 'OrganisasjonsenhetResult', id: string, orgNiv?: string | null, code: ResultCode, organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', orgNiv: string, agressoId: string, navn: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string } }> } | null }> };
 
 export type HentPersonQueryVariables = Exact<{
   personIdent: Scalars['String'];
@@ -1114,6 +1114,12 @@ export const HentAlleOrganisasjonsenheterDocument = gql`
       orgNiv
       agressoId
       navn
+      leder {
+        ressurs {
+          navIdent
+          personIdent
+        }
+      }
     }
     code
   }
