@@ -18,9 +18,9 @@ spec:
     - name: NOM_PROXY_CLIENT_ID
       value: prod-fss.nom.nom-proxy
     - name: GRAPHQL_PREAUTH_QUERY_PERSON
-      value: 78847351-6ee0-43cc-9c17-b92bc1eb076d
+      value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
     - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
-      value: 78847351-6ee0-43cc-9c17-b92bc1eb076d
+      value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
   image: {{image}}
   port: 8080
   ingresses:
@@ -92,6 +92,9 @@ spec:
           cluster: prod-fss
         - application: oppgavestatistikk
           namespace: oppgavehandtering
+          cluster: prod-fss
+        - application: remedy-identrutina
+          namespace: idm
           cluster: prod-fss
     outbound:
       external:
