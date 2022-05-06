@@ -13,9 +13,7 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.graphql.pdlutils.PdlUtils;
 import no.nav.nom.libs.test.SecurityTestUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
@@ -40,19 +38,10 @@ public abstract class GraphQLTestBase extends TestBase {
     protected ObjectMapper om;
 
     @Autowired
-    protected PdlUtils pdlUtils;
-
-    @Autowired
     protected DvhLegacyRessursUtils dvhLegacyRessursUtils;
 
     @Autowired
     protected IRessursService ressursService;
-
-    @AfterEach
-    protected void clearRepository() {
-        dvhRepository.clearRepository();
-        pdlUtils.reset();
-    }
 
     @SneakyThrows
     protected GraphQLResponse postForResource(String resource, boolean hasErrors) {

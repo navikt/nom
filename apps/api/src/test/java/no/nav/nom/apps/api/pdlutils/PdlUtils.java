@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.pdlutils;
+package no.nav.nom.apps.api.pdlutils;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,18 +66,20 @@ public class PdlUtils {
     }
 
     @SneakyThrows
-    public void mockSinglePersonResponse(String personIdent){
+    public NavnDto mockSinglePersonResponse(String personIdent){
         val resultBuilder = new StringBuilder();
+
+        val navn = NavnDto.builder()
+                .fornavn("fornavn")
+                .mellomnavn("mellomnavn")
+                .etternavn("etternavn")
+                .build();
+
         resultBuilder.append("{\"data\": {\"hentPerson\": { \"navn\": [");
-        resultBuilder.append(objectMapper.writeValueAsString(
-                NavnDto.builder()
-                        .fornavn("fornavn")
-                        .mellomnavn("mellomnavn")
-                        .etternavn("etternavn")
-                        .build()
-        ));
+        resultBuilder.append(objectMapper.writeValueAsString(navn));
         mockPdlResponse(resultBuilder.append("]}}}").toString());
 
+        return navn;
     }
 
     public void addErrorToPdlResponse(String personIdent, String code) {

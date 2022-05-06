@@ -4,10 +4,12 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,15 @@ public abstract class TestBase {
 
     @Autowired
     private GenericStorage genericStorage;
+
+    @Autowired
+    protected PdlUtils pdlUtils;
+
+    @AfterEach
+    protected void clearRepository() {
+        dvhRepository.clearRepository();
+        pdlUtils.reset();
+    }
 
     @BeforeEach
     @SuppressWarnings("unchecked")

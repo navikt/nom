@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.pdlutils;
+package no.nav.nom.apps.api.pdlutils;
 
 import lombok.Builder;
 import lombok.Data;
