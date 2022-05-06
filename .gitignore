@@ -83,3 +83,4 @@ apps/ui/**/node_modules/
 apps/ui/**/build/
 
 *LocalOnly*
+**/application-local.yaml
