@@ -2,35 +2,35 @@
 
 Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager]
 
-== Org.enhet
+== OrgEnhet
 [cols="3"]
 |===
 | https://jira.adeo.no/browse/BEGREP-207[Begrepsdefinisjon] | Oppslag: Kommer | Hendelser: Kommer
 |===
 
 *Beskrivelse:* +
-Delmengde av en organisasjon som etableres som følge av forhandlinger i Medbestemmelsesapparatet. Den har en leder, kan ha ressurser og underliggende org.enheter.
-Begrepet brukes om alle nivåer i hierakiet. For enkelthetsskyld er org.enhet også forkortet til _enhet_ flere steder i dokumentasjonen.
+Delmengde av en organisasjon som etableres som følge av forhandlinger i Medbestemmelsesapparatet. Den har en leder, kan ha ressurser og underliggende orgEnheter.
+Begrepet brukes om alle nivåer i hierakiet. 
 
-Team og produktområder er i dag ikke definert som org.enheter. 
-Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke org.enheter selv om enkelte løsninger i NAV beskriver de som enheter.
+Team og produktområder er i dag ikke definert som orgEnheter. 
+Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke orgEnheter selv om enkelte løsninger i NAV beskriver de som enheter.
 
 *Eksempler:* +
-_NAV Halden Stab_ er en org.enhet og har overliggende org.enhet _NAV Halden_. Denne har igjen flere underliggende org.enheter.
+_NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denne har igjen flere underliggende orgEnheter.
 
 [%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
-|id             |Ja         |Generert UUID som tilegnes org.enhet                       |123e4567-e89b-12d3-a456-426614174000          |NOM
-|navn           |Ja         |Navnet på en org.enhet                                     |NAV Halden Stab          | Unit4 via DVH
-|gyldigFom      |Ja         |Virkningsdato for når org.enheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | tobe
-|gyldigTom      |Nei        |Siste dag org.enheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | tobe
+|id             |Ja         |Generert UUID som tilegnes orgEnhet. (fremtidig felt)                       |123e4567-e89b-12d3-a456-426614174000          |TOBE
+|navn           |Ja         |Navnet på en orgEnheten                                     |NAV Halden Stab          | Unit4 via DVH
+|gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | tobe
+|gyldigTom      |Nei        |Siste dag orgEnheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | tobe
 |orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2          | Unit4 via DVH
-|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske org.enheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
-|organiseringer |Ja         |Liste over overliggende enhet og eventuelle underliggende enheter.        |Se Organiseringer-objektet         | Unit4 via DVH
-|leder          |Ja         |Ressursen som er leder for enheten.                                       |Se Ressurs-objektet         | Unit4 via DVH
-|type           |Nei        |Typen enhet. Kun satt på nederste nivå av org.enheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
-|koblinger      |Ja         |Liste over alle ressurser knyttet til org.enhet. Både ressurser som er ansatt ved enheten, og utlånt til enheten. | Unit4 via DVH
+|agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
+|organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter.        |Se Organiseringer-objektet         | Unit4 via DVH
+|leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se Ressurs-objektet         | Unit4 via DVH
+|type           |Nei        |Typen orgEnhet. Kun satt på nederste nivå av orgEnheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
+|koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. | Unit4 via DVH
 |===
 
 
@@ -51,7 +51,7 @@ Alle personer som er tilknyttet NAV som ressurs, enten direkte eller gjennom und
 Omfatter:
 
 * Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
-* Eksterne ressurser: Konsulenter, driftspersonell (rengjøring, kantine).
+* Eksterne ressurser: Konsulenter, tolker mm.
 
 
 [%header,cols="5%,5%,40%,20%,10%"]
@@ -67,9 +67,30 @@ Omfatter:
 |fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
 |telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
-|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en enhet og jobber i en annen kan det være flere. | |Unit4 via DVH
-|lederFor       |Ja         |Liste over organisasjonsenheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
-|koblinger      |Ja         |Ressursens kobling til organisasjonseneter. Alle aktive ressurser må ha en knytning til en enhet. Hvis en ressurs er ansatt i en enhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. Enheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt |Unit4 via DVH
+|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. | |Unit4 via DVH
+|lederFor       |Ja         |Liste over orgEnheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
+|koblinger      |Ja         |Ressursens kobling til orgEnheter. Alle aktive ressurser må ha en knytning til en orgEnhet. Hvis en ressurs er ansatt i en orgEnhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. OrgEnheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt |Unit4 via DVH
+|===
+
+
+
+
+
+== Telefon
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service.
+
+[%header,cols=5*]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel   |Kilde
+|nummer        |Ja         |Telefonnr med retningsnummer                               |4712345678  |Telenor via DVH
+|type        |Ja         |Angir typen telefon, både private og NAV-utdelt nr støttes.        |NAV_TJENESTE_TELEFON, NAV_KONTOR_TELEFON, PRIVAT_TELEFON | DVH
+|beskrivelse   |Nei       |TODO                            |          |DVH
+
 |===
 
 
