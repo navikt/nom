@@ -1,65 +1,15 @@
 = Hendelser
 
-Oversikt over hvilke hendelser NOM som system skal kunne *håndtere* eller *fasilitere*.
-Disse kan konkretiseres videre til hendelsesforløp.
+I dag støtter ikke NOM hendelser som konsumenter kan abonnere på. Det ligger derimot i planene å tilby hendelser over Kafka når NOM tar over som master for ressurs og orgEnhet. Dersom det er behov for Kafkahendelser før den tid, vil det vurderes å tilby dette tidligere. Ta kontakt på https://nav-it.slack.com/archives/C0362LA7ZLN[#nom]
 
-Alle hendelser skrives i fortid, som "noe som har skjedd"
+På sikt vil NOM tilby hendelser som f.eks.:
 
-== NOM skal håndtere:
+* OrgEnhet opprettet
+* OrgEnhet nedlagt
+* OrgEnhet har fått ny leder
+* Ressurs opprettet
+* Ressurs sluttet
+* Ressurs tilkoblet ny orgEnhet
+* Ressurs har fått ny leder
+* Ressurs fratred som leder
 
-Forretningslogikken som skal håndtere hendelsene nedenfor hører hjemme i NOM.
-
-=== Orgenhet
-
-* Enhet opprettet
-* Enhet i overgangsfase
-* Enhet nedlagt
-* Overenhet satt til ugyldig
-* Enhet har fått ny overenhet
-* Enheter sammenslått
-* Enhet splittet opp
-* Enhet detaljer endret
-
-=== Ansatt
-
-* Ansatt har begynt
-* Ansatt har sluttet
-* Ansatt detaljer endret
-
-=== Ansatt + Orgenhet
-
-* Ansatt lagt til orgenhet
-* Ansatt fjernet fra orgenhet
-
-=== Leder
-
-* Leder opprettet
-* Leder fjernet
-* Leder har fått ny (overordnet) leder
-* Leder detaljer endret
-
-=== Leder + Ansatt
-
-* Ansatt har fått ny leder
-* Ansatt i overgangsfase ifm ny leder
-* Den ansattes leder er blitt ugyldig
-* Ansatt har fått leder nr 2 (matriseorganisering ?)
-
-=== Leder + Orgenhet
-
-* Leder satt til å lede orgenhet
-* Leder "avsatt" fra å lede orgenhet
-
-== NOM skal fasilitere:
-
-Forretningslogikken som skal håndtere hendelsene nedenfor hører
-*ikke* hjemme i NOM, men NOM vil ha en fasiliteringsrolle.
-
-* Lønn utbetalt
-* Stilling utlyst
-* Produktteam opprettet
-* Produktteam nedlagt
-* Kompetanserolle opprettet
-* Ansatt betalt tilbake ifm telefonabonnement.
-* Ansatt ut i ferie
-* Ansatt ut i permisjon
