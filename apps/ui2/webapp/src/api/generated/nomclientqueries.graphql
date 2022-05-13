@@ -185,3 +185,51 @@ query searchRessurs($term: String!) {
         }
     }
 }
+
+query HentOrganisasjonsenhetOgOrganisering($agressoId: String!, $orgNiv: String!) {
+    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+        agressoId
+        navn
+        gyldigFom
+        gyldigTom
+        organiseringer{
+            retning
+            organisasjonsenhet{
+                agressoId
+                orgNiv
+                navn
+                gyldigFom
+                gyldigTom
+            }
+            gyldigFom
+            gyldigTom
+        }
+        leder{
+            ressurs{
+                navIdent
+                personIdent
+            }
+        }
+    }
+}
+
+query HentOrganisasjonsenhetMedOverenhet($agressoId: String!, $orgNiv: String!) {
+    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+    		organiseringer(retning: over) {
+      		organisasjonsenhet {
+            navn
+            agressoId
+            orgNiv
+            leder {
+              ressurs {
+                navIdent
+              }
+            }
+          }
+    		}
+        agressoId
+        navn
+        gyldigFom
+        gyldigTom
+    }
+}

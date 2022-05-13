@@ -416,6 +416,22 @@ export type SearchRessursQueryVariables = Exact<{
 
 export type SearchRessursQuery = { __typename?: 'Query', search: Array<{ __typename?: 'Organisasjonsenhet' } | { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null }> };
 
+export type HentOrganisasjonsenhetOgOrganiseringQueryVariables = Exact<{
+  agressoId: Scalars['String'];
+  orgNiv: Scalars['String'];
+}>;
+
+
+export type HentOrganisasjonsenhetOgOrganiseringQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', retning: Retning, gyldigFom: any, gyldigTom?: any | null, organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string } }> } | null };
+
+export type HentOrganisasjonsenhetMedOverenhetQueryVariables = Exact<{
+  agressoId: Scalars['String'];
+  orgNiv: Scalars['String'];
+}>;
+
+
+export type HentOrganisasjonsenhetMedOverenhetQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }> } | null };
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -1233,3 +1249,111 @@ export function useSearchRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOpti
 export type SearchRessursQueryHookResult = ReturnType<typeof useSearchRessursQuery>;
 export type SearchRessursLazyQueryHookResult = ReturnType<typeof useSearchRessursLazyQuery>;
 export type SearchRessursQueryResult = Apollo.QueryResult<SearchRessursQuery, SearchRessursQueryVariables>;
+export const HentOrganisasjonsenhetOgOrganiseringDocument = gql`
+    query HentOrganisasjonsenhetOgOrganisering($agressoId: String!, $orgNiv: String!) {
+  organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+    agressoId
+    navn
+    gyldigFom
+    gyldigTom
+    organiseringer {
+      retning
+      organisasjonsenhet {
+        agressoId
+        orgNiv
+        navn
+        gyldigFom
+        gyldigTom
+      }
+      gyldigFom
+      gyldigTom
+    }
+    leder {
+      ressurs {
+        navIdent
+        personIdent
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useHentOrganisasjonsenhetOgOrganiseringQuery__
+ *
+ * To run a query within a React component, call `useHentOrganisasjonsenhetOgOrganiseringQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentOrganisasjonsenhetOgOrganiseringQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHentOrganisasjonsenhetOgOrganiseringQuery({
+ *   variables: {
+ *      agressoId: // value for 'agressoId'
+ *      orgNiv: // value for 'orgNiv'
+ *   },
+ * });
+ */
+export function useHentOrganisasjonsenhetOgOrganiseringQuery(baseOptions: Apollo.QueryHookOptions<HentOrganisasjonsenhetOgOrganiseringQuery, HentOrganisasjonsenhetOgOrganiseringQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HentOrganisasjonsenhetOgOrganiseringQuery, HentOrganisasjonsenhetOgOrganiseringQueryVariables>(HentOrganisasjonsenhetOgOrganiseringDocument, options);
+      }
+export function useHentOrganisasjonsenhetOgOrganiseringLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentOrganisasjonsenhetOgOrganiseringQuery, HentOrganisasjonsenhetOgOrganiseringQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HentOrganisasjonsenhetOgOrganiseringQuery, HentOrganisasjonsenhetOgOrganiseringQueryVariables>(HentOrganisasjonsenhetOgOrganiseringDocument, options);
+        }
+export type HentOrganisasjonsenhetOgOrganiseringQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetOgOrganiseringQuery>;
+export type HentOrganisasjonsenhetOgOrganiseringLazyQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetOgOrganiseringLazyQuery>;
+export type HentOrganisasjonsenhetOgOrganiseringQueryResult = Apollo.QueryResult<HentOrganisasjonsenhetOgOrganiseringQuery, HentOrganisasjonsenhetOgOrganiseringQueryVariables>;
+export const HentOrganisasjonsenhetMedOverenhetDocument = gql`
+    query HentOrganisasjonsenhetMedOverenhet($agressoId: String!, $orgNiv: String!) {
+  organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+    organiseringer(retning: over) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+      }
+    }
+    agressoId
+    navn
+    gyldigFom
+    gyldigTom
+  }
+}
+    `;
+
+/**
+ * __useHentOrganisasjonsenhetMedOverenhetQuery__
+ *
+ * To run a query within a React component, call `useHentOrganisasjonsenhetMedOverenhetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentOrganisasjonsenhetMedOverenhetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHentOrganisasjonsenhetMedOverenhetQuery({
+ *   variables: {
+ *      agressoId: // value for 'agressoId'
+ *      orgNiv: // value for 'orgNiv'
+ *   },
+ * });
+ */
+export function useHentOrganisasjonsenhetMedOverenhetQuery(baseOptions: Apollo.QueryHookOptions<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>(HentOrganisasjonsenhetMedOverenhetDocument, options);
+      }
+export function useHentOrganisasjonsenhetMedOverenhetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>(HentOrganisasjonsenhetMedOverenhetDocument, options);
+        }
+export type HentOrganisasjonsenhetMedOverenhetQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetMedOverenhetQuery>;
+export type HentOrganisasjonsenhetMedOverenhetLazyQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetMedOverenhetLazyQuery>;
+export type HentOrganisasjonsenhetMedOverenhetQueryResult = Apollo.QueryResult<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>;
