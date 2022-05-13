@@ -67,12 +67,16 @@ Omfatter:
 |fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
 |sluttDato      |           |Ressursens sluttdato.
+
 Statlig ansatt: sluttDato i Unit4 brukes hvis satt, ellers brukes Remedy sluttdato
+
 Kommunalt ansatt: Sluttdato i Remedy benyttes
-annenStat: Sluttdato i Remedy benyttes
+
+annenStat (Helfo m.fl.): Sluttdato i Remedy benyttes
+
 Ekstern: Sluttdato i Remedy benyttes
 
-Ved permisjon på kommunal, stat og eksterne brukes samme logikk som over, men hvis sluttDato da ikke er satt så tillates NULL. For annen stat brukes sluttdato i Remedy.
+Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne brukes samme logikk som over, men hvis sluttDato da ikke er satt så tillates NULL. Dette betyr at ressursen ikke har sluttdato. For annenStat settes datoen permisjonsflagget settes i Remedy som sluttdato, selv om ressursen er aktiv.
                                                           | |
 |telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
 |ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. | |Unit4 via DVH
