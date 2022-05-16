@@ -2,6 +2,31 @@
 
 Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager]
 
+
+== Organisering
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
+|===
+
+*Beskrivelse:* +
+Organisering er den hierarkiske koblingen mellom orgEnheter som danner et hierarki.
+En organisering omfatter 2 orgEnheter og typen organisering mellom dem.
+En orgEnhet kan være overenhet for flere enheter, men en orgEnhet kan bare ha én overenhet.
+
+[%header,cols="15%,5%,40%,20%,10%"]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
+|id             |Ja         |Generert UUID som representerer organiseringen                       |7457a63b-c130-46a3-8278-deb23e2a526f   |NOM
+|retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over:"/"under:"                       |Unit4 via DVH
+|orgEnhet       |Ja         |OrgEnhet over eller under avhengig av retning                        |Se OrgEnhet                            |Unit4 via DVH
+|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
+|gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med                            |2020-02-14, NULL hvis ikke satt.       |Unit4 via DVH
+|===
+
+
+
+
 == OrgEnhet
 [cols="3"]
 |===
@@ -30,32 +55,48 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 |organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter.        |Se Organiseringer-objektet         | Unit4 via DVH
 |leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se Ressurs-objektet         | Unit4 via DVH
 |type           |Nei        |Typen orgEnhet. Kun satt på nederste nivå av orgEnheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
-|koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. | Unit4 via DVH
+|koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. |Se OrgEnhetskobling | Unit4 via DVH
 |===
 
 
 
-== Organisering
+== OrgEnhetskobling
 [cols="3"]
 |===
-| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
 |===
 
 *Beskrivelse:* +
-Organisering er den hierarkiske koblingen mellom orgEnheter som danner et hierarki.
-En organisering omfatter 2 orgEnheter og typen organisering mellom dem.
-En orgEnhet kan være overenhet for flere enheter, men en orgEnhet kan bare ha én overenhet.
+OrgEnhetskobling er knytningen mellom en orgEnhet og en ressurs. En orgEnhet kan flere orgEnhetskoblinger samtidig, men ikke flere for samme ressurs på et gitt tidspunkt. 
 
-[%header,cols="15%,5%,40%,20%,10%"]
+*Eksempler:* +
+OrgEnhet _NAV Halden_ har en orgEnhetskobling til ansatt Ola i perioden 01.01.2020 - 31.03.2022
+
+[%header,cols="5%,5%,40%,20%,10%"]
 |===
-|Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
-|id             |Ja         |Generert UUID som representerer organiseringen                       |7457a63b-c130-46a3-8278-deb23e2a526f   |NOM
-|retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over:"/"under:"                       |Unit4 via DVH
-|orgEnhet       |Ja         |Organisasjonsenhet over eller under avhengig av retning              |Se OrgEnhet                            |Unit4 via DVH
-|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
-|gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med                            |2020-02-14, NULL hvis ikke satt.       |Unit4 via DVH
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
+|ressurs        |Ja         |Ressursen orgEnheten er koblet til                         |Se Ressurs-objekt                    |Unit4 via DVH
+|gyldigFom      |Ja         |Datoen koblingen er gyldig fra og med                      |2009-01-22                           |Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag koblingen er gyldig.                             |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
 |===
 
+
+
+== OrgEnhetsleder
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+Knytning mellom en orgEnhet og en ressurs hvor ressursen er orgEnhetens leder. 
+
+*Fremtidig:* : I dag støttes ikke historikk over ledere på en orgEnhet. På sikt skal objektet utvides med periode, slik at man kan se historiske ledere, dog slik at en orgEnhet har maks én leder på et gitt tidspunkt.
+
+
+[%header,cols="5%,5%,40%,20%,10%"]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
+|ressurs        |Ja         |Ressursen som er leder for orgEnheten                      |Se Ressurs-objekt                    |Unit4 via DVH
+|===
 
 
 
@@ -68,7 +109,6 @@ En orgEnhet kan være overenhet for flere enheter, men en orgEnhet kan bare ha �
 *Beskrivelse:* +
 Person som utfører oppgaver på vegne av NAV.
 
-
 *Eksempler:* +
 Alle personer som er tilknyttet NAV som ressurs, enten direkte eller gjennom underleverandører.
 
@@ -76,7 +116,6 @@ Omfatter:
 
 * Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
 * Eksterne ressurser: Konsulenter, tolker mm.
-
 
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
@@ -110,13 +149,13 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 
 
 
-== RessursKobling
+== Ressurskobling
 [cols="3"]
 |===
 |===
 
 *Beskrivelse:* +
-RessursKobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursKoblinger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursKobling til en gitt orgEnhet på et gitt tidspunkt.
+Ressurskobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursKoblinger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursKobling til en gitt orgEnhet på et gitt tidspunkt.
 
 *Eksempler:* +
 Ansatt Ola har en ressursKobling til orgEnhet NAV Halden i perioden 01.01.2020 - 31.03.2022
@@ -124,7 +163,7 @@ Ansatt Ola har en ressursKobling til orgEnhet NAV Halden i perioden 01.01.2020 -
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
-|orgEnhet       |Ja         |orgEnheten ressursen er koblet til                         |Se organisasjonsenhet objekt         |Unit4 via DVH
+|orgEnhet       |Ja         |orgEnheten ressursen er koblet til                         |Se OrgEnhet-objekt                   |Unit4 via DVH
 |gyldigFom      |Ja         |Datoen ressursKoblingen er gyldig fra og med               |2009-01-22                           |Unit4 via DVH
 |gyldigTom      |Nei        |Siste dag koblingen er gyldig.                             |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
 |===
@@ -151,83 +190,5 @@ Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service. I dag støtt
 |===
 
 
-
-.
-
-.
-
-.
-
-.
-
-.
-
-
-== ALT UNDER HER ER HELT UTDATERT ==
-
-.
-
-.
-
-.
-
-.
-
-
-
-
-
-
-
-== Kobling
-[cols="3"]
-|===
-|===
-
-*Beskrivelse:* +
-Kobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere koblinger samtidig,
-og en organisasjonsenhet kan ha kobling med flere ressurser.
-Per nå kan ikke en ressurs ha flere koblinger til samme organisasjonsenhet.
-
-
-*Eksempler:* +
-Ansatt Ola har en kobling med organisasjonsenhet 0101000 - Halden
-
-Kodeverk omfatter: +
-
-[%header,cols=4*]
-|===
-|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|Ressurs        |Ja         |Ressursen koblingen gjelder                               |Se ressurs objekt
-|Organisasjonsenhet        |Ja         |Organisasjonsenheten koblingen gjelder         |Se organisasjonsenhet objekt
-|Gyldig fom     |Ja         |Datoen koblingen blir gyldig                              |2009-01-22
-|Gyldig tom     |Nei        |Koblingens siste gyldighets dato                          |2020-02-14, NULL hvis ikke satt.
-|===
-
-== Leder
-[cols="3"]
-|===
-|===
-
-*Beskrivelse:* +
-Leder er knytningen mellom en ressurs og en organisasjonsenhet. Flere ressurser kan ha lederknyttning mot en organisasjonsenhet, men hvor bare 1 kan være aktiv.
-En ressurs kan være leder for flere organisasjonsenheter samtidig.
-
-*Eksempler:* +
-Ansatt Ola var leder for organisasjonsenhet 0101000 - Halden i perioden 2018-01-01 til og med 2019-12-01,
-Ansatt Heidi tok over som leder fra 2019-12-02.
-
-Kodeverk omfatter: +
-
-[%header,cols=4*]
-|===
-|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|Ressurs        |Ja         |Ressursen leder knyttningen gjelder                         |Se ressurs objekt
-|Organisasjonsenhet        |Ja         |Organisasjonsenheten knyttningen gjelder          |Se organisasjonsenhet objekt
-|Gyldig fom     |Ja         |Datoen leder knyttningen blir gyldig                         |2009-01-22
-|Gyldig tom     |Nei        |Leder knyttningen siste gyldighets dato                     |2020-02-14, NULL hvis ikke satt.
-|===
-
-fast/kommunal/statlig kan være på ressurs og ikke stilling?
 
 
