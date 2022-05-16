@@ -66,18 +66,18 @@ Omfatter:
 |visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
 |fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
-|sluttDato      |           |Ressursens sluttdato.
+|sluttDato      |Ja         |Ressursens sluttdato.
 
-Statlig ansatt: sluttDato i Unit4 brukes hvis satt, ellers brukes Remedy sluttdato
+_Statlig ansatt_: sluttDato i Unit4 brukes hvis satt, ellers brukes Remedy sluttdato
 
-Kommunalt ansatt: Sluttdato i Remedy benyttes
+_Kommunalt ansatt_: Sluttdato i Remedy benyttes
 
-annenStat (Helfo m.fl.): Sluttdato i Remedy benyttes
+_annenStat_ (Helfo m.fl.): Sluttdato i Remedy benyttes
 
-Ekstern: Sluttdato i Remedy benyttes
+_Ekstern_: Sluttdato i Remedy benyttes
 
-Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne brukes samme logikk som over, men hvis sluttDato da ikke er satt så tillates NULL. Dette betyr at ressursen ikke har sluttdato. For annenStat settes datoen permisjonsflagget settes i Remedy som sluttdato, selv om ressursen er aktiv.
-                                                          | |
+Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne brukes samme logikk som over, men hvis sluttDato da ikke er satt så tillates NULL. Dette betyr at ressursen ikke har sluttdato. For annenStat settes sluttdato til datoen permisjonsflagget settes i Remedy, selv om ressursen er aktiv.
+                                                          | |Remedy og Unit4 via DVH
 |telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
 |ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. | |Unit4 via DVH
 |lederFor       |Ja         |Liste over orgEnheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
@@ -94,7 +94,7 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 |===
 
 *Beskrivelse:* +
-Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service.
+Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service. I dag støttes ikke privattelefon, men er planlagt å støttes på sikt.
 
 [%header,cols=5*]
 |===
