@@ -35,6 +35,30 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 
 
 
+== Organisering
+[cols="3"]
+|===
+| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
+|===
+
+*Beskrivelse:* +
+Organisering er den hierarkiske koblingen mellom orgEnheter som danner et hierarki.
+En organisering omfatter 2 orgEnheter og typen organisering mellom dem.
+En orgEnhet kan være overenhet for flere enheter, men en orgEnhet kan bare ha én overenhet.
+
+[%header,cols="15%,5%,40%,20%,10%"]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
+|id             |Ja         |Generert UUID som representerer organiseringen                       |7457a63b-c130-46a3-8278-deb23e2a526f   |NOM
+|retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over:"/"under:"                       |Unit4 via DVH
+|orgEnhet       |Ja         |Organisasjonsenhet over eller under avhengig av retning              |Se OrgEnhet                            |Unit4 via DVH
+|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
+|gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med                            |2020-02-14, NULL hvis ikke satt.       |Unit4 via DVH
+|===
+
+
+
+
 == Ressurs
 [cols="3"]
 |===
@@ -86,6 +110,27 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 
 
 
+== RessursKobling
+[cols="3"]
+|===
+|===
+
+*Beskrivelse:* +
+RessursKobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursKoblinger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursKobling til en gitt orgEnhet på et gitt tidspunkt.
+
+*Eksempler:* +
+Ansatt Ola har en ressursKobling til orgEnhet NAV Halden i perioden 01.01.2020 - 31.03.2022
+
+[%header,cols="5%,5%,40%,20%,10%"]
+|===
+|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
+|orgEnhet       |Ja         |orgEnheten ressursen er koblet til                         |Se organisasjonsenhet objekt         |Unit4 via DVH
+|gyldigFom      |Ja         |Datoen ressursKoblingen er gyldig fra og med               |2009-01-22                           |Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag koblingen er gyldig.                             |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
+|===
+
+
+
 
 
 == Telefon
@@ -96,7 +141,7 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 *Beskrivelse:* +
 Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service. I dag støttes ikke privattelefon, men er planlagt å støttes på sikt.
 
-[%header,cols=5*]
+[%header,cols="5%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel   |Kilde
 |nummer        |Ja         |Telefonnr med retningsnummer                               |4712345678  |Telenor via DVH
@@ -130,26 +175,6 @@ Telefon mastres ikke i NOM, men tilbys i våre API-er as-a-service. I dag støtt
 
 
 
-== Organisering
-[cols="3"]
-|===
-| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
-|===
-
-*Beskrivelse:* +
-Organisering er den hierarkiske koblingen mellom organisasjonsenheter som danner et hierarki.
-En organisering omfatter 2 enheter og typen organisering mellom dem.
-En organisasjonsenhet kan være overenhet for flere enheter, men en enhet kan bare ha én overenhet.
-
-[%header,cols=4*]
-|===
-|Felt           |Påkrevd    |Beskrivelse                                                |Eksempel
-|ID             |Ja         |Generert UUID som tilegnes organiseringen                  |7457a63b-c130-46a3-8278-deb23e2a526f
-|Retning        |Ja         |Overenhet eller underenhet                                 |"over:"/"under:"
-|Organisasjonsenhet          |Ja         |Organisasjonsenhet over eller under avhengig av retning    |Se Organisasjonsenhet
-|Gyldig fom     |Ja         |Dagen organiseringen blir gyldig                 |2009-01-22
-|Gyldig tom     |Nei        |Dagen organiseringen blir ugyldig                    |2020-02-14, NULL hvis ikke satt.
-|===
 
 
 
