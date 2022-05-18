@@ -7,9 +7,6 @@
 
 = NOM - NAV Organisasjonsmaster
 
-^Edit^ ^me:^ ^https://github.com/navikt/nom/tree/main/docs/src/main/asciidoc/ekstern^
-
-*Mye er utdatert. Under arbeid. Vil bli oppdatert iløpet av april.*
 
 NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
 
@@ -17,4 +14,7 @@ include::visjon.adoc[leveloffset=1]
 include::domenet.adoc[leveloffset=1]
 include::integrasjon.adoc[leveloffset=1]
 include::hendelser.adoc[leveloffset=1]
+
+
+^Edit^ ^me:^ ^https://github.com/navikt/nom/tree/main/docs/src/main/asciidoc/ekstern^
 
