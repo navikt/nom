@@ -1,0 +1,71 @@
+name: Build n Deploy NAV-IDENT
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/nav-ident/**'
+      - '.nais/*/nav-ident.yaml'
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/nav-ident:${{ github.sha }}
+  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nav-ident:latest
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: Cache Depdendencies
+        uses: actions/cache@v2.1.6
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 17
+      - name: Build
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+        run: mvn clean package --projects :nav-ident --also-make --batch-mode
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/nav-ident/target/app.jar .
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${IMAGE}
+          docker push ${IMAGE_LATEST}
+
+  deploy-dev:
+    name: Deploy to NAIS dev-gcp
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/dev-fss/nav-ident.yaml
+
+ deploy-prod:
+    name: Deploy to NAIS prod-gcp
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/prod-fss/nav-ident.yaml
