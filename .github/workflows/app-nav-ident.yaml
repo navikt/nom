@@ -6,7 +6,7 @@ on:
       - 'main'
     paths:
       - 'apps/nav-ident/**'
-      - '.nais/*/nav-ident.yaml'
+      - '.nais/*/app-nav-ident.yaml'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nav-ident:${{ github.sha }}
