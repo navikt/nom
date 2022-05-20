@@ -20,5 +20,6 @@
         <module>nom-ressurser</module>
         <module>ui</module>
         <module>nom-agresso</module>
+        <module>nav-ident</module>
     </modules>
 </project>
