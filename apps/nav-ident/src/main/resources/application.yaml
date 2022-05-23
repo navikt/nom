@@ -11,4 +11,5 @@ nom:
         app:
           load-properties: true
 
-# management.endpoints.web.exposure.include: health,mappings,prometheus
+management.endpoints.web.exposure.include: mappings
+#And prometheus,health,heapdump,scheduledtasks,threaddump from commons util
