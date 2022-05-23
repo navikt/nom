@@ -1,4 +1,4 @@
 app:
   appName: ${NAIS_APP_NAME:nav-ident}
 
-management.endpoints.web.exposure.include: mappings
+management.endpoints.web.exposure.include: health,mappings,prometheus
