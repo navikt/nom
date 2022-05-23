@@ -1,4 +1,14 @@
 app:
   appName: ${NAIS_APP_NAME:nav-ident}
 
-management.endpoints.web.exposure.include: health,mappings,prometheus
+
+nom:
+  libs:
+    utils:
+      common:
+        kafka:
+          load-properties: false
+        app:
+          load-properties: true
+
+# management.endpoints.web.exposure.include: health,mappings,prometheus
