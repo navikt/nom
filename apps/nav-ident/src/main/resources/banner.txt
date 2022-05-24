@@ -1,2 +1,2 @@
      :: Spring Boot${spring-boot.formatted-version} ::
-     - on Java java ${java.version}
+        - on Java ${java.version}
