@@ -12,3 +12,7 @@ nom:
           load-properties: true
 
 management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mappings
+
+spring:
+  main:
+    banner-mode: "off"
