@@ -1,5 +1,5 @@
 app:
-  appName: ${NAIS_APP_NAME:nav-ident}
+  name: ${NAIS_APP_NAME:nav-ident}
 
 
 nom:
