@@ -6,6 +6,7 @@ on:
     paths:
       - '.nais/alerts/dev/nav-ident-alerts.yaml'
       - '.nais/alerts/prod/nav-ident-alerts.yaml'
+      - '.github/workflows/alerts-app-nav-ident.yaml'
 
 jobs:
   apply-alerts:
