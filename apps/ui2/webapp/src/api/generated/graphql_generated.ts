@@ -422,7 +422,7 @@ export type HentOrganisasjonsenhetOgOrganiseringQueryVariables = Exact<{
 }>;
 
 
-export type HentOrganisasjonsenhetOgOrganiseringQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', retning: Retning, gyldigFom: any, gyldigTom?: any | null, organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string } }> } | null };
+export type HentOrganisasjonsenhetOgOrganiseringQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', retning: Retning, gyldigFom: any, gyldigTom?: any | null, organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string } }> } | null };
 
 export type HentOrganisasjonsenhetMedOverenhetQueryVariables = Exact<{
   agressoId: Scalars['String'];
@@ -431,6 +431,14 @@ export type HentOrganisasjonsenhetMedOverenhetQueryVariables = Exact<{
 
 
 export type HentOrganisasjonsenhetMedOverenhetQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }> } | null };
+
+export type HentOrganisasjonsEnheterHierarkiQueryVariables = Exact<{
+  agressoId: Scalars['String'];
+  orgNiv: Scalars['String'];
+}>;
+
+
+export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }> } }> } }> } }> } }> } }> } | null };
 
 
 
@@ -1253,6 +1261,7 @@ export const HentOrganisasjonsenhetOgOrganiseringDocument = gql`
     query HentOrganisasjonsenhetOgOrganisering($agressoId: String!, $orgNiv: String!) {
   organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
     agressoId
+    orgNiv
     navn
     gyldigFom
     gyldigTom
@@ -1357,3 +1366,126 @@ export function useHentOrganisasjonsenhetMedOverenhetLazyQuery(baseOptions?: Apo
 export type HentOrganisasjonsenhetMedOverenhetQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetMedOverenhetQuery>;
 export type HentOrganisasjonsenhetMedOverenhetLazyQueryHookResult = ReturnType<typeof useHentOrganisasjonsenhetMedOverenhetLazyQuery>;
 export type HentOrganisasjonsenhetMedOverenhetQueryResult = Apollo.QueryResult<HentOrganisasjonsenhetMedOverenhetQuery, HentOrganisasjonsenhetMedOverenhetQueryVariables>;
+export const HentOrganisasjonsEnheterHierarkiDocument = gql`
+    query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
+  organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+    underenheter: organiseringer(retning: under) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+      }
+    }
+    overenheter: organiseringer(retning: over) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+        organiseringer(retning: over) {
+          organisasjonsenhet {
+            navn
+            agressoId
+            orgNiv
+            leder {
+              ressurs {
+                navIdent
+              }
+            }
+            organiseringer(retning: over) {
+              organisasjonsenhet {
+                navn
+                agressoId
+                orgNiv
+                leder {
+                  ressurs {
+                    navIdent
+                  }
+                }
+                organiseringer(retning: over) {
+                  organisasjonsenhet {
+                    navn
+                    agressoId
+                    orgNiv
+                    leder {
+                      ressurs {
+                        navIdent
+                      }
+                    }
+                    organiseringer(retning: over) {
+                      organisasjonsenhet {
+                        navn
+                        agressoId
+                        orgNiv
+                        leder {
+                          ressurs {
+                            navIdent
+                          }
+                        }
+                        organiseringer(retning: over) {
+                          organisasjonsenhet {
+                            navn
+                            agressoId
+                            orgNiv
+                            leder {
+                              ressurs {
+                                navIdent
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    agressoId
+    navn
+    gyldigFom
+    gyldigTom
+  }
+}
+    `;
+
+/**
+ * __useHentOrganisasjonsEnheterHierarkiQuery__
+ *
+ * To run a query within a React component, call `useHentOrganisasjonsEnheterHierarkiQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentOrganisasjonsEnheterHierarkiQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHentOrganisasjonsEnheterHierarkiQuery({
+ *   variables: {
+ *      agressoId: // value for 'agressoId'
+ *      orgNiv: // value for 'orgNiv'
+ *   },
+ * });
+ */
+export function useHentOrganisasjonsEnheterHierarkiQuery(baseOptions: Apollo.QueryHookOptions<HentOrganisasjonsEnheterHierarkiQuery, HentOrganisasjonsEnheterHierarkiQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HentOrganisasjonsEnheterHierarkiQuery, HentOrganisasjonsEnheterHierarkiQueryVariables>(HentOrganisasjonsEnheterHierarkiDocument, options);
+      }
+export function useHentOrganisasjonsEnheterHierarkiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentOrganisasjonsEnheterHierarkiQuery, HentOrganisasjonsEnheterHierarkiQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HentOrganisasjonsEnheterHierarkiQuery, HentOrganisasjonsEnheterHierarkiQueryVariables>(HentOrganisasjonsEnheterHierarkiDocument, options);
+        }
+export type HentOrganisasjonsEnheterHierarkiQueryHookResult = ReturnType<typeof useHentOrganisasjonsEnheterHierarkiQuery>;
+export type HentOrganisasjonsEnheterHierarkiLazyQueryHookResult = ReturnType<typeof useHentOrganisasjonsEnheterHierarkiLazyQuery>;
+export type HentOrganisasjonsEnheterHierarkiQueryResult = Apollo.QueryResult<HentOrganisasjonsEnheterHierarkiQuery, HentOrganisasjonsEnheterHierarkiQueryVariables>;

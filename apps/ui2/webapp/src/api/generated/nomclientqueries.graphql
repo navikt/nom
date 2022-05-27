@@ -1,13 +1,12 @@
-
 query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
-  organisasjonsenhet(where: {agressoId: $aid, orgNiv: $oniv}) {
+  organisasjonsenhet(where: { agressoId: $aid, orgNiv: $oniv }) {
     agressoId
     orgNiv
     navn
     gyldigFom
     gyldigTom
     underenheter: organiseringer(retning: under) {
-      organisasjonsenhet{
+      organisasjonsenhet {
         navn
         agressoId
         orgNiv
@@ -19,43 +18,43 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
     }
     overenheter: organiseringer(retning: over) {
       retning
-      organisasjonsenhet{
+      organisasjonsenhet {
         navn
         agressoId
         orgNiv
         organiseringer(retning: over) {
           retning
-          organisasjonsenhet{
+          organisasjonsenhet {
             navn
             agressoId
             orgNiv
             organiseringer(retning: over) {
               retning
-              organisasjonsenhet{
+              organisasjonsenhet {
                 navn
                 agressoId
                 orgNiv
                 organiseringer(retning: over) {
                   retning
-                  organisasjonsenhet{
+                  organisasjonsenhet {
                     navn
                     agressoId
                     orgNiv
                     organiseringer(retning: over) {
                       retning
-                      organisasjonsenhet{
+                      organisasjonsenhet {
                         navn
                         agressoId
                         orgNiv
                         organiseringer(retning: over) {
                           retning
-                          organisasjonsenhet{
+                          organisasjonsenhet {
                             navn
                             agressoId
                             orgNiv
                             organiseringer(retning: over) {
                               retning
-                              organisasjonsenhet{
+                              organisasjonsenhet {
                                 navn
                                 agressoId
                                 orgNiv
@@ -73,8 +72,8 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
         }
       }
     }
-    leder{
-      ressurs{
+    leder {
+      ressurs {
         navIdent
         personIdent
         person {
@@ -106,117 +105,169 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
   }
 }
 
-query HentAlleRessurser{
-    ressurser {
-      ressurs{
-        navIdent
-      }
+query HentAlleRessurser {
+  ressurser {
+    ressurs {
+      navIdent
     }
+  }
 }
 
 query hentRessurs($navIdent: String) {
-  ressurs(where: {navIdent: $navIdent}){
+  ressurs(where: { navIdent: $navIdent }) {
     fornavn
     etternavn
   }
 }
 
 query HentRessursMedNavIdent($navIdent: String) {
-    ressurs(where: {navIdent: $navIdent}) {
+  ressurs(where: { navIdent: $navIdent }) {
+    navIdent
+    personIdent
+    fornavn
+    etternavn
+    epost
+    visningsNavn
+    ledere {
+      ressurs {
         navIdent
-        personIdent
-        fornavn
-        etternavn
-    		epost
         visningsNavn
-    		ledere{
-            ressurs{
-                navIdent
-                visningsNavn
-            }
-        }
-        koblinger{
-            organisasjonsenhet{
-                agressoId
-                navn
-            }
-        }
+      }
     }
+    koblinger {
+      organisasjonsenhet {
+        agressoId
+        navn
+      }
+    }
+  }
 }
 
 query HentAlleOrganisasjonsenheter {
   organisasjonsenheter {
     id
     orgNiv
-    organisasjonsenhet{
+    organisasjonsenhet {
       orgNiv
       agressoId
       navn
-      leder{
-          ressurs{
-              navIdent
-              personIdent
-          }
+      leder {
+        ressurs {
+          navIdent
+          personIdent
+        }
       }
     }
     code
   }
 }
 
-query hentPerson($personIdent: String!){
-    person(where: {personIdent: $personIdent}) {
-        navIdent
-        personIdent
-        person{
-            navn{
-                fornavn
-                mellomnavn
-                etternavn
-            }
-        }
+query hentPerson($personIdent: String!) {
+  person(where: { personIdent: $personIdent }) {
+    navIdent
+    personIdent
+    person {
+      navn {
+        fornavn
+        mellomnavn
+        etternavn
+      }
     }
+  }
 }
 
 query searchRessurs($term: String!) {
-    search(term: $term) {
-        ...on Ressurs {
-          navIdent
-          visningsNavn
-        }
+  search(term: $term) {
+    ... on Ressurs {
+      navIdent
+      visningsNavn
     }
+  }
 }
 
-query HentOrganisasjonsenhetOgOrganisering($agressoId: String!, $orgNiv: String!) {
-    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
+query HentOrganisasjonsenhetOgOrganisering(
+  $agressoId: String!
+  $orgNiv: String!
+) {
+  organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
+    agressoId
+    orgNiv
+    navn
+    gyldigFom
+    gyldigTom
+    organiseringer {
+      retning
+      organisasjonsenhet {
         agressoId
+        orgNiv
         navn
         gyldigFom
         gyldigTom
-        organiseringer{
-            retning
-            organisasjonsenhet{
-                agressoId
-                orgNiv
-                navn
-                gyldigFom
-                gyldigTom
-            }
-            gyldigFom
-            gyldigTom
-        }
-        leder{
-            ressurs{
-                navIdent
-                personIdent
-            }
-        }
+      }
+      gyldigFom
+      gyldigTom
     }
+    leder {
+      ressurs {
+        navIdent
+        personIdent
+      }
+    }
+  }
 }
 
-query HentOrganisasjonsenhetMedOverenhet($agressoId: String!, $orgNiv: String!) {
-    organisasjonsenhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
-    		organiseringer(retning: over) {
-      		organisasjonsenhet {
+query HentOrganisasjonsenhetMedOverenhet(
+  $agressoId: String!
+  $orgNiv: String!
+) {
+  organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
+    organiseringer(retning: over) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+      }
+    }
+    agressoId
+    navn
+    gyldigFom
+    gyldigTom
+  }
+}
+
+query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
+  organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
+    
+    underenheter: organiseringer(retning: under) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+      }
+    }
+    
+    overenheter: organiseringer(retning: over) {
+      organisasjonsenhet {
+        navn
+        agressoId
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+          }
+        }
+        organiseringer(retning: over) {
+          organisasjonsenhet {
             navn
             agressoId
             orgNiv
@@ -225,11 +276,61 @@ query HentOrganisasjonsenhetMedOverenhet($agressoId: String!, $orgNiv: String!) 
                 navIdent
               }
             }
+            organiseringer(retning: over) {
+              organisasjonsenhet {
+                navn
+                agressoId
+                orgNiv
+                leder {
+                  ressurs {
+                    navIdent
+                  }
+                }
+                organiseringer(retning: over) {
+                  organisasjonsenhet {
+                    navn
+                    agressoId
+                    orgNiv
+                    leder {
+                      ressurs {
+                        navIdent
+                      }
+                    }
+                    organiseringer(retning: over) {
+                      organisasjonsenhet {
+                        navn
+                        agressoId
+                        orgNiv
+                        leder {
+                          ressurs {
+                            navIdent
+                          }
+                        }
+                        organiseringer(retning: over) {
+                          organisasjonsenhet {
+                            navn
+                            agressoId
+                            orgNiv
+                            leder {
+                              ressurs {
+                                navIdent
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
-    		}
-        agressoId
-        navn
-        gyldigFom
-        gyldigTom
+        }
+      }
     }
+    agressoId
+    navn
+    gyldigFom
+    gyldigTom
+  }
 }

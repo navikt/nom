@@ -1,88 +1,59 @@
-import BannerSmall from "../components/BannerSmall"
 import ContentWrapper from "../components/ContentWrapper"
 import * as Gq from "../api/generated/graphql_generated"
-import OrgEnhetList from "../components/OrgHierarki/OrgEnhetList"
 import { useParams } from "react-router"
-import { agressoIdDataToUrl, agressoUrlToData } from "../resources/utils/url_utils"
-import { Link } from "react-router-dom"
-import React, { useEffect, useState } from "react"
+import { agressoUrlToData } from "../resources/utils/url_utils"
+import OrgHierarkiList from "../components/OrgHierarki/OrgHierarkiList"
+import { Heading, Loader } from "@navikt/ds-react"
+import { css } from "@emotion/css"
 
-const UnderEnheter = (props: {underenheter: UnderEnheterList}) => (
-    <ul>
-        {props.underenheter.map(ue => (
-            <li>{ue.navn} - <Link to={'/org/' + agressoIdDataToUrl(ue.agressoId, ue.orgNiv, ue.navn)}>
-                                    {agressoIdDataToUrl(ue.agressoId, ue.orgNiv, ue.navn)}
-                            </Link>
-            </li>
-        ))}
-    </ul>
-)
-
-const useOverEnheter = (props: {variables: {agressoId: string, orgNiv: string}}) => {
-    const [overEnheter, setOverEnheter] = useState<OverEnhet[]>()
-    const [currentOverenhet, setCurrentOverenhet] = useState<any>(props)
-    const currentQuery = Gq.useHentOrganisasjonsenhetMedOverenhetQuery({...currentOverenhet, skip: !currentOverenhet})
-
-    // console.log({overEnheter, currentOverenhet, currentQuery})
-
-    useEffect(() => {
-        if (!currentQuery.data) return
-
-        const oe = extractOverEnhet(currentQuery.data)
-        if (!currentQuery.loading && oe) {
-            console.log({oe, currentOverenhet})
-            setOverEnheter([oe, ...overEnheter || []])
-            setCurrentOverenhet({ variables: {agressoId: oe.agressoId, orgNiv: oe.orgNiv}})
-        } else { 
-            console.log("I Else", overEnheter)
-            setCurrentOverenhet(undefined)
+const mapOverEnheter = (data: Gq.HentOrganisasjonsEnheterHierarkiQuery) => {
+    if (!data.organisasjonsenhet) return []
+    else if (data.organisasjonsenhet.overenheter.length === 0) return []
+    else {
+        let enheter = [data.organisasjonsenhet.overenheter[0] as Gq.Organisering]
+        while (enheter[0].organisasjonsenhet.organiseringer.length > 0) {
+            enheter = [enheter[0].organisasjonsenhet.organiseringer[0] as Gq.Organisering, ...enheter]
         }
-
-    }, [currentQuery.data])
-
-    
-    return {loading: !currentOverenhet, data: !currentOverenhet ? overEnheter : undefined, error: currentQuery.error}
+        return enheter 
+    }
 }
 
 const extractUnderenheter = (queryresult: Gq.HentOrganisasjonsenhetOgOrganiseringQuery) => {
     return queryresult.organisasjonsenhet?.organiseringer.filter(org => org.retning === Gq.Retning.Under).map(it => it.organisasjonsenhet) || []
 }
-
 const extractOverEnhet = (queryresult: Gq.HentOrganisasjonsenhetMedOverenhetQuery) => {
     return queryresult.organisasjonsenhet?.organiseringer[0]?.organisasjonsenhet
 }
+const extractCurrentEnhet = (queryresult: Gq.HentOrganisasjonsEnheterHierarkiQuery) => {
+    return queryresult.organisasjonsenhet || undefined
+}
 
-type UnderEnheterList = ReturnType<typeof extractUnderenheter>;
-type OverEnhet = ReturnType<typeof extractOverEnhet>;
+export type UnderEnheterList = ReturnType<typeof extractUnderenheter>;
+export type OverEnhet = ReturnType<typeof extractOverEnhet>;
+export type CurrentEnhet = ReturnType<typeof extractCurrentEnhet>
 
 const OrganisasjonHierarkiPage = () => {
     const {id} = useParams()
     const agrId = agressoUrlToData(id || '') 
 
-    //const query = Gq.useHentOrganisasjonsenhetOgOrganiseringQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
-    const overenheterQuery = useOverEnheter({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
-    console.log(overenheterQuery, "QUERY")
-
-    // if (query.error)
-    //     console.error(query.error)
-
-    //const underenheter=query.data?.organisasjonsenhet?.organiseringer.map(it => it.organisasjonsenhet) || []
+    const query = Gq.useHentOrganisasjonsEnheterHierarkiQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
 
     return (
         <>
-            <BannerSmall title="Organisasjonshierarkiet"/>
             <ContentWrapper>
                 <>
-                    <p>{JSON.stringify(agrId)}</p>
-                    {/* {query.loading && <p>Loading...</p>}
+                    <Heading size="xlarge" className={css({ marginBottom: '20px'})} >Organisasjonen</Heading>
+
                     {query.error && <p>Feil</p>}
+                    {!query.data && <Loader />}
                     
-                    {query.data && (
-                        <>
-                            <pre>{JSON.stringify(query.data, null, 2)}</pre>) 
-                             <UnderEnheter underenheter={extractUnderenheter(query.data)} /> 
-                        </>
-                    )} */}
+                    {query.data  && (
+                        <OrgHierarkiList 
+                            currentEnhet={extractCurrentEnhet(query.data)}
+                            underEnheter={query.data.organisasjonsenhet?.underenheter as Gq.Organisering[]}
+                            overEnheter={mapOverEnheter(query.data)}
+                        />
+                    )}
                     
                 </>
             </ContentWrapper>

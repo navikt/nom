@@ -9,11 +9,10 @@ const customLinkPanelStyles = css({
 })
 
 type CustomLinkPanelProps = {
-    title: string
-    description: string
-    icon: string
-    linkTo: string
-    marginBottom?: string
+    title?: string
+    description?: string
+    icon?: string
+    linkTo?: string
 }
 
 const CustomLinkPanel = (props: CustomLinkPanelProps) => {
