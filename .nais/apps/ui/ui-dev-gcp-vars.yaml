@@ -6,6 +6,10 @@ env:
     value: https://nom-api.dev.intern.nav.no
   - name: NOM_API_SCOPE
     value: api://dev-gcp.nom.nom-api/.default
+  - name: TEAM_CATALOG_API_URL
+    value: https://teamkatalog-api.dev-fss-pub.nais.io
+  - name: TEAM_CATALOG_SCOPE
+    value: api://dev-fss.nom.team-catalog-backend/.default
   - name: DEFAULT_BASE_URL
     value: https://nom-ui2.dev.intern.nav.no
   - name: NODE_ENV
