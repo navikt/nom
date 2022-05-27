@@ -9,12 +9,11 @@ import { Organisering } from "../../api/generated/graphql_generated";
 const linkStyles = css({ textDecoration: "none", color: "black" });
 const dividerStyles = css({ 
     background: '#00347D', 
-    height: '30px', 
+    height: '20px', 
     width: '2px',
     border: '1px solid #00347D', 
     margin: '0 auto'
 })
-
 const Divider = () => <div className={dividerStyles}></div>
 
 type OrgHierarkiListProps = {
