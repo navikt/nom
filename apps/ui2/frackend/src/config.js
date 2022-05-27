@@ -49,6 +49,8 @@ const azureAd = {
 const proxy = {
     nomApiScope: requireEnv("NOM_API_SCOPE"),
     nomApiUrl: requireEnv("NOM_API_URL"),
+    teamcatApiScope: requireEnv("TEAM_CATALOG_SCOPE"),
+    teamcatApiUrl: requireEnv("TEAM_CATALOG_API_URL")
 }
 
 const app = {
