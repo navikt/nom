@@ -18,7 +18,7 @@ type CustomLinkPanelProps = {
 const CustomLinkPanel = (props: CustomLinkPanelProps) => {
 
     return (
-        <div className={props.marginBottom && css({ marginBottom: props.marginBottom})}>
+        <div>
             <LinkPanel href={props.linkTo}>
                 <div className={customLinkPanelStyles}>
                 <img src={props.icon} className={css({ marginRight: '50px'})} />
