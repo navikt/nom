@@ -1,5 +1,5 @@
 FROM navikt/java:17
-LABEL maintainer="Team Registre"
+LABEL maintainer="Team Org"
 
 ARG JAR_PATH
 

@@ -1,0 +1,31 @@
+app:
+  name: ${NAIS_APP_NAME:nav-ident}
+
+
+nom:
+  libs:
+    utils:
+      common:
+        kafka:
+          load-properties: false
+        app:
+          load-properties: true
+
+management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mappings
+
+spring:
+  main:
+    banner-mode: "log"
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 2
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    schemas: public
+    table: schema_version
