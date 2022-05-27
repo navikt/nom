@@ -14,7 +14,6 @@ const MainPage = () => {
             description="Oversikt over alle ressurser i NAV og mulighet for å opprette nye ressurser."
             icon={ressursLogo}
             linkTo="/ressurs/create"
-            marginBottom="20px"
           />
 
           <CustomLinkPanel
