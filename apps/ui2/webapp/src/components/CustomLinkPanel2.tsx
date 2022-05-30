@@ -4,6 +4,7 @@ import { Next } from "@navikt/ds-icons"
 export enum LinkPanelType {
     CURRENT='current',
     OVERENHET='overenhet',
+    KOBLING='kobling',
     LARGE='large',
     SMALL='small'
 }
@@ -35,6 +36,12 @@ const linkPanelOverenhetStyles = css(commonCss, {
     width: "100%",
     marginBottom: '0px'
 })
+const linkPanelKoblingStyles = css(commonCss, {
+    backgroundColor: "#FFFFFF",
+    height: '70px',
+    width: "100%",
+    borderLeft: '5px solid #134852'
+})
 
 type CustomLinkPanel2Props = {
     children: React.ReactNode
@@ -48,6 +55,7 @@ const CustomLinkPanel2 = (props: CustomLinkPanel2Props) => {
         if (type === LinkPanelType.CURRENT) return linkPanelCurrentStyles
         else if (type === LinkPanelType.OVERENHET) return linkPanelOverenhetStyles
         else if (type === LinkPanelType.LARGE) return linkPanelLargeStyles
+        else if (type === LinkPanelType.KOBLING) return linkPanelKoblingStyles
     }
 
     return (

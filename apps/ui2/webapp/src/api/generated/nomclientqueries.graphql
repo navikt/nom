@@ -332,5 +332,11 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
     navn
     gyldigFom
     gyldigTom
+    koblinger {
+      ressurs {
+          navIdent
+          personIdent
+      }
+    }
   }
 }
