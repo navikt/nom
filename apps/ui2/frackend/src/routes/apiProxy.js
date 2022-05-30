@@ -33,5 +33,6 @@ function _setupProxy(app, proxyPath, scope, apiTargetUrl) {
 }
 
 const nomApiSetupProxy = (app) => _setupProxy(app, '/nom-api', config.proxy.nomApiScope, config.proxy.nomApiUrl)
+const teamcatApiSetupProxy = (app) => _setupProxy(app, "/teamcat",config.proxy.teamcatApiScope, config.proxy.teamcatApiUrl)
 
-export {nomApiSetupProxy}
+export {nomApiSetupProxy, teamcatApiSetupProxy}

@@ -1,5 +1,5 @@
 import express from 'express';
-import {nomApiSetupProxy} from "./routes/apiProxy.js";
+import {nomApiSetupProxy, teamcatApiSetupProxy} from "./routes/apiProxy.js";
 import setupAcuators from './routes/actuators.js';
 import setupAuth from './auth/auth.js';
 import setupStaticRoutes from "./routes/frontendRoute.js";
@@ -29,6 +29,7 @@ setupAcuators(app)
 await setupAuth.setupAuth(app);
 
 nomApiSetupProxy(app);
+teamcatApiSetupProxy(app)
 
 setupStaticRoutes(app);
 
