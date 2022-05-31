@@ -36,7 +36,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                         <EnhetInfo
                           title={oe.organisasjonsenhet.navn}
                           lederNavn="Mangler Navn"
-                          ident={'K152330'}
+                          ident={oe.organisasjonsenhet.leder[0].ressurs.navIdent}
                         />
                       </CustomLinkPanel2>
                     </Link>
@@ -60,6 +60,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                   <EnhetInfo
                     title={ue.organisasjonsenhet.navn}
                     lederNavn="Mangler Navn"
+                    ident={ue.organisasjonsenhet.leder[0].ressurs.navIdent}
                   />
                 </CustomLinkPanel2>
               </Link>

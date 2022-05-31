@@ -1,6 +1,7 @@
 import { css } from "@emotion/css"
 import { LinkPanel } from "@navikt/ds-react"
 import { mannMedFjes } from "../Images"
+import UserImage from "../UserImage"
 
 const enhetInfoStyles = css({
     height: '100%',
@@ -32,14 +33,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
                 <LinkPanel.Title>{title}</LinkPanel.Title>
                 <LinkPanel.Description>Leder: <span> {lederNavn}</span></LinkPanel.Description>
             </div>
-            <img 
-                src={ident ? getImageUrl(ident) : mannMedFjes}
-                className={css({ height: '100%'})}
-                onError={(e) => {
-                    console.log('Feil i henting av bilde', e)
-                }}
-
-            />
+            <UserImage navIdent={ident} />
         </div>
     )
 }
