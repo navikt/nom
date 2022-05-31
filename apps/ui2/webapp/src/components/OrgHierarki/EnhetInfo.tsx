@@ -21,7 +21,6 @@ type EnhetInfoProps = {
 const getImageUrl = (ident: string) => {
     console.log(ident, "IDENT")
     return `https://nom-ui2.intern.nav.no/teamcat/resource/${ident}/photo`
-
 }
 const EnhetInfo = (props: EnhetInfoProps) => {
     const {title, lederNavn, ident, icon} = props
