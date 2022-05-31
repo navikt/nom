@@ -19,7 +19,7 @@ type EnhetInfoProps = {
 
 const getImageUrl = (ident: string) => {
     console.log(ident, "IDENT")
-    return `https://nom-ui2.intern.nav.no/teamcat/${ident}/photo`
+    return `https://nom-ui2.intern.nav.no/teamcat/resource/${ident}/photo`
 
 }
 const EnhetInfo = (props: EnhetInfoProps) => {
@@ -35,8 +35,8 @@ const EnhetInfo = (props: EnhetInfoProps) => {
             <img 
                 src={ident ? getImageUrl(ident) : mannMedFjes}
                 className={css({ height: '100%'})}
-                onError={() => {
-                    console.log('Feil i henting av bilde')
+                onError={(e) => {
+                    console.log('Feil i henting av bilde', e)
                 }}
 
             />
