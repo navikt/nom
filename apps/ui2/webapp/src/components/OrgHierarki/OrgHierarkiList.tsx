@@ -5,7 +5,7 @@ import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
 import EnhetInfo from "./EnhetInfo";
 import { Organisering } from "../../api/generated/graphql_generated";
-import { Heading, Loader } from "@navikt/ds-react";
+import { Heading } from "@navikt/ds-react";
 
 const linkStyles = css({ textDecoration: "none", color: "black" });
 const dividerStyles = css({ 
@@ -24,7 +24,7 @@ type OrgHierarkiListProps = {
 };
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
-  const { currentEnhet, underEnheter, overEnheter} = props;
+  const { currentEnhet, underEnheter, overEnheter} = props
 
   return (
     <div>
@@ -36,6 +36,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                         <EnhetInfo
                           title={oe.organisasjonsenhet.navn}
                           lederNavn="Mangler Navn"
+                          ident={'K152330'}
                         />
                       </CustomLinkPanel2>
                     </Link>
@@ -71,7 +72,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
           <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
             {currentEnhet.koblinger.map(k => 
               <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs.navIdent}</Heading>
+                <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs.visningsNavn}</Heading>
               </CustomLinkPanel2>
             )}
           </div>

@@ -13,11 +13,18 @@ const enhetInfoStyles = css({
 type EnhetInfoProps = {
     title: string
     lederNavn: string
+    ident?: string
     icon?: string | undefined
 }
 
+const getImageUrl = (ident: string) => {
+    console.log(ident, "IDENT")
+    return `https://nom-ui2.intern.nav.no/teamcat/${ident}/photo`
+
+}
 const EnhetInfo = (props: EnhetInfoProps) => {
-    const {title, lederNavn, icon} = props
+    const {title, lederNavn, ident, icon} = props
+
 
     return (
         <div className={enhetInfoStyles}>
@@ -25,7 +32,14 @@ const EnhetInfo = (props: EnhetInfoProps) => {
                 <LinkPanel.Title>{title}</LinkPanel.Title>
                 <LinkPanel.Description>Leder: <span> {lederNavn}</span></LinkPanel.Description>
             </div>
-            <img src={mannMedFjes} className={css({ height: '100%'})}/>
+            <img 
+                src={ident ? getImageUrl(ident) : mannMedFjes}
+                className={css({ height: '100%'})}
+                onError={() => {
+                    console.log('Feil i henting av bilde')
+                }}
+
+            />
         </div>
     )
 }
