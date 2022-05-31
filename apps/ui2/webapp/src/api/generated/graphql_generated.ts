@@ -438,7 +438,7 @@ export type HentOrganisasjonsEnheterHierarkiQueryVariables = Exact<{
 }>;
 
 
-export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string } }> } }> } }> } }> } }> } }> } }>, koblinger: Array<{ __typename?: 'OrganisasjonsenhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, visningsNavn?: string | null } }> } | null };
+export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }> } }> } }> } }> } }> } }> } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, koblinger: Array<{ __typename?: 'OrganisasjonsenhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, visningsNavn?: string | null } }> } | null };
 
 
 
@@ -1377,6 +1377,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
         leder {
           ressurs {
             navIdent
+            visningsNavn
           }
         }
       }
@@ -1389,6 +1390,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
         leder {
           ressurs {
             navIdent
+            visningsNavn
           }
         }
         organiseringer(retning: over) {
@@ -1399,6 +1401,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
             leder {
               ressurs {
                 navIdent
+                visningsNavn
               }
             }
             organiseringer(retning: over) {
@@ -1409,6 +1412,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
                 leder {
                   ressurs {
                     navIdent
+                    visningsNavn
                   }
                 }
                 organiseringer(retning: over) {
@@ -1419,6 +1423,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
                     leder {
                       ressurs {
                         navIdent
+                        visningsNavn
                       }
                     }
                     organiseringer(retning: over) {
@@ -1429,6 +1434,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
                         leder {
                           ressurs {
                             navIdent
+                            visningsNavn
                           }
                         }
                         organiseringer(retning: over) {
@@ -1439,6 +1445,7 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
                             leder {
                               ressurs {
                                 navIdent
+                                visningsNavn
                               }
                             }
                           }
@@ -1457,6 +1464,12 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
     navn
     gyldigFom
     gyldigTom
+    leder {
+      ressurs {
+        navIdent
+        visningsNavn
+      }
+    }
     koblinger {
       ressurs {
         navIdent

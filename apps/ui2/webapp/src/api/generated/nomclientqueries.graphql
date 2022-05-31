@@ -251,6 +251,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
         leder {
           ressurs {
             navIdent
+            visningsNavn
           }
         }
       }
@@ -264,6 +265,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
         leder {
           ressurs {
             navIdent
+            visningsNavn
           }
         }
         organiseringer(retning: over) {
@@ -274,6 +276,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
             leder {
               ressurs {
                 navIdent
+                visningsNavn
               }
             }
             organiseringer(retning: over) {
@@ -284,6 +287,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                 leder {
                   ressurs {
                     navIdent
+                    visningsNavn
                   }
                 }
                 organiseringer(retning: over) {
@@ -294,6 +298,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                     leder {
                       ressurs {
                         navIdent
+                        visningsNavn
                       }
                     }
                     organiseringer(retning: over) {
@@ -304,6 +309,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                         leder {
                           ressurs {
                             navIdent
+                            visningsNavn
                           }
                         }
                         organiseringer(retning: over) {
@@ -314,6 +320,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                             leder {
                               ressurs {
                                 navIdent
+                                visningsNavn
                               }
                             }
                           }
@@ -332,6 +339,12 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
     navn
     gyldigFom
     gyldigTom
+    leder {
+      ressurs {
+        navIdent
+        visningsNavn 
+      }
+    }
     koblinger {
       ressurs {
           navIdent
