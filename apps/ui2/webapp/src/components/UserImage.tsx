@@ -1,3 +1,4 @@
+import { css } from "@emotion/css"
 import { mannMedFjes } from "./Images"
 
 const imageSrc = (navIdent: string) => `https://nom-ui2.intern.nav.no/teamcat/resource/${navIdent}/photo`
@@ -13,7 +14,7 @@ const UserImage = (props: UserImageProps) => {
 
     return <img 
               src={navIdent ? imageSrc(navIdent) : mannMedFjes}
-              sizes="65px"
+              className={css({ height: '65px'})}
            />
 }
 
