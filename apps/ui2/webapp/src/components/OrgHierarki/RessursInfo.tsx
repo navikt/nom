@@ -50,7 +50,6 @@ const RessursInfo = (props: RessursInfoProps) => {
                         <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
                         <TextWithLabel2 label="Leder:  " text={ressurs.ledere[0].ressurs.visningsNavn || 'Mangler leder'} />
                     </div>
-                    
                 </div>
             </div>
         </CustomLinkPanel2>
