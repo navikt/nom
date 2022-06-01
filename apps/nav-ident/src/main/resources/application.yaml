@@ -16,9 +16,7 @@ spring:
   main:
     banner-mode: "log"
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:${DATABASE_URL}
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
