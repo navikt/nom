@@ -16,7 +16,7 @@ spring:
   main:
     banner-mode: "log"
   datasource:
-    url: jdbc:${DATABASE_URL}
+    url: jdbc:${DATABASE.URL}
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
