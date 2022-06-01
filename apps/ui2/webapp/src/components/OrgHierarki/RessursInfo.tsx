@@ -19,7 +19,8 @@ const ressursMetadataStyles = css({
     width: '100%',
     marginTop: '10px',
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    alignItems: 'center'
 })
 
 
@@ -44,7 +45,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                         <TextWithLabel2 label="Org-enhet: " text="Mangler enhet" />
                     </div>
                     
-                    <div>
+                    <div className={css({ marginLeft: '20px'})}>
                         <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
                         <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
                         <TextWithLabel2 label="Leder:  " text={ressurs.ledere[0].ressurs.visningsNavn || 'Mangler leder'} />
