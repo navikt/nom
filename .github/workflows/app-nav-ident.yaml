@@ -56,7 +56,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/dev-fss/nav-ident.yaml
+          RESOURCE: .nais/dev-gcp/nav-ident.yaml
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -69,4 +69,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/prod-fss/nav-ident.yaml
+          RESOURCE: .nais/prod-gcp/nav-ident.yaml

@@ -1,7 +1,6 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
 
-
 nom:
   libs:
     utils:
