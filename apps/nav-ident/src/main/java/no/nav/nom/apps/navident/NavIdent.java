@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories
 @ConfigurationPropertiesScan
 public class NavIdent {
+
     public static void main(String[] args) {
         PropertyUtils.initDefaultProperties("nav-ident");
         SpringApplication.run(NavIdent.class, args);
