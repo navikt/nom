@@ -5,10 +5,15 @@ import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
 import EnhetInfo from "./EnhetInfo";
 import { Organisering, Ressurs } from "../../api/generated/graphql_generated";
-import { Heading } from "@navikt/ds-react";
+import { BodyShort, Heading } from "@navikt/ds-react";
 import RessursInfo from "./RessursInfo";
+import { Back, Next } from "@navikt/ds-icons";
 
 const linkStyles = css({ textDecoration: "none", color: "black" });
+const ressursLinkStyles = css({ 
+  display: 'flex',
+  marginTop: '30px',
+})
 const dividerStyles = css({ 
     background: '#00347D', 
     height: '20px', 
@@ -27,11 +32,11 @@ type OrgHierarkiListProps = {
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
   const { currentEnhet, underEnheter, overEnheter, ressurs} = props
-  console.log(ressurs, "Ressurs")
 
   return (
     <div>
       <div>
+        {/* Liste av alle overenheter */}
         {overEnheter.map((oe: Organisering) => (
                   <>
                     <Link to={"/org/" + agressoIdDataToUrl(oe.organisasjonsenhet.agressoId, oe.organisasjonsenhet.orgNiv, oe.organisasjonsenhet.navn)} className={linkStyles}>
@@ -49,7 +54,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         }
       </div>
       
-
+      {/* Den valgte enheten */}
       <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
         <EnhetInfo 
             title={currentEnhet?.navn || 'Feil i henting av navn'} 
@@ -58,6 +63,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         />
       </CustomLinkPanel2>
 
+      {/* Liste av underenheter */}
       {underEnheter.length > 0 && (
         <div className={css({ display: "grid", gridTemplateColumns: underEnheter.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
           {underEnheter.map((ue: Organisering) => (
@@ -76,6 +82,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         </div>
       )}
 
+      {/* Liste av ressurser */}
       {underEnheter.length < 1 && currentEnhet && !ressurs && (
           <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
             {currentEnhet.koblinger.map(k =>
@@ -89,8 +96,18 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
           </div>
       )}
 
-      {underEnheter.length < 1 && ressurs && (
-            <RessursInfo ressurs={ressurs}/>
+      {/* Visning av en ressurs */}
+      {underEnheter.length < 1 && currentEnhet && ressurs && (
+            <>
+              <RessursInfo ressurs={ressurs}/>
+
+              <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn)}>
+                  <div className={ressursLinkStyles}>
+                      <Back className="navds-link-panel__chevron"/>
+                      <BodyShort size="medium" >Se alle ressurser i {currentEnhet?.navn}</BodyShort>
+                  </div>
+              </Link>
+            </>
       )}
     </div>
   );

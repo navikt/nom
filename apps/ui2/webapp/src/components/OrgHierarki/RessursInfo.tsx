@@ -1,6 +1,5 @@
 import { css } from "@emotion/css"
 import { Heading } from "@navikt/ds-react"
-import React from "react"
 import { Ressurs } from "../../api/generated/graphql_generated"
 import CustomLinkPanel2,{ LinkPanelType }  from "../CustomLinkPanel2"
 import TextWithLabel2 from "../TextWithLabel2"
@@ -17,12 +16,11 @@ const ressursInfoStyles = css({
 
 const ressursMetadataStyles = css({
     width: '100%',
-    marginTop: '10px',
+    marginTop: '30px',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
 })
-
 
 type RessursInfoProps = {
     ressurs: Ressurs
@@ -48,7 +46,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                     <div className={css({ marginLeft: '20px'})}>
                         <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
                         <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
-                        <TextWithLabel2 label="Leder:  " text={ressurs.ledere[0].ressurs.visningsNavn || 'Mangler leder'} />
+                        <TextWithLabel2 label="Leder: " text={ressurs.ledere[0].ressurs.visningsNavn || 'Mangler leder'} />
                     </div>
                 </div>
             </div>

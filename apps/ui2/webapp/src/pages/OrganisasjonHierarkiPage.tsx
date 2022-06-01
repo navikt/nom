@@ -40,8 +40,6 @@ const OrganisasjonHierarkiPage = () => {
     const query = Gq.useHentOrganisasjonsEnheterHierarkiQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
     const resourceQuery = Gq.useHentRessursMedNavIdentQuery({variables: { navIdent: resourceId}, skip: !resourceId})
 
-    console.log(resourceQuery, "RESOUCE")
-
     return (
         <>
             <ContentWrapper>
