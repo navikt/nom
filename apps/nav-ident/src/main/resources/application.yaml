@@ -20,5 +20,4 @@ spring:
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
-  flyway:
-    url: jdbc:${DATABASE_URL}
+
