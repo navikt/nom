@@ -1,4 +1,5 @@
 import { css } from "@emotion/css"
+import { Loader } from "@navikt/ds-react"
 import React from "react"
 import { mannMedFjes } from "./Images"
 
@@ -12,11 +13,23 @@ type UserImageProps = {
 const UserImage = (props: UserImageProps) => {
     const { navIdent, size } = props
     const [image, setImage] = React.useState(navIdent ? imageSrc(navIdent) : mannMedFjes)
+    const [loading, setLoading] = React.useState(true)
 
-    return <img 
-              className={css({ height: size || '65px', width: size || '65px', borderRadius: '100%'})}
-              src={navIdent ? imageSrc(navIdent) : mannMedFjes}
-           />
+       return (
+           <>
+                {loading && <Loader />}
+                <img 
+                    className={css({ height: size || '65px', width: size || '65px', borderRadius: '100%'})}
+                    src={image}
+                    onError={() => {
+                        setImage(mannMedFjes)
+                        setLoading(false)
+                    }}
+                    onLoad={() => setLoading(false)}
+                />
+           </>
+          
+       )
 }
 
 export default UserImage
