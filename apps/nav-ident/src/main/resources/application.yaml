@@ -23,9 +23,4 @@ spring:
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
-  jpa:
-    hibernate:
-      ddl-auto: none
-  flyway:
-    schemas: public
-    table: schema_version
+
