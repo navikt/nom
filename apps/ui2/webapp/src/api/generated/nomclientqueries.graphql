@@ -336,6 +336,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
       }
     }
     agressoId
+    orgNiv
     navn
     gyldigFom
     gyldigTom

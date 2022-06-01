@@ -5,6 +5,7 @@ export enum LinkPanelType {
     CURRENT='current',
     OVERENHET='overenhet',
     KOBLING='kobling',
+    RESSURS='ressurs',
     LARGE='large',
     SMALL='small'
 }
@@ -42,6 +43,11 @@ const linkPanelKoblingStyles = css(commonCss, {
     width: "100%",
     borderLeft: '5px solid #134852'
 })
+const linkPanelRessursStyles = css({
+    backgroundColor: "#CCE1FF",
+    width: "100%",
+    borderTop: '5px solid #134852'
+})
 
 type CustomLinkPanel2Props = {
     children: React.ReactNode
@@ -56,13 +62,14 @@ const CustomLinkPanel2 = (props: CustomLinkPanel2Props) => {
         else if (type === LinkPanelType.OVERENHET) return linkPanelOverenhetStyles
         else if (type === LinkPanelType.LARGE) return linkPanelLargeStyles
         else if (type === LinkPanelType.KOBLING) return linkPanelKoblingStyles
+        else if (type === LinkPanelType.RESSURS) return linkPanelRessursStyles
     }
 
     return (
             <>
                 <div className={setLinkPanelStyles()}>
                     {children}
-                    {type !== LinkPanelType.CURRENT && <Next className="navds-link-panel__chevron" />}
+                    {type !== LinkPanelType.CURRENT && type !== LinkPanelType.RESSURS && <Next className="navds-link-panel__chevron" />}
                 </div>
             </>
     )

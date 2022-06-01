@@ -33,12 +33,15 @@ export type OverEnhet = ReturnType<typeof extractOverEnhet>;
 export type CurrentEnhet = ReturnType<typeof extractCurrentEnhet>
 
 const OrganisasjonHierarkiPage = () => {
-    const {id} = useParams()
+    const {id, resourceId} = useParams()
+
     const agrId = agressoUrlToData(id || '') 
 
     const query = Gq.useHentOrganisasjonsEnheterHierarkiQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
-    console.log(query, "DATA")
-    
+    const resourceQuery = Gq.useHentRessursMedNavIdentQuery({variables: { navIdent: resourceId}, skip: !resourceId})
+
+    console.log(resourceQuery, "RESOUCE")
+
     return (
         <>
             <ContentWrapper>
@@ -53,6 +56,7 @@ const OrganisasjonHierarkiPage = () => {
                             currentEnhet={extractCurrentEnhet(query.data)}
                             underEnheter={query.data.organisasjonsenhet?.underenheter as Gq.Organisering[]}
                             overEnheter={mapOverEnheter(query.data)}
+                            ressurs={resourceQuery.data ? resourceQuery.data.ressurs as Gq.Ressurs : undefined}
                         />
                     )}
                     

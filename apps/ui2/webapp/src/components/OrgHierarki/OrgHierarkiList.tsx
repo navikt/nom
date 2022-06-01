@@ -4,8 +4,9 @@ import { CurrentEnhet } from "../../pages/OrganisasjonHierarkiPage";
 import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
 import EnhetInfo from "./EnhetInfo";
-import { Organisering } from "../../api/generated/graphql_generated";
+import { Organisering, Ressurs } from "../../api/generated/graphql_generated";
 import { Heading } from "@navikt/ds-react";
+import RessursInfo from "./RessursInfo";
 
 const linkStyles = css({ textDecoration: "none", color: "black" });
 const dividerStyles = css({ 
@@ -21,10 +22,12 @@ type OrgHierarkiListProps = {
   currentEnhet: CurrentEnhet 
   underEnheter: Organisering[]
   overEnheter: Organisering[]
+  ressurs?: Ressurs
 };
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
-  const { currentEnhet, underEnheter, overEnheter} = props
+  const { currentEnhet, underEnheter, overEnheter, ressurs} = props
+  console.log(ressurs, "Ressurs")
 
   return (
     <div>
@@ -73,14 +76,21 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         </div>
       )}
 
-      {underEnheter.length < 1 && currentEnhet && (
+      {underEnheter.length < 1 && currentEnhet && !ressurs && (
           <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
-            {currentEnhet.koblinger.map(k => 
-              <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs.visningsNavn}</Heading>
-              </CustomLinkPanel2>
+            {currentEnhet.koblinger.map(k =>
+              <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`}>
+                  <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
+                    <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs.visningsNavn}</Heading>
+                  </CustomLinkPanel2>
+              </Link> 
+              
             )}
           </div>
+      )}
+
+      {underEnheter.length < 1 && ressurs && (
+            <RessursInfo ressurs={ressurs}/>
       )}
     </div>
   );

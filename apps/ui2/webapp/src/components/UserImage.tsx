@@ -14,7 +14,7 @@ const UserImage = (props: UserImageProps) => {
 
     return <img 
               src={navIdent ? imageSrc(navIdent) : mannMedFjes}
-              className={css({ height: '65px', borderRadius: '100%', marginRight: '10px'})}
+              className={css({ height: '65px', borderRadius: '100%'})}
            />
 }
 

@@ -12,11 +12,15 @@ const AppRoutes = () => (
     <Route path="/" element={<MainPage />} />
     <Route path="/ressurs/:id" element={<ResourceView />} />
     <Route path="/ressurs/create" element={<CreateResourceView />} />
-    <Route path="/org" element={<Navigate to="/org/0_NAV_NAV"/>} />
-    <Route path="/org/:id" element={<OrganisasjonHierarkiPage />} />
+
     <Route path="/formtestpage" element={<FormTestPage />} />
     <Route path={"/nomapigraphqltest"} element={<NomApiGraphqlTestPage />} />
     <Route path={"*"} element={<NotfoundPage />} />
+    
+    <Route path="/org" element={<Navigate to="/org/0_NAV_NAV"/>} />
+    <Route path="/org/:id" element={<OrganisasjonHierarkiPage />}>
+        <Route path=":resourceId" element={<OrganisasjonHierarkiPage />} />
+    </Route>
   </Routes>
 );
 
