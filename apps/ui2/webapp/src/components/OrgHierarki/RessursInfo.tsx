@@ -7,9 +7,11 @@ import TextWithLabel2 from "../TextWithLabel2"
 import UserImage from "../UserImage"
 
 const ressursInfoStyles = css({
-    height: '400px',
+    height: '350px',
     width: '100%',
-    margin: '0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'column',
     paddingTop: '20px'
 })
 
@@ -31,7 +33,7 @@ const RessursInfo = (props: RessursInfoProps) => {
     return (
         <CustomLinkPanel2 type={LinkPanelType.RESSURS}>
             <div className={ressursInfoStyles}>
-                <div><UserImage navIdent={ressurs.navIdent} /></div>
+                <UserImage navIdent={ressurs.navIdent} size="130px" />
 
                 <Heading size="large">{ressurs.visningsNavn}</Heading>
 
@@ -50,7 +52,6 @@ const RessursInfo = (props: RessursInfoProps) => {
                     
                 </div>
             </div>
-
         </CustomLinkPanel2>
     )
 }
