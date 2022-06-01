@@ -1,5 +1,5 @@
 import { css } from "@emotion/css"
-import { BodyShort, Detail, Label } from "@navikt/ds-react"
+import { BodyShort, Label } from "@navikt/ds-react"
 
 
 const textStyles = css({ 
