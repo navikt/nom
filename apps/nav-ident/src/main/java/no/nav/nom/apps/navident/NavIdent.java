@@ -18,6 +18,10 @@ public class NavIdent {
         System.setProperty("spring.main.banner-mode", "log"); // Show customized banner
 
         log.info("DATABASE_DATABASE env prop: ${DATABASE_DATABASE}");
+        log.info("DATABASE_DATABASE env prop: ${DATABASE.DATABASE}");
+        log.info("NAIS_CLIENT_ID env prop: ${NAIS_CLIENT_ID}");
+        log.info("NAIS_CLIENT_ID env prop: ${NAIS.CLIENT.ID}");
+
         SpringApplication.run(NavIdent.class, args);
     }
 }
