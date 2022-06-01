@@ -1,6 +1,5 @@
 import { css } from "@emotion/css"
 import { LinkPanel } from "@navikt/ds-react"
-import { mannMedFjes } from "../Images"
 import UserImage from "../UserImage"
 
 const enhetInfoStyles = css({
@@ -16,14 +15,11 @@ type EnhetInfoProps = {
     lederNavn: string
     ident?: string
     icon?: string | undefined
+    overenhet?: boolean
 }
 
-const getImageUrl = (ident: string) => {
-    console.log(ident, "IDENT")
-    return `https://nom-ui2.intern.nav.no/teamcat/resource/${ident}/photo`
-}
 const EnhetInfo = (props: EnhetInfoProps) => {
-    const {title, lederNavn, ident, icon} = props
+    const {title, lederNavn, ident, overenhet} = props
 
 
     return (
@@ -32,7 +28,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
                 <LinkPanel.Title>{title}</LinkPanel.Title>
                 <LinkPanel.Description>Leder: <span> {lederNavn}</span></LinkPanel.Description>
             </div>
-            <UserImage navIdent={ident} />
+            {!overenhet && <UserImage navIdent={ident} />}
         </div>
     )
 }
