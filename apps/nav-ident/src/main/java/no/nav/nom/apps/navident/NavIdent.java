@@ -13,6 +13,7 @@ public class NavIdent {
 
     public static void main(String[] args) {
         PropertyUtils.initDefaultProperties("nav-ident");
+        System.setProperty("spring.main.banner-mode", "log"); // Show customized banner
         SpringApplication.run(NavIdent.class, args);
     }
 }
