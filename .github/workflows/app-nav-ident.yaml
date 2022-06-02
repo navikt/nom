@@ -6,6 +6,7 @@ on:
       - 'main'
     paths:
       - 'apps/nav-ident/**'
+      - 'libs/utils-common/**'
       - '.nais/*/nav-ident.yaml'
       - '.github/*/app-nav-ident.yaml'
 
