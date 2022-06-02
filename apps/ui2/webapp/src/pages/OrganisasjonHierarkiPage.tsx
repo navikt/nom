@@ -48,6 +48,7 @@ const OrganisasjonHierarkiPage = () => {
                     <Heading size="xlarge" className={css({ marginBottom: '20px'})} >Organisasjonen</Heading>
 
                     {query.error && <p>Feil</p>}
+                    
                     {!query.data && <Loader />}
                     
                     {query.data  && (

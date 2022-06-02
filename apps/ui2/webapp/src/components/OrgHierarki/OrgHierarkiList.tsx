@@ -38,7 +38,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       <div>
         {/* Liste av alle overenheter */}
         {overEnheter.map((oe: Organisering) => (
-                  <>
+                  <div key={agressoIdDataToUrl(oe.organisasjonsenhet.agressoId, oe.organisasjonsenhet.orgNiv, oe.organisasjonsenhet.navn)}>
                     <Link to={"/org/" + agressoIdDataToUrl(oe.organisasjonsenhet.agressoId, oe.organisasjonsenhet.orgNiv, oe.organisasjonsenhet.navn)} className={linkStyles}>
                       <CustomLinkPanel2 type={LinkPanelType.OVERENHET}>
                         <EnhetInfo
@@ -49,7 +49,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                       </CustomLinkPanel2>
                     </Link>
                     <Divider />
-                  </>
+                  </div>
                 ))
         }
       </div>
@@ -67,7 +67,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       {underEnheter.length > 0 && (
         <div className={css({ display: "grid", gridTemplateColumns: underEnheter.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
           {underEnheter.map((ue: Organisering) => (
-            <>
+            <div key={agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)}>
               <Link to={"/org/" + agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)} className={linkStyles}>
                 <CustomLinkPanel2 type={LinkPanelType.LARGE}>
                   <EnhetInfo
@@ -77,7 +77,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                   />
                 </CustomLinkPanel2>
               </Link>
-            </>
+            </div>
           ))}
         </div>
       )}
