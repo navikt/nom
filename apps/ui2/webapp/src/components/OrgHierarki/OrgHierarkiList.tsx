@@ -43,7 +43,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                       <CustomLinkPanel2 type={LinkPanelType.OVERENHET}>
                         <EnhetInfo
                           title={oe.organisasjonsenhet.navn}
-                          lederNavn={oe.organisasjonsenhet.leder[0].ressurs.visningsNavn || "Mangler Navn"}
+                          lederNavn={oe.organisasjonsenhet.leder[0]?.ressurs?.visningsNavn || "Mangler Navn"}
                           overenhet
                         />
                       </CustomLinkPanel2>
@@ -58,8 +58,8 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
         <EnhetInfo 
             title={currentEnhet?.navn || 'Feil i henting av navn'} 
-            lederNavn={currentEnhet?.leder[0].ressurs.visningsNavn || "Mangler navn"}
-            ident={currentEnhet?.leder[0].ressurs.navIdent} 
+            lederNavn={currentEnhet?.leder[0]?.ressurs?.visningsNavn || "Mangler navn"}
+            ident={currentEnhet?.leder[0]?.ressurs?.navIdent} 
         />
       </CustomLinkPanel2>
 
@@ -72,8 +72,8 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                 <CustomLinkPanel2 type={LinkPanelType.LARGE}>
                   <EnhetInfo
                     title={ue.organisasjonsenhet.navn}
-                    lederNavn={ue.organisasjonsenhet.leder[0].ressurs.visningsNavn || "Mangler Navn"}
-                    ident={ue.organisasjonsenhet.leder[0].ressurs.navIdent}
+                    lederNavn={ue.organisasjonsenhet.leder[0]?.ressurs?.visningsNavn || "Mangler Navn"}
+                    ident={ue.organisasjonsenhet.leder[0]?.ressurs?.navIdent}
                   />
                 </CustomLinkPanel2>
               </Link>
