@@ -20,6 +20,7 @@ const TextWithLabel2 = (props: TextWithLabel2Props) => {
             <BodyShort size="medium">{props.label} &nbsp;</BodyShort>
             <Label size="medium">{props.text}</Label>
         </div>
-)}
+    )
+}
 
 export default TextWithLabel2

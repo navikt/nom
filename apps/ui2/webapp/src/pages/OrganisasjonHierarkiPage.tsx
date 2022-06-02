@@ -38,6 +38,7 @@ const OrganisasjonHierarkiPage = () => {
     const agrId = agressoUrlToData(id || '') 
 
     const query = Gq.useHentOrganisasjonsEnheterHierarkiQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}})
+    console.log(query, "QUERY")
     const resourceQuery = Gq.useHentRessursMedNavIdentQuery({variables: { navIdent: resourceId}, skip: !resourceId})
 
     return (

@@ -7,7 +7,7 @@ import EnhetInfo from "./EnhetInfo";
 import { Organisering, Ressurs } from "../../api/generated/graphql_generated";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import RessursInfo from "./RessursInfo";
-import { Back, Next } from "@navikt/ds-icons";
+import { Back } from "@navikt/ds-icons";
 
 const linkStyles = css({ textDecoration: "none", color: "black" });
 const ressursLinkStyles = css({ 
