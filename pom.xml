@@ -45,6 +45,7 @@
         <graphql.java-version>17.3</graphql.java-version>
         <nimbus.jose.jwt-version>9.15.2</nimbus.jose.jwt-version>
 
+        <unleash.version>5.1.0</unleash.version>
         <org.testcontainers.prostgresql>1.16.3</org.testcontainers.prostgresql>
 
         <snyk-plugin.version>2.0.0</snyk-plugin.version>
