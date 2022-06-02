@@ -1,9 +1,16 @@
-# NAV ident komponent
+:sectnums:
+:sectanchors:
+:toc: left
+:toclevels: 2
+:toc-title: Innhold
+:icons: font
+
+= NAV ident komponent
 
 Heretter "NIK"
 
-___
-#### Hvorfor trengs denne komponenten?
+
+== Hvorfor trengs denne komponenten?
 
 Må kunne generere nav-identer unikt, og uten konflikter. Da må det være en sentral komponent som står for dette.
 
@@ -14,27 +21,26 @@ Kan gi ifra oss NIK til f.eks IDM på sikt om dette er mer hensiktsmessig
 Ved å trekke ut nav-identer i egen komponent, vil vi slippe at NOM må håndtere corner-caser som
 vikafossen, roboter og utenlandskonsulenter
 
-___
-#### Hvilke data skal den inneholde
+== Hvilke data skal den inneholde
 
 Hvis org-tilknytning er nødvendig, blir det vanskelig å skille ut nav-ident i egen komponent,
 men må likevel gjennomgås.
 
-nav-ident knyttet til fødselsnr/d-nr/annen nøkkel, 
+nav-ident knyttet til fødselsnr/d-nr/annen nøkkel,
 
 Utledes via eventsourcing?
-````
+```
 {
     navident: string (a123456)
     personid: string (fnr/d-nr/ annen nøkkel)
-    identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p     
+    identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p
 }
-````
+```
 
 full historikk
 metadata rundt bestillinger (opprett, deaktiver)
 
-````
+```
 {
     bestilling: "OPPRETT" | "DEAKTIVER" | "GJENOPPRETT"
     dato: Date
@@ -42,33 +48,31 @@ metadata rundt bestillinger (opprett, deaktiver)
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
-        identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p     
+        identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p
     }
 }
-````
+```
 
-___
-#### API
 
-##### Hvilke spørsmål og forespørsler forventer vi at konsumenter vil ha?
+== API
+
+=== Hvilke spørsmål og forespørsler forventer vi at konsumenter vil ha?
 
 - Hvilken navident har dette personid?
 - Hvilket personid har denne navidenten?
 - Har denne navidenten flere tilknyttede person-id?
 - Gi meg nav-ident for FNR (enten det gamle eller opprett nytt på stedet)
-  - Gi meg navident for FNR, med selvbestemt prefix bokstav (enten det gamle eller opprett nytt på stedet)
+- Gi meg navident for FNR, med selvbestemt prefix bokstav (enten det gamle eller opprett nytt på stedet)
 - Er denne identen en (robot | utenlandskkonsulent | vanlig-ansatt) ?
 - Gi meg alle navidenter i en gitt kategori (robot | utenlandskkonsulent | vanlig-ansatt)
 - Er denne navidenten aktiv?
 - Hvor lenge siden er det denne navidenten byttet status (aktiv/inaktiv)
 
-
-##### REST
+=== REST
 
 Bestilling blir på rest
 
-
-##### Kafka
+=== Kafka
 
 NB. Kafka egner seg ikke for persistering.
 
@@ -77,52 +81,47 @@ utledet stream for "nå-bildet"
 
 Eventsourcing
 
-___
-#### Persistering
+=== Persistering
 
 Database for backup av kø
 og ACID transaksjon for å unngå dobbelt-booking
+    Trenger vi det? Er det et reelt problem?
 Sekvens = vanlig databasesekvens
 
-___
-#### Identgenereringslogikk
+=== Identgenereringslogikk
 
 navident =  ( Første bokstav i etternavn -> bokstav) + sekvensnr
 
 sekvensen er unik i seg selv
 
-___
-#### Konsumenter
+=== Konsumenter
 
 - Remedy
 - NOM-UI
 - Dolly i dev-miljø
 - IDA for test-identer i dev-miljø
 
-___
-#### Avhengigheter
+=== Avhengigheter
 
 Mulig å droppe PDL som avhengighet
 
 - (?) PDL
-- 
+-
 
-___
-#### Håndtering av endring over tid
+=== Håndtering av endring over tid
 
 - Opprettelse
 - Deaktivering
 - Gjenopprettelse
 - Rettelse av feil-punching
 
-___
-#### Visning av historikk
+=== Visning av historikk
 
 - slutt/start-dato
 - auditing behov
 
-___
-#### Corner-cases
+
+=== Corner-cases
 
 Roboter
 - Hvem er ansvarlig for roboten? Kan man bruke org-tilknytning for dette?
@@ -139,25 +138,25 @@ Hvor skal vikafossens ansattes "navn" (det som brukes i virksomheten) ligge?
 - På sikt, i NOM (?)
 
 Riksrevisjonen
-- Trenger navident for å kunne lese 
+- Trenger navident for å kunne lese
 
-___
-#### Hypoteser
+
+=== Hypoteser
 
 - Roboter, utenlandskonsulenter, og vikafossen identer skal ikke inn i NOM
-  - utenlandskonsulenter trenger ikke være i lønnssystemet for å få betalt
+- utenlandskonsulenter trenger ikke være i lønnssystemet for å få betalt
 - Kun eksternt/statlig/kommunalt ansatte skal inn i NOM
 - Testpersoner skal ikke inn i NOM
 - Roboten skal vite om sin org-tilknytning, men NOM vet ikke om roboten
 - lønnsnr er likt navident uten prefix bokstav
 - (?) Roboter har fast prefix-bokstav i sin nav-ident
 - vikafossen har prefix-bokstav "s", av fiktivt etteravn "Skjult"
-  - egentlig 3 stykker fiktiv/skjult/ukjent etc
+- egentlig 3 stykker fiktiv/skjult/ukjent etc
 - anonyme nav-identer har prefix-bokstav "a", av fiktivt etternavn "Anonym"
 - Verifisering av identitet:
-  - identiteten er verifisert FØR den når NIK
+- identiteten er verifisert FØR den når NIK
 - (?) NIK skal ikke inneholde navn
-  - Navn berikes andre steder, eller er ikke nødvendig
+- Navn berikes andre steder, eller er ikke nødvendig
 - NIK må inneholde navn der PDL ikke kan bidra med navn
 - Det skal opprettes "ROBOT-NOM" av et annet team som holder styr på idente rsom ikke skal i NOM!
 - IDM holder styr på tilgangene til roboten, NIK holder styr på identen til roboten. Hvis mer info om roboten behøves, f.eks navn: så vet vi ikke.
