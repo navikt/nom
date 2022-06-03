@@ -31,9 +31,18 @@ nav-ident knyttet til fødselsnr/d-nr/annen nøkkel,
 Utledes via eventsourcing?
 ```
 {
-    navident: string (a123456)
-    personid: string (fnr/d-nr/ annen nøkkel)
-    identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p
+    navident: <string (a123456)>
+    personid: <string (fnr/d-nr/annen nøkkel)>
+    andrePersonider: [
+        personid: <string (fnr/d-nr/annen nøkkel)>
+    ]
+    identType: <ROBOT | MENNESKE | UTENLANDSK_KONSULENT>
+    aktivePerioder: [
+        periode: {
+            fom: <date not null>,
+            tom: <date>
+        }
+    ]
 }
 ```
 
@@ -42,13 +51,13 @@ metadata rundt bestillinger (opprett, deaktiver)
 
 ```
 {
-    bestilling: "OPPRETT" | "DEAKTIVER" | "GJENOPPRETT"
+    bestilling: "OPPRETT" | "DEAKTIVER" | "REAKTIVER" | "SLETT"
     dato: Date
     bestiller: Nav-ident
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
-        identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT :p
+        identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT
     }
 }
 ```
@@ -72,6 +81,8 @@ metadata rundt bestillinger (opprett, deaktiver)
 
 Bestilling blir på rest
 
+
+
 === Kafka
 
 NB. Kafka egner seg ikke for persistering.
@@ -79,7 +90,16 @@ NB. Kafka egner seg ikke for persistering.
 Ha en topic for lesing?
 utledet stream for "nå-bildet"
 
-Eventsourcing
+==== Eventsourcing
+
+Event source navIdent på topic `nav-ident`.
+`navident` brukes som meldingsnøkkel
+
+
+
+Lage en Kafka stream med sink til PostgreSQL for backup.
+Egen rutine for recovery av eventsource må lages
+
 
 === Persistering
 
