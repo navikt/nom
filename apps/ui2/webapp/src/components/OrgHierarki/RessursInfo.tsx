@@ -11,7 +11,8 @@ const ressursInfoStyles = css({
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
-    paddingTop: '20px'
+    paddingTop: '20px',
+    marginTop: '40px'
 })
 const ressursMetadataStyles = css({
     width: '100%',
