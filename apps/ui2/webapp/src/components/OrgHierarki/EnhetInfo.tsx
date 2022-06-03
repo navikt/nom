@@ -1,5 +1,6 @@
 import { css } from "@emotion/css"
 import { LinkPanel } from "@navikt/ds-react"
+import { LinkPanelType } from "../CustomLinkPanel2"
 import UserImage from "../UserImage"
 
 const enhetInfoStyles = css({
@@ -16,11 +17,17 @@ type EnhetInfoProps = {
     ident?: string
     icon?: string | undefined
     overenhet?: boolean
+    type: LinkPanelType
 }
 
 const EnhetInfo = (props: EnhetInfoProps) => {
-    const {title, lederNavn, ident, overenhet} = props
+    const {title, lederNavn, ident, overenhet, type} = props
 
+    const getSize = () => {
+        if (type === LinkPanelType.CURRENT) return '130px'
+        else if (type === LinkPanelType.LARGE) return '100px'
+        else return undefined
+    }
 
     return (
         <div className={enhetInfoStyles}>
@@ -28,7 +35,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
                 <LinkPanel.Title>{title}</LinkPanel.Title>
                 <LinkPanel.Description>Leder: <span> {lederNavn}</span></LinkPanel.Description>
             </div>
-            {!overenhet && <UserImage navIdent={ident} />}
+            {!overenhet && <UserImage navIdent={ident} size={getSize()} />}
         </div>
     )
 }

@@ -45,6 +45,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                           title={oe.organisasjonsenhet.navn}
                           lederNavn={oe.organisasjonsenhet.leder[0]?.ressurs?.visningsNavn || "Mangler Navn"}
                           overenhet
+                          type={LinkPanelType.OVERENHET}
                         />
                       </CustomLinkPanel2>
                     </Link>
@@ -60,6 +61,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             title={currentEnhet?.navn || 'Feil i henting av navn'} 
             lederNavn={currentEnhet?.leder[0]?.ressurs?.visningsNavn || "Mangler navn"}
             ident={currentEnhet?.leder[0]?.ressurs?.navIdent} 
+            type={LinkPanelType.CURRENT}
         />
       </CustomLinkPanel2>
 
@@ -74,6 +76,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                     title={ue.organisasjonsenhet.navn}
                     lederNavn={ue.organisasjonsenhet.leder[0]?.ressurs?.visningsNavn || "Mangler Navn"}
                     ident={ue.organisasjonsenhet.leder[0]?.ressurs?.navIdent}
+                    type={LinkPanelType.LARGE}
                   />
                 </CustomLinkPanel2>
               </Link>
