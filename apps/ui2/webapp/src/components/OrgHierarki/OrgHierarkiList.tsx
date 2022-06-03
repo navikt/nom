@@ -65,7 +65,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
 
       {/* Liste av underenheter */}
       {underEnheter.length > 0 && (
-        <div className={css({ display: "grid", gridTemplateColumns: underEnheter.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
+        <div className={css({ display: "grid", gridTemplateColumns: underEnheter.length > 5 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
           {underEnheter.map((ue: Organisering) => (
             <div key={agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)}>
               <Link to={"/org/" + agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)} className={linkStyles}>
@@ -84,11 +84,11 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
 
       {/* Liste av ressurser */}
       {underEnheter.length < 1 && currentEnhet && !ressurs && (
-          <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length >= 10 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
+          <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length > 5 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
             {currentEnhet.koblinger.map(k =>
               <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`}>
                   <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                    <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs.visningsNavn}</Heading>
+                    <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs?.visningsNavn || 'Mangler navn'}</Heading>
                   </CustomLinkPanel2>
               </Link> 
               
