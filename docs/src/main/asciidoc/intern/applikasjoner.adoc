@@ -217,7 +217,7 @@ Frackend (backend for frontend) for ui delen av NOM.
 Holder på sessjoner for bruker og proxyer kall videre til eventuelle nedstrøms-tjenester.
 Proxy benyttes for å støtte accessPolicies mellom applikasjoner, pluss at man må bytte ut token til et `on-behalf-of` token som har audience den appen man kontakter.
 
-include::nav-ident.adoc[leveloffset=1]
+include::nav-ident.adoc[leveloffset=+1]
 
 == Lokal utvikling mot miljø
 
