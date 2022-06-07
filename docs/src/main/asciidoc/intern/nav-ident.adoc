@@ -9,7 +9,6 @@
 
 Heretter "NIK"
 
-
 == Hvorfor trengs denne komponenten?
 
 Må kunne generere nav-identer unikt, og uten konflikter. Da må det være en sentral komponent som står for dette.
@@ -32,11 +31,12 @@ Utledes via eventsourcing?
 ```
 {
     navident: <string (a123456)>
-    personid: <string (fnr/d-nr/annen nøkkel)>
-    andrePersonider: [
+    personid: <string (fnr/d-nr/annen nøkkel)> - den aktive personid'en for navidenten
+    allePersonider: [
         personid: <string (fnr/d-nr/annen nøkkel)>
+        type: PDL | MANUELL
     ]
-    identType: <ROBOT | MENNESKE | UTENLANDSK_KONSULENT>
+    identType: <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT>
     aktivePerioder: [
         periode: {
             fom: <date not null>,
@@ -51,16 +51,19 @@ metadata rundt bestillinger (opprett, deaktiver)
 
 ```
 {
-    bestilling: "OPPRETT" | "DEAKTIVER" | "REAKTIVER" | "SLETT"
-    dato: Date
+    event: "OPPRETT" | "DEAKTIVER" | "REAKTIVER" | "SLETT"
+    eventTS: DateTime (Timestamp for selve eventen)
+    dato: Date  (Dato for når aktivering skal eller deaktivering skjer)
     bestiller: Nav-ident
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
-        identType: ROBOT | MENNESKE | UTENLANDSK_KONSULENT
+        personidtype: PDL | MANUELL
+        identType: ROBOT | ORDINÆR | UTENLANDSK_KONSULENT
     }
 }
 ```
+
 
 
 == API
@@ -79,8 +82,115 @@ metadata rundt bestillinger (opprett, deaktiver)
 
 === REST
 
-Bestilling blir på rest
+Bestilling blir på rest.
+En bestilling vil gi en ny eller eksisterende navident tilbake basert på om personidenten finnes ifra før.
+Bestilligen må angi når denne navidenten skal være aktiv fra dato.
+Bestillingen vil knyttes til pålogget nav-ident via aad-obo
 
+==== Opprette eller reaktivere en navident
+
+request:    POST /personid
+```
+{
+    personid: string påkrevd (f-nr, d-nr, annen nøkkel)
+    identType: string <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT> - Default MENNESKE
+    aktivFra: date - Default - dagens dato
+}
+```
+
+respons:
+```
+200 OK          hvis den eksisterer ifra før
+201 CREATED     hvis den blir nyopprettet
+body:
+{
+    navident: <ny eller eksisterende navident for angitt personid>
+    aktivFra: Datoen fra requesten
+}
+
+409 CONFLICT    Hvis den allerede er aktiv
+body:
+{
+    navident: <navident for angitt personid>
+    aktivFra: Datoen den er aktiv fra ifra før
+    feilmelding: "Navident for angitt personid er allerede aktiv"
+}
+
+409 CONFLICT    Hvis requestens aktivFra er før evt seneste periode sin aktivtil dato (kan ikke ha overlappende periode.
+body:
+{
+    navident: <navident for angitt personid>
+    aktivFra: Start datoen for seneste aktive periode
+    aktivTil: Slutt datoen for seneste aktive periode
+    feilmelding: "Navident for angitt personid kan ikke settes aktiv fra angitt dato siden dette er i en allerede deaktivert periode"
+}
+
+404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL
+body:
+{
+    feilmelding: "Angitt personid for ordinær ident finnes ikke i PDL"
+}
+
+500 Internal Server Error
+body:
+{
+    feilmelding: <Feilårsak>
+}
+```
+
+REST tjenesten utfører følgende handlinger:
+- Lager AKTIVER event på kafka (egen request/forespørsel topic?) som en 'need' melding
+```
+    {
+        personid: string påkrevd (f-nr, d-nr, annen nøkkel)
+        identType: string <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT>
+        aktivFra: date
+    }
+```
+- 'Query' - konsument slår opp om det finnes eksisterende navident og legger til dette i 'need' medlingen over
+```
+    {
+        ...<tidligere data i need melding>...
+        eksisterendeIdent: { <Tom hvis den ikke eksisterer>
+            navident: <eksisterende navident>
+            aktivFra: fra dato for sist gjeldende periode
+            aktivTil: eventuell til dato for sist gjeldende periode
+        }
+    }
+```
+- 'PDL' - konsument sjekker mot PDL for å finne personident hvis identtypen er ORDINÆR.
+Populerer eksisterende informasjon om personid i 'need' meldingen over
+```
+    {
+        ...<tidligere data i need melding>...
+        pdl: {
+            personid: <string (fnr/d-nr)> - den gjeldende id'en i PDL
+            allePersonider: [ <Tom hvis den ikke eksisterer i PDL>
+                personid: <string (fnr/d-nr)>
+            ]
+        }
+    }
+```
+- 'NAV ident generator' - konsument trår til hvis need meldingen har fått feltet 'eksisterendeIdent' men den er tom. Da lager den ny ident og legger det til i need meldingen:
+```
+    {
+        ...<tidligere data i need melding>...
+        nyNavident: <Ny generert navident>
+    }
+```
+- 'Respons' konsument kan returnere svar så fort den enten har funnet en eksisterende ident. Eller need meldingen har fått 'ny navident' og PDL ident finnes hvis det er ORDINÆR ident. Respons konsumenten kan legge til sin fulle respons til i 'need' meldingen.
+```
+    {
+        ...<tidligere data i need melding>...
+        respons: {
+            responseCode: <HTTP response code>
+            responsBody: {
+                <Som returert i REST meldingen>
+            }
+        }
+    }
+```
+- 'Respons' - konsumenten må også lage en event melding på eventsource køen, og også persistere denne i base. Event hendelsen vil være enten en 'OPPRETT' eller en 'REAKTIVER' melding.
 
 
 === Kafka
