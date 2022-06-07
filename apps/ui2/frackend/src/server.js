@@ -7,6 +7,7 @@ import cors from "cors";
 import morgan from 'morgan'
 import ecsFormat from '@elastic/ecs-morgan-format'
 import config from "./config.js";
+import {setupSessionRoutes} from "./routes/sessionRoutes.js";
 
 // Create Express Server
 const app = express();
@@ -31,6 +32,9 @@ await setupAuth.setupAuth(app);
 nomApiSetupProxy(app);
 teamcatApiSetupProxy(app)
 
+setupSessionRoutes(app);
+
+// Catch all route, må være sist
 setupStaticRoutes(app);
 
 export default app;

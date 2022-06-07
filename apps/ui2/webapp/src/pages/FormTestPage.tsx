@@ -3,6 +3,7 @@ import { Pagewrap } from "../components/Pagewrap";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { css } from "@emotion/css";
+import ContentWrapper from "../components/ContentWrapper";
 
 const formFieldsStyle = css({
   display: "grid",
@@ -25,7 +26,8 @@ export function FormTestPage() {
   console.log({ errors });
 
   return (
-    <Pagewrap>
+    <ContentWrapper>
+      <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Panel className={formFieldsStyle}>
           <TextField
@@ -50,6 +52,7 @@ export function FormTestPage() {
       <hr />
       Form output, use in API request body instead of printing:
       <pre>{JSON.stringify(formView, null, 2)}</pre>
-    </Pagewrap>
+        </>
+    </ContentWrapper>
   );
 }

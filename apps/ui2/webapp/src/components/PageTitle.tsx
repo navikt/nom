@@ -1,4 +1,4 @@
-import { css } from "@emotion/css"
+import {css} from "@emotion/css"
 
 const titleStyles = css({
     fontFamily: 'Source Sans Pro',
@@ -7,7 +7,7 @@ const titleStyles = css({
     fontWeight: '800',
     lineHeight: '24px',
     letterSpacing: '0em',
-    color: '#262626'
+    color: '#262626',
 })
 
 type PageTitleProps = {

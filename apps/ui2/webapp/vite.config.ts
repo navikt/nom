@@ -9,6 +9,10 @@ export default defineConfig({
       "/nom-api": {
         target: "http://localhost:8080/",
         changeOrigin: true
+      },
+      "/sessionInfo": {
+        target: "http://localhost:8080/",
+        changeOrigin: true
       }
     }
   }

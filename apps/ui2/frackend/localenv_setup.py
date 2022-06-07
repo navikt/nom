@@ -6,7 +6,7 @@ import base64
 sp.run(["kubectl", "config", "use-context", "dev-gcp"])
 
 # Henter secretname for frackenden
-secretname = sp.getoutput("kubectl get azureapp -n org team-catalog-frackend -o go-template='{{.spec.secretName}}'")
+secretname = sp.getoutput("kubectl get azureapp -n org nom-ui2 -o go-template='{{.spec.secretName}}'")
 # Henter alle secretene i JSON format 
 azureInfo = json.loads(sp.getoutput("kubectl -n org get secret " + secretname + " -o json"))
 
