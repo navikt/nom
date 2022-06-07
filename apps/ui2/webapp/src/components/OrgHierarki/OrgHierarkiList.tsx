@@ -9,10 +9,13 @@ import { BodyShort, Heading } from "@navikt/ds-react";
 import RessursInfo from "./RessursInfo";
 import { Back } from "@navikt/ds-icons";
 
-const linkStyles = css({ textDecoration: "none", color: "black" });
-const ressursLinkStyles = css({ 
+const linkStyles = css({ textDecoration: "none", color: "#262626" });
+const ressursLinkStyles = css(...linkStyles, { 
   display: 'flex',
   marginTop: '30px',
+  fontWeight: '600',
+  textDecoration: 'none',
+  color: '#262626'
 })
 const dividerStyles = css({ 
     background: '#00347D', 
@@ -89,7 +92,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       {underEnheter.length < 1 && currentEnhet && !ressurs && (
           <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length > 5 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
             {currentEnhet.koblinger.map(k =>
-              <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`}>
+              <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`} className={linkStyles}>
                   <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
                     <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs?.visningsNavn || 'Mangler navn'}</Heading>
                   </CustomLinkPanel2>
@@ -107,13 +110,13 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
               <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn)}>
                   <div className={ressursLinkStyles}>
                       <Back className="navds-link-panel__chevron"/>
-                      <BodyShort size="medium" >Se alle ressurser i {currentEnhet?.navn}</BodyShort>
+                      <BodyShort size="medium">Se alle ressurser i {currentEnhet?.navn}</BodyShort>
                   </div>
               </Link>
             </>
       )}
     </div>
   );
-};
+}
 
 export default OrgHierarkiList;

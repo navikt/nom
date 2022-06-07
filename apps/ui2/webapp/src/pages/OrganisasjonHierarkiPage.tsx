@@ -45,7 +45,7 @@ const OrganisasjonHierarkiPage = () => {
         <>
             <ContentWrapper>
                 <>
-                    <Heading size="xlarge" className={css({ marginBottom: '20px'})} >Organisasjonen</Heading>
+                    <Heading size="xlarge" className={css({ marginBottom: '20px'})} >NAV Organisasjon</Heading>
 
                     {query.error && <p>Feil</p>}
                     

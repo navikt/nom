@@ -1,6 +1,7 @@
 import { css } from "@emotion/css"
 import { LinkPanel } from "@navikt/ds-react"
 import { LinkPanelType } from "../CustomLinkPanel2"
+import TextWithLabel2 from "../TextWithLabel2"
 import UserImage from "../UserImage"
 
 const enhetInfoStyles = css({
@@ -33,7 +34,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
         <div className={enhetInfoStyles}>
             <div>
                 <LinkPanel.Title>{title}</LinkPanel.Title>
-                <LinkPanel.Description>Leder: <span> {lederNavn}</span></LinkPanel.Description>
+                <LinkPanel.Description>Leder: <span className={css({ fontWeight: '600'})}> {lederNavn}</span></LinkPanel.Description>
             </div>
             {!overenhet && <UserImage navIdent={ident} size={getSize()} />}
         </div>
