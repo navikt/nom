@@ -36,7 +36,7 @@ Utledes via eventsourcing?
         personid: <string (fnr/d-nr/annen nøkkel)>
         type: PDL | MANUELL
     ]
-    identType: <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT>
+    identType: <ROBOT | STANDARD | UTENLANDSK_KONSULENT>
     aktivePerioder: [
         periode: {
             fom: <date not null>,
@@ -54,12 +54,12 @@ metadata rundt bestillinger (opprett, deaktiver)
     event: "OPPRETT" | "DEAKTIVER" | "REAKTIVER" | "SLETT"
     eventTS: DateTime (Timestamp for selve eventen)
     dato: Date  (Dato for når aktivering skal eller deaktivering skjer)
-    bestiller: Nav-ident
+    bestiller: Nav-ident/system
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
         personidtype: PDL | MANUELL
-        identType: ROBOT | ORDINÆR | UTENLANDSK_KONSULENT
+        identType: ROBOT | STANDARD | UTENLANDSK_KONSULENT
     }
 }
 ```
@@ -89,17 +89,19 @@ Bestillingen vil knyttes til pålogget nav-ident via aad-obo
 
 ==== Opprette eller reaktivere en navident
 
-request:    POST /personid
 ```
+Request:    POST /personid
+
 {
     personid: string påkrevd (f-nr, d-nr, annen nøkkel)
-    identType: string <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT> - Default MENNESKE
+    identType: string <ROBOT | STANDARD | UTENLANDSK_KONSULENT> - Default STANDARD
     aktivFra: date - Default - dagens dato
 }
 ```
 
-respons:
 ```
+Respons:
+
 200 OK          hvis den eksisterer ifra før
 201 CREATED     hvis den blir nyopprettet
 body:
@@ -143,7 +145,7 @@ REST tjenesten utfører følgende handlinger:
 ```
     {
         personid: string påkrevd (f-nr, d-nr, annen nøkkel)
-        identType: string <ROBOT | ORDINÆR | UTENLANDSK_KONSULENT>
+        identType: string <ROBOT | STANDARD | UTENLANDSK_KONSULENT>
         aktivFra: date
     }
 ```
@@ -158,7 +160,7 @@ REST tjenesten utfører følgende handlinger:
         }
     }
 ```
-- 'PDL' - konsument sjekker mot PDL for å finne personident hvis identtypen er ORDINÆR.
+- 'PDL' - konsument sjekker mot PDL for å finne personident hvis identtypen er STANDARD.
 Populerer eksisterende informasjon om personid i 'need' meldingen over
 ```
     {
