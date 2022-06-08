@@ -1,5 +1,9 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
+  kafka:
+    username: ${app.username}
+    password: ${app.password}
+    topic.eventsource.name: nav-ident
 
 nom:
   libs:
@@ -22,4 +26,27 @@ spring:
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
-
+  kafka:
+    client-id: ${app.kafka.username}
+    properties:
+      security.protocol: SASL_SSL
+      sasl:
+        mechanism: PLAIN
+        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+      ssl:
+        truststore.location: ${javax.net.ssl.trustStore:}
+        truststore.password: ${javax.net.ssl.trustStorePassword:}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transaction-id-prefix: ${kafka-transaction-uuid}-
+      acks: all
+      retries: 30
+      properties:
+        max.block.ms: 15000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      auto-offset-reset: earliest
