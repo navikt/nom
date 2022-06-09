@@ -1,8 +1,8 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
   kafka:
-    username: ${app.username}
-    password: ${app.password}
+#    username: ${app.username}
+#    password: ${app.password}
     topic.eventsource.name: nav-ident
 
 nom:
