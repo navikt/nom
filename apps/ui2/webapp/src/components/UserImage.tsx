@@ -1,6 +1,6 @@
 import { css } from "@emotion/css"
 import { Loader } from "@navikt/ds-react"
-import React from "react"
+import React, { useEffect } from "react"
 import { mannMedFjes } from "./Images"
 
 const imageSrc = (navIdent: string) => `https://nom-ui2.intern.nav.no/teamcat/resource/${navIdent}/photo`
@@ -14,6 +14,12 @@ const UserImage = (props: UserImageProps) => {
     const { navIdent, size } = props
     const [image, setImage] = React.useState(navIdent ? imageSrc(navIdent) : mannMedFjes)
     const [loading, setLoading] = React.useState(true)
+
+    useEffect(() => {
+        if (navIdent) {
+            setImage(imageSrc(navIdent))
+        }
+    }, [navIdent])
 
        return (
            <>

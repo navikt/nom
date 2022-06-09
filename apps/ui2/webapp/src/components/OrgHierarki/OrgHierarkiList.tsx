@@ -10,7 +10,7 @@ import RessursInfo from "./RessursInfo";
 import { Back } from "@navikt/ds-icons";
 
 const linkStyles = css({ textDecoration: "none", color: "#262626" });
-const ressursLinkStyles = css(...linkStyles, { 
+const ressursLinkStyles = css({ 
   display: 'flex',
   marginTop: '30px',
   fontWeight: '600',

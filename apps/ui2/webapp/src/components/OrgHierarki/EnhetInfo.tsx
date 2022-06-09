@@ -1,44 +1,54 @@
-import { css } from "@emotion/css"
-import { LinkPanel } from "@navikt/ds-react"
-import { LinkPanelType } from "../CustomLinkPanel2"
-import TextWithLabel2 from "../TextWithLabel2"
-import UserImage from "../UserImage"
+import { css } from "@emotion/css";
+import { BodyShort, Label, LinkPanel } from "@navikt/ds-react";
+import { Link } from "react-router-dom";
+import { LinkPanelType } from "../CustomLinkPanel2";
+import UserImage from "../UserImage";
 
 const enhetInfoStyles = css({
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-})
+  height: "100%",
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+});
 
 type EnhetInfoProps = {
-    title: string
-    lederNavn: string
-    ident?: string
-    icon?: string | undefined
-    overenhet?: boolean
-    type: LinkPanelType
-}
+  title: string;
+  lederNavn: string;
+  ident?: string;
+  icon?: string | undefined;
+  overenhet?: boolean;
+  type: LinkPanelType;
+};
 
 const EnhetInfo = (props: EnhetInfoProps) => {
-    const {title, lederNavn, ident, overenhet, type} = props
+  const { title, lederNavn, ident, overenhet, type } = props;
 
-    const getSize = () => {
-        if (type === LinkPanelType.CURRENT) return '130px'
-        else if (type === LinkPanelType.LARGE) return '90px'
-        else return undefined
-    }
+  const getSize = () => {
+    if (type === LinkPanelType.CURRENT) return "130px";
+    else if (type === LinkPanelType.LARGE) return "90px";
+    else return undefined;
+  };
 
-    return (
-        <div className={enhetInfoStyles}>
-            <div>
-                <LinkPanel.Title>{title}</LinkPanel.Title>
-                <LinkPanel.Description>Leder: <span className={css({ fontWeight: '600'})}> {lederNavn}</span></LinkPanel.Description>
-            </div>
-            {!overenhet && <UserImage navIdent={ident} size={getSize()} />}
-        </div>
-    )
-}
+  return (
+    <div className={enhetInfoStyles}>
+      <div>
+        <LinkPanel.Title>{title}</LinkPanel.Title>
+        <LinkPanel.Description>
+          <div className={css({ display: "flex", alignItem: "baseline" })}>
+            <BodyShort>Leder: &nbsp;</BodyShort>
 
-export default EnhetInfo
+            {type === LinkPanelType.CURRENT ? (
+              <Link to={"#"} className={css({ color: "#262626" })}><Label>{lederNavn}</Label></Link>
+            ) : (
+              <Label>{lederNavn}</Label>
+            )}
+          </div>
+        </LinkPanel.Description>
+      </div>
+      {!overenhet && <UserImage navIdent={ident} size={getSize()} />}
+    </div>
+  );
+};
+
+export default EnhetInfo;
