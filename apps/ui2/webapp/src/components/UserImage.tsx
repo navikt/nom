@@ -12,7 +12,7 @@ type UserImageProps = {
 
 const UserImage = (props: UserImageProps) => {
     const { navIdent, size } = props
-    const [image, setImage] = React.useState(navIdent ? imageSrc(navIdent) : mannMedFjes)
+    const [image, setImage] = React.useState<string>()
     const [loading, setLoading] = React.useState(true)
 
     useEffect(() => {
