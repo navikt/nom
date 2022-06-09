@@ -1,7 +1,7 @@
 app:
   kafka:
-#    username: ${app.username}
-#    password: ${app.password}
+    username: ${app.username}
+    password: ${app.password}
     topic.ressurs.name: aapen-nom-ressurs-v1
   scheduledTasks:
     dvhConsumer: 0 0 5 ? * *  # Every day 5AM
