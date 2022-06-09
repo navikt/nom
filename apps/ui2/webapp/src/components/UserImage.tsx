@@ -20,7 +20,7 @@ const UserImage = (props: UserImageProps) => {
       setImage(imageSrc(navIdent));
     }
     setLoading(false)
-  }, []);
+  }, [navIdent]);
 
   return (
     <>
