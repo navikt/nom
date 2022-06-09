@@ -9,16 +9,16 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Map;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
 @Slf4j
 public class EventSourceService {
     private final KafkaTemplate<String, SourceEvent> eventSource;
     private final Map<String, Navident> navidenter;
 
-    @KafkaListener(
-            id = "EventSourceListener",
-            topics = "${app.kafka.topic.eventsource.name}")
+//    @KafkaListener(
+//            id = "EventSourceListener",
+//            topics = "${app.kafka.topic.eventsource.name}")
     public void listen(SourceEvent event) {
         // Update domain model with sourced event
 

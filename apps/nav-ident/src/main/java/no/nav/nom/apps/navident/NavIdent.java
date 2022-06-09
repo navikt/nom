@@ -17,7 +17,7 @@ public class NavIdent {
 
     public static void main(String[] args) {
         PropertyUtils.initDefaultProperties("nav-ident");
-        
+
         System.setProperty("kafka-transaction-uuid", UUID.randomUUID().toString().substring(0, 8));
         System.setProperty("spring.main.banner-mode", "log"); // Show customized banner
         SpringApplication.run(NavIdent.class, args);
