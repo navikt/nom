@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
-public class Config {
+public class DomainConfig {
 
     @Bean
     @Scope("singleton")

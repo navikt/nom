@@ -12,7 +12,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
 @EnableKafka
 @Configuration
-public class Config {
+public class KafkaConfig {
 
     @Bean
     public ConsumerFactory<String, SourceEvent> consumerFactory(KafkaProperties properties) {
