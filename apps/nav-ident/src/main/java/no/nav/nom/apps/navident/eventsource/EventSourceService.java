@@ -20,7 +20,7 @@ public class EventSourceService {
             id = "EventSourceListener",
             topics = "${app.kafka.topic.eventsource.name}")
     public void listen(SourceEvent event) {
-
         // Update domain model with sourced event
+
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.util.UUID;
+
 @SpringBootApplication
 @EnableJpaRepositories
 @ConfigurationPropertiesScan
@@ -15,6 +17,8 @@ public class NavIdent {
 
     public static void main(String[] args) {
         PropertyUtils.initDefaultProperties("nav-ident");
+        
+        System.setProperty("kafka-transaction-uuid", UUID.randomUUID().toString().substring(0, 8));
         System.setProperty("spring.main.banner-mode", "log"); // Show customized banner
         SpringApplication.run(NavIdent.class, args);
     }
