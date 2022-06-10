@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import { mannMedFjes } from "./Images";
+import { person } from "./Images";
 
 const imageSrc = (navIdent: string) => `https://nom-ui2.intern.nav.no/teamcat/resource/${navIdent}/photo`;
 
@@ -35,7 +35,7 @@ const UserImage = (props: UserImageProps) => {
           })}
           src={image}
           onError={() => {
-            setImage(mannMedFjes);
+            setImage(person);
             setLoading(false);
           }}
           onLoad={() => setLoading(false)}
