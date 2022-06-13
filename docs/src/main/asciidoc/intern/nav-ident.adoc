@@ -7,25 +7,24 @@
 
 = NAV ident komponent
 
-Heretter "NIK"
+
+
+== Hva er NAV ident komponent (NIK)?
+
+NAV ident komponent (heretter forkortet "NIK") er en liten komponent som står for all opprettelse av NAV-identer i NAV. NAV-ident er en unik nøkkel for hver person (og andre som skal opptre som en person - f.eks. roboter) som skal utføre en oppgave i NAV. Komponenten er master for NAV-identer, og deres knytning til fnr/dnr og evt. andre nøkler brukt internt i NAV. 
 
 == Hvorfor trengs denne komponenten?
 
-Må kunne generere nav-identer unikt, og uten konflikter. Da må det være en sentral komponent som står for dette.
+NAV-identer må være unike. Når en sentral komponent står for dette, vil flere konsumenter kunne bestille identer uten konflikt.
 
 Generering og bokholderi på nav-identer blir en veldig stabil type funksjonalitet som ikke vil endre seg særlig over tid.
 
-Kan gi ifra oss NIK til f.eks IDM på sikt om dette er mer hensiktsmessig
+Dersom NIK hører mer hjemme i IDM-sfæren, så er det enklere å flytte komponenten dit dersom den er adskilt fra øvrige HR-systemer i teamet.
 
-Ved å trekke ut nav-identer i egen komponent, vil vi slippe at NOM må håndtere corner-caser som
-vikafossen, roboter og utenlandskonsulenter
 
-== Hvilke data skal den inneholde
+== Hvilke data skal NIK inneholde?
 
-Hvis org-tilknytning er nødvendig, blir det vanskelig å skille ut nav-ident i egen komponent,
-men må likevel gjennomgås.
-
-nav-ident knyttet til fødselsnr/d-nr/annen nøkkel,
+NIK skal være smal og holde på NAV-ident, dets knyting til fødselsnr/d-nr/annen nøkkel, samt metadata. Løsningen vil også holde på historiske personid knyttet til NAV-identen, samt alle historiske NAV-identer. 
 
 Utledes via eventsourcing?
 ```
@@ -36,7 +35,7 @@ Utledes via eventsourcing?
         personid: <string (fnr/d-nr/annen nøkkel)>
         type: PDL | MANUELL
     ]
-    identType: <ROBOT | STANDARD | UTENLANDSK_KONSULENT>
+    identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
     aktivePerioder: [
         periode: {
             fom: <date not null>,
@@ -73,10 +72,10 @@ metadata rundt bestillinger (opprett, deaktiver)
 - Hvilken navident har dette personid?
 - Hvilket personid har denne navidenten?
 - Har denne navidenten flere tilknyttede person-id?
-- Gi meg nav-ident for FNR (enten det gamle eller opprett nytt på stedet)
-- Gi meg navident for FNR, med selvbestemt prefix bokstav (enten det gamle eller opprett nytt på stedet)
-- Er denne identen en (robot | utenlandskkonsulent | vanlig-ansatt) ?
-- Gi meg alle navidenter i en gitt kategori (robot | utenlandskkonsulent | vanlig-ansatt)
+- Gi meg nav-ident for personId (enten det gamle eller opprett nytt på stedet)
+- Gi meg navident for personId, med selvbestemt prefix bokstav (enten det gamle eller opprett nytt på stedet)
+- Er denne identen en (robot | utenlandskkonsulent | vikafossen | øvrig ansatte/konsulenter) ?
+- Gi meg alle navidenter i en gitt kategori (robot | utenlandskkonsulent | vikafossen | vanlig-ansatt)
 - Er denne navidenten aktiv?
 - Hvor lenge siden er det denne navidenten byttet status (aktiv/inaktiv)
 
@@ -94,7 +93,7 @@ Request:    POST /personid
 
 {
     personid: string påkrevd (f-nr, d-nr, annen nøkkel)
-    identType: string <ROBOT | STANDARD | UTENLANDSK_KONSULENT> - Default STANDARD
+    identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT> - Default STANDARD
     aktivFra: date - Default - dagens dato
 }
 ```
@@ -224,7 +223,7 @@ Sekvens = vanlig databasesekvens
 
 navident =  ( Første bokstav i etternavn -> bokstav) + sekvensnr
 
-sekvensen er unik i seg selv
+Sekvensen er unik i seg selv, og brukes i dag bl.a. i UNIT4 som ressursnr. 
 
 === Konsumenter
 
@@ -259,40 +258,23 @@ Roboter
 - Hvem er ansvarlig for roboten? Kan man bruke org-tilknytning for dette?
 - Hvis roboten ikke har org-tilknytning, skal det settes opp en manuelt ansvarlig?
 
-Kort-tids konsulenter fortrinnsvis fra utlandet, uten personnr eller d-nummer.
+Kort-tids konsulenter fortrinnsvis fra utlandet, uten personnr eller d-nummer. Administreres av Sikkerhetsseksjonen.
 
-Godkjennings-rutine. Identiteten til konsulenten skal verifiseres på et eller annet vis?
+Vikafossen ansatte: Administreres av Sikkerhetsseksjonen. NIK oppretter kun NAV-ident, og skal ikke ha nok info til å identifisere den fysiske personen.
 
-Vikafossen ansatte
-
-Hvor skal vikafossens ansattes "navn" (det som brukes i virksomheten) ligge?
-- dette ligger i AD
-- På sikt, i NOM (?)
-
-Riksrevisjonen
-- Trenger navident for å kunne lese
+Riksrevisjonen: Trenger navident for å kunne lese
 
 
 === Hypoteser
 
-- Roboter, utenlandskonsulenter, og vikafossen identer skal ikke inn i NOM
 - utenlandskonsulenter trenger ikke være i lønnssystemet for å få betalt
-- Kun eksternt/statlig/kommunalt ansatte skal inn i NOM
-- Testpersoner skal ikke inn i NOM
-- Roboten skal vite om sin org-tilknytning, men NOM vet ikke om roboten
-- lønnsnr er likt navident uten prefix bokstav
 - (?) Roboter har fast prefix-bokstav i sin nav-ident
 - vikafossen har prefix-bokstav "s", av fiktivt etteravn "Skjult"
 - egentlig 3 stykker fiktiv/skjult/ukjent etc
 - anonyme nav-identer har prefix-bokstav "a", av fiktivt etternavn "Anonym"
 - Verifisering av identitet:
 - identiteten er verifisert FØR den når NIK
-- (?) NIK skal ikke inneholde navn
-- Navn berikes andre steder, eller er ikke nødvendig
-- NIK må inneholde navn der PDL ikke kan bidra med navn
-- Det skal opprettes "ROBOT-NOM" av et annet team som holder styr på idente rsom ikke skal i NOM!
-- IDM holder styr på tilgangene til roboten, NIK holder styr på identen til roboten. Hvis mer info om roboten behøves, f.eks navn: så vet vi ikke.
-- NIK er slave av NOM (eller andre) når det kommer til navn
+- NIK er slave av NOM når det kommer til navn
 - Kan ikke endre en bestilling tilbake i tid for audit-formål
 - NIK stoler på at bestillingene den får er verifisert av bestiller (f.eks nom/remedy) mtp gyldig personident
 - IDA-identer starter alltid med Z som bokstav-prefix
