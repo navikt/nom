@@ -53,6 +53,3 @@ spring:
       auto-offset-reset: earliest
       properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource"
 
-logging:
-  level:
-    root: DEBUG
