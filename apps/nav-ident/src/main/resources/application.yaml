@@ -54,3 +54,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
       auto-offset-reset: earliest
       properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource"
+
+logging:
+  level:
+   root: DEBUG
