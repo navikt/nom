@@ -1,18 +1,16 @@
 import { css } from "@emotion/css"
-import { Heading } from "@navikt/ds-react"
+import { BodyShort, Heading } from "@navikt/ds-react"
 import { Ressurs } from "../../api/generated/graphql_generated"
 import CustomLinkPanel2,{ LinkPanelType }  from "../CustomLinkPanel2"
 import TextWithLabel2 from "../TextWithLabel2"
 import UserImage from "../UserImage"
 
 const ressursInfoStyles = css({
-    height: '350px',
+    minHeight: '350px',
     width: '100%',
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
-    paddingTop: '20px',
-    marginTop: '40px'
 })
 const ressursMetadataStyles = css({
     width: '100%',
@@ -28,13 +26,17 @@ type RessursInfoProps = {
 
 const RessursInfo = (props: RessursInfoProps) => {
     const { ressurs } = props
+    console.log(ressurs, "RESSURS")
 
     return (
         <CustomLinkPanel2 type={LinkPanelType.RESSURS}>
             <div className={ressursInfoStyles}>
-                <UserImage navIdent={ressurs.navIdent} size="130px" />
+                <div className={css({ marginTop: '2rem', marginBottom: '0.5rem'})}>
+                    <UserImage navIdent={ressurs.navIdent} size="130px" />
+                </div>
 
-                <Heading size="large">{ressurs.visningsNavn}</Heading>
+                <Heading size="large" className={css({ width: '50%'})}>{ressurs.fornavn} {ressurs.etternavn}</Heading>
+                <BodyShort size="medium">{`(${ressurs.navIdent})`}</BodyShort>
 
                 <div className={ressursMetadataStyles}>
                     <div className={css({ marginRight: '30px'})}>

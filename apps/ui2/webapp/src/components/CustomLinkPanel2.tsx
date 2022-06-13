@@ -28,7 +28,7 @@ const linkPanelCurrentStyles = css(commonCss, {
   })
 const linkPanelLargeStyles = css(commonCss, {
     backgroundColor: "#FFFFFF",
-    height: "120px",
+    height: "130px",
     width: "100%",
     borderLeft: '5px solid #134852'
 })
