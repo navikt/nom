@@ -1,8 +1,6 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
   kafka:
-#    username: ${app.username}
-#    password: ${app.password}
     topic.eventsource.name: nav-ident
 
 nom:
@@ -19,6 +17,7 @@ management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mapp
 spring:
   main:
     banner-mode: "log"
+
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
     username: ${DATABASE_USERNAME}
@@ -26,20 +25,24 @@ spring:
     hikari:
       minimum-idle: 2
       maximum-pool-size: 2
+
   kafka:
-    client-id: ${app.kafka.username}
+    bootstrap-servers: ${KAFKA_BROKERS}
     properties:
-      security.protocol: SASL_SSL
-      sasl:
-        mechanism: PLAIN
-        jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+      security.protocol: SSL
+      basic.auth.credentials.source: USER_INFO
+      basic.auth.user.info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
       ssl:
-        truststore.location: ${javax.net.ssl.trustStore:}
-        truststore.password: ${javax.net.ssl.trustStorePassword:}
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      transaction-id-prefix: ${kafka-transaction-uuid}-
       acks: all
       retries: 30
       properties:
@@ -50,3 +53,5 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
       auto-offset-reset: earliest
+      properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource"
+
