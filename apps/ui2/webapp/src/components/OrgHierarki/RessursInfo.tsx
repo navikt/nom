@@ -35,7 +35,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                     <UserImage navIdent={ressurs.navIdent} size="130px" />
                 </div>
 
-                <Heading size="large" className={css({ width: '50%'})}>{ressurs.fornavn} {ressurs.etternavn}</Heading>
+                <Heading size="large" >{ressurs.fornavn} {ressurs.etternavn}</Heading>
                 <BodyShort size="medium">{`(${ressurs.navIdent})`}</BodyShort>
 
                 <div className={ressursMetadataStyles}>
