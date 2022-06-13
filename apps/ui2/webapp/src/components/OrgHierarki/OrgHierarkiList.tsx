@@ -38,7 +38,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
   const { currentEnhet, underEnheter, overEnheter, ressurs} = props
   
   const sortedUnderEnheter = underEnheter.length > 0 ? [...underEnheter].sort((a, b) => sortItems(a.organisasjonsenhet.navn, b.organisasjonsenhet.navn)) : []
-  const sortedKoblinger = currentEnhet ? currentEnhet.koblinger.sort((a, b) => sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')) : []
+  const sortedKoblinger = currentEnhet ? [...currentEnhet.koblinger].sort((a, b) => sortItems(a.ressurs.visningsNavn || 'Mangler navn', b.ressurs.visningsNavn || 'Mangler navn')) : []
 
   return (
     <div>
