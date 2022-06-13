@@ -5,6 +5,7 @@ import { agressoUrlToData } from "../resources/utils/url_utils"
 import OrgHierarkiList from "../components/OrgHierarki/OrgHierarkiList"
 import { Heading, Loader } from "@navikt/ds-react"
 import { css } from "@emotion/css"
+import { sortItems } from "../resources/utils/utils"
 
 const mapOverEnheter = (data: Gq.HentOrganisasjonsEnheterHierarkiQuery) => {
     if (!data.organisasjonsenhet) return []
