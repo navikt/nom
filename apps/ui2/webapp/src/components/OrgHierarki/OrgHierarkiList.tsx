@@ -35,7 +35,7 @@ type OrgHierarkiListProps = {
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
   const { currentEnhet, underEnheter, overEnheter, ressurs} = props
-
+  
   return (
     <div>
       <div>
@@ -67,6 +67,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             type={LinkPanelType.CURRENT}
         />
       </CustomLinkPanel2>
+      
 
       {/* Liste av underenheter */}
       {underEnheter.length > 0 && (

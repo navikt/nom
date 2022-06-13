@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { BodyShort, Label, LinkPanel } from "@navikt/ds-react";
+import { BodyShort, Heading, Label, LinkPanel } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
 import { LinkPanelType } from "../CustomLinkPanel2";
 import UserImage from "../UserImage";
@@ -33,7 +33,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
   return (
     <div className={enhetInfoStyles}>
       <div>
-        <LinkPanel.Title>{title}</LinkPanel.Title>
+        <Heading size={type === LinkPanelType.CURRENT ? 'large' : 'medium'}>{title}</Heading>
         <LinkPanel.Description>
           <div className={css({ display: "flex", alignItem: "baseline" })}>
             <BodyShort>Leder: &nbsp;</BodyShort>
