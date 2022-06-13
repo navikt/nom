@@ -30,8 +30,6 @@ spring:
     bootstrap-servers: ${KAFKA_BROKERS}
     properties:
       security.protocol: SSL
-      basic.auth.credentials.source: USER_INFO
-      basic.auth.user.info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
       ssl:
         keystore:
           type: PKCS12
@@ -51,7 +49,10 @@ spring:
         max.in.flight.requests.per.connection: 1
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
       properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource"
 
+logging:
+  level:
+    root: DEBUG
