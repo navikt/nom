@@ -46,3 +46,5 @@ spec:
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
+  kafka:
+    pool: nav-prod
