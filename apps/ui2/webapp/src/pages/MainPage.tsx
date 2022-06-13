@@ -6,7 +6,6 @@ import { orghierarkietLogo, ressursLogo } from '../components/Images'
 const MainPage = () => {
   return (
     <div>
-      <Banner />
       <ContentWrapper>
         <>
           <CustomLinkPanel

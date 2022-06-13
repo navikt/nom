@@ -2,11 +2,14 @@ package no.nav.nom.apps.navident.eventsource;
 
 import lombok.Builder;
 import lombok.Data;
+import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.domain.Personid;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class SourceEvent {
     EventType event;
@@ -14,4 +17,17 @@ public class SourceEvent {
     LocalDate dato;
     String bestiller;
     EventPayload payload;
+
+    public String maskedToString() {
+        SourceEvent masked = this.toBuilder().build(); // Is not a deep copy
+        masked.payload = payload.toBuilder().build();
+        masked.payload.personid = mask(payload.personid);
+
+        return masked.toString();
+    }
+
+    private String mask(String toBeMasked) {
+        if (toBeMasked == null || toBeMasked.length() < 7) return toBeMasked;
+        return toBeMasked.substring(0, 6) + "***";
+    }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.PersonidType;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class EventPayload {
     String navident;
