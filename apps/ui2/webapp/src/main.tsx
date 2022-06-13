@@ -8,6 +8,7 @@ import { apolloClient } from './api/apolloclient'
 import { css } from '@emotion/css'
 import AppRoutes from './routes'
 import NavHeader, { headerHeight } from './components/NavHeader'
+import Footer from './components/Footer'
 
 const layoutStyle = css({
   backgroundColor: '#F1F1F1',
@@ -26,6 +27,7 @@ ReactDOM.render(
             <AppRoutes />
           </div>
         </div>
+        <Footer />
       </ApolloProvider>
     </BrowserRouter>
   </React.StrictMode>,
