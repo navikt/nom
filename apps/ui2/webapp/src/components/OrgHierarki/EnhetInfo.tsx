@@ -46,7 +46,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
           </div>
         </LinkPanel.Description>
       </div>
-      {!overenhet && <UserImage navIdent={ident} size={getSize()} />}
+      {!overenhet && <UserImage navIdent={ident} size={getSize()} altText={`Fotografi av ${lederNavn}`}/>}
     </div>
   );
 };

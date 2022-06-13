@@ -8,10 +8,11 @@ const imageSrc = (navIdent: string) => `https://nom-ui2.intern.nav.no/teamcat/re
 type UserImageProps = {
   navIdent?: string;
   size?: string;
+  altText?: string
 };
 
 const UserImage = (props: UserImageProps) => {
-  const { navIdent, size } = props;
+  const { navIdent, size, altText } = props;
   const [image, setImage] = React.useState<string>()
   const [loading, setLoading] = React.useState(true)
 
@@ -28,17 +29,18 @@ const UserImage = (props: UserImageProps) => {
       {loading && <Loader />}
       {!loading && (
         <img
+          src={image}
+          alt={props.altText || 'Fotografi av ' + navIdent}
+          onLoad={() => setLoading(false)}
+          onError={() => {
+            setImage(person);
+            setLoading(false);
+          }}
           className={css({
             height: size || "65px",
             width: size || "65px",
             borderRadius: "100%",
           })}
-          src={image}
-          onError={() => {
-            setImage(person);
-            setLoading(false);
-          }}
-          onLoad={() => setLoading(false)}
         />
       )}
     </>

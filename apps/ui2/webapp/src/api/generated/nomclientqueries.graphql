@@ -252,6 +252,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
           ressurs {
             navIdent
             visningsNavn
+            fornavn
+            etternavn
           }
         }
       }
@@ -266,6 +268,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
           ressurs {
             navIdent
             visningsNavn
+            fornavn
+            etternavn
           }
         }
         organiseringer(retning: over) {
@@ -277,6 +281,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
               ressurs {
                 navIdent
                 visningsNavn
+                fornavn
+                etternavn
               }
             }
             organiseringer(retning: over) {
@@ -288,6 +294,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                   ressurs {
                     navIdent
                     visningsNavn
+                    fornavn
+                    etternavn
                   }
                 }
                 organiseringer(retning: over) {
@@ -299,6 +307,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                       ressurs {
                         navIdent
                         visningsNavn
+                        fornavn
+                        etternavn
                       }
                     }
                     organiseringer(retning: over) {
@@ -310,6 +320,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                           ressurs {
                             navIdent
                             visningsNavn
+                            fornavn
+                            etternavn
                           }
                         }
                         organiseringer(retning: over) {
@@ -321,6 +333,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                               ressurs {
                                 navIdent
                                 visningsNavn
+                                fornavn
+                                etternavn
                               }
                             }
                           }
@@ -344,6 +358,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
       ressurs {
         navIdent
         visningsNavn 
+        fornavn
+        etternavn
       }
     }
     koblinger {
@@ -351,6 +367,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
           navIdent
           personIdent
           visningsNavn
+          fornavn
+          etternavn
       }
     }
   }
