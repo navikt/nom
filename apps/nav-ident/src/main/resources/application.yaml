@@ -1,7 +1,7 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
   kafka:
-    topic.eventsource.name: nav-ident
+    topic.eventsource.name: org.nav-ident
 
 nom:
   libs:
