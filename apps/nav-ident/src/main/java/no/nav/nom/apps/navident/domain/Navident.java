@@ -5,9 +5,10 @@ import lombok.Data;
 import lombok.Singular;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Navident {
 
@@ -27,4 +28,24 @@ public class Navident {
         return aktivePerioder.stream().anyMatch( periode -> periode.contains(date));
     }
 
+    public String maskedToString() {
+        Navident masked = this.toBuilder().build(); // Is not a deep copy
+        masked.gjeldendePersonid = mask(gjeldendePersonid);
+        masked.allePersonider = new ArrayList<>();
+        this.allePersonider.forEach( p ->
+                masked.allePersonider.add(
+                        Personid.builder()
+                                .personid(mask(p.personid))
+                                .type(p.type)
+                                .build()
+                )
+        );
+
+        return masked.toString();
+    }
+
+    private String mask(String toBeMasked) {
+        if (toBeMasked == null || toBeMasked.length() < 7) return toBeMasked;
+        return toBeMasked.substring(0, 6) + "***";
+    }
 }

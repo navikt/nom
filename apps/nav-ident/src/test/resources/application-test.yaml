@@ -46,3 +46,6 @@ nom:
         app:
           load-properties": false
 
+logging:
+  level:
+    no.nav.nom: DEBUG

@@ -12,6 +12,6 @@ public class Periode {
     LocalDate tilOgMed;
 
     public boolean contains(LocalDate date) {
-        return fraOgMed.isBefore(date.plusDays(1)) && tilOgMed.isAfter(date.minusDays(1));
+        return fraOgMed.isBefore(date.plusDays(1)) && (tilOgMed == null || tilOgMed.isAfter(date.minusDays(1)) );
     }
 }
