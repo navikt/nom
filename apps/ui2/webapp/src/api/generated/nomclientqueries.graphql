@@ -138,6 +138,7 @@ query HentRessursMedNavIdent($navIdent: String) {
       organisasjonsenhet {
         agressoId
         navn
+        orgNiv
       }
     }
   }
@@ -254,6 +255,13 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
             visningsNavn
             fornavn
             etternavn
+            koblinger {
+              organisasjonsenhet {
+                agressoId
+                orgNiv
+                navn
+          	}
+       		 }
           }
         }
       }
@@ -360,6 +368,13 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
         visningsNavn 
         fornavn
         etternavn
+        koblinger {
+          organisasjonsenhet {
+            agressoId
+            orgNiv
+            navn
+          }
+        }
       }
     }
     koblinger {

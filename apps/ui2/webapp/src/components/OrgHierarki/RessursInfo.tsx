@@ -26,7 +26,6 @@ type RessursInfoProps = {
 
 const RessursInfo = (props: RessursInfoProps) => {
     const { ressurs } = props
-    console.log(ressurs, "RESSURS")
 
     return (
         <CustomLinkPanel2 type={LinkPanelType.RESSURS}>
@@ -40,7 +39,6 @@ const RessursInfo = (props: RessursInfoProps) => {
 
                 <div className={ressursMetadataStyles}>
                     <div className={css({ marginRight: '30px'})}>
-                        <TextWithLabel2 label="NAV-ident: " text={ressurs.navIdent} />
                         <TextWithLabel2 label="Startdato: " text="Mangler startdato" />
                         <TextWithLabel2 label="Org-enhet: " text="Mangler enhet" />
                     </div>
@@ -48,7 +46,6 @@ const RessursInfo = (props: RessursInfoProps) => {
                     <div className={css({ marginLeft: '20px'})}>
                         <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
                         <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
-                        <TextWithLabel2 label="Leder: " text={ressurs.ledere[0].ressurs.visningsNavn || 'Mangler leder'} />
                     </div>
                 </div>
             </div>

@@ -45,6 +45,8 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
     return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '') 
   }
 
+  console.log(currentEnhet?.leder, "LEDERRRR")
+
   return (
     <div>
       <div>
@@ -58,6 +60,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                           lederNavn={getFornavnAndEtternavnForLeder(oe.organisasjonsenhet.leder[0]) || "Mangler Navn"}
                           overenhet
                           type={LinkPanelType.OVERENHET}
+                          leder={oe.organisasjonsenhet.leder[0].ressurs as Ressurs}
                         />
                       </CustomLinkPanel2>
                     </Link>
@@ -72,8 +75,9 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         <EnhetInfo 
             title={currentEnhet?.navn || 'Feil i henting av navn'} 
             lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
-            ident={currentEnhet?.leder[0]?.ressurs?.navIdent} 
+            ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
             type={LinkPanelType.CURRENT}
+            leder={currentEnhet?.leder[0].ressurs as Ressurs}
         />
       </CustomLinkPanel2>
       
@@ -90,6 +94,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                     lederNavn={getFornavnAndEtternavnForLeder(ue.organisasjonsenhet.leder[0])}
                     ident={ue.organisasjonsenhet.leder[0]?.ressurs?.navIdent}
                     type={LinkPanelType.LARGE}
+                    leder={ue.organisasjonsenhet.leder[0].ressurs as Ressurs}
                   />
                 </CustomLinkPanel2>
               </Link>
