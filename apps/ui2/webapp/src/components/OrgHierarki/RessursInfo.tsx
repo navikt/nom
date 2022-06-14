@@ -14,6 +14,7 @@ const ressursInfoStyles = css({
 
 const metadataStyles = css({
     width: '50%',
+    marginLeft: '2rem'
 })
 
 const metadataRow = css({
