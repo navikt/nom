@@ -37,17 +37,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                 <Heading size="large" >{ressurs.fornavn} {ressurs.etternavn}</Heading>
                 <BodyShort size="medium">{`(${ressurs.navIdent})`}</BodyShort>
 
-                <div className={ressursMetadataStyles}>
-                    <div className={css({ marginRight: '30px'})}>
-                        <TextWithLabel2 label="Startdato: " text="Mangler startdato" />
-                        <TextWithLabel2 label="Org-enhet: " text="Mangler enhet" />
-                    </div>
-                    
-                    <div className={css({ marginLeft: '20px'})}>
-                        <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
-                        <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
-                    </div>
-                </div>
+                
             </div>
         </CustomLinkPanel2>
     )
