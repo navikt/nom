@@ -6,26 +6,30 @@ import TextWithLabel2 from "../TextWithLabel2"
 import UserImage from "../UserImage"
 
 const ressursInfoStyles = css({
-    minHeight: '350px',
     width: '100%',
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
 })
-const ressursMetadataStyles = css({
-    width: '100%',
-    marginTop: '30px',
+
+const metadataStyles = css({
+    width: '50%',
+})
+
+const metadataRow = css({
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: '1rem'
 })
 
 type RessursInfoProps = {
     ressurs: Ressurs
 }
 
+
 const RessursInfo = (props: RessursInfoProps) => {
     const { ressurs } = props
+    console.log(ressurs, "RESSURS")
 
     return (
         <CustomLinkPanel2 type={LinkPanelType.RESSURS}>
@@ -36,8 +40,13 @@ const RessursInfo = (props: RessursInfoProps) => {
 
                 <Heading size="large" >{ressurs.fornavn} {ressurs.etternavn}</Heading>
                 <BodyShort size="medium">{`(${ressurs.navIdent})`}</BodyShort>
-
                 
+                <div className={metadataStyles}>
+                    <div className={metadataRow}>
+                        <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
+                        <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
+                    </div>
+                </div>
             </div>
         </CustomLinkPanel2>
     )

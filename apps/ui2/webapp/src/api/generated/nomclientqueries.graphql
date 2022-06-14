@@ -139,6 +139,14 @@ query HentRessursMedNavIdent($navIdent: String) {
         agressoId
         navn
         orgNiv
+        leder {
+          ressurs {
+            navIdent
+            personIdent
+            fornavn
+            etternavn
+          }
+        }
       }
     }
   }

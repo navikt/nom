@@ -395,7 +395,7 @@ export type HentRessursMedNavIdentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string } }> } | null };
+export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1096,6 +1096,15 @@ export const HentRessursMedNavIdentDocument = gql`
       organisasjonsenhet {
         agressoId
         navn
+        orgNiv
+        leder {
+          ressurs {
+            navIdent
+            personIdent
+            fornavn
+            etternavn
+          }
+        }
       }
     }
   }

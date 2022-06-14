@@ -1,11 +1,10 @@
 import { css } from "@emotion/css"
 import { BodyShort, Label } from "@navikt/ds-react"
 
-
 const textStyles = css({ 
     display: 'flex',
     margin: '0px',
-    marginBottom: '10px'
+    marginBottom: '10px',
 })
 
 type TextWithLabel2Props = {
