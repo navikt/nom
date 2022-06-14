@@ -1,6 +1,6 @@
 import { css } from "@emotion/css"
 import { BodyShort, Heading } from "@navikt/ds-react"
-import { Ressurs } from "../../api/generated/graphql_generated"
+import { Ressurs, RessursKobling } from "../../api/generated/graphql_generated"
 import CustomLinkPanel2,{ LinkPanelType }  from "../CustomLinkPanel2"
 import TextWithLabel2 from "../TextWithLabel2"
 import UserImage from "../UserImage"
@@ -13,7 +13,7 @@ const ressursInfoStyles = css({
 })
 
 const metadataStyles = css({
-    width: '50%',
+    width: '60%',
     marginLeft: '2rem'
 })
 
@@ -47,6 +47,13 @@ const RessursInfo = (props: RessursInfoProps) => {
                         <TextWithLabel2 label="Tlf: " text="Mangler tlf" />
                         <TextWithLabel2 label="E-post: " text={ressurs.epost || 'Mangler e-post'} />
                     </div>
+                    
+                    {ressurs.koblinger && ressurs.koblinger.map((kobling: RessursKobling)  => (
+                        <div className={metadataRow}>
+                            <TextWithLabel2 label="Org-enhet: " text={kobling.organisasjonsenhet.navn} />
+                            <TextWithLabel2 label="Leder: " text={kobling.organisasjonsenhet.leder[0].ressurs.fornavn + ' ' + kobling.organisasjonsenhet.leder[0].ressurs.etternavn} />
+                        </div>
+                    ))}
                 </div>
             </div>
         </CustomLinkPanel2>

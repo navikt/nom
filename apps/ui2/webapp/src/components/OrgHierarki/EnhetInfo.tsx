@@ -26,6 +26,7 @@ type EnhetInfoProps = {
 
 const EnhetInfo = (props: EnhetInfoProps) => {
   const { title, lederNavn, ident, overenhet, type, leder } = props
+  
 
   const getSize = () => {
     if (type === LinkPanelType.CURRENT) return "130px";
