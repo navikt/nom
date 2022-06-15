@@ -8,6 +8,7 @@ import no.nav.nom.apps.navident.domain.PersonidType;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.awaitility.Awaitility;
 import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,23 +50,17 @@ class EventSourceServiceTest {
         }
     }
 
-    @Autowired
-    private KafkaConsumer<String, String> stringValueConsumer;
+    @Autowired private KafkaConsumer<String, String> stringValueConsumer;
+    @Autowired private EventSourceService eventSourceService;
+    @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
+    @Autowired private Map<String, Navident> navidenter;
+    @MockBean  private DataSource dataSource;
+    @Value("${test.topic}")  private String topic;
 
-    @MockBean
-    private DataSource dataSource;
-
-    @Value("${test.topic}")
-    private String topic;
-
-    @Autowired
-    private EventSourceService eventSourceService;
-
-    @Autowired
-    private KafkaTemplate<String, SourceEvent> kafkaTemplate;
-
-    @Autowired
-    private Map<String, Navident> navidenter;
+    @BeforeEach
+    public void resetDomain() {
+        navidenter.clear();
+    }
 
     @Test
     public void opprettNavIdentEvent() {
@@ -78,9 +73,80 @@ class EventSourceServiceTest {
         await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
 
         List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(perioder.size(), 1);
-        assertEquals(perioder.get(0).getFraOgMed(), LocalDate.now());
-        assertEquals(perioder.get(0).getTilOgMed(), null);
+        assertEquals(1, perioder.size());
+        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
+        assertEquals(null, perioder.get(0).getTilOgMed());
+    }
+
+    @Test
+    public void opprett3NavIdenterEvent() {
+        String navIdent = "A000001";
+        String personid = "01019900001";
+        String navIdent2 = "A000002";
+        String personid2 = "01019900002";
+        String navIdent3 = "A000003";
+        String personid3 = "01019900003";
+
+        SourceEvent event = getOpprettEvent(navIdent, personid);
+        SourceEvent event2 = getOpprettEvent(navIdent2, personid2);
+        SourceEvent event3 = getOpprettEvent(navIdent3, personid3);
+
+        kafkaTemplate.send(topic, event.payload.navident, event);
+        kafkaTemplate.send(topic, event2.payload.navident, event2);
+        kafkaTemplate.send(topic, event3.payload.navident, event3);
+
+        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent2));
+        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent3));
+
+        assertEquals(3, navidenter.size());
+
+        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
+        assertEquals(1, perioder.size());
+        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
+        assertEquals(null, perioder.get(0).getTilOgMed());
+    }
+
+    @Test
+    public void opprettNavIdentSomFinnesEvent() {
+        String navIdent = "A000001";
+        String personid = "01019900001";
+        String personid2 = "01019900002";
+        SourceEvent event = getOpprettEvent(navIdent, personid);
+        SourceEvent event2 = getOpprettEvent(navIdent, personid2);
+
+        kafkaTemplate.send(topic, event.payload.navident, event);
+        kafkaTemplate.send(topic, event.payload.navident, event2); // Forventer at denne ikke behandles - med kun en error log
+
+        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+
+        assertEquals(navidenter.size(), 1);
+
+        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
+        assertEquals(1, perioder.size());
+        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
+        assertEquals(null, perioder.get(0).getTilOgMed());
+    }
+
+    @Test
+    public void opprettNavIdentHvorPersonidFinnesEvent() {
+        String navIdent = "A000001";
+        String navIdent2 = "A000002";
+        String personid = "01019900001";
+        SourceEvent event = getOpprettEvent(navIdent, personid);
+        SourceEvent event2 = getOpprettEvent(navIdent2, personid);
+
+        kafkaTemplate.send(topic, event.payload.navident, event);
+        kafkaTemplate.send(topic, event2.payload.navident, event2); // Forventer at denne ikke behandles - med kun en error log
+
+        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+
+        assertEquals(1, navidenter.size());
+
+        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
+        assertEquals(1, perioder.size());
+        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
+        assertEquals(null, perioder.get(0).getTilOgMed());
     }
 
     @Test
@@ -99,9 +165,9 @@ class EventSourceServiceTest {
         await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() ->!navidenter.get(navIdent).isActive(tilDato.plusDays(1)));
 
         List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(perioder.size(), 1);
-        assertEquals(perioder.get(0).getFraOgMed(), fraDato);
-        assertEquals(perioder.get(0).getTilOgMed(), tilDato);
+        assertEquals(1, perioder.size());
+        assertEquals(fraDato, perioder.get(0).getFraOgMed());
+        assertEquals(tilDato, perioder.get(0).getTilOgMed());
     }
 
     private SourceEvent getOpprettEvent(String navid, String personid) {
