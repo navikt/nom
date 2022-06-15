@@ -26,6 +26,9 @@ spring:
       minimum-idle: 2
       maximum-pool-size: 2
 
+  jpa:
+    open-in-view: false
+
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
     properties:
