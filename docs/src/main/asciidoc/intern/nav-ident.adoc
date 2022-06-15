@@ -290,4 +290,4 @@ En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 1. Skal NIK vite noe om perioder en NAV-ident var aktiv? Dette er jo info som uansett vil bo i NOM. 
 2. Aktiv/inaktiv for en NAV-ident. Trengs den i NIK? Det er egentlig utlede info fra NOM, så burde være tilstrekkelig at det er i NOM?
 3. Integrasjon mot PDL: Må både NOM og NIK ha det, holder det med bare en av de? NOM må hente navn fra PDL. NIK trenger fnr-historikk. NIK: bør vurdere å droppe å abonnere på fnr-endringer, og heller spørre dersom vi ikke får treff for å se om personen har fått nytt fnr.
-
+4. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Hvis ja, så trenger ikke IDA å benytte NIK?
