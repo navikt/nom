@@ -1,6 +1,7 @@
 export function setupSessionRoutes(app) {
-    app.get('/sessionInfo', (req, res) => {
-        const name = req.session?.passport?.user?.claims?.name
-        res.json( name ? name : "" )
-    })
+  app.get('/sessionInfo', (req, res) => {
+    const navIdent = req.session?.passport?.user?.claims?.NAVident
+
+    res.json(navIdent ? navIdent : '')
+  })
 }

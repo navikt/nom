@@ -11,6 +11,9 @@ spec:
   azure:
     application:
       enabled: true
+      claims:
+        extra:
+          - NAVident
       tenant: {{azure.application.tenant}}
       replyURLs:
       {{#each azure.application.replyURLs as |url|}}
