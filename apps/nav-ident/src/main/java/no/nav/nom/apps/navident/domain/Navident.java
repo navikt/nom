@@ -2,24 +2,35 @@ package no.nav.nom.apps.navident.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Builder(toBuilder = true)
+@Builder
 @Data
 public class Navident {
 
     String navident;
     String gjeldendePersonid;
-    @Singular("personid") List<Personid> allePersonider;
+    List<Personid> allePersonider;
     IdentType identType;
-    @Singular("periode") List<Periode> aktivePerioder;
+    List<Periode> aktivePerioder;
+
+    public boolean addPeriode(Periode periode) {
+        ArrayList<Periode> perioder = new ArrayList<>(aktivePerioder);
+        aktivePerioder = perioder;
+        return aktivePerioder.add(periode);
+    }
+    public boolean addPersonid(Personid personid) {
+        ArrayList<Personid> personider = new ArrayList<>(allePersonider);
+        allePersonider = personider;
+        return allePersonider.add(personid);
+    }
 
     public boolean is(String personid) {
-        return allePersonider.stream().anyMatch( id -> id.personid.equals(personid));
+        return allePersonider.stream().anyMatch( id -> id.id.equals(personid));
     }
 
     public boolean isActive() { return isActive(LocalDate.now()); }
@@ -28,19 +39,39 @@ public class Navident {
         return aktivePerioder.stream().anyMatch( periode -> periode.contains(date));
     }
 
+    public LocalDate senestePeriodeDato() {
+        Periode sistePeriode = aktivePerioder.get(aktivePerioder.size()-1);
+        return sistePeriode.tilOgMed != null ? sistePeriode.tilOgMed : sistePeriode.fraOgMed;
+    }
+
+
+    @Override
+    public Navident clone() {
+        Navident clone = null;
+        try {
+            clone = (Navident) super.clone();
+        } catch(CloneNotSupportedException e) {
+            clone = Navident.builder()
+                    .navident(this.navident)
+                    .gjeldendePersonid(this.getGjeldendePersonid())
+                    .identType(this.identType)
+                    .build();
+        }
+        clone.aktivePerioder = this.aktivePerioder.stream().map(periode -> periode.clone()).collect(Collectors.toList());
+        clone.allePersonider = this.allePersonider.stream().map(personid -> personid.clone()).collect(Collectors.toList());
+        return clone;
+    }
+
     public String maskedToString() {
-        Navident masked = this.toBuilder().build(); // Is not a deep copy
-        masked.gjeldendePersonid = mask(gjeldendePersonid);
-        masked.allePersonider = new ArrayList<>();
-        this.allePersonider.forEach( p ->
-                masked.allePersonider.add(
+        Navident masked = (Navident) this.clone();
+        masked.gjeldendePersonid = mask(this.gjeldendePersonid);
+        masked.allePersonider =
+                this.allePersonider.stream().map( p ->
                         Personid.builder()
-                                .personid(mask(p.personid))
+                                .id(mask(p.id))
                                 .type(p.type)
                                 .build()
-                )
-        );
-
+                ).collect(Collectors.toList());
         return masked.toString();
     }
 

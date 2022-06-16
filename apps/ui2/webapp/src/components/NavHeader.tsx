@@ -91,7 +91,7 @@ const NavHeader = () => {
           size='medium'
         ></Search>
         <PeopleFilled color='#236B7D' fontSize={'2rem'} />
-        <span className={userText}>H158887</span>
+        <span className={userText}>{session}</span>
         <BurgerMenu />
         {/* <span className={placeholderMeny}>Meny</span> */}
       </div>

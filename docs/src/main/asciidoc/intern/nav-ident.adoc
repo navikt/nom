@@ -44,6 +44,8 @@ Utledes via eventsourcing?
     ]
 }
 ```
+Foreslått format på annen nøkkel: <XXX999>
+Navn på "annen nøkkel" bør gis av Sikkerhetsseksjonen i og med at det er de som utdeler denne.
 
 full historikk
 metadata rundt bestillinger (opprett, deaktiver)
@@ -58,7 +60,7 @@ metadata rundt bestillinger (opprett, deaktiver)
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
         personidtype: PDL | MANUELL
-        identType: ROBOT | STANDARD | UTENLANDSK_KONSULENT
+        identType: ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT
     }
 }
 ```
@@ -144,7 +146,7 @@ REST tjenesten utfører følgende handlinger:
 ```
     {
         personid: string påkrevd (f-nr, d-nr, annen nøkkel)
-        identType: string <ROBOT | STANDARD | UTENLANDSK_KONSULENT>
+        identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
         aktivFra: date
     }
 ```
@@ -227,8 +229,8 @@ Sekvensen er unik i seg selv, og brukes i dag bl.a. i UNIT4 som ressursnr.
 
 === Konsumenter
 
-- Remedy
-- NOM-UI
+- Remedy / IGA 
+- NOM-UI 
 - Dolly i dev-miljø
 - IDA for test-identer i dev-miljø
 
@@ -264,11 +266,15 @@ Vikafossen ansatte: Administreres av Sikkerhetsseksjonen. NIK oppretter kun NAV-
 
 Riksrevisjonen: Trenger navident for å kunne lese
 
+Helfo: jobber i en del av navs applikasjoner. 
+
+En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 
 === Hypoteser
 
 - utenlandskonsulenter trenger ikke være i lønnssystemet for å få betalt
 - (?) Roboter har fast prefix-bokstav i sin nav-ident
+- Robot knyttes til en org.enhet i NOM. Leder for org.enheten er da ansvarlig for roboten. 
 - vikafossen har prefix-bokstav "s", av fiktivt etteravn "Skjult"
 - egentlig 3 stykker fiktiv/skjult/ukjent etc
 - anonyme nav-identer har prefix-bokstav "a", av fiktivt etternavn "Anonym"
@@ -278,3 +284,10 @@ Riksrevisjonen: Trenger navident for å kunne lese
 - Kan ikke endre en bestilling tilbake i tid for audit-formål
 - NIK stoler på at bestillingene den får er verifisert av bestiller (f.eks nom/remedy) mtp gyldig personident
 - IDA-identer starter alltid med Z som bokstav-prefix
+
+
+=== Åpne punkter
+1. Skal NIK vite noe om perioder en NAV-ident var aktiv? Dette er jo info som uansett vil bo i NOM. 
+2. Aktiv/inaktiv for en NAV-ident. Trengs den i NIK? Det er egentlig utlede info fra NOM, så burde være tilstrekkelig at det er i NOM?
+3. Integrasjon mot PDL: Må både NOM og NIK ha det, holder det med bare en av de? NOM må hente navn fra PDL. NIK trenger fnr-historikk. NIK: bør vurdere å droppe å abonnere på fnr-endringer, og heller spørre dersom vi ikke får treff for å se om personen har fått nytt fnr.
+4. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Hvis ja, så trenger ikke IDA å benytte NIK?
