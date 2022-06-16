@@ -14,4 +14,13 @@ public class Periode {
     public boolean contains(LocalDate date) {
         return fraOgMed.isBefore(date.plusDays(1)) && (tilOgMed == null || tilOgMed.isAfter(date.minusDays(1)) );
     }
+
+    @Override
+    public Periode clone() {
+        try {
+            return (Periode) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return Periode.builder().fraOgMed(this.fraOgMed).tilOgMed(this.tilOgMed).build();
+        }
+    }
 }

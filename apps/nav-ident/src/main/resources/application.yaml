@@ -2,6 +2,7 @@ app:
   name: ${NAIS_APP_NAME:nav-ident}
   kafka:
     topic.eventsource.name: org.nav-ident
+    topic.rnr.name: org.nav-ident-rnr
 
 nom:
   libs:
@@ -54,5 +55,5 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
-      properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource"
+      properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
 

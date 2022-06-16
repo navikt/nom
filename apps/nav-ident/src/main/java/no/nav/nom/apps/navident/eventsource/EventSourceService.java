@@ -52,7 +52,7 @@ public class EventSourceService {
 
         Personid personid = Personid
                 .builder()
-                .personid(event.payload.personid)
+                .id(event.payload.personid)
                 .type(event.payload.personidtype)
                 .build();
 
@@ -64,7 +64,7 @@ public class EventSourceService {
         Navident ident = Navident
                 .builder()
                 .navident(event.payload.navident)
-                .gjeldendePersonid(personid.getPersonid())
+                .gjeldendePersonid(personid.getId())
                 .identType(event.payload.identType)
                 .allePersonider(Arrays.asList(personid))
                 .aktivePerioder(Arrays.asList(periode))

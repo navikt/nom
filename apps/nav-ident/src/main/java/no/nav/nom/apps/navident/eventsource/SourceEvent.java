@@ -2,12 +2,9 @@ package no.nav.nom.apps.navident.eventsource;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.Personid;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Builder(toBuilder = true)
 @Data

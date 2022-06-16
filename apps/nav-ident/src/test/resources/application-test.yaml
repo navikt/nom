@@ -32,6 +32,7 @@ spring:
 
 test:
   topic: embedded-test-topic
+  rnr-topic: embedded-rnr-test-topic
 
 app:
   kafka:

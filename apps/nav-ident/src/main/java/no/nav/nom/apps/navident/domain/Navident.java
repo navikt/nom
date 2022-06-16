@@ -2,13 +2,9 @@ package no.nav.nom.apps.navident.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
-import lombok.Value;
 
-import java.awt.desktop.AppReopenedEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +30,7 @@ public class Navident {
     }
 
     public boolean is(String personid) {
-        return allePersonider.stream().anyMatch( id -> id.personid.equals(personid));
+        return allePersonider.stream().anyMatch( id -> id.id.equals(personid));
     }
 
     public boolean isActive() { return isActive(LocalDate.now()); }
@@ -48,24 +44,31 @@ public class Navident {
         return sistePeriode.tilOgMed != null ? sistePeriode.tilOgMed : sistePeriode.fraOgMed;
     }
 
+
+    @Override
     public Navident clone() {
-        Navident clone = Navident.builder()
-                .navident(this.navident)
-                .gjeldendePersonid(mask(this.gjeldendePersonid))
-                .identType(this.identType)
-                .build();
-        clone.aktivePerioder = List.copyOf(this.aktivePerioder);
-        clone.allePersonider = List.copyOf(this.allePersonider);
+        Navident clone = null;
+        try {
+            clone = (Navident) super.clone();
+        } catch(CloneNotSupportedException e) {
+            clone = Navident.builder()
+                    .navident(this.navident)
+                    .gjeldendePersonid(this.getGjeldendePersonid())
+                    .identType(this.identType)
+                    .build();
+        }
+        clone.aktivePerioder = this.aktivePerioder.stream().map(periode -> periode.clone()).collect(Collectors.toList());
+        clone.allePersonider = this.allePersonider.stream().map(personid -> personid.clone()).collect(Collectors.toList());
         return clone;
     }
 
     public String maskedToString() {
-        Navident masked = this.clone();
+        Navident masked = (Navident) this.clone();
         masked.gjeldendePersonid = mask(this.gjeldendePersonid);
         masked.allePersonider =
                 this.allePersonider.stream().map( p ->
                         Personid.builder()
-                                .personid(mask(p.personid))
+                                .id(mask(p.id))
                                 .type(p.type)
                                 .build()
                 ).collect(Collectors.toList());
