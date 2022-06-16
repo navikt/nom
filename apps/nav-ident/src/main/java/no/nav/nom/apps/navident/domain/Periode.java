@@ -5,11 +5,11 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Periode {
-    LocalDate fraOgMed;
-    LocalDate tilOgMed;
+    final LocalDate fraOgMed;
+    final LocalDate tilOgMed;
 
     public boolean contains(LocalDate date) {
         return fraOgMed.isBefore(date.plusDays(1)) && (tilOgMed == null || tilOgMed.isAfter(date.minusDays(1)) );
