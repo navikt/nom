@@ -25,7 +25,7 @@ const metadataColumnStyles = css({
   width: "50%",
 });
 
-const LabenAndText = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
+const LabelAndText = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
   <div className={props.alignAtEnd ? css(metadataStyles, {justifyContent: 'end'}) : metadataStyles}>
     <BodyShort>{props.label} &nbsp;</BodyShort>
     {!props.linkTo && <Label>{props.text}</Label>}
@@ -55,44 +55,46 @@ const RessursInfo = (props: RessursInfoProps) => {
 
         <Heading size="large">{ressurs.fornavn} {ressurs.etternavn}</Heading>
         <BodyShort size="medium">{`(${ressurs.navIdent})`}</BodyShort>
-      </div>
 
-      <div className={css({ display: "flex" })}>
-        <div className={css(metadataColumnStyles, { marginRight: "1.8rem" })}>
-          <LabenAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
+        <div className={css({ display: "flex", marginBottom: '1.5rem' })}>
+            <div className={css(metadataColumnStyles, { marginRight: "1.8rem" })}>
+            <LabelAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
 
-          {ressurs.koblinger &&
-            ressurs.koblinger.map((kobling: RessursKobling) => (
-                <LabenAndText 
-                    alignAtEnd
-                    label="Org-enhet: " 
-                    text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
-                    linkTo="#"
-                />
-          ))}
-        </div>
-
-        <div className={metadataColumnStyles}>
-          <LabenAndText label="E-post: " text={ressurs.epost || "Mangler tlf"} />
-
-          {ressurs.koblinger &&
-            ressurs.koblinger.map((kobling: RessursKobling) => (
-              <>
-                {kobling.organisasjonsenhet.leder && (
-                  <LabenAndText
-                    label="Leder: "
-                    linkTo="#"
-                    text={
-                      kobling.organisasjonsenhet.leder.length > 0
-                        ? (kobling.organisasjonsenhet.leder[0].ressurs.fornavn as string + ' ' + kobling.organisasjonsenhet.leder[0].ressurs.etternavn as string)
-                        : "Mangler navn"
-                    }
-                  />
-                )}
-              </>
+            {ressurs.koblinger &&
+                ressurs.koblinger.map((kobling: RessursKobling) => (
+                    <LabelAndText 
+                        alignAtEnd
+                        label="Org-enhet: " 
+                        text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
+                        linkTo="#"
+                    />
             ))}
+            </div>
+
+            <div className={metadataColumnStyles}>
+            <LabelAndText label="E-post: " text={ressurs.epost || "Mangler tlf"} />
+
+            {ressurs.koblinger &&
+                ressurs.koblinger.map((kobling: RessursKobling) => (
+                <>
+                    {kobling.organisasjonsenhet.leder && (
+                    <LabelAndText
+                        label="Leder: "
+                        linkTo="#"
+                        text={
+                        kobling.organisasjonsenhet.leder.length > 0
+                            ? (kobling.organisasjonsenhet.leder[0].ressurs.fornavn as string + ' ' + kobling.organisasjonsenhet.leder[0].ressurs.etternavn as string)
+                            : "Mangler navn"
+                        }
+                    />
+                    )}
+                </>
+                ))}
+            </div>
         </div>
       </div>
+
+      
     </CustomLinkPanel2>
   );
 };
