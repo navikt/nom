@@ -21,7 +21,10 @@ public class NeedProducer {
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
 
     public void produceNeed(String personid, IdentType type) {
-        Need need = Need.builder().personid(personid).build();
+        Need need = Need.builder()
+                .personid(personid)
+                .identType(type)
+                .build();
         kafkaTemplate.send(topic, need);
 
         log.debug("Publisert Need melding: %s".formatted(need.maskedToString()));

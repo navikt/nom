@@ -28,6 +28,7 @@ import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
@@ -46,9 +47,14 @@ class NeedProducerTest {
 
     @Test
     public void createNeed() {
-        needProducer.produceNeed("A000001", IdentType.STANDARD);
+        String id = "A000001";
+        needProducer.produceNeed(id, IdentType.STANDARD);
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> needsRead.size() >= 1);
+
+        assertEquals(1, needsRead.size());
+        assertEquals(id, needsRead.get(0).personid);
+        assertEquals(IdentType.STANDARD, needsRead.get(0).identType);
     }
 
     @KafkaListener(
