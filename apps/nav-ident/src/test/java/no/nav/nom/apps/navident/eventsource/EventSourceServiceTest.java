@@ -35,19 +35,6 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @Slf4j
 @EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 class EventSourceServiceTest {
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public KafkaConsumer<String, String> stringValueConsumer(KafkaProperties properties) {
-            properties.setClientId("plaintextConsumer");
-            properties.getConsumer().setValueDeserializer(org.apache.kafka.common.serialization.StringDeserializer.class);
-            return new KafkaConsumer<>(properties.buildConsumerProperties());
-        }
-    }
-
-    @Autowired private KafkaConsumer<String, String> stringValueConsumer;
-    @Autowired private EventSourceService eventSourceService;
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
     @Autowired private Map<String, Navident> navidenter;
     @MockBean  private DataSource dataSource;

@@ -10,9 +10,11 @@ import java.util.stream.Collectors;
 @Builder
 @Data
 public class Need {
+    public String eksisterendeId;
     String personid;
     IdentType identType;
     List<String> pdlPersonider;
+    int visited;
 
     @Override
     public Need clone() {
@@ -23,6 +25,8 @@ public class Need {
             clone = Need.builder()
                     .personid(this.personid)
                     .identType(this.identType)
+                    .eksisterendeId(this.eksisterendeId)
+                    .visited(this.visited)
                     .build();
         }
         clone.pdlPersonider = this.pdlPersonider != null ? List.copyOf(this.pdlPersonider) : null;

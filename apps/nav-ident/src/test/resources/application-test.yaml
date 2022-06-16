@@ -1,18 +1,8 @@
 spring:
   kafka:
-    bootstrap-servers: "localhost:9092"
+    bootstrap-servers: "localhost:9092, localhost:9093"
     properties:
       security.protocol: PLAINTEXT
-#      basic.auth.credentials.source: USER_INFO
-#      basic.auth.user.info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
-#      ssl:
-#        keystore:
-#          type: PKCS12
-#          location: ${KAFKA_KEYSTORE_PATH}
-#          password: ${KAFKA_CREDSTORE_PASSWORD}
-#        truststore:
-#          location: ${KAFKA_TRUSTSTORE_PATH}
-#          password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -36,9 +26,8 @@ test:
 
 app:
   kafka:
-    topic:
-      eventsource:
-        name: ${test.topic}
+    topic.eventsource.name: ${test.topic}
+    topic.rnr.name: ${test.rnr-topic}
 
 nom:
   libs:
