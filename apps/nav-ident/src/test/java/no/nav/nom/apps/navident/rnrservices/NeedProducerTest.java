@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
 @Slf4j
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9093", "port=9093" })
 class NeedProducerTest {
 
 //    @Autowired private KafkaProperties properties;
