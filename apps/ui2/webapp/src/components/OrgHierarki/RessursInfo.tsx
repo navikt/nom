@@ -15,15 +15,17 @@ const ressursInfoStyles = css({
 const metadataStyles = css({
     display: 'flex',
     width: '100%',
-    marginLeft: '2rem',
     justifyContent: 'center',
+    marginLeft: '2rem'
 })
 
 const metadataColumnStyles = css({
     display: 'flex',
     flexDirection: 'column',
     marginTop: '1rem',
-    wordBreak: 'break-all'
+    wordBreak: 'break-all',
+    maxWidth: '48%',
+    minWidth: '30%'
 })
 
 type RessursInfoProps = {
@@ -61,7 +63,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                             {kobling.organisasjonsenhet.leder && (
                                 <TextWithLabel2 
                                     label="Leder: " 
-                                    text={kobling.organisasjonsenhet.leder.length > 0 ? (kobling.organisasjonsenhet.leder[0].ressurs.fornavn as string + ' ' + kobling.organisasjonsenhet.leder[0].ressurs.etternavn as string) as string : 'Mangler navn'} 
+                                    text={kobling.organisasjonsenhet.leder.length > 0 ? (kobling.organisasjonsenhet.leder[0].ressurs.fornavn as string ) as string : 'Mangler navn'} 
                                 />
                             )}
                         </>
