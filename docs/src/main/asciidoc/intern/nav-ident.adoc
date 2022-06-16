@@ -60,7 +60,7 @@ metadata rundt bestillinger (opprett, deaktiver)
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
         personidtype: PDL | MANUELL
-        identType: ROBOT | STANDARD | UTENLANDSK_KONSULENT
+        identType: ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT
     }
 }
 ```
@@ -146,7 +146,7 @@ REST tjenesten utfører følgende handlinger:
 ```
     {
         personid: string påkrevd (f-nr, d-nr, annen nøkkel)
-        identType: string <ROBOT | STANDARD | UTENLANDSK_KONSULENT>
+        identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
         aktivFra: date
     }
 ```
