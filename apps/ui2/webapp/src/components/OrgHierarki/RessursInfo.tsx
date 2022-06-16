@@ -3,7 +3,6 @@ import { BodyShort, Heading, Label } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
 import { Ressurs, RessursKobling } from "../../api/generated/graphql_generated";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
-import TextWithLabel2 from "../TextWithLabel2";
 import UserImage from "../UserImage";
 
 const ressursInfoStyles = css({
@@ -26,7 +25,7 @@ const metadataColumnStyles = css({
   width: "50%",
 });
 
-const LinkWithTextAndLabel = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
+const LabenAndText = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
   <div className={props.alignAtEnd ? css(metadataStyles, {justifyContent: 'end'}) : metadataStyles}>
     <BodyShort>{props.label} &nbsp;</BodyShort>
     {!props.linkTo && <Label>{props.text}</Label>}
@@ -59,12 +58,12 @@ const RessursInfo = (props: RessursInfoProps) => {
       </div>
 
       <div className={css({ display: "flex" })}>
-        <div className={css(metadataColumnStyles, { marginRight: "1.5rem" })}>
-          <LinkWithTextAndLabel alignAtEnd label="Tlf: " text="Mangler tlf" />
+        <div className={css(metadataColumnStyles, { marginRight: "1.8rem" })}>
+          <LabenAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
 
           {ressurs.koblinger &&
             ressurs.koblinger.map((kobling: RessursKobling) => (
-                <LinkWithTextAndLabel 
+                <LabenAndText 
                     alignAtEnd
                     label="Org-enhet: " 
                     text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
@@ -74,13 +73,13 @@ const RessursInfo = (props: RessursInfoProps) => {
         </div>
 
         <div className={metadataColumnStyles}>
-          <TextWithLabel2 label="E-post: " text={ressurs.epost || "Mangler tlf"} />
+          <LabenAndText label="E-post: " text={ressurs.epost || "Mangler tlf"} />
 
           {ressurs.koblinger &&
             ressurs.koblinger.map((kobling: RessursKobling) => (
               <>
                 {kobling.organisasjonsenhet.leder && (
-                  <LinkWithTextAndLabel
+                  <LabenAndText
                     label="Leder: "
                     linkTo="#"
                     text={
