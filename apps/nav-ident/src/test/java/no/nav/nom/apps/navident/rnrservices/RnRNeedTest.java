@@ -2,11 +2,13 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.*;
+import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestNeedProducer;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,8 +27,7 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
@@ -41,6 +42,8 @@ class RnRNeedTest {
     @Value("${test.rnr-topic}")  private String topic;
     @Autowired private RnRTestListener rnrTestListener;
     @Autowired private RnRTestNeedProducer rnrTestNeedProducer;
+
+    @MockBean private PdlService pdlService;
 
     @BeforeEach
     public void emptyNeedsRead() { rnrTestListener.needsRead.clear(); }
@@ -230,6 +233,106 @@ class RnRNeedTest {
 
         assertEquals(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId, populatedNeed.personid);
         assertEquals(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_2, populatedNeed.eksisterendeId); // Dette er den med nyeste dato
+    }
+
+    @Test
+    public void pdlOppslag_Need_IdIkkeFunnet_TomRespons() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .build();
+
+        Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList());
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+
+        assertNull(populatedNeed.pdlGjeldendePersonid);
+        assertTrue(populatedNeed.pdlPersonider.isEmpty());
+    }
+
+    @Test
+    public void pdlOppslag_Need_IdIkkeFunnet_NullRespons() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .build();
+
+        Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(null);
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+
+        assertNull(populatedNeed.pdlGjeldendePersonid);
+        assertTrue(populatedNeed.pdlPersonider.isEmpty());
+    }
+
+    @Test
+    public void pdlOppslag_Need_IdFunnet_1_ident() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .build();
+
+        Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId));
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+
+        assertEquals(TIDLIGERE_ANSATT_1_PersonId, populatedNeed.pdlGjeldendePersonid);
+        assertEquals(1, populatedNeed.pdlPersonider.size());
+        assertEquals(TIDLIGERE_ANSATT_1_PersonId, populatedNeed.pdlPersonider.get(0));
+    }
+
+    @Test
+    public void pdlOppslag_Need_IdFunnet_2_identer() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .build();
+
+        Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
+        assertEquals(2, populatedNeed.pdlPersonider.size());
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlPersonider.get(0));
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2, populatedNeed.pdlPersonider.get(1));
+    }
+
+    @Test
+    public void pdlOppslag_Need_IdFunnet_2_identer_v2() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .build();
+
+        Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
+        assertEquals(2, populatedNeed.pdlPersonider.size());
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlPersonider.get(0));
+        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2, populatedNeed.pdlPersonider.get(1));
     }
 
     private void prepNavidenter() {

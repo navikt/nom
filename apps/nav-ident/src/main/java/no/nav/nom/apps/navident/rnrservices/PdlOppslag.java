@@ -10,6 +10,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,8 +43,9 @@ public class PdlOppslag {
 
         List<String> pdlIder = pdlService.getKnownPersonider(need.getPersonid());
 
-        if (pdlIder.size() == 0) {
+        if (pdlIder == null || pdlIder.size() == 0) {
             log.error("PDL kjenner ikke til personId som er angitt");
+            pdlIder = Collections.emptyList();
         } else {
             need.setPdlGjeldendePersonid(pdlIder.get(0));
         }
