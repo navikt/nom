@@ -69,7 +69,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                   ressurs.koblinger.map((kobling: RessursKobling) => (
                       <LabelAndText 
                           alignAtEnd
-                          label="Org-enhet: " 
+                          label="Org.enhet: " 
                           text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
                           linkTo={getLink(kobling.organisasjonsenhet)}
                       />

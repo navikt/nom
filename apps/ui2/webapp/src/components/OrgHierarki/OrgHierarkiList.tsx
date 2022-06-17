@@ -109,7 +109,9 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             {sortedKoblinger.map(k =>
               <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`} className={linkStyles}>
                   <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                    <Heading size="medium" className={css({ width: '100%' })}>{k.ressurs?.visningsNavn || 'Mangler navn'}</Heading>
+                    <Heading size="medium" className={css({ width: '100%' })}>
+                        {k.ressurs?.fornavn && k.ressurs?.etternavn ? (k.ressurs.fornavn + ' ' + k.ressurs.etternavn) : 'Mangler navn'}
+                    </Heading>
                   </CustomLinkPanel2>
               </Link> 
               
