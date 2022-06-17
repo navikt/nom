@@ -21,7 +21,6 @@ const metadataColumnStyles = css({
   display: "flex",
   flexDirection: "column",
   marginTop: "1rem",
-  width: "100%",
 })
 
 const LabelAndText = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
@@ -57,17 +56,17 @@ const RessursInfo = (props: RessursInfoProps) => {
 
         <div className={css({ display: "flex", marginBottom: '1.5rem' })}>
             <div className={css(metadataColumnStyles, { marginRight: "1.8rem" })}>
-            <LabelAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
+              <LabelAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
 
-            {ressurs.koblinger &&
-                ressurs.koblinger.map((kobling: RessursKobling) => (
-                    <LabelAndText 
-                        alignAtEnd
-                        label="Org-enhet: " 
-                        text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
-                        linkTo="#"
-                    />
-            ))}
+              {ressurs.koblinger &&
+                  ressurs.koblinger.map((kobling: RessursKobling) => (
+                      <LabelAndText 
+                          alignAtEnd
+                          label="Org-enhet: " 
+                          text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
+                          linkTo="#"
+                      />
+              ))}
             </div>
 
             <div className={metadataColumnStyles}>
