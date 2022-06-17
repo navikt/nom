@@ -58,7 +58,6 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                         <EnhetInfo
                           title={oe.organisasjonsenhet.navn}
                           lederNavn={getFornavnAndEtternavnForLeder(oe.organisasjonsenhet.leder[0]) || "Mangler Navn"}
-                          overenhet
                           type={LinkPanelType.OVERENHET}
                           leder={oe.organisasjonsenhet.leder[0].ressurs as Ressurs}
                         />
@@ -70,17 +69,32 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         }
       </div>
       
-      {/* Den valgte enheten */}
-      <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
-        <EnhetInfo 
-            title={currentEnhet?.navn || 'Feil i henting av navn'} 
-            lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
-            ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
-            type={LinkPanelType.CURRENT}
-            leder={currentEnhet?.leder[0].ressurs as Ressurs}
-        />
-      </CustomLinkPanel2>
+      {/* Den valgte enheten - når det ikke vises et ressurskort*/}
+      {currentEnhet && !ressurs && (
+          <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
+            <EnhetInfo 
+                title={currentEnhet?.navn || 'Feil i henting av navn'} 
+                lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
+                ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
+                type={LinkPanelType.CURRENT}
+                leder={currentEnhet?.leder[0].ressurs as Ressurs}
+            />
+          </CustomLinkPanel2>
+      )}
       
+      {/* Den valgte enheten - vises som en overenhet når det vises et ressurskort - gjøres om til en lenke siden den ikke finnses i overenhetlista */}
+      {currentEnhet && ressurs && (
+        <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn)} className={linkStyles}>
+            <CustomLinkPanel2 type={LinkPanelType.OVERENHET}>
+              <EnhetInfo 
+                  title={currentEnhet?.navn || 'Feil i henting av navn'} 
+                  lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
+                  type={LinkPanelType.OVERENHET}
+                  leder={currentEnhet?.leder[0].ressurs as Ressurs}
+              />
+            </CustomLinkPanel2>
+          </Link>
+      )}
 
       {/* Liste av underenheter */}
       {underEnheter.length > 0 && (

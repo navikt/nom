@@ -21,11 +21,10 @@ type EnhetInfoProps = {
   lederNavn: string;
   ident?: string;
   icon?: string | undefined;
-  overenhet?: boolean;
 };
 
 const EnhetInfo = (props: EnhetInfoProps) => {
-  const { title, lederNavn, ident, overenhet, type, leder } = props
+  const { title, lederNavn, ident, type, leder } = props
   
 
   const getSize = () => {
@@ -50,9 +49,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
             <BodyShort>Leder: &nbsp;</BodyShort>
 
             {type === LinkPanelType.CURRENT ? (
-              <Link 
-                to={getUrlForLeder()}
-                className={css({ color: "#262626" })}>
+              <Link to={getUrlForLeder()} className={css({ color: "#262626" })}>
                     <Label>{lederNavn}</Label>
               </Link>
             ) : (
@@ -61,7 +58,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
           </div>
         </LinkPanel.Description>
       </div>
-      {!overenhet && <UserImage navIdent={ident} size={getSize()} altText={`Fotografi av ${lederNavn}`}/>}
+      {type !== LinkPanelType.OVERENHET && <UserImage navIdent={ident} size={getSize()} altText={`Fotografi av ${lederNavn}`}/>}
     </div>
   );
 };
