@@ -14,7 +14,6 @@ const ressursInfoStyles = css({
 
 const metadataStyles = css({
   display: "flex",
-  width: "100%",
   marginBottom: "0.5rem",
 });
 
@@ -22,8 +21,8 @@ const metadataColumnStyles = css({
   display: "flex",
   flexDirection: "column",
   marginTop: "1rem",
-  width: "50%",
-});
+  width: "100%",
+})
 
 const LabelAndText = (props: { label: string; text: string, linkTo?: string, alignAtEnd?: boolean }) => (
   <div className={props.alignAtEnd ? css(metadataStyles, {justifyContent: 'end'}) : metadataStyles}>
