@@ -127,7 +127,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
               <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn)}>
                   <div className={ressursLinkStyles}>
                       <Back className="navds-link-panel__chevron"/>
-                      <BodyShort size="medium">Se alle ressurser i {currentEnhet?.navn}</BodyShort>
+                      <BodyShort size="medium" className={css({fontWeight: '600'})}>Se alle ressurser i {currentEnhet?.navn}</BodyShort>
                   </div>
               </Link>
             </>
