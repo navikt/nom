@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 @RequiredArgsConstructor
@@ -36,13 +34,12 @@ public class PersonidOppslag {
         log.debug("PersonidOppslagNeedListener: Got Need %s".formatted(need.maskedToString()));
 
         if (
-                (need.eksisterendeId != null) // Vi har allerede svart
-                || (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.size() == 0)) // Vi må vente på pdl sine personid'er
+                (need.isPersonOppslagVisited()) // Vi har allerede svart
+                || (need.identType == IdentType.STANDARD && !need.isPdlOppslagVisited() ) // Vi må vente på pdl sine personid'er
         ) {
             log.debug("Nothing to do - skipping message");
             return;
         }
-
 
         List<Navident> eksisterendeNavidenter;
         if (need.identType != IdentType.STANDARD) {
@@ -55,7 +52,7 @@ public class PersonidOppslag {
         }
 
         if (eksisterendeNavidenter.size() == 0) {
-            need.setEksisterendeId("");
+            log.debug("Ingen eksisterende NavIdent funnet");
         } else if (eksisterendeNavidenter.size() == 1) {
             need.setEksisterendeId(eksisterendeNavidenter.get(0).getNavident());
         } else { // Found multiple for same personId
@@ -67,6 +64,7 @@ public class PersonidOppslag {
         }
 
         // Need er oppdatert - publiser på nytt
+        need.personOppslagVisited = true;
         need.visited++;
         kafkaTemplate.send(topic, need);
 

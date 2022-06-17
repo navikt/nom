@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 
 import java.util.List;
@@ -9,25 +10,34 @@ import java.util.stream.Collectors;
 
 @Builder
 @Data
-public class Need {
-    public String eksisterendeId;
+@Slf4j
+public class Need implements Cloneable {
     String personid;
     IdentType identType;
+
+    String eksisterendeId;
+    boolean personOppslagVisited;
+
+    String pdlGjeldendePersonid;
     List<String> pdlPersonider;
+    boolean pdlOppslagVisited;
+
     int visited;
 
     @Override
     public Need clone() {
-        Need clone;
+        Need clone = null;
         try {
             clone = (Need)super.clone();
         } catch (CloneNotSupportedException e) {
-            clone = Need.builder()
-                    .personid(this.personid)
-                    .identType(this.identType)
-                    .eksisterendeId(this.eksisterendeId)
-                    .visited(this.visited)
-                    .build();
+            log.error("Could not clone myself - ", e);
+            throw new RuntimeException("Could not clone myself - ", e);
+//            clone = Need.builder()
+//                    .personid(this.personid)
+//                    .identType(this.identType)
+//                    .eksisterendeId(this.eksisterendeId)
+//                    .visited(this.visited)
+//                    .build();
         }
         clone.pdlPersonider = this.pdlPersonider != null ? List.copyOf(this.pdlPersonider) : null;
         return clone;

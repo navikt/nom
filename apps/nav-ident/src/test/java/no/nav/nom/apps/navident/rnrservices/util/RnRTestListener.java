@@ -23,11 +23,19 @@ public class RnRTestListener {
     }
 
     public boolean personOppslagVisited() {
-        return needsRead.stream().anyMatch(n -> n.getVisited() > 0 && n.eksisterendeId != null);
+        return needsRead.stream().anyMatch(n -> n.isPersonOppslagVisited());
     }
 
     public Need getNeed_personOppslagVisited() {
-        return needsRead.stream().filter(n -> n.getVisited() > 0 && n.eksisterendeId != null).findFirst().get();
+        return needsRead.stream().filter(n -> n.isPersonOppslagVisited()).findFirst().get();
+    }
+
+    public boolean pdlOppslagVisited() {
+        return needsRead.stream().anyMatch(n -> n.isPdlOppslagVisited());
+    }
+
+    public Need getNeed_pdlOppslagVisited() {
+        return needsRead.stream().filter(n -> n.isPdlOppslagVisited()).findFirst().get();
     }
 
 }

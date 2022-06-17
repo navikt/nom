@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
@@ -61,10 +63,12 @@ class RnRNeedTest {
 
 
     @Test
-    public void personOppslagId_NeedStandardUtenPDL() {
+    public void personOppslagId_NeedStandard_FinnesIkkeIPDL() {
         String id = "01019912345";
         Need need = Need.builder()
                 .personid(id)
+                .pdlOppslagVisited(true)
+                .pdlPersonider(Collections.emptyList())
                 .identType(IdentType.STANDARD)
                 .build();
 
@@ -73,9 +77,11 @@ class RnRNeedTest {
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> !rnrTestListener.personOppslagVisited() );
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
 
-        // Ingen behandling, men forvent også logg fra PersonidOppslagNeedListener
+        assertEquals(id, populatedNeed.personid);
+        assertNull(populatedNeed.eksisterendeId);
     }
 
     @Test
@@ -92,7 +98,7 @@ class RnRNeedTest {
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
 
         assertEquals(id, populatedNeed.personid);
-        assertEquals("", populatedNeed.eksisterendeId);
+        assertNull(populatedNeed.eksisterendeId);
     }
 
     @Test
@@ -116,6 +122,8 @@ class RnRNeedTest {
         Need need = Need.builder()
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(TIDLIGERE_ANSATT_1_PersonId)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId))
                 .build();
 
@@ -133,6 +141,8 @@ class RnRNeedTest {
         Need need = Need.builder()
                 .personid(NÅVÆRENDE_ANSATT_2_PersonId)
                 .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(NÅVÆRENDE_ANSATT_2_PersonId)
                 .pdlPersonider(Arrays.asList(NÅVÆRENDE_ANSATT_2_PersonId))
                 .build();
 
@@ -150,6 +160,8 @@ class RnRNeedTest {
         Need need = Need.builder()
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
                 .build();
 
@@ -167,6 +179,8 @@ class RnRNeedTest {
         Need need = Need.builder()
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)
                 .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
                 .build();
 
@@ -180,11 +194,14 @@ class RnRNeedTest {
     }
 
     @Test
-    public void personOppslagId_Need_MedPDL_FinnesIkke() {
+    public void personOppslagId_Need_MedPDL_NavIdFinnesIkke() {
+        String id =  "01019912345";
         Need need = Need.builder()
-                .personid("01019912345")
+                .personid(id)
                 .identType(IdentType.STANDARD)
-                .pdlPersonider(Arrays.asList("01019912345"))
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(id)
+                .pdlPersonider(Arrays.asList(id))
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -192,8 +209,8 @@ class RnRNeedTest {
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
 
-        assertEquals("01019912345", populatedNeed.personid);
-        assertEquals("", populatedNeed.eksisterendeId);
+        assertEquals(id, populatedNeed.personid);
+        assertNull(populatedNeed.eksisterendeId);
     }
 
     @Test
@@ -201,6 +218,8 @@ class RnRNeedTest {
         Need need = Need.builder()
                 .personid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
                 .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId))
                 .build();
 
