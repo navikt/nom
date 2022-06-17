@@ -1,7 +1,8 @@
 import { css } from "@emotion/css";
 import { BodyShort, Heading, Label } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
-import { Ressurs, RessursKobling } from "../../api/generated/graphql_generated";
+import { Organisasjonsenhet, Ressurs, RessursKobling } from "../../api/generated/graphql_generated";
+import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
 import UserImage from "../UserImage";
 
@@ -36,6 +37,12 @@ const LabelAndText = (props: { label: string; text: string, linkTo?: string, ali
   </div>
 );
 
+const getLink = (orgenhet: Organisasjonsenhet, lederIdent?: string) => {
+  if (!lederIdent) return '/org/' + agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn)
+  else return '/org/' + agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn) + `/${lederIdent}`
+  
+}
+
 type RessursInfoProps = {
   ressurs: Ressurs;
 };
@@ -64,7 +71,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                           alignAtEnd
                           label="Org-enhet: " 
                           text={kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"}
-                          linkTo="#"
+                          linkTo={getLink(kobling.organisasjonsenhet)}
                       />
               ))}
             </div>
@@ -78,9 +85,9 @@ const RessursInfo = (props: RessursInfoProps) => {
                     {kobling.organisasjonsenhet.leder && (
                     <LabelAndText
                         label="Leder: "
-                        linkTo="#"
+                        linkTo={getLink(kobling.organisasjonsenhet, kobling.organisasjonsenhet.leder[0].ressurs.navIdent)}
                         text={
-                        kobling.organisasjonsenhet.leder.length > 0
+                          kobling.organisasjonsenhet.leder.length > 0
                             ? (kobling.organisasjonsenhet.leder[0].ressurs.fornavn as string + ' ' + kobling.organisasjonsenhet.leder[0].ressurs.etternavn as string)
                             : "Mangler navn"
                         }
