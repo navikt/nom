@@ -54,13 +54,14 @@ class RnRNeedTest {
     @Test
     public void createNeed() {
         String id = "01019912345";
-        needProducer.produceNeed(id, IdentType.STANDARD);
+        needProducer.produceNeed('A', id, IdentType.STANDARD);
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
         List<Need> needs = rnrTestListener.needsRead.stream().filter(n -> n.visited == 0).collect(Collectors.toList());
         assertEquals(1, needs.size());
-        assertEquals(id,needs.get(0).personid);
+        assertEquals(id, needs.get(0).personid);
+        assertEquals('A', needs.get(0).idPrefix);
         assertEquals(IdentType.STANDARD, needs.get(0).identType);
     }
 
@@ -69,10 +70,12 @@ class RnRNeedTest {
     public void personOppslagId_NeedStandard_FinnesIkkeIPDL() {
         String id = "01019912345";
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(id)
                 .pdlOppslagVisited(true)
                 .pdlPersonider(Collections.emptyList())
                 .identType(IdentType.STANDARD)
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -91,8 +94,10 @@ class RnRNeedTest {
     public void personOppslagId_NeedRobot_FinnesIkke() {
         String id = "X1019912345";
         Need need = Need.builder()
+                .idPrefix('X')
                 .personid(id)
                 .identType(IdentType.ROBOT)
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -107,6 +112,7 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_NeedRobot_Finnes() {
         Need need = Need.builder()
+                .idPrefix('X')
                 .personid(ROBOT_1_PersonId)
                 .identType(IdentType.ROBOT)
                 .build();
@@ -123,11 +129,13 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_Need_MedPDL_TidligereAnsatt() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_1_PersonId)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId))
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -142,11 +150,13 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_Need_MedPDL_NåværendeAnsatt() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(NÅVÆRENDE_ANSATT_2_PersonId)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(NÅVÆRENDE_ANSATT_2_PersonId)
                 .pdlPersonider(Arrays.asList(NÅVÆRENDE_ANSATT_2_PersonId))
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -161,11 +171,13 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_Need_MedPDL_TidligereAnsatt_Flere_IDer_1() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -180,11 +192,13 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_Need_MedPDL_TidligereAnsatt_Flere_IDer_2() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -200,11 +214,13 @@ class RnRNeedTest {
     public void personOppslagId_Need_MedPDL_NavIdFinnesIkke() {
         String id =  "01019912345";
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(id)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(id)
                 .pdlPersonider(Arrays.asList(id))
+                .idGeneratorVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -219,6 +235,7 @@ class RnRNeedTest {
     @Test
     public void personOppslagId_Need_MedPDL_TidligereAnsatt_Duplikat_NavIDer() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
@@ -238,9 +255,11 @@ class RnRNeedTest {
     @Test
     public void pdlOppslag_Need_IdIkkeFunnet_TomRespons() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
+                .idGeneratorVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList());
@@ -257,6 +276,7 @@ class RnRNeedTest {
     @Test
     public void pdlOppslag_Need_IdIkkeFunnet_NullRespons() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
@@ -276,9 +296,11 @@ class RnRNeedTest {
     @Test
     public void pdlOppslag_Need_IdFunnet_1_ident() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
+                .idGeneratorVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId));
@@ -296,8 +318,10 @@ class RnRNeedTest {
     @Test
     public void pdlOppslag_Need_IdFunnet_2_identer() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .identType(IdentType.STANDARD)
+                .idGeneratorVisited(true)
                 .personOppslagVisited(true)
                 .build();
 
@@ -317,9 +341,11 @@ class RnRNeedTest {
     @Test
     public void pdlOppslag_Need_IdFunnet_2_identer_v2() {
         Need need = Need.builder()
+                .idPrefix('A')
                 .personid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
+                .idGeneratorVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
@@ -333,6 +359,46 @@ class RnRNeedTest {
         assertEquals(2, populatedNeed.pdlPersonider.size());
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlPersonider.get(0));
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2, populatedNeed.pdlPersonider.get(1));
+    }
+
+    @Test
+    public void navIdGenerator_personOppslagVisited_ikkeFunnet() {
+        Need need = Need.builder()
+                .idPrefix('A')
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .build();
+
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.idGeneratorVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited();
+
+        assertNotNull(populatedNeed.generertId);
+        assertTrue(populatedNeed.generertId.startsWith("A"));
+    }
+
+    @Test
+    public void navIdGenerator_personOppslagVisited_Funnet() {
+        Need need = Need.builder()
+                .idPrefix('A')
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .eksisterendeId(TIDLIGERE_ANSATT_1_NavId)
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .build();
+
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until( () -> !rnrTestListener.idGeneratorVisited() );
+
+        // After 200 ms (poll delay), expect no id generated
+        assertFalse( rnrTestListener.needsRead.stream().anyMatch( n -> n.isIdGeneratorVisited() ) );
     }
 
     private void prepNavidenter() {

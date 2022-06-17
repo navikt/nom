@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class Need implements Cloneable {
     String personid;
     IdentType identType;
+    char idPrefix;
 
     String eksisterendeId;
     boolean personOppslagVisited;
@@ -21,6 +22,9 @@ public class Need implements Cloneable {
     String pdlGjeldendePersonid;
     List<String> pdlPersonider;
     boolean pdlOppslagVisited;
+
+    String generertId;
+    boolean idGeneratorVisited;
 
     int visited;
 

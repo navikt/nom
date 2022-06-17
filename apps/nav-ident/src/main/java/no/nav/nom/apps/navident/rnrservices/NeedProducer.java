@@ -15,8 +15,9 @@ public class NeedProducer {
 
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
 
-    public void produceNeed(String personid, IdentType type) {
+    public void produceNeed(char idPrefix, String personid, IdentType type) {
         Need need = Need.builder()
+                .idPrefix(idPrefix)
                 .personid(personid)
                 .identType(type)
                 .build();

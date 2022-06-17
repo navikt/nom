@@ -25,11 +25,6 @@ public class PdlOppslag {
 
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
 
-    // Oppdatert Need melding med info om eksisterende NavIdent for angitt personid
-    // Kryss med alle personid'er fra PDL.
-    // Finnes ikke NavIdent ifra før sett need.eksisterendeId til tom streng
-    // Finnes den fra før sett den til å være id'en til eksisterende NavIdent
-
     @KafkaListener(
             id = "PdlOppslagNeedListener",
             topics = "${app.kafka.topic.rnr.name}")
