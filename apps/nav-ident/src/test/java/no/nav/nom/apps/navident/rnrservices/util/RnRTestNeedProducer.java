@@ -1,8 +1,9 @@
-package no.nav.nom.apps.navident.rnrservices;
+package no.nav.nom.apps.navident.rnrservices.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.apps.navident.rnrservices.Need;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,7 @@
-package no.nav.nom.apps.navident.rnrservices;
+package no.nav.nom.apps.navident.rnrservices.util;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.rnrservices.Need;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -20,4 +21,13 @@ public class RnRTestListener {
         needsRead.add(need);
         log.debug("Need consumed from rnr topic: %s".formatted(need));
     }
+
+    public boolean personOppslagVisited() {
+        return needsRead.stream().anyMatch(n -> n.getVisited() > 0 && n.eksisterendeId != null);
+    }
+
+    public Need getNeed_personOppslagVisited() {
+        return needsRead.stream().filter(n -> n.getVisited() > 0 && n.eksisterendeId != null).findFirst().get();
+    }
+
 }

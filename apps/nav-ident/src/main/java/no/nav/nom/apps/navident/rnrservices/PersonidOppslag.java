@@ -10,7 +10,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -31,7 +33,7 @@ public class PersonidOppslag {
             id = "PersonidOppslagNeedListener",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
-        log.debug("PersonidOppslagNeedListener: Got Need for %s".formatted(need.maskedToString()));
+        log.debug("PersonidOppslagNeedListener: Got Need %s".formatted(need.maskedToString()));
 
         if (
                 (need.eksisterendeId != null) // Vi har allerede svart
@@ -42,24 +44,24 @@ public class PersonidOppslag {
         }
 
 
-        Stream<Navident> eksisterendeNavidenter;
+        List<Navident> eksisterendeNavidenter;
         if (need.identType != IdentType.STANDARD) {
-            eksisterendeNavidenter = navidenter.values().stream().filter(ident -> ident.is(need.personid));
+            eksisterendeNavidenter = navidenter.values().stream().filter(ident -> ident.is(need.personid)).collect(Collectors.toList());
         } else {
             // Finn alle NavIdenter hvor en eller flere av Need's pdlPersonid'er finnes i NavIdent.allePersonid'er
-            eksisterendeNavidenter = navidenter.values().stream().filter(ident -> need.pdlPersonider.stream().anyMatch(pdlId -> ident.is(pdlId)));
+            eksisterendeNavidenter = navidenter.values().stream().filter(ident -> need.pdlPersonider.stream().anyMatch(pdlId -> ident.is(pdlId))).collect(Collectors.toList());
 
             // TODO: Nå har vi både NavIdenter.allePersonid'er og nye pdlPersonid'er -> Oppdater Domene via EventSource med korrekt sett av personid'er
         }
 
-        if (eksisterendeNavidenter.count() == 0) {
+        if (eksisterendeNavidenter.size() == 0) {
             need.setEksisterendeId("");
-        } else if (eksisterendeNavidenter.count() == 1) {
-            need.setEksisterendeId(eksisterendeNavidenter.findFirst().get().getNavident());
+        } else if (eksisterendeNavidenter.size() == 1) {
+            need.setEksisterendeId(eksisterendeNavidenter.get(0).getNavident());
         } else { // Found multiple for same personId
-            log.error("Det finnes flere NavIdenter for samme personid. Plukker den som har nyeste benyttet dato i sine perioder");
+            log.error("Det finnes flere NavIdenter, %s, for samme personid. Plukker den som har nyeste benyttet dato i sine perioder".formatted(eksisterendeNavidenter.stream().map(Navident::getNavident).collect(Collectors.toList())));
             need.setEksisterendeId(
-                    eksisterendeNavidenter.sorted((id1, id2) -> id2.senestePeriodeDato().compareTo(id2.senestePeriodeDato()))
+                    eksisterendeNavidenter.stream().sorted((id1, id2) -> id2.senestePeriodeDato().compareTo(id2.senestePeriodeDato()))
                             .findFirst().get().getNavident()
             );
         }
