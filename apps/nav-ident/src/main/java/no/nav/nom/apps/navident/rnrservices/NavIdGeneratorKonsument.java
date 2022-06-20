@@ -28,9 +28,9 @@ public class NavIdGeneratorKonsument {
             id = "NavIdGeneratorKonsument",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
-        log.debug("NavIdGeneratorKonsument: Got Need %s".formatted(need.maskedToString()));
+        log.debug("Got Need %s".formatted(need.maskedToString()));
 
-        if (need.idGeneratorVisited || !need.isPersonOppslagVisited() || need.eksisterendeId != null) {
+        if (need.idGeneratorVisited || !need.personOppslagVisited || need.eksisterendeId != null) {
             log.debug("Nothing to do - skipping message");
             return;
         }

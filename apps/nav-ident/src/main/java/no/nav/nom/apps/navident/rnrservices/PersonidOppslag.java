@@ -31,11 +31,11 @@ public class PersonidOppslag {
             id = "PersonidOppslagNeedListener",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
-        log.debug("PersonidOppslagNeedListener: Got Need %s".formatted(need.maskedToString()));
+        log.debug("Got Need %s".formatted(need.maskedToString()));
 
         if (
-                (need.isPersonOppslagVisited()) // Vi har allerede svart
-                || (need.identType == IdentType.STANDARD && !need.isPdlOppslagVisited() ) // Vi må vente på pdl sine personid'er
+                (need.personOppslagVisited) // Vi har allerede svart
+                || (need.identType == IdentType.STANDARD && !need.pdlOppslagVisited ) // Vi må vente på pdl sine personid'er
         ) {
             log.debug("Nothing to do - skipping message");
             return;

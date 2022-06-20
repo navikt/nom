@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ public class Need implements Cloneable {
     String personid;
     IdentType identType;
     char idPrefix;
+    LocalDate fraDato;
 
     String eksisterendeId;
     boolean personOppslagVisited;
@@ -26,6 +28,9 @@ public class Need implements Cloneable {
     String generertId;
     boolean idGeneratorVisited;
 
+    Respons respons;
+    boolean responsProdusentVisited;
+
     int visited;
 
     @Override
@@ -36,12 +41,6 @@ public class Need implements Cloneable {
         } catch (CloneNotSupportedException e) {
             log.error("Could not clone myself - ", e);
             throw new RuntimeException("Could not clone myself - ", e);
-//            clone = Need.builder()
-//                    .personid(this.personid)
-//                    .identType(this.identType)
-//                    .eksisterendeId(this.eksisterendeId)
-//                    .visited(this.visited)
-//                    .build();
         }
         clone.pdlPersonider = this.pdlPersonider != null ? List.copyOf(this.pdlPersonider) : null;
         return clone;
@@ -51,6 +50,7 @@ public class Need implements Cloneable {
         Need masked = this.clone();
         masked.personid = mask(this.personid);
         masked.pdlPersonider = this.pdlPersonider != null ? this.pdlPersonider.stream().map( p -> mask(p)).collect(Collectors.toList()) : null;
+        masked.pdlGjeldendePersonid =  mask(this.pdlGjeldendePersonid);
         return masked.toString();
     }
 

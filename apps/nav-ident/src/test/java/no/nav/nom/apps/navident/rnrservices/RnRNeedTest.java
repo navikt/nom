@@ -63,6 +63,7 @@ class RnRNeedTest {
         assertEquals(id, needs.get(0).personid);
         assertEquals('A', needs.get(0).idPrefix);
         assertEquals(IdentType.STANDARD, needs.get(0).identType);
+        assertEquals(LocalDate.now(), needs.get(0).fraDato);
     }
 
 
@@ -76,6 +77,7 @@ class RnRNeedTest {
                 .pdlPersonider(Collections.emptyList())
                 .identType(IdentType.STANDARD)
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -98,6 +100,7 @@ class RnRNeedTest {
                 .personid(id)
                 .identType(IdentType.ROBOT)
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -115,6 +118,7 @@ class RnRNeedTest {
                 .idPrefix('X')
                 .personid(ROBOT_1_PersonId)
                 .identType(IdentType.ROBOT)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -136,6 +140,7 @@ class RnRNeedTest {
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_1_PersonId)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId))
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -157,6 +162,7 @@ class RnRNeedTest {
                 .pdlGjeldendePersonid(NÅVÆRENDE_ANSATT_2_PersonId)
                 .pdlPersonider(Arrays.asList(NÅVÆRENDE_ANSATT_2_PersonId))
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -178,6 +184,7 @@ class RnRNeedTest {
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -199,6 +206,7 @@ class RnRNeedTest {
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2))
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -221,6 +229,7 @@ class RnRNeedTest {
                 .pdlGjeldendePersonid(id)
                 .pdlPersonider(Arrays.asList(id))
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -241,6 +250,7 @@ class RnRNeedTest {
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
                 .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId))
+                .responsProdusentVisited(true)
                 .build();
 
         rnrTestNeedProducer.publish(need);
@@ -260,6 +270,7 @@ class RnRNeedTest {
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList());
@@ -280,6 +291,7 @@ class RnRNeedTest {
                 .personid(TIDLIGERE_ANSATT_1_PersonId)
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(null);
@@ -301,6 +313,7 @@ class RnRNeedTest {
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_1_PersonId)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId));
@@ -323,6 +336,7 @@ class RnRNeedTest {
                 .identType(IdentType.STANDARD)
                 .idGeneratorVisited(true)
                 .personOppslagVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
@@ -346,6 +360,7 @@ class RnRNeedTest {
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .idGeneratorVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
         Mockito.when(pdlService.getKnownPersonider(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2)).thenReturn(Arrays.asList(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
@@ -369,6 +384,7 @@ class RnRNeedTest {
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
 
@@ -390,6 +406,7 @@ class RnRNeedTest {
                 .eksisterendeId(TIDLIGERE_ANSATT_1_NavId)
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
+                .responsProdusentVisited(true)
                 .build();
 
 
@@ -401,8 +418,169 @@ class RnRNeedTest {
         assertFalse( rnrTestListener.needsRead.stream().anyMatch( n -> n.isIdGeneratorVisited() ) );
     }
 
+    @Test
+    public void responsProdusent_Robot_NyIdent() {
+        Need need = Need.builder()
+                .personid("Y1019900002")
+                .identType(IdentType.ROBOT)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .eksisterendeId(null)
+                .idGeneratorVisited(true)
+                .generertId("Y000002")
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(201, respons.code);
+        assertEquals("Y000002", respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNull(respons.body.feilmelding);
+    }
+
+    @Test
+    public void responsProdusent_Robot_Eksisterende_Ikkeaktiv() {
+        Need need = Need.builder()
+                .personid("X1019900002")
+                .identType(IdentType.ROBOT)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .eksisterendeId("X000002")
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(200, respons.code);
+        assertEquals("X000002", respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNull(respons.body.feilmelding);
+    }
+
+    @Test
+    public void responsProdusent_Standard_IkkeEksisterende() {
+        Need need = Need.builder()
+                .personid("01019912345")
+                .identType(IdentType.STANDARD)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .pdlPersonider(Arrays.asList("01019912345"))
+                .pdlGjeldendePersonid("01019912345")
+                .idGeneratorVisited(true)
+                .generertId("C000001")
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(201, respons.code);
+        assertEquals("C000001", respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNull(respons.body.feilmelding);
+    }
+
+    @Test
+    public void responsProdusent_Standard_IkkeEksisterende_PdlFunnetMenIkkeGjeldende() {
+        Need need = Need.builder()
+                .personid("01019912345")
+                .identType(IdentType.STANDARD)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .pdlPersonider(Arrays.asList("01019912345", "11019912345"))
+                .pdlGjeldendePersonid("11019912345")
+                .idGeneratorVisited(true)
+                .generertId("C000001")
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(201, respons.code);
+        assertEquals("C000001", respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNull(respons.body.feilmelding);
+    }
+
+
+    @Test
+    public void responsProdusent_Standard_Eksisterende_Ikkeaktiv() {
+        Need need = Need.builder()
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(TIDLIGERE_ANSATT_1_PersonId)
+                .pdlPersonider(Arrays.asList(TIDLIGERE_ANSATT_1_PersonId))
+                .eksisterendeId(TIDLIGERE_ANSATT_1_NavId)
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(200, respons.code);
+        assertEquals(TIDLIGERE_ANSATT_1_NavId, respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNull(respons.body.feilmelding);
+    }
+
+    @Test
+    public void responsProdusent_Standard_IkkeEksisterende_PdlIkkeFunnet() {
+        Need need = Need.builder()
+                .personid("01010100000")
+                .identType(IdentType.STANDARD)
+                .fraDato(LocalDate.now())
+                .personOppslagVisited(true)
+                .pdlOppslagVisited(true)
+                .idGeneratorVisited(true)
+                .generertId("C000001")
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+
+        Respons respons = populatedNeed.respons;
+        assertNotNull(respons);
+        assertEquals(404, respons.code);
+        assertEquals("C000001", respons.body.navident);
+        assertEquals(LocalDate.now(), respons.body.aktivFra);
+        assertNull(respons.body.aktivTil);
+        assertNotNull(respons.body.feilmelding);
+    }
+
     private void prepNavidenter() {
         navidenter.put(ROBOT_1_NavId, robot_1());
+        navidenter.put(ROBOT_2_NavId, robot_2());
         navidenter.put(TIDLIGERE_ANSATT_1_NavId, tidligere_ansatt_1());
         navidenter.put(NÅVÆRENDE_ANSATT_2_NavId, nåværende_ansatt_2());
         navidenter.put(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, tidligere_ansatt_flere_id_3());
@@ -414,6 +592,9 @@ class RnRNeedTest {
 
     private static String ROBOT_1_PersonId = "X1019900001";
     private static String ROBOT_1_NavId = "X000001";
+
+    private static String ROBOT_2_PersonId = "X1019900002";
+    private static String ROBOT_2_NavId = "X000002";
 
     private static String TIDLIGERE_ANSATT_1_PersonId = "01019900001";
     private static String TIDLIGERE_ANSATT_1_NavId = "A000001";
@@ -441,6 +622,21 @@ class RnRNeedTest {
                 ))
                 .aktivePerioder(Arrays.asList(
                         Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).build()
+                ))
+                .build();
+    }
+
+
+    private Navident robot_2() {
+        return Navident.builder()
+                .navident(ROBOT_2_NavId)
+                .identType(IdentType.ROBOT)
+                .gjeldendePersonid(ROBOT_2_PersonId)
+                .allePersonider(Arrays.asList(
+                        Personid.builder().id(ROBOT_2_PersonId).type(PersonidType.MANUELL).build()
+                ))
+                .aktivePerioder(Arrays.asList(
+                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).tilOgMed(LocalDate.now().minusMonths(6)).build()
                 ))
                 .build();
     }

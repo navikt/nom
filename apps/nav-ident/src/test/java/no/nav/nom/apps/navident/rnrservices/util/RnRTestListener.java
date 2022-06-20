@@ -46,5 +46,11 @@ public class RnRTestListener {
         return needsRead.stream().filter(n -> n.isIdGeneratorVisited()).findFirst().get();
     }
 
+    public boolean responsProdusentVisited() {
+        return needsRead.stream().anyMatch(n -> n.isResponsProdusentVisited());
+    }
 
+    public Need getNeed_responsProdusentVisited() {
+        return needsRead.stream().filter(n -> n.isResponsProdusentVisited()).findFirst().get();
+    }
 }

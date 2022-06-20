@@ -29,14 +29,14 @@ public class PdlOppslag {
             id = "PdlOppslagNeedListener",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
-        log.debug("PdlOppslagNeedListener: Got Need %s".formatted(need.maskedToString()));
+        log.debug("Got Need %s".formatted(need.maskedToString()));
 
         if ( need.pdlOppslagVisited || need.identType != IdentType.STANDARD) {
             log.debug("Nothing to do - skipping message");
             return;
         }
 
-        List<String> pdlIder = pdlService.getKnownPersonider(need.getPersonid());
+        List<String> pdlIder = pdlService.getKnownPersonider(need.personid);
 
         if (pdlIder == null || pdlIder.size() == 0) {
             log.error("PDL kjenner ikke til personId som er angitt");
