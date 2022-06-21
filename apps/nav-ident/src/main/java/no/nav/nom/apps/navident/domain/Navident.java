@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,12 @@ public class Navident {
         return aktivePerioder.stream().anyMatch( periode -> periode.contains(date));
     }
 
+    public Periode senestePeriode() {
+        return aktivePerioder.stream().sorted( (p1, p2) -> p2.fraOgMed.compareTo(p1.fraOgMed)).findFirst().get();
+    }
+
     public LocalDate senestePeriodeDato() {
-        Periode sistePeriode = aktivePerioder.get(aktivePerioder.size()-1);
+        Periode sistePeriode = senestePeriode();
         return sistePeriode.tilOgMed != null ? sistePeriode.tilOgMed : sistePeriode.fraOgMed;
     }
 

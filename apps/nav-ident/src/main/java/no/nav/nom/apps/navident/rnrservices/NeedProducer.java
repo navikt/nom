@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -15,10 +17,19 @@ public class NeedProducer {
 
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
 
-    public void produceNeed(String personid, IdentType type) {
+
+    public void produceNeed(char idPrefix, String personid, IdentType type) {
+        produceNeed(idPrefix, personid, type, LocalDate.now());
+
+    }
+
+
+    public void produceNeed(char idPrefix, String personid, IdentType type, LocalDate fraDato) {
         Need need = Need.builder()
+                .idPrefix(idPrefix)
                 .personid(personid)
                 .identType(type)
+                .fraDato(fraDato)
                 .build();
         kafkaTemplate.send(topic, need);
 

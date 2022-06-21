@@ -128,10 +128,12 @@ body:
     feilmelding: "Navident for angitt personid kan ikke settes aktiv fra angitt dato siden dette er i en allerede deaktivert periode"
 }
 
-404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL
+404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL, men vi genererer allikevel navident
 body:
 {
-    feilmelding: "Angitt personid for ordinær ident finnes ikke i PDL"
+    navident: <ny navident generert>
+    aktivFra: Datoen fra requesten
+    feilmelding: "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes ikke i PDL eller PDL oppslag feilet"
 }
 
 500 Internal Server Error
@@ -284,10 +286,12 @@ En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 - Kan ikke endre en bestilling tilbake i tid for audit-formål
 - NIK stoler på at bestillingene den får er verifisert av bestiller (f.eks nom/remedy) mtp gyldig personident
 - IDA-identer starter alltid med Z som bokstav-prefix
+- Abonnerer ikke på endringsmeldinger fra PDL.
+- Gjør kall til PDL ved hvert oppslag i NIK slik at man får hentet evt. nye fnr på personen. 
+
 
 
 === Åpne punkter
-1. Skal NIK vite noe om perioder en NAV-ident var aktiv? Dette er jo info som uansett vil bo i NOM. 
-2. Aktiv/inaktiv for en NAV-ident. Trengs den i NIK? Det er egentlig utlede info fra NOM, så burde være tilstrekkelig at det er i NOM?
-3. Integrasjon mot PDL: Må både NOM og NIK ha det, holder det med bare en av de? NOM må hente navn fra PDL. NIK trenger fnr-historikk. NIK: bør vurdere å droppe å abonnere på fnr-endringer, og heller spørre dersom vi ikke får treff for å se om personen har fått nytt fnr.
-4. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Hvis ja, så trenger ikke IDA å benytte NIK?
+1. Skal NIK vite noe om perioder en NAV-ident var aktiv? Dette er jo info som uansett vil bo i NOM. Må forankres med Team IDM.
+2. Aktiv/inaktiv for en NAV-ident. Trengs den i NIK? Det er egentlig utlede info fra NOM, så burde være tilstrekkelig at det er i NOM? Hvordan treffer dette når Remedy oppretter identer i NIK? Må forankres med Team IDM. 
+3. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
