@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom'
 import { slackNom } from './Images'
 
 const outerDiv = css({
-  position: 'fixed',
   width: '100%',
   bottom: '0',
   height: '9.5rem',

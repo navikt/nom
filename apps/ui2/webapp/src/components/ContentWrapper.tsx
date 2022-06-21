@@ -3,7 +3,7 @@ import { css } from "@emotion/css";
 const contentStyle = css({
     margin: "0 auto 2.5rem",
     marginTop: '2rem',
-    marginBottom: '10rem',
+    marginBottom: '5rem',
     width: '50%'
 })
 

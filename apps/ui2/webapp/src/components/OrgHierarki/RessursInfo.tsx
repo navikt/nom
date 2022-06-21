@@ -39,16 +39,9 @@ const LabelAndText = (props: {label: string, text: string, linkTo?: string, alig
 
 const getLink = (orgenhet: Organisasjonsenhet, lederIdent?: string) => {
   if (!lederIdent)
-    return (
-      "/org/" +
-      agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn)
-    );
+    return ("/org/" + agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn))
   else
-    return (
-      "/org/" +
-      agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn) +
-      `/${lederIdent}`
-    );
+    return ("/org/" + agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn) + `/${lederIdent}`)
 };
 
 type RessursInfoProps = {

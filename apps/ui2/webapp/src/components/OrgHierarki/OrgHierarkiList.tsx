@@ -9,8 +9,11 @@ import { BodyShort, Heading } from "@navikt/ds-react";
 import RessursInfo from "./RessursInfo";
 import { Back } from "@navikt/ds-icons";
 import { sortItems } from "../../resources/utils/utils";
+import { useEffect, useRef } from "react";
 
-const linkStyles = css({ textDecoration: "none", color: "#262626" });
+const scrollToRef = (ref: any) => window.scrollTo(0, ref.current.offsetTop - 100) 
+
+const linkStyles = css({ textDecoration: "none", color: "#262626" })
 const ressursLinkStyles = css({ 
   display: 'flex',
   marginTop: '30px',
@@ -35,8 +38,9 @@ type OrgHierarkiListProps = {
 };
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
+  const refDiv = useRef(null)
   const { currentEnhet, underEnheter, overEnheter, ressurs} = props
-  
+
   const sortedUnderEnheter = underEnheter.length > 0 ? [...underEnheter].sort((a, b) => sortItems(a.organisasjonsenhet.navn, b.organisasjonsenhet.navn)) : []
   const sortedKoblinger = currentEnhet ? [...currentEnhet.koblinger].sort((a, b) => sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')) : []
 
@@ -44,6 +48,10 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
     if (!leder) return 'Fant ikke leder'
     return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '') 
   }
+
+  useEffect(() => {
+    scrollToRef(refDiv) 
+  }, [])
 
   console.log(currentEnhet?.leder, "LEDERRRR")
 
@@ -71,15 +79,17 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       
       {/* Den valgte enheten - når det ikke vises et ressurskort*/}
       {currentEnhet && !ressurs && (
-          <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
-            <EnhetInfo 
-                title={currentEnhet?.navn || 'Feil i henting av navn'} 
-                lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
-                ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
-                type={LinkPanelType.CURRENT}
-                leder={currentEnhet?.leder[0].ressurs as Ressurs}
-            />
-          </CustomLinkPanel2>
+          <div ref={refDiv}>
+            <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
+              <EnhetInfo 
+                  title={currentEnhet?.navn || 'Feil i henting av navn'} 
+                  lederNavn={currentEnhet ? getFornavnAndEtternavnForLeder(currentEnhet?.leder[0] as OrganisasjonsenhetsLeder) : 'Mangler navn'}
+                  ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
+                  type={LinkPanelType.CURRENT}
+                  leder={currentEnhet?.leder[0].ressurs as Ressurs}
+              />
+            </CustomLinkPanel2>
+          </div>
       )}
       
       {/* Den valgte enheten - vises som en overenhet når det vises et ressurskort - gjøres om til en lenke siden den ikke finnses i overenhetlista */}

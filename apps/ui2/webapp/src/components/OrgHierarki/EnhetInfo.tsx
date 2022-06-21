@@ -17,7 +17,7 @@ const enhetInfoStyles = css({
 type EnhetInfoProps = {
   title: string;
   type: LinkPanelType;
-  leder: Ressurs
+  leder?: Ressurs
   lederNavn: string;
   ident?: string;
   icon?: string | undefined;
@@ -49,9 +49,7 @@ const EnhetInfo = (props: EnhetInfoProps) => {
             <BodyShort>Leder: &nbsp;</BodyShort>
 
             {type === LinkPanelType.CURRENT ? (
-              <Link to={getUrlForLeder()} className={css({ color: "#262626" })}>
-                    <Label>{lederNavn}</Label>
-              </Link>
+              <Link to={getUrlForLeder()} className={css({ color: "#262626" })}><Label>{lederNavn}</Label></Link>
             ) : (
               <Label>{lederNavn}</Label>
             )}
