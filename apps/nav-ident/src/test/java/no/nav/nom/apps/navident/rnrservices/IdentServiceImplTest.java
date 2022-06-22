@@ -1,11 +1,13 @@
 package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +35,12 @@ class IdentServiceImplTest {
     @Autowired private DomainTestData domainTestData;
 
     @Autowired private Map<String, Navident> navidenter;
+    @Autowired private IdentService identService;
 
     @BeforeEach
     public void resetNavidenterDomainData() { domainTestData.prepNavidenter(navidenter); }
+
+    @Test
+    public void bestillIdent_nyansatt() {
+    }
 }

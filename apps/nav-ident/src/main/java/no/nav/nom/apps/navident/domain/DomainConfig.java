@@ -10,8 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Configuration
 public class DomainConfig {
 
-    @Bean
-//    @Scope("singleton")
+    @Bean @Scope("singleton")
     public Map<String, Navident> navidenter() {
         return new ConcurrentHashMap<>();
     }
