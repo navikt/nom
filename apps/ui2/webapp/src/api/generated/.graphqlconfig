@@ -1,6 +1,6 @@
 {
   "name": "NOM-API GraphQL Schema",
-  "schemaPath": "schema.graphql",
+  "schemaPath": "graphql.schema.json",
   "extensions": {
     "endpoints": {
       "Default GraphQL Endpoint": {
