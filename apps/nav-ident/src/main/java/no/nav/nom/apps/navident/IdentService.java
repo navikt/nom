@@ -5,5 +5,5 @@ import no.nav.nom.apps.navident.rnrservices.Respons;
 
 public interface IdentService {
 
-    Respons bestillIdent(char idPrefix, String personid, IdentType type);
+    Respons bestillIdent(String personid, IdentType type, char idPrefix);
 }

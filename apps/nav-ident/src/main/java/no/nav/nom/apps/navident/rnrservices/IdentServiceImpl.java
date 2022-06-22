@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class IdentServiceImpl implements IdentService {
 
     @Autowired NeedProducer needProducer;
 
-    public Respons bestillIdent(char idPrefix, String personid, IdentType type)  {
+    public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
         needProducer.produceNeed(idPrefix, personid, type);
         CountDownLatch latch = new CountDownLatch(1);
         requests.put(personid, latch);
@@ -35,7 +36,7 @@ public class IdentServiceImpl implements IdentService {
                 } else {
                     log.error("Forventet respons data for bestilling av personid %s, men ingen var tilgjengelig".formatted(mask(personid)));
                     return Respons.builder()
-                            .code(500)
+                            .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body(Respons.Body.builder()
                                     .feilmelding("Noe gikk feil i ident bestilling. Resultat ikke tilgjengelig")
                                     .build())
@@ -44,7 +45,7 @@ public class IdentServiceImpl implements IdentService {
             } else { // TimeOut
                 log.error("Tjenesten for bestilling av personid timet ut i bestilling av %s".formatted(mask(personid)));
                 return Respons.builder()
-                        .code(500)
+                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(Respons.Body.builder()
                                 .feilmelding("Behandling av ident bestilling timet ut")
                                 .build())
@@ -53,7 +54,7 @@ public class IdentServiceImpl implements IdentService {
         } catch (InterruptedException e) {
             log.error("Ident bestilling for ident %s ble avbrutt".formatted(mask(personid)), e);
             return Respons.builder()
-                    .code(500)
+                    .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Respons.Body.builder()
                             .feilmelding("Kunne ikke prosessere ident bestilling. Årsak: %s".formatted(e.getMessage()))
                             .build())

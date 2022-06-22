@@ -30,6 +30,8 @@ public class DomainTestData {
     public static String ROBOT_2_PersonId = "X1019900002";
     public static String ROBOT_2_NavId = "X000002";
 
+    public static String IKKE_TIDLIGERE_ANSATT_1_PersonId = "01019900000";
+
     public static String TIDLIGERE_ANSATT_1_PersonId = "01019900001";
     public static String TIDLIGERE_ANSATT_1_NavId = "A000001";
 

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -446,7 +447,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(201, respons.code);
+        assertEquals(HttpStatus.CREATED, respons.httpStatus);
         assertEquals("Y000002", respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
@@ -470,7 +471,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(200, respons.code);
+        assertEquals(HttpStatus.OK, respons.httpStatus);
         assertEquals("X000002", respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
@@ -498,7 +499,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(201, respons.code);
+        assertEquals(HttpStatus.CREATED, respons.httpStatus);
         assertEquals("C000001", respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
@@ -526,7 +527,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(201, respons.code);
+        assertEquals(HttpStatus.CREATED, respons.httpStatus);
         assertEquals("C000001", respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
@@ -554,7 +555,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(200, respons.code);
+        assertEquals(HttpStatus.OK, respons.httpStatus);
         assertEquals(TIDLIGERE_ANSATT_1_NavId, respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
@@ -580,7 +581,7 @@ class RnRNeedTest {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(404, respons.code);
+        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
         assertEquals("C000001", respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
