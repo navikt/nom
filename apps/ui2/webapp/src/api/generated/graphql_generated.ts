@@ -395,7 +395,7 @@ export type HentRessursMedNavIdentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null } }>, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavIdentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, orgNiv: string, agressoId: string } }> } }>, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -438,7 +438,7 @@ export type HentOrganisasjonsEnheterHierarkiQueryVariables = Exact<{
 }>;
 
 
-export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string } }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }> } }> } }> } }> } }> } }> } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string } }> } }>, koblinger: Array<{ __typename?: 'OrganisasjonsenhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }> } | null };
+export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string } }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }> } }> } }> } }> } }> } }> } }>, leder: Array<{ __typename?: 'OrganisasjonsenhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', agressoId: string, orgNiv: string, navn: string } }> } }>, koblinger: Array<{ __typename?: 'OrganisasjonsenhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursKobling', organisasjonsenhet: { __typename?: 'Organisasjonsenhet', navn: string, orgNiv: string, agressoId: string } }> } }> } }> } | null };
 
 
 
@@ -1090,6 +1090,15 @@ export const HentRessursMedNavIdentDocument = gql`
       ressurs {
         navIdent
         visningsNavn
+        fornavn
+        etternavn
+        koblinger {
+          organisasjonsenhet {
+            navn
+            orgNiv
+            agressoId
+          }
+        }
       }
     }
     koblinger {
@@ -1517,6 +1526,20 @@ export const HentOrganisasjonsEnheterHierarkiDocument = gql`
         visningsNavn
         fornavn
         etternavn
+        ledere {
+          ressurs {
+            visningsNavn
+            fornavn
+            etternavn
+            koblinger {
+              organisasjonsenhet {
+                navn
+                orgNiv
+                agressoId
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -132,6 +132,15 @@ query HentRessursMedNavIdent($navIdent: String) {
       ressurs {
         navIdent
         visningsNavn
+        fornavn
+        etternavn
+        koblinger {
+          organisasjonsenhet {
+            navn
+            orgNiv
+            agressoId
+          }
+        }
       }
     }
     koblinger {
@@ -392,6 +401,20 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
           visningsNavn
           fornavn
           etternavn
+          ledere {
+            ressurs {
+              visningsNavn
+              fornavn
+              etternavn
+              koblinger {
+                organisasjonsenhet {
+                  navn
+                  orgNiv
+                  agressoId
+                }
+              }
+            }
+          }
       }
     }
   }
