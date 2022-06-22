@@ -1,5 +1,5 @@
 package no.nav.nom.apps.navident.idgenerator;
 
-public interface NavIdGenerator {
+public interface NavidGenerator {
      String generate(char prefix);
 }

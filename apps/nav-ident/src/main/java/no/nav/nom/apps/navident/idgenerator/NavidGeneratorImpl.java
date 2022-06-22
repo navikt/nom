@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.util.Random;
 
 @Component
-public class NavIdGeneratorImpl implements NavIdGenerator {
+public class NavidGeneratorImpl implements NavidGenerator {
     Random rng = new Random();
 
     @Override

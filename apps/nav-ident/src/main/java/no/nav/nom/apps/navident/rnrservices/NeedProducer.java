@@ -23,7 +23,6 @@ public class NeedProducer {
 
     }
 
-
     public void produceNeed(char idPrefix, String personid, IdentType type, LocalDate fraDato) {
         Need need = Need.builder()
                 .idPrefix(idPrefix)

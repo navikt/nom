@@ -22,35 +22,35 @@ public class RnRTestListener {
         log.debug("Need consumed from rnr topic: %s".formatted(need));
     }
 
-    public boolean personOppslagVisited() {
-        return needsRead.stream().anyMatch(n -> n.isPersonOppslagVisited());
+    public boolean personOppslagVisited(String personid) {
+        return needsRead.stream().anyMatch(n -> n.isPersonOppslagVisited()  && n.getPersonid().equals(personid));
     }
 
-    public Need getNeed_personOppslagVisited() {
-        return needsRead.stream().filter(n -> n.isPersonOppslagVisited()).findFirst().get();
+    public Need getNeed_personOppslagVisited(String personid) {
+        return needsRead.stream().filter(n -> n.isPersonOppslagVisited()  && n.getPersonid().equals(personid)).findFirst().get();
     }
 
-    public boolean pdlOppslagVisited() {
-        return needsRead.stream().anyMatch(n -> n.isPdlOppslagVisited());
+    public boolean pdlOppslagVisited(String personid) {
+        return needsRead.stream().anyMatch(n -> n.isPdlOppslagVisited()  && n.getPersonid().equals(personid));
     }
 
-    public Need getNeed_pdlOppslagVisited() {
-        return needsRead.stream().filter(n -> n.isPdlOppslagVisited()).findFirst().get();
+    public Need getNeed_pdlOppslagVisited(String personid) {
+        return needsRead.stream().filter(n -> n.isPdlOppslagVisited()  && n.getPersonid().equals(personid)).findFirst().get();
     }
 
-    public boolean idGeneratorVisited() {
-        return needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited());
+    public boolean idGeneratorVisited(String personid) {
+        return needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited()  && n.getPersonid().equals(personid));
     }
 
-    public Need getNeed_idGeneratorVisited() {
-        return needsRead.stream().filter(n -> n.isIdGeneratorVisited()).findFirst().get();
+    public Need getNeed_idGeneratorVisited(String personid) {
+        return needsRead.stream().filter(n -> n.isIdGeneratorVisited()  && n.getPersonid().equals(personid)).findFirst().get();
     }
 
-    public boolean responsProdusentVisited() {
-        return needsRead.stream().anyMatch(n -> n.isResponsProdusentVisited());
+    public boolean responsProdusentVisited(String personid) {
+        return needsRead.stream().anyMatch(n -> n.isResponsProdusentVisited()  && n.getPersonid().equals(personid));
     }
 
-    public Need getNeed_responsProdusentVisited() {
-        return needsRead.stream().filter(n -> n.isResponsProdusentVisited()).findFirst().get();
+    public Need getNeed_responsProdusentVisited(String personid) {
+        return needsRead.stream().filter(n -> n.isResponsProdusentVisited() && n.getPersonid().equals(personid) ).findFirst().get();
     }
 }

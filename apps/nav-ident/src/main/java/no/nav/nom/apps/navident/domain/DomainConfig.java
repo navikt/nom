@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DomainConfig {
 
     @Bean
-    @Scope("singleton")
+//    @Scope("singleton")
     public Map<String, Navident> navidenter() {
         return new ConcurrentHashMap<>();
     }

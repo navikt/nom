@@ -1,8 +1,10 @@
 package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.navident.domain.*;
+import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.pdl.PdlService;
+import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestNeedProducer;
 import org.awaitility.Awaitility;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles({"test", "log-console"})
@@ -37,23 +40,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class RnRNeedTest {
 
     @Autowired private Map<String, Navident> navidenter;
-    @Autowired private NeedProducer needProducer;
-    @MockBean private DataSource dataSource;
-    @Value("${test.rnr-topic}")  private String topic;
-    @Autowired private RnRTestListener rnrTestListener;
-    @Autowired private RnRTestNeedProducer rnrTestNeedProducer;
 
-    @MockBean private PdlService pdlService;
+    @Autowired    private NeedProducer needProducer;
+    @MockBean    private DataSource dataSource;
+    @Value("${test.rnr-topic}")    private String topic;
+    @Autowired    private RnRTestListener rnrTestListener;
+    @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;
+    @Autowired private DomainTestData domainTestData;
+
+    @MockBean    private PdlService pdlService;
 
     @BeforeEach
-    public void emptyNeedsRead() { rnrTestListener.needsRead.clear(); }
+    public void emptyNeedsRead() {
+        rnrTestListener.needsRead.clear();
+    }
 
     @BeforeEach
-    public void resetNavidenterDomainData() { prepNavidenter(); }
+    public void resetNavidenterDomainData() {
+        domainTestData.prepNavidenter(navidenter);
+    }
 
     @Test
     public void createNeed() {
-        String id = "01019912345";
+        String id = "51019955555";
         needProducer.produceNeed('A', id, IdentType.STANDARD);
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
@@ -85,8 +94,8 @@ class RnRNeedTest {
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("01019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("01019912345");
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -105,8 +114,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("X1019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("X1019912345");
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -123,8 +132,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(ROBOT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(ROBOT_1_PersonId);
 
         assertEquals(ROBOT_1_PersonId, populatedNeed.personid);
         assertEquals(ROBOT_1_NavId, populatedNeed.eksisterendeId);
@@ -145,8 +154,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         assertEquals(TIDLIGERE_ANSATT_1_PersonId, populatedNeed.personid);
         assertEquals(TIDLIGERE_ANSATT_1_NavId, populatedNeed.eksisterendeId);
@@ -167,8 +176,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(NÅVÆRENDE_ANSATT_2_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(NÅVÆRENDE_ANSATT_2_PersonId);
 
         assertEquals(NÅVÆRENDE_ANSATT_2_PersonId, populatedNeed.personid);
         assertEquals(NÅVÆRENDE_ANSATT_2_NavId, populatedNeed.eksisterendeId);
@@ -189,8 +198,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1);
 
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.personid);
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, populatedNeed.eksisterendeId);
@@ -211,8 +220,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2);
 
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2, populatedNeed.personid);
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, populatedNeed.eksisterendeId);
@@ -220,7 +229,7 @@ class RnRNeedTest {
 
     @Test
     public void personOppslagId_Need_MedPDL_NavIdFinnesIkke() {
-        String id =  "01019912345";
+        String id = "01019912345";
         Need need = Need.builder()
                 .idPrefix('A')
                 .personid(id)
@@ -234,8 +243,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("01019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("01019912345");
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -255,8 +264,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.personOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId);
 
         assertEquals(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId, populatedNeed.personid);
         assertEquals(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_2, populatedNeed.eksisterendeId); // Dette er den med nyeste dato
@@ -277,8 +286,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
         assertTrue(populatedNeed.pdlPersonider.isEmpty());
@@ -298,8 +307,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
         assertTrue(populatedNeed.pdlPersonider.isEmpty());
@@ -320,8 +329,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         assertEquals(TIDLIGERE_ANSATT_1_PersonId, populatedNeed.pdlGjeldendePersonid);
         assertEquals(1, populatedNeed.pdlPersonider.size());
@@ -343,8 +352,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1);
 
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
         assertEquals(2, populatedNeed.pdlPersonider.size());
@@ -367,8 +376,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.pdlOppslagVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2);
 
         assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
         assertEquals(2, populatedNeed.pdlPersonider.size());
@@ -390,8 +399,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.idGeneratorVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         assertNotNull(populatedNeed.generertId);
         assertTrue(populatedNeed.generertId.startsWith("A"));
@@ -412,10 +421,10 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until( () -> !rnrTestListener.idGeneratorVisited() );
+        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until(() -> !rnrTestListener.idGeneratorVisited(TIDLIGERE_ANSATT_1_PersonId));
 
         // After 200 ms (poll delay), expect no id generated
-        assertFalse( rnrTestListener.needsRead.stream().anyMatch( n -> n.isIdGeneratorVisited() ) );
+        assertFalse(rnrTestListener.needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited() && n.getPersonid().equals(TIDLIGERE_ANSATT_1_PersonId)));
     }
 
     @Test
@@ -432,8 +441,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("Y1019900002"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("Y1019900002");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -456,8 +465,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("X1019900002"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("X1019900002");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -484,8 +493,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01019912345");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -512,8 +521,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01019912345");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -540,8 +549,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(TIDLIGERE_ANSATT_1_PersonId);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -566,8 +575,8 @@ class RnRNeedTest {
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until( () -> rnrTestListener.responsProdusentVisited() );
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited();
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01010100000"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01010100000");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -576,140 +585,6 @@ class RnRNeedTest {
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
         assertNotNull(respons.body.feilmelding);
-    }
-
-    private void prepNavidenter() {
-        navidenter.put(ROBOT_1_NavId, robot_1());
-        navidenter.put(ROBOT_2_NavId, robot_2());
-        navidenter.put(TIDLIGERE_ANSATT_1_NavId, tidligere_ansatt_1());
-        navidenter.put(NÅVÆRENDE_ANSATT_2_NavId, nåværende_ansatt_2());
-        navidenter.put(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, tidligere_ansatt_flere_id_3());
-
-        navidenter.put(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_1, tidligere_ansatt_duplikat_navId_1());
-        navidenter.put(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_2, tidligere_ansatt_duplikat_navId_2());
-
-    }
-
-    private static String ROBOT_1_PersonId = "X1019900001";
-    private static String ROBOT_1_NavId = "X000001";
-
-    private static String ROBOT_2_PersonId = "X1019900002";
-    private static String ROBOT_2_NavId = "X000002";
-
-    private static String TIDLIGERE_ANSATT_1_PersonId = "01019900001";
-    private static String TIDLIGERE_ANSATT_1_NavId = "A000001";
-
-    private static String NÅVÆRENDE_ANSATT_2_PersonId = "01019900002";
-    private static String NÅVÆRENDE_ANSATT_2_NavId = "A000002";
-
-    private static String TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1= "01019900003";
-    private static String TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2= "02019900003";
-    private static String TIDLIGERE_ANSATT_FLERE_ID_3_NavId = "A000003";
-
-    private static String TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId = "01019900004";
-    private static String TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_1 = "A000004";
-    private static String TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_2 = "B000004";
-
-
-
-    private Navident robot_1() {
-        return Navident.builder()
-                .navident(ROBOT_1_NavId)
-                .identType(IdentType.ROBOT)
-                .gjeldendePersonid(ROBOT_1_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(ROBOT_1_PersonId).type(PersonidType.MANUELL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).build()
-                ))
-                .build();
-    }
-
-
-    private Navident robot_2() {
-        return Navident.builder()
-                .navident(ROBOT_2_NavId)
-                .identType(IdentType.ROBOT)
-                .gjeldendePersonid(ROBOT_2_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(ROBOT_2_PersonId).type(PersonidType.MANUELL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).tilOgMed(LocalDate.now().minusMonths(6)).build()
-                ))
-                .build();
-    }
-
-    private Navident tidligere_ansatt_1() {
-        return Navident.builder()
-                .navident(TIDLIGERE_ANSATT_1_NavId)
-                .identType(IdentType.STANDARD)
-                .gjeldendePersonid(TIDLIGERE_ANSATT_1_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(TIDLIGERE_ANSATT_1_PersonId).type(PersonidType.PDL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).tilOgMed(LocalDate.now().minusYears(1)).build()
-                ))
-                .build();
-    }
-
-    private Navident nåværende_ansatt_2() {
-        return Navident.builder()
-                .navident(NÅVÆRENDE_ANSATT_2_NavId)
-                .identType(IdentType.STANDARD)
-                .gjeldendePersonid(NÅVÆRENDE_ANSATT_2_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(NÅVÆRENDE_ANSATT_2_PersonId).type(PersonidType.PDL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).build()
-                ))
-                .build();
-    }
-
-    private Navident tidligere_ansatt_flere_id_3() {
-        return Navident.builder()
-                .navident(TIDLIGERE_ANSATT_FLERE_ID_3_NavId)
-                .identType(IdentType.STANDARD)
-                .gjeldendePersonid(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1).type(PersonidType.PDL).build(),
-                        Personid.builder().id(TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2).type(PersonidType.PDL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).tilOgMed(LocalDate.now().minusYears(1)).build()
-                ))
-                .build();
-    }
-
-    private Navident tidligere_ansatt_duplikat_navId_1() {
-        return Navident.builder()
-                .navident(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_1)
-                .identType(IdentType.STANDARD)
-                .gjeldendePersonid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId).type(PersonidType.PDL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusYears(2)).tilOgMed(LocalDate.now().minusYears(1)).build()
-                ))
-                .build();
-    }
-
-    private Navident tidligere_ansatt_duplikat_navId_2() {
-        return Navident.builder()
-                .navident(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_NavId_2)
-                .identType(IdentType.STANDARD)
-                .gjeldendePersonid(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(TIDLIGERE_ANSATT_DUPLIKAT_NavId_4_PersonId).type(PersonidType.PDL).build()
-                ))
-                .aktivePerioder(Arrays.asList(
-                        Periode.builder().fraOgMed(LocalDate.now().minusMonths(8)).tilOgMed(LocalDate.now().minusMonths(2)).build()
-                ))
-                .build();
     }
 
 }
