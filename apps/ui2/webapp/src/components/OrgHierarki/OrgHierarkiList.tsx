@@ -50,7 +50,9 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
   }
 
   useEffect(() => {
-    scrollToRef(refDiv) 
+      if(refDiv.current !== null){
+        scrollToRef(refDiv)
+      }
   }, [])
 
   console.log(currentEnhet?.leder, "LEDERRRR")
