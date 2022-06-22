@@ -9,6 +9,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public class PersonidOppslag {
         }
 
         List<Navident> eksisterendeNavidenter;
-        if (need.identType != IdentType.STANDARD) {
+        if (need.identType != IdentType.STANDARD || need.pdlPersonider == null || need.pdlPersonider.isEmpty()) {
             eksisterendeNavidenter = navidenter.values().stream().filter(ident -> ident.is(need.personid)).collect(Collectors.toList());
         } else {
             // Finn alle NavIdenter hvor en eller flere av Need's pdlPersonid'er finnes i NavIdent.allePersonid'er

@@ -273,6 +273,31 @@ class RnRNeedTest {
     }
 
     @Test
+    public void personOppslagId_Need_PdlIkkeFunnet_TidligereAnsatt() {
+        Need need = Need.builder()
+                .idPrefix('A')
+                .personid(TIDLIGERE_ANSATT_1_PersonId)
+                .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(null)
+                .pdlPersonider(Collections.emptyList())
+                .idGeneratorVisited(true)
+                .generertId(null)
+                .responsProdusentVisited(true)
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(TIDLIGERE_ANSATT_1_PersonId));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(TIDLIGERE_ANSATT_1_PersonId);
+
+        assertEquals(TIDLIGERE_ANSATT_1_PersonId, populatedNeed.personid);
+        assertEquals(TIDLIGERE_ANSATT_1_NavId, populatedNeed.eksisterendeId); // Selv om PDL feiler, bruk id som finnes
+    }
+
+
+
+    @Test
     public void pdlOppslag_Need_IdIkkeFunnet_TomRespons() {
         Need need = Need.builder()
                 .idPrefix('A')
@@ -429,6 +454,31 @@ class RnRNeedTest {
     }
 
     @Test
+    public void navIdGenerator_PdlIkkeFunnet_personOppslagIkkeFunnet() {
+        Need need = Need.builder()
+                .idPrefix('A')
+                .personid("01019922222")
+                .identType(IdentType.STANDARD)
+                .pdlOppslagVisited(true)
+                .pdlGjeldendePersonid(null)
+                .pdlPersonider(Collections.emptyList())
+                .personOppslagVisited(true)
+                .eksisterendeId(null)
+                .responsProdusentVisited(true)
+                .build();
+
+        rnrTestNeedProducer.publish(need);
+
+
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited("01019922222"));
+        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited("01019922222");
+
+        assertEquals("01019922222", populatedNeed.personid);
+        assertNull(populatedNeed.eksisterendeId);
+        assertNotNull(populatedNeed.generertId);
+    }
+
+    @Test
     public void responsProdusent_Robot_NyIdent() {
         Need need = Need.builder()
                 .personid("Y1019900002")
@@ -582,7 +632,7 @@ class RnRNeedTest {
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
         assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
-        assertEquals("C000001", respons.body.navident);
+        assertEquals("C000001",respons.body.navident);
         assertEquals(LocalDate.now(), respons.body.aktivFra);
         assertNull(respons.body.aktivTil);
         assertNotNull(respons.body.feilmelding);

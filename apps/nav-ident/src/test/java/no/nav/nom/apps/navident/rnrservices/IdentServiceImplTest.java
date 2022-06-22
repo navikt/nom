@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
@@ -109,13 +110,42 @@ class IdentServiceImplTest {
     public void bestillIdent_nåværendeAnsatt() {
         String personid = NÅVÆRENDE_ANSATT_2_PersonId;
         char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
+        when(pdlService.getKnownPersonider(personid)).thenReturn(null);
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
         assertEquals(HttpStatus.CONFLICT, respons.httpStatus);
         assertEquals(NÅVÆRENDE_ANSATT_2_NavId, respons.body.getNavident());
         assertNotEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertNotNull(respons.body.getFeilmelding());
+    }
+
+    @Test
+    public void bestillIdent_Ny_FinnesIkkeIPdl() {
+        String personid = "XXX";
+        char prefix = 'A';
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.emptyList());
+        when(navidGenerator.generate('A')).thenReturn("A100001");
+
+        Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
+        assertNotNull(respons);
+        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
+        assertEquals("A100001", respons.body.getNavident());
+        assertEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertNotNull(respons.body.getFeilmelding());
+    }
+
+    @Test
+    public void bestillIdent_Eksisterende_FinnesIkkeIPdl() {
+        String personid = TIDLIGERE_ANSATT_1_PersonId;
+        char prefix = 'A';
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.emptyList());
+
+        Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
+        assertNotNull(respons);
+        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
+        assertEquals(TIDLIGERE_ANSATT_1_NavId, respons.body.getNavident());
+        assertEquals(LocalDate.now(), respons.body.getAktivFra());
         assertNotNull(respons.body.getFeilmelding());
     }
 }

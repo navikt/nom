@@ -133,7 +133,15 @@ body:
 {
     navident: <ny navident generert>
     aktivFra: Datoen fra requesten
-    feilmelding: "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes ikke i PDL eller PDL oppslag feilet"
+    feilmelding: "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet"
+}
+
+404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL, men vi vi fant den som tidligere navident
+body:
+{
+    navident: <ny navident generert>
+    aktivFra: Datoen fra requesten
+    feilmelding: "Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet"
 }
 
 500 Internal Server Error

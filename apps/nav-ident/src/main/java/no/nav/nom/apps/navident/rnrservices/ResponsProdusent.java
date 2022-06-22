@@ -48,18 +48,22 @@ public class ResponsProdusent {
                 code = HttpStatus.CONFLICT;
                 periode = senestePeriode.clone();
                 feilmelding = "Navident for angitt personid kan ikke settes aktiv fra angitt dato siden dette er i en allerede deaktivert periode";
-            } else {
+            } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
+                code = HttpStatus.NOT_FOUND;
+                periode = Periode.builder().fraOgMed(need.fraDato).build();
+                feilmelding = "Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet";
+            } else  {
                 code = HttpStatus.OK;
                 periode = Periode.builder().fraOgMed(need.fraDato).build();
             }
-        } else if (need.identType == IdentType.STANDARD && need.generertId != null && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
+        } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
             code = HttpStatus.NOT_FOUND;
             id = need.generertId;
             periode = Periode.builder().fraOgMed(need.fraDato).build();
-            feilmelding = "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes ikke i PDL eller PDL oppslag feilet";
-        } else if (need.generertId == null) {
+            feilmelding = "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet";
+        } else if (need.generertId == null && !need.pdlPersonider.isEmpty()) {
             code = HttpStatus.INTERNAL_SERVER_ERROR;
-            feilmelding = "Ukjent feil - hverken ikke funnet eksisterende navident ei heller generert ny";
+            feilmelding = "Ukjent feil - Angitt personid hverken ikke funnet som eksisterende navident ei heller generert ny";
         } else {
             code = HttpStatus.CREATED;
             periode = Periode.builder().fraOgMed(need.fraDato).build();
