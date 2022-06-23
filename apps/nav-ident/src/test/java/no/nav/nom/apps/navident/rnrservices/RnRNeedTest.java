@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.pdl.PdlService;
@@ -21,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +50,7 @@ class RnRNeedTest {
     @Autowired private DomainTestData domainTestData;
 
     @MockBean    private PdlService pdlService;
+    @MockBean private IdentService identService;
 
     @BeforeEach
     public void emptyNeedsRead() {
