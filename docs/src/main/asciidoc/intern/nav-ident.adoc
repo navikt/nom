@@ -42,14 +42,11 @@ Utledes via eventsourcing?
 Foreslått format på annen nøkkel: <XXX999>
 Navn på "annen nøkkel" bør gis av Sikkerhetsseksjonen i og med at det er de som utdeler denne.
 
-full historikk
-metadata rundt bestillinger (opprett, deaktiver)
-
+Eventsourcing metadata rundt bestillinger (opprett, slett)
 ```
 {
-    event: "OPPRETT" | "DEAKTIVER" | "REAKTIVER" | "SLETT"
+    event: "OPPRETT" | "SLETT"
     eventTS: DateTime (Timestamp for selve eventen)
-    dato: Date  (Dato for når aktivering skal eller deaktivering skjer)
     bestiller: Nav-ident/system
     payload: {
         navident: string (a123456)
@@ -59,8 +56,6 @@ metadata rundt bestillinger (opprett, deaktiver)
     }
 }
 ```
-
-
 
 == API
 
@@ -73,14 +68,11 @@ metadata rundt bestillinger (opprett, deaktiver)
 - Gi meg navident for personId, med selvbestemt prefix bokstav (enten det gamle eller opprett nytt på stedet)
 - Er denne identen en (robot | utenlandskkonsulent | vikafossen | øvrig ansatte/konsulenter) ?
 - Gi meg alle navidenter i en gitt kategori (robot | utenlandskkonsulent | vikafossen | vanlig-ansatt)
-- Er denne navidenten aktiv?
-- Hvor lenge siden er det denne navidenten byttet status (aktiv/inaktiv)
 
 === REST
 
 Bestilling blir på rest.
 En bestilling vil gi en ny eller eksisterende navident tilbake basert på om personidenten finnes ifra før.
-Bestilligen må angi når denne navidenten skal være aktiv fra dato.
 Bestillingen vil knyttes til pålogget nav-ident via aad-obo
 
 ==== Opprette eller reaktivere en navident
@@ -91,7 +83,6 @@ Request:    POST /personid
 {
     personid: string påkrevd (f-nr, d-nr, annen nøkkel)
     identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT> - Default STANDARD
-    aktivFra: date - Default - dagens dato
 }
 ```
 
@@ -103,31 +94,12 @@ Respons:
 body:
 {
     navident: <ny eller eksisterende navident for angitt personid>
-    aktivFra: Datoen fra requesten
-}
-
-409 CONFLICT    Hvis den allerede er aktiv
-body:
-{
-    navident: <navident for angitt personid>
-    aktivFra: Datoen den er aktiv fra ifra før
-    feilmelding: "Navident for angitt personid er allerede aktiv"
-}
-
-409 CONFLICT    Hvis requestens aktivFra er før evt seneste periode sin aktivtil dato (kan ikke ha overlappende periode.
-body:
-{
-    navident: <navident for angitt personid>
-    aktivFra: Start datoen for seneste aktive periode
-    aktivTil: Slutt datoen for seneste aktive periode
-    feilmelding: "Navident for angitt personid kan ikke settes aktiv fra angitt dato siden dette er i en allerede deaktivert periode"
 }
 
 404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL, men vi genererer allikevel navident
 body:
 {
     navident: <ny navident generert>
-    aktivFra: Datoen fra requesten
     feilmelding: "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet"
 }
 
@@ -135,7 +107,6 @@ body:
 body:
 {
     navident: <ny navident generert>
-    aktivFra: Datoen fra requesten
     feilmelding: "Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet"
 }
 
@@ -147,22 +118,19 @@ body:
 ```
 
 REST tjenesten utfører følgende handlinger:
-- Lager AKTIVER event på kafka (egen request/forespørsel topic?) som en 'need' melding
+- Lager 'bestillings' event på kafka (egen request/forespørsel topic?) som en 'need' melding
 ```
     {
         personid: string påkrevd (f-nr, d-nr, annen nøkkel)
         identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
-        aktivFra: date
     }
 ```
-- 'Query' - konsument slår opp om det finnes eksisterende navident og legger til dette i 'need' medlingen over
+- 'Oppslag' - konsument slår opp om det finnes eksisterende navident og legger til dette i 'need' medlingen over
 ```
     {
         ...<tidligere data i need melding>...
         eksisterendeIdent: { <Tom hvis den ikke eksisterer>
             navident: <eksisterende navident>
-            aktivFra: fra dato for sist gjeldende periode
-            aktivTil: eventuell til dato for sist gjeldende periode
         }
     }
 ```
@@ -198,8 +166,7 @@ Populerer eksisterende informasjon om personid i 'need' meldingen over
         }
     }
 ```
-- 'Respons' - konsumenten må også lage en event melding på eventsource køen, og også persistere denne i base. Event hendelsen vil være enten en 'OPPRETT' eller en 'REAKTIVER' melding.
-
+- 'EventSourceProducerKonsument' - Må lage en event melding på eventsource køen, og også persistere denne i base. Event hendelsen vil være enten en 'OPPRETT'. Selv om det er en ifra før, for å oppdatere eksisterende info.
 
 === Kafka
 
@@ -214,10 +181,11 @@ Event source navIdent på topic `nav-ident`.
 `navident` brukes som meldingsnøkkel
 
 
-
 Lage en Kafka stream med sink til PostgreSQL for backup.
 Egen rutine for recovery av eventsource må lages
 
+[NOTE]
+Eventsource som beskrevet nå vil bestå av en eller flere OPPRETT meldinger for en navident. Og en teknisk SLETT melding. Kanskje splitte OPPRETT i to og lage OPPRETT og OPPDATER. Jira https://jira.adeo.no/browse/ORG-596
 
 === Persistering
 
@@ -249,15 +217,12 @@ Mulig å droppe PDL som avhengighet
 === Håndtering av endring over tid
 
 - Opprettelse
-- Deaktivering
-- Gjenopprettelse
 - Rettelse av feil-punching
+
 
 === Visning av historikk
 
-- slutt/start-dato
 - auditing behov
-
 
 === Corner-cases
 
