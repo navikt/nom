@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -50,8 +51,8 @@ class IdentServiceImplTest {
     public void resetNavidenterDomainData() { domainTestData.prepNavidenter(navidenter); }
 
     @Test
-    public void bestillIdent_nyansatt() {
-        String personid = IKKE_TIDLIGERE_ANSATT_1_PersonId;
+    public void bestillIdent_knytningFinnesIkke() {
+        String personid = KNYTNING_FINNES_IKKE_1_PersonId;
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
         when(navidGenerator.generate(prefix)).thenReturn("A100001");
@@ -60,68 +61,50 @@ class IdentServiceImplTest {
         assertNotNull(respons);
         assertEquals(HttpStatus.CREATED, respons.httpStatus);
         assertEquals("A100001", respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
         assertNull(respons.body.getFeilmelding());
     }
 
     @Test
-    public void bestillIdent_tidligereAnsatt() {
-        String personid = TIDLIGERE_ANSATT_1_PersonId;
+    public void bestillIdent_knytningFinnes() {
+        String personid = KNYTNING_FINNES_1_PersonId;
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
         assertEquals(HttpStatus.OK, respons.httpStatus);
-        assertEquals(TIDLIGERE_ANSATT_1_NavId, respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertEquals(KNYTNING_FINNES_1_NavId, respons.body.getNavident());
         assertNull(respons.body.getFeilmelding());
     }
 
     @Test
-    public void bestillIdent_tidligereAnsatt_FlerePersonideer_1() {
-        String personid = TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_1;
+    public void bestillIdent_knytningFinnes_FlerePersonideer_1() {
+        String personid = KNYTNING_FINNES_FLERE_ID_3_PersonId_1;
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
         assertEquals(HttpStatus.OK, respons.httpStatus);
-        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertEquals(KNYTNING_FINNES_FLERE_ID_3_NavId, respons.body.getNavident());
         assertNull(respons.body.getFeilmelding());
     }
 
     @Test
-    public void bestillIdent_tidligereAnsatt_FlerePersonideer_2() {
-        String personid = TIDLIGERE_ANSATT_FLERE_ID_3_PersonId_2;
+    public void bestillIdent_knytningFinnes_FlerePersonideer_2() {
+        String personid = KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
         assertEquals(HttpStatus.OK, respons.httpStatus);
-        assertEquals(TIDLIGERE_ANSATT_FLERE_ID_3_NavId, respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertEquals(KNYTNING_FINNES_FLERE_ID_3_NavId, respons.body.getNavident());
         assertNull(respons.body.getFeilmelding());
     }
 
     @Test
-    public void bestillIdent_nåværendeAnsatt() {
-        String personid = NÅVÆRENDE_ANSATT_2_PersonId;
-        char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(null);
-
-        Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
-        assertNotNull(respons);
-        assertEquals(HttpStatus.CONFLICT, respons.httpStatus);
-        assertEquals(NÅVÆRENDE_ANSATT_2_NavId, respons.body.getNavident());
-        assertNotEquals(LocalDate.now(), respons.body.getAktivFra());
-        assertNotNull(respons.body.getFeilmelding());
-    }
-
-    @Test
-    public void bestillIdent_Ny_FinnesIkkeIPdl() {
+    public void bestillIdent_KnytningFinnesIkke_FinnesIkkeIPdl() {
         String personid = "XXX";
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.emptyList());
@@ -131,21 +114,19 @@ class IdentServiceImplTest {
         assertNotNull(respons);
         assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
         assertEquals("A100001", respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
         assertNotNull(respons.body.getFeilmelding());
     }
 
     @Test
-    public void bestillIdent_Eksisterende_FinnesIkkeIPdl() {
-        String personid = TIDLIGERE_ANSATT_1_PersonId;
+    public void bestillIdent_KnytningFinnes_FinnesIkkeIPdl() {
+        String personid = KNYTNING_FINNES_1_PersonId;
         char prefix = 'A';
         when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.emptyList());
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
         assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
-        assertEquals(TIDLIGERE_ANSATT_1_NavId, respons.body.getNavident());
-        assertEquals(LocalDate.now(), respons.body.getAktivFra());
+        assertEquals(KNYTNING_FINNES_1_NavId, respons.body.getNavident());
         assertNotNull(respons.body.getFeilmelding());
     }
 }

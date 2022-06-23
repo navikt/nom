@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,6 @@ public class Need implements Cloneable {
     String personid;
     IdentType identType;
     char idPrefix;
-    LocalDate fraDato;
 
     String eksisterendeId;
     boolean personOppslagVisited;

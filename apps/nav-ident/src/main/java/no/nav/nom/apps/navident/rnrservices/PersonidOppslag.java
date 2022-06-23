@@ -58,9 +58,9 @@ public class PersonidOppslag {
         } else if (eksisterendeNavidenter.size() == 1) {
             need.setEksisterendeId(eksisterendeNavidenter.get(0).getNavident());
         } else { // Found multiple for same personId
-            log.error("Det finnes flere NavIdenter, %s, for samme personid. Plukker den som har nyeste benyttet dato i sine perioder".formatted(eksisterendeNavidenter.stream().map(Navident::getNavident).collect(Collectors.toList())));
+            log.error("Det finnes flere NavIdenter, %s, for samme personid. Plukker den som har høyeste navident id".formatted(eksisterendeNavidenter.stream().map(Navident::getNavident).collect(Collectors.toList())));
             need.setEksisterendeId(
-                    eksisterendeNavidenter.stream().sorted((id1, id2) -> id2.senestePeriodeDato().compareTo(id2.senestePeriodeDato()))
+                    eksisterendeNavidenter.stream().sorted((id1, id2) -> id2.getNavident().compareTo(id2.getNavident()))
                             .findFirst().get().getNavident()
             );
         }

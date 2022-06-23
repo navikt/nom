@@ -28,7 +28,6 @@ public class NeedProducer {
                 .idPrefix(idPrefix)
                 .personid(personid)
                 .identType(type)
-                .fraDato(fraDato)
                 .build();
         kafkaTemplate.send(topic, need);
 

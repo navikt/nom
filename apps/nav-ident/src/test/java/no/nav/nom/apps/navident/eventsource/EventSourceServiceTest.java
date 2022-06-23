@@ -3,18 +3,13 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.Periode;
 import no.nav.nom.apps.navident.domain.PersonidType;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,12 +18,11 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @ActiveProfiles({"test", "log-console"})
@@ -56,11 +50,6 @@ class EventSourceServiceTest {
         kafkaTemplate.send(topic, event.payload.navident, event);
 
         await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
-
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(1, perioder.size());
-        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
-        assertEquals(null, perioder.get(0).getTilOgMed());
     }
 
     @Test
@@ -85,11 +74,7 @@ class EventSourceServiceTest {
         await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent3));
 
         assertEquals(3, navidenter.size());
-
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(1, perioder.size());
-        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
-        assertEquals(null, perioder.get(0).getTilOgMed());
+        assertEquals(personid3, navidenter.get(navIdent3).getGjeldendePersonid());
     }
 
     @Test
@@ -101,16 +86,12 @@ class EventSourceServiceTest {
         SourceEvent event2 = getOpprettEvent(navIdent, personid2);
 
         kafkaTemplate.send(topic, event.payload.navident, event);
-        kafkaTemplate.send(topic, event.payload.navident, event2); // Forventer at denne ikke behandles - med kun en error log
+        kafkaTemplate.send(topic, event.payload.navident, event2); // Forventer at denne erstatter forrige info
 
         await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
 
         assertEquals(navidenter.size(), 1);
-
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(1, perioder.size());
-        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
-        assertEquals(null, perioder.get(0).getTilOgMed());
+        assertEquals(personid2, navidenter.get(navIdent).getGjeldendePersonid());
     }
 
     @Test
@@ -128,56 +109,6 @@ class EventSourceServiceTest {
 
         assertEquals(1, navidenter.size());
 
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(1, perioder.size());
-        assertEquals(LocalDate.now(), perioder.get(0).getFraOgMed());
-        assertEquals(null, perioder.get(0).getTilOgMed());
-    }
-
-    @Test
-    public void deaktiverNavIdentEvent() throws InterruptedException {
-        String navIdent = "A000002";
-        String personid = "01019900002";
-        LocalDate fraDato = LocalDate.now().minusMonths(2);
-        LocalDate tilDato = LocalDate.now();
-        SourceEvent opprett = getOpprettEvent(navIdent, personid, fraDato );
-        SourceEvent deaktiver = getDeaktiverEvent(navIdent, personid, tilDato);
-
-        kafkaTemplate.send(topic, navIdent, opprett);
-        kafkaTemplate.send(topic, navIdent, deaktiver);
-
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() ->!navidenter.get(navIdent).isActive(tilDato.plusDays(1)));
-
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(1, perioder.size());
-        assertEquals(fraDato, perioder.get(0).getFraOgMed());
-        assertEquals(tilDato, perioder.get(0).getTilOgMed());
-    }
-
-    @Test
-    public void reaktiverNavIdentEvent() throws InterruptedException {
-        String navIdent = "A000001";
-        String personid = "01019900001";
-        LocalDate fraDato = LocalDate.now().minusMonths(6);
-        LocalDate tilDato = LocalDate.now().minusMonths(2);
-        LocalDate reaktiverDato = LocalDate.now();
-        SourceEvent opprett = getOpprettEvent(navIdent, personid, fraDato );
-        SourceEvent deaktiver = getDeaktiverEvent(navIdent, personid, tilDato);
-        SourceEvent reaktiver = getReaktiverEvent(navIdent, personid, reaktiverDato);
-
-        kafkaTemplate.send(topic, navIdent, opprett);
-        kafkaTemplate.send(topic, navIdent, deaktiver);
-        kafkaTemplate.send(topic, navIdent, reaktiver);
-
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.get(navIdent).getAktivePerioder().size() > 1);
-
-        List<Periode> perioder = navidenter.get(navIdent).getAktivePerioder();
-        assertEquals(2, perioder.size());
-        assertEquals(fraDato, perioder.get(0).getFraOgMed());
-        assertEquals(tilDato, perioder.get(0).getTilOgMed());
-        assertEquals(reaktiverDato, perioder.get(1).getFraOgMed());
     }
 
     private SourceEvent getOpprettEvent(String navid, String personid) {
@@ -189,7 +120,6 @@ class EventSourceServiceTest {
                 .bestiller("Test-bestiller")
                 .event(EventType.OPPRETT)
                 .eventTS(LocalDateTime.now())
-                .dato(fraDato)
                 .payload(
                         EventPayload.builder()
                                 .identType(IdentType.STANDARD)
@@ -197,54 +127,6 @@ class EventSourceServiceTest {
                                 .personid(personid)
                                 .personidtype(PersonidType.PDL)
                                 .build()
-                ).build();
-    }
-
-    private SourceEvent getDeaktiverEvent(String navid, String personid, LocalDate tilDato) {
-        return SourceEvent.builder()
-                .bestiller("Test-bestiller")
-                .event(EventType.DEAKTIVER)
-                .eventTS(LocalDateTime.now())
-                .dato(tilDato)
-                .payload(
-                        EventPayload.builder()
-                                .identType(IdentType.STANDARD)
-                                .navident(navid)
-                                .personid(personid)
-                                .personidtype(PersonidType.PDL)
-                                .build()
-                ).build();
-    }
-
-    private SourceEvent getReaktiverEvent(String navid, String personid, LocalDate reaktiverDato) {
-        return SourceEvent.builder()
-                .bestiller("Test-bestiller")
-                .event(EventType.REAKTIVER)
-                .eventTS(LocalDateTime.now())
-                .dato(reaktiverDato)
-                .payload(
-                        EventPayload.builder()
-                                .identType(IdentType.STANDARD)
-                                .navident(navid)
-                                .personid(personid)
-                                .personidtype(PersonidType.PDL)
-                                .build()
-                ).build();
-    }
-
-    private SourceEvent getReaktiverEvent(String navid, String personid) {
-        return SourceEvent.builder()
-                .bestiller("Test-bestiller")
-                .event(EventType.SLETT)
-                .eventTS(LocalDateTime.now())
-                .payload(
-                        EventPayload.builder()
-                                .identType(IdentType.STANDARD)
-                                .navident(navid)
-                                .personid(personid)
-                                .personidtype(PersonidType.PDL)
-                                .build()
-                ).build();
-    }
+                ).build();}
 
 }

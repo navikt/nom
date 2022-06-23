@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 public class SourceEvent {
     EventType event;
     LocalDateTime eventTS;
-    LocalDate dato;
     String bestiller;
     EventPayload payload;
 

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.Periode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -33,40 +32,26 @@ public class ResponsProdusent {
             return;
         }
         String id = null;
-        Periode periode = null;
         HttpStatus code = null;
         String feilmelding = null;
         if (need.eksisterendeId != null) {
             id = need.eksisterendeId;
             var ident = navidenter.get(need.eksisterendeId);
-            var senestePeriode = ident.senestePeriode();
-            if (senestePeriode.getTilOgMed() == null) {
-                code = HttpStatus.CONFLICT;
-                periode = senestePeriode.clone();
-                feilmelding = "Navident for angitt personid er allerede aktiv";
-            } else if (senestePeriode.getTilOgMed().isAfter(need.fraDato)) {
-                code = HttpStatus.CONFLICT;
-                periode = senestePeriode.clone();
-                feilmelding = "Navident for angitt personid kan ikke settes aktiv fra angitt dato siden dette er i en allerede deaktivert periode";
-            } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
+            if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
                 code = HttpStatus.NOT_FOUND;
-                periode = Periode.builder().fraOgMed(need.fraDato).build();
                 feilmelding = "Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet";
-            } else  {
+            } else {
                 code = HttpStatus.OK;
-                periode = Periode.builder().fraOgMed(need.fraDato).build();
             }
         } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
             code = HttpStatus.NOT_FOUND;
             id = need.generertId;
-            periode = Periode.builder().fraOgMed(need.fraDato).build();
             feilmelding = "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet";
         } else if (need.generertId == null && !need.pdlPersonider.isEmpty()) {
             code = HttpStatus.INTERNAL_SERVER_ERROR;
             feilmelding = "Ukjent feil - Angitt personid hverken ikke funnet som eksisterende navident ei heller generert ny";
         } else {
             code = HttpStatus.CREATED;
-            periode = Periode.builder().fraOgMed(need.fraDato).build();
             id = need.generertId;
         }
 
@@ -76,8 +61,6 @@ public class ResponsProdusent {
                 .body(
                     Respons.Body.builder()
                             .navident(id)
-                            .aktivFra(periode != null ? periode.getFraOgMed() : null)
-                            .aktivTil(periode != null ? periode.getTilOgMed() : null)
                             .feilmelding(feilmelding)
                             .build()
                 )

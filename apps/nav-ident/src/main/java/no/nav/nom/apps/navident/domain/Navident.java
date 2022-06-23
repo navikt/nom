@@ -17,13 +17,7 @@ public class Navident {
     String gjeldendePersonid;
     List<Personid> allePersonider;
     IdentType identType;
-    List<Periode> aktivePerioder;
 
-    public boolean addPeriode(Periode periode) {
-        ArrayList<Periode> perioder = new ArrayList<>(aktivePerioder);
-        aktivePerioder = perioder;
-        return aktivePerioder.add(periode);
-    }
     public boolean addPersonid(Personid personid) {
         ArrayList<Personid> personider = new ArrayList<>(allePersonider);
         allePersonider = personider;
@@ -33,22 +27,6 @@ public class Navident {
     public boolean is(String personid) {
         return allePersonider.stream().anyMatch( id -> id.id.equals(personid));
     }
-
-    public boolean isActive() { return isActive(LocalDate.now()); }
-
-    public boolean isActive(LocalDate date) {
-        return aktivePerioder.stream().anyMatch( periode -> periode.contains(date));
-    }
-
-    public Periode senestePeriode() {
-        return aktivePerioder.stream().sorted( (p1, p2) -> p2.fraOgMed.compareTo(p1.fraOgMed)).findFirst().get();
-    }
-
-    public LocalDate senestePeriodeDato() {
-        Periode sistePeriode = senestePeriode();
-        return sistePeriode.tilOgMed != null ? sistePeriode.tilOgMed : sistePeriode.fraOgMed;
-    }
-
 
     @Override
     public Navident clone() {
@@ -62,7 +40,6 @@ public class Navident {
                     .identType(this.identType)
                     .build();
         }
-        clone.aktivePerioder = this.aktivePerioder.stream().map(periode -> periode.clone()).collect(Collectors.toList());
         clone.allePersonider = this.allePersonider.stream().map(personid -> personid.clone()).collect(Collectors.toList());
         return clone;
     }
