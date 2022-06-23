@@ -296,10 +296,9 @@ En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 - IDA-identer starter alltid med Z som bokstav-prefix
 - Abonnerer ikke på endringsmeldinger fra PDL.
 - Gjør kall til PDL ved hvert oppslag i NIK slik at man får hentet evt. nye fnr på personen. 
+- NIK skal ikke si noe om status aktiv/inaktiv eller perioder knyttet til dette på identer. NIK holder bare mapping av nav-identer og fnr/dnr/annen nøkkel. Aktiv/inaktiv er kontekstavhengig, f.eks. om du var ansatt eller ikke, eller når du hadde tilganger eller ikke, og den informasjonen bor i andre løsninger (f.eks. IGA for tilganger og NOM for ansettelse). Avklart med Team IDM.
 
 
 
 === Åpne punkter
-1. Skal NIK vite noe om perioder en NAV-ident var aktiv? Dette er jo info som uansett vil bo i NOM. Må forankres med Team IDM.
-2. Aktiv/inaktiv for en NAV-ident. Trengs den i NIK? Det er egentlig utlede info fra NOM, så burde være tilstrekkelig at det er i NOM? Hvordan treffer dette når Remedy oppretter identer i NIK? Må forankres med Team IDM. 
-3. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
+1. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
