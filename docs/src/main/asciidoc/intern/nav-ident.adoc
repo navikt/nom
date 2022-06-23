@@ -36,12 +36,7 @@ Utledes via eventsourcing?
         type: PDL | MANUELL
     ]
     identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
-    aktivePerioder: [
-        periode: {
-            fom: <date not null>,
-            tom: <date>
-        }
-    ]
+
 }
 ```
 Foreslått format på annen nøkkel: <XXX999>
