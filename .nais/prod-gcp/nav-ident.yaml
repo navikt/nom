@@ -9,6 +9,10 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
+    - name: PDL_BASE_URL
+      value: https://pdl-api.prod-fss-pub.nais.io/graphql
+    - name: PDL_SCOPES
+      value: api://prod-fss.pdl.pdl-api/.default
   image: {{image}}
   port: 8080
   ingresses:
@@ -46,5 +50,8 @@ spec:
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
+  azure:
+    application:
+      enabled: true
   kafka:
     pool: nav-prod
