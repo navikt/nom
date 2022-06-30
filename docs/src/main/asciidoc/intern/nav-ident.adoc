@@ -261,4 +261,4 @@ En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 
 
 === Åpne punkter
-1. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
+1. IDAs Z-identer? Z-identene er på egen nummerserie, og skal ikke blandes med NIK sin nummerserie. Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
