@@ -41,7 +41,7 @@ public class EventBasedRessursService {
     }
 
     public List<RessursI> matchByNavident(String navident) {
-        return repository.findHendelserByJsonMatch(EventBasedRessurs.NAVIDENT_FIELD, navident.toLowerCase())
+        return repository.findHendelserByJsonMatch(EventBasedRessurs.NAVIDENT_FIELD, navident.toLowerCase(), HendelseDataType.RESSURS_V1.getDataType())
                 .stream()
                 .map(hendelseService::convert)
                 .collect(Collectors.groupingBy(IHendelse::getFid))

@@ -27,6 +27,7 @@
           "ORGNODE_KODE_OVER": "testId3",
           "ORGNODE_NAVN": "testNavn",
           "ORGNODE_NIVA": "ORGENHET",
+          "ORGNODE_NAVN_OVER": "testNavn",
           "ORGNODE_NIVA_OVER": "ORGNIV3",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": null
@@ -38,6 +39,7 @@
           "ORGNODE_NAVN": "testNavn",
           "ORGNODE_NIVA": "ORGNIV3",
           "ORGNODE_NIVA_OVER": "ORGNIV2",
+          "ORGNODE_NAVN_OVER": "testNavn4",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         },
@@ -45,9 +47,10 @@
           "LEDER_NAVIDENT": "testNavIdent1",
           "ORGNODE_KODE": "testId4",
           "ORGNODE_KODE_OVER": "testId6",
-          "ORGNODE_NAVN": "testNavn",
+          "ORGNODE_NAVN": "testNavn4",
           "ORGNODE_NIVA": "ORGNIV2",
           "ORGNODE_NIVA_OVER": "ORGNIV1",
+          "ORGNODE_NAVN_OVER": "testNavn6",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         },
@@ -58,6 +61,7 @@
           "ORGNODE_NAVN": "testNavn",
           "ORGNODE_NIVA": "ORGENHET",
           "ORGNODE_NIVA_OVER": "ORGNIV2",
+          "ORGNODE_NAVN_OVER": "testNavn4",
           "ORGNODE_STATUS": "N",
           "agresso_orgnode_type": "54"
         }

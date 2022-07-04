@@ -24,7 +24,7 @@ public class RessursKoblingResolver implements GraphQLResolver<Ressurs> {
         final List<RessursKobling> result = koblingService.getKoblingerByNavIdent(ressurs.getNavIdent())
                 .stream()
                 .map(dvh -> {
-                    val orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(dvh.getAgressoId(), dvh.getOrgNiv(), null).get();
+                    val orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(dvh.getAgressoId(), dvh.getOrgNiv(), dvh.getOrgenhetNavn()).get();
                     return RessursKobling.builder()
                             .organisasjonsenhet(orgenhetService.convertToGraphQlResponse(orgenhet))
                             .gyldigFom(dvh.getGyldigFom())

@@ -9,7 +9,6 @@ import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,19 +45,18 @@ public abstract class TestBase {
     private GenericStorage genericStorage;
 
     @Autowired
-    protected PdlUtils pdlUtils;
+    public DvhOrgenhetMockUtils dvhOrgenhetMockUtils;
 
-    @AfterEach
-    protected void clearRepository() {
-        dvhRepository.clearRepository();
-        pdlUtils.reset();
-    }
+    @Autowired
+    protected PdlUtils pdlUtils;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void reset() {
         dvhRepository.clearRepository();
         genericStorage.deleteAll();
+        dvhOrgenhetMockUtils.createEmptyResponse();
+        pdlUtils.reset();
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

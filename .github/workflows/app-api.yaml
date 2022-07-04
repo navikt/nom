@@ -50,7 +50,7 @@ jobs:
   deploy-dev:
     name: Deploy to NAIS dev-gcp
     needs: build-jar-docker
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev') || startsWith(github.ref, 'refs/heads/qa')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4

@@ -1,0 +1,53 @@
+package no.nav.nom.apps.api;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+
+@Service
+@RequiredArgsConstructor
+public class DvhOrgenhetMockUtils {
+
+    private final List<DvhOrgenhetMock> response = new LinkedList<>();
+    private final AppProperties appProperties;
+    private final ObjectMapper objectMapper;
+    private final DvhDataLoader dvhDataLoader;
+
+    private void mockDvhOrgenhetResponse(String response){
+        stubFor(get(appProperties.getProxy().getEnhetPath())
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(response)));
+        dvhDataLoader.load();
+    }
+
+    @SneakyThrows
+    public void addToResponse(DvhOrgenhetMock... enheter){
+        response.addAll(List.of(enheter));
+        createResponse(response);
+    }
+
+    public void createEmptyResponse(){
+        response.clear();
+        createResponse(response);
+    }
+
+    @SneakyThrows
+    private void createResponse(List<DvhOrgenhetMock> orgenhetMocks){
+        val response = objectMapper.createObjectNode();
+        response.set("NOM_HRORG_ORGENHETResponse", objectMapper.createObjectNode().set("NOM_HRORG_ORGENHETResult", objectMapper.convertValue(orgenhetMocks, JsonNode.class)));
+        mockDvhOrgenhetResponse(objectMapper.writeValueAsString(response));
+    }
+}
