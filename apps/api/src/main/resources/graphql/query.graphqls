@@ -44,7 +44,7 @@ input RessurserSearch {
 }
 
 input PersonSearch {
-    personIdent: String! @deprecated(reason: "personIdent er erstattet med personident")
+    personIdent: String @deprecated(reason: "personIdent er erstattet med personident")
     personident: String
 }
 
