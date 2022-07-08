@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Value
 @Builder
-public class Organisasjonsenhet {
+public class OrgEnhet {
     String agressoId;
     String orgNiv;
     String navn;

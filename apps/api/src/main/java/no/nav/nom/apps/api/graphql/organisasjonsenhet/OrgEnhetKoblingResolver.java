@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
-import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,16 +16,16 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organisasjonsenhet> {
+public class OrgEnhetKoblingResolver implements GraphQLResolver<OrgEnhet> {
 
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
 
-    public DataFetcherResult<List<OrganisasjonsenhetsKobling>> koblinger(Organisasjonsenhet orgEnhet, DataFetchingEnvironment env) {
-        final List<OrganisasjonsenhetsKobling> result = dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
+    public DataFetcherResult<List<OrgEnhetsKobling>> koblinger(OrgEnhet orgEnhet, DataFetchingEnvironment env) {
+        final List<OrgEnhetsKobling> result = dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
                 .map(dvh -> {
                     val ressurs = ressursService.findByNavIdent(dvh.getNavIdent()).get();
-                    return OrganisasjonsenhetsKobling.builder()
+                    return OrgEnhetsKobling.builder()
                             .ressurs(ressursService.convertToGraphQlResponse(ressurs))
                             .gyldigFom(dvh.getGyldigFom())
                             .gyldigTom(dvh.getGyldigTom().orElse(null))
@@ -33,7 +33,7 @@ public class OrganisasjonsenhetKoblingResolver implements GraphQLResolver<Organi
                 })
                 .collect(Collectors.toUnmodifiableList());
 
-        return DataFetcherResult.<List<OrganisasjonsenhetsKobling>>newResult()
+        return DataFetcherResult.<List<OrgEnhetsKobling>>newResult()
                 .data(result)
                 .build();
     }

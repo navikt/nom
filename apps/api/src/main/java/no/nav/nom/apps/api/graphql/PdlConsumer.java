@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.contract.nom.api.graphql.Person;
+import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +25,7 @@ public class PdlConsumer {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate;
 
-    public Optional<Person> hentPerson(String personIdent){
+    public Optional<FolkeregisterPerson> hentPerson(String personIdent){
         val headers = new HttpHeaders();
         val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -50,7 +50,7 @@ public class PdlConsumer {
                 val navnResult = result.getBody().get("data").get("hentPerson").get("navn").get(0);
                 val mellomnavn = navnResult.hasNonNull("mellomnavn") ? navnResult.get("mellomnavn").asText() : null;
                 return Optional.of(
-                        Person.builder()
+                        FolkeregisterPerson.builder()
                         .navn(
                                 RessursNavn.builder()
                                         .fornavn(navnResult.get("fornavn").asText())

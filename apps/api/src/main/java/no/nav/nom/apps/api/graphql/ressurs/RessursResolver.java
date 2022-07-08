@@ -6,6 +6,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.val;
 import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
@@ -36,9 +37,15 @@ class RessursResolver implements GraphQLQueryResolver {
             if (objectNode == null) {
                 result = Optional.empty();
             } else {
-                result = objectNode.findValue("navIdent") != null ?
-                        ressursService.findByNavIdent(objectNode.findValue("navIdent").asText()) :
-                        ressursService.findByPersonIdent(objectNode.findValue("personIdent").asText());
+                val navident = Optional
+                        .ofNullable(objectNode.findValue("navident"))
+                        .orElse(objectNode.findValue("navIdent"));
+                val personident = Optional
+                        .ofNullable(objectNode.findValue("personident"))
+                        .orElse(objectNode.findValue("personIdent"));
+                result = navident != null ?
+                        ressursService.findByNavIdent(navident.asText()) :
+                        ressursService.findByPersonIdent(personident.asText());
             }
 
             return DataFetcherResult.<Ressurs>newResult()
@@ -51,13 +58,18 @@ class RessursResolver implements GraphQLQueryResolver {
         return securityUtil.<List<RessursResult>>checkAuth(env, null).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
             var result = new ArrayList<Result>();
-            List<String> navIdenter = toStringList(objectNode, "navIdenter");
-            List<String> personIdenter = toStringList(objectNode, "personIdenter");
+
             if (objectNode == null) {
                 ressursService.getAll().forEach(r -> result.add(new Result(r.getNavIdent(), r)));
             } else {
-                navIdenter.forEach(ident -> result.add(new Result(ident, ressursService.findByNavIdent(ident).orElse(null))));
-                personIdenter.forEach(ident -> result.add(new Result(ident, ressursService.findByPersonIdent(ident).orElse(null))));
+                val navidenter = objectNode.findValue("navIdenter") != null
+                        ? toStringList(objectNode, "navIdenter")
+                        : toStringList(objectNode, "navidenter");
+                val personidenter = objectNode.findValue("personIdenter") != null
+                        ? toStringList(objectNode, "personIdenter")
+                        : toStringList(objectNode, "personidenter");
+                navidenter.forEach(ident -> result.add(new Result(ident, ressursService.findByNavIdent(ident).orElse(null))));
+                personidenter.forEach(ident -> result.add(new Result(ident, ressursService.findByPersonIdent(ident).orElse(null))));
             }
 
             return DataFetcherResult.<List<RessursResult>>newResult()

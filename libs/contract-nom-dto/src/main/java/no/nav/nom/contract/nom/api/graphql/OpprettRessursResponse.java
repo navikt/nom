@@ -10,6 +10,9 @@ import java.util.UUID;
 public class OpprettRessursResponse {
     UUID nomId;
     String navIdent;
+    String navident;
     String personIdent;
-    Person person;
+    String personident;
+    FolkeregisterPerson person;
+    FolkeregisterPerson folkeregisterPerson;
 }

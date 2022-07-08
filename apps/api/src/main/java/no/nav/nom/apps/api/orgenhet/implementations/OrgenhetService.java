@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.DvhInterface;
 import no.nav.nom.contract.nom.api.graphql.Kode;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -45,8 +45,8 @@ public class OrgenhetService implements IOrgenhetService {
     }
 
     @Override
-    public Organisasjonsenhet convertToGraphQlResponse(IOrgenhet orgenhet) {
-        return Organisasjonsenhet.builder()
+    public OrgEnhet convertToGraphQlResponse(IOrgenhet orgenhet) {
+        return OrgEnhet.builder()
                 .agressoId(orgenhet.getAgressoId())
                 .orgNiv(orgenhet.getOrgNiv())
                 .navn(orgenhet.getNavn())

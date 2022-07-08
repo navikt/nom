@@ -10,8 +10,8 @@ import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
-import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -24,14 +24,14 @@ import static no.nav.nom.apps.api.graphql.common.ConverterUtils.toStringList;
 
 @Component
 @RequiredArgsConstructor
-class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
+class OrgEnhetResolver implements GraphQLQueryResolver {
 
     private final IOrgenhetService orgenhetService;
     private final SecurityUtil securityUtil;
     private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
-    public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return securityUtil.<Organisasjonsenhet>checkAuth(env, null).orElseGet(() -> {
+    public DataFetcherResult<OrgEnhet> orgEnhet(ObjectNode objectNode, DataFetchingEnvironment env) {
+        return securityUtil.<OrgEnhet>checkAuth(env, null).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
             Optional<IOrgenhet> result;
             if (objectNode != null && objectNode.hasNonNull("agressoId") && objectNode.hasNonNull("orgNiv")) {
@@ -42,14 +42,18 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
             } else {
                 result = Optional.empty();
             }
-            return DataFetcherResult.<Organisasjonsenhet>newResult()
+            return DataFetcherResult.<OrgEnhet>newResult()
                     .data(result.map(orgenhetService::convertToGraphQlResponse).orElse(null))
                     .build();
         });
     }
 
-    public DataFetcherResult<List<OrganisasjonsenhetResult>> organisasjonsenheter(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return securityUtil.<List<OrganisasjonsenhetResult>>checkAuth(env, null).orElseGet(() -> {
+    public DataFetcherResult<OrgEnhet> organisasjonsenhet(ObjectNode objectNode, DataFetchingEnvironment env) {
+        return orgEnhet(objectNode,  env);
+    }
+
+    public DataFetcherResult<List<OrgEnhetResult>> orgEnheter(ObjectNode objectNode, DataFetchingEnvironment env) {
+        return securityUtil.<List<OrgEnhetResult>>checkAuth(env, null).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
             Collection<IOrgenhet> result;
             val agressoIder = toStringList(objectNode, "agressoIder");
@@ -63,12 +67,16 @@ class OrganisasjonsenhetResolver implements GraphQLQueryResolver {
                         .filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv())).toList();
                 result.forEach(e -> agressoIder.remove(e.getAgressoId()));
             }
-            return DataFetcherResult.<List<OrganisasjonsenhetResult>>newResult()
+            return DataFetcherResult.<List<OrgEnhetResult>>newResult()
                     .data(Stream.concat(
-                            result.stream().map(orgenhetService::convertToGraphQlResponse).map(OrganisasjonsenhetResult::new),
-                            agressoIder.stream().map(id -> new OrganisasjonsenhetResult(id, orgNiv))
+                            result.stream().map(orgenhetService::convertToGraphQlResponse).map(OrgEnhetResult::new),
+                            agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv))
                     ).collect(Collectors.toList()))
                     .build();
         });
+    }
+
+    public DataFetcherResult<List<OrgEnhetResult>> organisasjonsenheter(ObjectNode objectNode, DataFetchingEnvironment env) {
+        return orgEnheter(objectNode, env);
     }
 }

@@ -11,19 +11,17 @@ import lombok.val;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
+import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest2;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse2;
-import no.nav.nom.contract.nom.api.graphql.Person;
-import no.nav.nom.contract.nom.api.graphql.Ressurstype;
+import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -113,7 +111,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
         });
     }
 
-    private OpprettRessursResponse convert(RessursI ressurs, Person person){
+    private OpprettRessursResponse convert(RessursI ressurs, FolkeregisterPerson person){
         return OpprettRessursResponse.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())

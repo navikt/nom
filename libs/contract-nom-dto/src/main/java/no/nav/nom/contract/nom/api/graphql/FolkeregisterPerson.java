@@ -3,8 +3,8 @@ package no.nav.nom.contract.nom.api.graphql;
 import lombok.Builder;
 import lombok.Value;
 
-@Builder
 @Value
-public class OrganisasjonsenhetsLeder {
-    Ressurs ressurs;
+@Builder
+public class FolkeregisterPerson {
+    RessursNavn navn;
 }

@@ -7,10 +7,10 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
-import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetResult;
-import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsKobling;
-import no.nav.nom.contract.nom.api.graphql.OrganisasjonsenhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario11() {
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", Organisasjonsenhet.class);
+        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", OrgEnhet.class);
         assertEquals(outputEnhet.getAgressoId(), "testId1");
         assertEquals(outputEnhet.getType().getKode(), "NAY");
         assertEquals(outputEnhet.getType().getNavn(), "Arbeid og ytelser");
@@ -50,7 +50,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario112() {
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        val outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
         assertEquals(outputEnhet.get(0).getId(), "testId1");
         assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
         assertEquals(outputEnhet.get(1).getId(), "notFoundIdent");
@@ -63,7 +63,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario113() {
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        val outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
         assertEquals(outputEnhet.get(0).getId(), "testId4");
         assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
         assertEquals(outputEnhet.get(0).getOrgNiv(), "ORGNIV2");
@@ -75,7 +75,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario114() {
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql", false).getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class);
+        val outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
         assertEquals(outputEnhet.get(0).getId(), "testId4");
         assertEquals(outputEnhet.get(0).getOrgNiv(), "ORGNIV2");
         assertEquals(outputEnhet.get(0).getCode(), ResultCode.OK);
@@ -91,7 +91,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(5, response.getList("$.data.organisasjonsenheter", OrganisasjonsenhetResult.class).size());
+        assertEquals(5, response.getList("$.data.organisasjonsenheter", OrgEnhetResult.class).size());
     }
 
     @Test
@@ -106,7 +106,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
                 .collect(Collectors.toMap(
                         o -> o.get("retning").asText(),
-                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
+                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)));
 
         assertEquals("testId4", organiserteEnheter.get("over").getAgressoId());
         assertEquals("testId2", organiserteEnheter.get("under").getAgressoId());
@@ -124,7 +124,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
                 .collect(Collectors.toMap(
                         o -> o.get("retning").asText(),
-                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), Organisasjonsenhet.class)));
+                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)));
 
         assertThat(organiserteEnheter).hasSize(1);
         assertEquals("testId3", organiserteEnheter.get("over").getAgressoId());
@@ -142,7 +142,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val response = postForResource("organisasjonsenhet/scenario4.graphql", false);
 
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
+        val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
         }).get(0);
 
         assertEquals(ressurs.getNavIdent(), outputLeder.getRessurs().getNavIdent());
@@ -158,7 +158,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val response = postForResource("organisasjonsenhet/scenario32.graphql", false);
 
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrganisasjonsenhetsLeder>>() {
+        val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
         });
 
         assertEquals(0, outputLedere.size());
@@ -192,7 +192,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
 
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrganisasjonsenhetsKobling>>() {
+        val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
         });
 
         assertEquals(1, outputKoblinger.size());

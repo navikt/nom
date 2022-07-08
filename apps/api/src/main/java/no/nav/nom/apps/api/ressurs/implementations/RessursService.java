@@ -69,8 +69,11 @@ public class RessursService implements IRessursService {
         return Ressurs.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
+                .navident(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
+                .personident(ressurs.getPersonIdent())
                 .ressurstype(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
+                .sektor(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
                 .sluttdato(dvhRessursInterface.getSluttdatoForPersonident(ressurs.getPersonIdent()))
                 .build();
     }

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,11 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Component
 @RequiredArgsConstructor
-public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet> {
+public class OrganiseringResolver implements GraphQLResolver<OrgEnhet> {
 
     private final DvhRepository dvhRepository;
 
-    public DataFetcherResult<List<Organisering>> organiseringer(Organisasjonsenhet orgEnhet, OrganiseringRetning retning) {
+    public DataFetcherResult<List<Organisering>> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
         val dvhOrganiseringer = dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn()).stream()
                 .map(o -> convert(o, orgEnhet))
                 .filter(o -> retning == null || o.getRetning() == retning)
@@ -32,7 +32,7 @@ public class OrganiseringResolver implements GraphQLResolver<Organisasjonsenhet>
                 .build();
     }
 
-    private Organisering convert(DvhOrganisering organisering, Organisasjonsenhet orgEnhet) {
+    private Organisering convert(DvhOrganisering organisering, OrgEnhet orgEnhet) {
         val retning = organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) && organisering.getOrgNivOver().equals(orgEnhet.getOrgNiv()) && organisering.getNavnOver().equals(orgEnhet.getNavn())
                 ? OrganiseringRetning.under : OrganiseringRetning.over;
 

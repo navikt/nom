@@ -38,11 +38,15 @@ public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
         return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getEmail);
     }
 
-    public CompletableFuture<DataFetcherResult<String>> visningsNavn(Ressurs ressurs, DataFetchingEnvironment env) {
+    public CompletableFuture<DataFetcherResult<String>> visningsnavn(Ressurs ressurs, DataFetchingEnvironment env) {
         if(sendDummydata){
             return respondWithDummydata("dummy-visningsnavn-i-dev" + ressurs.getNavIdent());
         }
         return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getDisplayName);
+    }
+
+    public CompletableFuture<DataFetcherResult<String>> visningsNavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        return visningsnavn(ressurs, env);
     }
 
     public CompletableFuture<DataFetcherResult<String>> fornavn(Ressurs ressurs, DataFetchingEnvironment env) {

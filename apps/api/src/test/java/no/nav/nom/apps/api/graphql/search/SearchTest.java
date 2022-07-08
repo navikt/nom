@@ -5,8 +5,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -54,8 +52,8 @@ public class SearchTest extends GraphQLTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("search/scenario2.graphql", false);
-        val searchResults = response.getList("$.data.search", Organisasjonsenhet.class);
-        val agressoIds = searchResults.stream().map(Organisasjonsenhet::getAgressoId).collect(Collectors.toList());
+        val searchResults = response.getList("$.data.search", OrgEnhet.class);
+        val agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
         assertThat(searchResults.size(), greaterThan(1));
         assertThat(agressoIds, hasItem("testId1"));
@@ -68,8 +66,8 @@ public class SearchTest extends GraphQLTestBase {
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("search/scenario3.graphql", false);
-        val searchResults = response.getList("$.data.search", Organisasjonsenhet.class);
-        val enhetsnavn = searchResults.stream().map(Organisasjonsenhet::getNavn).collect(Collectors.toList());
+        val searchResults = response.getList("$.data.search", OrgEnhet.class);
+        val enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
         assertThat(enhetsnavn, hasItem("testNavn"));
     }
@@ -93,7 +91,7 @@ public class SearchTest extends GraphQLTestBase {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
-        assertThat(resultTypes.getOrDefault("Organisasjonsenhet", 0L), greaterThan(0L));
+        assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
     }
 }
 

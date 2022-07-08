@@ -7,25 +7,28 @@ import lombok.Value;
 @Value
 @Builder
 @AllArgsConstructor
-public class OrganisasjonsenhetResult {
+public class OrgEnhetResult {
 
     ResultCode code;
     String id;
     String orgNiv;
-    Organisasjonsenhet organisasjonsenhet;
+    OrgEnhet organisasjonsenhet;
+    OrgEnhet orgEnhet;
 
-    public OrganisasjonsenhetResult(Organisasjonsenhet organisasjonsenhet) {
+    public OrgEnhetResult(OrgEnhet orgEnhet) {
         this.code = ResultCode.OK;
-        this.id = organisasjonsenhet.getAgressoId();
-        this.orgNiv = organisasjonsenhet.getOrgNiv();
-        this.organisasjonsenhet = organisasjonsenhet;
+        this.id = orgEnhet.getAgressoId();
+        this.orgNiv = orgEnhet.getOrgNiv();
+        this.organisasjonsenhet = orgEnhet;
+        this.orgEnhet = orgEnhet;
     }
 
-    public OrganisasjonsenhetResult(String id, String orgNiv) {
+    public OrgEnhetResult(String id, String orgNiv) {
         this.code = ResultCode.NOT_FOUND;
         this.id = id;
         this.orgNiv = orgNiv;
         this.organisasjonsenhet = null;
+        this.orgEnhet = null;
     }
 
 }

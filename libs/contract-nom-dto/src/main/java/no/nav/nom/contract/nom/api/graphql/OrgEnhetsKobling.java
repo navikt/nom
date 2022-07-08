@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Builder
 @Value
-public class OrganisasjonsenhetsKobling {
+public class OrgEnhetsKobling {
     Ressurs ressurs;
     LocalDate gyldigFom;
     LocalDate gyldigTom;

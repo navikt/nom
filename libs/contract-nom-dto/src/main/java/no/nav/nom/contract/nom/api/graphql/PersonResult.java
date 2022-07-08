@@ -10,7 +10,10 @@ import java.util.UUID;
 public class PersonResult {
 
     String personIdent;
+    String personident;
     UUID nomId;
     String navIdent;
-    Person person;
+    String navident;
+    FolkeregisterPerson person;
+    FolkeregisterPerson folkeregisterPerson;
 }

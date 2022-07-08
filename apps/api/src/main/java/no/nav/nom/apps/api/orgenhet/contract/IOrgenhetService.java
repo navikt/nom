@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.contract;
 
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,5 +14,5 @@ public interface IOrgenhetService {
     List<IOrgenhet> matchByAgressoId(String agressoId);
     List<IOrgenhet> matchByNavn(String navn);
 
-    Organisasjonsenhet convertToGraphQlResponse(IOrgenhet orgenhet);
+    OrgEnhet convertToGraphQlResponse(IOrgenhet orgenhet);
 }
