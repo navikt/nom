@@ -39,10 +39,11 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
 
   const underEnheter: OrgEnhetFelter[] = underEnheterTmp.map((it) => {
     return {
+      id: it.organisasjonsenhet.id,
       enhetNavn: it.organisasjonsenhet.navn,
       enhetNr: it.organisasjonsenhet.agressoId,
       enhetNiva: it.organisasjonsenhet.orgNiv,
-      enhetType: it.organisasjonsenhet.type?.navn || nullText,
+      enhetType: it.organisasjonsenhet.agressoOrgenhetType || nullText,
       gyldigFom: it.organisasjonsenhet.gyldigFom,
       gyldigTom: it.organisasjonsenhet.gyldigTom || nullText
     };
@@ -92,10 +93,11 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
 
   return {
     data: {
+      id: organisasjonsenhet.id,
       enhetNavn: organisasjonsenhet.navn,
       enhetNr: organisasjonsenhet.agressoId,
       enhetNiva: organisasjonsenhet.orgNiv,
-      enhetType: organisasjonsenhet.type?.navn || nullText,
+      enhetType: organisasjonsenhet.agressoOrgenhetType || nullText,
       gyldigFom: organisasjonsenhet.gyldigFom,
       gyldigTom: organisasjonsenhet.gyldigTom || nullText
     },
@@ -104,10 +106,11 @@ function transformResult(graphQlData: any): OrgEnhetData | undefined {
         enhetHierarkiListe.length !== 0
           ? enhetHierarkiListe.map((it: any) => {
               return {
+                id: it.id,
                 enhetNavn: it.navn,
                 enhetNr: it.agressoId,
                 enhetNiva: it.orgNiv,
-                enhetType: it.type?.navn || nullText,
+                enhetType: it.agressoOrgenhetType|| nullText,
               };
             })
           : [],
@@ -188,6 +191,8 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
   const infoVisning = (
     <Contentbox label="Info">
       <LabeledItemsgrid>
+        <label>id</label>
+        <div>{props.orgenhetData.data.id}</div>
         <label>Enhet agresso-nr</label>
         <div>{props.orgenhetData.data.enhetNr}</div>
         <label>Enhetsnavn: </label>
@@ -281,6 +286,7 @@ function LocalTable(props: { orgenhetData?: OrgEnhetData }): JSX.Element {
             return { key: it.enhetNr, ...it };
           })}
           columns={[
+              { id: "id", label: "Id", type: "string"},
             { id: "enhetNr", label: "Nr", type: "string" },
             {
               id: "enhetNavn",

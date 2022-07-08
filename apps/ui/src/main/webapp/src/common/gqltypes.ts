@@ -35,6 +35,8 @@ export interface GqlNavn {
 }
 
 export interface GqlOrganisasjonsenhet {
+  id: string;
+  agressoOrgenhetType: string;
   agressoId: string;
   orgNiv: string;
   navn: string;

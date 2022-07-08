@@ -2,6 +2,7 @@ app:
   appName: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
+    enhetPath: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
     aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
   pdl:
     tema: GEN

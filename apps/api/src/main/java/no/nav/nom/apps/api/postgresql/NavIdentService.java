@@ -26,5 +26,4 @@ public class NavIdentService {
         }while(ressursHendelseRepository.navIdentSeqIsPresent(seq).isPresent());
         return navIdentBokstav.toUpperCase() + seq;
     }
-
 }

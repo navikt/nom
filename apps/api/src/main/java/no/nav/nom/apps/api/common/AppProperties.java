@@ -25,6 +25,7 @@ public class AppProperties {
     @Value
     public static class Proxy {
         String baseUrl;
+        String enhetPath;
         String aadClientId;
     }
 

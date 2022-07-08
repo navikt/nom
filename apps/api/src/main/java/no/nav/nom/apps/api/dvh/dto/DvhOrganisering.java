@@ -39,6 +39,7 @@ public class DvhOrganisering {
     public DvhOrganisering(JsonNode node) {
         agressoIdOver = node.get("ORGNODE_KODE_OVER").asText();
         orgNivOver = node.get("ORGNODE_NIVA_OVER").asText();
+        navnOver = node.get("ORGNODE_NAVN_OVER").asText();
         agressoIdUnder = node.get("ORGNODE_KODE").asText();
         orgNivUnder = node.get("ORGNODE_NIVA").asText();
         navnUnder = node.get("ORGNODE_NAVN").asText();
@@ -53,9 +54,4 @@ public class DvhOrganisering {
         return (Objects.equals(agressoId, agressoIdOver) && Objects.equals(orgNiv, orgNivOver) && Objects.equals(navn, navnOver)) ||
                 (Objects.equals(agressoId, agressoIdUnder) && Objects.equals(orgNiv, orgNivUnder) && Objects.equals(navn, navnUnder));
     }
-
-    public void setNavnOver(String navnOver){
-        this.navnOver = navnOver;
-    }
-
 }

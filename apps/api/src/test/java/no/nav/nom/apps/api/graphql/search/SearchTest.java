@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.graphql.search;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.DvhOrgenhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -49,33 +51,44 @@ public class SearchTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        dvhRestConsumer.loadFromDvh();
+        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
+        val mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
+
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
 
         val response = postForResource("search/scenario2.graphql", false);
         val searchResults = response.getList("$.data.search", OrgEnhet.class);
         val agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
         assertThat(searchResults.size(), greaterThan(1));
-        assertThat(agressoIds, hasItem("testId1"));
+        assertThat(agressoIds, hasItem(mockedEnhet.getORGENHET_KODE()));
+        assertThat(agressoIds, hasItem(mockedEnhet2.getORGENHET_KODE()));
+
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
+        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("search/scenario3.graphql", false);
         val searchResults = response.getList("$.data.search", OrgEnhet.class);
         val enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
-        assertThat(enhetsnavn, hasItem("testNavn"));
+        assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
+        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+
         createRessursHendelse("1");
         createRessursHendelse("2");
 

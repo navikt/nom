@@ -7,18 +7,24 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Service
 @RequiredArgsConstructor
-public class DvhClient {
+public class NomProxyRestClient {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
 
-    private JsonNode dvhExchange(String urlPath) {
+    public JsonNode getEnheterResponse(){
+        return dvhExchange(appProperties.getProxy().getEnhetPath()).get("NOM_HRORG_ORGENHETResponse").get("NOM_HRORG_ORGENHETResult");
+    }
+
+    private JsonNode dvhExchange(String path) {
         val headers = new HttpHeaders();
         headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
-        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + path, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 }
