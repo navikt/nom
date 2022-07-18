@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
@@ -51,6 +52,8 @@ class RnRNeedTest {
 
     @MockBean    private PdlService pdlService;
     @MockBean private IdentService identService;
+
+    @MockBean private NavidRepository navidRepository;
 
     @BeforeEach
     public void emptyNeedsRead() {
@@ -444,6 +447,8 @@ class RnRNeedTest {
                 .eksisterendeId(null)
                 .responsProdusentVisited(true)
                 .build();
+
+        Mockito.when(navidRepository.getNextval()).thenReturn(123321L);
 
         rnrTestNeedProducer.publish(need);
 
