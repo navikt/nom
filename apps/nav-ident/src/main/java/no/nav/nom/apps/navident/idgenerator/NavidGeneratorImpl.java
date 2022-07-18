@@ -1,16 +1,16 @@
 package no.nav.nom.apps.navident.idgenerator;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Random;
-
 @Component
+@RequiredArgsConstructor
 public class NavidGeneratorImpl implements NavidGenerator {
-    Random rng = new Random();
+
+    private final NavidRepository navidRepository;
 
     @Override
     public String generate(char prefix) {
-        // TODO: implement me
-        return prefix + String.valueOf(rng.nextInt(120000, 999999));
+        return prefix + String.valueOf(navidRepository.getNextval());
     }
 }
