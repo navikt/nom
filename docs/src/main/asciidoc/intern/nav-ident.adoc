@@ -33,7 +33,6 @@ Utledes via eventsourcing?
     personid: <string (fnr/d-nr/annen nøkkel)> - den aktive personid'en for navidenten
     allePersonider: [
         personid: <string (fnr/d-nr/annen nøkkel)>
-        type: PDL | MANUELL
     ]
     identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
 
@@ -51,7 +50,6 @@ Eventsourcing metadata rundt bestillinger (opprett, slett)
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
-        personidtype: PDL | MANUELL
         identType: ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT
     }
 }
