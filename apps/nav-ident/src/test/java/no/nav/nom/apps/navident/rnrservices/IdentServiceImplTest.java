@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
@@ -19,14 +20,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
-
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
-import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -42,10 +40,12 @@ class IdentServiceImplTest {
     @MockBean  private DataSource dataSource;
     @MockBean private PdlService pdlService;
     @MockBean private NavidGenerator navidGenerator;
+    @MockBean private EventSourceService eventSourceService;
     @Autowired private DomainTestData domainTestData;
 
     @Autowired private Map<String, Navident> navidenter;
     @Autowired private IdentService identService;
+
 
     @BeforeEach
     public void resetNavidenterDomainData() { domainTestData.prepNavidenter(navidenter); }
