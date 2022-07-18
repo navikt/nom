@@ -3,7 +3,6 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.PersonidType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,8 +124,6 @@ class EventSourceServiceTest {
                                 .identType(IdentType.STANDARD)
                                 .navident(navid)
                                 .personid(personid)
-                                .personidtype(PersonidType.PDL)
                                 .build()
                 ).build();}
-
 }

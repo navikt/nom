@@ -31,9 +31,7 @@ Utledes via eventsourcing?
 {
     navident: <string (a123456)>
     personid: <string (fnr/d-nr/annen nøkkel)> - den aktive personid'en for navidenten
-    allePersonider: [
-        personid: <string (fnr/d-nr/annen nøkkel)>
-    ]
+    allePersonider: [ string (fnr/d-nr/annen nøkkel) ]
     identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
 
 }
