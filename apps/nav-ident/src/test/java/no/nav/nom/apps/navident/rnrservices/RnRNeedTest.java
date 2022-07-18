@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
@@ -50,8 +51,9 @@ class RnRNeedTest {
     @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;
     @Autowired private DomainTestData domainTestData;
 
-    @MockBean    private PdlService pdlService;
+    @MockBean private PdlService pdlService;
     @MockBean private IdentService identService;
+    @MockBean private EventSourceService eventSourceService;
 
     @MockBean private NavidRepository navidRepository;
 
