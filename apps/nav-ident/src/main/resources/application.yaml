@@ -3,6 +3,10 @@ app:
   kafka:
     topic.eventsource.name: org.nav-ident
     topic.rnr.name: org.nav-ident-rnr
+  pdl:
+    tema: GEN
+    baseUrl: ${PDL_BASEURL}
+    aadClientId: api://${PDL_CLIENT_ID}/.default
 
 nom:
   libs:
@@ -12,6 +16,12 @@ nom:
           load-properties: false
         app:
           load-properties: true
+
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    clientId: ${AZURE_APP_CLIENT_ID}
+    jwk: ${AZURE_APP_JWK}
 
 management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mappings
 
@@ -59,6 +69,10 @@ spring:
 
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+          accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
       client:
         registration:
           aad:
