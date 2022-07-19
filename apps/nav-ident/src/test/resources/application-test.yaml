@@ -29,6 +29,11 @@ app:
     topic.eventsource.name: ${test.topic}
     topic.rnr.name: ${test.rnr-topic}
 
+  pdl:
+    tema: GEN
+    baseUrl: ${PDL_BASEURL}
+    aadClientId: api://${PDL_CLIENT_ID}/.default
+
 nom:
   libs:
     utils:
