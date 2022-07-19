@@ -510,20 +510,20 @@ class RnRNeedTest {
     @Test
     public void responsProdusent_Standard_KnytningFinnesIkke() {
         Need need = Need.builder()
-                .personid("01019912345")
+                .personid("02019912345")
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
-                .pdlPersonider(Arrays.asList("01019912345"))
-                .pdlGjeldendePersonid("01019912345")
+                .pdlPersonider(Arrays.asList("02019912345"))
+                .pdlGjeldendePersonid("02019912345")
                 .idGeneratorVisited(true)
                 .generertId("C000001")
                 .build();
 
         rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("02019912345"));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("02019912345");
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
