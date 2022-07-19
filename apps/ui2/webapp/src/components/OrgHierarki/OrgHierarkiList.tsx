@@ -53,18 +53,21 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         )
       : []
   const sortedKoblinger = currentEnhet
-    ? [...currentEnhet.koblinger].sort((a, b) =>
-        sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')
-      )
+    ? [...currentEnhet.koblinger]
+        .sort((a, b) =>
+          sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')
+        )
+        .filter(
+          (v, i, a) =>
+            a.findIndex((v2) => v2.ressurs.navIdent === v.ressurs.navIdent) ===
+            i
+        )
     : []
 
-  // const sortedKoblingerFiltered = Array.from(new Set(sortedKoblinger))
-
-  const sortedKoblingerFiltered = sortedKoblinger.filter(
-    (el, i, a) => i === a.indexOf(el)
-  )
-
-  console.log({ sortedKoblingerFiltered })
+  // const sortedKoblingerFiltered = sortedKoblinger.filter(
+  //   (v, i, a) =>
+  //     a.findIndex((v2) => v2.ressurs.navIdent === v.ressurs.navIdent) === i
+  // )
 
   const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
     if (!leder) return 'Fant ikke leder'
@@ -226,7 +229,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             columnGap: '10px',
           })}
         >
-          {sortedKoblingerFiltered.map((k) => (
+          {sortedKoblinger.map((k) => (
             <Link
               to={
                 '/org/' +
