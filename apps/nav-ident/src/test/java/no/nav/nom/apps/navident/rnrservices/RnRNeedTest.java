@@ -560,6 +560,7 @@ class RnRNeedTest {
 
     @Test
     public void responsProdusent_Standard_KnytningFinnes() {
+        log.info("responsProdusent_Standard_KnytningFinnes()");
         Need need = Need.builder()
                 .personid(KNYTNING_FINNES_1_PersonId)
                 .identType(IdentType.STANDARD)
