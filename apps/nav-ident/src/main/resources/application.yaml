@@ -8,6 +8,10 @@ app:
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
 
+logging:
+  level:
+    no.nav.nom: DEBUG
+
 nom:
   libs:
     utils:
