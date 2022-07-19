@@ -58,7 +58,13 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       )
     : []
 
-  const sortedKoblingerFiltered = Array.from(new Set(sortedKoblinger))
+  // const sortedKoblingerFiltered = Array.from(new Set(sortedKoblinger))
+
+  const sortedKoblingerFiltered = sortedKoblinger.filter(
+    (el, i, a) => i === a.indexOf(el)
+  )
+
+  console.log({ sortedKoblingerFiltered })
 
   const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
     if (!leder) return 'Fant ikke leder'
