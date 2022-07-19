@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 public class Need implements Cloneable {
+
+    String uuid;
+
     String personid;
     IdentType identType;
     char idPrefix;

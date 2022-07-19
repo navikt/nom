@@ -22,35 +22,35 @@ public class RnRTestListener {
         log.debug("Need consumed from rnr topic: %s".formatted(need));
     }
 
-    public boolean personOppslagVisited(String personid) {
-        return needsRead.stream().anyMatch(n -> n.isPersonOppslagVisited()  && n.getPersonid().equals(personid));
+    public boolean personOppslagVisited(String uuid) {
+        return needsRead.stream().anyMatch(n -> n.isPersonOppslagVisited()  && n.getUuid().equals(uuid));
     }
 
-    public Need getNeed_personOppslagVisited(String personid) {
-        return needsRead.stream().filter(n -> n.isPersonOppslagVisited()  && n.getPersonid().equals(personid)).findFirst().get();
+    public Need getNeed_personOppslagVisited(String uuid) {
+        return needsRead.stream().filter(n -> n.isPersonOppslagVisited()  && n.getUuid().equals(uuid)).findFirst().get();
     }
 
-    public boolean pdlOppslagVisited(String personid) {
-        return needsRead.stream().anyMatch(n -> n.isPdlOppslagVisited()  && n.getPersonid().equals(personid));
+    public boolean pdlOppslagVisited(String uuid) {
+        return needsRead.stream().anyMatch(n -> n.isPdlOppslagVisited()  && n.getUuid().equals(uuid));
     }
 
-    public Need getNeed_pdlOppslagVisited(String personid) {
-        return needsRead.stream().filter(n -> n.isPdlOppslagVisited()  && n.getPersonid().equals(personid)).findFirst().get();
+    public Need getNeed_pdlOppslagVisited(String uuid) {
+        return needsRead.stream().filter(n -> n.isPdlOppslagVisited()  && n.getUuid().equals(uuid)).findFirst().get();
     }
 
-    public boolean idGeneratorVisited(String personid) {
-        return needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited()  && n.getPersonid().equals(personid));
+    public boolean idGeneratorVisited(String uuid) {
+        return needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited()  && n.getUuid().equals(uuid));
     }
 
-    public Need getNeed_idGeneratorVisited(String personid) {
-        return needsRead.stream().filter(n -> n.isIdGeneratorVisited()  && n.getPersonid().equals(personid)).findFirst().get();
+    public Need getNeed_idGeneratorVisited(String uuid) {
+        return needsRead.stream().filter(n -> n.isIdGeneratorVisited()  && n.getUuid().equals(uuid)).findFirst().get();
     }
 
-    public boolean responsProdusentVisited(String personid) {
-        return needsRead.stream().anyMatch(n -> n.isResponsProdusentVisited()  && n.getPersonid().equals(personid));
+    public boolean responsProdusentVisited(String uuid) {
+        return needsRead.stream().anyMatch(n -> n.isResponsProdusentVisited()  && n.getUuid().equals(uuid));
     }
 
-    public Need getNeed_responsProdusentVisited(String personid) {
-        return needsRead.stream().filter(n -> n.isResponsProdusentVisited() && n.getPersonid().equals(personid) ).findFirst().get();
+    public Need getNeed_responsProdusentVisited(String uuid) {
+        return needsRead.stream().filter(n -> n.isResponsProdusentVisited() && n.getUuid().equals(uuid) ).findFirst().get();
     }
 }

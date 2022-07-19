@@ -22,14 +22,14 @@ public class IdentServiceImpl implements IdentService {
     @Autowired NeedProducer needProducer;
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
-        needProducer.produceNeed(idPrefix, personid, type);
+        String uuid = needProducer.produceNeed(idPrefix, personid, type);
         CountDownLatch latch = new CountDownLatch(1);
-        requests.put(personid, latch);
+        requests.put(uuid, latch);
 
         try {
             if (latch.await(1, TimeUnit.SECONDS)) {
-                if (responses.containsKey(personid)) {
-                    Respons respons = responses.get(personid);
+                if (responses.containsKey(uuid)) {
+                    Respons respons = responses.get(uuid);
                     responses.remove(respons);
                     log.debug("Returnerer respons for personid %s : %s".formatted(mask(personid), respons));
                     return respons;
@@ -71,10 +71,10 @@ public class IdentServiceImpl implements IdentService {
         if (!need.isResponsProdusentVisited()) return;
 
         Respons respons = need.getRespons();
-        responses.put(need.getPersonid(), respons);
+        responses.put(need.getUuid(), respons);
 
         CountDownLatch latch =
-                requests.get(need.getPersonid());
+                requests.get(need.getUuid());
 
         if (latch != null) latch.countDown();
     }

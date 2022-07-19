@@ -8,6 +8,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -18,13 +19,15 @@ public class NeedProducer {
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
 
 
-    public void produceNeed(char idPrefix, String personid, IdentType type) {
-        produceNeed(idPrefix, personid, type, LocalDate.now());
-
+    public String produceNeed(char idPrefix, String personid, IdentType type) {
+        return produceNeed(idPrefix, personid, type, LocalDate.now());
     }
 
-    public void produceNeed(char idPrefix, String personid, IdentType type, LocalDate fraDato) {
+    public String produceNeed(char idPrefix, String personid, IdentType type, LocalDate fraDato) {
+        String uuid = UUID.randomUUID().toString();
+
         Need need = Need.builder()
+                .uuid(uuid)
                 .idPrefix(idPrefix)
                 .personid(personid)
                 .identType(type)
@@ -32,5 +35,6 @@ public class NeedProducer {
         kafkaTemplate.send(topic, need);
 
         log.debug("Publisert Need melding: %s".formatted(need.maskedToString()));
+        return uuid;
     }
 }
