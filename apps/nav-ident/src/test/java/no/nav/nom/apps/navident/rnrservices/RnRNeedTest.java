@@ -1,6 +1,8 @@
 package no.nav.nom.apps.navident.rnrservices;
 
+import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
@@ -10,6 +12,7 @@ import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestNeedProducer;
+import no.nav.nom.libs.test.RsaStub;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,17 +38,12 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles({"test", "log-console"})
-@SpringBootTest
 @Slf4j
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class RnRNeedTest {
+class RnRNeedTest extends EmbeddedKafkaTestBase {
 
     @Autowired private Map<String, Navident> navidenter;
 
     @Autowired    private NeedProducer needProducer;
-    @MockBean    private DataSource dataSource;
     @Value("${test.rnr-topic}")    private String topic;
     @Autowired    private RnRTestListener rnrTestListener;
     @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;

@@ -1,6 +1,6 @@
 package no.nav.nom.apps.navident.rnrservices;
 
-import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
@@ -12,14 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -28,16 +23,10 @@ import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles({"test", "log-console"})
-@SpringBootTest
-@Slf4j
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class IdentServiceImplTest {
+class IdentServiceImplTest extends EmbeddedKafkaTestBase {
 
     @Value("${test.rnr-topic}")  private String topic;
 
-    @MockBean  private DataSource dataSource;
     @MockBean private PdlService pdlService;
     @MockBean private NavidGenerator navidGenerator;
     @MockBean private EventSourceService eventSourceService;
