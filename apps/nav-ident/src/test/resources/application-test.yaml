@@ -20,6 +20,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+#          issuer-uri: http://localhost:${wiremock.server.port}/aad
+          accepted-audience: test
+
 test:
   topic: embedded-test-topic
   rnr-topic: embedded-rnr-test-topic

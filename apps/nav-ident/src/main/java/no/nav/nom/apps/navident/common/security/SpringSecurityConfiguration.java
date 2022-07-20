@@ -46,9 +46,9 @@ public class SpringSecurityConfiguration {
                 .authorizeRequests()
                     .anyRequest().authenticated()
                 .and().exceptionHandling()
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                .and().oauth2ResourceServer()
-                    .jwt().decoder(jwtDecoder());
+                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+//                .and().oauth2ResourceServer()
+//                    .jwt().decoder(jwtDecoder());
         return http.build();
     }
 
