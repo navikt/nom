@@ -59,5 +59,5 @@ spec:
     inbound:
       rules:
         - application: ida
-          namespace: default
+          namespace: traktor
           cluster: prod-fss
