@@ -55,3 +55,9 @@ spec:
       enabled: true
   kafka:
     pool: nav-dev
+  accessPolicy:
+    inbound:
+      rules:
+        - application: ida
+          namespace: default
+          cluster: prod-fss

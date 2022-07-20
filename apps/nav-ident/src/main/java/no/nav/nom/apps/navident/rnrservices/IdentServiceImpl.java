@@ -30,7 +30,7 @@ public class IdentServiceImpl implements IdentService {
             if (latch.await(1, TimeUnit.SECONDS)) {
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
-                    responses.remove(respons);
+                    responses.remove(uuid);
                     log.debug("Returnerer respons for personid %s : %s".formatted(mask(personid), respons));
                     return respons;
                 } else {
