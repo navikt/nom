@@ -16,7 +16,7 @@ public class EventSourceService {
     private final Map<String, Navident> navidenter;
 
     @KafkaListener(
-            id = "${eventSourceListenerName}",
+            id = "${app.kafka.eventSourceListenerName}",
             topics = "${app.kafka.topic.eventsource.name}")
     public void listen(SourceEvent event) {
         log.debug(event.maskedToString());
