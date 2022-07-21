@@ -5,6 +5,7 @@ import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
+import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
@@ -27,6 +28,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
 
     @Value("${test.rnr-topic}")  private String topic;
 
+    @MockBean private SourceEventRepository sourceEventRepository;
     @MockBean private PdlService pdlService;
     @MockBean private NavidGenerator navidGenerator;
     @MockBean private EventSourceService eventSourceService;

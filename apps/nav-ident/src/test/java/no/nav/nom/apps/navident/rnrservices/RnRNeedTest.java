@@ -1,32 +1,27 @@
 package no.nav.nom.apps.navident.rnrservices;
 
-import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.eventsource.EventSourceProducerTest;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
+import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestNeedProducer;
-import no.nav.nom.libs.test.RsaStub;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +30,20 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_PersonId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_DUPLIKAT_NavId_4_NavId_2;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_1;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.ROBOT_1_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.ROBOT_1_PersonId;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class RnRNeedTest extends EmbeddedKafkaTestBase {
@@ -52,8 +59,10 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
     @MockBean private PdlService pdlService;
     @MockBean private IdentService identService;
     @MockBean private EventSourceService eventSourceService;
+    @MockBean private EventSourceProducerTest eventSourceProducer;
 
     @MockBean private NavidRepository navidRepository;
+    @MockBean private SourceEventRepository sourceEventRepository;
 
     @BeforeEach
     public void emptyNeedsRead() {
