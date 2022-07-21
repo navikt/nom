@@ -38,6 +38,11 @@ spring:
         provider:
           aad:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+
+  redis:
+    host: localhost
+    port: 6370
+
 test:
   topic: embedded-test-topic
   rnr-topic: embedded-rnr-test-topic
@@ -53,6 +58,9 @@ app:
     tema: GEN
     baseUrl: http://localhost:${wiremock.server.port}
     aadClientId: test
+
+  redis:
+    clientTokenCacheName: needClientTokenCache
 
 authentication:
   aad:

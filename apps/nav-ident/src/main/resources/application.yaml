@@ -9,6 +9,8 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
+  redis:
+    clientTokenCacheName: needClientTokenCache
 
 logging:
   level:
@@ -72,6 +74,10 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
       properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
+
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
 
   security:
     oauth2:

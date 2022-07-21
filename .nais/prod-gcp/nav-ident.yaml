@@ -13,6 +13,8 @@ spec:
       value: prod-fss.pdl.pdl-api
     - name: PDL_BASE_URL
       value: https://pdl-api.prod-fss-pub.nais.io
+    - name: REDIS_HOST
+      value: nav-ident-redis.org.svc.cluster.local
   image: {{image}}
   port: 8080
   ingresses:
