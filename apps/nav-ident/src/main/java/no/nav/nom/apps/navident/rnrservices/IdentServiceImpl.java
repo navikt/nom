@@ -65,7 +65,7 @@ public class IdentServiceImpl implements IdentService {
 
 
     @KafkaListener(
-            id = "IdentService",
+            id = "${app.kafka.identServiceListenerName}",
             topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
         if (!need.isResponsProdusentVisited()) return;

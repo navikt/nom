@@ -27,6 +27,17 @@ spring:
           issuer-uri: http://localhost:${wiremock.server.port}/aad
           accepted-audience: test
 
+      client:
+        registration:
+          pdlClient:
+            provider: aad
+            client-id: test
+            client-secret: test
+            authorization-grant-type: JWT_BEARER
+            scope: ${app.pdl.aadClientId}
+        provider:
+          aad:
+            issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
 test:
   topic: embedded-test-topic
   rnr-topic: embedded-rnr-test-topic
@@ -35,11 +46,12 @@ app:
   kafka:
     topic.eventsource.name: ${test.topic}
     topic.rnr.name: ${test.rnr-topic}
+    identServiceListenerName: IdentService # Ønsker unik consumer group per pod for å lese alle meldinger
 
   pdl:
     tema: GEN
-    baseUrl: ${PDL_BASEURL}
-    aadClientId: api://${PDL_CLIENT_ID}/.default
+    baseUrl: http://localhost:${wiremock.server.port}
+    aadClientId: test
 
 authentication:
   aad:
