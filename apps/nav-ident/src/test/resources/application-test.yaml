@@ -46,7 +46,8 @@ app:
   kafka:
     topic.eventsource.name: ${test.topic}
     topic.rnr.name: ${test.rnr-topic}
-    identServiceListenerName: IdentService # Ønsker unik consumer group per pod for å lese alle meldinger
+    identServiceListenerName: IdentService
+    eventSourceListenerName: EventSourceListener
 
   pdl:
     tema: GEN
