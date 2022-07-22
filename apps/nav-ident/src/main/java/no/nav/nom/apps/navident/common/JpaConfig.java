@@ -20,7 +20,7 @@ public class JpaConfig {
         return () -> {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-                return Optional.of(auth.getToken().getClaim("sub").toString());
+                return Optional.of(auth.getToken().getClaim("name").toString());
             } else {
                 return Optional.of("SYSTEMBRUKER");
             }

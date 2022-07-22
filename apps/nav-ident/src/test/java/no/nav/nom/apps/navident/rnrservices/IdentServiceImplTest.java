@@ -5,6 +5,7 @@ import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
+import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +34,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
     @MockBean private PdlService pdlService;
     @MockBean private NavidGenerator navidGenerator;
     @MockBean private EventSourceService eventSourceService;
+    @MockBean private KafkaTemplate<String, SourceEvent> producer;
     @Autowired private DomainTestData domainTestData;
 
     @Autowired private Map<String, Navident> navidenter;

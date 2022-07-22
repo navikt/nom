@@ -11,7 +11,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +47,7 @@ public class EventSourceProducer {
                 Jwt jwt = cache.getJwtFromCacheToken(need.getUuid());
                 if (jwt != null) SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
             } catch (RuntimeException e) {
-                log.error("Coould not set JWT Authentication on SecurityContext", e);
+                log.error("Could not set JWT Authentication on SecurityContext", e);
             }
 
             val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
