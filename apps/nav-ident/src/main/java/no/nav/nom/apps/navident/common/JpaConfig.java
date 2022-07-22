@@ -13,12 +13,13 @@ import java.util.Optional;
 @EnableJpaRepositories(basePackageClasses = {NavidRepository.class})
 @EnableJpaAuditing
 public class JpaConfig {
-
-    @Bean
-    public AuditorAware<String> auditor() {
-        return () -> {
-            // Må oppdateres med info fra tokenet når spring-security er på plass
-            return Optional.of("SYSTEMBRUKER");
-        };
-    }
+//    Bruk default: principal fra SecurityContext‘s Authentication instance
+//    @Bean
+//    public AuditorAware<String> auditor() {
+//        return () -> {
+//            // Må oppdateres med info fra tokenet når spring-security er på plass
+//
+//            return Optional.of("SYSTEMBRUKER");
+//        };
+//    }
 }
