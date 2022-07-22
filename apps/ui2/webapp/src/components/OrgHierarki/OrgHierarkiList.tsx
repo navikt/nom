@@ -272,7 +272,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             <div className={ressursLinkStyles}>
               <Back className='navds-link-panel__chevron' />
               <BodyShort size='medium' className={css({ fontWeight: '600' })}>
-                Se alle ressurser i {currentEnhet?.navn}
+                Se alle ressurser i enheten
               </BodyShort>
             </div>
           </Link>
