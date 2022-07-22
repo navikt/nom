@@ -3,8 +3,8 @@ app:
   kafka:
     topic.eventsource.name: org.nav-ident
     topic.rnr.name: org.nav-ident-rnr
-    identServiceListenerName: IdentService_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (For asynk koble rnr need.respons til selve requesten
-    eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod)
+    identServiceListenerName: IdentService_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (For asynk koble rnr need.respons til selve requesten)
+    eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod), også fra start av stream
   pdl:
     tema: GEN
     baseUrl: ${PDL_BASEURL}

@@ -32,7 +32,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
         requests.put(uuid, latch);
 
         try {
-            if (latch.await(1, TimeUnit.SECONDS)) {
+            if (latch.await(5, TimeUnit.SECONDS)) { // First time after pod restart is usually slow.
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
                     responses.remove(uuid);
