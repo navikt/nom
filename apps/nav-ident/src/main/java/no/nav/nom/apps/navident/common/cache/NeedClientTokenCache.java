@@ -24,12 +24,12 @@ public class NeedClientTokenCache {
         if (token == null)
             log.debug("No token found for need %s in cache".formatted(needUUID));
         else
-            log.debug("Token %s found for need %s in cache".formatted(token.substring(0, Math.min(9, token.length())), needUUID));
+            log.debug("Token %s... found for need %s in cache".formatted(token.substring(0, Math.min(9, token.length())), needUUID));
         return token;
     }
 
     public void putToken(String needUUID, String token) {
-        log.debug("Caching token %s found for need uuid %s".formatted(token.substring(0, Math.min(9, token.length())), needUUID));
+        log.debug("Caching token %s... found for need uuid %s".formatted(token.substring(0, Math.min(9, token.length())), needUUID));
         cacheManager.getCache(cacheName).put(needUUID, token);
     }
 
