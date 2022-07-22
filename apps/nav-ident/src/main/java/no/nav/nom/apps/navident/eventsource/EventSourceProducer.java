@@ -2,11 +2,15 @@ package no.nav.nom.apps.navident.eventsource;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.navident.common.cache.NeedClientTokenCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +21,7 @@ public class EventSourceProducer {
 
     private final KafkaTemplate<String, SourceEvent> producer;
     private final SourceEventRepository sourceEventRepository;
+    private final NeedClientTokenCache cache;
 
     @Value("${app.kafka.topic.eventsource.name}")
     private String eventSourceTopic;
@@ -34,6 +39,15 @@ public class EventSourceProducer {
                                     .personid(need.getPersonid())
                                     .build()
                     ).build();
+
+            // Since this is async from request there is no SecurityContext.Authentication present.
+            // Try to populate this with token from cache
+            String token = cache.getToken(need.getUuid());
+            if (token != null) {
+                Jwt jwt = Jwt.withTokenValue(token).build();
+                SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+            }
+
             val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
 
             producer.send(eventSourceTopic, persistedSourceEvent);
