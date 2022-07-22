@@ -2,13 +2,21 @@ package no.nav.nom.apps.navident.common.cache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -16,6 +24,7 @@ import org.springframework.stereotype.Component;
 @EnableCaching
 public class NeedClientTokenCache {
     private final RedisCacheManager cacheManager;
+    private final OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
 
     @Value("${app.redis.clientTokenCacheName}") private String cacheName;
 
@@ -46,4 +55,19 @@ public class NeedClientTokenCache {
             log.error("SecurityContext Authentication is not of expected JwtAuthenticationToken type. Cannot cache token for need %s".formatted(uuid), e);
         }
     }
+
+
+    public Jwt getJwtFromCacheToken(String needUUID) {
+        String token = getToken(needUUID);
+        if (token != null) {
+            return jwtDecoder(oAuth2ResourceServerProperties).decode(token);
+        } else return null;
+    }
+
+    private JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
+        val jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(properties.getJwt().getIssuerUri());
+        return jwtDecoder;
+    }
+
+
 }

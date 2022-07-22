@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.eventsource;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.cache.NeedClientTokenCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
@@ -10,6 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,8 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventSourceProducer {
-
     private final KafkaTemplate<String, SourceEvent> producer;
     private final SourceEventRepository sourceEventRepository;
     private final NeedClientTokenCache cache;
@@ -42,10 +44,11 @@ public class EventSourceProducer {
 
             // Since this is async from request there is no SecurityContext.Authentication present.
             // Try to populate this with token from cache
-            String token = cache.getToken(need.getUuid());
-            if (token != null) {
-                Jwt jwt = Jwt.withTokenValue(token).build();
-                SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+            try {
+                Jwt jwt = cache.getJwtFromCacheToken(need.getUuid());
+                if (jwt != null) SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+            } catch (RuntimeException e) {
+                log.error("Coould not set JWT Authentication on SecurityContext", e);
             }
 
             val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
