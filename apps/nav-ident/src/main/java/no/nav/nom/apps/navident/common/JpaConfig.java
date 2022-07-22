@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.Optional;
 
@@ -13,13 +15,15 @@ import java.util.Optional;
 @EnableJpaRepositories(basePackageClasses = {NavidRepository.class})
 @EnableJpaAuditing
 public class JpaConfig {
-//    Bruk default: principal fra SecurityContext‘s Authentication instance
-//    @Bean
-//    public AuditorAware<String> auditor() {
-//        return () -> {
-//            // Må oppdateres med info fra tokenet når spring-security er på plass
-//
-//            return Optional.of("SYSTEMBRUKER");
-//        };
-//    }
+    @Bean
+    public AuditorAware<String> auditor() {
+        return () -> {
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+                return Optional.of(auth.getToken().getClaim("sub").toString());
+            } else {
+                return Optional.of("SYSTEMBRUKER");
+            }
+        };
+    }
 }
