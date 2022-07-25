@@ -41,7 +41,12 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
   const refDiv = useRef(null)
   const { currentEnhet, underEnheter, overEnheter, ressurs} = props
 
-  const sortedUnderEnheter = underEnheter.length > 0 ? [...underEnheter].sort((a, b) => sortItems(a.organisasjonsenhet.navn, b.organisasjonsenhet.navn)) : []
+  const sortedUnderEnheter = () => {
+    if (!underEnheter) return []
+
+    if (underEnheter.length > 0 ) return [...underEnheter].sort((a, b) => sortItems(a.organisasjonsenhet.navn, b.organisasjonsenhet.navn)) as Organisering[]
+    else return []
+  } 
   const sortedKoblinger = currentEnhet ? [...currentEnhet.koblinger].sort((a, b) => sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')) : []
 
   const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
@@ -109,9 +114,9 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       )}
 
       {/* Liste av underenheter */}
-      {underEnheter.length > 0 && (
+      {sortedUnderEnheter().length > 0 && (
         <div className={css({ display: "grid", gridTemplateColumns: underEnheter.length > 5 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
-          {sortedUnderEnheter.map((ue: Organisering) => (
+          {sortedUnderEnheter().map((ue: Organisering) => (
             <div key={agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)}>
               <Link to={"/org/" + agressoIdDataToUrl(ue.organisasjonsenhet.agressoId, ue.organisasjonsenhet.orgNiv, ue.organisasjonsenhet.navn)} className={linkStyles}>
                 <CustomLinkPanel2 type={LinkPanelType.LARGE}>
@@ -130,7 +135,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       )}
 
       {/* Liste av ressurser */}
-      {underEnheter.length < 1 && currentEnhet && !ressurs && (
+      {sortedUnderEnheter().length < 1 && currentEnhet && !ressurs && (
           <div className={css({ display: "grid", gridTemplateColumns: currentEnhet.koblinger.length > 5 ? '1fr 1fr' : '1fr', columnGap: '10px'})}>
             {sortedKoblinger.map(k =>
               <Link to={"/org/" + agressoIdDataToUrl(currentEnhet.agressoId, currentEnhet.orgNiv, currentEnhet.navn) + `/${k.ressurs.navIdent}`} className={linkStyles}>
@@ -146,7 +151,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       )}
 
       {/* Visning av en ressurs */}
-      {underEnheter.length < 1 && currentEnhet && ressurs && (
+      {sortedUnderEnheter().length < 1 && currentEnhet && ressurs && (
             <>
               <RessursInfo ressurs={ressurs}/>
 

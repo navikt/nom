@@ -53,8 +53,8 @@ type RessursInfoProps = {
 };
 
 const RessursInfo = (props: RessursInfoProps) => {
-  const { ressurs } = props;
-  console.log(ressurs, "RESSURS");
+  const { ressurs } = props
+  console.log(ressurs, "RESSURS")
 
   return (
     <div className={css({ marginTop: '1rem'})}>
@@ -88,9 +88,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                   ressurs.ledere.map((leder: RessursLeder) => {
                     const l = leder.ressurs;
                     let lederNavn = "Uten navn"
-                    if (l.fornavn && l.etternavn) {
-                      lederNavn = l.fornavn + " " + l.etternavn;
-                    }
+                    if (l.fornavn && l.etternavn) lederNavn = l.fornavn + " " + l.etternavn;
                     const oe = l.koblinger[0].organisasjonsenhet;
                     return <LabelAndText
                         label="Leder: "

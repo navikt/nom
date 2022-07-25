@@ -16,10 +16,10 @@ const SearchBar = (props: { register: any }) => {
                 type="text"
                 label=""
                 hideLabel
-                className={css({width: "500px"})}
+                className={css({width: "100%"})}
                 {...register("searchValue")}
             />
-            <Button variant="tertiary"><img src={searchIcon} /></Button>
+            <Button variant="primary"><img src={searchIcon} /></Button>
         </div>
     )
 }

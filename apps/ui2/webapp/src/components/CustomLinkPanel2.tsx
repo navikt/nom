@@ -47,7 +47,7 @@ const linkPanelKoblingStyles = css(commonCss, {
 const linkPanelRessursStyles = css({
     backgroundColor: "#CCE1FF",
     width: "100%",
-    borderTop: '5px solid #134852'
+    borderTop: '5px solid #236B7D'
 })
 
 type CustomLinkPanel2Props = {

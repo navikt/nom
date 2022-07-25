@@ -1,128 +1,92 @@
 import { css } from '@emotion/css'
 import { useForm } from 'react-hook-form'
-import PageTitle from '../components/PageTitle'
-import { defaultTextStyles } from '../components/Styles'
 import * as Gq from '../api/generated/graphql_generated'
 import { useEffect, useState } from 'react'
-import PersonDetailCard from '../components/Resource/PersonDetailCard'
-import ResourceFormCard from '../components/Resource/ResourceFormCard'
 import { useNavigate } from 'react-router'
 import ContentWrapper from '../components/ContentWrapper'
-import SearchBar from '../components/Resource/SearchBar'
-
-/*const bannerStyles = css({
-  background: '#e5e5e5',
-  width: '200%',
-  display: 'flex',
-  marginTop: '-32px',
-  marginLeft: '-50%',
-  height: '100px',
-  overflow: 'hidden',
-})
-
-const headerStyle = css({
-  marginLeft: '50%',
-})*/
+import ResourceFormPanel from '../components/Resource/ResourceFormPanel'
+import { opprettRessursIkon } from '../components/Images'
+import { BodyShort, Heading, Search } from '@navikt/ds-react'
+import ResourceMetadata from '../components/Resource/ResourceMetadata'
+import ResourceForm from '../components/Resource/ResourceForm'
 
 const CreateResourceView = () => {
-  const { register, handleSubmit } = useForm()
+  const { register, handleSubmit, formState: { errors } } = useForm()
   const navigate = useNavigate()
   const [searchStr, setSearchStr] = useState<string | undefined>()
-  const [requestBody, setRequestBody] = useState<
-    Gq.OpprettRessursRequest2 | undefined
-  >()
-  console.log({ searchStr })
-  const query = Gq.useHentPersonQuery({
-    variables: { personIdent: searchStr || '' },
-    // SKIP er/var bugged. Hvis den starter som true kan den ike blie false
-    // skip: 11 !== searchStr?.length,
-  })
+
+  const query = Gq.useHentPersonQuery({ variables: { personIdent: searchStr || ''}, errorPolicy: 'all'})
+
   const [createResource, createResourceStatus] = Gq.useOpprettRessurs2Mutation()
 
-  //Ikke ferdig - Mangler feilhåndtering og onCompleted funksjon
+  //Ikke ferdig - Mangler feilhåndtering
   const handleCreateResource = (values: Gq.OpprettRessursRequest2) => {
     console.log(values, 'Values')
     if (!searchStr) return
-    setRequestBody({
-      personident: searchStr,
-      fornavn: values.fornavn,
-      etternavn: values.etternavn,
-    })
+    
     createResource({
-      variables: {
-        request: {
-          personident: searchStr,
-          fornavn: values.fornavn,
-          etternavn: values.etternavn,
-        },
+      variables: { request: { personident: searchStr, fornavn: values.fornavn, etternavn: values.etternavn}},
+      onCompleted: (data) => {
+          console.log('Skal redirectes til kvitteringsside...', data)
+          setSearchStr(undefined)
+
+          navigate('/ressurs/' + data.opprettRessurs2?.navident)
       },
-      onCompleted: (data) =>
-        console.log('Skal redirectes til kvitteringsside...', data),
       onError: (error) => console.log('ERROR', error),
     })
   }
 
   useEffect(() => {
+    console.log(errors, "ERROR")
     if (query.data?.person?.navIdent)
       navigate('/ressurs/' + query.data?.person?.navIdent, {
         state: { alreadyExists: true },
       })
   }, [query])
 
+
   return (
     <ContentWrapper>
-      <>
-        {/*<div className={bannerStyles}/>*/}
-
-        <PageTitle title='Opprett ressurs' />
-
-        <div className={css({ marginTop: '5em', width: '100%' })}>
-          <span className={defaultTextStyles}>
-            Fyll inn personnummer/D-nummer så finner vi personen i
-            folkeregisteret
-          </span>
-          <form
-            onSubmit={handleSubmit((form: any) => {
-              setSearchStr(form.searchValue)
-              console.log('dette skjer')
-            })}
-          >
-            <SearchBar register={register} />
-          </form>
-
-          {query.loading && <p>Loading...</p>}
-          {!query.loading && !query.data && query.error && (
-            <p>{query.error.message}</p>
-          )}
-
-          {/* Er ansatt i NAV - redirect til ressursvisning*/}
-          {!query.loading &&
-            query.data &&
-            query.data.person?.navIdent &&
-            history.pushState(
-              { alreadyExists: true },
-              '',
-              '/ressurs/' + query.data.person?.navIdent
-            )}
-
-          {/* Finnes ikke i NAV fra før */}
-          {!query.loading &&
-            query.data &&
-            !query.data.person?.navIdent &&
-            query.data.person?.person && (
-              <>
-                <PersonDetailCard
-                  cardTitle='Opplysninger fra folkeregisteret'
-                  person={query.data.person}
-                />
-                <ResourceFormCard
-                  cardTitle='NOM opplysninger/Andre opplysninger/Opplysninger til NOM '
-                  handleCreate={(values: any) => handleCreateResource(values)}
-                />
-              </>
-            )}
+      <ResourceFormPanel>
+        <div className={css({width: '100%', textAlign: 'center', marginBottom: '2rem'})}>
+          <div><img src={opprettRessursIkon} alt="Opprett ressurs ikon" /></div>
+          <Heading size="large">Opprett ressurs</Heading>
         </div>
-      </>
+
+        {/* Søkefelt */}
+        <form onSubmit={handleSubmit((form: any) => { setSearchStr(form.searchValue)})}>
+          <div>
+            <BodyShort size="medium" className={css({marginBottom: '0.5rem'})}>Fyll inn personnummer/D-nummer så finner vi personen i folkeregisteret</BodyShort>
+            <Search label="Søk etter person" variant='secondary' {...register('searchValue', { required: true, minLength: 11, maxLength: 11})} />
+            
+            {errors.searchValue?.type === ('minLength' || 'maxLength') && 
+                <BodyShort className={css({color: 'red', marginTop: '1rem'})}>Personnummer/D-nummer må være 11 siffer.</BodyShort>
+            }
+
+            {/* Viser feilmelding ved søk */}
+            {!errors.searchValue && !query.loading && query.error && searchStr?.length === 11 && <BodyShort className={css({color: 'red', marginTop: '1rem'})}>{query.error.message}</BodyShort>}  
+          </div>
+        </form>
+        
+        
+        {!query.loading && query.data && query.data.person?.person && !query.data.person?.navIdent && 
+          <>
+            {/* Viser opplysninger fra folkeregisteret */}
+            <ResourceMetadata resource={query.data.person.person as Gq.Person}/>
+
+            {/* Form - Fylles ut for oppretting av ressurs */}
+            <ResourceForm 
+                onSubmit={(values: any) => handleCreateResource(values)}
+                initialValues={{
+                  fornavn: query.data.person.person.navn.fornavn,
+                  mellomnavn: query.data.person.person.navn.mellomnavn || '',
+                  etternavn: query.data.person.person.navn.etternavn
+                }}
+            />
+          </>
+        }
+        
+      </ResourceFormPanel>
     </ContentWrapper>
   )
 }

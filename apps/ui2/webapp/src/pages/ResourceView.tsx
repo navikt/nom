@@ -1,27 +1,23 @@
 import * as Gq from "../api/generated/graphql_generated";
 import { useLocation, useParams } from "react-router";
-import PageTitle from "../components/PageTitle";
-import Card from "../components/Card";
 import { css } from "@emotion/css";
-import TextWithLabel from "../components/TextWithLabel";
-import { Alert } from "@navikt/ds-react";
+import { Alert, BodyShort } from "@navikt/ds-react";
 import ContentWrapper from "../components/ContentWrapper";
+import RessursInfo from "../components/OrgHierarki/RessursInfo";
+import { Back } from "@navikt/ds-icons";
+import { Link } from "react-router-dom";
 
 
-const rowStyles = css({
+const linkStyles = css({
   marginTop: '20px',
   display: "flex",
-  div: {
-    width: '70%'
-  }
+  color: 'black'
 })
 
 const ResourceView = () => {
   const { id } = useParams<any>();
   const location = useLocation() as any
-  const query = Gq.useHentRessursMedNavIdentQuery({
-    variables: { navIdent: id },
-  })
+  const query = Gq.useHentRessursMedNavIdentQuery({variables: { navIdent: id }})
 
 
   const showAlreadyExistsAlert = () => {
@@ -36,42 +32,28 @@ const ResourceView = () => {
 
   return (
     <div>
-      {query.loading && <div>...laster graphql data fra nom-api</div>}
-      {showAlreadyExistsAlert()}
-      {query.error && <p>{query.error.message}</p>}
-      {query.data && (
-        <ContentWrapper>
-          <>
-          <PageTitle
-            title={
-              query.data.ressurs?.visningsNavn ||
-              query.data.ressurs?.fornavn + " " + query.data.ressurs?.etternavn
-            }
-          />
-          <Card>
-            <div >
-              <div className={rowStyles}>
-                <TextWithLabel label="Fornavn" text={query.data.ressurs?.fornavn || ''} />
-                <TextWithLabel label="Etternavn"  text={query.data.ressurs?.etternavn || ''}/>
-                <TextWithLabel label="NAV-ident"  text={query.data.ressurs?.navIdent || ''}/>
+      <ContentWrapper>
+        <>
+          {query.loading && <div>...laster graphql data fra nom-api</div>}
+          {/* {showAlreadyExistsAlert()} */}
+          {query.error && <p>{query.error.message}</p>}
+          
+          {query.data && (
+            <>
+              <RessursInfo ressurs={query.data.ressurs as Gq.Ressurs} />
+            </>
+          )}
+
+          <Link to={"/ressurs/create"}>
+              <div className={linkStyles}>
+                <Back className="navds-link-panel__chevron"/>
+                <BodyShort size="medium" className={css({fontWeight: '600'})}>Gå til oppretting av ressurser</BodyShort>
               </div>
-              <div className={rowStyles}>
-                <TextWithLabel label="Kjønn"  text='-'/> 
-                <TextWithLabel label="E-post"  text={query.data.ressurs?.epost || ''}/>
-                <TextWithLabel label="Telefonnummer"  text='-'/>
-              </div>
-              <div className={rowStyles}>
-                <TextWithLabel label="Org.enhet"  text='-'/> 
-                <TextWithLabel label="Leder"  text='-'/>
-                <TextWithLabel label="Sektor"  text='-'/>
-              </div>
-            </div>
-          </Card>
-          </>
-        </ContentWrapper>
-      )}
+          </Link>
+        </>
+      </ContentWrapper>
     </div>
   );
 };
 
-export default ResourceView;
+export default ResourceView

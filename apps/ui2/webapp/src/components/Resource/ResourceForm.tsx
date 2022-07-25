@@ -1,0 +1,92 @@
+import { Alert, BodyShort, Button, Heading, Radio, RadioGroup, Search, TextField } from "@navikt/ds-react"
+import { useForm } from "react-hook-form"
+import { css } from "@emotion/css"
+import { useState } from "react"
+import ModalResource from "./ModalResource"
+
+const rowStyles = css({
+    display: 'flex',
+    marginTop: '1.2rem'
+})
+
+export type InitialValuesResourceForm = {
+    fornavn: string
+    mellomnavn?: string
+    etternavn: string
+}
+
+type ResourceFormProps = {
+    initialValues: InitialValuesResourceForm
+    onSubmit: (values: any) => void
+}
+
+const ResourceForm = (props: ResourceFormProps) => {
+    const { initialValues, onSubmit } = props
+    const {register, handleSubmit, getValues} = useForm({defaultValues: { fornavn: initialValues.fornavn + ' ' + initialValues.mellomnavn, etternavn: initialValues.etternavn}})
+    const [showModal, setShowModal] = useState<boolean>(false)
+
+    return (
+        <form onSubmit={handleSubmit((form: any) => onSubmit(form))}>
+            <div className={css({ marginTop: '2rem'})}>
+                <Heading size="small">Opplysninger til NOM</Heading>
+                <Alert variant="info" size="medium" className={css({marginTop: '1rem'})}>
+                    Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle navn du ikke vil ha med. 
+                    Ressursen må ha minst ett fornavn og minst ett etternavn.
+                </Alert>
+                
+                <div className={rowStyles}>
+                    <TextField
+                        type="text"
+                        label="Fornavn"
+                        className={css({width: '48%', marginRight: '1rem'})}
+                        autoComplete="off"
+                        {...register("fornavn")}
+                    />
+                    <TextField
+                        type="text"
+                        label="Etternavn"
+                        className={css({width: '48%'})}
+                        autoComplete="off"
+                        {...register("etternavn")}
+                    />
+                </div>
+
+                <div className={rowStyles}>
+                    <Search 
+                        label="Org.enhet"
+                        variant="secondary"
+                        hideLabel={false}
+                        disabled
+                    />
+                </div>
+                
+                <div className={rowStyles}>
+                    <RadioGroup legend="Sektor" size="medium">
+                        <Radio value="10" checked>NAV statlig</Radio>
+                        <Radio value="20" disabled>NAV kommunal</Radio>
+                        <Radio value="30" disabled>Ekstern</Radio>
+                    </RadioGroup>
+                </div>
+
+                <div className={rowStyles}>
+                    <Button
+                        type="button" 
+                        className={css({ marginRight: '1rem'})} 
+                        onClick={() => showModal ? setShowModal(false) : setShowModal(true)}
+                    >
+                        Opprett ressurs
+                    </Button>
+                    <Button variant="secondary" >Avbryt</Button>
+                </div>
+            </div>
+            <ModalResource 
+                isOpen={showModal} 
+                formValues={getValues()} 
+                onSubmit={onSubmit}
+                closeModal={() => setShowModal(false)}
+            />
+        </form>
+    )
+}
+
+export default ResourceForm

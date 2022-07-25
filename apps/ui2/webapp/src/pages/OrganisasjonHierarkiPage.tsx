@@ -38,17 +38,16 @@ const OrganisasjonHierarkiPage = () => {
     const agrId = agressoUrlToData(id || '') 
 
     const query = Gq.useHentOrganisasjonsEnheterHierarkiQuery({ variables: {agressoId: agrId.agressoId, orgNiv: agrId.agressoNiva}, errorPolicy: 'all'})
-    console.log(query, "QUERY")
     const resourceQuery = Gq.useHentRessursMedNavIdentQuery({variables: { navIdent: resourceId}, skip: !resourceId})
+
+    console.log(query, "QUERYY")
 
     return (
         <>
             <ContentWrapper>
                 <>
                     <Heading size="xlarge" className={css({ marginBottom: '20px'})} >NAV Organisasjon</Heading>
-
-                    {query.error && <p>Feil</p>}
-                    
+                                
                     {!query.data && <Loader />}
                     
                     {query.data  && (
