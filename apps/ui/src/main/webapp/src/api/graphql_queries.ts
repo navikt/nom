@@ -70,15 +70,19 @@ export function createOrganisasjonsenhetQuery(
 
   return `query {
           organisasjonsenhet(${whereClause}) {
+            id
             agressoId
             orgNiv
+            agressoOrgenhetType
             navn
             gyldigFom
             gyldigTom
             underenheter: organiseringer(retning: under) {
               organisasjonsenhet{
+                id
                 navn
                 agressoId
+                agressoOrgenhetType
                 orgNiv
                 gyldigFom
                 gyldigTom

@@ -3,7 +3,6 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.Personid;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
 
@@ -17,7 +16,7 @@ public class EventSourceService {
     private final Map<String, Navident> navidenter;
 
     @KafkaListener(
-            id = "EventSourceListener",
+            id = "${app.kafka.eventSourceListenerName}",
             topics = "${app.kafka.topic.eventsource.name}")
     public void listen(SourceEvent event) {
         log.debug(event.maskedToString());
@@ -38,30 +37,34 @@ public class EventSourceService {
 
 
     private void handleCreateEvent(SourceEvent event) {
-        if ( navidenter.values().stream().anyMatch( id -> id.is(event.payload.personid))) {
-            throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes ifra før en på annen navident. Kan ikke behandle OPPRETT SourceEvent", event.payload.navident);
+        String navid =  event.payload.navident;
+        String personid = event.payload.personid;
+        if ( navidenter.values().stream().anyMatch( id -> id.is(personid) && navid != id.getNavident() ) ) {
+            throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes ifra før en på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
         }
 
-        Personid personid = Personid
-                .builder()
-                .id(event.payload.personid)
-                .type(event.payload.personidtype)
-                .build();
+        Navident ident = null;
+        if (navidenter.containsKey(navid)) {
+            log.info("Navident %s finnes ifra før. Denne eventen erstatter tidligere info", navid);
 
-        Navident ident = Navident
-                .builder()
-                .navident(event.payload.navident)
-                .gjeldendePersonid(personid.getId())
-                .identType(event.payload.identType)
-                .allePersonider(Arrays.asList(personid))
-                .build();
-
-        if (navidenter.containsKey(event.payload.navident)) {
-            log.info("Navident %s finnes ifra før. Denne eventen erstatter tidligere info", event.payload.navident);
+            ident = navidenter.get(navid).clone();
+            ident.setGjeldendePersonid(personid);  // ASSUMPTION!! Siste personid i eventsource benyttes som gjeldende
+            if (!ident.getAllePersonider().contains(personid)) {
+                ident.addPersonid(personid);
+            } else {
+                log.info("Personid finnes ifra før på denne navidenten %s. Denne eventen endrer kanskje kun på gjeldendeIdent info", navid);
+            }
+        } else {
+            ident = Navident
+                    .builder()
+                    .navident(navid)
+                    .gjeldendePersonid(event.payload.personid)
+                    .identType(event.payload.identType)
+                    .allePersonider(Arrays.asList(event.payload.personid))
+                    .build();
         }
 
-        navidenter.put(event.payload.navident, ident);
-
+        navidenter.put(navid, ident);
         log.debug(ident.maskedToString());
     }
 

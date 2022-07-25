@@ -33,7 +33,15 @@ public interface HendelseRepository extends GenericStorage {
             nativeQuery = true)
     List<GenericStorageElement> findHendelseByJsonBulk(String jsonFieldKey, List<String> jsonFieldValue);
 
-    @Query(value = "SELECT * FROM T_GENERIC_STORAGE WHERE lower(document -> 'hendelseData' ->> :jsonFieldKey) like :jsonFieldValue%",
-            nativeQuery = true)
-    List<GenericStorageElement> findHendelserByJsonMatch(String jsonFieldKey, String jsonFieldValue);
+    @Query(value = """
+                   SELECT a.* FROM T_GENERIC_STORAGE a\s
+                               WHERE a.DOCUMENT ->> 'fid' in (
+                                  SELECT b.document ->> 'fid' FROM T_GENERIC_STORAGE b
+                                  WHERE lower(b.document -> 'hendelseData' ->> :jsonFieldKey) like '%'||:jsonFieldValue||'%'
+                                  AND DOCUMENT @> cast('{"hendelseDataType": "'||:hendelseDataType||'"}' AS jsonb)
+                               );
+                   """
+            , nativeQuery = true)
+    List<GenericStorageElement> findHendelserByJsonMatch(String jsonFieldKey, String jsonFieldValue, String hendelseDataType);
+
 }

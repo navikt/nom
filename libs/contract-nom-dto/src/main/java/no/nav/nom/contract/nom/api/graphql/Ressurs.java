@@ -12,7 +12,10 @@ import java.util.UUID;
 public class Ressurs {
     UUID nomId;
     String navIdent;
+    String navident;
     String personIdent;
-    List<Ressurstype> ressurstype;
+    String personident;
+    List<Sektor> ressurstype;
+    List<Sektor> sektor;
     LocalDate sluttdato;
 }

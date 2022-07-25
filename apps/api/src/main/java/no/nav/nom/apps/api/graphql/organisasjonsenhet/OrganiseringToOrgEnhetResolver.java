@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.contract.nom.api.graphql.Organisasjonsenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import org.springframework.stereotype.Component;
 
@@ -16,13 +16,17 @@ import org.springframework.stereotype.Component;
 public class OrganiseringToOrgEnhetResolver implements GraphQLResolver<Organisering> {
     private final IOrgenhetService orgenhetService;
 
-    public DataFetcherResult<Organisasjonsenhet> organisasjonsenhet(Organisering organisering, DataFetchingEnvironment env) {
+    public DataFetcherResult<OrgEnhet> orgEnhet(Organisering organisering, DataFetchingEnvironment env) {
         val orgEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
                 .map(orgenhetService::convertToGraphQlResponse)
                 .orElseThrow();
 
-        return DataFetcherResult.<Organisasjonsenhet>newResult()
+        return DataFetcherResult.<OrgEnhet>newResult()
                 .data(orgEnhet)
                 .build();
+    }
+
+    public DataFetcherResult<OrgEnhet> organisasjonsenhet(Organisering organisering, DataFetchingEnvironment env) {
+        return orgEnhet(organisering, env);
     }
 }

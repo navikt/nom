@@ -15,9 +15,6 @@ public class DvhLeder {
         this.navIdent = node.get("LEDER_NAVIDENT").asText();
         this.orgEnhetNr = node.get("ORGNODE_KODE").asText();
         this.orgNiv = node.get("ORGNODE_NIVA").asText();
-    }
-
-    public void setOrgenhetNavn(String orgenhetNavn){
-        this.orgenhetNavn = orgenhetNavn;
+        this.orgenhetNavn = node.get("ORGNODE_NAVN").asText();
     }
 }

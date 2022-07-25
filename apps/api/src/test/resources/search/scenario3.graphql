@@ -1,6 +1,6 @@
 query {
     search(term: "testnavn") {
-        ... on Organisasjonsenhet {
+        ... on OrgEnhet {
             agressoId
             navn
             gyldigFom

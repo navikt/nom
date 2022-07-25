@@ -54,9 +54,7 @@ public class DomainTestData {
                 .navident(ROBOT_1_NavId)
                 .identType(IdentType.ROBOT)
                 .gjeldendePersonid(ROBOT_1_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(ROBOT_1_PersonId).type(PersonidType.MANUELL).build()
-                ))
+                .allePersonider(Arrays.asList(ROBOT_1_PersonId))
                 .build();
     }
 
@@ -66,9 +64,7 @@ public class DomainTestData {
                 .navident(ROBOT_2_NavId)
                 .identType(IdentType.ROBOT)
                 .gjeldendePersonid(ROBOT_2_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(ROBOT_2_PersonId).type(PersonidType.MANUELL).build()
-                ))
+                .allePersonider(Arrays.asList(ROBOT_2_PersonId))
                 .build();
     }
 
@@ -77,9 +73,7 @@ public class DomainTestData {
                 .navident(KNYTNING_FINNES_1_NavId)
                 .identType(IdentType.STANDARD)
                 .gjeldendePersonid(KNYTNING_FINNES_1_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(KNYTNING_FINNES_1_PersonId).type(PersonidType.PDL).build()
-                ))
+                .allePersonider(Arrays.asList(KNYTNING_FINNES_1_PersonId))
                 .build();
     }
 
@@ -88,9 +82,7 @@ public class DomainTestData {
                 .navident(KNYTNING_FINNES_2_NavId)
                 .identType(IdentType.STANDARD)
                 .gjeldendePersonid(KNYTNING_FINNES_2_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(KNYTNING_FINNES_2_PersonId).type(PersonidType.PDL).build()
-                ))
+                .allePersonider(Arrays.asList(KNYTNING_FINNES_2_PersonId))
                 .build();
     }
 
@@ -99,10 +91,7 @@ public class DomainTestData {
                 .navident(KNYTNING_FINNES_FLERE_ID_3_NavId)
                 .identType(IdentType.STANDARD)
                 .gjeldendePersonid(KNYTNING_FINNES_FLERE_ID_3_PersonId_1)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(KNYTNING_FINNES_FLERE_ID_3_PersonId_1).type(PersonidType.PDL).build(),
-                        Personid.builder().id(KNYTNING_FINNES_FLERE_ID_3_PersonId_2).type(PersonidType.PDL).build()
-                ))
+                .allePersonider(Arrays.asList(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, KNYTNING_FINNES_FLERE_ID_3_PersonId_2))
                 .build();
     }
 
@@ -111,9 +100,7 @@ public class DomainTestData {
                 .navident(KNYTNING_FINNES_DUPLIKAT_NavId_4_NavId_1)
                 .identType(IdentType.STANDARD)
                 .gjeldendePersonid(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId).type(PersonidType.PDL).build()
-                ))
+                .allePersonider(Arrays.asList(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId))
                 .build();
     }
 
@@ -122,9 +109,7 @@ public class DomainTestData {
                 .navident(KNYTNING_FINNES_DUPLIKAT_NavId_4_NavId_2)
                 .identType(IdentType.STANDARD)
                 .gjeldendePersonid(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId)
-                .allePersonider(Arrays.asList(
-                        Personid.builder().id(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId).type(PersonidType.PDL).build()
-                ))
+                .allePersonider(Arrays.asList(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId))
                 .build();
     }
 }

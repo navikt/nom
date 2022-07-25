@@ -30,7 +30,9 @@ public class PersonResolver implements GraphQLQueryResolver {
     public DataFetcherResult<PersonResult> person(ObjectNode objectNode, DataFetchingEnvironment env) {
         return securityUtil.<PersonResult>checkAuth(env, preauth).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
-            var personIdentOptional = Optional.ofNullable(objectNode).map(n -> n.findValue("personIdent").asText());
+            var personIdentOptional = Optional.ofNullable(objectNode).map(n ->
+                    Optional.of(n.findValue("personIdent"))
+                            .orElse(n.findValue("personident")).asText());
             if (personIdentOptional.isEmpty()) {
                 return DataFetcherResult.<PersonResult>newResult()
                         .data(null)
@@ -39,8 +41,8 @@ public class PersonResolver implements GraphQLQueryResolver {
             String personIdent = personIdentOptional.get();
             var ressursResult = ressursService.findByPersonIdent(personIdent);
 
-            var personResult = PersonResult.builder().personIdent(personIdent);
-            ressursResult.ifPresent(res -> personResult.nomId(res.getId()).navIdent(res.getNavIdent()));
+            var personResult = PersonResult.builder().personIdent(personIdent).personident(personIdent);
+            ressursResult.ifPresent(res -> personResult.nomId(res.getId()).navIdent(res.getNavIdent()).navident(res.getNavIdent()));
 
             return DataFetcherResult.<PersonResult>newResult()
                     .data(personResult.build())

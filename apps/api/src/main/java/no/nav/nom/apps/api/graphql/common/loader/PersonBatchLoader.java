@@ -12,7 +12,7 @@ import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
-import no.nav.nom.contract.nom.api.graphql.Person;
+import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;
 import org.dataloader.MappedBatchLoaderWithContext;
@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, DataFetcherResult<Person>> {
+public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, DataFetcherResult<FolkeregisterPerson>> {
     public static String PERSON_DATALOADER = "PersonDataLoader";
 
 
@@ -42,12 +42,12 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
     private final RestTemplate restTemplate;
 
     @Override
-    public CompletionStage<Map<String, DataFetcherResult<Person>>> load(Set<String> set, BatchLoaderEnvironment batchLoaderEnvironment) {
+    public CompletionStage<Map<String, DataFetcherResult<FolkeregisterPerson>>> load(Set<String> set, BatchLoaderEnvironment batchLoaderEnvironment) {
         return CompletableFuture.supplyAsync(() -> getNameBatch(set, batchLoaderEnvironment));
     }
 
     @SneakyThrows
-    public Map<String, DataFetcherResult<Person>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
+    public Map<String, DataFetcherResult<FolkeregisterPerson>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
         val headers = new HttpHeaders();
         val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -88,14 +88,14 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
         }
     }
 
-    private DataFetcherResult<Person> convert(JsonNode personResult, DataFetchingEnvironment env) {
+    private DataFetcherResult<FolkeregisterPerson> convert(JsonNode personResult, DataFetchingEnvironment env) {
         val code = personResult.get("code").asText();
         if (personResult.get("code").asText().equals("ok")) {
             val navn = personResult.get("person").get("navn").get(0);
             val mellomnavn = navn.hasNonNull("mellomnavn") ? navn.get("mellomnavn").asText() : null;
 
-            return DataFetcherResult.<Person>newResult()
-                    .data(Person.builder()
+            return DataFetcherResult.<FolkeregisterPerson>newResult()
+                    .data(FolkeregisterPerson.builder()
                             .navn(
                                     RessursNavn.builder()
                                             .fornavn(navn.get("fornavn").asText())
@@ -111,8 +111,8 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
         return convertToError(code, "PDL har ingen data på denne personidenten", env);
     }
 
-    private DataFetcherResult<Person> convertToError(String code, String message, DataFetchingEnvironment env) {
-        return DataFetcherResult.<Person>newResult()
+    private DataFetcherResult<FolkeregisterPerson> convertToError(String code, String message, DataFetchingEnvironment env) {
+        return DataFetcherResult.<FolkeregisterPerson>newResult()
                 .error(ErrorCode.valueOf(code.toUpperCase()).construct(env, message))
                 .build();
     }

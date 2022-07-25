@@ -3,6 +3,18 @@ app:
   kafka:
     topic.eventsource.name: org.nav-ident
     topic.rnr.name: org.nav-ident-rnr
+    identServiceListenerName: IdentService_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (For asynk koble rnr need.respons til selve requesten)
+    eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod), også fra start av stream
+  pdl:
+    tema: GEN
+    baseUrl: ${PDL_BASEURL}
+    aadClientId: api://${PDL_CLIENT_ID}/.default
+  redis:
+    clientTokenCacheName: needClientTokenCache
+
+logging:
+  level:
+    no.nav.nom: DEBUG
 
 nom:
   libs:
@@ -12,6 +24,12 @@ nom:
           load-properties: false
         app:
           load-properties: true
+
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    clientId: ${AZURE_APP_CLIENT_ID}
+    jwk: ${AZURE_APP_JWK}
 
 management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mappings
 
@@ -57,18 +75,47 @@ spring:
       auto-offset-reset: earliest
       properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
 
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+
   security:
     oauth2:
-      client:
-        registration:
-          aad:
-            provider: aad
-            client-id: ${AZURE_APP_CLIENT_ID}
-            client-secret: ${AZURE_APP_CLIENT_SECRET}
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            # ClientId/.default er for å få accessToken som går for denne appen
-            scope: openid,${AZURE_APP_CLIENT_ID}/.default
-        provider:
-          aad:
-            issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+      resourceserver:
+        jwt:
+          issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+          accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+#      client:
+#        registration:
+#          pdlClient:
+#            provider: aad
+#            client-id: ${AZURE_APP_CLIENT_ID}
+#            client-secret: ${AZURE_APP_CLIENT_SECRET}
+#            authorization-grant-type: authorization_code
+#            scope: ${app.pdl.aadClientId}
+#        provider:
+#          aad:
+#            issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
+
+  cloud:
+    azure:
+      # Properties like spring.cloud.azure.credential.client-id are global properties.
+      # Properties like spring.cloud.azure.active-directory.credential.client-id are AAD properties.
+      # If AAD properties is not configured, global properties will be used.
+      #      credential:
+      #        client-id:
+      #        client-secret:
+      #      profile:
+      #        tenant-id:
+      active-directory:
+        enabled: true
+        credential:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+        profile:
+          tenant-id: ${AZURE_APP_TENANT_ID}
+#        authorization-clients:
+#          pdlClient:         # When authorization-grant-type is null, on behalf of flow is used by default
+#            authorization-grant-type: on_behalf_of
+#            scopes: ${app.pdl.aadClientId}
+#        application-type: web_application_and_resource_server

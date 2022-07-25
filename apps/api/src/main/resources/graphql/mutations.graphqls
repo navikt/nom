@@ -24,7 +24,8 @@ input OrdreLinjeRequestMetadata {
 }
 
 input OpprettRessursRequest  {
-    personIdent: String!
+    personIdent: String!    @deprecated(reason: "personIdent er erstattet med personident")
+    personident: String!
     visningsnavn: String
 }
 
@@ -51,15 +52,19 @@ type OrdreLinjeResponse  {
 }
 
 type OpprettRessursResponse {
-    navIdent: String!
-    personIdent: String!
-    person: Person
+    navIdent: String!   @deprecated(reason: "navIdent er erstattet med navident")
+    navident: String!
+    personIdent: String!    @deprecated(reason: "personIdent er erstattet med personident")
+    personident: String!
+    person: FolkeregisterPerson
+    folkeregisterPerson: FolkeregisterPerson
 }
 
 type OpprettRessursResponse2 {
     navident: String!
     personident: String!
-    person: Person
+    person: FolkeregisterPerson
+    folkeregisterPerson: FolkeregisterPerson
     fornavn: String!
     etternavn: String!
 }

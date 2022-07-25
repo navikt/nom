@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.OrgenhetType;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 
@@ -26,17 +26,22 @@ import static java.util.Comparator.comparing;
 @Value
 public class EventBasedOrgenhet implements IOrgenhet {
 
-    public final static String AGRESSO_ID_FIELD = "agressoId";
     public final static String NAVN_FIELD = "navn";
+    public final static String GYLDIG_FOM_FIELD = "gyldigFom";
+    public final static String GYLDIG_TOM_FIELD = "gyldigTom";
+    public final static String AGRESSO_ID_FIELD = "agressoId";
+    public final static String AGRESSO_ORGNIV_FIELD = "agressoOrgNiv";
+    public final static String AGRESSO_ORGENHET_TYPE_FIELD = "agressoOrgenhetType";
 
     List<IHendelse> hendelser;
 
     public EventBasedOrgenhet(List<IHendelse> hendelser) {
         this.hendelser = hendelser.stream()
-                .sorted(comparing(h -> h.getHendelseMetadata().getOpprettetTidspunkt())).toList();
+                .sorted(comparing(h -> h.getHendelseMetadata().getOpprettetTidspunkt()))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public UUID getId() {
+    public UUID getFid() {
         return hendelser.stream()
                 .findFirst()
                 .map(IHendelse::getFid)
@@ -45,37 +50,50 @@ public class EventBasedOrgenhet implements IOrgenhet {
 
     @Override
     public String getAgressoId() {
-        return getLast("agressoId").orElseThrow();
+        return getLast(AGRESSO_ID_FIELD).orElseThrow();
+    }
+
+    @Override
+    public String getAgressoOrgenhetType() {
+        return getLast(AGRESSO_ORGENHET_TYPE_FIELD).orElse(null);
     }
 
     @Override
     public String getNavn() {
-        return getLast("navn").orElseThrow();
+        return getLast(NAVN_FIELD).orElseThrow();
     }
 
     @Override
     public String getOrgNiv() {
-        return null;
-    }
-
-    @Override
-    public OrgenhetType getOrgenhetType() {
-        return null;
+        return getLast(AGRESSO_ORGNIV_FIELD).orElseThrow();
     }
 
     public LocalDate getGyldigFom() {
-        return LocalDate.parse(getLast("gyldigFom").orElseThrow());
+        return LocalDate.parse(getLast(GYLDIG_FOM_FIELD).orElseThrow());
     }
 
     public Optional<LocalDate> getGyldigTom() {
-        return getLast("gyldigTom").map(LocalDate::parse);
+        return getLast(GYLDIG_TOM_FIELD).map(LocalDate::parse);
+    }
+
+    @Override
+    public String getUniqueAgressoId() {
+        return getAgressoId()+"-"+getNavn()+"-"+getOrgNiv();
     }
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
+                .filter(e -> e.getHendelseData().hasNonNull(property))
                 .map(e -> e.getHendelseData().get(property))
-                .filter(Objects::nonNull)
                 .map(JsonNode::asText)
                 .reduce((a, b) -> b);
+    }
+
+    public List<IHendelse> getHendelser(){
+        return hendelser;
+    }
+
+    public void addHendelse(IHendelse hendelse){
+        hendelser.add(hendelse);
     }
 }

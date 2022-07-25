@@ -3,7 +3,7 @@ import { Hamburger } from '@navikt/ds-icons'
 import { Button, Label } from '@navikt/ds-react'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { opprettRessursIcon, orgIcon } from './Images'
+import { addPerson, hierarchy2 } from './Images'
 
 const BurgerButton = css({
   display: 'flex',
@@ -66,11 +66,15 @@ const BurgerMenu = () => {
 
       {showMenu && (
         <div className={dropdownContent}>
-          <ListItem label='Organisasjonen' url='/org' icon={orgIcon} />
+          <ListItem
+            label='Organisasjonshierarki'
+            url='/org'
+            icon={hierarchy2}
+          />
           <ListItem
             label='Opprett ressurs'
             url='/ressurs/create'
-            icon={opprettRessursIcon}
+            icon={addPerson}
           />
         </div>
       )}

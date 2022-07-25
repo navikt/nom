@@ -11,7 +11,7 @@ query {
                 }
             }
         }
-        ... on Organisasjonsenhet {
+        ... on OrgEnhet {
             agressoId
             navn
             gyldigFom

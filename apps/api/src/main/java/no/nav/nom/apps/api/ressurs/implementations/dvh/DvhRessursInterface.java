@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.ressurs.implementations.dvh;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.contract.nom.api.graphql.Ressurstype;
+import no.nav.nom.contract.nom.api.graphql.Sektor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,12 +25,12 @@ public class DvhRessursInterface {
         return Optional.ofNullable((DvhRessurs) dvhRepository.getRessursByNavIdent().get(navIdent));
     }
 
-    public List<Ressurstype> getRessurstypeGraphQlResponse(String navIdent){
+    public List<Sektor> getRessurstypeGraphQlResponse(String navIdent){
         val ressurstype = getRessurs(navIdent)
                 .map(r -> switch (r.getRemedyAnsattType()) {
-                            case STATLIG -> Ressurstype.NAV_STATLIG;
-                            case KOMMUNAL -> Ressurstype.NAV_KOMMUNAL;
-                            case EKSTERN, ANNEN_STATLIG -> Ressurstype.EKSTERN;
+                            case STATLIG -> Sektor.NAV_STATLIG;
+                            case KOMMUNAL -> Sektor.NAV_KOMMUNAL;
+                            case EKSTERN, ANNEN_STATLIG -> Sektor.EKSTERN;
                             default -> null;
                         })
                 .orElse(null);

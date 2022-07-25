@@ -1,21 +1,14 @@
 package no.nav.nom.apps.navident.eventsource;
 
-import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.domain.PersonidType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,15 +18,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
-@ActiveProfiles({"test", "log-console"})
-@SpringBootTest
-@Slf4j
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class EventSourceServiceTest {
+class EventSourceServiceTest extends EmbeddedKafkaTestBase {
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
     @Autowired private Map<String, Navident> navidenter;
-    @MockBean  private DataSource dataSource;
     @Value("${test.topic}")  private String topic;
 
     @BeforeEach
@@ -125,8 +112,6 @@ class EventSourceServiceTest {
                                 .identType(IdentType.STANDARD)
                                 .navident(navid)
                                 .personid(personid)
-                                .personidtype(PersonidType.PDL)
                                 .build()
                 ).build();}
-
 }

@@ -13,7 +13,7 @@ query {
             }
         }
         __typename
-        ... on Organisasjonsenhet {
+        ... on OrgEnhet {
             agressoId
             navn
             gyldigFom

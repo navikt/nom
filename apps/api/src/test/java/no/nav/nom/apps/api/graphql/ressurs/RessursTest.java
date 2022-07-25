@@ -5,6 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhLegacyRessursUtils;
+import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -111,6 +112,8 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
         createRessursHendelse("2");
+        val enhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
+        dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario42.graphql", false);
@@ -271,6 +274,13 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
         createRessursHendelse("");
+        dvhOrgenhetMockUtils.addToResponse(
+                DvhOrgenhetMock.getBuilderWithDefault()
+                        .ORGENHET_KODE("testId1")
+                        .ORGNODE_NIV("ORGENHET")
+                        .ORGENHET_NAVN("testNavn")
+                        .build()
+        );
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("ressurs/scenario6.graphql", false);
@@ -284,6 +294,11 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Hente leder for ressurs")
     void scenario36() {
+        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2")
+                .ORGENHET_NAVN("testNavn")
+                .ORGNODE_NIV("ORGENHET")
+                .build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         createRessursHendelse("1");
         createRessursHendelse("2");
 
@@ -303,6 +318,12 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("1");
         createRessursHendelse("2");
         createRessursHendelse("4");
+        val ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+                        .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        val lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+                .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
+
+        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
         dvhRestConsumer.loadFromDvh();
 

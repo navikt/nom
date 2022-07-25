@@ -10,6 +10,8 @@ import orgIcon from '../resources/orgIcon.svg'
 import opprettRessursIcon from '../resources/opprettRessursIcon.svg'
 import slackNom from '../resources/slackNom.svg'
 import opprettRessursIkon from '../resources/opprettRessursIkon.svg'
+import addPerson from '../resources/addPerson.svg'
+import hierarchy2 from '../resources/hierarchy2.svg'
 
 export {
   navLogo,
@@ -23,5 +25,7 @@ export {
   opprettRessursIcon,
   slackNom,
   person,
-  opprettRessursIkon
+  opprettRessursIkon,
+  addPerson,
+  hierarchy2,
 }

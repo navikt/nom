@@ -53,7 +53,8 @@ public class GenericStorageElement {
     private LocalDateTime storedDate;
 
     public enum DataType {
-        HENDELSE_V1("no.nav.nom.generic.storage:Hendelse:v1");
+        HENDELSE_V1("no.nav.nom.generic.storage:Hendelse:v1"),
+        VALIDATION_V1("no.nav.nom.generic.storage:Validation:v1");
 
         String dataType;
 

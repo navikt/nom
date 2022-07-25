@@ -1,9 +1,14 @@
 package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
+import no.nav.nom.apps.navident.eventsource.EventSourceProducerTest;
+import no.nav.nom.apps.navident.eventsource.EventSourceService;
+import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
+import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
@@ -14,14 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,27 +30,39 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_PersonId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_DUPLIKAT_NavId_4_NavId_2;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_1;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.ROBOT_1_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.ROBOT_1_PersonId;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles({"test", "log-console"})
-@SpringBootTest
 @Slf4j
-@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class RnRNeedTest {
+class RnRNeedTest extends EmbeddedKafkaTestBase {
 
     @Autowired private Map<String, Navident> navidenter;
 
     @Autowired    private NeedProducer needProducer;
-    @MockBean    private DataSource dataSource;
     @Value("${test.rnr-topic}")    private String topic;
     @Autowired    private RnRTestListener rnrTestListener;
     @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;
     @Autowired private DomainTestData domainTestData;
 
-    @MockBean    private PdlService pdlService;
+    @MockBean private PdlService pdlService;
     @MockBean private IdentService identService;
+    @MockBean private EventSourceService eventSourceService;
+    @MockBean private EventSourceProducerTest eventSourceProducer;
+
+    @MockBean private NavidRepository navidRepository;
+    @MockBean private SourceEventRepository sourceEventRepository;
 
     @BeforeEach
     public void emptyNeedsRead() {
@@ -65,7 +77,7 @@ class RnRNeedTest {
     @Test
     public void createNeed() {
         String id = "51019955555";
-        needProducer.produceNeed('A', id, IdentType.STANDARD);
+        String uuid = needProducer.produceNeed('A', id, IdentType.STANDARD);
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
@@ -90,13 +102,13 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("01019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("01019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -113,10 +125,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("X1019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("X1019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -131,10 +143,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(ROBOT_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(ROBOT_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(ROBOT_1_PersonId, populatedNeed.personid);
         assertEquals(ROBOT_1_NavId, populatedNeed.eksisterendeId);
@@ -153,10 +165,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.personid);
         assertEquals(KNYTNING_FINNES_1_NavId, populatedNeed.eksisterendeId);
@@ -175,10 +187,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_1));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_1);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.personid);
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_NavId, populatedNeed.eksisterendeId);
@@ -197,10 +209,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_2));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_2);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_2, populatedNeed.personid);
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_NavId, populatedNeed.eksisterendeId);
@@ -220,10 +232,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited("01019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited("01019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -241,10 +253,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId, populatedNeed.personid);
         assertEquals(KNYTNING_FINNES_DUPLIKAT_NavId_4_NavId_2, populatedNeed.eksisterendeId); // Dette er den med 'høyeste'/seneste navident
@@ -264,10 +276,10 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.personid);
         assertEquals(KNYTNING_FINNES_1_NavId, populatedNeed.eksisterendeId); // Selv om PDL feiler, bruk id som finnes
@@ -288,10 +300,10 @@ class RnRNeedTest {
 
         Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(Arrays.asList());
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
         assertTrue(populatedNeed.pdlPersonider.isEmpty());
@@ -309,10 +321,10 @@ class RnRNeedTest {
 
         Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(null);
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
         assertTrue(populatedNeed.pdlPersonider.isEmpty());
@@ -331,10 +343,10 @@ class RnRNeedTest {
 
         Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(Arrays.asList(KNYTNING_FINNES_1_PersonId));
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.pdlGjeldendePersonid);
         assertEquals(1, populatedNeed.pdlPersonider.size());
@@ -354,10 +366,10 @@ class RnRNeedTest {
 
         Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_FLERE_ID_3_PersonId_1)).thenReturn(Arrays.asList(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, KNYTNING_FINNES_FLERE_ID_3_PersonId_2));
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_1));
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_1);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
         assertEquals(2, populatedNeed.pdlPersonider.size());
@@ -378,10 +390,10 @@ class RnRNeedTest {
 
         Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_FLERE_ID_3_PersonId_2)).thenReturn(Arrays.asList(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, KNYTNING_FINNES_FLERE_ID_3_PersonId_2));
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_2));
-        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(KNYTNING_FINNES_FLERE_ID_3_PersonId_2);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
         assertEquals(2, populatedNeed.pdlPersonider.size());
@@ -401,10 +413,10 @@ class RnRNeedTest {
                 .build();
 
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(uuid);
 
         assertNotNull(populatedNeed.generertId);
         assertTrue(populatedNeed.generertId.startsWith("A"));
@@ -423,12 +435,12 @@ class RnRNeedTest {
                 .build();
 
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until(() -> !rnrTestListener.idGeneratorVisited(KNYTNING_FINNES_1_PersonId));
+        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until(() -> !rnrTestListener.idGeneratorVisited(uuid));
 
         // After 200 ms (poll delay), expect no id generated
-        assertFalse(rnrTestListener.needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited() && n.getPersonid().equals(KNYTNING_FINNES_1_PersonId)));
+        assertFalse(rnrTestListener.needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited() && n.getPersonid().equals(uuid)));
     }
 
     @Test
@@ -445,11 +457,13 @@ class RnRNeedTest {
                 .responsProdusentVisited(true)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        Mockito.when(navidRepository.getNextval()).thenReturn(123321L);
+
+        String uuid = rnrTestNeedProducer.publish(need);
 
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited("01019922222"));
-        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited("01019922222");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(uuid);
 
         assertEquals("01019922222", populatedNeed.personid);
         assertNull(populatedNeed.eksisterendeId);
@@ -467,10 +481,10 @@ class RnRNeedTest {
                 .generertId("Y000002")
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("Y1019900002"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("Y1019900002");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -488,10 +502,10 @@ class RnRNeedTest {
                 .eksisterendeId("X000002")
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("X1019900002"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("X1019900002");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -503,20 +517,20 @@ class RnRNeedTest {
     @Test
     public void responsProdusent_Standard_KnytningFinnesIkke() {
         Need need = Need.builder()
-                .personid("01019912345")
+                .personid("02019912345")
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
-                .pdlPersonider(Arrays.asList("01019912345"))
-                .pdlGjeldendePersonid("01019912345")
+                .pdlPersonider(Arrays.asList("02019912345"))
+                .pdlGjeldendePersonid("02019912345")
                 .idGeneratorVisited(true)
                 .generertId("C000001")
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -538,10 +552,10 @@ class RnRNeedTest {
                 .generertId("C000001")
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01019912345"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01019912345");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -553,6 +567,7 @@ class RnRNeedTest {
 
     @Test
     public void responsProdusent_Standard_KnytningFinnes() {
+        log.info("responsProdusent_Standard_KnytningFinnes()");
         Need need = Need.builder()
                 .personid(KNYTNING_FINNES_1_PersonId)
                 .identType(IdentType.STANDARD)
@@ -563,10 +578,10 @@ class RnRNeedTest {
                 .eksisterendeId(KNYTNING_FINNES_1_NavId)
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(KNYTNING_FINNES_1_PersonId));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(KNYTNING_FINNES_1_PersonId);
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
@@ -586,10 +601,10 @@ class RnRNeedTest {
                 .generertId("C000001")
                 .build();
 
-        rnrTestNeedProducer.publish(need);
+        String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited("01010100000"));
-        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited("01010100000");
+        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);

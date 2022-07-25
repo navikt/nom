@@ -31,10 +31,7 @@ Utledes via eventsourcing?
 {
     navident: <string (a123456)>
     personid: <string (fnr/d-nr/annen nøkkel)> - den aktive personid'en for navidenten
-    allePersonider: [
-        personid: <string (fnr/d-nr/annen nøkkel)>
-        type: PDL | MANUELL
-    ]
+    allePersonider: [ string (fnr/d-nr/annen nøkkel) ]
     identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
 
 }
@@ -51,7 +48,6 @@ Eventsourcing metadata rundt bestillinger (opprett, slett)
     payload: {
         navident: string (a123456)
         personid: string (fnr/d-nr/annen nøkkel)
-        personidtype: PDL | MANUELL
         identType: ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT
     }
 }
@@ -261,4 +257,4 @@ En del andre eksterne virksomheter som: Skatt, NSM, Helsetilsynet m.fl.
 
 
 === Åpne punkter
-1. IDAs Z-identer? Er de på egen del av sekvensnrserien til NAV-ident? Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 
+1. IDAs Z-identer? Z-identene er på egen nummerserie, og skal ikke blandes med NIK sin nummerserie. Bør NIK ha en preprod-instans med bare synt-testdata, som er koblet til Dolly, slik at fagsystemer og andre kan bruke NOM-NIK med utelukkende syntetiske data. 

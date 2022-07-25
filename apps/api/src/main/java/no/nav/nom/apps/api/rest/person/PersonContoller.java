@@ -3,11 +3,10 @@ package no.nav.nom.apps.api.rest.person;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
-import no.nav.nom.contract.nom.api.graphql.Person;
+import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +34,7 @@ public class PersonContoller {
     }
 
 
-    private PdlPersonDTO convert(Person person){
+    private PdlPersonDTO convert(FolkeregisterPerson person){
         return PdlPersonDTO.builder()
                 .navn(
                         PdlPersonDTO.Navn.builder()
