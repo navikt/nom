@@ -20,7 +20,7 @@ const CreateResourceView = () => {
   
   const query = Gq.useHentPersonQuery({
     variables: { personIdent: searchStr || '' },
-    // SKIP er/var bugged. Hvis den starter som true kan den ike blie false
+    // SKIP er/var bugged. Hvis den starter som true kan den ike blie falses
     // skip: 11 !== searchStr?.length,
   })
   const [createResource, createResourceStatus] = Gq.useOpprettRessurs2Mutation()
