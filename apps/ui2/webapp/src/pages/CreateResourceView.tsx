@@ -21,7 +21,6 @@ const CreateResourceView = () => {
 
   //Ikke ferdig - Mangler feilhåndtering
   const handleCreateResource = (values: Gq.OpprettRessursRequest2) => {
-    console.log(values, 'Values')
     if (!searchStr) return
     
     createResource({
@@ -37,7 +36,6 @@ const CreateResourceView = () => {
   }
 
   useEffect(() => {
-    console.log(errors, "ERROR")
     if (query.data?.person?.navIdent)
       navigate('/ressurs/' + query.data?.person?.navIdent, {
         state: { alreadyExists: true },
