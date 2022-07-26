@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.libs.utils.common.mdc.RestMdcInterceptor;
 import no.nav.nom.libs.utils.common.properties.PropertyUtils;
 import org.slf4j.MDC;
 import org.springframework.boot.SpringApplication;
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.UUID;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @SpringBootApplication
 @EnableJpaRepositories
 @ConfigurationPropertiesScan
+@Import(RestMdcInterceptor.class)
 @Slf4j
 public class NavIdent {
 
