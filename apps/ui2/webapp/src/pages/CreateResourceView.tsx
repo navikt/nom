@@ -57,8 +57,12 @@ const CreateResourceView = () => {
         <form onSubmit={handleSubmit((form: any) => { setSearchStr(form.searchValue)})}>
           <div>
             <BodyShort size="medium" className={css({marginBottom: '0.5rem'})}>Fyll inn personnummer/D-nummer så finner vi personen i folkeregisteret</BodyShort>
-            <Search label="Søk etter person" variant='secondary' {...register('searchValue', { required: true, minLength: 11, maxLength: 11})} />
-            
+            <Search
+              label="Søk alle NAV sine sider"
+              size="medium"
+              variant="secondary"
+              {...register('searchValue', { required: true, minLength: 11, maxLength: 11}) as any}
+            />
             {errors.searchValue?.type === ('minLength' || 'maxLength') && 
                 <BodyShort className={css({color: 'red', marginTop: '1rem'})}>Personnummer/D-nummer må være 11 siffer.</BodyShort>
             }
