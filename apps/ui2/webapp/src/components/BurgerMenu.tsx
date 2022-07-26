@@ -4,13 +4,23 @@ import { Button, Label } from '@navikt/ds-react'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { addPerson, hierarchy2 } from './Images'
+import { NomColors } from '../resources/NomStyles'
 
 const BurgerButton = css({
   display: 'flex',
-  width: '7rem',
+  width: '6.3rem',
   height: '2.5rem',
   padding: '0.5rem',
-  // ':hover': { display: 'block' },
+  color: NomColors.primaryColor,
+  borderRadius: '0.25rem',
+  boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+  ':hover': {
+    backgroundColor: NomColors.primaryAccent,
+    color: NomColors.primaryColor,
+  },
+  ':focus': {
+    boxShadow: `inset 0 0 0 4px ${NomColors.primaryColor}`,
+  },
 })
 
 const buttonIcon = css({
@@ -26,7 +36,6 @@ const linkStyle = css({
 })
 
 const dropdownContent = css({
-  // display: 'none',
   position: 'absolute',
   backgroundColor: '#ffffff',
   minWidth: '160px',

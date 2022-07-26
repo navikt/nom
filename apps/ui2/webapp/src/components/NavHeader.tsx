@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router'
 import { getSession, SessionInterface } from '../api/getSession'
-import React, { ReactNode, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { css } from '@emotion/css'
-import { Link, NavLink } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { nomLogoCircle2 } from './Images'
 import { Search } from '@navikt/ds-react'
-import { PeopleFilled, System } from '@navikt/ds-icons'
-import { Dropdown, Header } from '@navikt/ds-react-internal'
+import { PeopleFilled } from '@navikt/ds-icons'
 import BurgerMenu from './BurgerMenu'
+import { NomColors } from '../resources/NomStyles'
 
 export const headerHeight = '6rem'
 
@@ -32,7 +32,7 @@ const titleStyle = css({
   fontWeight: '700',
   fontSize: '24px',
   lineHeight: '30px',
-  color: '#236B7D',
+  color: NomColors.primaryColor,
   marginLeft: '1rem',
   marginRight: '4rem',
 })
@@ -43,7 +43,7 @@ const userText = css({
   fontWeight: '700',
   fontSize: '16px',
   lineHeight: '30px',
-  color: '#236B7D',
+  color: NomColors.primaryColor,
   marginLeft: '0.5rem',
   marginRight: '1rem',
 })
@@ -57,13 +57,28 @@ const verticallyCenter = css({
   textAlign: 'center',
 })
 
-const searchBarStyle = css({
+export const searchBarStyle = css({
   marginRight: '4rem',
-})
+  color: NomColors.primaryColor,
+  ':hover': {
+    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+    border: NomColors.primaryColor,
+  },
+  ':focus': {
+    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+  },
 
-const placeholderMeny = css({
-  marginLeft: '4rem',
-  color: '#236B7D',
+  button: {
+    color: NomColors.primaryColor,
+
+    ':hover': {
+      backgroundColor: NomColors.primaryAccent,
+      color: NomColors.primaryColor,
+    },
+    ':focus': {
+      boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+    },
+  },
 })
 
 const NavHeader = () => {
@@ -88,12 +103,12 @@ const NavHeader = () => {
         <Search
           className={searchBarStyle}
           label={'Søk etter ressurser'}
+          variant='secondary'
           size='medium'
         ></Search>
         <PeopleFilled color='#236B7D' fontSize={'2rem'} />
         <span className={userText}>{session}</span>
         <BurgerMenu />
-        {/* <span className={placeholderMeny}>Meny</span> */}
       </div>
     </div>
   )
