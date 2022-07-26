@@ -38,16 +38,16 @@ public class SpringSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().csrf()
-                    .disable()
-                .authorizeRequests()
-                    .anyRequest().authenticated()
-                .and().exceptionHandling()
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                .and().oauth2ResourceServer()
-                    .jwt().decoder(jwtDecoder());
+            .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and().csrf()
+                .disable()
+            .authorizeRequests()
+                .anyRequest().authenticated()
+            .and().exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+            .and().oauth2ResourceServer()
+                .jwt().decoder(jwtDecoder());
         return http.build();
     }
 

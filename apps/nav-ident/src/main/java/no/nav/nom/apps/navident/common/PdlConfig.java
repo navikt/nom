@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 @AllArgsConstructor
 @ConfigurationProperties("app.pdl")
-public class PdlProperties {
+public class PdlConfig {
     String tema;
     String aadClientId;
     String baseUrl;

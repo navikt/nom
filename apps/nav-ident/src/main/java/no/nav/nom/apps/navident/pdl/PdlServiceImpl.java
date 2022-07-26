@@ -2,7 +2,9 @@ package no.nav.nom.apps.navident.pdl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.security.AADTokenRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,16 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class PdlServiceImpl implements PdlService {
-//    private WebClient webClient;
+
+    private final AADTokenRepository tokenRepository;
+    private final RestTemplate restTemplate;
 
     @Override
     public List<String> getKnownPersonider(String id) {
         // TODO: Not Implemented yet - just echo
         return Arrays.asList(id);
     }
-
-//    public List<String> callPdlEndpoint(@RegisteredOAuth2AuthorizedClient("pdlClient") OAuth2AuthorizedClient webapiBClient, String body) {
-//        return Arrays.asList();
-//    }
-
 }
