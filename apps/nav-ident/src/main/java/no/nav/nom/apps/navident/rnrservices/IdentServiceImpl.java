@@ -1,9 +1,12 @@
 package no.nav.nom.apps.navident.rnrservices;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
+import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.domain.IdentType;
 import org.apache.kafka.common.TopicPartition;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     private Map<String, CountDownLatch> requests = new ConcurrentHashMap<>();
     private Map<String, Respons> responses = new ConcurrentHashMap<>();
 
+    @Autowired RnRMdcCache rnRMdcCache;
     @Autowired NeedProducer needProducer;
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
@@ -75,6 +79,8 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     public void listen(Need need) {
         if (!need.isResponsProdusentVisited()) return;
 
+        rnRMdcCache.loadMdc(need.getUuid());
+
         Respons respons = need.getRespons();
         responses.put(need.getUuid(), respons);
 
@@ -82,9 +88,11 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                 requests.get(need.getUuid());
 
         if (latch != null) latch.countDown();
+
+        MDC.clear();
     }
 
-    @Value("${app.kafka.identServiceListenerName}")  private String listenerName;
+    @Value("${app.kafka.identServiceListenerName}") private String listenerName;
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {

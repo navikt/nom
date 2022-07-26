@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.libs.utils.common.properties.PropertyUtils;
+import org.slf4j.MDC;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;

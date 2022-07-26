@@ -2,6 +2,7 @@
 <configuration>
     <springProperty name="app.name" source="app.name"/>
 
+<!--    json appender for nais deploy - uten MDC -->
     <springProfile name="log-logstash">
         <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
@@ -18,6 +19,27 @@
         <logger name="org.springframework" level="INFO"/>
     </springProfile>
 
+<!--    json appender for nais deploy - Med MDC -->
+    <springProfile name="log-logstash-mdc">
+        <appender name="stdout_json-mdc" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
+                <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="stdout_json-mdc"/>
+        </root>
+
+        <logger name="no.nav.nom" level="INFO" additivity="false">
+            <appender-ref ref="stdout_json-mdc"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <!-- console appender for test og lokalkjøring - uten MDC -->
     <springProfile name="log-console">
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -36,10 +58,46 @@
         <logger name="org.springframework" level="INFO"/>
     </springProfile>
 
+    <!--    console appender for test og lokalkjøring - med MDC -->
+    <springProfile name="log-console-mdc">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date [%-5level] %logger{1} %replace(Nav-Consumer-Id=%X{Nav-Consumer-Id} ){'Nav-Consumer-Id= ',''}%replace(Nav-Call-Id=%X{Nav-Call-Id} ){'Nav-Call-Id= ',''}-- %message%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="WARN">
+            <appender-ref ref="STDOUT"/>
+        </root>
+
+        <logger name="no.nav.nom" level="INFO" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <!--  ERROR - console appender for test og lokalkjøring - uten MDC -->
     <springProfile name="log-console-error">
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%date [%-5level] %logger{1} -- %message%n</pattern>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <!--  ERROR - console appender for test og lokalkjøring - med MDC -->
+    <springProfile name="log-console-error-mdc">
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date [%-5level] %logger{1} %replace(Nav-Consumer-Id=%X{Nav-Consumer-Id} ){'Nav-Consumer-Id= ',''}%replace(Nav-Call-Id=%X{Nav-Call-Id} ){'Nav-Call-Id= ',''}-- %message%n</pattern>
             </encoder>
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>ERROR</level>

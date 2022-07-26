@@ -1,10 +1,9 @@
 package no.nav.nom.apps.navident.common.redis;
 
 import no.nav.nom.apps.navident.SpringBootTestBase;
-import no.nav.nom.apps.navident.common.cache.NeedClientTokenCache;
+import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
@@ -20,7 +19,8 @@ import static org.mockito.Mockito.*;
 @Import(TestRedisConfiguration.class)
 @EnableCaching
 class NeedClientTokenCacheTest extends SpringBootTestBase {
-    @Autowired NeedClientTokenCache cache;
+    @Autowired
+    RnRClientTokenCache cache;
 
     @Mock AnonymousAuthenticationToken anonAuthentication;
     @Mock SecurityContext securityContext;

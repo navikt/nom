@@ -22,11 +22,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 @EnableCaching
-public class NeedClientTokenCache {
+public class RnRClientTokenCache {
     private final RedisCacheManager cacheManager;
     private final OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
 
-    @Value("${app.redis.clientTokenCacheName}") private String cacheName;
+    @Value("${app.redis.rnrClientTokenCacheName}") private String cacheName;
 
     public String getToken(String needUUID) {
         String token =  cacheManager.getCache(cacheName).get(needUUID, String.class);

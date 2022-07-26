@@ -3,7 +3,7 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.navident.common.cache.NeedClientTokenCache;
+import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.List;
 public class EventSourceProducer {
     private final KafkaTemplate<String, SourceEvent> producer;
     private final SourceEventRepository sourceEventRepository;
-    private final NeedClientTokenCache cache;
+    private final RnRClientTokenCache cache;
 
     @Value("${app.kafka.topic.eventsource.name}")
     private String eventSourceTopic;

@@ -10,7 +10,7 @@ app:
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
   redis:
-    clientTokenCacheName: needClientTokenCache
+    rnrClientTokenCacheName: rnrClientTokenCache
 
 logging:
   level:

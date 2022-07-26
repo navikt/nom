@@ -40,7 +40,6 @@ public class AADTokenRepository {
     private static final String AAD_TOKEN_USE = "on_behalf_of";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
-
     @SneakyThrows
     public String getOnbehalfofTokenFor(String assertion, String scope) {
         val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
