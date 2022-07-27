@@ -24,7 +24,7 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
 @WireMockStubs(RsaStub.class)
 @Slf4j
 @SpringBootTest
-@Import({TestRedisConfiguration.class, RestMdcInterceptor.class})
+@Import(TestRedisConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class SpringBootTestBase {
     @MockBean DataSource dataSource;

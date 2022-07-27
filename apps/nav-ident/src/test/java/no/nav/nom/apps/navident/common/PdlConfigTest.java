@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PdlPropertiesTest extends SpringBootTestBase {
+class PdlConfigTest extends SpringBootTestBase {
     @Autowired
     PdlConfig pdlProperties;
 

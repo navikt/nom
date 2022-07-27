@@ -18,8 +18,11 @@
     <name>NOM</name>
 
     <properties>
-        <asciidoc.version>2.2.2</asciidoc.version>
         <java.version>17</java.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+
+        <asciidoc.version>2.2.2</asciidoc.version>
         <javassist.version>3.28.0-GA</javassist.version>
         <ow2-asm.version>9.2</ow2-asm.version>
         <spring-cloud.version>2020.0.3</spring-cloud.version>

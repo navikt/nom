@@ -17,7 +17,6 @@ import java.util.UUID;
 @SpringBootApplication
 @EnableJpaRepositories
 @ConfigurationPropertiesScan
-@Import(RestMdcInterceptor.class)
 @Slf4j
 public class NavIdent {
 
