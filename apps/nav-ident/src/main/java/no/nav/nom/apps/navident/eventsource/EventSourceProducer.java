@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
+import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -23,12 +25,15 @@ public class EventSourceProducer {
     private final KafkaTemplate<String, SourceEvent> producer;
     private final SourceEventRepository sourceEventRepository;
     private final RnRClientTokenCache cache;
+    private final RnRMdcCache mdcCache;
 
     @Value("${app.kafka.topic.eventsource.name}")
     private String eventSourceTopic;
 
     @KafkaListener(id = "EventSourceProducer", topics = "${app.kafka.topic.rnr.name}")
     public void listen(Need need) {
+        mdcCache.loadMdc(need.getUuid());
+
         if (need.isResponsProdusentVisited() && need.getRespons() != null && List.of(HttpStatus.OK, HttpStatus.CREATED).contains(need.getRespons().getHttpStatus())) {
             val responseBody = need.getRespons().getBody();
             val sourceEvent = SourceEvent.builder()
@@ -42,17 +47,14 @@ public class EventSourceProducer {
                     ).build();
 
             // Since this is async from request there is no SecurityContext.Authentication present.
-            // Try to populate this with token from cache
-            try {
-                Jwt jwt = cache.getJwtFromCacheToken(need.getUuid());
-                if (jwt != null) SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-            } catch (RuntimeException e) {
-                log.error("Could not set JWT Authentication on SecurityContext", e);
-            }
+            // This is needed for jpa @CreatedBy
+            cache.setCachedTokedBackOnSecurityContext(need.getUuid());
 
             val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
 
             producer.send(eventSourceTopic, persistedSourceEvent);
+
+            MDC.clear();
         }
     }
 }

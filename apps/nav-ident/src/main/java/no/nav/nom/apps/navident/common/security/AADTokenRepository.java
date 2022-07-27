@@ -9,11 +9,14 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AADTokenRepository {
 
     private final AuthenticationProperties authenticationProperties;
@@ -39,6 +43,22 @@ public class AADTokenRepository {
     private static final String AAD_GRANT_TYPE_OBO = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     private static final String AAD_TOKEN_USE = "on_behalf_of";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+
+    @SneakyThrows
+    public String getOnbehalfofTokenWithAuthFromSecurityContext(String scope) {
+        try {
+            final var auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                final var token = auth.getToken().getTokenValue();
+                return getOnbehalfofTokenFor(token, scope);
+            } else {
+                log.warn("SecurityContext has no Authentication at all. Cannot crete obo token");
+            }
+        } catch (ClassCastException e) {
+            log.error("SecurityContext Authentication is not of expected JwtAuthenticationToken type. Cannot crete obo token", e);
+        }
+        return null;
+    }
 
     @SneakyThrows
     public String getOnbehalfofTokenFor(String assertion, String scope) {
@@ -69,7 +89,6 @@ public class AADTokenRepository {
         return token;
     }
 
-
     @SneakyThrows
     private String generateClientAssertionToken() {
         val claimSet = new JWTClaimsSet.Builder()
@@ -77,7 +96,7 @@ public class AADTokenRepository {
                 .expirationTime(Date.from(Instant.now().plusSeconds(60 * 5)))
                 .issuer(authenticationProperties.getAad().getClientId())
                 .jwtID(UUID.randomUUID().toString())
-                .notBeforeTime(Date.from(Instant.now()))
+                .notBeforeTime(Date.from(Instant.now().minusSeconds(60*5)))
                 .subject(authenticationProperties.getAad().getClientId())
                 .build();
 

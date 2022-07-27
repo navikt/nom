@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static no.nav.nom.apps.navident.common.ResourceReader.readFileToString;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 
 @Getter
@@ -17,7 +18,6 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 @AllArgsConstructor
 @ConfigurationProperties("app.pdl")
 public class PdlConfig {
-
 
     String tema;
     String aadClientId;
@@ -33,4 +33,10 @@ public class PdlConfig {
                 .defaultHeader("Tema", tema)
                 .build();
     }
+
+    @Bean
+    public String pdlHentIdentQry() {
+        return ResourceReader.readFileToString("pdl/hent-ident.graphql");
+    }
+
 }

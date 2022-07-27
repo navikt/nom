@@ -56,6 +56,14 @@ public class RnRClientTokenCache {
         }
     }
 
+    public void setCachedTokedBackOnSecurityContext(String needUUID) {
+        try {
+            Jwt jwt = getJwtFromCacheToken(needUUID);
+            if (jwt != null) SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        } catch (RuntimeException e) {
+            log.error("Could not set JWT Authentication on SecurityContext", e);
+        }
+    }
 
     public Jwt getJwtFromCacheToken(String needUUID) {
         String token = getToken(needUUID);

@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
@@ -24,6 +25,7 @@ public class PdlOppslag {
     final KafkaTemplate<String, Need> kafkaTemplate;
     private final PdlService pdlService;
     private final RnRMdcCache mdcCache;
+    private final RnRClientTokenCache cache;
 
 
     @Value("${app.kafka.topic.rnr.name}")  private String topic;
@@ -41,13 +43,17 @@ public class PdlOppslag {
             return;
         }
 
+        // Since this is async from request there is no SecurityContext.Authentication present.
+        // This is needed in Pdl authentication
+        cache.setCachedTokedBackOnSecurityContext(need.getUuid());
+
         List<String> pdlIder = pdlService.getKnownPersonider(need.personid);
 
         if (pdlIder == null || pdlIder.size() == 0) {
             log.error("PDL kjenner ikke til personId som er angitt");
             pdlIder = Collections.emptyList();
         } else {
-            need.setPdlGjeldendePersonid(pdlIder.get(0));
+            need.setPdlGjeldendePersonid(pdlIder.get(0));   // Ta den første i listen. Skal være sortert slik at gjeldende folkeregistrert id er først
         }
         need.setPdlPersonider(pdlIder);
 
