@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.navident.common.PdlConfig;
 import no.nav.nom.apps.navident.common.security.AADTokenRepository;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CALL_ID_KEY;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Component
 @RequiredArgsConstructor
@@ -66,7 +64,8 @@ public class PdlServiceImpl implements PdlService {
             try {
                 List<PdlIdent> identer = Arrays.asList(mapper.treeToValue(response.findPath("identer"), PdlIdent[].class));
                 return identer.stream()
-                        .sorted( Comparator.comparing(PdlIdent::erGjeldendeFolkeregisterId) )   // Sorter slik at gjeldende folkeregistrert id for personen ligger først
+                        .filter( PdlIdent::erFolkeregisterId )
+                        .sorted( Comparator.comparing(PdlIdent::erGjeldende, Comparator.reverseOrder()) )   // Sorter slik at gjeldende folkeregistrert id for personen ligger først
                         .map( i -> i.ident ).collect(Collectors.toList());
             } catch (JsonProcessingException e) {
                 log.error(String.format("Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
@@ -82,7 +81,7 @@ public class PdlServiceImpl implements PdlService {
     private String postToPdl(String qryBody, String oboToken) {
         return pdlWebClient
                 .post()
-                .uri(pdlConfig.getBaseUrl())
+                .uri(pdlConfig.getBaseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.add(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
                     headers.setBearerAuth(oboToken);

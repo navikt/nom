@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/graphql",
+    "bodyPatterns" : [ {
+      "matchesJsonPath" : "$.variables[?(@.ident == '01019000001')]"
+    } ]
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody":
+    {
+      "data": {
+        "hentIdenter": {
+          "identer": [
+            {
+              "ident": "01019000001",
+              "gruppe": "FOLKEREGISTERIDENT",
+              "historisk": false
+            }
+          ]
+        }
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

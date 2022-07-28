@@ -62,6 +62,8 @@ public class AADTokenRepository {
 
     @SneakyThrows
     public String getOnbehalfofTokenFor(String assertion, String scope) {
+        if ( ! isValidToken(assertion) ) return null;
+
         val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
         return (isValidToken(signedJwt) ? signedJwt : getOBOTokenFor(assertion, scope)).serialize();
     }
@@ -110,5 +112,10 @@ public class AADTokenRepository {
     @SneakyThrows
     private boolean isValidToken(SignedJWT signedJwt) {
         return signedJwt != null && signedJwt.getJWTClaimsSet().getExpirationTime().after(Date.from(Instant.now().plusSeconds(20)));
+    }
+
+    @SneakyThrows
+    private boolean isValidToken(String token) {
+        return token != null && isValidToken(SignedJWT.parse(token));
     }
 }

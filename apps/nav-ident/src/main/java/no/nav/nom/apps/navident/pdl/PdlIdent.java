@@ -10,7 +10,11 @@ class PdlIdent {
     String gruppe;
     boolean historisk;
 
+    public boolean erGjeldende() { return !historisk; }
+    public boolean erFolkeregisterId() {
+        return gruppe.equals("FOLKEREGISTERIDENT");
+    }
     public boolean erGjeldendeFolkeregisterId() {
-        return !historisk && gruppe.equals("FOLKEREGISTERIDENT");
+        return erGjeldende() && erFolkeregisterId();
     }
 }

@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident.common.cache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.cache.CacheManager;
@@ -68,14 +69,8 @@ public class RnRClientTokenCache {
     public Jwt getJwtFromCacheToken(String needUUID) {
         String token = getToken(needUUID);
         if (token != null) {
-            return jwtDecoder(oAuth2ResourceServerProperties).decode(token);
+            // This will validate token from cache, and not just parse it as with SignedJwt.parse
+            return JwtUtils.jwtDecoder(oAuth2ResourceServerProperties).decode(token);
         } else return null;
     }
-
-    private JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
-        val jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(properties.getJwt().getIssuerUri());
-        return jwtDecoder;
-    }
-
-
 }

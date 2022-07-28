@@ -24,6 +24,11 @@ public class JwtUtils {
         return jwtDecoder;
     }
 
+    public static JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties) {
+        val jwtDecoder = (NimbusJwtDecoder) JwtDecoders.fromOidcIssuerLocation(properties.getJwt().getIssuerUri());
+        return jwtDecoder;
+    }
+
     private static OAuth2TokenValidator<Jwt> oAuth2TokenValidator(OAuth2ResourceServerProperties properties, Set<String> acceptedAudience) {
         val issuerValidator = JwtValidators.createDefaultWithIssuer(properties.getJwt().getIssuerUri());
         val audienceValidator = new AudienceValidator(acceptedAudience);
@@ -45,4 +50,5 @@ public class JwtUtils {
             }
         }
     }
+
 }

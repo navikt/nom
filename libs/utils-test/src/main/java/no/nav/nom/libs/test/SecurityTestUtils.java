@@ -43,11 +43,16 @@ public class SecurityTestUtils {
     }
 
     @SneakyThrows
-    public String createToken(JWTClaimsSet.Builder builder) {
+    public SignedJWT createSignedJWT(JWTClaimsSet.Builder builder) {
         val signer = new RSASSASigner(RSA_KEY);
         val signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_KEY.getKeyID()).build(), builder.build());
         signedJWT.sign(signer);
-        return signedJWT.serialize();
+        return signedJWT;
+    }
+
+    @SneakyThrows
+    public String createToken(JWTClaimsSet.Builder builder) {
+        return createSignedJWT(builder).serialize();
     }
 
     @Bean

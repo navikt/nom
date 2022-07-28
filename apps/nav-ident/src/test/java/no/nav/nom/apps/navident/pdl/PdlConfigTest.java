@@ -1,8 +1,8 @@
-package no.nav.nom.apps.navident.common;
+package no.nav.nom.apps.navident.pdl;
 
 import no.nav.nom.apps.navident.SpringBootTestBase;
+import no.nav.nom.apps.navident.pdl.PdlConfig;
 import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
