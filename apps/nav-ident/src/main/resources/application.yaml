@@ -7,7 +7,7 @@ app:
     eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod), også fra start av stream
   pdl:
     tema: GEN
-    baseUrl: ${PDL_BASEURL}
+    baseUrl: ${PDL_BASE_URL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
