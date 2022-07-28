@@ -12,7 +12,7 @@ const outerDiv = css({
 
 const innerDiv = css({
   height: '100%',
-  width: '60%',
+  width: '50%',
   margin: 'auto',
   display: 'flex',
   alignItems: 'center',

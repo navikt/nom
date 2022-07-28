@@ -64,11 +64,6 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         )
     : []
 
-  // const sortedKoblingerFiltered = sortedKoblinger.filter(
-  //   (v, i, a) =>
-  //     a.findIndex((v2) => v2.ressurs.navIdent === v.ressurs.navIdent) === i
-  // )
-
   const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
     if (!leder) return 'Fant ikke leder'
     return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '')
@@ -80,7 +75,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
     }
   }, [])
 
-  console.log(currentEnhet?.leder, 'LEDERRRR')
+  console.log(currentEnhet)
 
   return (
     <div>

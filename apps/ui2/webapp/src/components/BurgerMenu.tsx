@@ -41,6 +41,7 @@ const dropdownContent = css({
   minWidth: '160px',
   boxShadow: '0px 8px 16px 0px rgba(0,0,0,0.2)',
   zIndex: '1',
+  marginTop: '0.3em',
 })
 
 const dropDown = css({
@@ -70,7 +71,7 @@ const BurgerMenu = () => {
         onClick={() => (showMenu ? setShowMenu(false) : setShowMenu(true))}
       >
         <Hamburger className={buttonIcon} />
-        <b>Menu</b>
+        <b>Meny</b>
       </Button>
 
       {showMenu && (

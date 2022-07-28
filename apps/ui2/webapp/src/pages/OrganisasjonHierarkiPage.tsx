@@ -61,7 +61,7 @@ const OrganisasjonHierarkiPage = () => {
     skip: !resourceId,
   })
 
-  //   console.log(extractCurrentEnhet(query.data), 'UNDERENHETER')
+  // console.log(query.data?.organisasjonsenhet?.underenheter)
 
   return (
     <>

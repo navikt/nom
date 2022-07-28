@@ -20,22 +20,22 @@ const innerDiv = css({
   // border: 'solid',
   color: 'black',
   height: '100%',
-  width: '60%',
+  width: '50%',
   margin: 'auto',
   display: 'flex',
   alignItems: 'center',
 })
 
-const titleStyle = css({
-  fontFamily: 'Source Sans Pro',
-  fontStyle: 'normal',
-  fontWeight: '700',
-  fontSize: '24px',
-  lineHeight: '30px',
-  color: NomColors.primaryColor,
-  marginLeft: '1rem',
-  marginRight: '4rem',
-})
+// const titleStyle = css({
+//   fontFamily: 'Source Sans Pro',
+//   fontStyle: 'normal',
+//   fontWeight: '700',
+//   fontSize: '24px',
+//   lineHeight: '30px',
+//   color: NomColors.primaryColor,
+//   marginLeft: '1rem',
+//   marginRight: '4rem',
+// })
 
 const userText = css({
   fontFamily: 'Source Sans Pro',
@@ -44,7 +44,6 @@ const userText = css({
   fontSize: '16px',
   lineHeight: '30px',
   color: NomColors.primaryColor,
-  marginLeft: '0.5rem',
   marginRight: '1rem',
 })
 
@@ -58,7 +57,8 @@ const verticallyCenter = css({
 })
 
 export const searchBarStyle = css({
-  marginRight: '4rem',
+  marginRight: '10rem',
+  width: '20em',
   color: NomColors.primaryColor,
   ':hover': {
     boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
@@ -106,7 +106,11 @@ const NavHeader = () => {
           variant='secondary'
           size='medium'
         ></Search>
-        <PeopleFilled color='#236B7D' fontSize={'2rem'} />
+        <PeopleFilled
+          className={css({ marginRigh: '1em' })}
+          color='#236B7D'
+          fontSize={'2rem'}
+        />
         <span className={userText}>{session}</span>
         <BurgerMenu />
       </div>
