@@ -46,7 +46,7 @@ public class NeedProducer {
                 .build();
         kafkaTemplate.send(topic, need);
 
-        Thread.sleep(2000); // Sleep two seconds to reproduce the synchronization problem
+        Thread.sleep(2000); // Sleep two seconds to try to reproduce the synchronization problem -> should not fail now with the synchronization in IdentServiceImpl
 
         log.debug("Publisert Need melding: %s".formatted(need.maskedToString()));
         return uuid;

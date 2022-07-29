@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
+    // Map contents need to be consistent between thread running bestillIdent(...) and thread listening for the RnR Response
     private Map<String, CountDownLatch> requests = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Respons> responses = Collections.synchronizedMap(new HashMap<>());
 
@@ -33,9 +34,16 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     @Autowired NeedProducer needProducer;
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
-        String uuid = needProducer.produceNeed(idPrefix, personid, type);
         CountDownLatch latch = new CountDownLatch(1);
-        requests.put(uuid, latch);
+        /**
+         * Thread safe consideration.
+         * This block needs to complete before any Response listener tries to fetch the latch from map
+         */
+        String uuid = null;
+        synchronized (this) {
+            uuid = needProducer.produceNeed(idPrefix, personid, type);
+            requests.put(uuid, latch);
+        }
 
         try {
             if (latch.await(5, TimeUnit.SECONDS)) { // First time after pod restart is usually slow.
@@ -86,13 +94,16 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
         Respons respons = need.getRespons();
         responses.put(need.getUuid(), respons);
 
-        CountDownLatch latch =
-                requests.get(need.getUuid());
+        /**
+         * Thread safe consideration
+         * Do not try to find a latch unless bestillIdent threads has fully completed both to produceNeed and put latch onto the map
+         */
+        synchronized (this) {
+            CountDownLatch latch = requests.get(need.getUuid());
 
-        if (latch != null) latch.countDown();
-        if (latch == null) {
-            log.error("We have gotten a RnR Produced Response, but the latch has not been put on requests collection yet.");
-            log.error("E.g. this thread reached execution of line 87, when thread that produced a Need in line 36 has not reached eexecution of line 38");
+            if (latch != null) latch.countDown();
+            if (latch == null)
+                log.error("Got final rnr ResponseProducer=visited message, but latch is not present in the request map. I thought this would not be possible when synchronized.. :(");
         }
 
         MDC.clear();
