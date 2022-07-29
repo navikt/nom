@@ -43,13 +43,11 @@ public class ResponsProdusent {
             id = need.eksisterendeId;
             var ident = navidenter.get(need.eksisterendeId);
             if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
-                code = HttpStatus.NOT_FOUND;
                 feilmelding = "Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet";
-            } else {
-                code = HttpStatus.OK;
             }
+            code = HttpStatus.OK;
         } else if (need.identType == IdentType.STANDARD && (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {
-            code = HttpStatus.NOT_FOUND;
+            code = HttpStatus.CREATED;
             id = need.generertId;
             feilmelding = "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet";
         } else if (need.generertId == null && !need.pdlPersonider.isEmpty()) {
@@ -59,7 +57,6 @@ public class ResponsProdusent {
             code = HttpStatus.CREATED;
             id = need.generertId;
         }
-
 
         Respons respons = Respons.builder()
                 .httpStatus(code)
