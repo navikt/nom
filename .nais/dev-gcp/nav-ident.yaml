@@ -22,8 +22,8 @@ spec:
   webproxy: true
   leaderElection: false
   replicas:
-    min: 1
-    max: 2
+    min: 2
+    max: 3
     cpuThresholdPercentage: 50
     liveness:
       path: internal/health/liveness
