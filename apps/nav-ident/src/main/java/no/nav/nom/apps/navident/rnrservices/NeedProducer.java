@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
@@ -27,6 +28,7 @@ public class NeedProducer {
         return produceNeed(idPrefix, personid, type, LocalDate.now());
     }
 
+    @SneakyThrows
     public String produceNeed(char idPrefix, String personid, IdentType type, LocalDate fraDato) {
         String uuid = UUID.randomUUID().toString();
 
@@ -43,6 +45,8 @@ public class NeedProducer {
                 .identType(type)
                 .build();
         kafkaTemplate.send(topic, need);
+
+        Thread.sleep(2000); // Sleep two seconds to reproduce the synchronization problem
 
         log.debug("Publisert Need melding: %s".formatted(need.maskedToString()));
         return uuid;

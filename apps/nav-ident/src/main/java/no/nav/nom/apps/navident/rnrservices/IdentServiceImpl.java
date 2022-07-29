@@ -14,6 +14,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,8 +26,8 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
-    private Map<String, CountDownLatch> requests = new ConcurrentHashMap<>();
-    private Map<String, Respons> responses = new ConcurrentHashMap<>();
+    private Map<String, CountDownLatch> requests = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, Respons> responses = Collections.synchronizedMap(new HashMap<>());
 
     @Autowired RnRMdcCache rnRMdcCache;
     @Autowired NeedProducer needProducer;
@@ -88,6 +90,10 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                 requests.get(need.getUuid());
 
         if (latch != null) latch.countDown();
+        if (latch == null) {
+            log.error("We have gotten a RnR Produced Response, but the latch has not been put on requests collection yet.");
+            log.error("E.g. this thread reached execution of line 87, when thread that produced a Need in line 36 has not reached eexecution of line 38");
+        }
 
         MDC.clear();
     }
