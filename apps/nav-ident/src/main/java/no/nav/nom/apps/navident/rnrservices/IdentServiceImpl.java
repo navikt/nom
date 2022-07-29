@@ -34,6 +34,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     @Autowired NeedProducer needProducer;
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
+        log.debug("bestillIdent(personId = %s, type = %s, idPrefix = '%s') invokert".formatted(mask(personid), type, idPrefix));
         CountDownLatch latch = new CountDownLatch(1);
         /**
          * Thread safe consideration.
