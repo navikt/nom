@@ -92,14 +92,14 @@ body:
     navident: <ny eller eksisterende navident for angitt personid>
 }
 
-404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL, men vi genererer allikevel navident
+201 CREATED     Angitt personid for ordinær ident finnes ikke i PDL, men vi genererer allikevel navident
 body:
 {
     navident: <ny navident generert>
     feilmelding: "Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet"
 }
 
-404 NOT FOUND       Angitt personid for ordinær ident finnes ikke i PDL, men vi vi fant den som tidligere navident
+200 OK          Angitt personid for ordinær ident finnes ikke i PDL, men vi vi fant den som tidligere navident
 body:
 {
     navident: <ny navident generert>
