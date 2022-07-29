@@ -608,7 +608,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         Respons respons = populatedNeed.respons;
         assertNotNull(respons);
-        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
+        assertEquals(HttpStatus.CREATED, respons.httpStatus);
         assertEquals("C000001",respons.body.navident);
         assertNotNull(respons.body.feilmelding);
     }

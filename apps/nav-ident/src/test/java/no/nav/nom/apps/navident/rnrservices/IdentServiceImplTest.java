@@ -106,7 +106,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
-        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus); // gha HTTP 500 times - x
+        assertEquals(HttpStatus.CREATED, respons.httpStatus); // gha HTTP 500 times - x
         assertEquals("A100001", respons.body.getNavident());
         assertNotNull(respons.body.getFeilmelding());
     }
@@ -119,7 +119,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
-        assertEquals(HttpStatus.NOT_FOUND, respons.httpStatus);
+        assertEquals(HttpStatus.OK, respons.httpStatus);
         assertEquals(KNYTNING_FINNES_1_NavId, respons.body.getNavident());
         assertNotNull(respons.body.getFeilmelding());
     }
