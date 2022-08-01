@@ -4,6 +4,8 @@ type Mutation {
 
     opprettRessurs2(request: OpprettRessursRequest2): OpprettRessursResponse2
 
+    opprettRessurs0(request: OpprettRessursRequest0): OpprettRessursResponse0
+
     # OrdreLinje
     ordreRessurs(request: OpprettRessursRequest!): OrdreLinjeResponse!
     opprettEnhet(request: OpprettEnhetRequest!): OrdreLinjeResponse!
@@ -17,6 +19,15 @@ type Mutation {
 
 # Requests
 
+input OpprettRessursRequest0 {
+    personident: String!
+    visningsfornavn: String!
+    visningsetternavn: String!
+    sektor: Sektor!
+    orgEnhet: String
+    startDato: Date
+}
+
 input OrdreLinjeRequestMetadata {
     # Request set/Endringspakke, valgfri, bruk for å legge til eksisterende pakke
     ordreId: ID
@@ -24,8 +35,8 @@ input OrdreLinjeRequestMetadata {
 }
 
 input OpprettRessursRequest  {
-    personIdent: String!    @deprecated(reason: "personIdent er erstattet med personident")
-    personident: String!
+    personIdent: String    @deprecated(reason: "personIdent er erstattet med personident")
+    personident: String
     visningsnavn: String
 }
 
@@ -46,6 +57,14 @@ input EditOrdreRequest {
 }
 
 # Responses
+
+type OpprettRessursResponse0 {
+    personident: String!
+    navident: String!
+    visningsfornavn: String!
+    visningsetternavn: String!
+    sektor: Sektor!
+}
 
 type OrdreLinjeResponse  {
     ordreLinje: OrdreLinje!

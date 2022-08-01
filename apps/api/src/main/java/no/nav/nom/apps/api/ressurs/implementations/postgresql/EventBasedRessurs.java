@@ -15,6 +15,9 @@ public class EventBasedRessurs implements RessursI {
 
     public final static String NAVIDENT_FIELD = "navident";
     public final static String PERSONIDENT_FIELD = "personident";
+    public final static String VISNINGSFORNAVN_FIELD = "visningsfornavn";
+    public final static String VISNINGSETTERNAVN_FIELD = "visningsetternavn";
+    public final static String SEKTOR_FIELD = "sektor";
 
     private final List<IHendelse> hendelser;
 
@@ -39,6 +42,19 @@ public class EventBasedRessurs implements RessursI {
     @Override
     public String getNavIdent() {
         return getLast(NAVIDENT_FIELD).orElseThrow();
+    }
+
+    @Override
+    public String getVisningsfornavn() {
+        return getLast(VISNINGSFORNAVN_FIELD).orElseThrow();
+    }
+    @Override
+    public String getVisningsetternavn() {
+        return getLast(VISNINGSETTERNAVN_FIELD).orElseThrow();
+    }
+    @Override
+    public String getSektor() {
+        return getLast(SEKTOR_FIELD).orElseThrow();
     }
 
     private Optional<String> getLast(String property) {

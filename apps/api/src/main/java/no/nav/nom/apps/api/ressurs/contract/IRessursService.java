@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.contract;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 
@@ -14,6 +15,7 @@ public interface IRessursService {
     Map<String, RessursI> findByNavIdentBulk(List<String> navIdenter);
     List<RessursI> getAll();
     RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
+    RessursI opprettRessurs0(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
     Ressurs convertToGraphQlResponse(RessursI ressurs);
     List<RessursI> matchByNavident(String navident);
 }

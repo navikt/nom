@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.implementations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.common.security.AuthenticationProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
@@ -62,6 +63,12 @@ public class RessursService implements IRessursService {
     @Transactional
     public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
         return eventBasedRessursService.opprettRessurs(personIdent, navIdent, navIdentForbokstav, hendelseMetadata);
+    }
+
+    @Override
+    @Transactional
+    public RessursI opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize metadata) {
+        return eventBasedRessursService.opprettRessurs0(personident, data, metadata);
     }
 
     @Override

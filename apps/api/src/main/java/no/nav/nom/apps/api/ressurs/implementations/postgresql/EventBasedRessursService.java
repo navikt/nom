@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.implementations.postgresql;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -95,6 +96,17 @@ public class EventBasedRessursService {
             repository.save(hendelseService.convert(event));
 
             return findByFid(event.getFid()).orElse(null);
+        });
+    }
+
+    @Transactional
+    public RessursI opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
+        return findByPersonIdent(personident).orElseGet(() -> {
+            val event = hendelseService.createOpprettHendelse(data, hendelseMetadataSerialize, HendelseDataType.RESSURS_V1);
+            repository.save(hendelseService.convert(event));
+
+            return findByFid(event.getFid()).orElse(null);
+
         });
     }
 

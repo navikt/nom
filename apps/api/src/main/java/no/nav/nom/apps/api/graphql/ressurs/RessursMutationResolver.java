@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
@@ -11,14 +12,18 @@ import lombok.val;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
+import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest2;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse2;
-import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
+import no.nav.nom.contract.nom.api.graphql.Sektor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +38,54 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
 
     private final IRessursService ressursService;
     private final PdlConsumer pdlConsumer;
+    private final NIKConsumer nikConsumer;
     private final SecurityUtil securityUtil;
     private final RessursHendelseRepository ressursHendelseRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${app.graphql.preauth.mutation.ressurs}")
     private List<String> preauth;
+
+    public DataFetcherResult<OpprettRessursResponse0> opprettRessurs0(OpprettRessursRequest0 request, DataFetchingEnvironment env) {
+        return securityUtil.<OpprettRessursResponse0>checkAuth(env, preauth).orElseGet(() -> {
+            System.out.println("Resolver 1");
+            val response = DataFetcherResult.<OpprettRessursResponse0>newResult();
+            val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
+                System.out.println("Resolver 2");
+                try {
+                    val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1));
+                    System.out.println("Resolver 3");
+                    if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
+                        val data = objectMapper.createObjectNode()
+                                .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
+                                .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
+                                .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn())
+                                .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn())
+                                .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
+                        val metadata = securityUtil.metadataFromEnv(env, data);
+                        val newRessurs = ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
+                        response.error(resolveError(nikResponse.getStatusCode(), nikResponse.getBody().getFeilmelding(),env));
+
+                        return newRessurs;
+                    }
+
+                    response.error(resolveError(nikResponse.getStatusCode(),nikResponse.getBody().getFeilmelding(), env));
+                } catch (IllegalArgumentException | NoSuchElementException e) {
+                    System.out.println("Exception 1");
+                    log.warn(e.getMessage(), e);
+                    response.error(ErrorCode.BAD_REQUEST.construct(env, e.getMessage()));
+                } catch (Exception e) {
+                    System.out.println("Exception 2");
+                    log.error("Intern feil ved opprettelse av ny ressurs", e);
+                    response.error(ErrorCode.SERVER_ERROR.construct(env, "Intern feil"));
+                }
+
+
+                return null;
+            });
+            return response.data(toResponse((EventBasedRessurs) ressurs)).build();
+        });
+    }
 
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(String personIdent, Optional<String> forbokstav, DataFetchingEnvironment env) {
         return securityUtil.<OpprettRessursResponse>checkAuth(env, preauth).orElseGet(() -> {
@@ -118,5 +165,25 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                 .personIdent(ressurs.getPersonIdent())
                 .person(person)
                 .build();
+    }
+
+    private OpprettRessursResponse0 toResponse(EventBasedRessurs ressurs) {
+        return ressurs != null ?
+                OpprettRessursResponse0.builder()
+                .personident(ressurs.getPersonIdent())
+                .navident(ressurs.getNavIdent())
+                .visningsfornavn(ressurs.getVisningsfornavn())
+                .visningsetternavn(ressurs.getVisningsetternavn())
+                .sektor(Sektor.valueOf(ressurs.getSektor()))
+                .build(): null;
+    }
+
+    private GraphQLError resolveError(HttpStatus httpStatus, String errorMsg, DataFetchingEnvironment env) {
+        return errorMsg != null ?
+                switch (httpStatus) {
+                    case INTERNAL_SERVER_ERROR -> ErrorCode.SERVER_ERROR.construct(env, errorMsg);
+                    case NOT_FOUND -> ErrorCode.NOT_FOUND.construct(env, errorMsg);
+                    default -> ErrorCode.SERVER_ERROR.construct(env, "Ukjent feil");
+                } : null;
     }
 }

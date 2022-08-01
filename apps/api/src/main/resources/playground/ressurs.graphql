@@ -93,17 +93,12 @@ query HentRessursFullpakke($navIdent: String!) {
     }
 }
 
-mutation opprettRessurs($personIdent: String!) {
-    opprettRessurs(personIdent: $personIdent) {
-        nomId
-        navIdent
-        personIdent
-        person{
-            navn{
-                fornavn
-                mellomnavn
-                etternavn
-            }
-        }
+mutation opprettRessurs($request: OpprettRessursRequest0!) {
+    opprettRessurs0(request: $request) {
+        navident
+        personident
+        visningsfornavn
+        visningsetternavn
+        sektor
     }
 }
