@@ -4,13 +4,14 @@ app:
   pdl:
     tema: GEN
     baseUrl: http://localhost:${wiremock.server.port}
+  nik:
+    baseUrl: http://localhost:${wiremock.server.port}
   graphql:
     preauth:
       query:
         person: testSubject
       mutation:
         ressurs: testSubject
-
 
 authentication:
   aad:
