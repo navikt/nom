@@ -9,7 +9,7 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
-    - name: NIK_BASE_URL
+    - name: NIK_BASEURL
       value: https://nav-ident.dev.intern.nav.no
     - name: PDL_BASEURL
       value: https://pdl-api.dev-fss-pub.nais.io
