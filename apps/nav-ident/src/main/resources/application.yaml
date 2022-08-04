@@ -31,7 +31,7 @@ authentication:
     clientId: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
-management.endpoints.web.exposure.include: prometheus,health,scheduledtasks,mappings
+management.endpoints.web.exposure.include: prometheus,health,mappings,flyway,info,loggers,metrics
 
 spring:
   main:
