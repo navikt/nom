@@ -44,6 +44,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test klasse for å teste applikasjonen satt opp med integrasjon til andre løsninger.
  *
+ * Pass på å fylle i verdier i application-e2e-local.yaml
+ * Også ny gyldig JWT
+ *
  * Redis - Embedded
  * Kafka - Embedded
  * Postgres - Embedded H2

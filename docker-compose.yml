@@ -19,6 +19,14 @@ services:
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-ressurs'
+  postgres-navident:
+    image: 'postgres:alpine'
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'postgres-navident'
+
   zookeeper-server:
     image: 'bitnami/zookeeper:latest'
     networks:
@@ -37,7 +45,7 @@ services:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-server:2181
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CREATE_TOPICS=aapen-nom-ressurs-v1:1:1:compact, aapen-skjermede-personer-v1:1:1:compact
+      - KAFKA_CREATE_TOPICS=aapen-nom-ressurs-v1:1:1:compact, aapen-skjermede-personer-v1:1:1:compact, nav-ident:1:1:delete, nav-ident-rnr:1:1::delete
     depends_on:
       - zookeeper-server
   pgadmin:
@@ -51,6 +59,12 @@ services:
       - "8089:80"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+
+  redis-server:
+    container_name: redis
+    image: 'redis'
+    ports:
+      - "6379:6379"
 
 volumes:
   pgadmin-data:

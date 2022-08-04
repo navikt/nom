@@ -27,21 +27,14 @@ PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 KAFKA_BROKERS: "localhost:9092"
 spring.kafka.properties.security.protocol: PLAINTEXT
 
-# Embedded postgres
-spring.datasource.url: jdbc:h2:mem:test_db
-spring.datasource.driverClassName: org.h2.Driver
-
-
-# DATABASE_HOST: localhost
-# DATABASE_PORT: 5432
-# DATABASE_DATABASE: postgres-api
-# DATABASE_USERNAME: postgres
-# DATABASE_PASSWORD: password
+# DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
+DATABASE_HOST: localhost
+DATABASE_PORT: 5434
+DATABASE_DATABASE: postgres-navident
+DATABASE_USERNAME: postgres
+DATABASE_PASSWORD: password
 
 #Embedded redis
 REDIS_HOST: "localhost"
 
 server.port: 8081
-
-e2e.aad.testuser:   Z bruker fra Ida/Dolly
-e2e.aad.testpwd:
