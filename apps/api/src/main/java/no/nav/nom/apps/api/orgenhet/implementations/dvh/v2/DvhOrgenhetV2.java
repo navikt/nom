@@ -59,10 +59,10 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public Optional<LocalDate> getGyldigTom(){
-        val dateToUse = agressoGyldigTom.equals("0") || agressoGyldigTom.equals("209999") ? "209912" : agressoGyldigTom;
+        val dateToUse = !orgNiv.equals("ORGENHET") || agressoGyldigFom.equals("0") || agressoGyldigTom.equals("209999") ? null : agressoGyldigTom;
         return Optional.ofNullable(
                 getDate(getLastDay(dateToUse)).orElseGet(() ->
-                        orgenhetStatus.equals("P") ? getDate(stillingMaksDato).orElse(null) : null
+                        orgenhetStatus.equals("P") && orgNiv.equals("ORGENHET") ? getDate(stillingMaksDato).orElse(null) : null
                 )
         );
     }
@@ -73,8 +73,11 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     private LocalDate getLastDay(String yyyyMM){
-        LocalDate convertedDate = getFirstDay(yyyyMM);
-        return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
+        if(yyyyMM != null) {
+            LocalDate convertedDate = getFirstDay(yyyyMM);
+            return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
+        }
+        return null;
     }
 
     private LocalDate getFirstDay(String yyyyMM){

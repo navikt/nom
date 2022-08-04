@@ -44,6 +44,10 @@ public class DvhOrgenhetMockUtils {
         createResponse(response);
     }
 
+    public void recreateResponse(){
+        createResponse(response);
+    }
+
     @SneakyThrows
     private void createResponse(List<DvhOrgenhetMock> orgenhetMocks){
         val response = objectMapper.createObjectNode();

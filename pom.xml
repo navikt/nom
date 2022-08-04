@@ -49,7 +49,7 @@
         <nimbus.jose.jwt-version>9.15.2</nimbus.jose.jwt-version>
 
         <unleash.version>5.1.0</unleash.version>
-        <org.testcontainers.prostgresql>1.16.3</org.testcontainers.prostgresql>
+        <org.testcontainers.prostgresql>1.17.3</org.testcontainers.prostgresql>
 
         <snyk-plugin.version>2.0.0</snyk-plugin.version>
         <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
@@ -59,7 +59,7 @@
 
         <snyk-api-token>placeholder</snyk-api-token>
 
-        <org.testcontainers.kafka.version>1.17.2</org.testcontainers.kafka.version>
+        <org.testcontainers.kafka.version>1.17.3</org.testcontainers.kafka.version>
         <awaitility.version>4.2.0</awaitility.version>
         <awaitility-proxy.version>3.1.6</awaitility-proxy.version>
     </properties>

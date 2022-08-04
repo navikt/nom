@@ -27,6 +27,8 @@ public class DvhOrgenhetMock {
     private int ORGENHET_TIL_PERIODE;
     @JsonProperty("STILLING_MAKS_GYLDIG_TIL_DATO")
     private LocalDate STILLING_MAKS_GYLDIG_TIL_DATO;
+    @JsonProperty("LEDER_RESSURSNR")
+    private String LEDER_RESSURSNR;
     @JsonProperty("LASTET_DATO")
     private LocalDate LASTET_DATO;
 
