@@ -82,5 +82,6 @@ apps/ui/src/main/resources/public/**
 apps/ui/**/node_modules/
 apps/ui/**/build/
 
-*LocalOnly*
+# *LocalOnly*
 **/application-local.yaml
+**/application-e2e-local.yaml

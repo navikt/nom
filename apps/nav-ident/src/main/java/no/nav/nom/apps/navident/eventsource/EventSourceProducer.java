@@ -35,6 +35,7 @@ public class EventSourceProducer {
         mdcCache.loadMdc(need.getUuid());
 
         if (need.isResponsProdusentVisited() && need.getRespons() != null && List.of(HttpStatus.OK, HttpStatus.CREATED).contains(need.getRespons().getHttpStatus())) {
+            log.debug("Producing and persisting SourceEvent for need: %s".formatted(need.maskedToString()));
             val responseBody = need.getRespons().getBody();
             val sourceEvent = SourceEvent.builder()
                     .event(EventType.OPPRETT)
@@ -53,6 +54,8 @@ public class EventSourceProducer {
             val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
 
             producer.send(eventSourceTopic, persistedSourceEvent);
+
+            log.debug("Persisted SourceEvent posted: %s".formatted(persistedSourceEvent.maskedToString()));
 
             MDC.clear();
         }
