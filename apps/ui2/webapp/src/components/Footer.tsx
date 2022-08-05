@@ -3,10 +3,12 @@ import { BodyLong } from '@navikt/ds-react/esm/typography'
 import { Link } from 'react-router-dom'
 import { slackNom } from './Images'
 
+export const footerHeigth = '9.5rem'
+
 const outerDiv = css({
   width: '100%',
   bottom: '0',
-  height: '9.5rem',
+  height: footerHeigth,
   background: '#134852',
 })
 

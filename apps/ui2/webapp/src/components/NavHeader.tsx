@@ -12,7 +12,7 @@ import { NomColors } from '../resources/NomStyles'
 export const headerHeight = '6rem'
 
 const outerDiv = css({
-  height: '6rem',
+  height: headerHeight,
   width: '100%',
 })
 

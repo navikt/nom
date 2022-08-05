@@ -8,11 +8,11 @@ import { apolloClient } from './api/apolloclient'
 import { css } from '@emotion/css'
 import AppRoutes from './routes'
 import NavHeader, { headerHeight } from './components/NavHeader'
-import Footer from './components/Footer'
+import Footer, { footerHeigth } from './components/Footer'
 
 const layoutStyle = css({
   backgroundColor: '#F1F1F1',
-  minHeight: `calc(100vh - ${headerHeight})`,
+  minHeight: `calc(100vh - ${headerHeight} - ${footerHeigth})`,
   width: '100%',
   display: 'flex',
 })

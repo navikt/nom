@@ -19,6 +19,7 @@ const scrollToRef = (ref: any) =>
   window.scrollTo(0, ref.current.offsetTop - 100)
 
 const linkStyles = css({ textDecoration: 'none', color: '#262626' })
+
 const ressursLinkStyles = css({
   display: 'flex',
   marginTop: '30px',
