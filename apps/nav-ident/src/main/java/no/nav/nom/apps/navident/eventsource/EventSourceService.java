@@ -3,11 +3,11 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
-import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.ConsumerSeekAware;
+import org.springframework.kafka.event.ListenerContainerIdleEvent;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 
@@ -17,13 +17,11 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class EventSourceService implements ConsumerSeekAware {
+public class EventSourceService {
 
-    @Value("${app.kafka.topic.eventsource.name}") private final String topic;
-    private final EventSourceOffsetProbe eventSourceOffsetProbe;
+    @Value("${app.kafka.eventSourceListenerName}") public final String listenerId;
     private final Map<String, Navident> navidenter;
 
-    private long endOffsetOnStartup = -1;
     private boolean hasReadToEndOnStartup = false;
 
     @KafkaListener(
@@ -31,10 +29,6 @@ public class EventSourceService implements ConsumerSeekAware {
             topics = "${app.kafka.topic.eventsource.name}")
     public void listen(SourceEvent event, @Header(KafkaHeaders.OFFSET) long currentOffset) {
         log.debug("Got SourceEvent on offset %d: %s".formatted(currentOffset, event.maskedToString()));
-
-        if (!hasReadToEndOnStartup) {
-            readToEndOnStartup(currentOffset);
-        }
 
         try {
             // Update domain model with sourced event
@@ -53,7 +47,6 @@ public class EventSourceService implements ConsumerSeekAware {
     public boolean hasAllSourceEventsBeenRead() {
         return hasReadToEndOnStartup;
     }
-
 
     private void handleCreateEvent(SourceEvent event) {
         String navid =  event.payload.navident;
@@ -96,25 +89,14 @@ public class EventSourceService implements ConsumerSeekAware {
         log.debug("Fjernet navident %s fra domain".formatted(navident));
     }
 
+    @EventListener
+    public void eventHandler(ListenerContainerIdleEvent event) {
+        if (hasReadToEndOnStartup) return;
 
-    private void readToEndOnStartup(long currentOffset) {
-        log.debug("OnStartup reading offset %d with max offset as %d".formatted(currentOffset, endOffsetOnStartup));
-        if (currentOffset >= endOffsetOnStartup) {
+        log.debug("Idle event received for listener %s. Waiting for listener %s".formatted(event.getListenerId(), listenerId));
+        if (event.getListenerId().startsWith(listenerId)) {
             log.info("All SourceEvents has now been read on startup");
             hasReadToEndOnStartup = true;
         }
-    }
-
-
-
-    @Override
-    public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekAware.ConsumerSeekCallback callback)  {
-        log.debug("onPartitionsAssigned for EventSourceListener");
-        long lastOffset = eventSourceOffsetProbe.findLastOffsetOnTopic(topic);
-        if (lastOffset < 0) {
-            log.info("Topic is empty on startup, setting 'hasReadToEndOnStartup = true'");
-            hasReadToEndOnStartup = true;
-        }
-        endOffsetOnStartup = lastOffset;
     }
 }

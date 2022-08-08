@@ -18,8 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 class EventSourceServiceTest extends EmbeddedKafkaTestBase {
-    @Autowired private EventSourceService eventSourceService;
-
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
     @Autowired private Map<String, Navident> navidenter;
     @Value("${test.topic}")  private String topic;
@@ -27,7 +25,6 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
 
     @BeforeEach
     public void resetDomain() {
-        await().atMost(5, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
         navidenter.clear();
     }
 

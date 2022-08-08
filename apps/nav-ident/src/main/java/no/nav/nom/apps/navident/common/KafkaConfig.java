@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident.common;
 
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.rnrservices.Need;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +24,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SourceEvent>> kafkaListenerContainerFactory(ConsumerFactory<String, SourceEvent> consumerFactory) {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SourceEvent>>
+            kafkaListenerContainerFactory(ConsumerFactory<String, SourceEvent> consumerFactory,
+                                          @Value("${app.kafka.eventSourceIdleTimeout}") Long idleTimeout) {
         var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, SourceEvent>();
         concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
+
+        concurrentKafkaListenerContainerFactory.getContainerProperties().setIdleEventInterval(idleTimeout);
 
         return concurrentKafkaListenerContainerFactory;
     }

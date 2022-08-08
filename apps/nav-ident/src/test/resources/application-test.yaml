@@ -45,6 +45,7 @@ app:
     topic.rnr.name: ${test.rnr-topic}
     identServiceListenerName: IdentService
     eventSourceListenerName: EventSourceListener
+    eventSourceIdleTimeout: 300 # Millis - For testing this can be set low
 
   pdl:
     tema: GEN
