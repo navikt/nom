@@ -36,7 +36,7 @@ public class EventSourceOffsetProbe {
                         }
             });
 
-            consumer.poll(Duration.ofMillis(100)); // Need to give some time for partitions to be assigned
+            consumer.poll(Duration.ofMillis(1000)); // Need to give some time for partitions to be assigned
 
             long lastOffset = consumer.assignment().stream().mapToLong(consumer::position).max().orElse(0) - 1;
             log.info("Max offset for EventSource on startup: %d".formatted(lastOffset));
