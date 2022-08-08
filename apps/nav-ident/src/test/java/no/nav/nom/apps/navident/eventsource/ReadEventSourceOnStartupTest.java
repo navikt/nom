@@ -30,7 +30,6 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     @Autowired private EventSourceService eventSourceService;
 
     @Value("${test.topic}")  private String topic;
-    @Value("${app.kafka.eventSourceListenerName}") private String eventSourceListenerName;
 
     @MockBean EventSourceOffsetProbe eventSourceOffsetProbe;
 
@@ -38,7 +37,6 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     @Test
     @SneakyThrows
     public void readEventSourceOnStartup() {
-
         doAnswer(prepopulateThenProbe -> {
                 populateTopicOnStartup();
                 return (new EventSourceOffsetProbe(consumerFactory)).findLastOffsetOnTopic(topic);
@@ -46,7 +44,7 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
                 .when(eventSourceOffsetProbe)
                 .findLastOffsetOnTopic(anyString());
 
-        await().atMost(5, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
+        await().atMost(10, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
 
         assertEquals(10, navidenter.size());
     }

@@ -1,10 +1,8 @@
 package no.nav.nom.apps.navident.eventsource;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -111,6 +109,7 @@ public class EventSourceService implements ConsumerSeekAware {
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekAware.ConsumerSeekCallback callback)  {
+        log.debug("onPartitionsAssigned for EventSourceListener");
         long lastOffset = eventSourceOffsetProbe.findLastOffsetOnTopic(topic);
         if (lastOffset < 0) {
             log.info("Topic is empty on startup, setting 'hasReadToEndOnStartup = true'");
