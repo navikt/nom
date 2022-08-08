@@ -1,11 +1,11 @@
 package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -83,17 +83,17 @@ public class EventBasedOrgenhet implements IOrgenhet {
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
-                .filter(e -> e.getHendelseData().hasNonNull(property))
+                .filter(e -> e.getHendelseData().has(property))
                 .map(e -> e.getHendelseData().get(property))
-                .map(JsonNode::asText)
-                .reduce((a, b) -> b);
-    }
-
-    public List<IHendelse> getHendelser(){
-        return hendelser;
+                .reduce((a, b) -> b)
+                .map(e -> !e.isNull() ? e.asText() : null);
     }
 
     public void addHendelse(IHendelse hendelse){
         hendelser.add(hendelse);
+    }
+
+    public List<IHendelse> getHendelser(){
+        return Collections.unmodifiableList(hendelser);
     }
 }
