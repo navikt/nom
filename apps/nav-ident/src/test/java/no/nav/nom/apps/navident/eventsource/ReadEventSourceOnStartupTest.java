@@ -12,18 +12,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 
+import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
@@ -36,7 +34,6 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     @Value("${test.topic}")  private String topic;
 
     @MockBean EventSourceOffsetProbe eventSourceOffsetProbe;
-
 
     @Test
     @SneakyThrows
