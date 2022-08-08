@@ -37,7 +37,7 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
 
     @Test
     @SneakyThrows
-//    @Disabled //Bug ved å kjøre denne på GHA....
+    @Disabled //Bug ved å kjøre denne på GHA....
     public void readEventSourceOnStartup() {
 
         when(eventSourceOffsetProbe.findLastOffsetOnTopic(anyString())).thenAnswer( prepopulate -> {
