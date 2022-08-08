@@ -33,11 +33,13 @@ public class EventSourceOffsetProbe {
                         @Override
                         public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
                             consumer.seekToEnd(partitions);
+                            log.debug("After probe seekToEnd onPartitionsAssigned");
                         }
             });
 
             consumer.poll(Duration.ofMillis(1000)); // Need to give some time for partitions to be assigned
 
+            log.debug("Probe consumer got assignments: " + consumer.assignment());
             long lastOffset = consumer.assignment().stream().mapToLong(consumer::position).max().orElse(0) - 1;
             log.info("Max offset for EventSource on startup: %d".formatted(lastOffset));
 

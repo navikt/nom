@@ -19,7 +19,7 @@ import java.util.Map;
 @Slf4j
 public class EventSourceService implements ConsumerSeekAware {
 
-    @Value("${app.kafka.eventSourceListenerName}") private final String topic;
+    @Value("${app.kafka.topic.eventsource.name}") private final String topic;
     private final EventSourceOffsetProbe eventSourceOffsetProbe;
     private final Map<String, Navident> navidenter;
 
