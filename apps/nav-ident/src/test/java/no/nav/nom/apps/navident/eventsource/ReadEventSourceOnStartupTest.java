@@ -13,11 +13,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,14 +40,22 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     @Test
     @SneakyThrows
     public void readEventSourceOnStartup() {
-        doAnswer(prepopulateThenProbe -> {
-                populateTopicOnStartup();
-                return (new EventSourceOffsetProbe(consumerFactory)).findLastOffsetOnTopic(topic);
-            })
-                .when(eventSourceOffsetProbe)
-                .findLastOffsetOnTopic(anyString());
 
-        await().atMost(10, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
+        when(eventSourceOffsetProbe.findLastOffsetOnTopic(anyString())).thenAnswer( prepopulate -> {
+                    populateTopicOnStartup();
+                    return (new EventSourceOffsetProbe(consumerFactory)).findLastOffsetOnTopic(topic);
+                }
+        );
+
+//        doAnswer(prepopulateThenProbe -> {
+//
+//                populateTopicOnStartup();
+//                return (new EventSourceOffsetProbe(consumerFactory)).findLastOffsetOnTopic(topic);
+//            })
+//                .when(eventSourceOffsetProbe)
+//                .findLastOffsetOnTopic(anyString());
+
+        await().atMost(5, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
 
         assertEquals(10, navidenter.size());
     }
