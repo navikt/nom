@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.common;
 
 import lombok.AllArgsConstructor;
+import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.availability.ApplicationAvailability;
@@ -10,9 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class StartupProbeHealthIndicator implements HealthIndicator {
+public class StartupStateHealthIndicator implements HealthIndicator {
 
     private ApplicationAvailability applicationAvailability;
+    private EventSourceService eventSourceService;
 
     @Override
     public Health health() {
@@ -27,8 +29,7 @@ public class StartupProbeHealthIndicator implements HealthIndicator {
     }
 
     private boolean hasAllSourceEventsBeenRead() {
-        // TODO: Implement me
-        return true;
+        return eventSourceService.hasAllSourceEventsBeenRead();
     }
 }
 

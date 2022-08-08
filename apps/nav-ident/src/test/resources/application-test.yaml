@@ -71,3 +71,7 @@ nom:
 logging:
   level:
     no.nav.nom: DEBUG
+#    org:
+#      springframework:
+#        kafka:
+#          core: TRACE

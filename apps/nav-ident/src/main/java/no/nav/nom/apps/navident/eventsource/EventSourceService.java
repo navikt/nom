@@ -1,10 +1,17 @@
 package no.nav.nom.apps.navident.eventsource;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.listener.ConsumerSeekAware;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -12,14 +19,24 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
-public class EventSourceService {
+public class EventSourceService implements ConsumerSeekAware {
+
+    @Value("${app.kafka.eventSourceListenerName}") private final String topic;
+    private final EventSourceOffsetProbe eventSourceOffsetProbe;
     private final Map<String, Navident> navidenter;
+
+    private long endOffsetOnStartup = -1;
+    private boolean hasReadToEndOnStartup = false;
 
     @KafkaListener(
             id = "${app.kafka.eventSourceListenerName}",
             topics = "${app.kafka.topic.eventsource.name}")
-    public void listen(SourceEvent event) {
-        log.debug(event.maskedToString());
+    public void listen(SourceEvent event, @Header(KafkaHeaders.OFFSET) long currentOffset) {
+        log.debug("Got SourceEvent on offset %d: %s".formatted(currentOffset, event.maskedToString()));
+
+        if (!hasReadToEndOnStartup) {
+            readToEndOnStartup(currentOffset);
+        }
 
         try {
             // Update domain model with sourced event
@@ -33,6 +50,10 @@ public class EventSourceService {
             log.error(error);
             log.debug("Callstack:", e);
         }
+    }
+
+    public boolean hasAllSourceEventsBeenRead() {
+        return hasReadToEndOnStartup;
     }
 
 
@@ -75,5 +96,26 @@ public class EventSourceService {
         }
         navidenter.remove(navident);
         log.debug("Fjernet navident %s fra domain".formatted(navident));
+    }
+
+
+    private void readToEndOnStartup(long currentOffset) {
+        log.debug("OnStartup reading offset %d with max offset as %d".formatted(currentOffset, endOffsetOnStartup));
+        if (currentOffset >= endOffsetOnStartup) {
+            log.info("All SourceEvents has now been read on startup");
+            hasReadToEndOnStartup = true;
+        }
+    }
+
+
+
+    @Override
+    public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekAware.ConsumerSeekCallback callback)  {
+        long lastOffset = eventSourceOffsetProbe.findLastOffsetOnTopic(topic);
+        if (lastOffset < 0) {
+            log.info("Topic is empty on startup, setting 'hasReadToEndOnStartup = true'");
+            hasReadToEndOnStartup = true;
+        }
+        endOffsetOnStartup = lastOffset;
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -19,12 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 class EventSourceServiceTest extends EmbeddedKafkaTestBase {
+    @Autowired private EventSourceService eventSourceService;
+
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
     @Autowired private Map<String, Navident> navidenter;
     @Value("${test.topic}")  private String topic;
 
+
     @BeforeEach
     public void resetDomain() {
+        await().atMost(5, SECONDS).pollInterval(10, MILLISECONDS).until(eventSourceService::hasAllSourceEventsBeenRead);
         navidenter.clear();
     }
 
@@ -99,10 +102,6 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
     }
 
     private SourceEvent getOpprettEvent(String navid, String personid) {
-        return getOpprettEvent(navid, personid, LocalDate.now());
-    }
-
-    private SourceEvent getOpprettEvent(String navid, String personid, LocalDate fraDato) {
         return SourceEvent.builder()
                 .bestiller("Test-bestiller")
                 .event(EventType.OPPRETT)
