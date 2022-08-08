@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.eventsource;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@Slf4j
 class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;
     @Autowired private Map<String, Navident> navidenter;
@@ -42,6 +43,7 @@ class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {
     public void readEventSourceOnStartup() {
 
         when(eventSourceOffsetProbe.findLastOffsetOnTopic(anyString())).thenAnswer( prepopulate -> {
+                    log.debug("Inside mock to prepopulate EventSource queue");
                     populateTopicOnStartup();
                     return (new EventSourceOffsetProbe(consumerFactory)).findLastOffsetOnTopic(topic);
                 }
