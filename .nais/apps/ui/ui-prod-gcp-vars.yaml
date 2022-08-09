@@ -12,7 +12,7 @@ env:
   - name: TEAM_CATALOG_SCOPE
     value: api://prod-fss.nom.team-catalog-backend/.default
   - name: DEFAULT_BASE_URL
-    value: https://nom-ui2.intern.nav.no
+    value: https://nom.nav.no
   - name: NODE_ENV
     value: production
 azure:
