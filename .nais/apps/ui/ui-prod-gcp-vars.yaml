@@ -1,7 +1,7 @@
 name: nom-ui2
 ingresses:
   - https://nom-ui2.intern.nav.no
-  - https://nom-ui.nav.no
+  - https://nom.nav.no
 env:
   - name: NOM_API_URL
     value: https://nom-api.intern.nav.no
@@ -20,7 +20,7 @@ azure:
     tenant: nav.no
     replyURLs:
       - https://nom-ui2.intern.nav.no/login/aad/callback
-      - https://nom-ui.nav.no/login/aad/callback
+      - https://nom.nav.no/login/aad/callback
 
 
 accessPolicy:

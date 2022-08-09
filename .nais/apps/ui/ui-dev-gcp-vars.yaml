@@ -1,6 +1,7 @@
 name: nom-ui2
 ingresses:
   - https://nom-ui2.dev.intern.nav.no
+  - https://nom.dev.nav.no
 env:
   - name: NOM_API_URL
     value: https://nom-api.dev.intern.nav.no
@@ -18,6 +19,7 @@ azure:
   application:
     tenant: trygdeetaten.no
     replyURLs:
+      - https://nom.dev.nav.no/login/aad/callback
       - https://nom-ui2.dev.intern.nav.no/login/aad/callback
       - http://localhost:3000/login/aad/callback
       - http://localhost:8080/login/aad/callback
