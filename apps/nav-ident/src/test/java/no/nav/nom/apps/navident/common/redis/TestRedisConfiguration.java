@@ -15,7 +15,8 @@ public class TestRedisConfiguration {
     private RedisServer redisServer;
 
     public TestRedisConfiguration(@Value("${spring.redis.port}") final int redisPort) {
-        this.redisServer = new RedisServer(redisPort);
+        //this.redisServer = new RedisServer(redisPort);
+        this.redisServer = RedisServer.builder().setting("maxmemory 16MB").port(redisPort).setting("bind localhost").build();
         log.debug("Redis port(s): ".formatted(this.redisServer.ports()));
     }
 
