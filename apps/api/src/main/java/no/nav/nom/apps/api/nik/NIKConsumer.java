@@ -19,14 +19,12 @@ public class NIKConsumer {
     private String appName;
 
     private final WebClient webClient;
-
-    private final String IDENT_TYPE = "STANDARD";
-
-    public ResponseEntity<OpprettNavidentResponse> opprettNavident(String personid, String forbokstav) {
+    
+    public ResponseEntity<OpprettNavidentResponse> opprettNavident(String personid, String forbokstav, String identType) {
         val body = OpprettNavidentRequest.builder()
                 .personident(personid)
                 .forbokstav(forbokstav)
-                .identType(IDENT_TYPE)
+                .identType(identType)
                 .build();
 
         return webClient.post()

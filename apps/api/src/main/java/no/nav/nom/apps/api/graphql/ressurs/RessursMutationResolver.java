@@ -53,7 +53,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
             val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
                 System.out.println("Resolver 2");
                 try {
-                    val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1));
+                    val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1),  "STANDARD");
                     System.out.println("Resolver 3");
                     if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
                         val data = objectMapper.createObjectNode()
