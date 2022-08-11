@@ -48,13 +48,11 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
 
     public DataFetcherResult<OpprettRessursResponse0> opprettRessurs0(OpprettRessursRequest0 request, DataFetchingEnvironment env) {
         return securityUtil.<OpprettRessursResponse0>checkAuth(env, preauth).orElseGet(() -> {
-            System.out.println("Resolver 1");
             val response = DataFetcherResult.<OpprettRessursResponse0>newResult();
             val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
-                System.out.println("Resolver 2");
                 try {
                     val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1),  "STANDARD");
-                    System.out.println("Resolver 3");
+
                     if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
                         val data = objectMapper.createObjectNode()
                                 .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
@@ -71,11 +69,9 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
 
                     response.error(resolveError(nikResponse.getStatusCode(),nikResponse.getBody().getFeilmelding(), env));
                 } catch (IllegalArgumentException | NoSuchElementException e) {
-                    System.out.println("Exception 1");
                     log.warn(e.getMessage(), e);
                     response.error(ErrorCode.BAD_REQUEST.construct(env, e.getMessage()));
                 } catch (Exception e) {
-                    System.out.println("Exception 2");
                     log.error("Intern feil ved opprettelse av ny ressurs", e);
                     response.error(ErrorCode.SERVER_ERROR.construct(env, "Intern feil"));
                 }
