@@ -112,7 +112,7 @@ const NavHeader = () => {
           fontSize={'2rem'}
         />
         <span className={userText}>{session}</span>
-        <BurgerMenu />
+        {/* <BurgerMenu /> */}
       </div>
     </div>
   )

@@ -72,7 +72,8 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
 
   useEffect(() => {
     if (refDiv.current !== null) {
-      scrollToRef(refDiv)
+      if (overEnheter.length > 0)
+        scrollToRef(refDiv)
     }
   }, [])
 
