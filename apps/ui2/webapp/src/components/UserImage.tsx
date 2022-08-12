@@ -21,7 +21,7 @@ const UserImage = (props: UserImageProps) => {
     if (navIdent) {
       setImage(imageSrc(navIdent));
     }
-    setLoading(false)
+    // setLoading(false)
   }, [navIdent]);
 
   return (
