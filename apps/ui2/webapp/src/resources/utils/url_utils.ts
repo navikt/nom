@@ -34,7 +34,7 @@ export function agressoIdDataToUrl(
 ): string {
   const niva = agressoNivaToNumberStr(agressoNiva);
   const nivaStr = niva ? niva + "_" : "";
-  const agressoIdDataToUrlTmp = nivaStr + agressoId + "_"+navn.replaceAll(" ", "&");
+  const agressoIdDataToUrlTmp = nivaStr + agressoId + "_" + navn.replaceAll(" ", "&").replaceAll("/","\\");
   return agressoIdDataToUrlTmp;
 }
 
@@ -53,7 +53,7 @@ export function agressoUrlToData(agressoIdUrl: string): {
   if (arr.length !== 3) {
     out.agressoNiva = "ORGENHET";
     out.agressoId = arr[0];
-    out.enhetNavn = arr[1].replaceAll("&", " ");
+    out.enhetNavn = arr[1].replaceAll("&", " ").replaceAll("\\","/");
   } else {
     out.agressoNiva = agressoNumberStrToNiva(arr[0]);
     out.agressoId = arr[1];
