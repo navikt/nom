@@ -4,7 +4,8 @@ const contentStyle = css({
     margin: "0 auto 2.5rem",
     marginTop: '2rem',
     marginBottom: '5rem',
-    width: '50%'
+    width: '50%',
+    minWidth: "50rem"
 })
 
 type ContentWrapperProps = {
