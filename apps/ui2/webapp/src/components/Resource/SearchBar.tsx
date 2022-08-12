@@ -13,9 +13,11 @@ const SearchBar = (props: { register: any }) => {
     return (
         <div className={searchStyles}>
             <TextField
+                disabled={true}
                 type="text"
                 label=""
                 hideLabel
+                placeholder={"Søkefunksjonalitet kommer"}
                 className={css({width: "100%"})}
                 {...register("searchValue")}
             />
