@@ -49,8 +49,8 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
     @SneakyThrows
-    protected GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
-        val claims = validJwtWithAzpClaim();
+    private GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String,Object> vars, boolean includeValidAzp){
+        val claims = includeValidAzp ? validJwtWithAzpClaim() : securityTestUtils.validJwtClaims();
         claims.claim("azp_name","test");
         claims.claim("NAVident", "A321321");
         val token = securityTestUtils.createToken(claims);
@@ -65,6 +65,17 @@ public abstract class GraphQLTestBase extends TestBase {
         }
         return response;
     }
+
+    @SneakyThrows
+    protected GraphQLResponse postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
+        return postForResource(resource,hasErrors,vars,true);
+    }
+
+    @SneakyThrows
+    protected GraphQLResponse postForResourceWithoutAzp(String resource, boolean hasErrors) {
+        return postForResource(resource,hasErrors,Map.of(),false);
+    }
+
 
     protected RessursI createRessursHendelse(String suffix) {
         val metadata = HendelseMetadataSerialize.builder()

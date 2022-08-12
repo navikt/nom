@@ -30,8 +30,11 @@ class RessursResolver implements GraphQLQueryResolver {
     private final SecurityUtil securityUtil;
     private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
+    @org.springframework.beans.factory.annotation.Value("${app.graphql.preauth.query.person}")
+    private List<String> personPreAuth;
+
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return securityUtil.<Ressurs>checkAuth(env, null).orElseGet(() -> {
+        return this.<Ressurs>checkAuthRessurs(env).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
             Optional<RessursI> result;
             if (objectNode == null) {
@@ -55,7 +58,7 @@ class RessursResolver implements GraphQLQueryResolver {
     }
 
     public DataFetcherResult<List<RessursResult>> ressurser(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return securityUtil.<List<RessursResult>>checkAuth(env, null).orElseGet(() -> {
+        return this.<List<RessursResult>>checkAuthRessurs(env).orElseGet(()-> {
             graphQLFieldConsumptionCounter.count(env);
             var result = new ArrayList<Result>();
 
@@ -79,6 +82,11 @@ class RessursResolver implements GraphQLQueryResolver {
                     )
                     .build();
         });
+    }
+
+    private <T> Optional<DataFetcherResult<T>> checkAuthRessurs(DataFetchingEnvironment env){
+        var personIdentRequested = env.getSelectionSet().contains("**/personIdent") || env.getSelectionSet().contains("**/personident");
+        return securityUtil.<T>checkAuth(env, personIdentRequested ? this.personPreAuth : null);
     }
 
     @Value

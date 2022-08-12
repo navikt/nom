@@ -333,4 +333,23 @@ class RessursTest extends RessursTestBase {
         assertThat(ledere.size()).isEqualTo(1);
         assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
     }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Ikke tillate henting av personNr uten riktig gruppemedlemskap")
+    void scenario51(){
+        createRessursHendelse("1");
+        createRessursHendelse("2");
+        createRessursHendelse("4");
+        val ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+                .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        val lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+                .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
+
+        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
+
+        dvhRestConsumer.loadFromDvh();
+        val res = postForResourceWithoutAzp("ressurs/scenario51.graphql", true);
+        assertThat(res.isOk());
+    }
 }
