@@ -101,6 +101,8 @@ const NavHeader = () => {
         </Link>
 
         <Search
+          disabled={true}
+          placeholder={"søkefunksjonalitet kommer"}
           className={searchBarStyle}
           label={'Søk etter ressurser'}
           variant='secondary'
