@@ -99,6 +99,10 @@ spec:
           namespace: idm
           cluster: prod-fss
     outbound:
+      rules:
+        - application: nav-ident
+          namespace: org
+          cluster: prod-gcp
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
   gcp:

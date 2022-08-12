@@ -37,15 +37,15 @@ public class PdlServiceImpl implements PdlService {
 
     @Override
     public List<String> getKnownPersonider(String id) {
-        String oboToken = tokenRepository.getOnbehalfofTokenWithAuthFromSecurityContext(pdlConfig.getAadClientId());
-        if (oboToken == null) {
-            log.error("Ingen obo token for pdl oppslag. Skipper oppslag mot PDL");
+        String token = tokenRepository.getOboOrClientCredToken(pdlConfig.getAadClientId());
+        if (token == null) {
+            log.error("Fikk ingen token fra tokenRepository. Skipper oppslag mot PDL");
             return Collections.emptyList();
         }
 
         String qryBody = getQuery(pdlHentIdentQry, "ident", id).toPrettyString();
 
-        String pdlResponse = postToPdl(qryBody, oboToken);
+        String pdlResponse = postToPdl(qryBody, token);
 
         if (pdlResponse == null) {
             log.error(String.format("PDL GraphQL returned empty response for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
@@ -78,13 +78,13 @@ public class PdlServiceImpl implements PdlService {
         }
     }
 
-    private String postToPdl(String qryBody, String oboToken) {
+    private String postToPdl(String qryBody, String token) {
         return pdlWebClient
                 .post()
                 .uri(pdlConfig.getBaseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.add(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
-                    headers.setBearerAuth(oboToken);
+                    headers.setBearerAuth(token);
                 })
                 .body(Mono.just(qryBody), String.class)
                 .retrieve()

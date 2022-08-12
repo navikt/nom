@@ -48,21 +48,33 @@ spec:
     requests:
       cpu: 200m
       memory: 256Mi
+
   prometheus:
     enabled: true
     path: internal/prometheus
+
   gcp:
     sqlInstances:
       - type: POSTGRES_14
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
+
   azure:
     application:
       enabled: true
+      claims:
+        extra:
+          - "idtyp"
+
   kafka:
     pool: nav-prod
   accessPolicy:
+    inbound:
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident-redis
