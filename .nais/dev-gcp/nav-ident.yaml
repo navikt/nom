@@ -63,9 +63,9 @@ spec:
   azure:
     application:
       enabled: true
-      claims:
-        extra:
-          - "idtyp"
+#      claims:
+#        extra:
+#          - "idtyp"
 
   kafka:
     pool: nav-dev
