@@ -21,7 +21,7 @@ const UserImage = (props: UserImageProps) => {
     if (navIdent) {
       setImage(imageSrc(navIdent));
     }
-    // setLoading(false)
+    setLoading(false)
   }, [navIdent]);
 
   return (
@@ -30,7 +30,7 @@ const UserImage = (props: UserImageProps) => {
       {!loading && (
         <img
           src={image}
-          alt={props.altText || 'Fotografi av ' + navIdent}
+          alt={altText || 'Fotografi av ' + navIdent}
           onLoad={() => setLoading(false)}
           onError={() => {
             setImage(person);
