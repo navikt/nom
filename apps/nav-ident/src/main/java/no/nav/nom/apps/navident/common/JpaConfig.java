@@ -17,12 +17,15 @@ import java.util.Optional;
 public class JpaConfig {
     @Bean
     public AuditorAware<String> auditor() {
+        Optional<String> system = Optional.of("SYSTEMBRUKER");
         return () -> {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 JwtAuthenticationToken auth = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-                return Optional.of(auth.getToken().getClaim("name").toString());
+                String nameClaim = auth.getToken().getClaimAsString("name");
+
+                return nameClaim != null ? Optional.of(auth.getToken().getClaimAsString("name")) : system;
             } else {
-                return Optional.of("SYSTEMBRUKER");
+                return system;
             }
         };
     }

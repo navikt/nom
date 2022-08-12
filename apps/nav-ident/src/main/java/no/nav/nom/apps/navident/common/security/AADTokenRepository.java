@@ -74,11 +74,17 @@ public class AADTokenRepository {
             log.debug("JWT auth token claim 'idtyp=%s'".formatted(idtyp));
         }
         return idtyp != null;
+
+//        String oid = jwt.getJWTClaimsSet().getStringClaim("oid");
+//        String sub = jwt.getJWTClaimsSet().getStringClaim("sub");
+//
+//        return !oid.equals(sub);
     }
 
 
     @SneakyThrows
     public String getOnbehalfofTokenFor(String assertion, String scope) {
+        log.debug("Getting obo token for scope %s".formatted(scope));
         if ( ! isValidToken(assertion) ) return null;
 
         val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
@@ -87,6 +93,7 @@ public class AADTokenRepository {
 
     @SneakyThrows
     public String getAadToken(String scope) {
+        log.debug("Getting service token for scope %s".formatted(scope));
         val signedJwt = cachedAadTokensByScope.get(scope);
         return (isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope)).serialize();
     }

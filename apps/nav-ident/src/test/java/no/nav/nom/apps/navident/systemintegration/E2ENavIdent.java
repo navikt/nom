@@ -112,7 +112,7 @@ public class E2ENavIdent {
 
     @Test
     public void justGetServiceToken() {
-        log.info("JWT Service token: %s".formatted(aadServiceTokenProvider_forTests.getAadToken(nomApiClientId, nomApiJwk)));
+        log.info("JWT Service token: %s".formatted(aadServiceTokenProvider_forTests.getAadToken(nomApiClientId, nomApiJwk).serialize()));
     }
 
     @Test
