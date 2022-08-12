@@ -18,7 +18,9 @@ AZURE_APP_CLIENT_ID:'placeholder'
 AZURE_APP_JWK: 'placeholder'
 
 # JWT Token in http request
-# Create this in ida.intern.nav.no -> AAD On-Behalf-Of Token for navIdent Client Id
+# Create user token in ida.intern.nav.no -> AAD On-Behalf-Of Token for navIdent Client Id
+# OR
+# Run E3ENavIdent.justGetServiceToken() and copy from log for a service token
 e2e.aad.testJWT: 'placeholder'
 
   #!/bin/sh
