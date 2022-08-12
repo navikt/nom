@@ -3,7 +3,7 @@ import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 import { person } from "./Images";
 
-const imageSrc = (navIdent: string) => `https://nom-ui2.intern.nav.no/teamcat/resource/${navIdent}/photo`;
+const imageSrc = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
 
 type UserImageProps = {
   navIdent?: string;
