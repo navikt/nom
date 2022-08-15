@@ -31,8 +31,8 @@ const innerCommonCss = css({
 const linkPanelCurrentStyles = css(commonCss, {
   backgroundColor: '#DEECEF',
   minHeight: '160px',
-  borderTop: '5px solid #236B7D',
-  gridAutoFlow: "row"
+  gridAutoFlow: "row",
+  gridTemplateColumns: "1fr",
 })
 const linkPanelLargeStyles = css(commonCss, {
   backgroundColor: '#FFFFFF',
@@ -67,6 +67,9 @@ const iconStyle = css({
   alignItems: "center",
   backgroundColor: "#236B7D",
   color: "white",
+  img: {
+    padding: "0.2rem"
+  }
 })
 
 type CustomLinkPanel2Props = {
