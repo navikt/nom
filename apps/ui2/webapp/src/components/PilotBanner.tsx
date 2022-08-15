@@ -9,7 +9,7 @@ const outerDivStyles = css({
     minHeight: '50px',
     backgroundColor: '#DEECEF',
     borderBottom: '1px solid #236B7D',
-    borderTop: '1px solid #236B7D'
+    borderTop: '1px solid #236B7D',
 })
 
 const bannerStyles = css({
@@ -28,6 +28,8 @@ const textDivStyles = css({
     width: '30%',
     margin: '0 auto',
     paddingBottom: '0.7rem',
+    paddingTop: '10px',
+    marginBottom: '10px'
 })
 
 const buttonStyles = css({
