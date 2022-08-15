@@ -111,6 +111,7 @@ const RessursInfo = (props: RessursInfoProps) => {
               {ressurs.koblinger &&
                 ressurs.koblinger.map((kobling: RessursKobling) => (
                   <LabelAndText
+                      key={JSON.stringify(kobling)}
                     alignAtEnd
                     label='Org.enhet: '
                     text={
@@ -135,6 +136,7 @@ const RessursInfo = (props: RessursInfoProps) => {
                   const oe = l.koblinger[0].organisasjonsenhet
                   return (
                     <LabelAndText
+                        key={JSON.stringify(leder)}
                       label='Leder: '
                       linkTo={getLink2(
                         oe.agressoId,

@@ -226,28 +226,26 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             columnGap: '10px',
           })}
         >
-          {sortedKoblinger.map((k) => (
-            <Link
-              to={
-                '/org/' +
-                agressoIdDataToUrl(
-                  currentEnhet.agressoId,
-                  currentEnhet.orgNiv,
-                  currentEnhet.navn
-                ) +
-                `/${k.ressurs.navIdent}`
-              }
-              className={linkStyles}
-            >
+          {sortedKoblinger.map((k) => {
+            const agrIdUrl = agressoIdDataToUrl(
+                currentEnhet.agressoId,
+                currentEnhet.orgNiv,
+                currentEnhet.navn
+            ) + `/${k.ressurs.navIdent}`;
+            return <Link
+                key={agrIdUrl}
+                to={'/org/' + agrIdUrl}
+                className={linkStyles}
+              >
               <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                <Heading size='medium' className={css({ width: '100%' })}>
+                <Heading size='medium' className={css({width: '100%'})}>
                   {k.ressurs?.fornavn && k.ressurs?.etternavn
-                    ? k.ressurs.fornavn + ' ' + k.ressurs.etternavn
-                    : 'Mangler navn'}
+                      ? k.ressurs.fornavn + ' ' + k.ressurs.etternavn
+                      : 'Mangler navn'}
                 </Heading>
               </CustomLinkPanel2>
             </Link>
-          ))}
+          })}
         </div>
       )}
 
