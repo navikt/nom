@@ -9,6 +9,7 @@ import { css } from '@emotion/css'
 import AppRoutes from './routes'
 import NavHeader, { headerHeight } from './components/NavHeader'
 import Footer, { footerHeigth } from './components/Footer'
+import PilotBanner from './components/PilotBanner'
 
 const layoutStyle = css({
   backgroundColor: '#F1F1F1',
@@ -22,6 +23,7 @@ ReactDOM.render(
     <BrowserRouter>
       <ApolloProvider client={apolloClient}>
         <NavHeader />
+        <PilotBanner />
         <div className={layoutStyle}>
           <div className={css({ width: '100%' })}>
             <AppRoutes />

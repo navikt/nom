@@ -12,6 +12,7 @@ import slackNom from '../resources/slackNom.svg'
 import opprettRessursIkon from '../resources/opprettRessursIkon.svg'
 import addPerson from '../resources/addPerson.svg'
 import hierarchy2 from '../resources/hierarchy2.svg'
+import InfoIcon from '../resources/InfoIcon.svg'
 
 export {
   navLogo,
@@ -28,4 +29,5 @@ export {
   opprettRessursIkon,
   addPerson,
   hierarchy2,
+  InfoIcon
 }
