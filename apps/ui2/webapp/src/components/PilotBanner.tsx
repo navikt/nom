@@ -7,7 +7,9 @@ import { InfoIcon } from "./Images"
 const outerDivStyles = css({
     width: '100%',
     minHeight: '50px',
-    backgroundColor: '#DEECEF'
+    backgroundColor: '#DEECEF',
+    borderBottom: '1px solid #236B7D',
+    borderTop: '1px solid #236B7D'
 })
 
 const bannerStyles = css({
