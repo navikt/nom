@@ -21,30 +21,32 @@ const UserImage = (props: UserImageProps) => {
     if (navIdent) {
       setImage(imageSrc(navIdent));
     }
-    setLoading(false)
   }, [navIdent]);
 
-  return (
-    <>
-      {loading && <Loader />}
-      {!loading && (
-        <img
-          src={image}
-          alt={altText || 'Fotografi av ' + navIdent}
-          onLoad={() => setLoading(false)}
-          onError={() => {
-            setImage(person);
-            setLoading(false);
-          }}
-          className={css({
-            height: size || "65px",
-            width: size || "65px",
-            borderRadius: "100%",
-          })}
-        />
-      )}
-    </>
-  );
+    const stl = css({
+        height: size || "65px",
+        width: size || "65px",
+        borderRadius: "100%",
+    })
+
+
+    return (
+        <div>
+            {loading && <Loader className={stl}/>}
+            <img
+                hidden={loading}
+                src={image}
+                alt={altText || 'Fotografi av ' + navIdent}
+                onLoad={() => setLoading(false)}
+                onError={() => {
+                    setImage(person);
+                    setLoading(false);
+                }}
+                className={stl}
+            />
+
+        </div>
+    );
 };
 
 export default UserImage;
