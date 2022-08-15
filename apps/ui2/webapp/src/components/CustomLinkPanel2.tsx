@@ -16,6 +16,7 @@ const commonCss = css({
   width: '100%',
   display: 'grid',
   gridAutoFlow: 'column',
+  gridTemplateColumns: 'min-content 1fr min-content',
   alignItems: 'center',
   border: '1px solid #B0B0B0',
   borderRadius: '5px',
@@ -60,12 +61,12 @@ const linkPanelRessursStyles = css({
 })
 
 const iconStyle = css({
-            height: "100%",
-            display: "grid",
-            justifyItems: "center",
-            alignItems: "center",
-            backgroundColor: "#236B7D",
-            color: "white",
+  height: "100%",
+  display: "grid",
+  justifyItems: "center",
+  alignItems: "center",
+  backgroundColor: "#236B7D",
+  color: "white",
 })
 
 type CustomLinkPanel2Props = {
