@@ -19,15 +19,15 @@ const bannerStyles = css({
 })
 
 const iconStyles = css({
-    height: '30px',
-    width: '30px',
-    marginRight: '1rem'
+    height: '25px',
+    width: '25px',
+    marginRight: '0.5rem'
 })
 
 const textDivStyles = css({
-    width: '50%',
+    width: '30%',
     margin: '0 auto',
-    paddingBottom: '1rem'
+    paddingBottom: '0.7rem',
 })
 
 const buttonStyles = css({
@@ -35,7 +35,6 @@ const buttonStyles = css({
 })
 
 const buttonDivStyles = css({ display: 'flex', alignItems: 'baseline', marginLeft: '1rem' })
-
 
 const PilotBanner = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -45,7 +44,7 @@ const PilotBanner = () => {
         <div className={outerDivStyles}>
             <div className={bannerStyles}>
                 <img src={InfoIcon} alt="Pilot info" className={iconStyles}/>
-                <Heading size="small">Løsningen er i pilot!</Heading>
+                <Heading size="small">Løsningen er i pilot</Heading>
                 <div className={buttonDivStyles}>
                     <Button variant="tertiary" onClick={() => !isOpen ? setIsOpen(true) : setIsOpen(false)} className={buttonStyles}>
                         {isOpen && <Collapse fontSize='32px'/>}
@@ -56,9 +55,10 @@ const PilotBanner = () => {
 
             {isOpen && (
                 <div className={textDivStyles}>
-                    <BodyShort size="medium">
+                    <BodyShort size="medium" className={css({lineHeight: '28px'})}>
                         NOM presenterer det formelle organisasjonshierarkiet i NAV. 
-                        Hierarkiet hentes rett fra lønnssystemet. Oppsett i lønnssystemet gjør at ansatte må knyttes til laveste nivå i organisasjonsstrukturen. 
+                        Hierarkiet hentes rett fra lønnssystemet. 
+                        Oppsett i lønnssystemet gjør at ansatte må knyttes til laveste nivå i organisasjonsstrukturen. 
                         Dette fører eksempelvis til at “HR-avdelingen” gjentas flere ganger.
                     </BodyShort>
                 </div>
