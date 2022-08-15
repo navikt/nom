@@ -102,8 +102,14 @@ const NavHeader = () => {
 
         <Search
           disabled={true}
-          placeholder={"søkefunksjonalitet kommer"}
-          className={searchBarStyle}
+          placeholder={"Søkefunksjonalitet kommer"}
+          className={css(searchBarStyle,{
+          // midlertidig hack for mørkere tekst i "disabled" tekst-felt
+            "::placeholder": {
+              color: "black",
+              opacity: 1.0
+            }
+          })}
           label={'Søk etter ressurser'}
           variant='secondary'
           size='medium'
