@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import { person } from "./Images";
+import { person, HelpIcon } from "./Images";
 
 const imageSrc = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
 
@@ -29,6 +29,11 @@ const UserImage = (props: UserImageProps) => {
         borderRadius: "100%",
     })
 
+    if(!navIdent){
+        return <div>
+            <img className={stl} src={HelpIcon} />
+        </div>
+    }
 
     return (
         <div>
