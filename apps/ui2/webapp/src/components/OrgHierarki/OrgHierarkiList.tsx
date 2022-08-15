@@ -135,7 +135,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
               }
               ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
               type={LinkPanelType.CURRENT}
-              leder={currentEnhet?.leder[0].ressurs as Ressurs}
+              leder={currentEnhet?.leder[0]?.ressurs as Ressurs}
             />
           </CustomLinkPanel2>
         </div>
@@ -165,7 +165,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                   : 'Mangler navn'
               }
               type={LinkPanelType.OVERENHET}
-              leder={currentEnhet?.leder[0].ressurs as Ressurs}
+              leder={currentEnhet?.leder[0]?.ressurs as Ressurs}
             />
           </CustomLinkPanel2>
         </Link>
