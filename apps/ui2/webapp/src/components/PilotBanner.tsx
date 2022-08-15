@@ -30,6 +30,10 @@ const textDivStyles = css({
     paddingBottom: '1rem'
 })
 
+const buttonStyles = css({
+    color: '#262626'
+})
+
 const buttonDivStyles = css({ display: 'flex', alignItems: 'baseline', marginLeft: '1rem' })
 
 
@@ -43,7 +47,7 @@ const PilotBanner = () => {
                 <img src={InfoIcon} alt="Pilot info" className={iconStyles}/>
                 <Heading size="small">Løsningen er i pilot!</Heading>
                 <div className={buttonDivStyles}>
-                    <Button variant="tertiary" onClick={() => !isOpen ? setIsOpen(true) : setIsOpen(false)}>
+                    <Button variant="tertiary" onClick={() => !isOpen ? setIsOpen(true) : setIsOpen(false)} className={buttonStyles}>
                         {isOpen && <Collapse fontSize='32px'/>}
                         {!isOpen && <Expand fontSize='32px'/> }
                     </Button>
