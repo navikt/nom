@@ -53,8 +53,8 @@ const EnhetInfo = (props: EnhetInfoProps) => {
             <BodyShort>Leder: &nbsp;</BodyShort>
 
             {type === LinkPanelType.CURRENT ? (
-              <Link to={getUrlForLeder()} className={css({ color: '#262626' })}><Label>{lederNavn}</Label>
-              </Link>
+                leder ? <Link to={getUrlForLeder()} className={css({ color: '#262626' })}><Label>{lederNavn}</Label>
+              </Link> : <Label>{lederNavn}</Label>
             ) : (
               <Label>{lederNavn}</Label>
             )}
