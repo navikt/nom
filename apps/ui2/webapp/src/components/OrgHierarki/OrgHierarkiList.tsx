@@ -111,7 +111,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                     ) || 'Mangler Navn'
                   }
                   type={LinkPanelType.OVERENHET}
-                  leder={oe.organisasjonsenhet.leder[0].ressurs as Ressurs}
+                  leder={oe.organisasjonsenhet.leder[0]?.ressurs as Ressurs | undefined}
                 />
               </CustomLinkPanel2>
             </Link>
@@ -207,7 +207,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                     )}
                     ident={ue.organisasjonsenhet.leder[0]?.ressurs?.navIdent}
                     type={LinkPanelType.LARGE}
-                    leder={ue.organisasjonsenhet.leder[0].ressurs as Ressurs}
+                    leder={ue.organisasjonsenhet.leder[0]?.ressurs as Ressurs | undefined}
                   />
                 </CustomLinkPanel2>
               </Link>
