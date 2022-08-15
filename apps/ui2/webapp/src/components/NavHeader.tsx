@@ -3,7 +3,7 @@ import { getSession, SessionInterface } from '../api/getSession'
 import React, { useEffect } from 'react'
 import { css } from '@emotion/css'
 import { Link } from 'react-router-dom'
-import { nomLogoCircle2 } from './Images'
+import { nomLogoCircle } from './Images'
 import { Search } from '@navikt/ds-react'
 import { PeopleFilled } from '@navikt/ds-icons'
 import BurgerMenu from './BurgerMenu'
@@ -97,7 +97,7 @@ const NavHeader = () => {
     <div className={outerDiv}>
       <div className={innerDiv}>
         <Link to='/' className={verticallyCenter}>
-          <img src={nomLogoCircle2} alt='logo' className={logoStyle} />
+          <img src={nomLogoCircle} alt='logo' className={logoStyle} />
         </Link>
 
         <Search

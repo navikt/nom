@@ -28,7 +28,6 @@ const EnhetInfo = (props: EnhetInfoProps) => {
 
   const getSize = () => {
     if (type === LinkPanelType.CURRENT) return '130px'
-    else if (type === LinkPanelType.LARGE) return '90px'
     else return undefined
   }
 

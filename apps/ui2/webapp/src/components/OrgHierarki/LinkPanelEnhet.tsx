@@ -16,7 +16,7 @@ const commonCss = css({
 })
 
 const linkPanelCurrentStyles = css(commonCss, {
-  backgroundColor: "#CCE1FF",
+  backgroundColor: "#DEECEF",
   height: "150px",
 })
 const linkPanelLargeStyles = css(commonCss, {

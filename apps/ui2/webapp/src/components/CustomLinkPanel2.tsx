@@ -22,15 +22,15 @@ const commonCss = css({
 })
 
 const linkPanelCurrentStyles = css(commonCss, {
-  backgroundColor: '#CCE1FF',
+  backgroundColor: '#DEECEF',
   height: '160px',
-  borderTop: '5px solid #134852',
+  borderTop: '5px solid #236B7D',
 })
 const linkPanelLargeStyles = css(commonCss, {
   backgroundColor: '#FFFFFF',
   height: '130px',
   width: '100%',
-  borderLeft: '5px solid #134852',
+  borderLeft: '5px solid #236B7D',
 })
 const linkPanelOverenhetStyles = css(commonCss, {
   backgroundColor: '#FFFFFF',
@@ -42,10 +42,10 @@ const linkPanelKoblingStyles = css(commonCss, {
   backgroundColor: '#FFFFFF',
   height: '70px',
   width: '100%',
-  borderLeft: '5px solid #134852',
+  borderLeft: '5px solid #236B7D',
 })
 const linkPanelRessursStyles = css({
-  backgroundColor: '#CCE1FF',
+  backgroundColor: '#DEECEF',
   width: '100%',
   borderTop: '5px solid #236B7D',
   borderRadius: '5px',
