@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,4 +29,12 @@ public class KoblingDvhService implements KoblingService {
                 .filter(s -> s.getNavIdent().equals(navIdent))
                 .toList();
     }
+
+    @Override
+    public Map<String, List<Kobling>> getKoblingerByNavidenter(Set<String> navidenter) {
+        return getAllKoblinger().stream()
+                .filter(kobling -> navidenter.contains(kobling.getNavIdent()))
+                .collect(Collectors.groupingBy(Kobling::getNavIdent));
+    }
+
 }
