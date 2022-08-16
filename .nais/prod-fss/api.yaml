@@ -23,6 +23,8 @@ spec:
       value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
     - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
       value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
+  envFrom:
+    - secret: nom-sluttdato-override
   image: {{image}}
   port: 8080
   ingresses:

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,6 +19,9 @@ public class DvhRessursInterface {
     public static final String STATLIG = "NAV Statlig";
     public static final String KOMMUNAL = "NAV Kommunalt";
     public static final String ANNEN_STATLIG = "Annen Statlig";
+
+    @Value("${SLUTTDATO_OVERRIDE:#{{}}}")
+    private List<String> overridedSluttdato;
 
     private final DvhRepository dvhRepository;
 
@@ -39,6 +43,7 @@ public class DvhRessursInterface {
     }
 
     public LocalDate getSluttdatoForPersonident(String personIdent){
-        return dvhRepository.getSluttdatoByPersonIdent().getOrDefault(personIdent, null);
+        return overridedSluttdato.contains(personIdent) ? LocalDate.parse("2019-01-29") :
+                dvhRepository.getSluttdatoByPersonIdent().getOrDefault(personIdent, null);
     }
 }
