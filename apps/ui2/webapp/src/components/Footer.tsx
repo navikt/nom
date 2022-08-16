@@ -14,11 +14,13 @@ const outerDiv = css({
 
 const innerDiv = css({
   height: '100%',
-  width: '50%',
-  margin: 'auto',
+  width: '100%',
+  margin: '0 auto',
   display: 'flex',
+  justifyContent: 'center',
   alignItems: 'center',
   color: '#ffffff',
+  textAlign: 'center'
 })
 
 const slackLink = css({
@@ -39,9 +41,9 @@ const Footer = () => {
   return (
     <div className={outerDiv}>
       <div className={innerDiv}>
-        <div className={FooterStyle}>
+        {/* <div className={FooterStyle}>
           <BodyLong> {footerText}</BodyLong>
-        </div>
+        </div> */}
         <a
           rel='noopener noreferrer'
           href='https://nav-it.slack.com/archives/C0362LA7ZLN'

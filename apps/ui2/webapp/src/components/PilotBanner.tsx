@@ -15,7 +15,8 @@ const outerDivStyles = css({
 const bannerStyles = css({
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginTop: '0.5rem'
 })
 
 const iconStyles = css({
@@ -29,14 +30,14 @@ const textDivStyles = css({
     margin: '0 auto',
     paddingBottom: '0.7rem',
     paddingTop: '10px',
-    marginBottom: '10px'
+    marginBottom: '10px',
 })
 
 const buttonStyles = css({
     color: '#262626'
 })
 
-const buttonDivStyles = css({ display: 'flex', alignItems: 'baseline', marginLeft: '1rem' })
+const buttonDivStyles = css({ display: 'flex', alignItems: 'center', marginLeft: '0.5rem' })
 
 const PilotBanner = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -44,14 +45,12 @@ const PilotBanner = () => {
 
     return (
         <div className={outerDivStyles}>
-            <div className={bannerStyles}>
+            <div className={bannerStyles} onClick={() => !isOpen ? setIsOpen(true) : setIsOpen(false)}>
                 <img src={InfoIcon} alt="Pilot info" className={iconStyles}/>
                 <Heading size="small">Løsningen er i pilot</Heading>
                 <div className={buttonDivStyles}>
-                    <Button variant="tertiary" onClick={() => !isOpen ? setIsOpen(true) : setIsOpen(false)} className={buttonStyles}>
-                        {isOpen && <Collapse fontSize='32px'/>}
-                        {!isOpen && <Expand fontSize='32px'/> }
-                    </Button>
+                    {isOpen && <Collapse fontSize='32px'/>}
+                    {!isOpen && <Expand fontSize='32px'/> }
                 </div>
             </div>
 
@@ -59,9 +58,9 @@ const PilotBanner = () => {
                 <div className={textDivStyles}>
                     <BodyShort size="medium" className={css({lineHeight: '28px'})}>
                         NOM presenterer det formelle organisasjonshierarkiet i NAV. 
-                        Hierarkiet hentes rett fra lønnssystemet. 
-                        Oppsett i lønnssystemet gjør at ansatte må knyttes til laveste nivå i organisasjonsstrukturen. 
-                        Dette fører eksempelvis til at “HR-avdelingen” gjentas flere ganger.
+                        Hierarkiet hentes per idag fra lønnssystemet, 
+                        og oppsettet i lønnssystemet gjør at ansatte må knyttes til laveste nivå i organisasjonsstrukturen. 
+                        Dette fører til at enkelte enheter gjentas flere ganger.
                     </BodyShort>
                 </div>
             )}
