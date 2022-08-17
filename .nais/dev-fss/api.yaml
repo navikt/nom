@@ -11,6 +11,8 @@ spec:
       value: log-logstash
     - name: NIK_BASEURL
       value: https://nav-ident.dev.intern.nav.no
+    - name: NIK_CLIENT_ID
+      value: dev-gcp:org:nav-ident
     - name: PDL_BASEURL
       value: https://pdl-api.dev-fss-pub.nais.io
     - name: PDL_CLIENT_ID

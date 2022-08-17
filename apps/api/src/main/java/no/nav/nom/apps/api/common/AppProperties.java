@@ -15,6 +15,8 @@ public class AppProperties {
 
     private final Proxy proxy;
     private final Pdl pdl;
+    private final Nik nik;
+
     @Setter
     private String appName;
 
@@ -34,5 +36,11 @@ public class AppProperties {
         String tema;
         String aadClientId;
         String baseUrl;
+    }
+
+    @Value
+    public static class Nik {
+        String baseUrl;
+        String aadClientId;
     }
 }

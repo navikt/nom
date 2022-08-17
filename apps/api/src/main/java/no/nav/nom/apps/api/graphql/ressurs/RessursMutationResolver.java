@@ -9,6 +9,7 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -51,7 +52,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
             val response = DataFetcherResult.<OpprettRessursResponse0>newResult();
             val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
                 try {
-                    val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1),  "STANDARD");
+                    val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1),  "STANDARD", "");
 
                     if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
                         val data = objectMapper.createObjectNode()

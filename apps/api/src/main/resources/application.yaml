@@ -6,6 +6,7 @@ app:
     aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
   nik:
     baseUrl: ${NIK_BASEURL}
+    aadClientId: api://${NIK_CLIENT_ID}/.default
   pdl:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
