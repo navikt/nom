@@ -1,6 +1,6 @@
 import { css } from '@emotion/css'
 import { Next } from '@navikt/ds-icons'
-import {building2Icon, HelpIcon, peopleFilledIcon} from "./Images";
+import {building2Icon, peopleFilledIcon} from "./Images";
 
 export enum LinkPanelType {
   CURRENT = 'current',
