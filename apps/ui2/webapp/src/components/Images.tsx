@@ -13,9 +13,9 @@ import opprettRessursIkon from '../resources/opprettRessursIkon.svg'
 import addPerson from '../resources/addPerson.svg'
 import hierarchy2 from '../resources/hierarchy2.svg'
 import InfoIcon from '../resources/InfoIcon.svg'
-import HelpIcon from '../resources/helpicon.svg'
 import building2Icon from '../resources/building-2.svg'
 import peopleFilledIcon from '../resources/people-filled.svg'
+import questionMarkIcon from '../resources/questionmark.svg'
 
 export {
   navLogo,
@@ -33,7 +33,7 @@ export {
   addPerson,
   hierarchy2,
   InfoIcon,
-  HelpIcon,
   peopleFilledIcon,
-  building2Icon
+  building2Icon,
+  questionMarkIcon
 }
