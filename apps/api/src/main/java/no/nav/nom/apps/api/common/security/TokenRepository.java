@@ -44,6 +44,8 @@ public class TokenRepository {
         return isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope);
     }
 
+
+
     @SneakyThrows
     public String getOnbehalfofTokenFor(String assertion, String scope) {
         val signedJwt = cachedAadTokensByUserAndScope.get(scope);

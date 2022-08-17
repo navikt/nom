@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,8 @@ public class SecurityUtil {
         securityEnabled = !Arrays.stream(environment.getActiveProfiles()).toList().contains("local");
     }
 
-    public <T> Optional<DataFetcherResult<T>> checkAuth(DataFetchingEnvironment env, List<String> preAuth) {
+    public <T> Optional<DataFetcherResult<T>>
+    checkAuth(DataFetchingEnvironment env, List<String> preAuth) {
         if(securityEnabled) {
             CustomGraphQLContext context = env.getContext();
 
@@ -57,6 +59,19 @@ public class SecurityUtil {
         }
         return Optional.empty();
     }
+
+    public Optional<String> getToken(DataFetchingEnvironment env) {
+        if (securityEnabled) {
+            CustomGraphQLContext context = env.getLocalContext();
+            val token = ((JwtAuthenticationToken)context.getAuthentication()).getToken();
+
+            return Optional.of(token.getTokenValue());
+        }
+
+        return Optional.empty();
+    }
+
+
 
     public HendelseMetadataSerialize metadataFromEnv(DataFetchingEnvironment env, JsonNode rawData){
         CustomGraphQLContext context = env.getContext();
