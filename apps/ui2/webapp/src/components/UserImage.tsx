@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import { person, HelpIcon } from "./Images";
+import {person, questionMarkIcon} from "./Images";
 
 const imageSrc = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
 
@@ -31,7 +31,7 @@ const UserImage = (props: UserImageProps) => {
 
     if(!navIdent){
         return <div>
-            <img className={stl} src={HelpIcon} />
+            <img className={stl} src={questionMarkIcon} />
         </div>
     }
 

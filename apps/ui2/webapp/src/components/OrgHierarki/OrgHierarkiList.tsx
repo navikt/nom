@@ -66,7 +66,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
     : []
 
   const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
-    if (!leder) return 'Fant ikke leder'
+    if (!leder) return 'Leder ikke funnet'
     return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '')
   }
 
