@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.ressurs;
+package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-public class OpprettRessursRequest0 {
+public class OpprettRessursRequest {
 
     private String personident;
     private String visningsfornavn;

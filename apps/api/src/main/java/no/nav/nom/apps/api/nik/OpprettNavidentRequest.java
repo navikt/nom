@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OpprettNavidentRequest {
 
-    private String personident;
-    private String forbokstav;
+    private String personid;
+    private String identPrefix;
     private String identType;
 }

@@ -1,13 +1,7 @@
 type Mutation {
-
-    opprettRessurs(personIdent: String!, forbokstav: String): OpprettRessursResponse
-
-    opprettRessurs2(request: OpprettRessursRequest2): OpprettRessursResponse2
-
-    opprettRessurs0(request: OpprettRessursRequest0): OpprettRessursResponse0
+    opprettRessurs(request: OpprettRessursRequest): OpprettRessursResponse
 
     # OrdreLinje
-    ordreRessurs(request: OpprettRessursRequest!): OrdreLinjeResponse!
     opprettEnhet(request: OpprettEnhetRequest!): OrdreLinjeResponse!
 
     # Ordre
@@ -19,7 +13,7 @@ type Mutation {
 
 # Requests
 
-input OpprettRessursRequest0 {
+input OpprettRessursRequest {
     personident: String!
     visningsfornavn: String!
     visningsetternavn: String!
@@ -34,18 +28,6 @@ input OrdreLinjeRequestMetadata {
     beskrivelse: String
 }
 
-input OpprettRessursRequest  {
-    personIdent: String    @deprecated(reason: "personIdent er erstattet med personident")
-    personident: String
-    visningsnavn: String
-}
-
-input OpprettRessursRequest2 {
-    personident: String!
-    fornavn: String!
-    etternavn: String!
-}
-
 input OpprettEnhetRequest {
     metadata: OrdreLinjeRequestMetadata!
     agressoId: String
@@ -58,7 +40,7 @@ input EditOrdreRequest {
 
 # Responses
 
-type OpprettRessursResponse0 {
+type OpprettRessursResponse {
     personident: String!
     navident: String!
     visningsfornavn: String!
@@ -68,24 +50,6 @@ type OpprettRessursResponse0 {
 
 type OrdreLinjeResponse  {
     ordreLinje: OrdreLinje!
-}
-
-type OpprettRessursResponse {
-    navIdent: String!   @deprecated(reason: "navIdent er erstattet med navident")
-    navident: String!
-    personIdent: String!    @deprecated(reason: "personIdent er erstattet med personident")
-    personident: String!
-    person: FolkeregisterPerson
-    folkeregisterPerson: FolkeregisterPerson
-}
-
-type OpprettRessursResponse2 {
-    navident: String!
-    personident: String!
-    person: FolkeregisterPerson
-    folkeregisterPerson: FolkeregisterPerson
-    fornavn: String!
-    etternavn: String!
 }
 
 enum OrdreLinjesaktiving {

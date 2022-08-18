@@ -16,7 +16,6 @@ public class AppProperties {
     private final Proxy proxy;
     private final Pdl pdl;
     private final Nik nik;
-
     @Setter
     private String appName;
 

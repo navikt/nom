@@ -49,7 +49,7 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
     @SneakyThrows
     public Map<String, DataFetcherResult<FolkeregisterPerson>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
         val headers = new HttpHeaders();
-        val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
+        val token = tokenRepository.getSystemAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token.serialize());
         headers.add("Tema", appProperties.getPdl().getTema());

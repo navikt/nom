@@ -23,7 +23,7 @@ public class NomProxyRestClient {
 
     private JsonNode dvhExchange(String path) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getAadToken(appProperties.getProxy().getAadClientId()).serialize());
+        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
 
         return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + path, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
