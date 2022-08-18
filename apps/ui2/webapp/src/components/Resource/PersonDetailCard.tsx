@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { Person, PersonResult } from "../../api/generated/graphql_generated";
+import { FolkeregisterPerson as Person, PersonResult } from "../../api/generated/graphql_generated";
 import Card from "../Card";
 import TextWithLabel from "../TextWithLabel";
 

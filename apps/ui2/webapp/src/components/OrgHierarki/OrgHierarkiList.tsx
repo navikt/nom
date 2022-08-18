@@ -5,7 +5,7 @@ import { agressoIdDataToUrl } from '../../resources/utils/url_utils'
 import CustomLinkPanel2, { LinkPanelType } from '../CustomLinkPanel2'
 import EnhetInfo from './EnhetInfo'
 import {
-  OrganisasjonsenhetsLeder,
+   OrgEnhetsLeder as LederOrgEnhet,
   Organisering,
   Ressurs,
 } from '../../api/generated/graphql_generated'
@@ -65,7 +65,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         )
     : []
 
-  const getFornavnAndEtternavnForLeder = (leder: OrganisasjonsenhetsLeder) => {
+  const getFornavnAndEtternavnForLeder = (leder: LederOrgEnhet) => {
     if (!leder) return 'Leder ikke funnet'
     return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '')
   }
@@ -129,7 +129,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
               lederNavn={
                 currentEnhet
                   ? getFornavnAndEtternavnForLeder(
-                      currentEnhet?.leder[0] as OrganisasjonsenhetsLeder
+                      currentEnhet?.leder[0] as LederOrgEnhet
                     )
                   : 'Mangler navn'
               }
@@ -160,7 +160,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
               lederNavn={
                 currentEnhet
                   ? getFornavnAndEtternavnForLeder(
-                      currentEnhet?.leder[0] as OrganisasjonsenhetsLeder
+                      currentEnhet?.leder[0] as LederOrgEnhet
                     )
                   : 'Mangler navn'
               }

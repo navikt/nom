@@ -25,25 +25,26 @@ const CreateResourceView = () => {
     errorPolicy: 'all',
   })
 
-  const [createResource, createResourceStatus] = Gq.useOpprettRessurs2Mutation()
+  const [createResource, createResourceStatus] = Gq.useOpprettRessursMutation()
 
   //Ikke ferdig - Mangler feilhåndtering
-  const handleCreateResource = (values: Gq.OpprettRessursRequest2) => {
+  const handleCreateResource = (values: Gq.OpprettRessursRequest) => {
     if (!searchStr) return
 
     createResource({
       variables: {
         request: {
           personident: searchStr,
-          fornavn: values.fornavn,
-          etternavn: values.etternavn,
+          visningsfornavn: values.visningsfornavn,
+          visningsetternavn: values.visningsetternavn,
+          sektor: (values as any).sektorTxt
         },
       },
       onCompleted: (data) => {
         console.log('Skal redirectes til kvitteringsside...', data)
         setSearchStr(undefined)
 
-        navigate('/ressurs/' + data.opprettRessurs2?.navident)
+        navigate('/ressurs/' + data.opprettRessurs?.navident)
       },
       onError: (error) => console.log('ERROR', error),
     })
@@ -122,16 +123,17 @@ const CreateResourceView = () => {
             <>
               {/* Viser opplysninger fra folkeregisteret */}
               <ResourceMetadata
-                resource={query.data.person.person as Gq.Person}
+                resource={query.data.person.person as Gq.FolkeregisterPerson}
               />
 
               {/* Form - Fylles ut for oppretting av ressurs */}
               <ResourceForm
-                onSubmit={(values: any) => handleCreateResource(values)}
+                onSubmit={(values: Gq.OpprettRessursRequest) => handleCreateResource(values)}
                 initialValues={{
-                  fornavn: query.data.person.person.navn.fornavn,
+                  visningsfornavn: query.data.person.person.navn.fornavn,
                   mellomnavn: query.data.person.person.navn.mellomnavn || '',
-                  etternavn: query.data.person.person.navn.etternavn,
+                  visningsetternavn: query.data.person.person.navn.etternavn,
+                  sektorTxt: "NAV_STATLIG",
                 }}
               />
             </>

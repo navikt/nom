@@ -258,9 +258,12 @@ query HentOrganisasjonsenhetMedOverenhet(
   }
 }
 
+
+
+
 query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
   organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
-    
+
     underenheter: organiseringer(retning: under) {
       organisasjonsenhet {
         navn
@@ -277,13 +280,13 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
                 agressoId
                 orgNiv
                 navn
-          	}
-       		 }
+              }
+            }
           }
         }
       }
     }
-    
+
     overenheter: organiseringer(retning: over) {
       organisasjonsenhet {
         navn
@@ -382,7 +385,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
     leder {
       ressurs {
         navIdent
-        visningsNavn 
+        visningsNavn
         fornavn
         etternavn
         koblinger {
@@ -396,25 +399,166 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
     }
     koblinger {
       ressurs {
-          navIdent
-          personIdent
-          visningsNavn
-          fornavn
-          etternavn
-          ledere {
-            ressurs {
-              visningsNavn
-              fornavn
-              etternavn
-              koblinger {
-                organisasjonsenhet {
-                  navn
-                  orgNiv
-                  agressoId
+        navIdent
+        personIdent
+        visningsNavn
+        fornavn
+        etternavn
+        ledere {
+          ressurs {
+            visningsNavn
+            fornavn
+            etternavn
+            koblinger {
+              organisasjonsenhet {
+                navn
+                orgNiv
+                agressoId
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fragment RessursStandalone on Ressurs{
+  navIdent
+  visningsNavn
+  fornavn
+  etternavn
+  epost
+  telefon {
+    beskrivelse
+    nummer
+    type
+  }
+}
+
+fragment OrgenhetAgressoIds on OrgEnhet {
+  agressoId
+  orgNiv
+  navn
+}
+
+fragment RessursWithKobling on Ressurs{
+  ...RessursStandalone
+  koblinger {
+    organisasjonsenhet {
+      ...OrgenhetAgressoIds
+    }
+  }
+}
+
+fragment OrgenhetStandaloneWithLeder on OrgEnhet {
+  ...OrgenhetAgressoIds
+  gyldigFom
+  gyldigTom
+  leder {
+    ressurs {
+      ...RessursStandalone
+      koblinger {
+        organisasjonsenhet {
+          ...OrgenhetAgressoIds
+        }
+      }
+    }
+  }
+}
+
+
+
+query HentMedFragmentEnhet($agressoId: String! $orgNiv: String!) {
+  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+    ...OrgenhetAgressoIds
+    gyldigFom
+    gyldigTom
+  }
+}
+
+
+query HentHierarki($agressoId: String! $orgNiv: String!) {
+
+  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+    ...OrgenhetAgressoIds
+    gyldigFom
+    gyldigTom
+    type{
+      kode
+    }
+  }
+
+  lederkoblinger: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+    leder {
+      ressurs {
+        ...RessursWithKobling
+      }
+    }
+  }
+
+  ressursKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+    koblinger {
+      ressurs {
+        ...RessursStandalone
+        ledere {
+          ressurs {
+            ...RessursWithKobling
+          }
+        }
+      }
+    }
+  }
+
+  enhetsKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
+
+    underenheter: organiseringer(retning: under) {
+      organisasjonsenhet {
+        ...OrgenhetStandaloneWithLeder
+      }
+    }
+
+    overenheter: organiseringer(retning: over) {
+      organisasjonsenhet {
+        ...OrgenhetStandaloneWithLeder
+        organiseringer(retning: over) {
+          organisasjonsenhet {
+            ...OrgenhetStandaloneWithLeder
+            organiseringer(retning: over) {
+              organisasjonsenhet {
+                ...OrgenhetStandaloneWithLeder
+                organiseringer(retning: over) {
+                  organisasjonsenhet {
+                    ...OrgenhetStandaloneWithLeder
+                    organiseringer(retning: over) {
+                      organisasjonsenhet {
+                        ...OrgenhetStandaloneWithLeder
+                        organiseringer(retning: over) {
+                          organisasjonsenhet {
+                            ...OrgenhetStandaloneWithLeder
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           }
+        }
       }
     }
   }

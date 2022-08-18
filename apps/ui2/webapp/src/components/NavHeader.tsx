@@ -119,7 +119,7 @@ const NavHeader = () => {
           color='#236B7D'
           fontSize={'2rem'}
         />
-        <span className={userText}>{session}</span>
+        <span className={userText}>{session?.name}</span>
         {/* <BurgerMenu /> */}
       </div>
     </div>

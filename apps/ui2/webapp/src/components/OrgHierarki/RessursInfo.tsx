@@ -2,13 +2,13 @@ import { css } from '@emotion/css'
 import { BodyShort, Heading, Label } from '@navikt/ds-react'
 import { Link } from 'react-router-dom'
 import {
-  Organisasjonsenhet,
+  OrgEnhet as Organisasjonsenhet,
   Ressurs,
-  RessursKobling,
+  RessursOrgTilknytning as RessursKobling,
   RessursLeder,
 } from '../../api/generated/graphql_generated'
 import { agressoIdDataToUrl } from '../../resources/utils/url_utils'
-import CustomLinkPanel2, { LinkPanelType } from '../CustomLinkPanel2'
+import CustomLinkPanel2, {LinkPanelType} from '../CustomLinkPanel2'
 import UserImage from '../UserImage'
 
 const ressursInfoStyles = css({

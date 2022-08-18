@@ -1,6 +1,6 @@
 import { css } from '@emotion/css'
 import { BodyShort, Heading, Label } from '@navikt/ds-react'
-import { Person } from '../../api/generated/graphql_generated'
+import { FolkeregisterPerson as Person } from '../../api/generated/graphql_generated'
 
 const contentStyles = css({
   backgroundColor: '#DEECEF',
