@@ -466,13 +466,17 @@ export type HentOrganisasjonsEnheterHierarkiQueryVariables = Exact<{
 
 export type HentOrganisasjonsEnheterHierarkiQuery = { __typename?: 'Query', organisasjonsenhet?: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string, gyldigFom: any, gyldigTom?: any | null, underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }>, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, agressoId: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null } }> } }> } }> } }> } }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }> } }>, koblinger: Array<{ __typename?: 'OrgEnhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, personIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }> } }> } | null };
 
-export type RessursStandaloneFragment = { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
+export type RessursStandaloneFragment = { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
+
+export type RessursWithLederFragment = { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null, navident: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
 
 export type OrgenhetAgressoIdsFragment = { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string };
 
-export type RessursWithKoblingFragment = { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
+export type RessursWithKoblingFragment = { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
 
-export type OrgenhetStandaloneWithLederFragment = { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> };
+export type RessursWithLederAndKoblingFragment = { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null, navident: string } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
+
+export type OrgenhetStandaloneWithLederFragment = { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> };
 
 export type HentMedFragmentEnhetQueryVariables = Exact<{
   agressoId: Scalars['String'];
@@ -488,7 +492,14 @@ export type HentHierarkiQueryVariables = Exact<{
 }>;
 
 
-export type HentHierarkiQuery = { __typename?: 'Query', enhet?: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, type?: { __typename?: 'Kode', kode: string } | null } | null, lederkoblinger?: { __typename?: 'OrgEnhet', leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, ressursKoblinger?: { __typename?: 'OrgEnhet', koblinger: Array<{ __typename?: 'OrgEnhetsKobling', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, enhetsKoblinger?: { __typename?: 'OrgEnhet', underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }> } | null };
+export type HentHierarkiQuery = { __typename?: 'Query', enhet?: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, type?: { __typename?: 'Kode', kode: string } | null } | null, lederkoblinger?: { __typename?: 'OrgEnhet', leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null, navident: string } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, ressursKoblinger?: { __typename?: 'OrgEnhet', koblinger: Array<{ __typename?: 'OrgEnhetsKobling', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null, navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, enhetsKoblinger?: { __typename?: 'OrgEnhet', underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', gyldigFom: any, gyldigTom?: any | null, agressoId: string, orgNiv: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, epost?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }> } | null };
+
+export type HentLederForNavidentQueryVariables = Exact<{
+  navident?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type HentLederForNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navIdent: string, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navIdent: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }> } | null };
 
 
 
@@ -883,8 +894,8 @@ export type Resolvers<ContextType = any> = {
 
 export const RessursStandaloneFragmentDoc = gql`
     fragment RessursStandalone on Ressurs {
-  navIdent
-  visningsNavn
+  navident
+  visningsnavn
   fornavn
   etternavn
   epost
@@ -895,6 +906,17 @@ export const RessursStandaloneFragmentDoc = gql`
   }
 }
     `;
+export const RessursWithLederFragmentDoc = gql`
+    fragment RessursWithLeder on Ressurs {
+  ...RessursStandalone
+  ledere {
+    ressurs {
+      visningsnavn
+      navident
+    }
+  }
+}
+    ${RessursStandaloneFragmentDoc}`;
 export const OrgenhetAgressoIdsFragmentDoc = gql`
     fragment OrgenhetAgressoIds on OrgEnhet {
   agressoId
@@ -913,6 +935,13 @@ export const RessursWithKoblingFragmentDoc = gql`
 }
     ${RessursStandaloneFragmentDoc}
 ${OrgenhetAgressoIdsFragmentDoc}`;
+export const RessursWithLederAndKoblingFragmentDoc = gql`
+    fragment RessursWithLederAndKobling on Ressurs {
+  ...RessursWithLeder
+  ...RessursWithKobling
+}
+    ${RessursWithLederFragmentDoc}
+${RessursWithKoblingFragmentDoc}`;
 export const OrgenhetStandaloneWithLederFragmentDoc = gql`
     fragment OrgenhetStandaloneWithLeder on OrgEnhet {
   ...OrgenhetAgressoIds
@@ -1725,7 +1754,7 @@ export const HentHierarkiDocument = gql`
   lederkoblinger: orgEnhet(where: {agressoId: $agressoId, orgNiv: $orgNiv}) {
     leder {
       ressurs {
-        ...RessursWithKobling
+        ...RessursWithLederAndKobling
       }
     }
   }
@@ -1734,10 +1763,10 @@ export const HentHierarkiDocument = gql`
   ) {
     koblinger {
       ressurs {
-        ...RessursStandalone
+        ...RessursWithLeder
         ledere {
           ressurs {
-            ...RessursWithKobling
+            ...RessursStandalone
           }
         }
       }
@@ -1784,7 +1813,8 @@ export const HentHierarkiDocument = gql`
   }
 }
     ${OrgenhetAgressoIdsFragmentDoc}
-${RessursWithKoblingFragmentDoc}
+${RessursWithLederAndKoblingFragmentDoc}
+${RessursWithLederFragmentDoc}
 ${RessursStandaloneFragmentDoc}
 ${OrgenhetStandaloneWithLederFragmentDoc}`;
 
@@ -1816,3 +1846,53 @@ export function useHentHierarkiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type HentHierarkiQueryHookResult = ReturnType<typeof useHentHierarkiQuery>;
 export type HentHierarkiLazyQueryHookResult = ReturnType<typeof useHentHierarkiLazyQuery>;
 export type HentHierarkiQueryResult = Apollo.QueryResult<HentHierarkiQuery, HentHierarkiQueryVariables>;
+export const HentLederForNavidentDocument = gql`
+    query HentLederForNavident($navident: String) {
+  ressurs(where: {navIdent: $navident}) {
+    navIdent
+    ledere {
+      ressurs {
+        navIdent
+        visningsNavn
+        fornavn
+        etternavn
+        koblinger {
+          organisasjonsenhet {
+            navn
+            orgNiv
+            agressoId
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useHentLederForNavidentQuery__
+ *
+ * To run a query within a React component, call `useHentLederForNavidentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentLederForNavidentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHentLederForNavidentQuery({
+ *   variables: {
+ *      navident: // value for 'navident'
+ *   },
+ * });
+ */
+export function useHentLederForNavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentLederForNavidentQuery, HentLederForNavidentQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HentLederForNavidentQuery, HentLederForNavidentQueryVariables>(HentLederForNavidentDocument, options);
+      }
+export function useHentLederForNavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentLederForNavidentQuery, HentLederForNavidentQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HentLederForNavidentQuery, HentLederForNavidentQueryVariables>(HentLederForNavidentDocument, options);
+        }
+export type HentLederForNavidentQueryHookResult = ReturnType<typeof useHentLederForNavidentQuery>;
+export type HentLederForNavidentLazyQueryHookResult = ReturnType<typeof useHentLederForNavidentLazyQuery>;
+export type HentLederForNavidentQueryResult = Apollo.QueryResult<HentLederForNavidentQuery, HentLederForNavidentQueryVariables>;
