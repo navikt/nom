@@ -1,12 +1,14 @@
 import { css } from "@emotion/css";
 
-const contentStyle = css({
-    margin: "0 auto 2.5rem",
-    marginTop: '2rem',
-    marginBottom: '5rem',
-    width: '50%',
-    minWidth: "30rem"
-})
+const contentStyle = css`
+  margin: 0 auto 2.5rem;
+  margin-top: 2rem;
+  margin-bottom: 5rem;
+  width: 95%;
+  @media (min-width: 60rem) {
+    width: 50%;
+  }
+`
 
 type ContentWrapperProps = {
     children: React.ReactElement
