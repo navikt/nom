@@ -306,7 +306,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
               <span>
-              <Heading className={panelCss.textCenter} size={'large'}>
+              <Heading size={'large'}>
                   <BuildingSvg/>
                   {valgtEnhet.navn}
               </Heading>
