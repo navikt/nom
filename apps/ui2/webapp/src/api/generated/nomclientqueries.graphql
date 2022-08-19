@@ -528,7 +528,7 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
   ressursKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
     koblinger {
       ressurs {
-        ...RessursWithLeder
+        ...RessursStandalone
         ledere {
           ressurs {
             ...RessursStandalone
