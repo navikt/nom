@@ -158,6 +158,7 @@ const panelCss = {
     textCenter: css`
         text-align: center;
     `,
+    fullHeight: css`height: 100%`,
     labeledItemsPane: css`
       display: grid;
       column-gap: 1rem;
@@ -206,7 +207,7 @@ const OverEnhet = (props: {children: ReactNode, navIdentForImg: string}) => <div
 </div>
 
 const Ressurs = (props: { children: ReactNode }) => <HorizontallyAlignedPanel
-    className={commonPanelCss} iconSrc={peopleFilledIcon}>{props.children}
+    className={css(commonPanelCss, panelCss.fullHeight)} iconSrc={peopleFilledIcon}>{props.children}
 </HorizontallyAlignedPanel>
 
 
