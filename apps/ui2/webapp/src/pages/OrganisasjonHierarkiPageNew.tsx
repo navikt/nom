@@ -4,7 +4,7 @@ import {useParams} from 'react-router'
 import {agressoIdDataToUrl, agressoUrlToData} from '../resources/utils/url_utils'
 import {BodyShort, Heading, Loader} from '@navikt/ds-react'
 import {css} from '@emotion/css'
-import {Fragment, ReactNode} from "react";
+import React, {Fragment, ReactNode} from "react";
 import {building2Icon, peopleFilledIcon} from "../components/Images";
 import { Link } from 'react-router-dom'
 import {Back, Next} from "@navikt/ds-icons";
@@ -239,9 +239,15 @@ const BackFromRessurs = (props: {valgtEnhetUrl: string, ressursIsLeder?: boolean
     </BodyShort>
 </Link>
 
+const scrollToRef = (ref: any) =>
+    window.scrollTo(0, ref.current.offsetTop - 100)
 
 const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof extractSortAndFlattenHierarkiData>, focusedNavIdent?: string }) {
     const overEnheter = props.data.overenheter;
+    const scrollRef = React.useRef<any>();
+    React.useEffect(() => {
+        if(overEnheter.length !== 0) scrollRef.current && scrollToRef(scrollRef);
+    },[])
 
     const underEnheter = props.data.underenheter
     const lederKoblinger = props.data.ledere
@@ -275,10 +281,10 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                   Leder: {lederKoblinger[0]?.ressurs?.visningsNavn || "Leder ikke funnet"}
               </OverEnhet>
           </Link>
-          <div className={panelCss.focusedRessurs}>
+          <div ref={scrollRef} className={panelCss.focusedRessurs}>
               <div className={panelCss.panelRim}></div>
-                  <UserImage navIdent={focusedRessurs.navIdent}/>
-                  <Heading size={'large'}>
+                  <UserImage size={"130px"} navIdent={focusedRessurs.navIdent}/>
+                  <Heading className={panelCss.textCenter} size={'large'}>
                       {focusedRessurs.visningsNavn}
                   </Heading>
               <div>({focusedRessurs.navIdent})</div>
@@ -296,17 +302,17 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
 
       </>}
       {!focusedRessurs && <>
-          {valgtEnhet && <div className={panelCss.currentEnhet}>
+          {valgtEnhet && <div ref={scrollRef} className={panelCss.currentEnhet}>
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
               <span>
-              <Heading size={'large'}>
+              <Heading className={panelCss.textCenter} size={'large'}>
                   <BuildingSvg/>
                   {valgtEnhet.navn}
               </Heading>
               Leder: <LederLink leder={lederKoblinger[0]?.ressurs!!} enhetUrlCtx={valgtEnhetUrl}/>
               </span>
-                  <UserImage navIdent={lederKoblinger[0]?.ressurs?.navIdent}/>
+                  <UserImage size={"130px"} navIdent={lederKoblinger[0]?.ressurs?.navIdent}/>
               </div>
           </div>}
           <div className={css(hierarkiCss.underEnheter, underEnheter.length > 5 && hierarkiCss.dynamicSecondColumn)}>
