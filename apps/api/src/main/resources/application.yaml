@@ -58,6 +58,8 @@ graphql:
 management.endpoints.web.exposure.include: health,prometheus
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
     username: ${DATABASE_USERNAME}

@@ -9,5 +9,5 @@ public class NavidentRequest {
     private String fornavn;
     private String etternavn;
     private String forbokstav;
-    private String identType;
+    private String sektor;
 }
