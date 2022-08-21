@@ -1,9 +1,15 @@
 package no.nav.nom.apps.api.rest.navident;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
@@ -24,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
 @RequiredArgsConstructor
@@ -42,6 +49,10 @@ public class NavidentController {
 
     @PostMapping
     @Transactional
+    @Operation(
+            description = "Henter en eksisterende eller oppretter en ny navident",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN))
+    @ApiResponses(value = @ApiResponse(responseCode = "200", description = "Success"))
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
         val token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 

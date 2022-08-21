@@ -47,6 +47,7 @@
         <org.jetbrains.annotations>21.0.1</org.jetbrains.annotations>
         <graphql.java-version>17.3</graphql.java-version>
         <nimbus.jose.jwt-version>9.15.2</nimbus.jose.jwt-version>
+        <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
 
         <unleash.version>5.1.0</unleash.version>
         <org.testcontainers.prostgresql>1.17.3</org.testcontainers.prostgresql>
