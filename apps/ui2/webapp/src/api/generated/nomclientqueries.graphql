@@ -113,13 +113,6 @@ query HentAlleRessurser {
   }
 }
 
-query hentRessurs($navIdent: String) {
-  ressurs(where: { navIdent: $navIdent }) {
-    fornavn
-    etternavn
-  }
-}
-
 query HentRessursMedNavIdent($navIdent: String) {
   ressurs(where: { navIdent: $navIdent }) {
     navIdent
@@ -438,7 +431,6 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
 
 fragment RessursStandalone on Ressurs{
   navident
-  visningsnavn
   fornavn
   etternavn
   epost
@@ -453,7 +445,6 @@ fragment RessursWithLeder on Ressurs {
   ...RessursStandalone
   ledere {
     ressurs {
-      visningsnavn
       navident
     }
   }
@@ -520,7 +511,7 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
   lederkoblinger: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
     leder {
       ressurs {
-        ...RessursWithLederAndKobling
+        ...RessursStandalone
       }
     }
   }
@@ -593,6 +584,25 @@ query HentLederForNavident($navident: String){
             navn
             orgNiv
             agressoId
+          }
+        }
+      }
+    }
+  }
+}
+
+query HentRessurs($navident: String){
+  ressurs(where: {navident: $navident}) {
+    ...RessursWithKobling
+    ledere {
+      ressurs {
+        ...RessursStandalone
+        orgTilknytning {
+          orgEnhet {
+            agressoId
+            orgNiv
+            navn
+            id
           }
         }
       }

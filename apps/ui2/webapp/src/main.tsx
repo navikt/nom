@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import {createRoot} from 'react-dom/client'
 import '@navikt/ds-css'
 import '@navikt/ds-css-internal'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
@@ -18,20 +18,19 @@ const layoutStyle = css({
   display: 'flex',
 })
 
-ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <ApolloProvider client={apolloClient}>
-        <NavHeader />
-        <PilotBanner />
-        <div className={layoutStyle}>
-          <div className={css({ width: '100%' })}>
-            <AppRoutes />
-          </div>
+const container = document.getElementById("root")
+const root = createRoot(container!);
+root.render(<React.StrictMode>
+  <BrowserRouter>
+    <ApolloProvider client={apolloClient}>
+      <NavHeader />
+      <PilotBanner />
+      <div className={layoutStyle}>
+        <div className={css({ width: '100%' })}>
+          <AppRoutes />
         </div>
-        <Footer />
-      </ApolloProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById('root')
-)
+      </div>
+      <Footer />
+    </ApolloProvider>
+  </BrowserRouter>
+</React.StrictMode>)
