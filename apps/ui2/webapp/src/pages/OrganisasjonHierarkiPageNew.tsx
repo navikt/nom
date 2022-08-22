@@ -170,6 +170,19 @@ const panelCss = {
     `
 }
 
+
+const lederStyling = {
+    lederTekst: css`
+      color: ${colorPalette.font};
+      font-weight: 600;
+      margin-left: 0.3rem
+    `,
+    lederDiv: css`
+      display: flex;
+      alignItems: center
+    `
+}
+
 function OverenheterDivider() {
   return <div className={css`
     background-color: inherit;
@@ -232,8 +245,10 @@ const hierarkiCss = {
       }`,
 }
 
-const LederLink = (props: {leder: {navident: string, visningsnavn?: string | null}, enhetUrlCtx: string}) =>
-    <Link to={`/org2/${props.enhetUrlCtx}/${props.leder.navident}`}>{props.leder.visningsnavn} ({props.leder.navident})</Link>
+const LederLink = (props: {leder: {navident: string, fornavn?: string | undefined, etternavn: string | undefined}, enhetUrlCtx: string}) =>
+    <Link to={`/org2/${props.enhetUrlCtx}/${props.leder.navident}`} className={css({ color: colorPalette.font, fontWeight: '600'})}>
+      {getFornavnAndEtternavnForLeder(props.leder)}
+    </Link>
 
 function LederLinkForRessurs(props: {navident?: string}){
     if(!props.navident){
@@ -248,18 +263,22 @@ function LederLinkForRessurs(props: {navident?: string}){
         const oe = l?.koblinger[0]?.organisasjonsenhet;
         if (l && oe) {
             const urlCtx = extractLinkFromEnhet(oe)
-            return <Link to={`${urlCtx}/${l.navIdent}`}>{l.visningsNavn}</Link>
+            return <Link to={`${urlCtx}/${l.navIdent}`} className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(l)}</Link>
         }
     }
     return null
 }
 
+const getFornavnAndEtternavnForLeder = (leder?: {fornavn: string | undefined, etternavn: string | undefined}) => {
+  if (!leder || !leder.fornavn && !leder.etternavn) return 'Leder ikke funnet'
+  return (leder.fornavn || '') + ' ' + (leder.etternavn || '')
+}
 
 const BackFromRessurs = (props: {valgtEnhetUrl: string, ressursIsLeder?: boolean}) => <Link
     className={css`display: grid; grid-template-columns: min-content auto;`}
     to={"/org2/" + props.valgtEnhetUrl}>
-    <Back className='navds-link-panel__chevron' />
-    <BodyShort size='medium' className={css({ fontWeight: '600' })}>
+    <Back className='navds-link-panel__chevron' color={colorPalette.font} />
+    <BodyShort size='medium' className={css({ fontWeight: '600', color: colorPalette.font })}>
         {props.ressursIsLeder ? "Se alle underenhetene for enheten " : "Se alle ressurser i enheten"}
     </BodyShort>
 </Link>
@@ -292,7 +311,9 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                         <Heading size={'medium'}>
                             {it.navn}
                         </Heading>
-                        Leder: {it.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
+                        <div className={lederStyling.lederDiv}>
+                          Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
+                        </div>
                     </OverEnhet>
                 </Link>}
         )}
@@ -303,7 +324,9 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                   <Heading size={'medium'}>
                       {valgtEnhet.navn}
                   </Heading>
-                  Leder: {lederKoblinger[0]?.ressurs?.visningsnavn || "Leder ikke funnet"}
+                  <div className={lederStyling.lederDiv}>
+                    Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(lederKoblinger[0]?.ressurs) || "Leder ikke funnet"}</span>
+                  </div>
               </OverEnhet>
           </Link>
           <div ref={scrollRef} className={panelCss.focusedRessurs}>
@@ -334,7 +357,9 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                     <BuildingSvg/>
                     {valgtEnhet.navn}
                 </Heading>
-                <span>Leder: <LederLink leder={lederKoblinger[0]?.ressurs} enhetUrlCtx={valgtEnhetUrl} /></span>
+                <div className={lederStyling.lederDiv}>
+                    Leder: <span className={lederStyling.lederTekst}><LederLink leder={lederKoblinger[0]?.ressurs} enhetUrlCtx={valgtEnhetUrl} /></span>
+                </div>
               </div>
                   <UserImage size={"130px"} navIdent={lederKoblinger[0]?.ressurs?.navident}/>
               </div>
@@ -346,7 +371,9 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                           <Heading size={'medium'}>
                               {it.navn}
                           </Heading>
-                          Leder: {it.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
+                          <div className={lederStyling.lederDiv}>
+                              Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
+                          </div>
                       </UnderEnhet>
                   </Link>
               )}
@@ -354,7 +381,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           <div className={css(hierarkiCss.underEnheter, ressurser.length > 5 && hierarkiCss.dynamicSecondColumn)}>
               {ressurser.map(it =>
                   <Link className={hierarkiCss.link} key={it.navident}
-                        to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>{it.visningsnavn}</Ressurs>
+                        to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>{getFornavnAndEtternavnForLeder(it)}</Ressurs>
                   </Link>)}
           </div>
       </>
