@@ -8,20 +8,19 @@ let postedHtml = {}
 
 export function setupUiDevEndpoint(app) {
     app.get('/uidev', (req, res, next) => {
-        const {ses: uidevSession, port: port} = req.query
+        const {ses: uidevSession} = req.query
         if(uidevSession){
             if(!postedHtml[uidevSession]){
                 res.status(404).send("Error: '" + uidevSession + "' was not a current session. Return to /uidev <a href=\"/uidev\">here</a>");
                 return;
             }
-            let spaHtml = postedHtml[req.query.ses || "default"] || ``
-            spaHtml = spaHtml.replaceAll("href=\"/","href=\"http://localhost:"+port)
-            spaHtml = spaHtml.replaceAll("src=\"/","src=\"http://localhost:" + port)
+            let {html: spaHtml, port: port} = postedHtml[req.query.ses]
+            spaHtml = spaHtml.replaceAll("href=\"/","href=\"http://localhost:"+ port + "/")
+            spaHtml = spaHtml.replaceAll("src=\"/","src=\"http://localhost:" + port + "/")
             res.send(spaHtml)
             return;
         }
-
-        const sessionLinks = Object.keys(postedHtml).map(it => "<a href=\"/uidev?ses=" + it + "\">" + it ).join("</a><br/>")
+        const sessionLinks = Object.keys(postedHtml).map(it => "<a href=\"/uidev?ses=" + it + "\">" + it + " (localhost:" + postedHtml[it].port + ")</a>").join("<br/>")
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
@@ -45,10 +44,11 @@ export function setupUiDevEndpoint(app) {
                         fetch("/uidev", {method: "DELETE"}).then(it => location.reload());
                     }
                     function init() {
+                        console.log('${sessionLinks}',"SESSIONLINKS")
                         document.getElementById("div-linkdump").innerHTML = '${sessionLinks}'
                     }
                 </script>
-                <title>NOM uidev</title></head>
+                <title>NOM uidev</title>
             </head>
             <body onLoad="init()">
             <div id="div-content">
@@ -75,14 +75,15 @@ export function setupUiDevEndpoint(app) {
             return;
         }
         const ses = req.query["ses"] || "default";
-        postedHtml[ses] = reqBody.toLocaleString();
+        const port = req.query["port"] || "4173"
+        postedHtml[ses] = {html: reqBody.toLocaleString(), port};
         res.redirect("/uidev?ses=" + ses);
     })
 
     app.delete('/uidev',(req,res,next) => {
         const l = Object.keys(postedHtml).length;
         postedHtml = {}
-        res.send("deleted " + l + " html entries.")
+        res.status(200).send("deleted " + l + " html entries.")
     })
 }
 
