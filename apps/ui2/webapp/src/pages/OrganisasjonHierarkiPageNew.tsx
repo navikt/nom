@@ -2,9 +2,9 @@ import ContentWrapper from '../components/ContentWrapper'
 import * as Gq from '../api/generated/graphql_generated'
 import {useParams} from 'react-router'
 import {agressoIdDataToUrl, agressoUrlToData} from '../resources/utils/url_utils'
-import {BodyShort, Heading, Loader} from '@navikt/ds-react'
+import {BodyShort, Heading} from '@navikt/ds-react'
 import {css} from '@emotion/css'
-import React, {Fragment, ReactNode} from "react";
+import React, {ReactNode} from "react";
 import {building2Icon, peopleFilledIcon} from "../components/Images";
 import { Link } from 'react-router-dom'
 import {Back, Next} from "@navikt/ds-icons";
@@ -179,7 +179,7 @@ const lederStyling = {
     `,
     lederDiv: css`
       display: flex;
-      alignItems: center
+      align-items: center
     `
 }
 
@@ -245,8 +245,8 @@ const hierarkiCss = {
       }`,
 }
 
-const LederLink = (props: {leder: {navident: string, fornavn?: string | undefined, etternavn: string | undefined}, enhetUrlCtx: string}) =>
-    <Link to={`/org2/${props.enhetUrlCtx}/${props.leder.navident}`} className={css({ color: colorPalette.font, fontWeight: '600'})}>
+const LederLink = (props: {leder: {navident: string, fornavn?: string | null, etternavn?: string | null}, enhetUrlCtx: string}) =>
+    <Link to={`/org2/${props.enhetUrlCtx}/${props.leder?.navident}`} className={css({ color: colorPalette.font, fontWeight: '600'})}>
       {getFornavnAndEtternavnForLeder(props.leder)}
     </Link>
 
@@ -269,7 +269,7 @@ function LederLinkForRessurs(props: {navident?: string}){
     return null
 }
 
-const getFornavnAndEtternavnForLeder = (leder?: {fornavn: string | undefined, etternavn: string | undefined}) => {
+const getFornavnAndEtternavnForLeder = (leder?: {fornavn?: string | null, etternavn?: string | null}) => {
   if (!leder || !leder.fornavn && !leder.etternavn) return 'Leder ikke funnet'
   return (leder.fornavn || '') + ' ' + (leder.etternavn || '')
 }
