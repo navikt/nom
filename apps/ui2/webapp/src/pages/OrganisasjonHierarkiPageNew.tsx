@@ -41,7 +41,6 @@ const BuildingSvg = (props: {className? : string}) => <svg className={props.clas
         5.25H12V3H14.25V5.25ZM3.53025 1.5L4.28025 0.75H13.7198L14.4698 1.5H3.53025Z`}/>
 </svg>
 
-
 function extractSortAndFlattenHierarkiData(qryRes: Gq.HentHierarkiQueryResult){
   if(!qryRes.data) {
     throw "Wrong usage"
@@ -330,13 +329,13 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           {valgtEnhet && <div ref={scrollRef} className={panelCss.currentEnhet}>
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
-              <span>
-              <Heading size={'large'}>
-                  <BuildingSvg/>
-                  {valgtEnhet.navn}
-              </Heading>
-              Leder: <LederLink leder={lederKoblinger[0]?.ressurs} enhetUrlCtx={valgtEnhetUrl} />
-              </span>
+              <div className={css({display: 'flex', flexDirection: 'column', justifyContent: 'center'})}>
+                <Heading size={'large'}>
+                    <BuildingSvg/>
+                    {valgtEnhet.navn}
+                </Heading>
+                <span>Leder: <LederLink leder={lederKoblinger[0]?.ressurs} enhetUrlCtx={valgtEnhetUrl} /></span>
+              </div>
                   <UserImage size={"130px"} navIdent={lederKoblinger[0]?.ressurs?.navident}/>
               </div>
           </div>}
