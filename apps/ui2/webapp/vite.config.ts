@@ -13,6 +13,10 @@ export default defineConfig({
       "/sessionInfo": {
         target: "http://localhost:8080/",
         changeOrigin: true
+      },
+      "/teamcat": {
+        target: "http://localhost:8080/",
+        changeOrigin: true
       }
     }
   }
