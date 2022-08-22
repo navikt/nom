@@ -13,9 +13,6 @@ export function NotfoundPage() {
   return (
     <ContentWrapper>
       <>
-        <button onClick={() => setToggle(!toggle)}>
-          heihei toggle ( {toggle ? 'true' : 'false'} )
-        </button>
         404. Undersiden fantes ikke. Gå <NavLink to='/'>hjem</NavLink>
       </>
     </ContentWrapper>
