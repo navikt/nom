@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom'
 import { nomLogoCircle } from './Images'
 import { Search } from '@navikt/ds-react'
 import { PeopleFilled } from '@navikt/ds-icons'
-import BurgerMenu from './BurgerMenu'
 import { NomColors } from '../resources/NomStyles'
 
 export const headerHeight = '6rem'
@@ -82,12 +81,10 @@ export const searchBarStyle = css({
 })
 
 const NavHeader = () => {
-  const [session, setSession] = React.useState<SessionInterface>()
-
-  const navigate = useNavigate()
+  const [session, setSession] = React.useState<any>()
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       const res = await getSession()
       setSession(res)
     })()
@@ -103,23 +100,17 @@ const NavHeader = () => {
         <Search
           disabled={true}
           placeholder={"Søkefunksjonalitet kommer"}
-          className={css(searchBarStyle,{
-          // midlertidig hack for mørkere tekst i "disabled" tekst-felt
-            "::placeholder": {
-              color: "black",
-              opacity: 1.0
-            }
-          })}
+          className={searchBarStyle}
           label={'Søk etter ressurser'}
           variant='secondary'
           size='medium'
         ></Search>
         <PeopleFilled
-          className={css({ marginRigh: '1em' })}
+          className={css({ marginRight: '1em', minWidth: "2rem" })}
           color='#236B7D'
           fontSize={'2rem'}
         />
-        <span className={userText}>{session?.name}</span>
+        <span className={userText}>{session}</span>
         {/* <BurgerMenu /> */}
       </div>
     </div>
@@ -127,3 +118,4 @@ const NavHeader = () => {
 }
 
 export default NavHeader
+
