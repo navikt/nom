@@ -13,6 +13,7 @@ public class OpprettRessursRequest {
 
     private String personident;
     private String visningsfornavn;
+    private String visningsmellomnavn;
     private String visningsetternavn;
     private Sektor sektor;
     private OrgEnhet orgEnhet;

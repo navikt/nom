@@ -2,11 +2,11 @@ import ContentWrapper from '../components/ContentWrapper'
 import * as Gq from '../api/generated/graphql_generated'
 import {useParams} from 'react-router'
 import {agressoIdDataToUrl, agressoUrlToData} from '../resources/utils/url_utils'
-import {BodyShort, Heading, Loader} from '@navikt/ds-react'
+import {Alert, BodyShort, Heading} from '@navikt/ds-react'
 import {css} from '@emotion/css'
-import React, {Fragment, ReactNode} from "react";
+import React, {ReactNode} from "react";
 import {building2Icon, peopleFilledIcon} from "../components/Images";
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import {Back, Next} from "@navikt/ds-icons";
 import UserImage from "../components/UserImage";
 
@@ -61,7 +61,7 @@ function extractSortAndFlattenHierarkiData(qryRes: Gq.HentHierarkiQueryResult){
   qryData.enhetsKoblinger?.underenheter.sort((a, b) =>
       (a?.organisasjonsenhet?.navn || '').localeCompare(b?.organisasjonsenhet?.navn || '', "no"))
   qryData.ressursKoblinger?.koblinger.sort((a, b) =>
-      (a.ressurs.visningsnavn || '').localeCompare(b.ressurs.visningsnavn || '', "no"))
+      (a.ressurs.fornavn || '').localeCompare(b.ressurs.fornavn || '', "no"))
 
   return {
     enhet: qryData.enhet!!,
@@ -70,6 +70,41 @@ function extractSortAndFlattenHierarkiData(qryRes: Gq.HentHierarkiQueryResult){
     ledere: qryData.lederkoblinger?.leder || [],
       ressurser: qryData.ressursKoblinger?.koblinger.map(it => it.ressurs) || []
   }
+}
+
+function extractRessursData(qryRes: Gq.HentRessursQueryResult){
+    if(!qryRes.data?.ressurs) {
+        throw "Wrong usage"
+    }
+    const r = qryRes.data.ressurs;
+
+    function formatTlf(nr: string){
+        const tmpNr = nr.startsWith("47") && nr.length === 10  ? nr.substring(2) : nr;
+        let out = []
+        for(let k = 0; k < 8; k+= 2){
+            out.push(tmpNr.substring(k,k+2))
+        }
+        return out.join(" ");
+    }
+
+    return {
+        navident: r.navident,
+        epost: r.epost,
+        telefon: r.telefon.map(it => formatTlf(it.nummer)),
+        fornavn: r.fornavn,
+        etternavn: r.etternavn,
+        lederList: r.ledere.map(it => it.ressurs).map(it => {
+            // Umulig å prioritere hvordan en orgTilknytning skal velges over en annen
+            const oeList = it.orgTilknytning.map(it => it.orgEnhet)
+            const orgenhetUrlList = oeList.map(oe => agressoIdDataToUrl(oe.agressoId, oe.orgNiv, oe.navn))
+            return {
+                navident: it.navident,
+                fornavn: it.fornavn,
+                etternavn: it.etternavn,
+                orgenhetUrlList
+            }
+        })
+    }
 }
 
 function OrganisasjonsHierarkiPageOuter(){
@@ -81,18 +116,39 @@ function OrganisasjonsHierarkiPageOuter(){
             orgNiv: agrId.agressoNiva,
         }, errorPolicy: "all",
     })
-    const gotData = !!(qry.data && !qry.loading && !qry.error)
 
-    return <ContentWrapper><div className={css`display: grid`}>
-        <Heading size='xlarge' className={css({ marginBottom: '20px' })}>
-            NAV Organisasjon
-        </Heading>
-        {!gotData && <>
-            <div>Loading...</div>
-            <pre>{JSON.stringify(qry.error, null, 2)}</pre>
-        </>}
-        {gotData && <OrganisasjonHierarkiPageInner data={extractSortAndFlattenHierarkiData(qry)} focusedNavIdent={resourceId}/>}
-    </div>
+    const ressursQry = Gq.useHentRessursQuery({
+        variables: {
+            navident: resourceId
+        },
+        skip: !resourceId
+    })
+
+    const gotHierarkiData = !!(qry.data && !qry.loading)
+    const gotRessursData = !resourceId || !!(ressursQry.data && !ressursQry.loading)
+
+    if(qry.error){
+        console.error(qry.error, "GRAPHQL ERROR")
+    }
+    if(ressursQry.error){
+        console.error(ressursQry.error, "GRAPHQL ERROR")
+    }
+
+
+    return <ContentWrapper>
+        <div className={css`display: grid`}>
+            <Heading size='xlarge' className={css({marginBottom: '20px'})}>
+                NAV Organisasjon
+            </Heading>
+            {(qry.error || ressursQry.error) && <Alert variant={"warning"}>Feil i graphql-respons</Alert>}
+            {!gotHierarkiData && !gotRessursData && <>
+                <div>Loading...</div>
+            </>}
+            {gotHierarkiData && gotRessursData &&
+                <OrganisasjonHierarkiPageInner data={extractSortAndFlattenHierarkiData(qry)}
+                                               focusedRessurs={resourceId ? extractRessursData(ressursQry) : undefined}
+                                               focusedNavIdent={resourceId}/>}
+        </div>
     </ContentWrapper>
 }
 
@@ -103,7 +159,7 @@ const commonPanelCss = css`
   display: grid;
   min-height: 1rem;
   min-width: 1rem;
-  grid-template-columns: min-content 1fr min-content min-content;
+  grid-template-columns: min-content 70% min-content min-content;
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
   background-color: ${colorPalette.unfocusedBackground};
@@ -113,7 +169,7 @@ const panelCss = {
     currentEnhet: css(commonPanelCss, css`
       grid-template-columns: 1fr;
       grid-template-rows: min-content 1fr;
-      margin-bottom: 2rem;
+      margin-bottom: 0.7rem;
       min-height: 13rem;
       background-color: ${colorPalette.focusedBackground};
       svg { // meant for header prefix icon
@@ -126,6 +182,7 @@ const panelCss = {
       width: 100%;
       justify-items: center;
       background-color: ${colorPalette.focusedBackground};
+      row-gap: 0.5rem;
       min-height: 15rem;
       margin-bottom: 1rem;
     `),
@@ -157,15 +214,19 @@ const panelCss = {
     textCenter: css`
         text-align: center;
     `,
+    textRight: css`
+        text-align: right;
+    `,
     fullHeight: css`height: 100%`,
     labeledItemsPane: css`
       display: grid;
+      grid-template-columns: min-content 1fr;
       column-gap: 1rem;
       row-gap: 1rem;
       width: 100%;
       padding: 1.5rem;
       @media (min-width: 80rem) {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: min-content 1fr min-content 1fr;
       }
     `
 }
@@ -179,7 +240,7 @@ const lederStyling = {
     `,
     lederDiv: css`
       display: flex;
-      alignItems: center
+      align-items: center
     `
 }
 
@@ -191,8 +252,9 @@ function OverenheterDivider() {
   `}>
     <div className={css`
       min-height: 1rem;
+      height: 1rem;
       background-color: ${colorPalette.rim};
-      width: 0.2rem;
+      width: 0.05rem;
     `}>
     </div>
   </div>
@@ -208,20 +270,16 @@ const HorizontallyAlignedPanel = (props: { children: ReactNode, iconSrc: string,
         <Next className={css`margin: 0 1rem 0 0.2rem`}/>
     </div>
 
-const UnderEnhet = (props: { children: ReactNode, navIdentForImg: string }) => <HorizontallyAlignedPanel
+const Enhet = (props: { children: ReactNode, navIdentForImg: string }) => <HorizontallyAlignedPanel
     className={panelCss.underEnhet} iconSrc={building2Icon} navidentForImg={props.navIdentForImg}>
     {props.children}
 </HorizontallyAlignedPanel>
-
-const OverEnhet = (props: {children: ReactNode, navIdentForImg: string}) => <div>
-    <UnderEnhet navIdentForImg={props.navIdentForImg}>{props.children}</UnderEnhet>
-    <OverenheterDivider/>
-</div>
 
 const Ressurs = (props: { children: ReactNode }) => <HorizontallyAlignedPanel
     className={css(commonPanelCss, panelCss.fullHeight)} iconSrc={peopleFilledIcon}>{props.children}
 </HorizontallyAlignedPanel>
 
+const RightText = (props: {children: ReactNode}) => <div className={panelCss.textRight}>{props.children}</div>
 
 function extractLinkFromEnhet(enhet: {agressoId: string, navn: string, orgNiv: string}){
     return "/org2/" + agressoIdDataToUrl(enhet.agressoId, enhet.orgNiv, enhet.navn)
@@ -238,6 +296,7 @@ const hierarkiCss = {
     link: css`
       text-decoration: none;
       color: inherit;
+      display: grid;
     `,
     dynamicSecondColumn: css`
       @media (min-width:  60rem) {
@@ -245,10 +304,15 @@ const hierarkiCss = {
       }`,
 }
 
-const LederLink = (props: {leder: {navident: string, fornavn?: string | undefined, etternavn: string | undefined}, enhetUrlCtx: string}) =>
-    <Link to={`/org2/${props.enhetUrlCtx}/${props.leder.navident}`} className={css({ color: colorPalette.font, fontWeight: '600'})}>
-      {getFornavnAndEtternavnForLeder(props.leder)}
-    </Link>
+const LederLink = (props: {ressurs: ReturnType<typeof extractRessursData>}) => <>
+    {props.ressurs.lederList
+        .map(l => l.orgenhetUrlList
+            .map(lu => <Link className={lederStyling.lederTekst} key={lu+"-"+l.navident} to={`/org2/${lu}/${l.navident}`} >{getFornavnAndEtternavnForLeder(l)}</Link>))}
+    </>
+
+const OrgenhetLederLink = (props: {navident: string, name:string, orgenhetCtxUrl: string}) => <Link className={lederStyling.lederTekst}
+    to={`/org2/${props.orgenhetCtxUrl}/${props.navident}`}
+>{props.name}</Link>
 
 function LederLinkForRessurs(props: {navident?: string}){
     if(!props.navident){
@@ -269,7 +333,7 @@ function LederLinkForRessurs(props: {navident?: string}){
     return null
 }
 
-const getFornavnAndEtternavnForLeder = (leder?: {fornavn: string | undefined, etternavn: string | undefined}) => {
+const getFornavnAndEtternavnForLeder = (leder?: {fornavn?: string | null, etternavn?: string | null}) => {
   if (!leder || !leder.fornavn && !leder.etternavn) return 'Leder ikke funnet'
   return (leder.fornavn || '') + ' ' + (leder.etternavn || '')
 }
@@ -286,7 +350,8 @@ const BackFromRessurs = (props: {valgtEnhetUrl: string, ressursIsLeder?: boolean
 const scrollToRef = (ref: any) =>
     window.scrollTo(0, ref.current.offsetTop - 100)
 
-const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof extractSortAndFlattenHierarkiData>, focusedNavIdent?: string }) {
+const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof extractSortAndFlattenHierarkiData>, focusedNavIdent?: string,
+    focusedRessurs?: ReturnType<typeof extractRessursData> }) {
     const overEnheter = props.data.overenheter;
     const scrollRef = React.useRef<any>();
     React.useEffect(() => {
@@ -298,50 +363,53 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
     const valgtEnhet = props.data.enhet;
     const ressurser = props.data.ressurser;
 
-    const focusedRessurs = props.focusedNavIdent && ressurser.find(it => it.navident === props.focusedNavIdent)
-        || lederKoblinger.find(it => it.ressurs.navident === props.focusedNavIdent)?.ressurs
-        || null;
+
+
+    const focusedRessurs = props.focusedRessurs || null
     const valgtEnhetUrl = agressoIdDataToUrl(valgtEnhet.agressoId, valgtEnhet.orgNiv, valgtEnhet.navn);
 
     return <div>
       {overEnheter.map(it =>{
           const linkPath = extractLinkFromEnhet(it)
-                return <Link className={hierarkiCss.link} key={linkPath} to={linkPath }>
-                    <OverEnhet navIdentForImg={it.leder[0].ressurs.navident}>
+                return <Link  className={hierarkiCss.link} key={linkPath} to={linkPath }>
+                    <Enhet navIdentForImg={it.leder[0].ressurs.navident}>
                         <Heading size={'medium'}>
                             {it.navn}
                         </Heading>
-                        <div className={lederStyling.lederDiv}>
+                        <div>
                           Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
                         </div>
-                    </OverEnhet>
+                    </Enhet>
+                    <OverenheterDivider/>
                 </Link>}
         )}
 
       {focusedRessurs && <>
           <Link className={hierarkiCss.link} to={valgtEnhetUrl}>
-              <OverEnhet navIdentForImg={lederKoblinger[0]?.ressurs?.navident}>
+              <Enhet navIdentForImg={lederKoblinger[0]?.ressurs?.navident}>
                   <Heading size={'medium'}>
                       {valgtEnhet.navn}
                   </Heading>
-                  <div className={lederStyling.lederDiv}>
+                  <div>
                     Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(lederKoblinger[0]?.ressurs) || "Leder ikke funnet"}</span>
                   </div>
-              </OverEnhet>
+              </Enhet>
+              <OverenheterDivider />
           </Link>
           <div ref={scrollRef} className={panelCss.focusedRessurs}>
               <div className={panelCss.panelRim}></div>
                   <UserImage size={"130px"} navIdent={focusedRessurs.navident}/>
                   <Heading className={panelCss.textCenter} size={'large'}>
-                      {focusedRessurs.visningsnavn}
+                      {getFornavnAndEtternavnForLeder(focusedRessurs)}
                   </Heading>
               <div>({focusedRessurs.navident})</div>
 
                   <div className={panelCss.labeledItemsPane}>
-                      <div>Epost: <strong>{focusedRessurs.epost}</strong></div>
-                      <div>Org.enhet: <strong>{valgtEnhet.navn}</strong></div>
-                      <div>Leder: <LederLinkForRessurs navident={focusedRessurs.navident} /></div>
-                      <div>Tel: <strong>{focusedRessurs.telefon[0]?.nummer || "Mangler tlf"}</strong></div>
+                      <><RightText>Org.enhet</RightText><strong>{valgtEnhet.navn}</strong></>
+                      {/*<div>Leder: <LederLinkForRessurs navident={focusedRessurs} /></div>*/}
+                      <RightText>Leder</RightText><strong><div><LederLink ressurs={focusedRessurs}/></div></strong>
+                      <RightText>Epost</RightText><strong>{focusedRessurs.epost}</strong>
+                      <RightText>Tel</RightText> <strong>{focusedRessurs.telefon.length === 0 ? "Mangler tlf" : focusedRessurs.telefon.map(it => <div><span>{it}</span></div>)}</strong>
                   </div>
 
           </div>
@@ -352,13 +420,13 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           {valgtEnhet && <div ref={scrollRef} className={panelCss.currentEnhet}>
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
-              <div className={css({display: 'flex', flexDirection: 'column', justifyContent: 'center'})}>
+              <div>
                 <Heading size={'large'}>
                     <BuildingSvg />
                     {valgtEnhet.navn}
                 </Heading>
                 <div className={lederStyling.lederDiv}>
-                    Leder: <span className={lederStyling.lederTekst}><LederLink leder={lederKoblinger[0]?.ressurs} enhetUrlCtx={valgtEnhetUrl} /></span>
+                    <span>Leder: <OrgenhetLederLink navident={lederKoblinger[0].ressurs.navident} orgenhetCtxUrl={valgtEnhetUrl} name={getFornavnAndEtternavnForLeder(lederKoblinger[0].ressurs)} /></span>
                 </div>
               </div>
                   <UserImage size={"130px"} navIdent={lederKoblinger[0]?.ressurs?.navident}/>
@@ -367,21 +435,22 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           <div className={css(hierarkiCss.underEnheter, underEnheter.length > 5 && hierarkiCss.dynamicSecondColumn)}>
               {underEnheter.map(it =>
                   <Link className={hierarkiCss.link} key={extractLinkFromEnhet(it)} to={extractLinkFromEnhet(it)}>
-                      <UnderEnhet navIdentForImg={it.leder[0]?.ressurs?.navident}>
+                      <Enhet navIdentForImg={it.leder[0]?.ressurs?.navident}>
                           <Heading size={'medium'}>
                               {it.navn}
                           </Heading>
-                          <div className={lederStyling.lederDiv}>
+                          <span>
                               Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
-                          </div>
-                      </UnderEnhet>
+                          </span>
+                      </Enhet>
                   </Link>
               )}
           </div>
           <div className={css(hierarkiCss.underEnheter, ressurser.length > 5 && hierarkiCss.dynamicSecondColumn)}>
               {ressurser.map(it =>
                   <Link className={hierarkiCss.link} key={it.navident}
-                        to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>{getFornavnAndEtternavnForLeder(it)}</Ressurs>
+                        to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>
+                  <Heading size={"medium"}>{getFornavnAndEtternavnForLeder(it)}</Heading></Ressurs>
                   </Link>)}
           </div>
       </>

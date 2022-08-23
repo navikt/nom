@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <title>nom-proxy-test</title>
     <script>
 
         function fetchContentTypeJson(url) {
@@ -36,7 +37,7 @@
 
         function teamcatGetTeam() {
             resetDump("teamcatGetTeam()")
-            fetchContentTypeJson('/team-catalog/team/287c50ee-9c29-4cdb-9f5a-79224057ecc6')
+            fetchContentTypeJson('/teamcat/team/287c50ee-9c29-4cdb-9f5a-79224057ecc6')
                 .then(response => response.json())
                 .then(data => setDumpJsonContents(data));
         }
@@ -76,7 +77,7 @@
 
         function teamcatUserInfo() {
             resetDump("teamcatUserInfo()");
-            fetchContentTypeJson('/team-catalog/userinfo')
+            fetchContentTypeJson('/teamcat/userinfo')
                 .then(response => response.json())
                 .then(data => setDumpJsonContents(data));
         }

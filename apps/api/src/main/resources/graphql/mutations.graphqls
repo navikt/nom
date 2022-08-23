@@ -1,5 +1,5 @@
 type Mutation {
-    opprettRessurs(request: OpprettRessursRequest): OpprettRessursResponse
+    opprettRessurs(request: OpprettRessursRequest!): OpprettRessursResponse!
 
     # OrdreLinje
     opprettEnhet(request: OpprettEnhetRequest!): OrdreLinjeResponse!
@@ -16,6 +16,7 @@ type Mutation {
 input OpprettRessursRequest {
     personident: String!
     visningsfornavn: String!
+    visningsmellomnavn: String
     visningsetternavn: String!
     sektor: Sektor!
     orgEnhet: String
