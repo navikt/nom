@@ -29,7 +29,7 @@ const colorPalette = {
     border: "#B0B0B0"
 }
 
-const BuildingSvg = (props: {className? : string}) => <svg className={props.className || ""} width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+const BuildingSvg = (props: {className? : string}) => <svg className={props.className || ""} width="24" height="24" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path fillRule="evenodd" clipRule="evenodd" d={`M15.6405 1.611C15.6405 1.611 15.6397 1.6095 15.639 1.6095L14.1397 
         0.11025C14.07 0.03975 13.9747 0 13.875 0H4.125C4.02525 0 3.93 0.03975 3.8595 0.11025L2.3595 1.6095C2.35875
         1.61025 2.35875 1.611 2.358 1.611C2.289 1.68225 2.25 1.7955 2.25 1.875V17.625C2.25 17.832 2.418 18 2.625
@@ -127,7 +127,7 @@ const panelCss = {
       justify-items: center;
       background-color: ${colorPalette.focusedBackground};
       min-height: 15rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
     `),
     underEnhet: css(commonPanelCss, css`
       height: 100%;
@@ -354,7 +354,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
               <div className={panelCss.currentEnhetPanelContent}>
               <div className={css({display: 'flex', flexDirection: 'column', justifyContent: 'center'})}>
                 <Heading size={'large'}>
-                    <BuildingSvg/>
+                    <BuildingSvg />
                     {valgtEnhet.navn}
                 </Heading>
                 <div className={lederStyling.lederDiv}>
