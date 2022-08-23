@@ -159,7 +159,7 @@ const commonPanelCss = css`
   display: grid;
   min-height: 1rem;
   min-width: 1rem;
-  grid-template-columns: min-content 70% min-content min-content;
+  grid-template-columns: min-content 1fr min-content min-content;
   background-color: ${colorPalette.unfocusedBackground};
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
