@@ -53,16 +53,22 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                                 .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
                                 .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
                                 .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn())
+                                .put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn())
                                 .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn())
                                 .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
                         val metadata = securityUtil.metadataFromEnv(env, data);
                         val newRessurs = ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
-                        response.error(resolveError(nikResponse.getStatusCode(), nikResponse.getBody().getFeilmelding(),env));
+                        if(nikResponse.getBody().getFeilmelding() != null) {
+                            response.error(resolveError(nikResponse.getStatusCode(), nikResponse.getBody().getFeilmelding(), env));
+                        }
 
                         return newRessurs;
                     }
-
-                    response.error(resolveError(nikResponse.getStatusCode(),nikResponse.getBody().getFeilmelding(), env));
+                    else {
+                        response.error(resolveError(nikResponse.getStatusCode(),
+                                nikResponse.getBody() != null && nikResponse.getBody().getFeilmelding() != null ? nikResponse.getBody().getFeilmelding() : "NIK connection error",
+                                env));
+                    }
                 } catch (IllegalArgumentException | NoSuchElementException e) {
                     log.warn(e.getMessage(), e);
                     response.error(ErrorCode.BAD_REQUEST.construct(env, e.getMessage()));
@@ -83,18 +89,17 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                 OpprettRessursResponse.builder()
                 .personident(ressurs.getPersonIdent())
                 .navident(ressurs.getNavIdent())
-                .visningsfornavn(ressurs.getVisningsfornavn())
+                .visningsfornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn()+" "+m).orElse(ressurs.getVisningsfornavn()))
                 .visningsetternavn(ressurs.getVisningsetternavn())
                 .sektor(Sektor.valueOf(ressurs.getSektor()))
                 .build(): null;
     }
 
     private GraphQLError resolveError(HttpStatus httpStatus, String errorMsg, DataFetchingEnvironment env) {
-        return errorMsg != null ?
-                switch (httpStatus) {
+        return switch (httpStatus) {
                     case INTERNAL_SERVER_ERROR -> ErrorCode.SERVER_ERROR.construct(env, errorMsg);
                     case NOT_FOUND -> ErrorCode.NOT_FOUND.construct(env, errorMsg);
-                    default -> ErrorCode.SERVER_ERROR.construct(env, "Ukjent feil");
-                } : null;
+                    default -> ErrorCode.SERVER_ERROR.construct(env, errorMsg != null ? errorMsg : "Ukjent feil");
+                };
     }
 }

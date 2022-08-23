@@ -82,6 +82,8 @@ public class RessursService implements IRessursService {
                 .ressurstype(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
                 .sektor(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
                 .sluttdato(dvhRessursInterface.getSluttdatoForPersonident(ressurs.getPersonIdent()))
+                .fornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn()+" "+m).orElse(ressurs.getVisningsfornavn()))
+                .etternavn(ressurs.getVisningsetternavn())
                 .build();
     }
 }

@@ -50,6 +50,12 @@ public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
     }
 
     public CompletableFuture<DataFetcherResult<String>> fornavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        if(ressurs.getFornavn() != null){
+            return CompletableFuture.completedFuture(DataFetcherResult.<String>newResult()
+                            .data(ressurs.getFornavn())
+                            .build()
+            );
+        }
         if(sendDummydata){
             return respondWithDummydata("dummy-fornavn-i-dev-" + ressurs.getNavIdent());
         }
@@ -57,6 +63,12 @@ public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
     }
 
     public CompletableFuture<DataFetcherResult<String>> etternavn(Ressurs ressurs, DataFetchingEnvironment env) {
+        if(ressurs.getEtternavn() != null){
+            return CompletableFuture.completedFuture(DataFetcherResult.<String>newResult()
+                    .data(ressurs.getEtternavn())
+                    .build()
+            );
+        }
         if(sendDummydata){
             return respondWithDummydata("dummy-etternnavn-i-dev-" + ressurs.getNavIdent());
         }

@@ -10,7 +10,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
