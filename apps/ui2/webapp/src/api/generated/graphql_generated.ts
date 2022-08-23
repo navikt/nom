@@ -52,7 +52,7 @@ export type Mutation = {
   godkjennOrdre: ResultCode;
   /** OrdreLinje */
   opprettEnhet: OrdreLinjeResponse;
-  opprettRessurs: OpprettRessursResponse;
+  opprettRessurs?: Maybe<OpprettRessursResponse>;
 };
 
 
@@ -395,7 +395,7 @@ export type OpprettRessursMutationVariables = Exact<{
 }>;
 
 
-export type OpprettRessursMutation = { __typename?: 'Mutation', opprettRessurs: { __typename?: 'OpprettRessursResponse', navident: string, personident: string, visningsfornavn: string, visningsetternavn: string, sektor: Sektor } };
+export type OpprettRessursMutation = { __typename?: 'Mutation', opprettRessurs?: { __typename?: 'OpprettRessursResponse', navident: string, personident: string, visningsfornavn: string, visningsetternavn: string, sektor: Sektor } | null };
 
 export type HentOrganiasjonsEnheterMedHierarkiQueryVariables = Exact<{
   aid?: InputMaybe<Scalars['String']>;
@@ -692,7 +692,7 @@ export type LederOrgEnhetResolvers<ContextType = any, ParentType extends Resolve
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   godkjennOrdre?: Resolver<ResolversTypes['ResultCode'], ParentType, ContextType, RequireFields<MutationGodkjennOrdreArgs, 'ordreId'>>;
   opprettEnhet?: Resolver<ResolversTypes['OrdreLinjeResponse'], ParentType, ContextType, RequireFields<MutationOpprettEnhetArgs, 'request'>>;
-  opprettRessurs?: Resolver<ResolversTypes['OpprettRessursResponse'], ParentType, ContextType, RequireFields<MutationOpprettRessursArgs, 'request'>>;
+  opprettRessurs?: Resolver<Maybe<ResolversTypes['OpprettRessursResponse']>, ParentType, ContextType, RequireFields<MutationOpprettRessursArgs, 'request'>>;
 };
 
 export type NavnResolvers<ContextType = any, ParentType extends ResolversParentTypes['Navn'] = ResolversParentTypes['Navn']> = {
