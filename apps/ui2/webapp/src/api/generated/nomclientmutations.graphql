@@ -1,4 +1,4 @@
-mutation opprettRessurs($request: OpprettRessursRequest){
+mutation opprettRessurs($request: OpprettRessursRequest!){
     opprettRessurs(request: $request){
         navident
         personident

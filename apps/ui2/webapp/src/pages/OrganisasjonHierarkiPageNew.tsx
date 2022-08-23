@@ -408,9 +408,9 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
                   <div className={panelCss.labeledItemsPane}>
                       <><RightText>Org.enhet</RightText><strong>{valgtEnhet.navn}</strong></>
                       {/*<div>Leder: <LederLinkForRessurs navident={focusedRessurs} /></div>*/}
-                      <RightText>Leder</RightText><strong><div><LederLink ressurs={focusedRessurs}/></div></strong>
-                      <RightText>Epost</RightText><strong>{focusedRessurs.epost}</strong>
                       <RightText>Tel</RightText> <strong>{focusedRessurs.telefon.length === 0 ? "Mangler tlf" : focusedRessurs.telefon.map(it => <div><span>{it}</span></div>)}</strong>
+                      <RightText>Epost</RightText><strong>{focusedRessurs.epost}</strong>
+                      <RightText>Leder</RightText><strong><div><LederLink ressurs={focusedRessurs}/></div></strong>
                   </div>
 
           </div>
@@ -451,7 +451,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
               {ressurser.map(it =>
                   <Link className={hierarkiCss.link} key={it.navident}
                         to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>
-                  <Heading size={"medium"}>{getFornavnAndEtternavnForLeder(it)}</Heading></Ressurs>
+                  <Heading size={"medium"} className={css`font-size: 24px; font-weight: 600;`}>{getFornavnAndEtternavnForLeder(it)}</Heading></Ressurs>
                   </Link>)}
           </div>
       </>
