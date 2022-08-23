@@ -24,9 +24,8 @@ const colorPalette = {
     rim: "#236B7D",
     focusedBackground: "#DEECEF",
     unfocusedBackground: "#FFFFFF",
-    panelBorder: "#333333",
+    panelBorder: "#B0B0B0",
     font: "#262626",
-    border: "#B0B0B0"
 }
 
 const BuildingSvg = (props: {className? : string}) => <svg className={props.className || ""} width="24" height="24" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -255,7 +254,7 @@ function OverenheterDivider() {
       min-height: 1rem;
       height: 1rem;
       background-color: ${colorPalette.rim};
-      width: 0.05rem;
+      width: 0.08rem;
     `}>
     </div>
   </div>
@@ -402,7 +401,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           {valgtEnhet && <div ref={scrollRef} className={panelCss.currentEnhet}>
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
-              <div>
+              <div className={css`display: grid; align-content: center`}>
                 <Heading size={'large'}>
                     <BuildingSvg />
                     {valgtEnhet.navn}

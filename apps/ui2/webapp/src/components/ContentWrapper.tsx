@@ -5,7 +5,7 @@ const contentStyle = css`
   margin-top: 2rem;
   margin-bottom: 5rem;
   width: 95%;
-  @media (min-width: 31.5rem) {
+  @media (min-width: 21.5rem) {
     width: 60%;
   }
   @media (min-width: 100rem) {
