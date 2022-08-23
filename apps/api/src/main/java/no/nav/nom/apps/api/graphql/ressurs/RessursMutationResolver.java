@@ -89,8 +89,8 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                 OpprettRessursResponse.builder()
                 .personident(ressurs.getPersonIdent())
                 .navident(ressurs.getNavIdent())
-                .visningsfornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn()+" "+m).orElse(ressurs.getVisningsfornavn()))
-                .visningsetternavn(ressurs.getVisningsetternavn())
+                .visningsfornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn()+" "+m).orElse(ressurs.getVisningsfornavn().orElseThrow()))
+                .visningsetternavn(ressurs.getVisningsetternavn().orElseThrow())
                 .sektor(Sektor.valueOf(ressurs.getSektor()))
                 .build(): null;
     }

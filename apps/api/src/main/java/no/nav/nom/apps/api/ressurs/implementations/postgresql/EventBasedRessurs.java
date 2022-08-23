@@ -46,8 +46,8 @@ public class EventBasedRessurs implements RessursI {
     }
 
     @Override
-    public String getVisningsfornavn() {
-        return getLast(VISNINGSFORNAVN_FIELD).orElseThrow();
+    public Optional<String> getVisningsfornavn() {
+        return getLast(VISNINGSFORNAVN_FIELD);
     }
 
     @Override
@@ -55,8 +55,8 @@ public class EventBasedRessurs implements RessursI {
         return getLast(VISNINGSMELLOMNAVN_FIELD);
     }
     @Override
-    public String getVisningsetternavn() {
-        return getLast(VISNINGSETTERNAVN_FIELD).orElseThrow();
+    public Optional<String> getVisningsetternavn() {
+        return getLast(VISNINGSETTERNAVN_FIELD);
     }
     @Override
     public String getSektor() {

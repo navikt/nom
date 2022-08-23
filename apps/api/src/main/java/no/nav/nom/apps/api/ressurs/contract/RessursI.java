@@ -7,16 +7,16 @@ public interface RessursI {
     UUID getId();
     String getPersonIdent();
     String getNavIdent();
-    default String getVisningsfornavn() {
-        return null;
+    default Optional<String> getVisningsfornavn() {
+        return Optional.empty();
     }
 
     default Optional<String> getVisningsmellomnavn() {
         return Optional.empty();
     }
 
-    default String getVisningsetternavn() {
-        return null;
+    default Optional<String> getVisningsetternavn() {
+        return Optional.empty();
     }
 
     default String getSektor() {
