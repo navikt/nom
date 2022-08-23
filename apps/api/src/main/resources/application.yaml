@@ -43,9 +43,6 @@ graphql:
       - name: Person
         query: classpath:playground/person.graphql
     enabled: true
-    settings:
-      request:
-        credentials: include
   voyager:
     enabled: true
   servlet:
