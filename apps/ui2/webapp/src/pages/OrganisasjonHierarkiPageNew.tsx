@@ -159,7 +159,7 @@ const commonPanelCss = css`
   display: grid;
   min-height: 1rem;
   min-width: 1rem;
-  grid-template-columns: min-content 1fr min-content min-content;
+  grid-template-columns: min-content 70% min-content min-content;
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
   background-color: ${colorPalette.unfocusedBackground};
@@ -252,6 +252,7 @@ function OverenheterDivider() {
   `}>
     <div className={css`
       min-height: 1rem;
+      height: 1rem;
       background-color: ${colorPalette.rim};
       width: 0.05rem;
     `}>
@@ -269,15 +270,10 @@ const HorizontallyAlignedPanel = (props: { children: ReactNode, iconSrc: string,
         <Next className={css`margin: 0 1rem 0 0.2rem`}/>
     </div>
 
-const UnderEnhet = (props: { children: ReactNode, navIdentForImg: string }) => <HorizontallyAlignedPanel
+const Enhet = (props: { children: ReactNode, navIdentForImg: string }) => <HorizontallyAlignedPanel
     className={panelCss.underEnhet} iconSrc={building2Icon} navidentForImg={props.navIdentForImg}>
     {props.children}
 </HorizontallyAlignedPanel>
-
-const OverEnhet = (props: {children: ReactNode, navIdentForImg: string}) => <div>
-    <UnderEnhet navIdentForImg={props.navIdentForImg}>{props.children}</UnderEnhet>
-    <OverenheterDivider/>
-</div>
 
 const Ressurs = (props: { children: ReactNode }) => <HorizontallyAlignedPanel
     className={css(commonPanelCss, panelCss.fullHeight)} iconSrc={peopleFilledIcon}>{props.children}
@@ -376,27 +372,29 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
       {overEnheter.map(it =>{
           const linkPath = extractLinkFromEnhet(it)
                 return <Link  className={hierarkiCss.link} key={linkPath} to={linkPath }>
-                    <OverEnhet navIdentForImg={it.leder[0].ressurs.navident}>
+                    <Enhet navIdentForImg={it.leder[0].ressurs.navident}>
                         <Heading size={'medium'}>
                             {it.navn}
                         </Heading>
                         <div>
                           Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
                         </div>
-                    </OverEnhet>
+                    </Enhet>
+                    <OverenheterDivider/>
                 </Link>}
         )}
 
       {focusedRessurs && <>
           <Link className={hierarkiCss.link} to={valgtEnhetUrl}>
-              <OverEnhet navIdentForImg={lederKoblinger[0]?.ressurs?.navident}>
+              <Enhet navIdentForImg={lederKoblinger[0]?.ressurs?.navident}>
                   <Heading size={'medium'}>
                       {valgtEnhet.navn}
                   </Heading>
                   <div>
                     Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(lederKoblinger[0]?.ressurs) || "Leder ikke funnet"}</span>
                   </div>
-              </OverEnhet>
+              </Enhet>
+              <OverenheterDivider />
           </Link>
           <div ref={scrollRef} className={panelCss.focusedRessurs}>
               <div className={panelCss.panelRim}></div>
@@ -437,14 +435,14 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
           <div className={css(hierarkiCss.underEnheter, underEnheter.length > 5 && hierarkiCss.dynamicSecondColumn)}>
               {underEnheter.map(it =>
                   <Link className={hierarkiCss.link} key={extractLinkFromEnhet(it)} to={extractLinkFromEnhet(it)}>
-                      <UnderEnhet navIdentForImg={it.leder[0]?.ressurs?.navident}>
+                      <Enhet navIdentForImg={it.leder[0]?.ressurs?.navident}>
                           <Heading size={'medium'}>
                               {it.navn}
                           </Heading>
                           <span>
                               Leder: <span className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(it.leder[0]?.ressurs) || "Leder ikke funnet"}</span>
                           </span>
-                      </UnderEnhet>
+                      </Enhet>
                   </Link>
               )}
           </div>
