@@ -163,6 +163,7 @@ const commonPanelCss = css`
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
   background-color: ${colorPalette.unfocusedBackground};
+  word-wrap: anywhere;
 `
 
 const panelCss = {
