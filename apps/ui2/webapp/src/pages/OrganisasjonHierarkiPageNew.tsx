@@ -163,7 +163,6 @@ const commonPanelCss = css`
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
   background-color: ${colorPalette.unfocusedBackground};
-  word-wrap: anywhere;
 `
 
 const panelCss = {
@@ -190,6 +189,7 @@ const panelCss = {
     underEnhet: css(commonPanelCss, css`
       height: 100%;
       min-height: 9rem;
+      word-wrap: anywhere;
     `),
     panelContent: css`
       padding: 1rem;
@@ -315,24 +315,6 @@ const OrgenhetLederLink = (props: {navident: string, name:string, orgenhetCtxUrl
     to={`/org2/${props.orgenhetCtxUrl}/${props.navident}`}
 >{props.name}</Link>
 
-function LederLinkForRessurs(props: {navident?: string}){
-    if(!props.navident){
-        return null;
-    }
-    const qryRes = Gq.useHentLederForNavidentQuery({variables: {navident: props.navident}})
-    if (qryRes.loading) {
-        return <>... ... </>
-    }
-    if(!qryRes.error && qryRes.data) {
-        const l = qryRes.data?.ressurs?.ledere[0]?.ressurs
-        const oe = l?.koblinger[0]?.organisasjonsenhet;
-        if (l && oe) {
-            const urlCtx = extractLinkFromEnhet(oe)
-            return <Link to={`${urlCtx}/${l.navIdent}`} className={lederStyling.lederTekst}>{getFornavnAndEtternavnForLeder(l)}</Link>
-        }
-    }
-    return null
-}
 
 const getFornavnAndEtternavnForLeder = (leder?: {fornavn?: string | null, etternavn?: string | null}) => {
   if (!leder || !leder.fornavn && !leder.etternavn) return 'Leder ikke funnet'
@@ -406,11 +388,10 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
               <div>({focusedRessurs.navident})</div>
 
                   <div className={panelCss.labeledItemsPane}>
-                      <><RightText>Org.enhet</RightText><strong>{valgtEnhet.navn}</strong></>
-                      {/*<div>Leder: <LederLinkForRessurs navident={focusedRessurs} /></div>*/}
+                      <RightText>Org.enhet</RightText><strong>{valgtEnhet.navn}</strong>
+                      <RightText>Leder</RightText><strong><div><LederLink ressurs={focusedRessurs}/></div></strong>
                       <RightText>Tel</RightText> <strong>{focusedRessurs.telefon.length === 0 ? "Mangler tlf" : focusedRessurs.telefon.map(it => <div><span>{it}</span></div>)}</strong>
                       <RightText>Epost</RightText><strong>{focusedRessurs.epost}</strong>
-                      <RightText>Leder</RightText><strong><div><LederLink ressurs={focusedRessurs}/></div></strong>
                   </div>
 
           </div>
