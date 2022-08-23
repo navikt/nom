@@ -65,9 +65,9 @@ public class EventBasedRessurs implements RessursI {
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
+                .filter(e -> e.getHendelseData().has(property))
                 .map(e -> e.getHendelseData().get(property))
-                .filter(Objects::nonNull)
-                .map(JsonNode::asText)
-                .reduce((a, b) -> b);
+                .reduce((a, b) -> b)
+                .map(e -> !e.isNull() ? e.asText() : null);
     }
 }
