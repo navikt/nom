@@ -160,9 +160,9 @@ const commonPanelCss = css`
   min-height: 1rem;
   min-width: 1rem;
   grid-template-columns: min-content 70% min-content min-content;
+  background-color: ${colorPalette.unfocusedBackground};
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
-  background-color: ${colorPalette.unfocusedBackground};
 `
 
 const panelCss = {
