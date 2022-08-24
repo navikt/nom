@@ -60,41 +60,39 @@ public class NavidentController {
             return ResponseEntity.ok(NavidentResponse.builder().status(HttpStatus.FORBIDDEN).feilmelding("Forbidden").build());
         }
 
-        try {
-            val aadToken = tokenRepository.getAadToken(appProperties.getNik().getAadClientId());
-            val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getSektor(), aadToken.serialize());
+        val responseBody = NavidentResponse.builder();
+        val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
+            try {
+                val aadToken = tokenRepository.getAadToken(appProperties.getNik().getAadClientId());
+                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getSektor(), aadToken.serialize());
 
-            if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
+                if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
 
-                val data = mapper.createObjectNode()
-                        .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
-                        .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
-                        .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn())
-                        .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn())
-                        .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
-                val metadata = HendelseMetadataSerialize.builder()
-                        .opprettetAv(new HendelseMetadata.OpprettetAv(token))
-                        .opprettetTidspunkt(LocalDateTime.now())
-                        .rawInputData(data)
-                        .build();
+                    val data = mapper.createObjectNode()
+                            .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
+                            .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
+                            .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn())
+                            .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn())
+                            .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
+                    val metadata = HendelseMetadataSerialize.builder()
+                            .opprettetAv(new HendelseMetadata.OpprettetAv(token))
+                            .opprettetTidspunkt(LocalDateTime.now())
+                            .rawInputData(data)
+                            .build();
 
-                ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
+                    responseBody.status(nikResponse.getStatusCode());
 
-                return ResponseEntity.ok(NavidentResponse.builder()
-                        .navident(nikResponse.getBody().getNavident())
-                        .status(nikResponse.getStatusCode())
-                        .build());
+                    return ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
+                }
+
+                responseBody.status(nikResponse.getStatusCode()).feilmelding(nikResponse.getBody().getFeilmelding());
+            } catch (Exception e) {
+                responseBody.status(HttpStatus.INTERNAL_SERVER_ERROR).feilmelding("Intern feil inntraff");
             }
 
-            return ResponseEntity.ok(NavidentResponse.builder()
-                    .status(nikResponse.getStatusCode())
-                    .feilmelding(nikResponse.getBody().getFeilmelding())
-                    .build());
-        } catch (Exception e) {
-            return ResponseEntity.ok(NavidentResponse.builder()
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .feilmelding("Intern feil inntraff")
-                    .build());
-        }
+            return null;
+        });
+
+        return ResponseEntity.ok(responseBody.navident(ressurs != null ? ressurs.getNavIdent() : null).build());
     }
 }
