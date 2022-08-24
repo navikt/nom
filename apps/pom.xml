@@ -19,7 +19,7 @@
         <module>proxy</module>
         <module>nom-ressurser</module>
         <module>ui</module>
-        <module>nom-agresso</module>
+        <module>unit4</module>
         <module>nav-ident</module>
     </modules>
 </project>

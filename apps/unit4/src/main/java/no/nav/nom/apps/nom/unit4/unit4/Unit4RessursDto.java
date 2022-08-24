@@ -1,11 +1,11 @@
-package no.nav.nom.apps.nom.agresso.agresso;
+package no.nav.nom.apps.nom.unit4.unit4;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
-import no.nav.nom.apps.nom.agresso.input.NomRessursDTO;
+import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ import java.util.List;
 @Value
 @Builder
 @RequiredArgsConstructor
-public class AgressoRessursDto {
+public class Unit4RessursDto {
 
     @JsonIgnore
     private final static LocalDateTime AGRESSO_TIMESTAMP_VOIDVALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
@@ -43,7 +43,7 @@ public class AgressoRessursDto {
 
 
 
-    public AgressoRessursDto(NomRessursDTO nomRessursDTO) {
+    public Unit4RessursDto(NomRessursDTO nomRessursDTO) {
         String ressursNr = nomRessursDTO.getNavident().substring(1);
         String firstName = Utils.convertName(nomRessursDTO.getFornavn()) + (nomRessursDTO.getMellomnavn() != null ? " "+Utils.convertName(nomRessursDTO.getMellomnavn()) : "");
         String surName = Utils.convertName(nomRessursDTO.getEtternavn());

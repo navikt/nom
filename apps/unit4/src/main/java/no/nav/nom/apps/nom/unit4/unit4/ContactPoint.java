@@ -1,7 +1,6 @@
-package no.nav.nom.apps.nom.agresso.agresso;
+package no.nav.nom.apps.nom.unit4.unit4;
 
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 

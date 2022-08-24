@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.agresso.input;
+package no.nav.nom.apps.nom.unit4.input;
 
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;

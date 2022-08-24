@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nom-agresso</artifactId>
-    <name>NOM :: Apps :: Agresso</name>
+    <artifactId>unit4</artifactId>
+    <name>NOM :: Apps :: Unit4</name>
 
     <dependencies>
         <dependency>

@@ -1,10 +1,10 @@
-package no.nav.nom.apps.nom.agresso.agresso;
+package no.nav.nom.apps.nom.unit4.unit4;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.nom.agresso.input.NomRessursDTO;
+import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class AgressoClient {
+public class Unit4Client {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -24,7 +24,7 @@ public class AgressoClient {
         val requestHeaders = new HttpHeaders();
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         requestHeaders.setBasicAuth("", "");
-        val body = objectMapper.writeValueAsString(new AgressoRessursDto(nomRessursDTO));
+        val body = objectMapper.writeValueAsString(new Unit4RessursDto(nomRessursDTO));
 
         val request = new HttpEntity<>(body, requestHeaders);
 

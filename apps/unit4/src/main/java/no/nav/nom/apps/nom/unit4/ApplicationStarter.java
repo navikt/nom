@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.agresso;
+package no.nav.nom.apps.nom.unit4;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
