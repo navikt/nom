@@ -3,3 +3,5 @@ ingresses:
 env:
   - name: UNIT4_BASEURL
     value: https://agresso.test.local
+  - name: SPRING_PROFILES_ACTIVE
+    value: log-logstash

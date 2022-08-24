@@ -20,7 +20,6 @@ public class ApplicationStarter {
     public static void main(String[] args) {
         ignoreCertificates();
         SpringApplication.run(ApplicationStarter.class, args);
-        
     }
 
     private static void ignoreCertificates(){
