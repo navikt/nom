@@ -18,7 +18,7 @@ import java.security.cert.X509Certificate;
 public class ApplicationStarter {
 
     public static void main(String[] args) {
-        ignoreCertificates();
+        //ignoreCertificates();
         SpringApplication.run(ApplicationStarter.class, args);
     }
 
