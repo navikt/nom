@@ -7,12 +7,13 @@ const imageSrc = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
 
 type UserImageProps = {
   navIdent?: string;
+  navn?: string,
   size?: string;
   altText?: string
 };
 
 const UserImage = (props: UserImageProps) => {
-  const { navIdent, size, altText } = props;
+  const { navIdent, size, altText, navn } = props;
   const [image, setImage] = React.useState<string>()
   const [loading, setLoading] = React.useState(true)
 
@@ -41,7 +42,7 @@ const UserImage = (props: UserImageProps) => {
             <img
                 hidden={loading}
                 src={image}
-                alt={altText || 'Fotografi av ' + navIdent}
+                alt={altText || 'Fotografi av ' + (navn || navIdent)}
                 onLoad={() => setLoading(false)}
                 onError={() => {
                     setImage(person);

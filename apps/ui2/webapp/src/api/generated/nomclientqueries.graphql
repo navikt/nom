@@ -506,14 +506,18 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
     type{
       kode
     }
-  }
-
-  lederkoblinger: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
     leder {
       ressurs {
         ...RessursStandalone
+        orgTilknytning {
+          orgEnhet {
+            ...OrgenhetAgressoIds
+            id
+          }
+        }
       }
     }
+
   }
 
   ressursKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
