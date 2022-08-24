@@ -471,7 +471,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
               {ressurser.map(it =>
                   <Link className={hierarkiCss.link} key={it.navident}
                         to={"/org2/" + valgtEnhetUrl + "/" + it.navident}><Ressurs>
-                  <Heading size={"medium"} className={css`font-size: 24px; font-weight: 600;`}>{getFornavnAndEtternavnForLeder(it)}</Heading></Ressurs>
+                  <Heading size={"medium"} className={css`font-size: 24px; font-weight: 600;`}>{it.fornavnAndEtternavn}</Heading></Ressurs>
                   </Link>)}
           </div>
       </>
