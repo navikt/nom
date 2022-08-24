@@ -207,7 +207,7 @@ const panelCss = {
     currentEnhet: css(commonPanelCss, css`
       grid-template-columns: 1fr;
       grid-template-rows: min-content 1fr;
-      margin-bottom: 0.7rem;
+      margin-bottom: 1rem;
       min-height: 13rem;
       background-color: ${colorPalette.focusedBackground};
       svg { // meant for header prefix icon
