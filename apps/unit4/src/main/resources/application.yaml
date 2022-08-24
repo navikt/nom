@@ -1,7 +1,7 @@
 app:
   unit4:
     baseUrl: ${UNIT4_BASEURL}
-    employeespath: /agrt01-web-api/v1/employees
+    employeesPath: /agrt01-web-api/v1/employees
     apiUsername: ${NOM_UNIT4_API_USERNAME}
     apiPassword: ${NOM_UNIT4_API_PASSWORD}
 

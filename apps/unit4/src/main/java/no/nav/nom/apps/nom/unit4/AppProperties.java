@@ -17,7 +17,7 @@ public class AppProperties {
     @Value
     public static class Unit4 {
         String baseUrl;
-        String enhetPath;
+        String employeesPath;
         String apiUsername;
         String apiPassword;
     }

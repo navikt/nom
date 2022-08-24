@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,16 +20,17 @@ public class Unit4Client {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
+    private final AppProperties appProperties;
+
     @SneakyThrows
     public String createRessurs(NomRessursDTO nomRessursDTO){
         val requestHeaders = new HttpHeaders();
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        requestHeaders.setBasicAuth("", "");
+        requestHeaders.setBasicAuth(appProperties.getUnit4().getApiUsername(), appProperties.getUnit4().getApiPassword());
         val body = objectMapper.writeValueAsString(new Unit4RessursDto(nomRessursDTO));
 
         val request = new HttpEntity<>(body, requestHeaders);
 
-
-        return restTemplate.exchange("https://agresso.test.local/agrt01-web-api/v1/employees", HttpMethod.POST, request, String.class).getBody();
+        return restTemplate.exchange(appProperties.getUnit4().getBaseUrl()+appProperties.getUnit4().getEmployeesPath(), HttpMethod.POST, request, String.class).getBody();
     }
 }

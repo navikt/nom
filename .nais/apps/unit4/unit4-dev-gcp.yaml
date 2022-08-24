@@ -1,5 +1,5 @@
 ingresses:
-  - https://nom-agresso.dev.intern.nav.no
+  - https://nom-unit4.dev.intern.nav.no
 env:
   - name: UNIT4_BASEURL
     value: https://agresso.test.local
