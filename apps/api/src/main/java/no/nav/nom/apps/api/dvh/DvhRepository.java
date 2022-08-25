@@ -115,8 +115,12 @@ public class DvhRepository {
     }
 
     public void clearRepository() {
-        organiseringer.clear();
-        koblinger.clear();
+        if(organiseringer != null){
+            organiseringer.clear();
+        }
+        if(koblinger != null) {
+            koblinger.clear();
+        }
         sluttdatoByPersonIdent.clear();
     }
 
