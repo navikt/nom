@@ -407,7 +407,7 @@ const OrganisasjonHierarkiPageInner = function (props: { data: ReturnType<typeof
 
       {focusedRessurs && <>
           <Link className={hierarkiCss.link} to={"/org2/" + valgtEnhetUrl}>
-              <Enhet navIdentForImg={valgtEnhet.leder[0]?.navident}>
+              <Enhet navIdentForImg={valgtEnhet.leder[0]?.navident} fornavnAndEtternavnForImg={valgtEnhet.leder[0]?.fornavnAndEtternavn}>
                   <Heading size={'medium'}>
                       {valgtEnhet.navn}
                   </Heading>

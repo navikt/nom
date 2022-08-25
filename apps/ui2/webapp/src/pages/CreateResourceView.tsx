@@ -9,7 +9,33 @@ import { opprettRessursIkon } from '../components/Images'
 import { BodyShort, Heading, Search } from '@navikt/ds-react'
 import ResourceMetadata from '../components/Resource/ResourceMetadata'
 import ResourceForm from '../components/Resource/ResourceForm'
-import { searchBarStyle } from '../components/NavHeader'
+import {NomColors} from "../resources/NomStyles";
+
+
+const searchBarStyle = css({
+  // marginRight: '10rem',
+  // width: '20em',
+  color: NomColors.primaryColor,
+  ':hover': {
+    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+    border: NomColors.primaryColor,
+  },
+  ':focus': {
+    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+  },
+
+  button: {
+    color: NomColors.primaryColor,
+
+    ':hover': {
+      backgroundColor: NomColors.primaryAccent,
+      color: NomColors.primaryColor,
+    },
+    ':focus': {
+      boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+    },
+  },
+})
 
 const CreateResourceView = () => {
   const {
