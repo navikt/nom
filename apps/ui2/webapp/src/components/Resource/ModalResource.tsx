@@ -29,7 +29,7 @@ const ModalResource = (props: ModalResourceProps) => {
             <Modal.Content>
                 <Heading spacing level="1" size="medium">Opprett ressurs</Heading>
                 <BodyShort className={css({ marginBottom: '1rem'})}>Du er nå i ferd med å opprette ressurs: </BodyShort>
-                <TextWithLabelHorizontal label="Navn: " text={formValues.fornavn + ' ' + formValues.etternavn || '-'} />
+                <TextWithLabelHorizontal label="Navn: " text={formValues.visningsfornavn + ' ' + formValues.visningsetternavn || '-'} />
                 <TextWithLabelHorizontal label="Org.enhet: " text="Mangler enhet" />
                 <TextWithLabelHorizontal label="Sektor: " text="Statlig" />
 

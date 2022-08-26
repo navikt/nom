@@ -8,6 +8,8 @@ import morgan from 'morgan'
 import ecsFormat from '@elastic/ecs-morgan-format'
 import config from "./config.js";
 import {setupSessionRoutes} from "./routes/sessionRoutes.js";
+import setupUiDevEndpoint from "./routes/uiDev.js";
+import {setupGqlPlaygroundProxy} from "./routes/gqlplaygroundproxy.js";
 
 // Create Express Server
 const app = express();
@@ -33,6 +35,10 @@ nomApiSetupProxy(app);
 teamcatApiSetupProxy(app)
 
 setupSessionRoutes(app);
+
+setupUiDevEndpoint(app);
+
+setupGqlPlaygroundProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

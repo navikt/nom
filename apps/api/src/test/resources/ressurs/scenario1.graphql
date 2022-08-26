@@ -2,6 +2,10 @@ query {
     ressurs(where: {navIdent: "testNavIdent"}) {
         navIdent
         personIdent
-        sluttdato
+        ...SluttDato
     }
+}
+
+fragment SluttDato on Ressurs{
+    sluttdato
 }

@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -264,7 +263,7 @@ public class DvhDataLoader {
 
     @SneakyThrows
     private HendelseMetadata.OpprettetAv getOpprettetAv(){
-        val jwt = tokenRepository.getAadToken("api://"+authenticationProperties.getAad().getClientId()+"/.default");
+        val jwt = tokenRepository.getSystemAadToken("api://"+authenticationProperties.getAad().getClientId()+"/.default");
         return new HendelseMetadata.OpprettetAv(jwt.getJWTClaimsSet().getClaim("azp_name").toString(), jwt.getJWTClaimsSet().getClaim("azp_name").toString());
     }
 }

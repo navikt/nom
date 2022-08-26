@@ -6,25 +6,31 @@ import { Link } from 'react-router-dom'
 import { nomLogoCircle } from './Images'
 import { Search } from '@navikt/ds-react'
 import { PeopleFilled } from '@navikt/ds-icons'
-import BurgerMenu from './BurgerMenu'
-import { NomColors } from '../resources/NomStyles'
+import {contentWidthByBreakpoint, mediaQueryContentWidth, NomColors, widthBreakpoints} from '../resources/NomStyles'
 
 export const headerHeight = '6rem'
 
 const outerDiv = css({
-  height: headerHeight,
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  minHeight: headerHeight,
   width: '100%',
+  justifyContent: "center",
+  alignContent: "center"
 })
 
-const innerDiv = css({
-  // border: 'solid',
-  color: 'black',
-  height: '100%',
-  width: '50%',
-  margin: 'auto',
-  display: 'flex',
-  alignItems: 'center',
-})
+const innerDiv = css(css`
+  display: grid;
+  justify-self: center;
+  grid-template-columns: auto 1fr auto;
+  column-gap: 2rem;
+  @media (max-width: 60rem){
+    grid-template-columns: 1fr;
+    justify-items: left;
+    row-gap: 1rem;
+    padding: 1rem 0;
+  }
+`,mediaQueryContentWidth)
 
 // const titleStyle = css({
 //   fontFamily: 'Source Sans Pro',
@@ -56,9 +62,8 @@ const verticallyCenter = css({
   textAlign: 'center',
 })
 
-export const searchBarStyle = css({
-  marginRight: '10rem',
-  width: '20em',
+const searchBarStyle = css({
+  minWidth: '18rem',
   color: NomColors.primaryColor,
   ':hover': {
     boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
@@ -82,12 +87,10 @@ export const searchBarStyle = css({
 })
 
 const NavHeader = () => {
-  const [session, setSession] = React.useState<SessionInterface>()
-
-  const navigate = useNavigate()
+  const [session, setSession] = React.useState<any>()
 
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       const res = await getSession()
       setSession(res)
     })()
@@ -97,29 +100,30 @@ const NavHeader = () => {
     <div className={outerDiv}>
       <div className={innerDiv}>
         <Link to='/' className={verticallyCenter}>
-          <img src={nomLogoCircle} alt='logo' className={logoStyle} />
+          <img src={nomLogoCircle} alt='logo'/>
         </Link>
 
         <Search
           disabled={true}
           placeholder={"Søkefunksjonalitet kommer"}
-          className={css(searchBarStyle,{
-          // midlertidig hack for mørkere tekst i "disabled" tekst-felt
-            "::placeholder": {
-              color: "black",
-              opacity: 1.0
-            }
-          })}
+          className={searchBarStyle}
           label={'Søk etter ressurser'}
           variant='secondary'
           size='medium'
         ></Search>
+        <span className={css`
+          display: flex;
+          align-items: center;
+        `}>
         <PeopleFilled
-          className={css({ marginRigh: '1em' })}
+          className={css({
+            minWidth: "2rem"
+          })}
           color='#236B7D'
           fontSize={'2rem'}
         />
         <span className={userText}>{session}</span>
+        </span>
         {/* <BurgerMenu /> */}
       </div>
     </div>
@@ -127,3 +131,4 @@ const NavHeader = () => {
 }
 
 export default NavHeader
+

@@ -17,6 +17,7 @@ public class EventBasedRessurs implements RessursI {
     public final static String PERSONIDENT_FIELD = "personident";
     public final static String VISNINGSFORNAVN_FIELD = "visningsfornavn";
     public final static String VISNINGSETTERNAVN_FIELD = "visningsetternavn";
+    public final static String VISNINGSMELLOMNAVN_FIELD = "visningsmellomnavn";
     public final static String SEKTOR_FIELD = "sektor";
 
     private final List<IHendelse> hendelser;
@@ -45,12 +46,17 @@ public class EventBasedRessurs implements RessursI {
     }
 
     @Override
-    public String getVisningsfornavn() {
-        return getLast(VISNINGSFORNAVN_FIELD).orElseThrow();
+    public Optional<String> getVisningsfornavn() {
+        return getLast(VISNINGSFORNAVN_FIELD);
+    }
+
+    @Override
+    public Optional<String> getVisningsmellomnavn() {
+        return getLast(VISNINGSMELLOMNAVN_FIELD);
     }
     @Override
-    public String getVisningsetternavn() {
-        return getLast(VISNINGSETTERNAVN_FIELD).orElseThrow();
+    public Optional<String> getVisningsetternavn() {
+        return getLast(VISNINGSETTERNAVN_FIELD);
     }
     @Override
     public String getSektor() {
@@ -59,9 +65,9 @@ public class EventBasedRessurs implements RessursI {
 
     private Optional<String> getLast(String property) {
         return hendelser.stream()
+                .filter(e -> e.getHendelseData().has(property))
                 .map(e -> e.getHendelseData().get(property))
-                .filter(Objects::nonNull)
-                .map(JsonNode::asText)
-                .reduce((a, b) -> b);
+                .reduce((a, b) -> b)
+                .map(e -> !e.isNull() ? e.asText() : null);
     }
 }

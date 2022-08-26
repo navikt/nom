@@ -1,7 +1,7 @@
 import {css} from "@emotion/css";
 import {Alert, Button, Radio, RadioGroup, TextField} from "@navikt/ds-react";
 import {useForm} from "react-hook-form";
-import {OpprettRessursRequest2} from "../../api/generated/graphql_generated";
+import {OpprettRessursRequest} from "../../api/generated/graphql_generated";
 import Card from "../Card";
 import CustomRadio from "../CustomRadio";
 import {radioStyles} from "../Styles";

@@ -29,7 +29,14 @@ public class GraphQLFieldConsumptionCounter {
         var currentPath = path != null && !path.isEmpty() ? path+"."+field.getName() : field.getName();
         val tagsAndValues = new LinkedHashMap<String, String>();
         if(field.getSelectionSet() != null) {
-            field.getSelectionSet().getSelections().forEach(s -> count(currentPath, (Field) s, consumer, operationName));
+            field.getSelectionSet().getSelections().forEach(s -> {
+                if(s instanceof Field) {
+                    count(currentPath, (Field) s, consumer, operationName);
+                }
+                else{
+                    // TODO, also count fields within Fragments or inline Fragments
+                }
+            });
             tagsAndValues.put("type", "complex-object");
         }
         else {

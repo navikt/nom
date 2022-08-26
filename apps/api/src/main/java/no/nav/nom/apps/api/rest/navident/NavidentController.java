@@ -37,8 +37,6 @@ import java.util.List;
 public class NavidentController {
 
     private final NIKConsumer nikConsumer;
-    private final TokenRepository tokenRepository;
-    private final AppProperties appProperties;
     private final ObjectMapper mapper;
     private final IRessursService ressursService;
 
@@ -63,8 +61,7 @@ public class NavidentController {
         val responseBody = NavidentResponse.builder();
         val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
             try {
-                val aadToken = tokenRepository.getAadToken(appProperties.getNik().getAadClientId());
-                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getSektor(), aadToken.serialize());
+                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getSektor(), false);
 
                 if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
 

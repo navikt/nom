@@ -12,7 +12,7 @@ spec:
     - name: NIK_BASEURL
       value: https://nav-ident.intern.nav.no
     - name: NIK_CLIENT_ID
-      value: prod-gcp:org:nav-ident
+      value: prod-gcp.org.nav-ident
     - name: PDL_BASEURL
       value: https://pdl-api.prod-fss-pub.nais.io
     - name: PDL_CLIENT_ID
@@ -26,7 +26,7 @@ spec:
     - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
       value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
   envFrom:
-    - secret: nom-sluttdato-override
+    - secret: nom-sluttdato-override-json
   image: {{image}}
   port: 8080
   ingresses:
@@ -91,6 +91,9 @@ spec:
           namespace: amt
           cluster: prod-gcp
         - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: prod-fss
+        - application: modia-robot-api
           namespace: personoversikt
           cluster: prod-fss
         - application: pdl-fullmakt

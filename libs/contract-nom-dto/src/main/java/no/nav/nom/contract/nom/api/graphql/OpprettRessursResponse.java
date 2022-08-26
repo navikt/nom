@@ -1,18 +1,17 @@
 package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+import no.nav.nom.contract.nom.api.graphql.Sektor;
 
-import java.util.UUID;
-
-@Value
+@Data
 @Builder
 public class OpprettRessursResponse {
-    UUID nomId;
-    String navIdent;
-    String navident;
-    String personIdent;
-    String personident;
-    FolkeregisterPerson person;
-    FolkeregisterPerson folkeregisterPerson;
+
+    private String personident;
+    private String navident;
+    private String visningsfornavn;
+    private String visningsetternavn;
+    private Sektor sektor;
+
 }

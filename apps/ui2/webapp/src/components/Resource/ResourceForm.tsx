@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { css } from "@emotion/css"
 import { useState } from "react"
 import ModalResource from "./ModalResource"
+import * as Gq from '../../api/generated/graphql_generated'
 
 const rowStyles = css({
     display: 'flex',
@@ -10,19 +11,20 @@ const rowStyles = css({
 })
 
 export type InitialValuesResourceForm = {
-    fornavn: string
+    visningsfornavn: string
     mellomnavn?: string
-    etternavn: string
+    visningsetternavn: string,
+    sektorTxt: string
 }
 
 type ResourceFormProps = {
     initialValues: InitialValuesResourceForm
-    onSubmit: (values: any) => void
+    onSubmit: (values: Gq.OpprettRessursRequest) => void
 }
 
 const ResourceForm = (props: ResourceFormProps) => {
     const { initialValues, onSubmit } = props
-    const {register, handleSubmit, getValues} = useForm({defaultValues: { fornavn: initialValues.fornavn + ' ' + initialValues.mellomnavn, etternavn: initialValues.etternavn}})
+    const {register, handleSubmit, getValues} = useForm({defaultValues: {...initialValues}})
     const [showModal, setShowModal] = useState<boolean>(false)
 
     return (
@@ -40,14 +42,14 @@ const ResourceForm = (props: ResourceFormProps) => {
                         label="Fornavn"
                         className={css({width: '48%', marginRight: '1rem'})}
                         autoComplete="off"
-                        {...register("fornavn")}
+                        {...register("visningsfornavn")}
                     />
                     <TextField
                         type="text"
                         label="Etternavn"
                         className={css({width: '48%'})}
                         autoComplete="off"
-                        {...register("etternavn")}
+                        {...register("visningsetternavn")}
                     />
                 </div>
 
@@ -61,10 +63,10 @@ const ResourceForm = (props: ResourceFormProps) => {
                 </div>
                 
                 <div className={rowStyles}>
-                    <RadioGroup legend="Sektor" size="medium">
-                        <Radio value="10" checked>NAV statlig</Radio>
-                        <Radio value="20" disabled>NAV kommunal</Radio>
-                        <Radio value="30" disabled>Ekstern</Radio>
+                    <RadioGroup legend="Sektor" size="medium" {...register("sektorTxt")}>
+                        <Radio value="NAV_STATLIG" checked>NAV statlig</Radio>
+                        <Radio value="NAV_KOMMUNAL" disabled>NAV kommunal</Radio>
+                        <Radio value="EKSTERN" disabled>Ekstern</Radio>
                     </RadioGroup>
                 </div>
 

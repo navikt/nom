@@ -27,7 +27,7 @@ public class PdlConsumer {
 
     public Optional<FolkeregisterPerson> hentPerson(String personIdent){
         val headers = new HttpHeaders();
-        val token = tokenRepository.getAadToken(appProperties.getPdl().getAadClientId());
+        val token = tokenRepository.getSystemAadToken(appProperties.getPdl().getAadClientId());
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token.serialize());
         headers.add("Tema", appProperties.getPdl().getTema());

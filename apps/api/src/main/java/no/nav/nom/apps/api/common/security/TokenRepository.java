@@ -14,6 +14,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -38,18 +40,21 @@ public class TokenRepository {
     private static final String AAD_TOKEN_USE = "on_behalf_of";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
+    public SignedJWT getAadToken(String scope, boolean OBO){
+        return OBO ? getOnbehalfofTokenFor(scope) : getSystemAadToken(scope);
+    }
+
     @SneakyThrows
-    public SignedJWT getAadToken(String scope) {
+    public SignedJWT getSystemAadToken(String scope) {
         val signedJwt = cachedAadTokensByScope.get(scope);
         return isValidToken(signedJwt) ? signedJwt : refreshAadToken(scope);
     }
 
-
-
     @SneakyThrows
-    public String getOnbehalfofTokenFor(String assertion, String scope) {
-        val signedJwt = cachedAadTokensByUserAndScope.get(scope);
-        return (isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope)).serialize();
+    public SignedJWT getOnbehalfofTokenFor(String scope) {
+        String assertion = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();
+        val signedJwt = cachedAadTokensByUserAndScope.get(assertion+scope);
+        return isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope);
     }
 
     @SneakyThrows

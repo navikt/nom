@@ -12,7 +12,7 @@ spec:
     - name: NIK_BASEURL
       value: https://nav-ident.dev.intern.nav.no
     - name: NIK_CLIENT_ID
-      value: dev-gcp:org:nav-ident
+      value: dev-gcp.org.nav-ident
     - name: PDL_BASEURL
       value: https://pdl-api.dev-fss-pub.nais.io
     - name: PDL_CLIENT_ID
@@ -111,6 +111,9 @@ spec:
           namespace: personoversikt
           cluster: dev-fss
         - application: modiapersonoversikt-api-q1
+          namespace: personoversikt
+          cluster: dev-fss
+        - application: modia-robot-api
           namespace: personoversikt
           cluster: dev-fss
         - application: testnav-nom-proxy-trygdeetaten

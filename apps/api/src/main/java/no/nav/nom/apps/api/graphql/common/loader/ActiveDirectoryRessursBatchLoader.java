@@ -45,7 +45,7 @@ public class ActiveDirectoryRessursBatchLoader implements MappedBatchLoaderWithC
     @SneakyThrows
     public Map<String, DataFetcherResult<AdRessurs>> getAdRessurserBatch(Set<String> navIdenter, BatchLoaderEnvironment batchEnvironment) {
         var headers = new HttpHeaders();
-        var token = tokenRepository.getAadToken(appProperties.getProxy().getAadClientId());
+        var token = tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId());
         headers.setBearerAuth(token.serialize());
 
         try {

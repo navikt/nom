@@ -28,7 +28,7 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             Optional.ofNullable(request.getHeader("Authorization"))
                     .filter(not(String::isEmpty))
-                    .map(t -> t.replace("Bearer ", ""))
+                    .map(t -> t.replaceFirst("(?i)Bearer ", ""))
                     .map(BearerTokenAuthenticationToken::new)
                     .map(jwtAuthenticationProvider::authenticate)
                     .ifPresent(e -> {

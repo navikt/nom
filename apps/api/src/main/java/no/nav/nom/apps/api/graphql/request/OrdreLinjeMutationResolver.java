@@ -34,20 +34,20 @@ public class OrdreLinjeMutationResolver implements GraphQLMutationResolver {
     private final ObjectMapper om;
     private final AtomicInteger idCounter = new AtomicInteger(500000);
 
-    public DataFetcherResult<OrdreLinjeResponse> ordreRessurs(OpprettRessursRequest request, DataFetchingEnvironment env) {
+    public DataFetcherResult<OrdreLinjeResponse> ordreRessurs(/*OpprettRessursRequest request,*/ DataFetchingEnvironment env) {
         return securityUtil.<OrdreLinjeResponse>checkAuth(env, null).orElseGet(() -> {
-            Ordre ordre = getOrdre(request.getMetadata());
+            Ordre ordre = null;//getOrdre(request.getMetadata());
             OrdreLinje r = OrdreLinje.builder()
                     .type(OrdreLinjeType.OPPRETT_RESSURS)
                     .ordreLinjeId(UUID.randomUUID())
                     .ordreId(ordre.getOrdreId())
                     .metadata(
                             OrdreMetadata.builder()
-                                    .ordreId(request.getMetadata().getOrdreId())
-                                    .beskrivelse(request.getMetadata().getBeskrivelse())
+                                    .ordreId(null/*request.getMetadata().getOrdreId()*/)
+                                    .beskrivelse(null/*request.getMetadata().getBeskrivelse()*/)
                                     .build()
                     )
-                    .data(toJson(Map.of("personIdent", request.getPersonIdent(), "visningsnavn", request.getVisningsnavn())))
+                    .data(toJson(Map.of("personIdent", /*request.getPersonIdent()*/null, "visningsnavn", /*request.getVisningsnavn()*/null)))
                     .build();
             ordre.getOrdreLinjer().add(r);
 
