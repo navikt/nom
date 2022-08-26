@@ -61,7 +61,7 @@ public class NavidentController {
         val responseBody = NavidentResponse.builder();
         val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
             try {
-                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getSektor(), false);
+                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
 
                 if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
 
@@ -69,6 +69,7 @@ public class NavidentController {
                             .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
                             .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
                             .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn())
+                            .put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn())
                             .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn())
                             .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
                     val metadata = HendelseMetadataSerialize.builder()
