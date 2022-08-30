@@ -13,11 +13,11 @@
     <name>NOM :: Apps :: Unit4</name>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>no.nav.nom</groupId>-->
-<!--            <artifactId>utils-common</artifactId>-->
-<!--            <version>${project.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
