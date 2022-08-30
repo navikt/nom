@@ -32,6 +32,9 @@ spec:
     initialDelay: 10
     periodSeconds: 5
     failureThreshold: 30
+  azure:
+    application:
+      enabled: true
   envFrom:
     - secret: nom-unit4-api-credentials
   env:
