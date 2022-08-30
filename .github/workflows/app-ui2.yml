@@ -8,7 +8,7 @@ on:
     paths:
       - '.github/workflows/app-ui2.yml'
       - 'apps/ui2/**'
-      - '.nais/apps/ui/**'
+      - '.nais/apps/ui/ui*'
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-ui2:${{ github.sha }}
 

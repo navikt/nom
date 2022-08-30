@@ -9,3 +9,7 @@ env:
     value: https://nom-proxy.dev-fss-pub.nais.io
   - name: NOM_PROXY_CLIENT_ID
     value: dev-fss.nom.nom-proxy
+inboundrules:
+  - application: ida
+    namespace: traktor
+    cluster: prod-fss

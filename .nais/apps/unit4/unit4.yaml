@@ -42,3 +42,11 @@ spec:
       - name: {{this.name}}
         value: {{this.value}}
   {{/each}}
+  accessPolicy:
+    inbound:
+      rules:
+      {{#each inboundrules}}
+        - application: {{this.application}}
+          namespace: {{this.namespace}}
+          cluster: {{this.cluster}}
+      {{/each}}

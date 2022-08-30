@@ -7,7 +7,7 @@ on:
     paths:
       - 'apps/nav-ident/**'
       - 'libs/utils-common/**'
-      - '.nais/*/nav-ident.yaml'
+      - '.nais/apps/nav-ident/nav-ident*.yaml'
       - '.github/*/app-nav-ident.yaml'
 
 env:
@@ -62,7 +62,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/dev-gcp/nav-ident.yaml
+          RESOURCE: .nais/apps/nav-ident/nav-ident-dev-gcp.yaml
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -75,4 +75,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/prod-gcp/nav-ident.yaml
+          RESOURCE: .nais/apps/nav-ident/nav-ident-prod-gcp.yaml
