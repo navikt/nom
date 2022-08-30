@@ -94,6 +94,12 @@ public class Unit4RessursDto {
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
                         .build(),
                 RelatedValue.builder()
+                        .relationId("23")
+                        .relatedValue("1111")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                        .build(),
+                RelatedValue.builder()
                         .relationId("20")
                         .relatedValue("000000")
                         .dateFrom(AGRESSO_STARTTIME)
