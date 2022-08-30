@@ -67,7 +67,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: nom-ui
         - application: nom-ui2
           namespace: org
           cluster: prod-gcp

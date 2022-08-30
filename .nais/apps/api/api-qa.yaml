@@ -60,10 +60,6 @@ spec:
           - NAVident
         groups:
           - id: "eb3dd903-42c9-4337-b8df-618a45da47cd"
-  accessPolicy:
-    inbound:
-      rules:
-        - application: nom-ui-qa
     outbound:
       external:
         - host: nom-proxy.prod-fss-pub.nais.io
