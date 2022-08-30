@@ -10,7 +10,7 @@ app:
 
 authentication:
   aad:
-    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
     clientId: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
@@ -20,3 +20,11 @@ nom:
       common:
         app:
           load-properties: true
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
