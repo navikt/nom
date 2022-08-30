@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public class AppProperties {
 
     private final Unit4 unit4;
+    private final Proxy proxy;
 
     @Value
     public static class Unit4 {
@@ -20,5 +21,11 @@ public class AppProperties {
         String employeesPath;
         String apiUsername;
         String apiPassword;
+    }
+
+    @Value
+    public static class Proxy {
+        String baseUrl;
+        String aadClientId;
     }
 }

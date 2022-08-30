@@ -14,8 +14,8 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public class AppProperties {
 
     private final Dvh dvh;
-    private final Pdl pdl;
     private final Tel tel;
+    private final Unit4 unit4;
 
     @Value
     public static class Tel {
@@ -37,9 +37,10 @@ public class AppProperties {
 
     }
 
-
     @Value
-    public static class Pdl {
+    public static class Unit4 {
+        String unit4Username;
+        String unit4Password;
         String baseUrl;
     }
 

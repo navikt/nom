@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/ressurs")
-public class RessursController {
+@RequestMapping("/api/v2/ressurs")
+public class RessursControllerV2 {
 
     private final Unit4Client unit4Client;
 
     @PostMapping
-    public String createRessurs(@RequestBody NomRessursDTO ressursDTO){
-        return unit4Client.createRessurs(ressursDTO);
+    public String createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
+        return unit4Client.createRessursByProxy(ressursDTO);
     }
+
 }

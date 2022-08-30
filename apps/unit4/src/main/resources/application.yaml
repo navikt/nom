@@ -4,6 +4,15 @@ app:
     employeesPath: /agrt01-web-api/v1/employees
     apiUsername: ${NOM_UNIT4_API_USERNAME}
     apiPassword: ${NOM_UNIT4_API_PASSWORD}
+  proxy:
+    baseUrl: ${NOM_PROXY_BASEURL}
+    aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
+
+authentication:
+  aad:
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    clientId: ${AZURE_APP_CLIENT_ID}
+    jwk: ${AZURE_APP_JWK}
 
 nom:
   libs:

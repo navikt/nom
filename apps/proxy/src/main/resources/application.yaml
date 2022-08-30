@@ -20,6 +20,10 @@ app:
     telUsername: ${teluser}
     telPassword: ${telpass}
     url: ${APP_TEL_BASE_URL}
+  unit4:
+    unit4Username: ${NOM_UNIT4_API_USERNAME}
+    unit4Password: ${NOM_UNIT4_API_PASSWORD}
+    baseUrl: ${UNIT4_BASE_URL}
 
 authentication:
   sts:
