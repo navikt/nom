@@ -17,13 +17,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
-public class AdController extends AbstractController {
+public class AdController {
 
     private final OnpremAdConsumer adConsumer;
 
     @PostMapping("/ad")
     public ResponseEntity<AdRessurser> hentAdRessurser(@AuthenticationPrincipal Jwt jwt, @RequestBody List<String> body) {
-        assertJwt(jwt);
         if (body.size() > 100) {
             throw new IllegalArgumentException("Max 100 per request");
         }

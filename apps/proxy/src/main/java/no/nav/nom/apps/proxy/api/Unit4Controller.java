@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/proxy/unit4")
 @RequiredArgsConstructor
-public class Unit4Controller extends AbstractController{
+public class Unit4Controller {
     public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
     private final RestTemplate restTemplate;
 
@@ -27,7 +27,6 @@ public class Unit4Controller extends AbstractController{
 
     @PostMapping("/ressurs")
     public String postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
-        assertJwt(jwt);
         log.info("Mottatt /proxy/unit4/ressurs POST request");
 
         var request = RequestEntity

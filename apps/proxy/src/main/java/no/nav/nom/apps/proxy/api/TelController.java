@@ -16,7 +16,7 @@ import java.nio.charset.Charset;
 @RestController
 @RequestMapping("/proxy")
 @RequiredArgsConstructor
-public class TelController extends AbstractController{
+public class TelController {
 
     private final RestTemplate restTemplate;
 
@@ -24,8 +24,6 @@ public class TelController extends AbstractController{
 
     @GetMapping("/tel")
     public String getTelv1(@AuthenticationPrincipal Jwt jwt) {
-        assertJwt(jwt);
-
         var request = RequestEntity
                 .get(appProperties.getTel().getUrl())
                 .header("Authorization", "Basic " + HttpHeaders.encodeBasicAuth(

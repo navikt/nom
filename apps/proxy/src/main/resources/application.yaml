@@ -40,7 +40,6 @@ spring:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-          subjects: ${ACCEPTED_SUBJECTS}
   ldap:
     urls: ${LDAP_URL}
     username: ${app.ldap.username}

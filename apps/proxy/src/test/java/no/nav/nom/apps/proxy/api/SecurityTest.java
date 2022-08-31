@@ -104,26 +104,6 @@ public class SecurityTest extends ApiTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Validerer 403 FORBIDDEN ved ugyldig subject i token")
-    public void scenario24() {
-        allUrls.forEach(this::scenario24Helper);
-    }
-
-    @SneakyThrows
-    public void scenario24Helper(String url) {
-        val claims = securityTestUtils.validJwtClaims();
-        claims.subject("ugyldigSubject");
-        val token = securityTestUtils.createToken(claims);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-
-        val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.FORBIDDEN));
-    }
-
-    @Test
-    @SneakyThrows
     @DisplayName("Validerer 401 UNAUTHORIZED ved ugyldig audience i token")
     public void scenario25() {
         allUrls.forEach(this::scenario25Helper);
