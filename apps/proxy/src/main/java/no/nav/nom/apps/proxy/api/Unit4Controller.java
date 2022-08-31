@@ -3,6 +3,7 @@ package no.nav.nom.apps.proxy.api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -31,7 +32,11 @@ public class Unit4Controller {
 
         var request = RequestEntity
                 .post(appProperties.getUnit4().getBaseUrl() + API_EMPLOYEES_PATH)
-                .headers(h -> h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password() ))
+                .headers(h -> {
+                            h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
+                            h.setContentType(MediaType.APPLICATION_JSON);
+                        }
+                )
                 .body(body);
 
         return restTemplate.exchange(request, String.class).getBody(); // nullptr ?
