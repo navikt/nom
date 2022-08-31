@@ -16,7 +16,7 @@ spec:
     - name: APP_TEL_URL
       value: http://jiraint-q1.adeo.no/si/telenor/
     - name: ACCEPTED_SUBJECTS
-      value: cb62b1c3-62b7-4e5c-839a-357f117108fb, f28d78e8-e787-4ff5-b1d7-49f49e225cdc, d61ff57e-2b89-4ef5-b629-7c39fbb9d2c0
+      value: cb62b1c3-62b7-4e5c-839a-357f117108fb, f28d78e8-e787-4ff5-b1d7-49f49e225cdc, 73dee5c7-75e1-4827-b212-ce9a09c10367
     - name: STS_BASEURL
       value: https://security-token-service.dev.adeo.no
     - name: PDL_BASEURL

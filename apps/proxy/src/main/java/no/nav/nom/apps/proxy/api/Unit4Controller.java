@@ -28,6 +28,7 @@ public class Unit4Controller extends AbstractController{
     @PostMapping("/ressurs")
     public String postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
         assertJwt(jwt);
+        log.info("Mottatt /proxy/unit4/ressurs POST request");
 
         var request = RequestEntity
                 .post(appProperties.getUnit4().getBaseUrl() + API_EMPLOYEES_PATH)
