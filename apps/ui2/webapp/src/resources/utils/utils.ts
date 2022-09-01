@@ -7,3 +7,28 @@ export const sortItems = (a: string, b: string) => {
     }
     return 0
 }
+
+export function structuredClone<T>(arg: T): T{
+    // @ts-ignore
+    const cloneFunc = window.structuredClone;
+    if(cloneFunc){
+        return cloneFunc(arg)
+    }else{
+        return JSON.parse(JSON.stringify(arg))
+    }
+}
+
+
+
+export function funcIsNotDuplicateByKey<T>(extractKey: (it: T) => string){
+    return (it: T, idx: number, arrCtx: T[]) => isNotDuplicate<T>(it,idx,arrCtx,extractKey)
+}
+
+export function isNotDuplicate<T>(it: T, idx: number, arrCtx: T[], extractKey: (it: T) => string): boolean{
+    const seen = arrCtx.slice(0,idx).map(extractKey);
+    const wasDuplicate = seen.includes(extractKey(it));
+    if(wasDuplicate){
+        console.warn({arrCtx, dupKey: extractKey(it), idx},"Duplicate removed: Key was seen more than once -> ")
+    }
+    return !wasDuplicate
+}
