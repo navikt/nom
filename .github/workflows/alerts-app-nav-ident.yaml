@@ -1,4 +1,4 @@
-name: Deploy NOM-API alerts to NAIS
+name: Deploy NAV-IDENT alerts to NAIS
 on:
   push:
     branches:
