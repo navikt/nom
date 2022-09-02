@@ -67,13 +67,3 @@ jobs:
       - name: build webapp
         working-directory: apps/ui2/webapp
         run: CI=false yarn run build
-      - name: Run npm ci
-        run: |
-          cd apps/ui/src/main/webapp/
-          npm ci
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-      - name: Run npm build
-        run: |
-          cd apps/ui/src/main/webapp/
-          npm run build
