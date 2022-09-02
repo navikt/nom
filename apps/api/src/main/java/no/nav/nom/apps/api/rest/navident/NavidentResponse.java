@@ -11,6 +11,10 @@ import org.springframework.http.HttpStatus;
 public class NavidentResponse {
 
     private HttpStatus status;
+    private String personident;
     private String navident;
+    private String fornavn;
+    private String mellomnavn;
+    private String etternavn;
     private String feilmelding;
 }

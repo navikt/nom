@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class DvhRepository {
     private List<DvhOrganisering> organiseringer;
     private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
-    private Map<String, RessursI> ressursByNavIdent;
+    private Map<String, RessursI> ressursByNavIdent = Collections.emptyMap();
     private final Map<String, LocalDate> sluttdatoByPersonIdent = new HashMap<>();
     private final IOrgenhetService orgenhetService;
 

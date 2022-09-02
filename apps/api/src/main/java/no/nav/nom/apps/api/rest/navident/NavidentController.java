@@ -8,9 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
@@ -91,6 +89,14 @@ public class NavidentController {
             return null;
         });
 
-        return ResponseEntity.ok(responseBody.navident(ressurs != null ? ressurs.getNavIdent() : null).build());
+        if (ressurs != null) {
+            responseBody.personident(ressurs.getPersonIdent())
+                    .navident(ressurs.getNavIdent())
+                    .fornavn(ressurs.getVisningsfornavn().orElse(null))
+                    .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
+                    .etternavn(ressurs.getVisningsetternavn().orElse(null));
+        }
+
+        return ResponseEntity.ok(responseBody.build());
     }
 }
