@@ -55,14 +55,15 @@ const panelCss = {
         margin: 0 0.2rem 0 0;
       }
     `),
-    focusedRessurs: css(commonPanelCss, css`
+    focusedRessurs: css(css`
       grid-template-columns: 1fr;
       width: 100%;
-      justify-items: center;
+      //justify-items: center;
       background-color: ${colorPalette.focusedBackground};
       row-gap: 0.5rem;
       min-height: 15rem;
       margin-bottom: 1rem;
+      padding: 2rem;
     `),
     underEnhet: css(commonPanelCss, css`
       height: 100%;
@@ -103,13 +104,13 @@ const panelCss = {
       column-gap: 1rem;
       row-gap: 1rem;
       width: 100%;
-      padding: 1.5rem;
+      padding: 1.5rem 0;
       @media (min-width: 80rem) {
         grid-template-columns: auto auto;
         width: auto;
-        span:nth-child(odd){
-          text-align: right;
-        }
+        //span:nth-child(odd){
+        //  text-align: right;
+        //}
       }
 
     `
@@ -235,33 +236,39 @@ const OrganisasjonHierarkiPageInner = function (props: {
         )}
 
       {focusedRessurs && <>
-          <div ref={scrollRef} className={panelCss.focusedRessurs}>
-              <div className={panelCss.panelRim}></div>
-                <div className={css`min-height: 2rem`}></div>
-                  <UserImage size={"130px"} navIdent={focusedRessurs.navident} navn={focusedRessurs.name} />
-                  <Heading className={panelCss.textCenter} size={'large'}>
-                      {focusedRessurs.name}
-                  </Heading>
-              <div>({focusedRessurs.navident})</div>
+          <div ref={scrollRef} className={panelCss.currentEnhet}>
+              <div className={panelCss.panelRim}/>
+              <div className={css`display: grid;
+                grid-template-columns: 1fr min-content`}>
+                  <div className={panelCss.focusedRessurs}>
+                      <Heading size={'large'}>
+                          {focusedRessurs.name}
+                      </Heading>
+                      <div>{focusedRessurs.sektor} <strong>({focusedRessurs.navident})</strong></div>
 
-              <div className={panelCss.labeledItemsPane}>
-                <span>Tlf: <strong>{focusedRessurs.tel.length === 0 ? "Mangler tlf" :
-                    <span>{focusedRessurs.tel}</span>}</strong>
-                </span>
-                  <span>E-post: <strong>{focusedRessurs.email}</strong></span>
-                  {focusedRessurs.tilknytninger.map(tilkn => {
-                      const {orgenhet: oe, leder: l} = tilkn
-                      return <Fragment key={l.navident + "_" + oe.url}>
-                          <span>Org.enhet:
-                          <Link className={lederStyling.lederTekst} to={oe.url}><strong>{oe.name}</strong></Link>
-                          </span>
-                          <span>
-                          Leder:
-                          <Link className={lederStyling.lederTekst} to={l.url}><strong>{l.name}</strong></Link>
-                              </span>
-                      </Fragment>
-                  })}
+                      <div className={panelCss.labeledItemsPane}>
 
+                          <span>E-post: <strong>{focusedRessurs.email}</strong></span>
+                          <span>Tlf: <strong>{focusedRessurs.tel.length === 0 ? "Mangler tlf" :
+                              <span>{focusedRessurs.tel}</span>}</strong>
+                        </span>
+                          {focusedRessurs.tilknytninger.map(tilkn => {
+                              const {orgenhet: oe, leder: l} = tilkn
+                              return <Fragment key={l.navident + "_" + oe.url}>
+                                      <span>Org.enhet:
+                                      <Link className={lederStyling.lederTekst} to={oe.url}><strong>{oe.name}</strong></Link>
+                                      </span>
+                                              <span>Leder:<Link className={lederStyling.lederTekst}
+                                                                to={l.url}><strong>{l.name}</strong></Link>
+                                          </span>
+                              </Fragment>
+                          })}
+
+                      </div>
+                  </div>
+                  <div className={css`padding: 2.5rem`}>
+                  <UserImage size={"130px"} navIdent={focusedRessurs.navident} navn={focusedRessurs.name}/>
+                  </div>
               </div>
           </div>
           <BackFromRessurs valgtEnhetUrl={valgtEnhetUrl} ressursIsLeder={ressurser.length === 0} />

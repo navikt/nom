@@ -1,4 +1,5 @@
 import * as Gq from '../generated/graphql_generated'
+import {Sektor} from '../generated/graphql_generated'
 import {agressoIdDataToUrl} from "../../resources/utils/url_utils";
 import {funcIsNotDuplicateByKey} from "../../resources/utils/utils";
 
@@ -27,6 +28,7 @@ export namespace Hierarchy {
     export type FocusedRessurs = {
         tel: string
         email: string
+        sektor: "Statlig ansatt" | "Eksternt ansatt" | "Kommunalt ansatt"
         tilknytninger: {
             leder: Ressurs,
             orgenhet: Omit<OrgEnhet, "ledere">
@@ -72,6 +74,18 @@ function translateRessurs(ress: ApiTypes.ApiRessurs, enhetCtx: ApiTypes.ApiEnhet
         name,
         url: gqlEnhetToUrl(enhetCtx) + "/" + ress.navident,
         navident: ress.navident,
+    }
+}
+
+function sektorToTxt(sektor: Gq.Sektor){
+    switch (sektor){
+        case Sektor.Ekstern:
+            return "Eksternt ansatt"
+        case Sektor.NavKommunal:
+            return "Kommunalt ansatt";
+        case Sektor.NavStatlig:
+            return "Statlig ansatt"
+
     }
 }
 
@@ -202,6 +216,7 @@ export function focusedRessursHierarchy(
         kind: "hierarchy_focused_ressurs",
         overEnheter: [...orgdata.overEnheter, orgdata.enhet],
         focusedRessurs: {
+            sektor: sektorToTxt(res.sektor[0]),
             name: nameFromRessurs({...res}),
             tel: res.telefon.map(it => formatTlf(it.nummer)).join(", ") || "Mangler tlf",
             email: res.epost || "Mangler epost",
