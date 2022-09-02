@@ -30,6 +30,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn clean test --threads=4 --batch-mode -Pintegration-test
+
   build-npm:
     runs-on: ubuntu-latest
     steps:
@@ -45,6 +46,27 @@ jobs:
           key: ${{ runner.os }}-node-cache-${{ hashFiles('apps/ui/src/main/webapp/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-cache-
+      - name: Install dependencies, frackend
+        working-directory: apps/ui2/frackend
+        run: |
+          npm ci
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        working-directory: apps/ui2/webapp
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: install webapp
+        working-directory: apps/ui2/webapp
+        run: yarn install
+      - name: build webapp
+        working-directory: apps/ui2/webapp
+        run: CI=false yarn run build
       - name: Run npm ci
         run: |
           cd apps/ui/src/main/webapp/
