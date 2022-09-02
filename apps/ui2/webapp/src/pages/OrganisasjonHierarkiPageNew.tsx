@@ -169,7 +169,7 @@ const HorizontallyAlignedPanel = (props: { children: ReactNode, iconSrc: string,
         </div>
         <div className={panelCss.panelContent}>{props.children}</div>
         {props.navidentForImg && <UserImage navIdent={props.navidentForImg} navn={props.fornavnAndEtternavnForImg}  />}
-        <Next className={css`margin: 0 1rem 0 0.2rem`}/>
+        <Next height={"inherit"} width={"inherit"} className={css`margin: 0 1rem 0 0.2rem; height: 2rem; width: 2rem;`}/>
     </div>
 
 const Enhet = (props: { children: ReactNode, navIdentForImg: string, fornavnAndEtternavnForImg?: string }) => <HorizontallyAlignedPanel

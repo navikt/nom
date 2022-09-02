@@ -66,12 +66,12 @@ function gqlEnhetToUrl(enhet: ApiTypes.ApiEnhet){
     return "/org2/" + agressoIdDataToUrl(enhet?.agressoId, enhet?.orgNiv, enhet?.navn)
 }
 
-function translateRessurs(ress: ApiTypes.ApiRessurs, enhetCtx: ApiTypes.ApiEnhet): Hierarchy.Ressurs{
+function translateRessurs(ress: ApiTypes.ApiRessurs, enhetCtx: ApiTypes.ApiEnhet): Hierarchy.Ressurs {
     const name = (ress.fornavn && ress.etternavn) ? `${ress.fornavn} ${ress.etternavn}` : "Uten navn";
     return {
         name,
         url: gqlEnhetToUrl(enhetCtx) + "/" + ress.navident,
-        navident: "",
+        navident: ress.navident,
     }
 }
 
@@ -124,43 +124,24 @@ export function focusedEnhetHierarchy(qryRes: Gq.HentHierarkiQueryResult): Hiera
         enhet: {
             name: qryData.enhet?.navn || "Mangler enhets-navn",
             url: focusedEnhetUrl,
-            ledere: qryData.enhet.leder.map(it => {
-                return {
-                    name: nameFromRessurs(it.ressurs),
-                    navident: it.ressurs.navident,
-                    url: focusedEnhetUrl + "/" + it.ressurs.navident
-                }
-            })
+            ledere: qryData.enhet.leder.map(it => ({
+                name: nameFromRessurs(it.ressurs),
+                navident: it.ressurs.navident,
+                url: focusedEnhetUrl + "/" + it.ressurs.navident
+            }))
 
         },
-        overEnheter:  flattenedOverenheter.map(it => {
-            return {
-                name: it.navn,
-                url: gqlEnhetToUrl(it),
-                ledere: it.leder.map(it2 => {
-                    return {
-                        name: nameFromRessurs(it2.ressurs),
-                        url: gqlEnhetToUrl(it) + "/" + it2.ressurs.navident
-                    } as Hierarchy.Ressurs
-                })
-            }
-        }),
-        underEnheter: underenheter.map(it => {
-            return {
-                name: it.organisasjonsenhet.navn,
-                url: gqlEnhetToUrl(it.organisasjonsenhet),
-                ledere: it.organisasjonsenhet.leder.map(it2 => {
-                    return translateRessurs(it2.ressurs,it.organisasjonsenhet)
-                })
-            }
-        }),
-        ressurser: ressurser.map(it => {
-            return {
-                name: nameFromRessurs(it.ressurs),
-                url: gqlEnhetToUrl(qryData.enhet!!) +"/" + it.ressurs,
-                navident: it.ressurs.navident
-            }
-        })
+        overEnheter:  flattenedOverenheter.map(it => ({
+            name: it.navn,
+            url: gqlEnhetToUrl(it),
+            ledere: it.leder.map(it2 => translateRessurs(it2.ressurs, it))
+        })),
+        underEnheter: underenheter.map(it => ({
+            name: it.organisasjonsenhet.navn,
+            url: gqlEnhetToUrl(it.organisasjonsenhet),
+            ledere: it.organisasjonsenhet.leder.map(it2 => translateRessurs(it2.ressurs, it.organisasjonsenhet))
+        })),
+        ressurser: ressurser.map(it => translateRessurs(it.ressurs,qryData.enhet!!))
 
     }
 
@@ -181,16 +162,26 @@ export function focusedRessursHierarchy(
     const ledere: { leder: Hierarchy.Ressurs, orgenhet: Hierarchy.OrgEnhet }[] = []
     for (const l of res.ledere) {
         for (const o of l.ressurs.orgTilknytning.map(it => it.orgEnhet)) {
+            const oUrl = agressoIdDataToUrl(o.agressoId,o.orgNiv,o.navn)
+            const closestOverenhet = orgdata.overEnheter[orgdata.overEnheter.length-1]
+            const isImplicitLederOfClosestOverenhet = orgdata.overEnheter.map(it => it.url).includes(oUrl)
+
             ledere.push({
                 leder: {
                     name: nameFromRessurs(l.ressurs),
                     url: gqlEnhetToUrl(o) + "/" + l.ressurs.navident,
                     navident: l.ressurs.navident
-                }, orgenhet: {
-                    name: o.navn,
-                    url: gqlEnhetToUrl(o),
-                    ledere: []
-                }
+                },
+                orgenhet: isImplicitLederOfClosestOverenhet ? {
+                        name: closestOverenhet.name,
+                        url: closestOverenhet.url,
+                        ledere: []
+                    }
+                    : {
+                        name: o.navn,
+                        url: gqlEnhetToUrl(o),
+                        ledere: []
+                    }
             })
         }
     }
