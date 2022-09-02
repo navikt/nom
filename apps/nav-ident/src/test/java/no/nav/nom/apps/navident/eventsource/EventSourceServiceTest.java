@@ -67,15 +67,15 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
     @Test
     public void opprettNavIdentSomFinnesEvent() {
         String navIdent = "A000001";
-        String personid = "01019900001";
-        String personid2 = "01019900002";
+        String personid = "11019900001";
+        String personid2 = "21019900002";
         SourceEvent event = getOpprettEvent(navIdent, personid);
         SourceEvent event2 = getOpprettEvent(navIdent, personid2);
 
         kafkaTemplate.send(topic, event.payload.navident, event);
         kafkaTemplate.send(topic, event.payload.navident, event2); // Forventer at denne erstatter forrige info
 
-        await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+        await().atMost(3, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
 
         assertEquals(navidenter.size(), 1);
         assertEquals(personid2, navidenter.get(navIdent).getGjeldendePersonid());
