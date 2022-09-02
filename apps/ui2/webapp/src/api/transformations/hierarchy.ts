@@ -165,6 +165,7 @@ export function focusedRessursHierarchy(
             const oUrl = agressoIdDataToUrl(o.agressoId,o.orgNiv,o.navn)
             const closestOverenhet = orgdata.overEnheter[orgdata.overEnheter.length-1]
             const isImplicitLederOfClosestOverenhet = orgdata.overEnheter.map(it => it.url).includes(oUrl)
+            console.log({l: l.ressurs.navident, o: oUrl, closestOverenhet, isImplicitLederOfClosestOverenhet})
 
             ledere.push({
                 leder: {
