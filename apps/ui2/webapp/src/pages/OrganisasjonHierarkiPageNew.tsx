@@ -66,7 +66,7 @@ const panelCss = {
     `),
     underEnhet: css(commonPanelCss, css`
       height: 100%;
-      min-height: 9rem;
+      min-height: 5rem;
       word-wrap: anywhere;
     `),
     panelContent: css`
@@ -169,7 +169,7 @@ const HorizontallyAlignedPanel = (props: { children: ReactNode, iconSrc: string,
         </div>
         <div className={panelCss.panelContent}>{props.children}</div>
         {props.navidentForImg && <UserImage navIdent={props.navidentForImg} navn={props.fornavnAndEtternavnForImg}  />}
-        <Next height={"inherit"} width={"inherit"} className={css`margin: 0 1rem 0 0.2rem; height: 2rem; width: 2rem;`}/>
+        <Next height={undefined} width={undefined} className={css`margin: 0 1rem 0 0.2rem; height: 2rem; width: 2rem;`}/>
     </div>
 
 const Enhet = (props: { children: ReactNode, navIdentForImg: string, fornavnAndEtternavnForImg?: string }) => <HorizontallyAlignedPanel
@@ -245,8 +245,12 @@ const OrganisasjonHierarkiPageInner = function (props: {
               <div>({focusedRessurs.navident})</div>
 
               <div className={panelCss.labeledItemsPane}>
-                  {focusedRessurs.ledere.map(lAnde => {
-                      const {orgenhet: oe, leder: l} = lAnde
+                <span>Tlf: <strong>{focusedRessurs.tel.length === 0 ? "Mangler tlf" :
+                    <span>{focusedRessurs.tel}</span>}</strong>
+                </span>
+                  <span>E-post: <strong>{focusedRessurs.email}</strong></span>
+                  {focusedRessurs.tilknytninger.map(tilkn => {
+                      const {orgenhet: oe, leder: l} = tilkn
                       return <Fragment key={l.navident + "_" + oe.url}>
                           <span>Org.enhet:
                           <Link className={lederStyling.lederTekst} to={oe.url}><strong>{oe.name}</strong></Link>
@@ -257,9 +261,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
                               </span>
                       </Fragment>
                   })}
-                  <span>Tlf: <strong>{focusedRessurs.tel.length === 0 ? "Mangler tlf" :
-                  <span>{focusedRessurs.tel}</span>}</strong> </span>
-                  <span>E-post: <strong>{focusedRessurs.email}</strong></span>
+
               </div>
           </div>
           <BackFromRessurs valgtEnhetUrl={valgtEnhetUrl} ressursIsLeder={ressurser.length === 0} />

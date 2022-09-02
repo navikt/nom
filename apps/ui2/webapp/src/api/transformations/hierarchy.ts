@@ -27,7 +27,7 @@ export namespace Hierarchy {
     export type FocusedRessurs = {
         tel: string
         email: string
-        ledere: {
+        tilknytninger: {
             leder: Ressurs,
             orgenhet: Omit<OrgEnhet, "ledere">
         }[]
@@ -159,26 +159,37 @@ export function focusedRessursHierarchy(
         return {kind: "err", msg: "null ressurs"}
     }
 
-    const ledere: { leder: Hierarchy.Ressurs, orgenhet: Hierarchy.OrgEnhet }[] = []
+    const overEnheter = [...orgdata.overEnheter, orgdata.enhet];
+    const tilknytninger: { leder: Hierarchy.Ressurs, orgenhet: Hierarchy.OrgEnhet }[] = []
     for (const l of res.ledere) {
-        for (const o of l.ressurs.orgTilknytning.map(it => it.orgEnhet)) {
-            const oUrl = agressoIdDataToUrl(o.agressoId,o.orgNiv,o.navn)
-            const closestOverenhet = orgdata.overEnheter[orgdata.overEnheter.length-1]
-            const isImplicitLederOfClosestOverenhet = orgdata.overEnheter.map(it => it.url).includes(oUrl)
-            console.log({l: l.ressurs.navident, o: oUrl, closestOverenhet, isImplicitLederOfClosestOverenhet})
+        const closestOverenhet = overEnheter[overEnheter.length-1]
+        const isImplicitLederOfClosestOverenhet = overEnheter.map(it => it.ledere.some(it2 => it2.navident === (l.ressurs.navident)))
+        if(isImplicitLederOfClosestOverenhet) {
+            const firstLederOrgtilknytning = l.ressurs.orgTilknytning[0].orgEnhet
+            tilknytninger.push({
+                leder: {
+                    name: nameFromRessurs(l.ressurs),
+                    url: gqlEnhetToUrl(firstLederOrgtilknytning) + "/" + l.ressurs.navident,
+                    navident: l.ressurs.navident
+                },
+                orgenhet: {
+                        name: closestOverenhet.name,
+                        url: closestOverenhet.url,
+                        ledere: []
+                    }
+            })
+            // only list the leder once
+            continue;
+        }
 
-            ledere.push({
+        for (const o of l.ressurs.orgTilknytning.map(it => it.orgEnhet)) {
+            tilknytninger.push({
                 leder: {
                     name: nameFromRessurs(l.ressurs),
                     url: gqlEnhetToUrl(o) + "/" + l.ressurs.navident,
                     navident: l.ressurs.navident
                 },
-                orgenhet: isImplicitLederOfClosestOverenhet ? {
-                        name: closestOverenhet.name,
-                        url: closestOverenhet.url,
-                        ledere: []
-                    }
-                    : {
+                orgenhet: {
                         name: o.navn,
                         url: gqlEnhetToUrl(o),
                         ledere: []
@@ -196,7 +207,7 @@ export function focusedRessursHierarchy(
             email: res.epost || "Mangler epost",
             navident: res.navident,
             url: orgdata.enhet.url + "/" + res.navident,
-            ledere
+            tilknytninger: tilknytninger
         },
     };
 
