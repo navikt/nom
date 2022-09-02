@@ -6,21 +6,21 @@ networks:
 
 services:
   postgres-api:
-    image: 'postgres:alpine'
+    image: postgres
     ports:
       - '5432:5432'
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-api'
   postgres-ressurs:
-    image: 'postgres:alpine'
+    image: postgres
     ports:
       - '5433:5432'
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'postgres-ressurs'
   postgres-navident:
-    image: 'postgres:alpine'
+    image: postgres
     ports:
       - '5434:5432'
     environment:
