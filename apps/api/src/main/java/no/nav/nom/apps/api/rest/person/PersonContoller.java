@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.graphql.PdlConsumer;
-import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
+import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.Person;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,15 +44,14 @@ public class PersonContoller {
     }
 
 
-    private PdlPersonDTO convert(FolkeregisterPerson person){
+    private PdlPersonDTO convert(Person person){
         return PdlPersonDTO.builder()
                 .navn(
                         PdlPersonDTO.Navn.builder()
-                                .fornavn(person.getNavn().getFornavn())
-                                .mellomnavn(person.getNavn().getMellomnavn())
-                                .etternavn(person.getNavn().getEtternavn())
-                                .build()
-                )
+                                .fornavn(person.getFornavn())
+                                .mellomnavn(person.getMellomnavn())
+                                .etternavn(person.getEtternavn())
+                                .build())
                 .build();
     }
 
