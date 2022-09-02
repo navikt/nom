@@ -82,7 +82,7 @@ jobs:
       - name: Build and push Docker container
         uses: docker/build-push-action@v3
         with:
-          context: apps/frackend
+          context: apps/ui2/frackend
           push: true
           tags: ${{ env.IMAGE }}
 
