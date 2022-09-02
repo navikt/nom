@@ -50,7 +50,7 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
-          build-args: JAR_PATH=apps/nav-ident/target/app.jar
+          build-args: JAR_PATH=apps/unit4/target/app.jar
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
