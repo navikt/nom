@@ -8,7 +8,7 @@ on:
     paths:
       - 'apps/nom-ressurser/**'
       - '.nais/apps/nom-ressurser/nom-ressurser*.yaml'
-      - '.github/workflows/app-nom-ressurser.yml'
+      - '.github/workflows/app-nom-ressurser.yaml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/nom-ressurser:${{ github.sha }}

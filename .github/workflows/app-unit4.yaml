@@ -8,6 +8,7 @@ on:
     paths:
       - 'apps/unit4/**'
       - '.nais/apps/unit4/**'
+      - '.github/workflows/app-unit4.yaml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/nom-unit4:${{ github.sha }}
