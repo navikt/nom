@@ -67,7 +67,7 @@ function nameFromRessurs(ressurs: ApiTypes.ApiRessurs) {
 
 function gqlEnhetToUrl(enhet: ApiTypes.ApiEnhet) {
   return (
-    "/org2/" + agressoIdDataToUrl(enhet?.agressoId, enhet?.orgNiv, enhet?.navn)
+    "/org/" + agressoIdDataToUrl(enhet?.agressoId, enhet?.orgNiv, enhet?.navn)
   );
 }
 
