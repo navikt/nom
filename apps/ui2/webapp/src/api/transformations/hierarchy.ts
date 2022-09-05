@@ -205,7 +205,7 @@ export function focusedRessursHierarchy(
   }[] = [];
   for (const l of res.ledere) {
     const closestOverenhet = overEnheter[overEnheter.length - 1];
-    const isImplicitLederOfClosestOverenhet = overEnheter.map((it) =>
+    const isImplicitLederOfClosestOverenhet = overEnheter.some((it) =>
       it.ledere.some((it2) => it2.navident === l.ressurs.navident)
     );
     if (isImplicitLederOfClosestOverenhet) {
