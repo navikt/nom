@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.graphql.common;
 
-import graphql.kickstart.execution.context.GraphQLContext;
+//import graphql.kickstart.execution.context.GraphQLContext;
 import graphql.kickstart.servlet.context.GraphQLServletContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
