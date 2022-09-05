@@ -1,4 +1,6 @@
 app:
+  name: nom-unit4
+  ressurs.topic: nom-ressurser
   unit4:
     baseUrl: ${UNIT4_BASEURL}
     employeesPath: /agrt01-web-api/v1/employees
@@ -22,6 +24,22 @@ nom:
           load-properties: true
 
 spring:
+  kafka:
+    client-id: ${app.name}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    properties:
+      security.protocol: SSL
+      ssl:
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
   security:
     oauth2:
       resourceserver:

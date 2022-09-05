@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,7 +41,7 @@ public class Unit4Client {
     }
 
     @SneakyThrows
-    public String createRessursByProxy(NomRessursDTO nomRessursDTO){
+    public ResponseEntity<String> createRessursByProxy(NomRessursDTO nomRessursDTO){
         val requestHeaders = new HttpHeaders();
         requestHeaders.setContentType(MediaType.APPLICATION_JSON);
         requestHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
@@ -48,6 +49,6 @@ public class Unit4Client {
 
         val request = new HttpEntity<>(body, requestHeaders);
 
-        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + RESSURS_POST_ENDPOINT, HttpMethod.POST, request, String.class).getBody();
+        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + RESSURS_POST_ENDPOINT, HttpMethod.POST, request, String.class);
     }
 }

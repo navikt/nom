@@ -16,7 +16,7 @@ public class RessursControllerV2 {
 
     @PostMapping
     public String createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
-        return unit4Client.createRessursByProxy(ressursDTO);
+        return unit4Client.createRessursByProxy(ressursDTO).getBody();
     }
 
 }
