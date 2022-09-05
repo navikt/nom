@@ -8,14 +8,11 @@ import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.apps.api.graphql.PdlConsumer;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
-import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
@@ -32,10 +29,8 @@ import java.util.NoSuchElementException;
 public class RessursMutationResolver implements GraphQLMutationResolver {
 
     private final IRessursService ressursService;
-    private final PdlConsumer pdlConsumer;
     private final NIKConsumer nikConsumer;
     private final SecurityUtil securityUtil;
-    private final RessursHendelseRepository ressursHendelseRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${app.graphql.preauth.mutation.ressurs}")
