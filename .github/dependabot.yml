@@ -2,18 +2,39 @@
 
 version: 2
 updates:
-  - package-ecosystem: "maven"
+  - package-ecosystem: maven
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: daily
+      time: "04:00"
     open-pull-requests-limit: 10
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: daily
+      time: "04:00"
     open-pull-requests-limit: 10
-  - package-ecosystem: "npm"
-    directory: "/apps/ui/src/main/webapp"
+  - package-ecosystem: github-actions
+    directory: "/"
     schedule:
-      interval: "daily"
+      interval: daily
+      time: "04:00"
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/apps/ui2/webapp"
+    schedule:
+      interval: daily
+      time: "04:00"
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/apps/ui2/frackend"
+    schedule:
+      interval: daily
+      time: "04:00"
+    open-pull-requests-limit: 10
+  - package-ecosystem: docker
+    directory: "/apps/ui2/frackend"
+    schedule:
+      interval: daily
+      time: "04:00"
     open-pull-requests-limit: 10

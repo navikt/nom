@@ -1,0 +1,31 @@
+name: Deploy NOM-UNIT4 alerts to NAIS
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.nais/alerts/dev/unit4-alerts.yaml'
+      - '.nais/alerts/prod/unit4-alerts.yaml'
+      - '.github/workflows/alerts-app-unit4.yaml'
+
+jobs:
+  apply-alerts:
+    name: Apply alerts to cluster
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/alerts/dev/unit4-alerts.yaml
+
+      - name: Deploy to prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/alerts/prod/unit4-alerts.yaml

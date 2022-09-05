@@ -266,21 +266,6 @@
                 <version>${versions.maven.plugin-version}</version>
             </plugin>
 
-            <plugin>
-                <groupId>io.snyk</groupId>
-                <artifactId>snyk-maven-plugin</artifactId>
-                <version>${snyk-plugin.version}</version>
-                <configuration>
-                    <apiToken>${snyk-api-token}</apiToken>
-                    <args>
-                        <arg>--org=org-6kx</arg>
-                    </args>
-<!--                    v1 opsjoner. hvordan oversette riktig til v2?-->
-<!--                    <org>org-6kx</org>-->
-<!--                    <failOnSeverity>false</failOnSeverity>-->
-<!--                    <includeProvidedDependencies>false</includeProvidedDependencies>-->
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 

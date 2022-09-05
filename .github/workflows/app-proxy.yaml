@@ -8,10 +8,11 @@ on:
     paths:
       - 'apps/proxy/**'
       - '.nais/apps/proxy/proxy*.yaml'
+      - '.github/workflows/app-proxy.yaml'
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/nom-proxy:${{ github.sha }}
-  IMAGE_LATEST: docker.pkg.github.com/${{ github.repository }}/nom-proxy:latest
+  IMAGE: ghcr.io/${{ github.repository }}/nom-proxy:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/nom-proxy:latest
 
 jobs:
   build-jar-docker:
@@ -20,38 +21,43 @@ jobs:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
       - name: Cache Depdendencies
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
       - name: JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
+          distribution: 'temurin'
           java-version: 17
       - name: Build
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
         run: mvn clean package --projects :proxy --also-make --batch-mode
-      - name: Build and publish Docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker build -t ${IMAGE} -t ${IMAGE_LATEST} --build-arg JAR_PATH=apps/proxy/target/app.jar .
-          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${IMAGE}
-          docker push ${IMAGE_LATEST}
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker container
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
+          build-args: JAR_PATH=apps/proxy/target/app.jar
 
   deploy-dev:
     name: Deploy to NAIS dev-fss
     needs: build-jar-docker
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
@@ -64,7 +70,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

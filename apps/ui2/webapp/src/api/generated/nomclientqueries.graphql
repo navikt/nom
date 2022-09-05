@@ -598,6 +598,7 @@ query HentLederForNavident($navident: String){
 query HentRessurs($navident: String){
   ressurs(where: {navident: $navident}) {
     ...RessursWithKobling
+    sektor
     ledere {
       ressurs {
         ...RessursStandalone
