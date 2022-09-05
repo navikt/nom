@@ -531,6 +531,12 @@ function OrganisasjonsHierarkiPageOuter() {
   const missingData =
     !qry.loading && !ressursQry.loading && (!gotRessursData || !gotRessursData);
 
+  const showAlert =
+    qry.error ||
+    ressursQry.error ||
+    (!qry.loading && !enhetHierarchyOk) ||
+    (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk);
+
   return (
     <ContentWrapper>
       <div
@@ -541,8 +547,11 @@ function OrganisasjonsHierarkiPageOuter() {
         <Heading size="xlarge" className={css({ marginBottom: "20px" })}>
           NAV Organisasjon
         </Heading>
-        {(qry.error || ressursQry.error) && (
-          <Alert variant={"warning"}>Feil i graphql-respons</Alert>
+        {showAlert && (
+          <>
+            <Alert variant={"info"}>Uventet data i graphql-respons</Alert>
+            <hr />
+          </>
         )}
         {!gotHierarkiData && !gotRessursData && (
           <>
