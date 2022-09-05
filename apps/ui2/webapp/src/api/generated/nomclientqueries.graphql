@@ -251,12 +251,8 @@ query HentOrganisasjonsenhetMedOverenhet(
   }
 }
 
-
-
-
-query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
+query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
   organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
-
     underenheter: organiseringer(retning: under) {
       organisasjonsenhet {
         navn
@@ -416,20 +412,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String! $orgNiv: String!) {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-fragment RessursStandalone on Ressurs{
+fragment RessursStandalone on Ressurs {
   navident
   fornavn
   etternavn
@@ -456,7 +439,7 @@ fragment OrgenhetAgressoIds on OrgEnhet {
   navn
 }
 
-fragment RessursWithKobling on Ressurs{
+fragment RessursWithKobling on Ressurs {
   ...RessursStandalone
   koblinger {
     organisasjonsenhet {
@@ -465,7 +448,7 @@ fragment RessursWithKobling on Ressurs{
   }
 }
 
-fragment RessursWithLederAndKobling on Ressurs{
+fragment RessursWithLederAndKobling on Ressurs {
   ...RessursWithLeder
   ...RessursWithKobling
 }
@@ -486,24 +469,20 @@ fragment OrgenhetStandaloneWithLeder on OrgEnhet {
   }
 }
 
-
-
-query HentMedFragmentEnhet($agressoId: String! $orgNiv: String!) {
-  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+query HentMedFragmentEnhet($agressoId: String!, $orgNiv: String!) {
+  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
     ...OrgenhetAgressoIds
     gyldigFom
     gyldigTom
   }
 }
 
-
-query HentHierarki($agressoId: String! $orgNiv: String!) {
-
-  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+query HentHierarki($agressoId: String!, $orgNiv: String!) {
+  enhet: orgEnhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
     ...OrgenhetAgressoIds
     gyldigFom
     gyldigTom
-    type{
+    type {
       kode
     }
     leder {
@@ -517,10 +496,11 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
         }
       }
     }
-
   }
 
-  ressursKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }){
+  ressursKoblinger: organisasjonsenhet(
+    where: { agressoId: $agressoId, orgNiv: $orgNiv }
+  ) {
     koblinger {
       ressurs {
         ...RessursStandalone
@@ -533,8 +513,9 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
     }
   }
 
-  enhetsKoblinger: organisasjonsenhet(where: { agressoId: $agressoId, orgNiv: $orgNiv }) {
-
+  enhetsKoblinger: organisasjonsenhet(
+    where: { agressoId: $agressoId, orgNiv: $orgNiv }
+  ) {
     underenheter: organiseringer(retning: under) {
       organisasjonsenhet {
         ...OrgenhetStandaloneWithLeder
@@ -574,7 +555,7 @@ query HentHierarki($agressoId: String! $orgNiv: String!) {
   }
 }
 
-query HentLederForNavident($navident: String){
+query HentLederForNavident($navident: String) {
   ressurs(where: { navIdent: $navident }) {
     navIdent
     ledere {
@@ -595,8 +576,8 @@ query HentLederForNavident($navident: String){
   }
 }
 
-query HentRessurs($navident: String){
-  ressurs(where: {navident: $navident}) {
+query HentRessurs($navident: String) {
+  ressurs(where: { navident: $navident }) {
     ...RessursWithKobling
     sektor
     ledere {

@@ -9,23 +9,24 @@ const bannerStyles = css({
   height: "230px",
   color: "#FFFFFF",
   display: "flex",
-  marginRight: '2.5rem'
+  marginRight: "2.5rem",
 });
 
 const headerStyles = css({
-    display: 'flex', 
-    alignItems: 'flex-end',
-    marginLeft: '20px',
-})
-
+  display: "flex",
+  alignItems: "flex-end",
+  marginLeft: "20px",
+});
 
 const Banner = () => {
   return (
     <div className={bannerStyles}>
       <ContentWrapper>
-        <div className={css({ display: 'flex', marginTop: '25px'})}> 
-            <img src={nomLogo} alt="nom logo"/>
-            <Heading size="xlarge" className={headerStyles}>NAV Organisasjonsmaster</Heading>
+        <div className={css({ display: "flex", marginTop: "25px" })}>
+          <img src={nomLogo} alt="nom logo" />
+          <Heading size="xlarge" className={headerStyles}>
+            NAV Organisasjonsmaster
+          </Heading>
         </div>
       </ContentWrapper>
     </div>

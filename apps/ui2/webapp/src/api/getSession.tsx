@@ -1,9 +1,9 @@
-import axios from 'axios'
+import axios from "axios";
 
 export interface SessionInterface {
-  name: string
+  name: string;
 }
 
 export const getSession = async () => {
-  return (await axios.get<SessionInterface>('/sessionInfo')).data
-}
+  return (await axios.get<SessionInterface>("/sessionInfo")).data;
+};

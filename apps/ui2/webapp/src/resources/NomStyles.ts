@@ -1,25 +1,23 @@
-import {css} from "@emotion/css";
+import { css } from "@emotion/css";
 
 export const NomColors = {
-  primaryColor: '#236B7D',
-  primaryAccent: 'rgba(35,107,125,0.2)',
+  primaryColor: "#236B7D",
+  primaryAccent: "rgba(35,107,125,0.2)",
   // primaryAccent: '#134852', //TODO VISE ANJA
-}
-
+};
 
 export const widthBreakpoints = {
   bp0: "0rem",
   bp1: "21.5rem",
   bp2: "100rem",
-  bp3: "120rem"
-}
+  bp3: "120rem",
+};
 export const contentWidthByBreakpoint = {
   bp0: "90%",
   bp1: "60%",
   bp2: "50%",
-  bp3: "60rem"
-
-}
+  bp3: "60rem",
+};
 
 export const mediaQueryContentWidth = css`
   width: ${contentWidthByBreakpoint.bp0};
