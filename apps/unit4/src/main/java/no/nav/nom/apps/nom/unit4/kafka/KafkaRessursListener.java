@@ -16,8 +16,8 @@ public class KafkaRessursListener {
 
     private final Unit4Client unit4Client;
 
-    @KafkaListener(topics = "${app.ressurs.topic}")
-    public void onMessage(NomRessursDto record, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String uuid) {
+    @KafkaListener(id="test", topics = "nom-ressurser", autoStartup = "true")
+    public void listener(NomRessursDto record, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String uuid) {
         log.debug("Received message uuid: {}", uuid);
     }
 

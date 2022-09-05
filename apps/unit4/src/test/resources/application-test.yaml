@@ -3,6 +3,7 @@ AZURE_APP_CLIENT_ID: 'placeholder'
 AZURE_APP_TENANT_ID: 'placeholder'
 AZURE_APP_JWK: 'placeholder'
 
+
 nom:
   libs:
     utils:
@@ -23,3 +24,17 @@ spring:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      auto-offset-reset: earliest
+
+
+logging:
+  level:
+    no.nav.nom: DEBUG
+    org:
+      springframework:
+        kafka:
+          core: TRACE
