@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
@@ -83,6 +85,7 @@ public class NavidentController {
 
                 responseBody.status(nikResponse.getStatusCode()).feilmelding(nikResponse.getBody().getFeilmelding());
             } catch (Exception e) {
+                log.info(e.getCause().getMessage());
                 responseBody.status(HttpStatus.INTERNAL_SERVER_ERROR).feilmelding("Intern feil inntraff");
             }
 
