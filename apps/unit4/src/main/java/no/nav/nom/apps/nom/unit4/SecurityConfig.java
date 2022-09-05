@@ -6,6 +6,7 @@ import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test")
 public class SecurityConfig {
 
     @Bean
@@ -33,6 +35,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Profile("!test")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize

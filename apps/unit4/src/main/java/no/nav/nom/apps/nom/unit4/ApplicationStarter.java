@@ -3,6 +3,7 @@ package no.nav.nom.apps.nom.unit4;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.kafka.annotation.EnableKafka;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -16,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
+@EnableKafka
 public class ApplicationStarter {
 
     public static void main(String[] args) {
