@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.unit4.kafka.utils;
 
-import lombok.SneakyThrows;
 import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursListener;
 import no.nav.nom.apps.nom.unit4.kafka.NomRessursDto;
 import org.mockito.Mockito;
@@ -22,7 +21,7 @@ public class KafkaUtils {
     @Autowired
     private KafkaTemplate<String, NomRessursDto> ressursKafkaTemplate;
 
-    @SneakyThrows
+
     public synchronized void send(String key, NomRessursDto data){
         CountDownLatch latch = new CountDownLatch(1);
 

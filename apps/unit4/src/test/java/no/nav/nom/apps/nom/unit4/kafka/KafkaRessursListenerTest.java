@@ -15,9 +15,6 @@ class KafkaRessursListenerTest {
     @Autowired
     KafkaUtils kafkaUtils;
 
-    //@Autowired
-    //KafkaTransactionManager kafkaTransactionManager;
-
     @Test
     public void ReadMessage() {
         kafkaUtils.send("key1", dummyRessurs());
