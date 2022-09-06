@@ -7,8 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
@@ -16,6 +14,9 @@ class KafkaRessursListenerTest {
 
     @Autowired
     KafkaUtils kafkaUtils;
+
+    //@Autowired
+    //KafkaTransactionManager kafkaTransactionManager;
 
     @Test
     public void ReadMessage() {

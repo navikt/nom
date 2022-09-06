@@ -1,7 +1,9 @@
 package no.nav.nom.apps.nom.unit4.input;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4RessursDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +17,9 @@ public class RessursControllerV2 {
     private final Unit4Client unit4Client;
 
     @PostMapping
+    @SneakyThrows
     public String createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
-        return unit4Client.createRessursByProxy(ressursDTO).getBody();
+        return unit4Client.createRessursByProxy(new Unit4RessursDto(ressursDTO)).getBody();
     }
 
 }

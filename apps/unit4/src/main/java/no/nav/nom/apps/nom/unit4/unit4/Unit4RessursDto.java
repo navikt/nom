@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
+import no.nav.nom.apps.nom.unit4.kafka.NomRessursDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,6 +68,34 @@ public class Unit4RessursDto {
         personalInformation = PersonalInformation.builder()
                 .gender("F")
                 .nationalIdentityNo(nomRessursDTO.getPersonident())
+                .build();
+        personId = ressursNr;
+    }
+
+    public Unit4RessursDto(NomRessursDto record) {
+        String ressursNr = null;
+        String firstName = null;
+        String surName = null;
+
+        additionalInformation = AdditionalInformation.builder()
+                .relatedPersonId(null)
+                .build();
+
+        val parsedBirthDate = LocalDate.parse(record.getPersonident().substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy"));
+
+        birthDate = (parsedBirthDate.isAfter(LocalDate.now()) ? parsedBirthDate.minusYears(100) : parsedBirthDate).atStartOfDay();
+        name = firstName + " " + surName;
+        nameInformation = NameInformation.builder()
+                .aliasName(null)
+                .firstName(firstName)
+                .surname(surName)
+                .build();
+        paymentInformation = PaymentInformation.builder()
+                .supplierId(ressursNr)
+                .build();
+        personalInformation = PersonalInformation.builder()
+                .gender(null)
+                .nationalIdentityNo(null)
                 .build();
         personId = ressursNr;
     }
