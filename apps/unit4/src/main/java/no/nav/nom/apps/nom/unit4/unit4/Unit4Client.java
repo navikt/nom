@@ -15,12 +15,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class Unit4Client {
 
+    private final WebClient webClient = WebClient.create();
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -52,7 +55,16 @@ public class Unit4Client {
         val request = new HttpEntity<>(body, requestHeaders);
 
         try {
-            ResponseEntity<JsonNode> response = restTemplate.exchange(appProperties.getProxy().getBaseUrl() + RESSURS_POST_ENDPOINT, HttpMethod.POST, request, JsonNode.class);
+            val response = webClient.post()
+                    .uri(appProperties.getProxy().getBaseUrl() + RESSURS_POST_ENDPOINT)
+                    .headers(httpHeaders -> {
+                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+                    })
+                    .bodyValue(body)
+                    .retrieve()
+                    .toEntity(JsonNode.class)
+                    .block();
 
             if (response.hasBody()) logIfErrorMessageInBody(response.getBody());
             HttpStatus httpStatus = response.getStatusCode();
@@ -68,6 +80,7 @@ public class Unit4Client {
                 throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
             }
         } catch (RestClientException rce) {
+            log.error("Unit4 RestClient Exception: ", rce);
             throw new Unit4UnknownException(""); // TODO:
         }
     }

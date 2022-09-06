@@ -21,16 +21,13 @@ class KafkaRessursListenerTest {
 
     @Autowired
     KafkaUtils kafkaUtils;
-    WireMockServer wireMockServer = new WireMockServer();
 
     @MockBean
     Unit4Client unit4Client;
 
     @Test
-    public void readMessage() throws Exception{
+    public void basicMessageUnit4AllOk() throws Exception{
         kafkaUtils.send("key1", dummyRessurs());
-
-//        when(unit4Client.createRessursByProxy(any())).thenReturn()
     }
 
     private NomRessursDto dummyRessurs() {

@@ -1,8 +1,13 @@
 
-AZURE_APP_CLIENT_ID: 'placeholder'
-AZURE_APP_TENANT_ID: 'placeholder'
-AZURE_APP_JWK: 'placeholder'
+AZURE_APP_CLIENT_ID: 'dummy'
+AZURE_APP_TENANT_ID: 'dummy'
+AZURE_APP_JWK: 'dummy'
 
+app:
+  unit4:
+    baseUrl: http://localhost:${wiremock.server.port}
+  proxy:
+    baseUrl: http://localhost:${wiremock.server.port}
 
 nom:
   libs:
