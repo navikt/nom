@@ -44,8 +44,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: '*'
-      enable-auto-commit: false
+        spring.json.trusted.packages: 'no.nav.nom.apps.nom.unit4.kafka'
       isolation-level: read_committed
 
 

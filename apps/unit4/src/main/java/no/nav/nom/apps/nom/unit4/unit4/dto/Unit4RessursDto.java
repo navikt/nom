@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nom.unit4.unit4;
+package no.nav.nom.apps.nom.unit4.unit4.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
@@ -7,6 +7,7 @@ import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import no.nav.nom.apps.nom.unit4.kafka.NomRessursDto;
+import no.nav.nom.apps.nom.unit4.unit4.Utils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

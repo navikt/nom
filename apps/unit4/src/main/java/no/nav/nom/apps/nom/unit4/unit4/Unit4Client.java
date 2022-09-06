@@ -8,6 +8,7 @@ import lombok.val;
 import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.apps.nom.unit4.TokenRepository;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

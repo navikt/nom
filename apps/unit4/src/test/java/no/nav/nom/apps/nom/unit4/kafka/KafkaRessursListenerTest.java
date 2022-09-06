@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.nom.apps.nom.unit4.kafka.utils.KafkaUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,10 @@ class KafkaRessursListenerTest {
 
     @Autowired
     KafkaUtils kafkaUtils;
+    WireMockServer wireMockServer = new WireMockServer();
 
     @Test
-    public void ReadMessage() {
+    public void readMessage() throws Exception{
         kafkaUtils.send("key1", dummyRessurs());
     }
 
