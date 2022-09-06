@@ -48,11 +48,9 @@ public class KafkaRessursListener {
         } catch (JsonProcessingException e) {
             log.error("NomRessursDto kan ikke serialiseres til Json på meldings-key: " + uuid, e);
             //.... TODO: Lag Null-toleranse alert på disse loggmeldingene
-        } catch (RestClientException e) {
-            log.error("Rest client feil mot Unit 4 på meldings-key: " + uuid, e);
-            blokkerOgBailUt();
         } catch (Unit4Exception e)  {
             log.error("Ubehandlet Unit4 Exception! På meldings-key: " + uuid, e);
+            blokkerOgBailUt();
         }
     }
 

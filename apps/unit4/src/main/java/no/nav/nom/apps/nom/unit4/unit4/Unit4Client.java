@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -66,8 +67,11 @@ public class Unit4Client {
                     .toEntity(JsonNode.class)
                     .block();
 
-            if (response.hasBody()) logIfErrorMessageInBody(response.getBody());
-            HttpStatus httpStatus = response.getStatusCode();
+        } catch (WebClientResponseException wce) {
+            HttpStatus httpStatus = wce.getStatusCode();
+
+            logIfErrorMessageInBody(wce.getResponseBodyAsString());
+
             if (httpStatus == HttpStatus.CREATED) {
                 return; // OK
             } else if (httpStatus == HttpStatus.CONFLICT) {
@@ -79,14 +83,22 @@ public class Unit4Client {
             } else {
                 throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
             }
-        } catch (RestClientException rce) {
-            log.error("Unit4 RestClient Exception: ", rce);
-            throw new Unit4UnknownException(""); // TODO:
+        } catch (WebClientException wce) {
+            log.error("Unit4 createRessurs request error", wce);
+            throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }
 
-    private void logIfErrorMessageInBody(JsonNode body) {
-        // TODO: Parse body, logg Feilmelding
-        body.findValues("$..notificationMessages").forEach(node -> log.error("Unit4 notification: {}", node.asText()));
+    private void logIfErrorMessageInBody(String body) {
+        if (body != null && body.length() > 0) {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode bodyNode = null;
+            try {
+                bodyNode = mapper.readTree(body);
+            } catch (JsonProcessingException e) {
+                log.warn("Could not parse Unit4 response body when looking for 'notificationMessages'");
+            }
+            bodyNode.findValues("$..notificationMessages").forEach(node -> log.error("Unit4 notification: {}", node.asText()));
+        }
     }
 }
