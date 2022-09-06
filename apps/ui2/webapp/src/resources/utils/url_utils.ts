@@ -34,8 +34,7 @@ export function agressoIdDataToUrl(
 ): string {
   const niva = agressoNivaToNumberStr(agressoNiva);
   const nivaStr = niva ? niva + "_" : "";
-  const agressoIdDataToUrlTmp = nivaStr + agressoId + "_" + encodeURIComponent(navn)
-  return agressoIdDataToUrlTmp;
+  return nivaStr + agressoId + "_" + encodeURIComponent(navn);
 }
 
 export function agressoUrlToData(agressoIdUrl: string): {
@@ -46,18 +45,18 @@ export function agressoUrlToData(agressoIdUrl: string): {
   const out = {
     agressoId: "",
     agressoNiva: "",
-    enhetNavn: ""
+    enhetNavn: "",
   };
 
   const arr = agressoIdUrl.split("_");
   if (arr.length !== 3) {
     out.agressoNiva = "ORGENHET";
     out.agressoId = arr[0];
-    out.enhetNavn = decodeURIComponent(arr[1])
+    out.enhetNavn = decodeURIComponent(arr[1]);
   } else {
     out.agressoNiva = agressoNumberStrToNiva(arr[0]);
     out.agressoId = arr[1];
-    out.enhetNavn = decodeURIComponent(arr[2])
+    out.enhetNavn = decodeURIComponent(arr[2]);
   }
 
   return out;

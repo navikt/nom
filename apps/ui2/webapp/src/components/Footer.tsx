@@ -1,41 +1,29 @@
-import { css } from '@emotion/css'
-import { BodyLong } from '@navikt/ds-react/esm/typography'
-import { Link } from 'react-router-dom'
-import { slackNom } from './Images'
+import { css } from "@emotion/css";
+import { slackNom } from "./Images";
 
-export const footerHeigth = '9.5rem'
+export const footerHeigth = "9.5rem";
 
 const outerDiv = css({
-  width: '100%',
-  bottom: '0',
+  width: "100%",
+  bottom: "0",
   height: footerHeigth,
-  background: '#134852',
-})
+  background: "#134852",
+});
 
 const innerDiv = css({
-  height: '100%',
-  width: '100%',
-  margin: '0 auto',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  color: '#ffffff',
-  textAlign: 'center'
-})
+  height: "100%",
+  width: "100%",
+  margin: "0 auto",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  color: "#ffffff",
+  textAlign: "center",
+});
 
 const slackLink = css({
-  marginLeft: '3rem',
-})
-
-const FooterStyle = css({
-  borderLeft: 'solid 1px #ffffff',
-  borderRight: 'solid 1px #ffffff',
-  paddingLeft: '1rem',
-  paddingright: '1rem',
-})
-
-const footerText =
-  'Organisasjonsstrukturen hentes rett fra lønnssystemet. Oppsett i lønnssystemet gjør at ansatte må knyttes til laveste nivå i organisasjonsstrukturen. Dette fører eksempelvis til at “HR-avdelingen” gjentas flere ganger.'
+  marginLeft: "3rem",
+});
 
 const Footer = () => {
   return (
@@ -45,16 +33,16 @@ const Footer = () => {
           <BodyLong> {footerText}</BodyLong>
         </div> */}
         <a
-          rel='noopener noreferrer'
-          href='https://nav-it.slack.com/archives/C0362LA7ZLN'
-          target='_blank'
+          rel="noopener noreferrer"
+          href="https://nav-it.slack.com/archives/C0362LA7ZLN"
+          target="_blank"
           className={slackLink}
         >
           <img src={slackNom}></img>
         </a>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;
