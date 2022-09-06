@@ -18,8 +18,8 @@ public class RessursControllerV2 {
 
     @PostMapping
     @SneakyThrows
-    public String createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
-        return unit4Client.createRessursByProxy(new Unit4RessursDto(ressursDTO)).getBody();
+    public void createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
+        unit4Client.createRessursByProxy(new Unit4RessursDto(ressursDTO));
     }
 
 }
