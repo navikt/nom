@@ -9,26 +9,28 @@ const bannerStyles = css({
   height: "100px",
   color: "#FFFFFF",
   display: "flex",
-  marginRight: '2.5rem'
+  marginRight: "2.5rem",
 });
 
 const headerStyles = css({
-    display: 'flex', 
-    alignItems: 'flex-end',
-    marginLeft: '20px',
-})
+  display: "flex",
+  alignItems: "flex-end",
+  marginLeft: "20px",
+});
 
 type BannerSmallProps = {
-    title: string
-}
+  title: string;
+};
 
 const BannerSmall = (props: BannerSmallProps) => {
   return (
     <div className={bannerStyles}>
       <ContentWrapper>
-        <div className={css({ display: 'flex', marginBottom: '20px'})}> 
-            <img src={nomLogo} alt="nom logo" height='55px'/>
-            <Heading size="large" className={headerStyles}>{props.title}</Heading>
+        <div className={css({ display: "flex", marginBottom: "20px" })}>
+          <img src={nomLogo} alt="nom logo" height="55px" />
+          <Heading size="large" className={headerStyles}>
+            {props.title}
+          </Heading>
         </div>
       </ContentWrapper>
     </div>

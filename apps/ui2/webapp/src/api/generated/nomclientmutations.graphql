@@ -1,9 +1,9 @@
-mutation opprettRessurs($request: OpprettRessursRequest!){
-    opprettRessurs(request: $request){
-        navident
-        personident
-        visningsfornavn
-        visningsetternavn
-        sektor
-    }
+mutation opprettRessurs($request: OpprettRessursRequest!) {
+  opprettRessurs(request: $request) {
+    navident
+    personident
+    visningsfornavn
+    visningsetternavn
+    sektor
+  }
 }

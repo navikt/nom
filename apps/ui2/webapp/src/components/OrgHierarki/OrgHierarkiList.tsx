@@ -1,83 +1,84 @@
-import { css } from '@emotion/css'
-import { Link } from 'react-router-dom'
-import { CurrentEnhet } from '../../pages/OrganisasjonHierarkiPage'
-import { agressoIdDataToUrl } from '../../resources/utils/url_utils'
-import CustomLinkPanel2, { LinkPanelType } from '../CustomLinkPanel2'
-import EnhetInfo from './EnhetInfo'
+import { css } from "@emotion/css";
+import { Link } from "react-router-dom";
+import { CurrentEnhet } from "../../pages/OrganisasjonHierarkiPage";
+import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
+import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
+import EnhetInfo from "./EnhetInfo";
 import {
-   OrgEnhetsLeder as LederOrgEnhet,
+  OrgEnhetsLeder as LederOrgEnhet,
   Organisering,
   Ressurs,
-} from '../../api/generated/graphql_generated'
-import { BodyShort, Heading } from '@navikt/ds-react'
-import RessursInfo from './RessursInfo'
-import { Back } from '@navikt/ds-icons'
-import { sortItems } from '../../resources/utils/utils'
-import { useEffect, useRef } from 'react'
+} from "../../api/generated/graphql_generated";
+import { BodyShort, Heading } from "@navikt/ds-react";
+import RessursInfo from "./RessursInfo";
+import { Back } from "@navikt/ds-icons";
+import { sortItems } from "../../resources/utils/utils";
+import { useEffect, useRef } from "react";
 
 const scrollToRef = (ref: any) =>
-  window.scrollTo(0, ref.current.offsetTop - 100)
+  window.scrollTo(0, ref.current.offsetTop - 100);
 
-const linkStyles = css({ textDecoration: 'none', color: '#262626' })
+const linkStyles = css({ textDecoration: "none", color: "#262626" });
 
 const ressursLinkStyles = css({
-  display: 'flex',
-  marginTop: '30px',
-  fontWeight: '600',
-  textDecoration: 'none',
-  color: '#262626',
-})
+  display: "flex",
+  marginTop: "30px",
+  fontWeight: "600",
+  textDecoration: "none",
+  color: "#262626",
+});
 const dividerStyles = css({
-  background: '#00347D',
-  height: '20px',
-  width: '2px',
-  border: '1px solid #00347D',
-  margin: '0 auto',
-})
-const Divider = () => <div className={dividerStyles}></div>
+  background: "#00347D",
+  height: "20px",
+  width: "2px",
+  border: "1px solid #00347D",
+  margin: "0 auto",
+});
+const Divider = () => <div className={dividerStyles}></div>;
 
 type OrgHierarkiListProps = {
-  currentEnhet: CurrentEnhet
-  underEnheter: Organisering[]
-  overEnheter: Organisering[]
-  ressurs?: Ressurs
-}
+  currentEnhet: CurrentEnhet;
+  underEnheter: Organisering[];
+  overEnheter: Organisering[];
+  ressurs?: Ressurs;
+};
 
 const OrgHierarkiList = (props: OrgHierarkiListProps) => {
-  const refDiv = useRef(null)
-  const { currentEnhet, underEnheter, overEnheter, ressurs } = props
+  const refDiv = useRef(null);
+  const { currentEnhet, underEnheter, overEnheter, ressurs } = props;
 
   const sortedUnderEnheter =
     underEnheter.length > 0
       ? [...underEnheter].sort((a, b) =>
           sortItems(a.organisasjonsenhet.navn, b.organisasjonsenhet.navn)
         )
-      : []
+      : [];
   const sortedKoblinger = currentEnhet
     ? [...currentEnhet.koblinger]
         .sort((a, b) =>
-          sortItems(a.ressurs.visningsNavn || '', b.ressurs.visningsNavn || '')
+          sortItems(a.ressurs.visningsNavn || "", b.ressurs.visningsNavn || "")
         )
         .filter(
           (v, i, a) =>
             a.findIndex((v2) => v2.ressurs.navIdent === v.ressurs.navIdent) ===
             i
         )
-    : []
+    : [];
 
   const getFornavnAndEtternavnForLeder = (leder: LederOrgEnhet) => {
-    if (!leder) return 'Leder ikke funnet'
-    return (leder.ressurs.fornavn || '') + ' ' + (leder.ressurs.etternavn || '')
-  }
+    if (!leder) return "Leder ikke funnet";
+    return (
+      (leder.ressurs.fornavn || "") + " " + (leder.ressurs.etternavn || "")
+    );
+  };
 
   useEffect(() => {
     if (refDiv.current !== null) {
-      if (overEnheter.length > 0)
-        scrollToRef(refDiv)
+      if (overEnheter.length > 0) scrollToRef(refDiv);
     }
-  }, [])
+  }, []);
 
-  console.log(currentEnhet)
+  console.log(currentEnhet);
 
   return (
     <div>
@@ -93,7 +94,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
           >
             <Link
               to={
-                '/org/' +
+                "/org/" +
                 agressoIdDataToUrl(
                   oe.organisasjonsenhet.agressoId,
                   oe.organisasjonsenhet.orgNiv,
@@ -108,10 +109,14 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                   lederNavn={
                     getFornavnAndEtternavnForLeder(
                       oe.organisasjonsenhet.leder[0]
-                    ) || 'Mangler Navn'
+                    ) || "Mangler Navn"
                   }
                   type={LinkPanelType.OVERENHET}
-                  leder={oe.organisasjonsenhet.leder[0]?.ressurs as Ressurs | undefined}
+                  leder={
+                    oe.organisasjonsenhet.leder[0]?.ressurs as
+                      | Ressurs
+                      | undefined
+                  }
                 />
               </CustomLinkPanel2>
             </Link>
@@ -125,13 +130,13 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         <div ref={refDiv}>
           <CustomLinkPanel2 type={LinkPanelType.CURRENT}>
             <EnhetInfo
-              title={currentEnhet?.navn || 'Feil i henting av navn'}
+              title={currentEnhet?.navn || "Feil i henting av navn"}
               lederNavn={
                 currentEnhet
                   ? getFornavnAndEtternavnForLeder(
                       currentEnhet?.leder[0] as LederOrgEnhet
                     )
-                  : 'Mangler navn'
+                  : "Mangler navn"
               }
               ident={currentEnhet?.leder[0]?.ressurs?.navIdent}
               type={LinkPanelType.CURRENT}
@@ -145,7 +150,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       {currentEnhet && ressurs && (
         <Link
           to={
-            '/org/' +
+            "/org/" +
             agressoIdDataToUrl(
               currentEnhet.agressoId,
               currentEnhet.orgNiv,
@@ -156,13 +161,13 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         >
           <CustomLinkPanel2 type={LinkPanelType.OVERENHET}>
             <EnhetInfo
-              title={currentEnhet?.navn || 'Feil i henting av navn'}
+              title={currentEnhet?.navn || "Feil i henting av navn"}
               lederNavn={
                 currentEnhet
                   ? getFornavnAndEtternavnForLeder(
                       currentEnhet?.leder[0] as LederOrgEnhet
                     )
-                  : 'Mangler navn'
+                  : "Mangler navn"
               }
               type={LinkPanelType.OVERENHET}
               leder={currentEnhet?.leder[0]?.ressurs as Ressurs}
@@ -175,9 +180,9 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       {underEnheter.length > 0 && (
         <div
           className={css({
-            display: 'grid',
-            gridTemplateColumns: underEnheter.length > 5 ? '1fr 1fr' : '1fr',
-            columnGap: '10px',
+            display: "grid",
+            gridTemplateColumns: underEnheter.length > 5 ? "1fr 1fr" : "1fr",
+            columnGap: "10px",
           })}
         >
           {sortedUnderEnheter.map((ue: Organisering) => (
@@ -190,7 +195,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             >
               <Link
                 to={
-                  '/org/' +
+                  "/org/" +
                   agressoIdDataToUrl(
                     ue.organisasjonsenhet.agressoId,
                     ue.organisasjonsenhet.orgNiv,
@@ -207,7 +212,11 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
                     )}
                     ident={ue.organisasjonsenhet.leder[0]?.ressurs?.navIdent}
                     type={LinkPanelType.LARGE}
-                    leder={ue.organisasjonsenhet.leder[0]?.ressurs as Ressurs | undefined}
+                    leder={
+                      ue.organisasjonsenhet.leder[0]?.ressurs as
+                        | Ressurs
+                        | undefined
+                    }
                   />
                 </CustomLinkPanel2>
               </Link>
@@ -220,31 +229,34 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
       {underEnheter.length < 1 && currentEnhet && !ressurs && (
         <div
           className={css({
-            display: 'grid',
+            display: "grid",
             gridTemplateColumns:
-              currentEnhet.koblinger.length > 5 ? '1fr 1fr' : '1fr',
-            columnGap: '10px',
+              currentEnhet.koblinger.length > 5 ? "1fr 1fr" : "1fr",
+            columnGap: "10px",
           })}
         >
           {sortedKoblinger.map((k) => {
-            const agrIdUrl = agressoIdDataToUrl(
+            const agrIdUrl =
+              agressoIdDataToUrl(
                 currentEnhet.agressoId,
                 currentEnhet.orgNiv,
                 currentEnhet.navn
-            ) + `/${k.ressurs.navIdent}`;
-            return <Link
+              ) + `/${k.ressurs.navIdent}`;
+            return (
+              <Link
                 key={agrIdUrl}
-                to={'/org/' + agrIdUrl}
+                to={"/org/" + agrIdUrl}
                 className={linkStyles}
               >
-              <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
-                <Heading size='medium' className={css({width: '100%'})}>
-                  {k.ressurs?.fornavn && k.ressurs?.etternavn
-                      ? k.ressurs.fornavn + ' ' + k.ressurs.etternavn
-                      : 'Mangler navn'}
-                </Heading>
-              </CustomLinkPanel2>
-            </Link>
+                <CustomLinkPanel2 type={LinkPanelType.KOBLING}>
+                  <Heading size="medium" className={css({ width: "100%" })}>
+                    {k.ressurs?.fornavn && k.ressurs?.etternavn
+                      ? k.ressurs.fornavn + " " + k.ressurs.etternavn
+                      : "Mangler navn"}
+                  </Heading>
+                </CustomLinkPanel2>
+              </Link>
+            );
           })}
         </div>
       )}
@@ -256,7 +268,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
 
           <Link
             to={
-              '/org/' +
+              "/org/" +
               agressoIdDataToUrl(
                 currentEnhet.agressoId,
                 currentEnhet.orgNiv,
@@ -265,8 +277,8 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
             }
           >
             <div className={ressursLinkStyles}>
-              <Back className='navds-link-panel__chevron' />
-              <BodyShort size='medium' className={css({ fontWeight: '600' })}>
+              <Back className="navds-link-panel__chevron" />
+              <BodyShort size="medium" className={css({ fontWeight: "600" })}>
                 Se alle ressurser i enheten
               </BodyShort>
             </div>
@@ -274,7 +286,7 @@ const OrgHierarkiList = (props: OrgHierarkiListProps) => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default OrgHierarkiList
+export default OrgHierarkiList;

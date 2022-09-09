@@ -1,58 +1,59 @@
 import { css } from "@emotion/css";
 import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
-import {person, questionMarkIcon} from "./Images";
+import { person, questionMarkIcon } from "./Images";
 
 const imageSrc = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
 
 type UserImageProps = {
   navIdent?: string;
-  navn?: string,
+  navn?: string;
   size?: string;
-  altText?: string
+  altText?: string;
 };
 
 const UserImage = (props: UserImageProps) => {
   const { navIdent, size, altText, navn } = props;
-  const [image, setImage] = React.useState<string>()
-  const [loading, setLoading] = React.useState(true)
+  const [image, setImage] = React.useState<string>();
+  const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    setLoading(true)
+    setLoading(true);
     if (navIdent) {
       setImage(imageSrc(navIdent));
     }
   }, [navIdent]);
 
-    const stl = css({
-        height: size || "65px",
-        width: size || "65px",
-        borderRadius: "100%",
-    })
+  const stl = css({
+    height: size || "65px",
+    width: size || "65px",
+    borderRadius: "100%",
+  });
 
-    if(!navIdent){
-        return <div>
-            <img className={stl} src={questionMarkIcon} />
-        </div>
-    }
-
+  if (!navIdent) {
     return (
-        <div>
-            {loading && <Loader className={stl}/>}
-            <img
-                hidden={loading}
-                src={image}
-                alt={altText || 'Fotografi av ' + (navn || navIdent)}
-                onLoad={() => setLoading(false)}
-                onError={() => {
-                    setImage(person);
-                    setLoading(false);
-                }}
-                className={stl}
-            />
-
-        </div>
+      <div>
+        <img className={stl} src={questionMarkIcon} />
+      </div>
     );
+  }
+
+  return (
+    <div>
+      {loading && <Loader className={stl} />}
+      <img
+        hidden={loading}
+        src={image}
+        alt={altText || "Fotografi av " + (navn || navIdent)}
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          setImage(person);
+          setLoading(false);
+        }}
+        className={stl}
+      />
+    </div>
+  );
 };
 
 export default UserImage;

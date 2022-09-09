@@ -1,48 +1,48 @@
-import { css } from '@emotion/css'
-import { BodyShort, Heading, Label } from '@navikt/ds-react'
-import { FolkeregisterPerson as Person } from '../../api/generated/graphql_generated'
+import { css } from "@emotion/css";
+import { BodyShort, Heading, Label } from "@navikt/ds-react";
+import { FolkeregisterPerson as Person } from "../../api/generated/graphql_generated";
 
 const contentStyles = css({
-  backgroundColor: '#DEECEF',
-  border: '1px solid #B0B0B0',
-  borderRadius: '4px',
-  marginTop: '2rem',
-  padding: '1rem',
-})
+  backgroundColor: "#DEECEF",
+  border: "1px solid #B0B0B0",
+  borderRadius: "4px",
+  marginTop: "2rem",
+  padding: "1rem",
+});
 
 const rowStyles = css({
-  display: 'flex',
-  justifyContent: 'space-between',
-  marginTop: '1rem',
-})
+  display: "flex",
+  justifyContent: "space-between",
+  marginTop: "1rem",
+});
 
 const TextWithLabelVertical = (props: { label: string; text: string }) => (
   <div>
     <BodyShort>{props.label}</BodyShort>
     <Label>{props.text}</Label>
   </div>
-)
+);
 
 type ResourceMetadataProps = {
-  resource: Person
-}
+  resource: Person;
+};
 
 const ResourceMetadata = (props: ResourceMetadataProps) => {
-  const { resource } = props
+  const { resource } = props;
 
   return (
     <div className={contentStyles}>
-      <Heading size='small'>Opplysninger fra folkeregisteret</Heading>
+      <Heading size="small">Opplysninger fra folkeregisteret</Heading>
 
       <div className={rowStyles}>
         <TextWithLabelVertical
-          label='Fornavn'
-          text={resource.navn.fornavn || ''}
+          label="Fornavn"
+          text={resource.navn.fornavn || ""}
         />
         {resource.navn.mellomnavn && (
           <>
             <TextWithLabelVertical
-              label='Mellomnavn'
+              label="Mellomnavn"
               text={resource.navn.mellomnavn}
             />
           </>
@@ -52,13 +52,13 @@ const ResourceMetadata = (props: ResourceMetadataProps) => {
           text={resource.navn.mellomnavn || ''}
         /> */}
         <TextWithLabelVertical
-          label='Etternavn'
-          text={resource.navn.etternavn || ''}
+          label="Etternavn"
+          text={resource.navn.etternavn || ""}
         />
-        <TextWithLabelVertical label='Kjønn' text='' />
+        <TextWithLabelVertical label="Kjønn" text="" />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ResourceMetadata
+export default ResourceMetadata;

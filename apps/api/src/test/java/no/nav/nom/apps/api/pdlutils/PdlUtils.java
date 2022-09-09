@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
+import no.nav.nom.apps.api.pdl.Kjonn;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -54,9 +55,10 @@ public class PdlUtils {
                     .mellomnavn(mellomnavn ? "mellomnavn"+pdlEntryByIdent.size() : null)
                     .etternavn("etternavn"+pdlEntryByIdent.size())
                     .build();
+            val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
             val entry = HentPersonBulkEntry.builder()
                     .ident(p)
-                    .person(new PersonDto(List.of(navn)))
+                    .person(new PersonDto(List.of(navn), List.of(kjoenn)))
                     .code("ok")
                     .build();
             pdlEntryByIdent.put(p, entry);
@@ -75,8 +77,13 @@ public class PdlUtils {
                 .etternavn("etternavn")
                 .build();
 
-        resultBuilder.append("{\"data\": {\"hentPerson\": { \"navn\": [");
-        resultBuilder.append(objectMapper.writeValueAsString(navn));
+        val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
+
+        resultBuilder.append("{\"data\": {\"hentPerson\": { \"navn\": [")
+                .append(objectMapper.writeValueAsString(navn))
+                .append("]")
+                .append(",\"kjoenn\": [")
+                .append(objectMapper.writeValueAsString(kjoenn));
         mockPdlResponse(resultBuilder.append("]}}}").toString());
 
         return navn;
