@@ -1,4 +1,5 @@
 app:
+  kafka.listener.enabled: false
   name: nom-unit4
   ressurs.topic: nom-ressurser
   unit4:

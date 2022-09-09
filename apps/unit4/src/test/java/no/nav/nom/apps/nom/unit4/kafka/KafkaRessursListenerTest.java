@@ -1,6 +1,5 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import no.nav.nom.apps.nom.unit4.kafka.utils.KafkaUtils;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import org.junit.jupiter.api.Test;
@@ -9,10 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
-
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
