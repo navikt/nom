@@ -1,22 +1,22 @@
-import { getSession } from '../api/getSession'
-import React, { useEffect } from 'react'
-import { css } from '@emotion/css'
-import { Link } from 'react-router-dom'
-import { nomLogoCircle } from './Images'
-import { Search } from '@navikt/ds-react'
-import { PeopleFilled } from '@navikt/ds-icons'
-import { mediaQueryContentWidth, NomColors } from '../resources/NomStyles'
+import { getSession } from "../api/getSession";
+import React, { useEffect } from "react";
+import { css } from "@emotion/css";
+import { Link } from "react-router-dom";
+import { nomLogoCircle } from "./Images";
+import { Search } from "@navikt/ds-react";
+import { PeopleFilled } from "@navikt/ds-icons";
+import { mediaQueryContentWidth, NomColors } from "../resources/NomStyles";
 
-export const headerHeight = '6rem'
+export const headerHeight = "6rem";
 
 const outerDiv = css({
-  display: 'grid',
-  gridTemplateColumns: '1fr',
+  display: "grid",
+  gridTemplateColumns: "1fr",
   minHeight: headerHeight,
-  width: '100%',
-  justifyContent: 'center',
-  alignContent: 'center',
-})
+  width: "100%",
+  justifyContent: "center",
+  alignContent: "center",
+});
 
 const innerDiv = css(
   css`
@@ -32,7 +32,7 @@ const innerDiv = css(
     }
   `,
   mediaQueryContentWidth
-)
+);
 
 // const titleStyle = css({
 //   fontFamily: 'Source Sans Pro',
@@ -46,67 +46,67 @@ const innerDiv = css(
 // })
 
 const userText = css({
-  fontFamily: 'Source Sans Pro',
-  fontStyle: 'normal',
-  fontWeight: '700',
-  fontSize: '16px',
-  lineHeight: '30px',
+  fontFamily: "Source Sans Pro",
+  fontStyle: "normal",
+  fontWeight: "700",
+  fontSize: "16px",
+  lineHeight: "30px",
   color: NomColors.primaryColor,
-  marginRight: '1rem',
-})
+  marginRight: "1rem",
+});
 
 const verticallyCenter = css({
-  textAlign: 'center',
-})
+  textAlign: "center",
+});
 
 const searchBarStyle = css({
-  minWidth: '18rem',
+  minWidth: "18rem",
   color: NomColors.primaryColor,
-  ':hover': {
+  ":hover": {
     boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
     border: NomColors.primaryColor,
   },
-  ':focus': {
+  ":focus": {
     boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
   },
 
   button: {
     color: NomColors.primaryColor,
 
-    ':hover': {
+    ":hover": {
       backgroundColor: NomColors.primaryAccent,
       color: NomColors.primaryColor,
     },
-    ':focus': {
+    ":focus": {
       boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
     },
   },
-})
+});
 
 const NavHeader = () => {
-  const [session, setSession] = React.useState<any>()
+  const [session, setSession] = React.useState<any>();
 
   useEffect(() => {
-    ;(async () => {
-      const res = await getSession()
-      setSession(res)
-    })()
-  }, [])
+    (async () => {
+      const res = await getSession();
+      setSession(res);
+    })();
+  }, []);
 
   return (
     <div className={outerDiv}>
       <div className={innerDiv}>
-        <Link to='/' className={verticallyCenter}>
-          <img src={nomLogoCircle} alt='logo' />
+        <Link to="/" className={verticallyCenter}>
+          <img src={nomLogoCircle} alt="logo" />
         </Link>
 
         <Search
           disabled={true}
-          placeholder={'Søkefunksjonalitet kommer'}
+          placeholder={"Søkefunksjonalitet kommer"}
           className={searchBarStyle}
-          label={'Søk etter ressurser'}
-          variant='secondary'
-          size='medium'
+          label={"Søk etter ressurser"}
+          variant="secondary"
+          size="medium"
         ></Search>
         <span
           className={css`
@@ -116,17 +116,17 @@ const NavHeader = () => {
         >
           <PeopleFilled
             className={css({
-              minWidth: '2rem',
+              minWidth: "2rem",
             })}
-            color='#236B7D'
-            fontSize={'2rem'}
+            color="#236B7D"
+            fontSize={"2rem"}
           />
           <span className={userText}>{session}</span>
         </span>
         {/* <BurgerMenu /> */}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default NavHeader
+export default NavHeader;

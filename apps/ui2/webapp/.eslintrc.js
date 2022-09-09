@@ -22,9 +22,7 @@ module.exports = {
     "prettier/prettier": ["error"],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/prefer-namespace-keyword": "off",
-    "@typescript-eslint/no-namespace": "off",
+    "@typescript-eslint/no-namespace": "off"
   },
-  ignorePatterns: [
-      "**/graphql_generated.ts"
-  ],
+  ignorePatterns: ["**/graphql_generated.ts"],
 };

@@ -6,7 +6,7 @@
     "dev": "vite",
     "dev-debug": "vite --debug",
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "eslint src/**/*.ts src/**/*.tsx && tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.tsx",
     "lint:fix": "eslint --fix src/**/*.ts src/**/*.tsx"

@@ -1,40 +1,40 @@
-import ContentWrapper from '../components/ContentWrapper'
-import * as Gq from '../api/generated/graphql_generated'
-import { useParams } from 'react-router'
-import { agressoUrlToData } from '../resources/utils/url_utils'
-import { Alert, BodyShort, Heading } from '@navikt/ds-react'
-import { css } from '@emotion/css'
-import React, { Fragment, ReactNode } from 'react'
-import { building2Icon, peopleFilledIcon } from '../components/Images'
-import { Link } from 'react-router-dom'
-import { Back, Next } from '@navikt/ds-icons'
-import UserImage from '../components/UserImage'
+import ContentWrapper from "../components/ContentWrapper";
+import * as Gq from "../api/generated/graphql_generated";
+import { useParams } from "react-router";
+import { agressoUrlToData } from "../resources/utils/url_utils";
+import { Alert, BodyShort, Heading } from "@navikt/ds-react";
+import { css } from "@emotion/css";
+import React, { Fragment, ReactNode } from "react";
+import { building2Icon, peopleFilledIcon } from "../components/Images";
+import { Link } from "react-router-dom";
+import { Back, Next } from "@navikt/ds-icons";
+import UserImage from "../components/UserImage";
 import {
   focusedEnhetHierarchy,
   focusedRessursHierarchy,
   Hierarchy,
-} from '../api/transformations/hierarchy'
+} from "../api/transformations/hierarchy";
 
 const colorPalette = {
-  rim: '#236B7D',
-  focusedBackground: '#DEECEF',
-  unfocusedBackground: '#FFFFFF',
-  panelBorder: '#B0B0B0',
-  font: '#262626',
-}
+  rim: "#236B7D",
+  focusedBackground: "#DEECEF",
+  unfocusedBackground: "#FFFFFF",
+  panelBorder: "#B0B0B0",
+  font: "#262626",
+};
 
 const BuildingSvg = (props: { className?: string }) => (
   <svg
-    className={props.className || ''}
-    width='24'
-    height='24'
-    viewBox='0 0 18 18'
-    fill='none'
-    xmlns='http://www.w3.org/2000/svg'
+    className={props.className || ""}
+    width="24"
+    height="24"
+    viewBox="0 0 18 18"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fillRule='evenodd'
-      clipRule='evenodd'
+      fillRule="evenodd"
+      clipRule="evenodd"
       d={`M15.6405 1.611C15.6405 1.611 15.6397 1.6095 15.639 1.6095L14.1397 
         0.11025C14.07 0.03975 13.9747 0 13.875 0H4.125C4.02525 0 3.93 0.03975 3.8595 0.11025L2.3595 1.6095C2.35875
         1.61025 2.35875 1.611 2.358 1.611C2.289 1.68225 2.25 1.7955 2.25 1.875V17.625C2.25 17.832 2.418 18 2.625
@@ -46,7 +46,7 @@ const BuildingSvg = (props: { className?: string }) => (
         5.25H12V3H14.25V5.25ZM3.53025 1.5L4.28025 0.75H13.7198L14.4698 1.5H3.53025Z`}
     />
   </svg>
-)
+);
 
 const commonPanelCss = css`
   border-radius: 5px;
@@ -58,7 +58,7 @@ const commonPanelCss = css`
   background-color: ${colorPalette.unfocusedBackground};
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
-`
+`;
 
 const panelCss = {
   currentEnhet: css(
@@ -83,9 +83,9 @@ const panelCss = {
     background-color: ${colorPalette.focusedBackground};
     row-gap: 0.5rem;
     min-height: 10rem;
-    margin-bottom: 0rem;
+    margin-bottom: 0;
     padding: 2rem;
-    padding-bottom: 0rem;
+    padding-bottom: 0;
   `),
   underEnhet: css(
     commonPanelCss,
@@ -140,7 +140,7 @@ const panelCss = {
       //}
     }
   `,
-}
+};
 
 const lederStyling = {
   lederTekst: css`
@@ -151,7 +151,7 @@ const lederStyling = {
     display: flex;
     align-items: center;
   `,
-}
+};
 
 const hierarkiCss = {
   underEnheter: css`
@@ -171,7 +171,7 @@ const hierarkiCss = {
       grid-template-columns: 1fr 1fr;
     }
   `,
-}
+};
 
 function OverenheterDivider() {
   return (
@@ -191,20 +191,20 @@ function OverenheterDivider() {
         `}
       ></div>
     </div>
-  )
+  );
 }
 
 const HorizontallyAlignedPanel = (props: {
-  children: ReactNode
-  iconSrc: string
-  className: string
-  navidentForImg?: string
-  fornavnAndEtternavnForImg?: string
+  children: ReactNode;
+  iconSrc: string;
+  className: string;
+  navidentForImg?: string;
+  fornavnAndEtternavnForImg?: string;
 }) => (
   <div className={props.className}>
     <div className={panelCss.panelRim}>
       {props.iconSrc && (
-        <img src={props.iconSrc} alt={'src=' + props.iconSrc} />
+        <img src={props.iconSrc} alt={"src=" + props.iconSrc} />
       )}
     </div>
     <div className={panelCss.panelContent}>{props.children}</div>
@@ -224,12 +224,12 @@ const HorizontallyAlignedPanel = (props: {
       `}
     />
   </div>
-)
+);
 
 const Enhet = (props: {
-  children: ReactNode
-  navIdentForImg: string
-  fornavnAndEtternavnForImg?: string
+  children: ReactNode;
+  navIdentForImg: string;
+  fornavnAndEtternavnForImg?: string;
 }) => (
   <HorizontallyAlignedPanel
     className={panelCss.underEnhet}
@@ -239,7 +239,7 @@ const Enhet = (props: {
   >
     {props.children}
   </HorizontallyAlignedPanel>
-)
+);
 
 const Ressurs = (props: { children: ReactNode }) => (
   <HorizontallyAlignedPanel
@@ -248,12 +248,12 @@ const Ressurs = (props: { children: ReactNode }) => (
   >
     {props.children}
   </HorizontallyAlignedPanel>
-)
+);
 
 const OrgenhetLederLink = (props: {
-  navident: string
-  name: string
-  orgenhetCtxUrl: string
+  navident: string;
+  name: string;
+  orgenhetCtxUrl: string;
 }) => (
   <Link
     className={lederStyling.lederTekst}
@@ -261,11 +261,11 @@ const OrgenhetLederLink = (props: {
   >
     {props.name}
   </Link>
-)
+);
 
 const BackFromRessurs = (props: {
-  valgtEnhetUrl: string
-  ressursIsLeder?: boolean
+  valgtEnhetUrl: string;
+  ressursIsLeder?: boolean;
 }) => (
   <Link
     className={css`
@@ -274,38 +274,38 @@ const BackFromRessurs = (props: {
     `}
     to={props.valgtEnhetUrl}
   >
-    <Back className='navds-link-panel__chevron' color={colorPalette.font} />
+    <Back className="navds-link-panel__chevron" color={colorPalette.font} />
     <BodyShort
-      size='medium'
-      className={css({ fontWeight: '600', color: colorPalette.font })}
+      size="medium"
+      className={css({ fontWeight: "600", color: colorPalette.font })}
     >
       {props.ressursIsLeder
-        ? 'Se alle underenhetene for enheten '
-        : 'Se alle ressurser i enheten'}
+        ? "Se alle underenhetene for enheten "
+        : "Se alle ressurser i enheten"}
     </BodyShort>
   </Link>
-)
+);
 
 const scrollToRef = (ref: any) =>
-  window.scrollTo(0, ref.current.offsetTop - 100)
+  window.scrollTo(0, ref.current.offsetTop - 100);
 
 const OrganisasjonHierarkiPageInner = function (props: {
-  data: Hierarchy.OrgHierarchy
-  focusedRessurs?: Hierarchy.OrgHierarchyWithFocusedRessurs
+  data: Hierarchy.OrgHierarchy;
+  focusedRessurs?: Hierarchy.OrgHierarchyWithFocusedRessurs;
 }) {
   const overEnheter =
-    props.focusedRessurs?.overEnheter || props.data.overEnheter
-  const scrollRef = React.useRef<any>()
+    props.focusedRessurs?.overEnheter || props.data.overEnheter;
+  const scrollRef = React.useRef<any>();
   React.useEffect(() => {
-    if (overEnheter.length !== 0) scrollRef.current && scrollToRef(scrollRef)
-  }, [])
+    if (overEnheter.length !== 0) scrollRef.current && scrollToRef(scrollRef);
+  }, []);
 
-  const underEnheter = props.data.underEnheter
-  const valgtEnhet = props.data.enhet
-  const ressurser = props.data.ressurser
+  const underEnheter = props.data.underEnheter;
+  const valgtEnhet = props.data.enhet;
+  const ressurser = props.data.ressurser;
 
-  const focusedRessurs = props.focusedRessurs?.focusedRessurs
-  const valgtEnhetUrl = valgtEnhet.url
+  const focusedRessurs = props.focusedRessurs?.focusedRessurs;
+  const valgtEnhetUrl = valgtEnhet.url;
 
   return (
     <div>
@@ -317,18 +317,18 @@ const OrganisasjonHierarkiPageInner = function (props: {
                 navIdentForImg={oe.ledere[0].navident}
                 fornavnAndEtternavnForImg={oe.ledere[0].name}
               >
-                <Heading size={'medium'}>{oe.name}</Heading>
+                <Heading size={"medium"}>{oe.name}</Heading>
                 <div>
-                  Leder:{' '}
+                  Leder:{" "}
                   <span className={lederStyling.lederTekst}>
-                    {oe.ledere[0]?.name || 'Leder ikke funnet'}
+                    {oe.ledere[0]?.name || "Leder ikke funnet"}
                   </span>
                 </div>
               </Enhet>
             </Link>
             <OverenheterDivider />
           </Fragment>
-        )
+        );
       })}
 
       {focusedRessurs && (
@@ -342,7 +342,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
               `}
             >
               <div className={panelCss.focusedRessurs}>
-                <Heading size={'large'}>{focusedRessurs.name}</Heading>
+                <Heading size={"large"}>{focusedRessurs.name}</Heading>
                 <div
                   className={css`
                     padding-top: 0.4rem;
@@ -357,10 +357,10 @@ const OrganisasjonHierarkiPageInner = function (props: {
                     E-post: <strong>{focusedRessurs.email}</strong>
                   </span>
                   <span>
-                    Tlf:{' '}
+                    Tlf:{" "}
                     <strong>
                       {focusedRessurs.tel.length === 0 ? (
-                        'Mangler tlf'
+                        "Mangler tlf"
                       ) : (
                         <span>{focusedRessurs.tel}</span>
                       )}
@@ -368,9 +368,9 @@ const OrganisasjonHierarkiPageInner = function (props: {
                   </span>
 
                   {focusedRessurs.tilknytninger.map((tilkn) => {
-                    const { orgenhet: oe, leder: l } = tilkn
+                    const { orgenhet: oe, leder: l } = tilkn;
                     return (
-                      <Fragment key={l.navident + '_' + oe.url}>
+                      <Fragment key={l.navident + "_" + oe.url}>
                         <span>
                           Org.enhet:
                           <Link className={lederStyling.lederTekst} to={oe.url}>
@@ -384,18 +384,18 @@ const OrganisasjonHierarkiPageInner = function (props: {
                           </Link>
                         </span>
                       </Fragment>
-                    )
+                    );
                   })}
                 </div>
               </div>
               <div
                 className={css`
                   padding: 2.5rem;
-                  padding-bottom: 0rem;
+                  padding-bottom: 0;
                 `}
               >
                 <UserImage
-                  size={'150px'}
+                  size={"150px"}
                   navIdent={focusedRessurs.navident}
                   navn={focusedRessurs.name}
                 />
@@ -420,13 +420,13 @@ const OrganisasjonHierarkiPageInner = function (props: {
                     align-content: center;
                   `}
                 >
-                  <Heading size={'large'}>
+                  <Heading size={"large"}>
                     <BuildingSvg />
                     {valgtEnhet.name}
                   </Heading>
                   <div className={lederStyling.lederDiv}>
                     <span>
-                      Leder:{' '}
+                      Leder:{" "}
                       <OrgenhetLederLink
                         navident={valgtEnhet.ledere[0].navident}
                         orgenhetCtxUrl={valgtEnhetUrl}
@@ -436,7 +436,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
                   </div>
                 </div>
                 <UserImage
-                  size={'130px'}
+                  size={"130px"}
                   navIdent={valgtEnhet.ledere[0]?.navident}
                   navn={valgtEnhet.ledere[0]?.name}
                 />
@@ -452,11 +452,11 @@ const OrganisasjonHierarkiPageInner = function (props: {
             {underEnheter.map((ue) => (
               <Link className={hierarkiCss.link} key={ue.url} to={ue.url}>
                 <Enhet navIdentForImg={ue.ledere[0].navident}>
-                  <Heading size={'medium'}>{ue.name}</Heading>
+                  <Heading size={"medium"}>{ue.name}</Heading>
                   <span>
-                    Leder:{' '}
+                    Leder:{" "}
                     <span className={lederStyling.lederTekst}>
-                      {ue.ledere[0]?.name || 'Leder ikke funnet'}
+                      {ue.ledere[0]?.name || "Leder ikke funnet"}
                     </span>
                   </span>
                 </Enhet>
@@ -473,11 +473,11 @@ const OrganisasjonHierarkiPageInner = function (props: {
               <Link
                 className={hierarkiCss.link}
                 key={it.navident}
-                to={valgtEnhetUrl + '/' + it.navident}
+                to={valgtEnhetUrl + "/" + it.navident}
               >
                 <Ressurs>
                   <Heading
-                    size={'medium'}
+                    size={"medium"}
                     className={css`
                       font-size: 24px;
                       font-weight: 600;
@@ -492,57 +492,57 @@ const OrganisasjonHierarkiPageInner = function (props: {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
 function OrganisasjonsHierarkiPageOuter() {
-  const { id, resourceId } = useParams()
-  const agrId = agressoUrlToData(id || '')
+  const { id, resourceId } = useParams();
+  const agrId = agressoUrlToData(id || "");
 
   const qry = Gq.useHentHierarkiQuery({
     variables: {
       agressoId: agrId.agressoId,
       orgNiv: agrId.agressoNiva,
     },
-    errorPolicy: 'all',
-  })
+    errorPolicy: "all",
+  });
 
   const ressursQry = Gq.useHentRessursQuery({
     variables: {
       navident: resourceId,
     },
     skip: !resourceId,
-  })
+  });
 
-  const gotHierarkiData = !!(qry.data && !qry.loading)
+  const gotHierarkiData = !!(qry.data && !qry.loading);
   const gotRessursData =
-    !resourceId || !!(ressursQry.data?.ressurs && !ressursQry.loading)
+    !resourceId || !!(ressursQry.data?.ressurs && !ressursQry.loading);
 
   if (qry.error) {
-    console.error(qry.error, 'GRAPHQL ERROR')
+    console.error(qry.error, "GRAPHQL ERROR");
   }
   if (ressursQry.error) {
-    console.error(ressursQry.error, 'GRAPHQL ERROR')
+    console.error(ressursQry.error, "GRAPHQL ERROR");
   }
 
-  const enhetHierarchy = gotHierarkiData ? focusedEnhetHierarchy(qry) : null
-  const enhetHierarchyOk = enhetHierarchy && enhetHierarchy.kind !== 'err'
+  const enhetHierarchy = gotHierarkiData ? focusedEnhetHierarchy(qry) : null;
+  const enhetHierarchyOk = enhetHierarchy && enhetHierarchy.kind !== "err";
 
   const focusedResourceHierarchy =
     resourceId && gotRessursData && enhetHierarchyOk
       ? focusedRessursHierarchy(enhetHierarchy, ressursQry)
-      : null
+      : null;
   const focusedResourceHierarchyOk =
-    focusedResourceHierarchy && focusedResourceHierarchy?.kind !== 'err'
+    focusedResourceHierarchy && focusedResourceHierarchy?.kind !== "err";
 
   const missingData =
-    !qry.loading && !ressursQry.loading && (!gotRessursData || !gotRessursData)
+    !qry.loading && !ressursQry.loading && (!gotRessursData || !gotRessursData);
 
   const showAlert =
     qry.error ||
     ressursQry.error ||
     (!qry.loading && !enhetHierarchyOk) ||
-    (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk)
+    (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk);
 
   return (
     <ContentWrapper>
@@ -551,12 +551,12 @@ function OrganisasjonsHierarkiPageOuter() {
           display: grid;
         `}
       >
-        <Heading size='xlarge' className={css({ marginBottom: '20px' })}>
+        <Heading size="xlarge" className={css({ marginBottom: "20px" })}>
           NAV Organisasjon
         </Heading>
         {showAlert && (
           <>
-            <Alert variant={'info'}>Uventet data i graphql-respons</Alert>
+            <Alert variant={"info"}>Uventet data i graphql-respons</Alert>
             <hr />
           </>
         )}
@@ -566,7 +566,7 @@ function OrganisasjonsHierarkiPageOuter() {
           </>
         )}
         {missingData && (
-          <Alert variant={'warning'}>
+          <Alert variant={"warning"}>
             Fant ikke data på IDer <br />
             {JSON.stringify(
               resourceId
@@ -587,7 +587,7 @@ function OrganisasjonsHierarkiPageOuter() {
         )}
       </div>
     </ContentWrapper>
-  )
+  );
 }
 
-export default OrganisasjonsHierarkiPageOuter
+export default OrganisasjonsHierarkiPageOuter;
