@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.common;
 
-//import graphql.kickstart.execution.context.GraphQLContext;
+import graphql.kickstart.execution.context.GraphQLKickstartContext;
+import graphql.kickstart.servlet.context.DefaultGraphQLServletContextBuilder;
 import graphql.kickstart.servlet.context.GraphQLServletContextBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -26,7 +27,7 @@ import static no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningBatchLoader.ORGT
 
 @Component
 @RequiredArgsConstructor
-class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
+class CustomGraphQLContextBuilder extends DefaultGraphQLServletContextBuilder {
 
     private static final int MAX_BATCH_SIZE = 100;
     private final PersonBatchLoader personBatchLoader;
@@ -35,17 +36,17 @@ class CustomGraphQLContextBuilder implements GraphQLServletContextBuilder {
     private final AppProperties appProperties;
 
     @Override
-    public GraphQLContext build(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public GraphQLKickstartContext build(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         return new CustomGraphQLContext(SecurityContextHolder.getContext().getAuthentication(), buildDataLoaderRegistry(), appProperties.isSandbox());
     }
 
     @Override
-    public GraphQLContext build(Session session, HandshakeRequest handshakeRequest) {
+    public GraphQLKickstartContext build(Session session, HandshakeRequest handshakeRequest) {
         return null;
     }
 
     @Override
-    public GraphQLContext build() {
+    public GraphQLKickstartContext build() {
         return null;
     }
 
