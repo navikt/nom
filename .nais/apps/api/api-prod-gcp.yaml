@@ -104,6 +104,9 @@ spec:
         - application: remedy-identrutina
           namespace: idm
           cluster: prod-fss
+        - application: veilarbveileder
+          namespace: pto
+          cluster: prod-fss
     outbound:
       rules:
         - application: nav-ident
