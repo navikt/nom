@@ -19,11 +19,6 @@ public class CustomGraphQLContext implements GraphQLKickstartContext {
     private final boolean sandbox;
 
     @Override
-    public Optional<Subject> getSubject() {
-        return Optional.empty();
-    }
-
-    @Override
     public DataLoaderRegistry getDataLoaderRegistry() {
         return dataLoaderRegistry;
     }
