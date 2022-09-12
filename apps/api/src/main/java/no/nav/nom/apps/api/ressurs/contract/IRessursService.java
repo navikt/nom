@@ -7,9 +7,13 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IRessursService {
     Optional<RessursI> findByPersonIdent(String personIdent);
+
+    Optional<RessursI> findByFid(UUID fid);
+
     Optional<RessursI> findByNavIdent(String navIdent);
     Map<String, RessursI> findByPersonIdentBulk(List<String> personIdenter);
     Map<String, RessursI> findByNavIdentBulk(List<String> navIdenter);
