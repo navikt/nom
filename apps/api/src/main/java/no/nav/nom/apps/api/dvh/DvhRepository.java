@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class DvhRepository {
     private List<DvhOrganisering> organiseringer;
     private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
-    private Map<String, RessursI> ressursByNavIdent = Collections.emptyMap();
+    private Map<String, IRessurs> ressursByNavIdent = Collections.emptyMap();
     private final Map<String, LocalDate> sluttdatoByPersonIdent = new HashMap<>();
     private final IOrgenhetService orgenhetService;
 
@@ -130,7 +130,7 @@ public class DvhRepository {
         return lst.toList();
     }
 
-    public void setRessursByNavIdent(Map<String, RessursI> ressursByNavIdent){
+    public void setRessursByNavIdent(Map<String, IRessurs> ressursByNavIdent){
         this.ressursByNavIdent = ressursByNavIdent;
     }
 }

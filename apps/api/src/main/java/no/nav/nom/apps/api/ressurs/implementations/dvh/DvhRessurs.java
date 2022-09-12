@@ -2,12 +2,12 @@ package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Value;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 
 import java.util.UUID;
 
 @Value
-public class DvhRessurs implements RessursI {
+public class DvhRessurs implements IRessurs {
 
     String navIdent;
     String personIdent;

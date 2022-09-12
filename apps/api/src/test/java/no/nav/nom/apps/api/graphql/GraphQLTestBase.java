@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
 
-    protected RessursI createRessursHendelse(String suffix) {
+    protected IRessurs createRessursHendelse(String suffix) {
         val metadata = HendelseMetadataSerialize.builder()
                 .opprettetAv(new HendelseMetadata.OpprettetAv("test","test"))
                 .rawInputData(om.createObjectNode().put("suffix",suffix))
