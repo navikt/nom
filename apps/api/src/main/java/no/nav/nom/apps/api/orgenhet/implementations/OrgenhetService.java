@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
-import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -95,19 +94,6 @@ public class OrgenhetService implements IOrgenhetService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
-    }
-
-    @Override
-    public OrgEnhet convertToGraphQlResponse(IOrgenhet orgenhet) {
-        return OrgEnhet.builder()
-                .id(orgenhet.getFid().toString())
-                .agressoId(orgenhet.getAgressoId())
-                .orgNiv(orgenhet.getOrgNiv())
-                .navn(orgenhet.getNavn())
-                .agressoOrgenhetType(orgenhet.getAgressoOrgenhetType())
-                .gyldigFom(orgenhet.getGyldigFom())
-                .gyldigTom(orgenhet.getGyldigTom().orElse(null))
-                .build();
     }
 
     private Optional<IOrgenhet> convert(List<IHendelse> hendelser){

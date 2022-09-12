@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLResolver;
 import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -21,7 +22,7 @@ public class RessursLederForResolver implements GraphQLResolver<Ressurs> {
     public DataFetcherResult<List<LederOrgEnhet>> lederFor(Ressurs ressurs) {
         var result = dvhRepository.getEnheterByLeder(ressurs.getNavIdent())
                 .stream()
-                .map(orgenhetService::convertToGraphQlResponse)
+                .map(ConverterUtils::convertToGraphQlResponse)
                 .map(LederOrgEnhet::new)
                 .toList();
 

@@ -6,6 +6,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
@@ -43,7 +44,7 @@ class OrgEnhetResolver implements GraphQLQueryResolver {
                 result = Optional.empty();
             }
             return DataFetcherResult.<OrgEnhet>newResult()
-                    .data(result.map(orgenhetService::convertToGraphQlResponse).orElse(null))
+                    .data(result.map(ConverterUtils::convertToGraphQlResponse).orElse(null))
                     .build();
         });
     }
@@ -69,7 +70,7 @@ class OrgEnhetResolver implements GraphQLQueryResolver {
             }
             return DataFetcherResult.<List<OrgEnhetResult>>newResult()
                     .data(Stream.concat(
-                            result.stream().map(orgenhetService::convertToGraphQlResponse).map(OrgEnhetResult::new),
+                            result.stream().map(ConverterUtils::convertToGraphQlResponse).map(OrgEnhetResult::new),
                             agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv))
                     ).collect(Collectors.toList()))
                     .build();
