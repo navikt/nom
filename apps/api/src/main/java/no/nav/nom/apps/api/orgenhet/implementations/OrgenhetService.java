@@ -1,60 +1,100 @@
 package no.nav.nom.apps.api.orgenhet.implementations;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.apps.api.hendelse.contract.HendelseDataType;
+import no.nav.nom.apps.api.hendelse.contract.IHendelse;
+import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Primary
 @Service
 @RequiredArgsConstructor
 public class OrgenhetService implements IOrgenhetService {
-
-    private final EventBasedOrgenhetService orgenhetHendelseRepository;
+    private final OrgenhetHendelseRepository orgenhetHendelseRepository;
+    private final IHendelseService hendelseService;
 
 
     @Override
     public Optional<IOrgenhet> getByFid(UUID fid) {
-        return orgenhetHendelseRepository.getByFid(fid);
+        return convert(orgenhetHendelseRepository.findAllByFunksjonellId(fid).stream().map(hendelseService::convert).toList());
     }
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
-        return name != null ? orgenhetHendelseRepository.getEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name)
-                : getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
+        return name != null ? orgenhetHendelseRepository.findEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .max(Comparator.comparing(IOrgenhet::getGyldigFom)) :
+                getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return orgenhetHendelseRepository.getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
+        return orgenhetHendelseRepository.findEnhetByAgressoIdNiva(agressoId, orgNiv).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .max(Comparator.comparing(IOrgenhet::getGyldigFom));
     }
 
     @Override
     public List<IOrgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
-        return orgenhetHendelseRepository.findEnheterByAgressoIdIn(agressoIds);
+        return orgenhetHendelseRepository.findByAgressoIdIn(agressoIds).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     @Override
     public Collection<IOrgenhet> getAllEnheter() {
-        return orgenhetHendelseRepository.getAllEnheter();
+        return orgenhetHendelseRepository.findAllByDataType(HendelseDataType.ORGENHET_V1.getDataType()).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     @Override
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
-        return orgenhetHendelseRepository.matchByAgressoId(agressoId);
+        return orgenhetHendelseRepository.findHendelserByJsonMatch(EventBasedOrgenhet.AGRESSO_ID_FIELD, agressoId, HendelseDataType.ORGENHET_V1.getDataType()).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     @Override
     public List<IOrgenhet> matchByNavn(String navn) {
-        return orgenhetHendelseRepository.matchByNavn(navn);
+        return orgenhetHendelseRepository.findHendelserByJsonMatch(EventBasedOrgenhet.NAVN_FIELD, navn, HendelseDataType.ORGENHET_V1.getDataType()).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .map(this::convert)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
     }
 
     @Override
@@ -68,5 +108,9 @@ public class OrgenhetService implements IOrgenhetService {
                 .gyldigFom(orgenhet.getGyldigFom())
                 .gyldigTom(orgenhet.getGyldigTom().orElse(null))
                 .build();
+    }
+
+    private Optional<IOrgenhet> convert(List<IHendelse> hendelser){
+        return hendelser == null || hendelser.isEmpty() ? Optional.empty() : Optional.of(new EventBasedOrgenhet(hendelser));
     }
 }
