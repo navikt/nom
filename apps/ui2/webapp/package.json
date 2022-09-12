@@ -16,7 +16,7 @@
     "@emotion/css": "^11.10.0",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
-    "@navikt/ds-css": "^1.0.2",
+    "@navikt/ds-css": "^1.2.6",
     "@navikt/ds-css-internal": "^1.0.2",
     "@navikt/ds-icons": "^1.2.6",
     "@navikt/ds-react": "^1.0.2",
