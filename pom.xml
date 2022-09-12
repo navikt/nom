@@ -203,10 +203,6 @@
                 <artifactId>token-validation-spring</artifactId>
                 <version>${token-support.version}</version>
                 <exclusions>
-<!--                    <exclusion>-->
-<!--                        <groupId>com.nimbusds</groupId>-->
-<!--                        <artifactId>nimbus-jose-jwt</artifactId>-->
-<!--                    </exclusion>-->
                     <exclusion>
                         <groupId>org.jetbrains</groupId>
                         <artifactId>annotations</artifactId>
@@ -285,40 +281,6 @@
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus.jose.jwt-version}</version>
             </dependency>
-
-<!--            Lagt inn pga dårlig dependency management i spring versjon 2.6.3-->
-
-<!--            <dependency>-->
-<!--                <groupId>org.jboss.logging</groupId>-->
-<!--                <artifactId>jboss-logging-processor</artifactId>-->
-<!--                <version>${org.jboss.logging-version}</version>-->
-<!--            </dependency>-->
-
-<!--            <dependency>-->
-<!--                <groupId>org.jboss.logging</groupId>-->
-<!--                <artifactId>jboss-logging-annotations</artifactId>-->
-<!--                <version>${org.jboss.logging-version}</version>-->
-<!--            </dependency>-->
-
-<!--            <dependency>-->
-<!--                <groupId>com.google.code.findbugs</groupId>-->
-<!--                <artifactId>jsr305</artifactId>-->
-<!--                <version>${com.google.code.findbugs.jsr305}</version>-->
-<!--            </dependency>-->
-
-<!--            <dependency>-->
-<!--                <groupId>org.jetbrains</groupId>-->
-<!--                <artifactId>annotations</artifactId>-->
-<!--                <version>${org.jetbrains.annotations}</version>-->
-<!--            </dependency>-->
-
-<!--            <dependency>-->
-<!--                <groupId>com.graphql-java</groupId>-->
-<!--                <artifactId>graphql-java</artifactId>-->
-<!--                <version>${graphql.java-version}</version>-->
-<!--            </dependency>-->
-
-<!--   ^        Lagt inn pga dårlig dependency management i spring versjon 2.6.3-->
 
             <!-- Test dpendencies -->
 
