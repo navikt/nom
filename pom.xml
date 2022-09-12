@@ -203,10 +203,10 @@
                 <artifactId>token-validation-spring</artifactId>
                 <version>${token-support.version}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>com.nimbusds</groupId>
-                        <artifactId>nimbus-jose-jwt</artifactId>
-                    </exclusion>
+<!--                    <exclusion>-->
+<!--                        <groupId>com.nimbusds</groupId>-->
+<!--                        <artifactId>nimbus-jose-jwt</artifactId>-->
+<!--                    </exclusion>-->
                     <exclusion>
                         <groupId>org.jetbrains</groupId>
                         <artifactId>annotations</artifactId>
