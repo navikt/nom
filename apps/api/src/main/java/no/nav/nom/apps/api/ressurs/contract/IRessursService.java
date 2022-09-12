@@ -7,15 +7,19 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IRessursService {
-    Optional<RessursI> findByPersonIdent(String personIdent);
-    Optional<RessursI> findByNavIdent(String navIdent);
-    Map<String, RessursI> findByPersonIdentBulk(List<String> personIdenter);
-    Map<String, RessursI> findByNavIdentBulk(List<String> navIdenter);
-    List<RessursI> getAll();
-    RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
-    RessursI opprettRessurs0(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
-    Ressurs convertToGraphQlResponse(RessursI ressurs);
-    List<RessursI> matchByNavident(String navident);
+    Optional<IRessurs> findByPersonIdent(String personIdent);
+
+    Optional<IRessurs> findByFid(UUID fid);
+
+    Optional<IRessurs> findByNavIdent(String navIdent);
+    Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter);
+    Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter);
+    List<IRessurs> getAll();
+    IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
+    IRessurs opprettRessurs0(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    Ressurs convertToGraphQlResponse(IRessurs ressurs);
+    List<IRessurs> matchByNavident(String navident);
 }

@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -175,7 +175,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
 
         dvhRestConsumer.loadFromDvh();
@@ -213,7 +213,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario34() {
         val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
@@ -234,7 +234,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
         val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
@@ -275,7 +275,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 

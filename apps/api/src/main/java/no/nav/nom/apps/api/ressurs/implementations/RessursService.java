@@ -1,14 +1,19 @@
 package no.nav.nom.apps.api.ressurs.implementations;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.common.security.AuthenticationProperties;
-import no.nav.nom.apps.api.common.security.TokenRepository;
+import lombok.val;
+import no.nav.nom.apps.api.hendelse.contract.HendelseDataType;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.hendelse.contract.IHendelse;
+import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
+import no.nav.nom.apps.api.postgresql.NavIdentService;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessursInterface;
-import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessursService;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,62 +22,111 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RessursService implements IRessursService {
 
     private final DvhRessursInterface dvhRessursInterface;
-    private final EventBasedRessursService eventBasedRessursService;
-    private final TokenRepository tokenRepository;
-    private final AuthenticationProperties authenticationProperties;
+    private final RessursHendelseRepository repository;
+    private final IHendelseService hendelseService;
+    private final ObjectMapper objectMapper;
+    private final NavIdentService navIdentService;
 
-    public Optional<RessursI> findByFid(UUID fid){
-        return eventBasedRessursService.findByFid(fid);
+    @Override
+    public Optional<IRessurs> findByFid(UUID fid){
+        return Optional.ofNullable(
+                convert(repository.findAllByFunksjonellId(fid).stream().map(hendelseService::convert).toList())
+        );
     }
 
     @Override
-    public Optional<RessursI> findByNavIdent(String navIdent){
-        return eventBasedRessursService.findByNavIdent(navIdent);
+    public Optional<IRessurs> findByNavIdent(String navIdent){
+        return Optional.ofNullable(
+                convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
+        );
     }
 
     @Override
-    public List<RessursI> matchByNavident(String navident) {
-        return eventBasedRessursService.matchByNavident(navident);
+    public List<IRessurs> matchByNavident(String navident) {
+        return repository.findHendelserByJsonMatch(EventBasedRessurs.NAVIDENT_FIELD, navident.toLowerCase(), HendelseDataType.RESSURS_V1.getDataType())
+                .stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid))
+                .values().stream().map(this::convert)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<RessursI> findByPersonIdent(String personIdent){
-        return eventBasedRessursService.findByPersonIdent(personIdent);
-    }
-
-    public Map<String, RessursI> findByNavIdentBulk(List<String> navIdenter){
-        return eventBasedRessursService.findByNavIdentBulk(navIdenter);
-    }
-
-    public Map<String, RessursI> findByPersonIdentBulk(List<String> personIdenter){
-        return eventBasedRessursService.findByPersonIdentBulk(personIdenter);
+    public Optional<IRessurs> findByPersonIdent(String personIdent){
+        return Optional.ofNullable(
+                convert(repository.findHendelseByJson(EventBasedRessurs.PERSONIDENT_FIELD, personIdent).stream().map(hendelseService::convert).toList())
+        );
     }
 
     @Override
-    public List<RessursI> getAll(){
-        return eventBasedRessursService.getAll();
+    public Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter){
+        return repository.findHendelseByJsonBulk(EventBasedRessurs.NAVIDENT_FIELD, navIdenter).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid))
+                .values().stream()
+                .map(this::convert)
+                .collect(Collectors.toUnmodifiableMap(IRessurs::getNavIdent, Function.identity()));
+    }
+
+    @Override
+    public Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter){
+        return repository.findHendelseByJsonBulk(EventBasedRessurs.PERSONIDENT_FIELD, personIdenter).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid))
+                .values().stream()
+                .map(this::convert)
+                .collect(Collectors.toUnmodifiableMap(IRessurs::getPersonIdent, Function.identity()));
+    }
+
+    @Override
+    public List<IRessurs> getAll(){
+        return repository.findAllByDataType(HendelseDataType.RESSURS_V1.getDataType()).stream()
+                .map(hendelseService::convert)
+                .collect(Collectors.groupingBy(IHendelse::getFid))
+                .values()
+                .stream()
+                .map(EventBasedRessurs::new)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public RessursI opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
-        return eventBasedRessursService.opprettRessurs(personIdent, navIdent, navIdentForbokstav, hendelseMetadata);
+    public IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
+        return findByPersonIdent(personIdent).orElseGet(() -> {
+            var data = objectMapper.createObjectNode();
+
+            data.put(EventBasedRessurs.NAVIDENT_FIELD, navIdent != null ? navIdent : navIdentService.generateNavIdent(navIdentForbokstav));
+            data.put(EventBasedRessurs.PERSONIDENT_FIELD, personIdent);
+
+            val event = hendelseService.createOpprettHendelse(data, hendelseMetadata, HendelseDataType.RESSURS_V1);
+            repository.save(hendelseService.convert(event));
+
+            return findByFid(event.getFid()).orElse(null);
+        });
     }
 
     @Override
     @Transactional
-    public RessursI opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize metadata) {
-        return eventBasedRessursService.opprettRessurs0(personident, data, metadata);
+    public IRessurs opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
+        return findByPersonIdent(personident).orElseGet(() -> {
+            val event = hendelseService.createOpprettHendelse(data, hendelseMetadataSerialize, HendelseDataType.RESSURS_V1);
+            repository.save(hendelseService.convert(event));
+
+            return findByFid(event.getFid()).orElse(null);
+
+        });
     }
 
     @Override
-    public Ressurs convertToGraphQlResponse(RessursI ressurs) {
+    public Ressurs convertToGraphQlResponse(IRessurs ressurs) {
         return Ressurs.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
@@ -85,5 +139,9 @@ public class RessursService implements IRessursService {
                 .fornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn().orElseThrow()+" "+m).orElse(ressurs.getVisningsfornavn().orElse(null)))
                 .etternavn(ressurs.getVisningsetternavn().orElse(null))
                 .build();
+    }
+
+    private IRessurs convert(List<IHendelse> hendelser){
+        return hendelser == null || hendelser.isEmpty() ? null : new EventBasedRessurs(hendelser);
     }
 }

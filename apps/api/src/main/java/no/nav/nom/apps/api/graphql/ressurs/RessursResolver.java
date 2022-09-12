@@ -9,7 +9,7 @@ import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -36,7 +36,7 @@ class RessursResolver implements GraphQLQueryResolver {
     public DataFetcherResult<Ressurs> ressurs(ObjectNode objectNode, DataFetchingEnvironment env) {
         return this.<Ressurs>checkAuthRessurs(env).orElseGet(() -> {
             graphQLFieldConsumptionCounter.count(env);
-            Optional<RessursI> result;
+            Optional<IRessurs> result;
             if (objectNode == null) {
                 result = Optional.empty();
             } else {
@@ -93,9 +93,9 @@ class RessursResolver implements GraphQLQueryResolver {
     private static class Result {
 
         String id;
-        RessursI ressurs;
+        IRessurs ressurs;
 
-        public RessursI getRessursResponse() {
+        public IRessurs getRessursResponse() {
             return ressurs;
         }
     }
