@@ -7,7 +7,7 @@ import lombok.val;
 import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
@@ -40,7 +40,7 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
         val response = postForResource("ressurs/scenario1.graphql", false);
 
@@ -83,7 +83,7 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
         val response = postForResource("ressurs/scenario2.graphql", false);
 
@@ -139,7 +139,7 @@ class RessursTest extends RessursTestBase {
     @SneakyThrows
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
-        RessursI ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
         val sluttdato = LocalDate.now();
 
         dvhLegacyRessursUtils.addToResponse(DvhLegacyRessursUtils.LegacyResponseObject.builder()

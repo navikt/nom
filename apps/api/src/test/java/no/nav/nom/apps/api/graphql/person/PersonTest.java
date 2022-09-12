@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ public class PersonTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som er ressurs")
     void scenario1() {
-        RessursI ressurs = createRessursHendelse("3");
+        IRessurs ressurs = createRessursHendelse("3");
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
 
         val response = postForResource("person/scenario1.graphql", false, Map.of("fnr", "testPersonIdent3"));
