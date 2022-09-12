@@ -1143,10 +1143,10 @@
   resolved "https://registry.yarnpkg.com/@n1ru4l/graphql-live-query/-/graphql-live-query-0.10.0.tgz#2306151630b0e74b017cc1067ebbea351acf56f8"
   integrity sha512-qZ7OHH/NB0NcG/Xa7irzgjE63UH0CkofZT0Bw4Ko6iRFagPRHBM8RgFXwTt/6JbFGIEUS4STRtaFoc/Eq/ZtzQ==
 
-"@navikt/ds-css-internal@^1.0.2":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-1.2.5.tgz#39113a82d9c712b89fed9302aa3e8378e0dc6d1c"
-  integrity sha512-7ieyCb37EY0fAwEF6hbegfI1q5Y8ZHvAazZ+xL2wRdw/XGZnfMzlOJ09CGyInCWyasZQpT+WoI6OBvUlHSUK7A==
+"@navikt/ds-css-internal@^1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@navikt/ds-css-internal/-/ds-css-internal-1.2.6.tgz#c50547085a4d2e9aa1c8666c5a8dfd54d84bb9f5"
+  integrity sha512-Q4Ym5MCbSSpfI07fzuma/Jx8sXoF7cMvpxEhtcxeHOan+ZoOsQwPVrWEsZb3cM9P2273H5Thdivp0e2gq1y+FA==
 
 "@navikt/ds-css@^1.2.6":
   version "1.2.6"
