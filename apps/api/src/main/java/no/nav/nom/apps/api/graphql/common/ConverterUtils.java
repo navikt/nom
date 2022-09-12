@@ -4,22 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.com.google.common.collect.Streams;
-import no.nav.nom.apps.api.graphql.request.Ordre;
-import no.nav.nom.apps.api.graphql.request.dto.OrdreLinje;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConverterUtils {
-
-    public static Ordre convert(no.nav.nom.apps.api.ordre.Ordre ordre){
-        return null;
-    }
-
-    public static List<OrdreLinje> convert(JsonNode ordreLinje){
-        return null;
-    }
-
     public static List<String> toStringList(ObjectNode objectNode, String fieldName) {
         if (objectNode == null) {
             return List.of();

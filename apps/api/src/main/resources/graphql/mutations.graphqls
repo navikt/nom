@@ -1,14 +1,5 @@
 type Mutation {
     opprettRessurs(request: OpprettRessursRequest!): OpprettRessursResponse
-
-    # OrdreLinje
-    opprettEnhet(request: OpprettEnhetRequest!): OrdreLinjeResponse!
-
-    # Ordre
-
-    #    removeRequestFromOrdre(ordreId: ID!, ordreLinjeId: ID!): ResultCode!
-    #    editOrdre(ordreId: ID!, metadata: EditOrdreRequest!): ResultCode!
-    godkjennOrdre(ordreId: ID!): ResultCode!
 }
 
 # Requests
@@ -23,22 +14,6 @@ input OpprettRessursRequest {
     startDato: Date
 }
 
-input OrdreLinjeRequestMetadata {
-    # Request set/Endringspakke, valgfri, bruk for å legge til eksisterende pakke
-    ordreId: ID
-    beskrivelse: String
-}
-
-input OpprettEnhetRequest {
-    metadata: OrdreLinjeRequestMetadata!
-    agressoId: String
-    navn: String!
-}
-
-input EditOrdreRequest {
-    beskrivelse: String
-}
-
 # Responses
 
 type OpprettRessursResponse {
@@ -47,23 +22,4 @@ type OpprettRessursResponse {
     visningsfornavn: String!
     visningsetternavn: String!
     sektor: Sektor!
-}
-
-type OrdreLinjeResponse  {
-    ordreLinje: OrdreLinje!
-}
-
-enum OrdreLinjesaktiving {
-    IMMEDIATE
-    FOR_APPROVAL
-}
-
-enum OrdreLinjeType {
-    OPPRETT_ENHET,
-    OPPRETT_RESSURS
-}
-
-type OrdreLinjeMetadata {
-    ordreId: ID!
-    beskrivelse: String
 }
