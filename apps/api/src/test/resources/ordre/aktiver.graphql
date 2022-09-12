@@ -1,3 +1,0 @@
-mutation opprettRessurs($ordreId: ID!) {
-    godkjennOrdre(ordreId: $ordreId)
-}

@@ -11,9 +11,6 @@ type Query {
     ressurs(where: RessursSearch): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
     person(where: PersonSearch): PersonResult
-
-    ordre(ordreId: ID!): Ordre
-    ordreBulk(ordreId: [ID!]): [Ordre!]!
 }
 
 union SearchResult = Ressurs | OrgEnhet
