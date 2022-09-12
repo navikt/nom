@@ -9,6 +9,8 @@ on:
       - 'apps/proxy/**'
       - '.nais/apps/proxy/proxy*.yaml'
       - '.github/workflows/app-proxy.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/nom-proxy:${{ github.sha }}

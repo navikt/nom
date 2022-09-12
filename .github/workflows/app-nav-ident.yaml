@@ -9,6 +9,8 @@ on:
       - 'libs/utils-common/**'
       - '.nais/apps/nav-ident/nav-ident*.yaml'
       - '.github/*/app-nav-ident.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/nav-ident:${{ github.sha }}

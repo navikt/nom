@@ -10,6 +10,8 @@ on:
       - 'apps/api/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/app-api.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
