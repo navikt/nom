@@ -55,7 +55,6 @@ jobs:
           build-args: JAR_PATH=apps/api/target/app.jar
 
   deploy-dev:
-    timeout-minutes: 20
     name: Deploy to NAIS dev-gcp
     needs: build-jar-docker
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
@@ -67,6 +66,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/api/api-dev-gcp.yaml
+          TIMEOUT: 20m
 
   deploy-prod-qa:
     name: Deploy to NAIS prod-gcp QA
