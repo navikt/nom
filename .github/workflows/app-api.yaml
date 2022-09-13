@@ -55,6 +55,7 @@ jobs:
           build-args: JAR_PATH=apps/api/target/app.jar
 
   deploy-dev:
+    timeout-minutes: 20
     name: Deploy to NAIS dev-gcp
     needs: build-jar-docker
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
