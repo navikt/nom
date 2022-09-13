@@ -14,6 +14,12 @@
     <name>NOM :: Apps :: PROXY</name>
 
     <dependencies>
+        <!-- Snyk security warning - Remove when springboot uses version ^1.31 -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-common</artifactId>
