@@ -86,13 +86,3 @@ spring:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-
-  flyway:
-    locations: classpath:/db/migration,classpath:/prod/db/migration
-  config:
-    activate:
-      on-profile:
-spring:
-  profiles: dev
-  flyway:
-    locations: classpath:/db/migration,classpath:/dev/db/migration
