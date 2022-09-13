@@ -44,7 +44,7 @@ spec:
     periodSeconds: 5
     timeout: 4
     failureThreshold: 5
-  startupProbe:
+  startup:
     path: internal/health/liveness
     failureThreshold: 30
     periodSeconds: 10
