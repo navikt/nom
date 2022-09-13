@@ -14,6 +14,12 @@
     <name>NOM :: Apps :: Api</name>
 
     <dependencies>
+        <!-- Snyk security warning -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-common</artifactId>
