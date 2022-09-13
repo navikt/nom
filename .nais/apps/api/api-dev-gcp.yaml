@@ -45,7 +45,8 @@ spec:
     timeout: 4
     failureThreshold: 5
   startup:
-    path: internal/health/liveness
+    path: internal/health/readiness
+    initialDelay: 30
     failureThreshold: 30
     periodSeconds: 10
   resources:
