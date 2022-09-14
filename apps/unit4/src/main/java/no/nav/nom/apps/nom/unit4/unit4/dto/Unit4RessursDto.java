@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
-import no.nav.nom.apps.nom.unit4.kafka.NomRessursDto;
+import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursDto;
 import no.nav.nom.apps.nom.unit4.unit4.Utils;
 
 import java.time.LocalDate;
@@ -73,13 +73,13 @@ public class Unit4RessursDto {
         personId = ressursNr;
     }
 
-    public Unit4RessursDto(NomRessursDto record) {
-        String ressursNr = null;
-        String firstName = null;
-        String surName = null;
+    public Unit4RessursDto(KafkaRessursDto record) {
+        String ressursNr = record.getNavident();
+        String firstName = record.getVisningsfornavn() + (record.getVisningsmellomnavn() != null ? (" " + record.getVisningsmellomnavn()) : "");
+        String surName = record.getVisningsetternavn();
 
         additionalInformation = AdditionalInformation.builder()
-                .relatedPersonId(null)
+                .relatedPersonId(record.getPersonident())
                 .build();
 
         val parsedBirthDate = LocalDate.parse(record.getPersonident().substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy"));
@@ -87,7 +87,7 @@ public class Unit4RessursDto {
         birthDate = (parsedBirthDate.isAfter(LocalDate.now()) ? parsedBirthDate.minusYears(100) : parsedBirthDate).atStartOfDay();
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
-                .aliasName(null)
+                .aliasName(record.getNavident())
                 .firstName(firstName)
                 .surname(surName)
                 .build();
@@ -95,8 +95,8 @@ public class Unit4RessursDto {
                 .supplierId(ressursNr)
                 .build();
         personalInformation = PersonalInformation.builder()
-                .gender(null)
-                .nationalIdentityNo(null)
+                .gender(record.getKjoenn())
+                .nationalIdentityNo(record.getPersonident())
                 .build();
         personId = ressursNr;
     }

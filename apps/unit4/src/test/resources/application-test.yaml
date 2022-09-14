@@ -3,7 +3,10 @@ AZURE_APP_TENANT_ID: 'dummy'
 AZURE_APP_JWK: 'dummy'
 
 app:
-  kafka.listener.enabled: true
+  kafka:
+    listener:
+      enabled: true
+      blockSecondsOnBail: 1
   unit4:
     baseUrl: http://localhost:${wiremock.server.port}
   proxy:

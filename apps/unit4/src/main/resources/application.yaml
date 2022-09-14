@@ -1,5 +1,9 @@
 app:
-  kafka.listener.enabled: false
+  kafka:
+    listener:
+      enabled: false
+      blockSecondsOnBail: 20
+
   name: nom-unit4
   ressurs.topic: nom-ressurser
   unit4:

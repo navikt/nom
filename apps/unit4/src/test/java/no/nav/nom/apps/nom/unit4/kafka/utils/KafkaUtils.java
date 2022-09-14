@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.unit4.kafka.utils;
 
 import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursListener;
-import no.nav.nom.apps.nom.unit4.kafka.NomRessursDto;
+import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursDto;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +19,10 @@ public class KafkaUtils {
     @SpyBean
     private KafkaRessursListener kafkaRessursListener;
     @Autowired
-    private KafkaTemplate<String, NomRessursDto> ressursKafkaTemplate;
+    private KafkaTemplate<String, KafkaRessursDto> ressursKafkaTemplate;
 
 
-    public synchronized void send(String key, NomRessursDto data){
+    public synchronized void send(String key, KafkaRessursDto data){
         CountDownLatch latch = new CountDownLatch(1);
 
         Mockito.doAnswer(invocation -> {

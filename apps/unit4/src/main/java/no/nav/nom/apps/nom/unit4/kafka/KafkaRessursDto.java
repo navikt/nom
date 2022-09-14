@@ -2,11 +2,10 @@ package no.nav.nom.apps.nom.unit4.kafka;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Value;
 
 @Data
 @Builder
-public class NomRessursDto {
+public class KafkaRessursDto {
     String personident;
     String navident;
     String visningsfornavn;

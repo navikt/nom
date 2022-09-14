@@ -17,14 +17,14 @@ public class KafkaConfig {
     /* Ressurs Topic */
 
     @Bean
-    public ConsumerFactory<String, NomRessursDto> consumerFactory(KafkaProperties properties) {
+    public ConsumerFactory<String, KafkaRessursDto> consumerFactory(KafkaProperties properties) {
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, NomRessursDto>>
-            kafkaListenerContainerFactory(ConsumerFactory<String, NomRessursDto> consumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, NomRessursDto>();
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, KafkaRessursDto>>
+            kafkaListenerContainerFactory(ConsumerFactory<String, KafkaRessursDto> consumerFactory) {
+        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, KafkaRessursDto>();
         concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
 
         return concurrentKafkaListenerContainerFactory;
