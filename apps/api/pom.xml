@@ -105,7 +105,6 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>21.0.1</version>
             <scope>test</scope>
         </dependency>
 

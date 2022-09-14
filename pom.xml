@@ -68,6 +68,8 @@
         <snappy-java.test.version>1.1.8.4</snappy-java.test.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
 
+        <jetbrains.annotations.version>21.0.1</jetbrains.annotations.version>
+        
         <!-- SNYK Security warnings -->
         <postgresql.version>42.5.0</postgresql.version>
         <snakeyaml.version>1.32</snakeyaml.version>
@@ -320,6 +322,13 @@
             </dependency>
 
             <!-- Test dpendencies -->
+
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${jetbrains.annotations.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.testcontainers</groupId>

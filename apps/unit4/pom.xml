@@ -55,31 +55,24 @@
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>2.27.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.thomaskasene.wiremock</groupId>
-            <artifactId>wiremock-junit-extension</artifactId>
-            <version>0.2.0.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>1.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>1.1.0</version>
+
+        <dependency> <!-- dependency for spring-kafka-test -->
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.thomaskasene.wiremock</groupId>
+            <artifactId>wiremock-junit-extension</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
