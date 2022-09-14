@@ -31,11 +31,16 @@ public class SecurityTestUtils {
     }
 
     public JWTClaimsSet.Builder validJwtClaims(String subject, String audience) {
+        return validJwtClaims(subject, subject, audience); // sub==oid -> Systemtoken , sub!=oid -> Usertoken
+    }
+
+    public JWTClaimsSet.Builder validJwtClaims(String subject, String oid, String audience) {
         val wiremockPort = env.getRequiredProperty("wiremock.server.port");
 
         return new JWTClaimsSet.Builder()
                 .subject(subject)
                 .audience(audience)
+                .claim("oid", oid)
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))
