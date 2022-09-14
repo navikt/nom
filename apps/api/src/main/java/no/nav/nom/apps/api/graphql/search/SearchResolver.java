@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult;
 import graphql.kickstart.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
@@ -30,7 +31,7 @@ public class SearchResolver implements GraphQLQueryResolver {
             ).map(IOrgenhet::getAgressoId).collect(Collectors.toList());
 
             var result = Stream.concat(
-                    orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(orgenhetService::convertToGraphQlResponse),
+                    orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(ConverterUtils::convertToGraphQlResponse),
                     ressursService.matchByNavident(term).stream().map(ressursService::convertToGraphQlResponse)
             ).collect(Collectors.toList());
 

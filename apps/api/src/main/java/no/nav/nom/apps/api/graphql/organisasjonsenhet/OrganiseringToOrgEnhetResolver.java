@@ -5,6 +5,7 @@ import graphql.kickstart.tools.GraphQLResolver;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
@@ -18,7 +19,7 @@ public class OrganiseringToOrgEnhetResolver implements GraphQLResolver<Organiser
 
     public DataFetcherResult<OrgEnhet> orgEnhet(Organisering organisering, DataFetchingEnvironment env) {
         val orgEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
-                .map(orgenhetService::convertToGraphQlResponse)
+                .map(ConverterUtils::convertToGraphQlResponse)
                 .orElseThrow();
 
         return DataFetcherResult.<OrgEnhet>newResult()

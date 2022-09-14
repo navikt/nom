@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
@@ -123,7 +123,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-        dvhRepository.setRessursByNavIdent(dvhRessurs.stream().collect(Collectors.toMap(RessursI::getNavIdent, Function.identity())));
+        dvhRepository.setRessursByNavIdent(dvhRessurs.stream().collect(Collectors.toMap(IRessurs::getNavIdent, Function.identity())));
         if (leaderElection.isLeader()) {
             ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
         }

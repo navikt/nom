@@ -1,17 +1,15 @@
 package no.nav.nom.apps.api.ressurs.implementations.postgresql;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
-import no.nav.nom.apps.api.ressurs.contract.RessursI;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Comparator.comparing;
 
-public class EventBasedRessurs implements RessursI {
+public class EventBasedRessurs implements IRessurs {
 
     public final static String NAVIDENT_FIELD = "navident";
     public final static String PERSONIDENT_FIELD = "personident";

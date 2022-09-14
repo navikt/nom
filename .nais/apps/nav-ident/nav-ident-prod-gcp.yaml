@@ -8,7 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
+      value: log-logstash,prod
     - name: PDL_CLIENT_ID
       value: prod-fss.pdl.pdl-api
     - name: PDL_BASE_URL

@@ -95,23 +95,6 @@ type Kode {
     gyldigTom: Date
 }
 
-type Ordre {
-    ordreId: ID!
-    ordreLinjer: [OrdreLinje!]!
-
-    beskrivelse: String
-    endretTidspunkt: DateTime!
-}
-
-type OrdreLinje {
-    ordreLinjeId: ID!
-    ordreId: ID!
-    metadata: OrdreLinjeMetadata
-    type: OrdreLinjeType
-    # define explicitly?
-    data: JSON
-}
-
 type Telefon {
     nummer: String!
     type: TelefonType!

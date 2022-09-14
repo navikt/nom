@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.execution.DataFetcherResult;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.kobling.KoblingDvhService;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
@@ -49,7 +50,7 @@ public class OrgTilknytningBatchLoader implements MappedBatchLoaderWithContext<S
 
     private RessursOrgTilknytning fromDvhKobling(Kobling kobling) {
         val orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(kobling.getAgressoId(), kobling.getOrgNiv(), null).get();
-        val orgEnhetGqlResponse = orgenhetService.convertToGraphQlResponse(orgenhet);
+        val orgEnhetGqlResponse = ConverterUtils.convertToGraphQlResponse(orgenhet);
 
         return RessursOrgTilknytning.builder()
                 .organisasjonsenhet(orgEnhetGqlResponse)

@@ -10,6 +10,8 @@ on:
       - 'apps/api/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/app-api.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
@@ -64,6 +66,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/api/api-dev-gcp.yaml
+          TIMEOUT: 20m
 
   deploy-prod-qa:
     name: Deploy to NAIS prod-gcp QA
@@ -90,3 +93,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/api/api-prod-gcp.yaml
+          TIMEOUT: 20m

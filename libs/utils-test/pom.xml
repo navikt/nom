@@ -26,7 +26,6 @@
         <dependency>
             <groupId>com.thomaskasene.wiremock</groupId>
             <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
         </dependency>
     </dependencies>
 

@@ -75,7 +75,7 @@ class EventSourceServiceTest extends EmbeddedKafkaTestBase {
         kafkaTemplate.send(topic, event.payload.navident, event);
         kafkaTemplate.send(topic, event.payload.navident, event2); // Forventer at denne erstatter forrige info
 
-        await().atMost(3, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent));
+        await().atMost(3, SECONDS).pollInterval(10, MILLISECONDS).until(() -> navidenter.containsKey(navIdent) && navidenter.get(navIdent).is(personid2));
 
         assertEquals(navidenter.size(), 1);
         assertEquals(personid2, navidenter.get(navIdent).getGjeldendePersonid());

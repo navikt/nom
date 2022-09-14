@@ -1,0 +1,140 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/proxy/unit4/ressurs",
+    "bodyPatterns" : [ {
+      "matchesJsonPath" : "$.[?(@.personId == '010199000001')]"
+    } ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "additionalInformation": {
+        "relatedPersonId": "910005",
+        "graduationYear": 0,
+        "hasOverTime": true
+      },
+      "birthDate": "1994-02-06T00:00:00",
+      "name": "Bent Api Test",
+      "nameInformation": {
+        "aliasName": "K910005",
+        "firstName": "Bent Api",
+        "surname": "Test"
+      },
+      "paymentInformation": {
+        "supplierId": "910005",
+        "bankAccount": "00000000019",
+        "payMethod": "AM",
+        "supplierGroupId": "01"
+      },
+      "personalInformation": {
+        "gender": "F",
+        "nationalIdentityNo": "06029400020"
+      },
+      "personId": "910005",
+      "companyId": "HR",
+      "dateFrom": "2021-12-31T00:00:00",
+      "dateTo": "2099-12-31T00:00:00",
+      "languageCode": "NO",
+      "personnelType": "F",
+      "status": "N",
+      "contactPoints": [
+        {
+          "address": {
+            "place": "SPIKKESTAD",
+            "postcode": "3430"
+          },
+          "contactPointType": "1"
+        }
+      ],
+      "relatedValues": [
+        {
+          "relationId": "M0",
+          "relatedValue": "5224300",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "C1",
+          "relatedValue": "522400",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "20",
+          "relatedValue": "000000",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "C8",
+          "relatedValue": "TLON",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "AL",
+          "relatedValue": "060501110000",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "ZA",
+          "relatedValue": "060501180000",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "B1",
+          "relatedValue": "000000",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "MQ",
+          "relatedValue": "BB",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "Y7",
+          "relatedValue": "SPK_A",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        },
+        {
+          "relationId": "23",
+          "relatedValue": "1111",
+          "dateFrom": "2021-12-31T00:00:00",
+          "dateTo": "2099-12-31T00:00:00",
+          "status": "N",
+          "percentage": 100
+        }
+      ]
+    }
+  }
+}

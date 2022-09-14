@@ -4,20 +4,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import graphql.com.google.common.collect.Streams;
-import no.nav.nom.apps.api.graphql.request.Ordre;
-import no.nav.nom.apps.api.graphql.request.dto.OrdreLinje;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConverterUtils {
-
-    public static Ordre convert(no.nav.nom.apps.api.ordre.Ordre ordre){
-        return null;
-    }
-
-    public static List<OrdreLinje> convert(JsonNode ordreLinje){
-        return null;
+    public static OrgEnhet convertToGraphQlResponse(IOrgenhet orgenhet) {
+        return OrgEnhet.builder()
+                .id(orgenhet.getFid().toString())
+                .agressoId(orgenhet.getAgressoId())
+                .orgNiv(orgenhet.getOrgNiv())
+                .navn(orgenhet.getNavn())
+                .agressoOrgenhetType(orgenhet.getAgressoOrgenhetType())
+                .gyldigFom(orgenhet.getGyldigFom())
+                .gyldigTom(orgenhet.getGyldigTom().orElse(null))
+                .build();
     }
 
     public static List<String> toStringList(ObjectNode objectNode, String fieldName) {

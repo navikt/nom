@@ -117,9 +117,6 @@ export function focusedEnhetHierarchy(
 
   if (!qryData.enhet) return { kind: "err", msg: "mangler enhet" };
 
-  if (!qryData.enhetsKoblinger?.overenheter[0])
-    return { kind: "err", msg: "mangler enhet" };
-
   const flattenedOverenheter = (function DO() {
     const extractOverEnhet = () =>
       qryData.enhetsKoblinger?.overenheter[0]?.organisasjonsenhet;

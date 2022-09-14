@@ -82,9 +82,10 @@ const panelCss = {
     //justify-items: center;
     background-color: ${colorPalette.focusedBackground};
     row-gap: 0.5rem;
-    min-height: 15rem;
-    margin-bottom: 1rem;
+    min-height: 10rem;
+    margin-bottom: 0;
     padding: 2rem;
+    padding-bottom: 0;
   `),
   underEnhet: css(
     commonPanelCss,
@@ -342,9 +343,13 @@ const OrganisasjonHierarkiPageInner = function (props: {
             >
               <div className={panelCss.focusedRessurs}>
                 <Heading size={"large"}>{focusedRessurs.name}</Heading>
-                <div>
-                  {focusedRessurs.sektor}{" "}
-                  <strong>({focusedRessurs.navident})</strong>
+                <div
+                  className={css`
+                    padding-top: 0.4rem;
+                  `}
+                >
+                  {focusedRessurs.sektor}
+                  <strong> ({focusedRessurs.navident})</strong>
                 </div>
 
                 <div className={panelCss.labeledItemsPane}>
@@ -361,6 +366,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
                       )}
                     </strong>
                   </span>
+
                   {focusedRessurs.tilknytninger.map((tilkn) => {
                     const { orgenhet: oe, leder: l } = tilkn;
                     return (
@@ -385,10 +391,11 @@ const OrganisasjonHierarkiPageInner = function (props: {
               <div
                 className={css`
                   padding: 2.5rem;
+                  padding-bottom: 0;
                 `}
               >
                 <UserImage
-                  size={"130px"}
+                  size={"150px"}
                   navIdent={focusedRessurs.navident}
                   navn={focusedRessurs.name}
                 />
@@ -531,6 +538,12 @@ function OrganisasjonsHierarkiPageOuter() {
   const missingData =
     !qry.loading && !ressursQry.loading && (!gotRessursData || !gotRessursData);
 
+  const showAlert =
+    qry.error ||
+    ressursQry.error ||
+    (!qry.loading && !enhetHierarchyOk) ||
+    (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk);
+
   return (
     <ContentWrapper>
       <div
@@ -541,8 +554,11 @@ function OrganisasjonsHierarkiPageOuter() {
         <Heading size="xlarge" className={css({ marginBottom: "20px" })}>
           NAV Organisasjon
         </Heading>
-        {(qry.error || ressursQry.error) && (
-          <Alert variant={"warning"}>Feil i graphql-respons</Alert>
+        {showAlert && (
+          <>
+            <Alert variant={"info"}>Uventet data i graphql-respons</Alert>
+            <hr />
+          </>
         )}
         {!gotHierarkiData && !gotRessursData && (
           <>
