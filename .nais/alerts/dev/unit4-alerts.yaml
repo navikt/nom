@@ -22,5 +22,6 @@ spec:
 
       # Alerter på alle ERROR log meldinger
     - alert: Error log på nom-unit4 de siste 5 min
+      for: 1m
       expr: 'sum(increase(logd_messages_total{log_app="nom-unit4",log_level="Error"}[5m])) > 0'
       action: "Sjekk logger til {{ $labels.log_app }} her: Link https://logs.adeo.no/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(columns:!(message,envclass,level,application,host),filters:!(),index:'96e648c0-980a-11e9-830a-e17bbd64b4db',interval:auto,query:(language:kuery,query:'application:%22{{ $labels.log_app }}%22%20and%20level:(Error)%20and%20cluster:%22prod-gcp%22'),sort:!()) "
