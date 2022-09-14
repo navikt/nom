@@ -19,6 +19,7 @@ public class EventBasedRessurs implements RessursI {
     public final static String VISNINGSETTERNAVN_FIELD = "visningsetternavn";
     public final static String VISNINGSMELLOMNAVN_FIELD = "visningsmellomnavn";
     public final static String SEKTOR_FIELD = "sektor";
+    public final static String KJONN_FIELD = "kjonn";
 
     private final List<IHendelse> hendelser;
 

@@ -13,6 +13,8 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
+import no.nav.nom.apps.api.pdl.Kjonn;
+import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,11 +41,13 @@ public class NavidentController {
     private final NIKConsumer nikConsumer;
     private final ObjectMapper mapper;
     private final IRessursService ressursService;
+    private final PdlConsumer pdlConsumer;
 
     @Value("${app.graphql.preauth.query.person}")
     private List<String> preAuth;
 
     public static final String BASE_URL = "api/v1/navident";
+
 
     @PostMapping
     @Transactional
@@ -64,14 +68,14 @@ public class NavidentController {
                 val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
 
                 if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
-
                     val data = mapper.createObjectNode()
                             .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
                             .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
                             .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn())
                             .put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn())
                             .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn())
-                            .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
+                            .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor())
+                            .put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
                     val metadata = HendelseMetadataSerialize.builder()
                             .opprettetAv(new HendelseMetadata.OpprettetAv(token))
                             .opprettetTidspunkt(LocalDateTime.now())
@@ -101,5 +105,15 @@ public class NavidentController {
         }
 
         return ResponseEntity.ok(responseBody.build());
+    }
+
+    private String getKjonn(String personident, String identType) {
+        if (!identType.equals("STANDARD")) {
+            return Kjonn.UKJENT.name();
+        }
+
+        val person = pdlConsumer.hentPerson(personident).orElse(null);
+
+        return person != null ? person.getKjonn().name() : Kjonn.UKJENT.name();
     }
 }

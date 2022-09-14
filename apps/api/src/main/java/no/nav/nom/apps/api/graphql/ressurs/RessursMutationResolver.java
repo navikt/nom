@@ -11,8 +11,12 @@ import lombok.val;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKConsumer;
+import no.nav.nom.apps.api.pdl.Kjonn;
+import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
+import no.nav.nom.apps.api.rest.person.PdlPersonDTO;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
@@ -32,6 +36,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
     private final NIKConsumer nikConsumer;
     private final SecurityUtil securityUtil;
     private final ObjectMapper objectMapper;
+    private final PdlConsumer pdlConsumer;
 
     @Value("${app.graphql.preauth.mutation.ressurs}")
     private List<String> preauth;
@@ -42,7 +47,7 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
             val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
                 try {
                     val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1),  "STANDARD", true);
-
+                    val person = pdlConsumer.hentPerson(request.getPersonident()).orElse(null);
                     if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
                         val data = objectMapper.createObjectNode()
                                 .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
@@ -50,7 +55,8 @@ public class RessursMutationResolver implements GraphQLMutationResolver {
                                 .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn())
                                 .put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn())
                                 .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn())
-                                .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
+                                .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name())
+                                .put(EventBasedRessurs.KJONN_FIELD, person == null ? Kjonn.UKJENT.name() : person.getKjonn().name());
                         val metadata = securityUtil.metadataFromEnv(env, data);
                         val newRessurs = ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
                         if(nikResponse.getBody().getFeilmelding() != null) {

@@ -48,23 +48,22 @@ public class PdlConsumer {
                 "}");
         body.getVariables().put("ident", personIdent);
 
+        val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
 
-            val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
-        System.out.println("pldresult\n" + result.getBody().asText());
-            if (result.getBody().get("data").hasNonNull("hentPerson")) {
-                val person = result.getBody().get("data").get("hentPerson").get("navn").get(0);
-                System.out.println("Person:\n" + person.asText());
-                val mellomnavn = person.hasNonNull("mellomnavn") ? person.get("mellomnavn").asText() : null;
-                //val kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
+        if (result.getBody().get("data").hasNonNull("hentPerson")) {
+            val person = result.getBody().get("data").get("hentPerson");
+            val navn = person.get("navn").get(0);
+            val mellomnavn = navn.hasNonNull("mellomnavn") ? navn.get("mellomnavn").asText() : null;
+            val kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
 
-                return Optional.of(Person.builder()
-                        .fornavn(person.get("fornavn").asText())
-                        .mellomnavn(mellomnavn)
-                        .etternavn(person.get("etternavn").asText())
-                        //.kjonn(Kjonn.valueOf(kjonn))
-                        .build());
-            }
+            return Optional.of(Person.builder()
+                    .fornavn(navn.get("fornavn").asText())
+                    .mellomnavn(mellomnavn)
+                    .etternavn(navn.get("etternavn").asText())
+                    .kjonn(Kjonn.valueOf(kjonn))
+                    .build());
+        }
 
-            return Optional.empty();
+        return Optional.empty();
     }
 }
