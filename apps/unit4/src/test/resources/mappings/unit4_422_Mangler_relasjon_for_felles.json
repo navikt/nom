@@ -1,0 +1,285 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/proxy/unit4/ressurs",
+    "bodyPatterns" : [ {
+      "matchesJsonPath" : "$.[?(@.personId == '010199000004')]"
+    } ]
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "additionalInformation": {
+        "graduationYear": 0,
+        "hasOvertime": true,
+        "isHourlyPaid": false,
+        "message": "",
+        "payYear": 0,
+        "piecework": false,
+        "probationPeriod": "1900-01-01T00:00:00.000",
+        "relatedPersonId": "920005",
+        "retirementAge": 0,
+        "roomNo": "",
+        "startDate": "1900-01-01T00:00:00.000",
+        "terminationReason": ""
+      },
+      "birthDate": "1994-02-06T00:00:00.000",
+      "companyId": "HR",
+      "customInformation": {
+        "customCategoryField1": "",
+        "customCategoryField2": "",
+        "customCategoryField3": "",
+        "customCategoryField4": "",
+        "customCode1": "",
+        "customCode2": "",
+        "customCode3": "",
+        "customCode4": "",
+        "customCode5": "",
+        "customCode6": "",
+        "customCode7": "",
+        "customCode8": "",
+        "customDate1": "1900-01-01T00:00:00.000",
+        "customDate2": "1900-01-01T00:00:00.000",
+        "customDate3": "1900-01-01T00:00:00.000",
+        "customFlag1": false,
+        "customFlag2": false
+      },
+      "dateFrom": "2021-12-31T00:00:00.000",
+      "dateTo": "2099-12-31T00:00:00.000",
+      "languageCode": "NO",
+      "lastUpdated": {
+        "updatedAt": "1900-01-01T00:00:00.000",
+        "updatedBy": "API"
+      },
+      "name": "Bent Api Test",
+      "nameInformation": {
+        "aliasName": "K920005",
+        "customNameField1": "",
+        "customNameField2": "",
+        "customNameField3": "",
+        "customNameField4": "",
+        "customNamePart": "",
+        "firstName": "Bent Api",
+        "surname": "Test",
+        "title": ""
+      },
+      "partTimePct": 100.0,
+      "paymentInformation": {
+        "bankAccount": "00000000019",
+        "bankClearingCode": "",
+        "contractId": "",
+        "currencyCode": "NOK",
+        "iban": "",
+        "otherAccount": "",
+        "payMethod": "AM",
+        "postalAccount": "00000000019",
+        "supplierGroupId": "01",
+        "supplierId": "920005",
+        "swift": ""
+      },
+      "payrollInformation": {
+        "batchId": 0,
+        "customTaxCode": "",
+        "notes": "",
+        "payPeriod": 0,
+        "payStatus": "N",
+        "taxBasis": "",
+        "taxCode": ""
+      },
+      "personalInformation": {
+        "citizenship": "",
+        "gender": "F",
+        "maritialStatus": "",
+        "nationalIdentityNo": "16029400020"
+      },
+      "personId": "920005",
+      "personnelType": "F",
+      "status": "N",
+      "employments": [],
+      "contactPoints": [
+        {
+          "additionalContactInfo": {
+            "contactPerson": "",
+            "contactPosition": "",
+            "eMail": "",
+            "eMailCc": "",
+            "gtin": "",
+            "url": ""
+          },
+          "address": {
+            "countryCode": "NO",
+            "place": "SPIKKESTAD",
+            "postcode": "3430",
+            "province": "",
+            "streetAddress": ""
+          },
+          "contactPointType": "1",
+          "lastUpdated": {
+            "updatedAt": "1900-01-01T00:00:00.000",
+            "updatedBy": "API"
+          },
+          "phoneNumbers": {
+            "telephone1": "",
+            "telephone2": "",
+            "telephone3": "",
+            "telephone4": "",
+            "telephone5": "",
+            "telephone6": "",
+            "telephone7": ""
+          },
+          "sortOrder": 0
+        }
+      ],
+      "customFieldGroups": {},
+      "relatedValues": [
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "M0",
+          "relationName": "ORGENHET",
+          "relatedValue": "5224300",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "C1",
+          "relationName": "KOSTSTED",
+          "relatedValue": "522400",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "20",
+          "relationName": "PRODUKT",
+          "relatedValue": "000000",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "C8",
+          "relationName": "GRUPPE",
+          "relatedValue": "TLON",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "AL",
+          "relationName": "STATSKONTO",
+          "relatedValue": "060501110000",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "ZA",
+          "relationName": "AGA",
+          "relatedValue": "060501180000",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "B1",
+          "relationName": "OPPGAVE",
+          "relatedValue": "000000",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "MQ",
+          "relationName": "AGASTAT",
+          "relatedValue": "BB",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "Y7",
+          "relationName": "PENSJON",
+          "relatedValue": "SPK_A",
+          "percentage": 100.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "",
+          "status": "N",
+          "relationId": "C2",
+          "relationName": "RESSTYPE",
+          "relatedValue": "F",
+          "percentage": 0.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        },
+        {
+          "description": "",
+          "relationGroup": "KONTERING",
+          "status": "N",
+          "relationId": "23",
+          "relationName": "FELLES",
+          "relatedValue": "",
+          "percentage": 0.0,
+          "dateFrom": "2021-12-31T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000",
+          "notificationMessages": {
+            "originalRelationValue": [
+              {
+                "code": 3010,
+                "message": "Obligatorisk relasjon for begrepet FELLES."
+              }
+            ]
+          }
+        }
+      ],
+      "notificationMessages": {
+        "_objectMessages": [
+          {
+            "code": 3010,
+            "message": "Endringene ble ikke lagret"
+          },
+          {
+            "code": 3010,
+            "message": "Endringene ble ikke lagret"
+          }
+        ]
+      }
+    }
+  }
+}

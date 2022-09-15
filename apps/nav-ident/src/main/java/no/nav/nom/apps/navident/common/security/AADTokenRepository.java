@@ -69,16 +69,11 @@ public class AADTokenRepository {
     @SneakyThrows
     private boolean isContextTokenForAnUserPrincipal(String token) {
         SignedJWT jwt = SignedJWT.parse(token);
-        String idtyp = jwt.getJWTClaimsSet().getStringClaim("idtyp");
-        if (idtyp != null) {
-            log.debug("JWT auth token claim 'idtyp=%s'".formatted(idtyp));
-        }
-        return idtyp != null;
 
-//        String oid = jwt.getJWTClaimsSet().getStringClaim("oid");
-//        String sub = jwt.getJWTClaimsSet().getStringClaim("sub");
-//
-//        return !oid.equals(sub);
+        String oid = jwt.getJWTClaimsSet().getStringClaim("oid");
+        String sub = jwt.getJWTClaimsSet().getStringClaim("sub");
+
+        return !oid.equals(sub);
     }
 
 
