@@ -23,7 +23,7 @@ icon:exclamation[role=yellow] Må flyttes til team org namespace
 Legg inn bruk av rammeverk, biblioteker osv som vi i teamet ikke standardiserer videre på?
 
 ****
-icon:exclamation[role=yellow] Spring boot (log4shell) for å ta vekk 'låste' versjoner av transitive bibliotek
+icon:check[role=green] OK
 ****
 
 === Plattform
@@ -66,8 +66,8 @@ icon:exclamation[role=yellow] Logging, alerts, metrikker og monitorering må gå
 Legg inn mangler rundt dependency checking som snyk, dependabot, bruk av usikre biblioteker eller teknikker
 
 ****
-icon:exclamation[role=yellow] Trenger gjennomgang +
-icon:exclamation[role=yellow] Oppsett og oppfølging av dependabot/Snyk
+icon:check[role=green] OK +
+icon:exclamation[role=yellow] Trenger kode QA rutiner
 ****
 
 == Rammeverk og Versjoner
@@ -75,7 +75,7 @@ icon:exclamation[role=yellow] Oppsett og oppfølging av dependabot/Snyk
 back-end::
 * Java 17
 * Spring
-- boot     (Parent pom  2.6.3 -> 2.6.4)
+- boot     (Parent pom  2.7.3)
 - cloud
 - webflux
 - graphql
@@ -92,33 +92,14 @@ front-end::
 
    npx outdated
 
-Frackend - per 02.09.2022
+Frackend - per 16.09.2022
 ----
-Package                Current  Wanted  Latest
-axios                   0.25.0  0.25.0  0.27.2
-dotenv                  14.3.2  14.3.2  16.0.2
-express                 4.17.3  4.18.1  4.18.1
-express-rate-limit       6.3.0   6.5.2   6.5.2
-express-session         1.17.2  1.17.3  1.17.3
-http-proxy-middleware    2.0.3   2.0.6   2.0.6
-node-jose                2.1.0   2.1.1   2.1.1
-openid-client            5.1.4   5.1.9   5.1.9
-passport                 0.5.2   0.5.3   0.6.0
+FULLT OPPGRADERT
 ----
 
-Frontend - per 02.09.2022
+Frontend - per 16.09.2022
 ----
-Package                    Current   Wanted   Latest
-@emotion/react             11.10.0  11.10.4  11.10.4
-@emotion/styled            11.10.0  11.10.4  11.10.4
-@graphql-codegen/cli        2.11.6   2.12.0   2.12.0
-@navikt/ds-css               1.0.2    1.2.4    1.2.4
-@navikt/ds-css-internal      1.0.2    1.2.4    1.2.4
-@navikt/ds-icons             1.0.2    1.2.4    1.2.4
-@navikt/ds-react             1.0.2    1.2.4    1.2.4
-@navikt/ds-react-internal    1.0.2    1.2.4    1.2.4
-@types/react               18.0.17  18.0.18  18.0.18
-typescript                   4.7.4    4.8.2    4.8.2
+FULLT OPPGRADERT
 ----
 
 
