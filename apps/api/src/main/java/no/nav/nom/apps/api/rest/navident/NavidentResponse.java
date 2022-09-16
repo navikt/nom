@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NavidentResponse {
 
-    private HttpStatus status;
+    private String status;
     private String personident;
     private String navident;
     private String fornavn;

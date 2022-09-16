@@ -59,7 +59,7 @@ public class NavidentController {
         val token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         if (token == null || !preAuth.contains(token.getTokenAttributes().get("azp"))) {
-            return ResponseEntity.ok(NavidentResponse.builder().status(HttpStatus.FORBIDDEN).feilmelding("Forbidden").build());
+            return ResponseEntity.ok(NavidentResponse.builder().status(String.valueOf(HttpStatus.FORBIDDEN.value())).feilmelding("Forbidden").build());
         }
 
         val responseBody = NavidentResponse.builder();
@@ -82,15 +82,15 @@ public class NavidentController {
                             .rawInputData(data)
                             .build();
 
-                    responseBody.status(nikResponse.getStatusCode());
+                    responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
 
                     return ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
                 }
 
-                responseBody.status(nikResponse.getStatusCode()).feilmelding(nikResponse.getBody().getFeilmelding());
+                responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());
             } catch (Exception e) {
                 log.info(e.getCause().getMessage());
-                responseBody.status(HttpStatus.INTERNAL_SERVER_ERROR).feilmelding("Intern feil inntraff");
+                responseBody.status(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value())).feilmelding("Intern feil inntraff");
             }
 
             return null;
