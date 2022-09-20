@@ -257,12 +257,12 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
+        val response = postForResource("organisasjonsenhet/scenario42.graphql", false);
 
         val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();

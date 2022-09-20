@@ -11,19 +11,16 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class LegacyRessursLoader {
 
@@ -47,14 +44,14 @@ public class LegacyRessursLoader {
                         .map(LegacyRessurs::new)
                         .toList();
 
-                dvhRepository.getSluttdatoByPersonIdent().putAll(
+                /*dvhRepository.getSluttdatoByPersonIdent().putAll(
                         tempResult.stream()
                                 .filter(Predicate.not(LegacyRessurs::hasPermisjon))
                                 .collect(Collectors.groupingBy(LegacyRessurs::getPersonIdent)).values().stream()
                                 .map(l -> l.stream().max(Comparator.comparing(LegacyRessurs::getOffset)).get())
                                 .filter(r -> r.getSluttdato() != null)
                                 .collect(Collectors.toMap(LegacyRessurs::getPersonIdent, LegacyRessurs::getSluttdato))
-                );
+                );*/
 
                 currentOffset = tempResult.stream().map(LegacyRessurs::getOffset).max(Comparator.comparing(Long::valueOf)).orElse(currentOffset);
             }

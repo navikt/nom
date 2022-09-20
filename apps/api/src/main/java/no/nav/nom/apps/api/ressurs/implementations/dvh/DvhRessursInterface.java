@@ -21,7 +21,7 @@ public class DvhRessursInterface {
     private final DvhRepository dvhRepository;
 
     public Optional<DvhRessurs> getRessurs(String navIdent){
-        return Optional.ofNullable((DvhRessurs) dvhRepository.getRessursByNavIdent().get(navIdent));
+        return Optional.ofNullable(dvhRepository.getRessursByNavIdent().get(navIdent));
     }
 
     public List<Sektor> getRessurstypeGraphQlResponse(String navIdent){
@@ -38,6 +38,7 @@ public class DvhRessursInterface {
     }
 
     public LocalDate getSluttdatoForPersonident(String personIdent){
-        return dvhRepository.getSluttdatoByPersonIdent().getOrDefault(personIdent, null);
+        return Optional.ofNullable(dvhRepository.getRessursByPersonident().get(personIdent))
+                .map(DvhRessurs::getSluttdato).orElse(null);
     }
 }

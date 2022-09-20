@@ -2,20 +2,15 @@ package no.nav.nom.apps.api.dvh;
 
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.DvhLegacyRessursUtils;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.LinkedList;
-import java.util.List;
 
 @DisplayName("Dvh.Sluttdato")
 public class SluttdatoTest extends DvhTestBase {
-    @Autowired
-    private DvhLegacyRessursUtils dvhLegacyRessursUtils;
 
     @Test
     @SneakyThrows
@@ -23,107 +18,88 @@ public class SluttdatoTest extends DvhTestBase {
     void scenario11(){
         // Fast statlig ansatt med sluttdato i agresso
         val test1Sluttdato = LocalDate.now().minusDays(10);
-        val test1 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test1 = DvhRessurs.builder()
                 .personIdent("test1")
                 .navIdent("test1")
-                .agressoRessursType("F")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("F")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(LocalDate.parse("2099-12-31"))
                 .agressoSluttdato(test1Sluttdato)
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(test1Sluttdato)
+                .remedyPermisjon(false)
                 .build();
-        // Fast statlig ansatt uten sluttdato i agresso, men sluttdato i remedy
+        Assertions.assertEquals(test1Sluttdato, test1.getSluttdato());
+
         val test2Sluttdato = LocalDate.now().minusDays(10);
-        val test2 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test2 = DvhRessurs.builder()
                 .personIdent("test2")
                 .navIdent("test2")
-                .agressoRessursType("F")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("F")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(test2Sluttdato)
                 .agressoSluttdato(LocalDate.parse("2099-12-31"))
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(test2Sluttdato)
+                .remedyPermisjon(false)
                 .build();
+        Assertions.assertEquals(test2Sluttdato, test2.getSluttdato());
+
         // Fast statlig ansatt med sluttdato i agresso og remedy
         val test3Sluttdato = LocalDate.now().minusDays(10);
-        val test3 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test3 = DvhRessurs.builder()
                 .personIdent("test3")
                 .navIdent("test3")
-                .agressoRessursType("F")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("F")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(test3Sluttdato.plusDays(20))
                 .agressoSluttdato(test3Sluttdato)
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(test3Sluttdato)
+                .remedyPermisjon(false)
                 .build();
+
+        Assertions.assertEquals(test3Sluttdato, test3.getSluttdato());
         // Fast statlig ansatt i remedy, men E i agresso med sluttdato i agresso og remedy
         val test4Sluttdato = LocalDate.now();
-        val test4 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test4 = DvhRessurs.builder()
                 .personIdent("test4")
                 .navIdent("test4")
-                .agressoRessursType("E")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("E")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(test4Sluttdato)
                 .agressoSluttdato(test4Sluttdato.minusDays(20))
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(test4Sluttdato)
+                .remedyPermisjon(false)
                 .build();
-
-
-        val response = List.of(test1, test2, test3, test4);
-        dvhLegacyRessursUtils.addToResponse(response);
-        dvhLegacyRessursUtils.mockResponse();
-        response.forEach(this::assertSluttdato);
+        Assertions.assertEquals(test4Sluttdato, test4.getSluttdato());
     }
     @Test
     @SneakyThrows
     @DisplayName("Tester regler for kommunalt, eksternt og annen_statlig ansatte")
     void scenario21(){
-        val testList = new LinkedList<DvhLegacyRessursUtils.LegacyResponseObject>();
-        testList.addAll(scenario21Helper("NAV Kommunalt", "1"));
-        testList.addAll(scenario21Helper("Annen Statlig", "2"));
-        testList.addAll(scenario21Helper("Eksternt", "3"));
-
-        dvhLegacyRessursUtils.addToResponse(testList);
-        dvhLegacyRessursUtils.mockResponse();
-        testList.forEach(this::assertSluttdato);
-        //scenario22();
+        scenario21Helper("NAV Kommunalt", "1");
+        scenario21Helper("Annen Statlig", "2");
+        scenario21Helper("Eksternt", "3");
     }
 
-    private List<DvhLegacyRessursUtils.LegacyResponseObject> scenario21Helper(String remedyRessursType, String suffix){
-        // Ikke statlig ansatt med sluttdato i remedy
+    private void scenario21Helper(String remedyRessursType, String suffix){
         val test1Sluttdato = LocalDate.now().minusDays(10);
-        val test1 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test1 = DvhRessurs.builder()
                 .personIdent("test1"+suffix)
                 .navIdent("test1"+suffix)
-                .agressoRessursType(null)
-                .remedyRessursType(remedyRessursType)
+                .ansattRessursKode(null)
+                .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(test1Sluttdato)
                 .agressoSluttdato(null)
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(test1Sluttdato)
+                .remedyPermisjon(false)
                 .build();
-        // Ikke statlig ansatt uten sluttdato i remedy
-        val test2 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        Assertions.assertEquals(test1Sluttdato, test1.getSluttdato());
+
+
+        val test2 = DvhRessurs.builder()
                 .personIdent("test2"+suffix)
                 .navIdent("test2"+suffix)
-                .agressoRessursType(null)
-                .remedyRessursType(remedyRessursType)
+                .ansattRessursKode(null)
+                .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(LocalDate.parse("2099-12-31"))
                 .agressoSluttdato(null)
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(null)
+                .remedyPermisjon(false)
                 .build();
-
-
-        return List.of(test1, test2);
+        Assertions.assertNull(test2.getSluttdato());
     }
 
     @Test
@@ -136,21 +112,16 @@ public class SluttdatoTest extends DvhTestBase {
     }
 
     void scenario22Helper(String remedyRessursType, String suffix){
-        val test = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test = DvhRessurs.builder()
                 .personIdent("test"+suffix)
                 .navIdent("test"+suffix)
-                .agressoRessursType("F")
-                .remedyRessursType(remedyRessursType)
+                .ansattRessursKode("F")
+                .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(LocalDate.parse("2099-12-31"))
                 .agressoSluttdato(LocalDate.now().minusDays(20))
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(null)
+                .remedyPermisjon(false)
                 .build();
-
-        dvhLegacyRessursUtils.addToResponse(test);
-        dvhLegacyRessursUtils.mockResponse();
-        assertSluttdato(test);
+        Assertions.assertNull(test.getSluttdato());
     }
 
     @Test
@@ -164,61 +135,54 @@ public class SluttdatoTest extends DvhTestBase {
      */
     void scenario31(){
         // Fast statlig ansatt i permisjon:
-        val test1 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test1 = DvhRessurs.builder()
                 .personIdent("test1")
                 .navIdent("test1")
-                .agressoRessursType("F")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("F")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(LocalDate.now())
                 .agressoSluttdato(LocalDate.parse("2099-12-31"))
-                .remedyPermisjon("JA")
-                .forventetSluttdato(null)
+                .remedyPermisjon(true)
+                .remedyAktiv(true)
                 .build();
+        Assertions.assertNull(test1.getSluttdato());
         // Fast kommunalt ansatt i permisjon:
-        val test2 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test2 = DvhRessurs.builder()
                 .personIdent("test2")
                 .navIdent("test2")
-                .agressoRessursType(null)
-                .remedyRessursType("NAV Kommunalt")
+                .ansattRessursKode(null)
+                .remedyAnsattType("NAV Kommunalt")
                 .remedySluttdato(LocalDate.now())
                 .agressoSluttdato(null)
-                .remedyPermisjon("JA")
-                .forventetSluttdato(null)
+                .remedyPermisjon(true)
+                .remedyAktiv(true)
                 .build();
+        Assertions.assertNull(test2.getSluttdato());
         // Fast statlig ansatt med sluttdato i agresso:
         val test3Sluttdato = LocalDate.now().minusDays(10);
-        val test3 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test3 = DvhRessurs.builder()
                 .personIdent("test3")
                 .navIdent("test3")
-                .agressoRessursType("F")
-                .remedyRessursType("NAV Statlig")
+                .ansattRessursKode("F")
+                .remedyAnsattType("NAV Statlig")
                 .remedySluttdato(LocalDate.now())
                 .agressoSluttdato(test3Sluttdato)
-                .remedyPermisjon("JA")
-                .forventetSluttdato(test3Sluttdato)
+                .remedyPermisjon(true)
+                .remedyAktiv(true)
                 .build();
+        Assertions.assertEquals(test3Sluttdato, test3.getSluttdato());
+
         val test4Sluttdato = LocalDate.now().minusDays(10);
-        val test4 = DvhLegacyRessursUtils.LegacyResponseObject
-                .builder()
+        val test4 = DvhRessurs.builder()
                 .personIdent("test4")
                 .navIdent("test4")
-                .agressoRessursType("E")
-                .remedyRessursType("Eksternt")
+                .ansattRessursKode("E")
+                .remedyAnsattType("Eksternt")
                 .remedySluttdato(test4Sluttdato)
                 .agressoSluttdato(null)
-                .remedyPermisjon("JA")
-                .forventetSluttdato(test4Sluttdato)
+                .remedyPermisjon(true)
+                .remedyAktiv(true)
                 .build();
-        val response = List.of(test1, test2, test3, test4);
-        dvhLegacyRessursUtils.addToResponse(response);
-        dvhLegacyRessursUtils.mockResponse();
-        response.forEach(this::assertSluttdato);
-    }
-
-    private void assertSluttdato(DvhLegacyRessursUtils.LegacyResponseObject legacyResponseObject){
-        Assertions.assertEquals(legacyResponseObject.getForventetSluttdato(), dvhRepository.getSluttdatoByPersonIdent().get(legacyResponseObject.getPersonIdent()));
+        Assertions.assertEquals(test4Sluttdato, test4.getSluttdato());
     }
 }

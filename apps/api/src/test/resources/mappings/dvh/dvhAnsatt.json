@@ -71,6 +71,22 @@
           "ANSATT_RESSURS_KODE": "N",
           "REMEDY_PERMISJON": "JA",
           "BUCKET_NUM": 6
+        },
+        {
+          "NAV_IDENT": "testNavIdent",
+          "FNR": "testPersonIdent",
+          "FORNAVN": "Navn 4",
+          "ETTERNAVN": "ENavn 4",
+          "EPOST": "epost4@nav.no",
+          "REMEDY_START_DATO": "2008-05-30",
+          "REMEDY_SLUTT_DATO": "2020-12-31",
+          "AGRESSO_SLUTT_DATO": "2020-12-31",
+          "ANSATT_PER_IDAG": "JA",
+          "ANSETTELSESTYPE_BESK": "Kommunalt ansatt",
+          "ANSATT_TYPE": "NAV Kommunalt",
+          "ANSATT_RESSURS_KODE": "N",
+          "REMEDY_PERMISJON": "JA",
+          "BUCKET_NUM": 6
         }
       ]
     },

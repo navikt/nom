@@ -7,15 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.kobling.DvhKobling;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.LegacyRessursLoader;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.LivenessState;
@@ -34,7 +32,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -58,7 +55,6 @@ public class DvhRestConsumer {
     private final RessursHendelseService ressursHendelseService;
     private final LeaderElection leaderElection;
     private final Environment environment;
-    private final LegacyRessursLoader legacyRessursLoader;
     private final DvhDataLoader dvhDataLoader;
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
@@ -75,7 +71,6 @@ public class DvhRestConsumer {
                 loadKoblingerFromDvh();
                 loadLedereAndOrganiseringerFromDvh();
                 log.info("Laster legacy ressurser fra dvh");
-                legacyRessursLoader.load();
                 log.info("Laster tlf fra dvh");
                 loadTlfFromDvh();
             } catch (Exception e) {
@@ -123,7 +118,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-        dvhRepository.setRessursByNavIdent(dvhRessurs.stream().collect(Collectors.toMap(IRessurs::getNavIdent, Function.identity())));
+        dvhRepository.setRessurs(dvhRessurs);
         if (leaderElection.isLeader()) {
             ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
         }

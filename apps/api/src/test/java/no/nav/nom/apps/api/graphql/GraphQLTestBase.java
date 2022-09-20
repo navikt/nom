@@ -6,13 +6,12 @@ import com.graphql.spring.boot.test.GraphQLResponse;
 import com.graphql.spring.boot.test.GraphQLTestTemplate;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,9 +35,6 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     protected ObjectMapper om;
-
-    @Autowired
-    protected DvhLegacyRessursUtils dvhLegacyRessursUtils;
 
     @Autowired
     protected IRessursService ressursService;

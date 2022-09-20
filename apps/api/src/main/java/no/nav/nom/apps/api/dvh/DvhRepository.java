@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.dvh;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
-import lombok.SneakyThrows;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
@@ -13,44 +11,31 @@ import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import org.springframework.beans.factory.annotation.Value;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Getter
 @Component
+@RequiredArgsConstructor
 public class DvhRepository {
 
     private List<DvhLeder> ledere;
     private List<DvhOrganisering> organiseringer;
     private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
-    private Map<String, IRessurs> ressursByNavIdent = Collections.emptyMap();
-    private final Map<String, LocalDate> sluttdatoByPersonIdent = new HashMap<>();
+    private Map<String, DvhRessurs> ressursByNavIdent = Collections.emptyMap();
+    private Map<String, DvhRessurs> ressursByPersonident = Collections.emptyMap();
     private final IOrgenhetService orgenhetService;
-
-    @SneakyThrows
-    public DvhRepository(ObjectMapper objectMapper, IOrgenhetService orgenhetService, @Value("${SLUTTDATO_OVERRIDE:[]}") String sluttdatoOverride) {
-        val sluttdatoOverrideJson = objectMapper.readValue(sluttdatoOverride, JsonNode.class);
-        StreamSupport.stream(sluttdatoOverrideJson.spliterator(), false)
-                .forEach(entry ->{
-                    sluttdatoByPersonIdent.put(entry.get("personident").asText(), LocalDate.parse(entry.get("sluttdato").asText()));
-                });
-
-        this.orgenhetService = orgenhetService;
-    }
 
     public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv, String navn) {
         return organiseringer.stream()
@@ -122,7 +107,6 @@ public class DvhRepository {
         if(koblinger != null) {
             koblinger.clear();
         }
-        sluttdatoByPersonIdent.clear();
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
@@ -130,7 +114,11 @@ public class DvhRepository {
         return lst.toList();
     }
 
-    public void setRessursByNavIdent(Map<String, IRessurs> ressursByNavIdent){
-        this.ressursByNavIdent = ressursByNavIdent;
+    public void setRessurs(List<DvhRessurs> dvhRessurs){
+        this.ressursByNavIdent = dvhRessurs.stream()
+                .collect(Collectors.toMap(IRessurs::getNavIdent, Function.identity()));
+
+        this.ressursByPersonident = dvhRessurs.stream()
+                .collect(Collectors.toMap(IRessurs::getPersonIdent, Function.identity()));
     }
 }

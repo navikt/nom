@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.DvhLegacyRessursUtils;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
@@ -140,20 +139,7 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
         IRessurs ressurs = createRessursHendelse("");
-        val sluttdato = LocalDate.now();
-
-        dvhLegacyRessursUtils.addToResponse(DvhLegacyRessursUtils.LegacyResponseObject.builder()
-                .personIdent(ressurs.getPersonIdent())
-                .navIdent(ressurs.getNavIdent())
-                .agressoRessursType("F")
-                .remedyRessursType("NAV STATLIG")
-                .remedySluttdato(LocalDate.parse("2099-12-31"))
-                .agressoSluttdato(sluttdato)
-                .remedyPermisjon("NEI")
-                .forventetSluttdato(sluttdato)
-                .build()
-        );
-        dvhLegacyRessursUtils.mockResponse();
+        val sluttdato = LocalDate.parse("2020-12-31");
 
         val response = postForResource("ressurs/scenario1.graphql", false);
 
