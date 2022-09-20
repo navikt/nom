@@ -48,6 +48,12 @@ const BuildingSvg = (props: { className?: string }) => (
   </svg>
 );
 
+const nextChevronCss = css`
+  margin: 0 1rem 0 0.2rem;
+  height: 2rem;
+  width: 2rem;
+`;
+
 const commonPanelCss = css`
   border-radius: 5px;
   overflow: hidden;
@@ -58,6 +64,14 @@ const commonPanelCss = css`
   background-color: ${colorPalette.unfocusedBackground};
   align-items: center;
   border: 1px solid ${colorPalette.panelBorder};
+
+  :hover {
+    background-color: ${colorPalette.focusedBackground};
+
+    ${"." + nextChevronCss} {
+      transform: translateX(0.6rem);
+    }
+  }
 `;
 
 const panelCss = {
@@ -69,6 +83,7 @@ const panelCss = {
       margin-bottom: 1rem;
       min-height: 13rem;
       background-color: ${colorPalette.focusedBackground};
+
       svg {
         // meant for header prefix icon
         fill: ${colorPalette.rim};
@@ -112,6 +127,7 @@ const panelCss = {
     justify-items: center;
     height: 100%;
     width: 100%;
+
     img {
       padding: 0.2rem;
     }
@@ -214,15 +230,7 @@ const HorizontallyAlignedPanel = (props: {
         navn={props.fornavnAndEtternavnForImg}
       />
     )}
-    <Next
-      height={undefined}
-      width={undefined}
-      className={css`
-        margin: 0 1rem 0 0.2rem;
-        height: 2rem;
-        width: 2rem;
-      `}
-    />
+    <Next height={undefined} width={undefined} className={nextChevronCss} />
   </div>
 );
 
