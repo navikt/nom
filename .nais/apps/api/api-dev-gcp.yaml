@@ -132,6 +132,9 @@ spec:
         - application: abac-test
           namespace: teamabac
           cluster: dev-fss
+        - application: fullmaktsregister-web
+          namespace: team-nof
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
