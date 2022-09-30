@@ -1,7 +1,6 @@
-package no.nav.nom.apps.api.graphql.common.resolver;
+package no.nav.nom.apps.api.graphql.ressurs;
 
 import graphql.execution.DataFetcherResult;
-import graphql.kickstart.tools.GraphQLResolver;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.LoaderUtils;
 import no.nav.nom.contract.ad.AdRessurs;
@@ -15,7 +14,7 @@ import static no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBa
 
 
 @Component
-public class RessursPropertyResolver implements GraphQLResolver<Ressurs> {
+public class RessursPropertyResolver {
 
 
     private final boolean sendDummydata;

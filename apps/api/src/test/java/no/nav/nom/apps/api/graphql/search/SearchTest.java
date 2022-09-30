@@ -1,110 +1,110 @@
-package no.nav.nom.apps.api.graphql.search;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import lombok.SneakyThrows;
-import lombok.val;
-import no.nav.nom.apps.api.DvhOrgenhetMock;
-import no.nav.nom.apps.api.DvhOrgenhetMockUtils;
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.graphql.GraphQLTestBase;
-import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-
-@DisplayName("GraphQL.Search")
-public class SearchTest extends GraphQLTestBase {
-
-    @Autowired
-    private DvhRestConsumer dvhRestConsumer;
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Søk på navident")
-    public void scenario1() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
-        val response = postForResource("search/scenario1.graphql", false);
-        val searchResults = response.getList("$.data.search", Ressurs.class);
-
-        assertThat(searchResults, hasSize(2));
-
-        val navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
-        assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Søk på agressoId")
-    public void scenario2() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
-        val mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
-
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
-
-        val response = postForResource("search/scenario2.graphql", false);
-        val searchResults = response.getList("$.data.search", OrgEnhet.class);
-        val agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
-
-        assertThat(searchResults.size(), greaterThan(1));
-        assertThat(agressoIds, hasItem(mockedEnhet.getORGENHET_KODE()));
-        assertThat(agressoIds, hasItem(mockedEnhet2.getORGENHET_KODE()));
-
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Søk på enhetsnavn")
-    public void scenario3() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-
-        dvhRestConsumer.loadFromDvh();
-
-        val response = postForResource("search/scenario3.graphql", false);
-        val searchResults = response.getList("$.data.search", OrgEnhet.class);
-        val enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
-
-        assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
-    }
-
-    @Test
-    @SneakyThrows
-    @DisplayName("Søk på term som resulterer i både enheter og ressurser")
-    public void scenario4() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadFromDvh();
-
-        val response = postForResource("search/scenario4.graphql", false);
-        val searchResults = response.get("$.data.search", JsonNode.class);
-
-        val resultTypes = StreamSupport
-                .stream(searchResults.spliterator(), false)
-                .map(result -> result.get("__typename").asText())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-        assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
-        assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
-    }
-}
-
+//package no.nav.nom.apps.api.graphql.search;
+//
+//import com.fasterxml.jackson.databind.JsonNode;
+//import lombok.SneakyThrows;
+//import lombok.val;
+//import no.nav.nom.apps.api.DvhOrgenhetMock;
+//import no.nav.nom.apps.api.DvhOrgenhetMockUtils;
+//import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+//import no.nav.nom.apps.api.graphql.GraphQLTestBase;
+//import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+//import no.nav.nom.contract.nom.api.graphql.Ressurs;
+//import org.junit.jupiter.api.DisplayName;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//
+//import java.util.function.Function;
+//import java.util.stream.Collectors;
+//import java.util.stream.StreamSupport;
+//
+//import static org.hamcrest.MatcherAssert.assertThat;
+//import static org.hamcrest.Matchers.greaterThan;
+//import static org.hamcrest.Matchers.hasItem;
+//import static org.hamcrest.Matchers.hasItems;
+//import static org.hamcrest.Matchers.hasSize;
+//
+//@DisplayName("GraphQL.Search")
+//public class SearchTest extends GraphQLTestBase {
+//
+//    @Autowired
+//    private DvhRestConsumer dvhRestConsumer;
+//
+//    @Test
+//    @SneakyThrows
+//    @DisplayName("Søk på navident")
+//    public void scenario1() {
+//        createRessursHendelse("1");
+//        createRessursHendelse("2");
+//
+//        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+//
+//        val response = postForResource("search/scenario1.graphql", false);
+//        val searchResults = response.getList("$.data.search", Ressurs.class);
+//
+//        assertThat(searchResults, hasSize(2));
+//
+//        val navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
+//        assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
+//    }
+//
+//    @Test
+//    @SneakyThrows
+//    @DisplayName("Søk på agressoId")
+//    public void scenario2() {
+//        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
+//        val mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
+//
+//        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
+//
+//        val response = postForResource("search/scenario2.graphql", false);
+//        val searchResults = response.getList("$.data.search", OrgEnhet.class);
+//        val agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
+//
+//        assertThat(searchResults.size(), greaterThan(1));
+//        assertThat(agressoIds, hasItem(mockedEnhet.getORGENHET_KODE()));
+//        assertThat(agressoIds, hasItem(mockedEnhet2.getORGENHET_KODE()));
+//
+//    }
+//
+//    @Test
+//    @SneakyThrows
+//    @DisplayName("Søk på enhetsnavn")
+//    public void scenario3() {
+//        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+//        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+//
+//        dvhRestConsumer.loadFromDvh();
+//
+//        val response = postForResource("search/scenario3.graphql", false);
+//        val searchResults = response.getList("$.data.search", OrgEnhet.class);
+//        val enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
+//
+//        assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
+//    }
+//
+//    @Test
+//    @SneakyThrows
+//    @DisplayName("Søk på term som resulterer i både enheter og ressurser")
+//    public void scenario4() {
+//        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+//        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+//
+//        createRessursHendelse("1");
+//        createRessursHendelse("2");
+//
+//        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+//        dvhRestConsumer.loadFromDvh();
+//
+//        val response = postForResource("search/scenario4.graphql", false);
+//        val searchResults = response.get("$.data.search", JsonNode.class);
+//
+//        val resultTypes = StreamSupport
+//                .stream(searchResults.spliterator(), false)
+//                .map(result -> result.get("__typename").asText())
+//                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+//
+//        assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
+//        assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
+//    }
+//}
+//

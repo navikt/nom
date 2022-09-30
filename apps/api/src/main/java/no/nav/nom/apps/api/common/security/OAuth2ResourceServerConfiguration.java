@@ -25,9 +25,7 @@ public class OAuth2ResourceServerConfiguration extends WebSecurityConfigurerAdap
          */
         web.ignoring().mvcMatchers(
                 "/internal/**",
-                "/playground/**",
-                "/voyager/**",
-                "/vendor/**",
+                "/graphiql/**",
                 "/api", // for redirect til swagger
                 "/swagger-ui",
                 "/swagger-ui.html",
@@ -40,11 +38,9 @@ public class OAuth2ResourceServerConfiguration extends WebSecurityConfigurerAdap
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .csrf()
-                .disable()
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/graphql").permitAll()
                 .anyRequest().fullyAuthenticated()

@@ -155,29 +155,26 @@
                 </exclusions>
             </dependency>
 
-            <dependency>
-                <groupId>com.graphql-java-kickstart</groupId>
-                <artifactId>graphql-spring-boot-starter</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.graphql-java</groupId>
-                        <artifactId>graphql-java-extended-scalars</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jetbrains</groupId>
-                        <artifactId>annotations</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.graphql-java</groupId>
-                        <artifactId>graphql-java</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-text</artifactId>
-                    </exclusion>
-                </exclusions>
-                <version>${spring.graphql-version}</version>
-            </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>com.graphql-java-kickstart</groupId>-->
+<!--                <artifactId>graphql-spring-boot-starter</artifactId>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.graphql-java</groupId>-->
+<!--                        <artifactId>graphql-java-extended-scalars</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>org.jetbrains</groupId>-->
+<!--                        <artifactId>annotations</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.graphql-java</groupId>-->
+<!--                        <artifactId>graphql-java</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--                <version>${spring.graphql-version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -373,22 +370,22 @@
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>com.graphql-java-kickstart</groupId>
-                <artifactId>graphql-spring-boot-starter-test</artifactId>
-                <version>${spring.graphql-version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.graphql-java</groupId>
-                        <artifactId>graphql-java-extended-scalars</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jetbrains</groupId>
-                        <artifactId>annotations</artifactId>
-                    </exclusion>
-                </exclusions>
-                <scope>test</scope>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.graphql-java-kickstart</groupId>-->
+<!--                <artifactId>graphql-spring-boot-starter-test</artifactId>-->
+<!--                <version>${spring.graphql-version}</version>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.graphql-java</groupId>-->
+<!--                        <artifactId>graphql-java-extended-scalars</artifactId>-->
+<!--                    </exclusion>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>org.jetbrains</groupId>-->
+<!--                        <artifactId>annotations</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--                <scope>test</scope>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>commons-cli</groupId>
