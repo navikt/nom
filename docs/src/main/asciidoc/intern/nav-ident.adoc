@@ -27,7 +27,9 @@ Dersom NIK hører mer hjemme i IDM-sfæren, så er det enklere å flytte kompone
 NIK skal være smal og holde på NAV-ident, dets knyting til fødselsnr/d-nr/annen nøkkel, samt metadata. Løsningen vil også holde på historiske personid knyttet til NAV-identen, samt alle historiske NAV-identer. 
 
 Utledes via eventsourcing?
-```
+
+[source]
+----
 {
     navident: <string (a123456)>
     personid: <string (fnr/d-nr/annen nøkkel)> - den aktive personid'en for navidenten
@@ -35,12 +37,14 @@ Utledes via eventsourcing?
     identType: <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
 
 }
-```
+----
 Foreslått format på annen nøkkel: <XXX999>
 Navn på "annen nøkkel" bør gis av Sikkerhetsseksjonen i og med at det er de som utdeler denne.
 
 Eventsourcing metadata rundt bestillinger (opprett, slett)
-```
+
+[source]
+----
 {
     event: "OPPRETT" | "SLETT"
     eventTS: DateTime (Timestamp for selve eventen)
@@ -51,7 +55,7 @@ Eventsourcing metadata rundt bestillinger (opprett, slett)
         identType: ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT
     }
 }
-```
+----
 
 == API
 
@@ -73,16 +77,18 @@ Bestillingen vil knyttes til pålogget nav-ident via aad-obo
 
 ==== Opprette eller reaktivere en navident
 
-```
+[source]
+----
 Request:    POST /personid
 
 {
     personid: string påkrevd (f-nr, d-nr, annen nøkkel)
     identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT> - Default STANDARD
 }
-```
+----
 
-```
+[source]
+----
 Respons:
 
 200 OK          hvis den eksisterer ifra før
@@ -111,28 +117,34 @@ body:
 {
     feilmelding: <Feilårsak>
 }
-```
+----
 
 REST tjenesten utfører følgende handlinger:
 - Lager 'bestillings' event på kafka (egen request/forespørsel topic?) som en 'need' melding
-```
+
+[source]
+----
     {
         personid: string påkrevd (f-nr, d-nr, annen nøkkel)
         identType: string <ROBOT | STANDARD | VIKAFOSSEN | UTENLANDSK_KONSULENT>
     }
-```
+----
 - 'Oppslag' - konsument slår opp om det finnes eksisterende navident og legger til dette i 'need' medlingen over
-```
+
+[source]
+----
     {
         ...<tidligere data i need melding>...
         eksisterendeIdent: { <Tom hvis den ikke eksisterer>
             navident: <eksisterende navident>
         }
     }
-```
+----
 - 'PDL' - konsument sjekker mot PDL for å finne personident hvis identtypen er STANDARD.
 Populerer eksisterende informasjon om personid i 'need' meldingen over
-```
+
+[source]
+----
     {
         ...<tidligere data i need melding>...
         pdl: {
@@ -142,16 +154,20 @@ Populerer eksisterende informasjon om personid i 'need' meldingen over
             ]
         }
     }
-```
+----
 - 'NAV ident generator' - konsument trår til hvis need meldingen har fått feltet 'eksisterendeIdent' men den er tom. Da lager den ny ident og legger det til i need meldingen:
-```
+
+[source]
+----
     {
         ...<tidligere data i need melding>...
         nyNavident: <Ny generert navident>
     }
-```
+----
 - 'Respons' konsument kan returnere svar så fort den enten har funnet en eksisterende ident. Eller need meldingen har fått 'ny navident' og PDL ident finnes hvis det er ORDINÆR ident. Respons konsumenten kan legge til sin fulle respons til i 'need' meldingen.
-```
+
+[source]
+----
     {
         ...<tidligere data i need melding>...
         respons: {
@@ -161,7 +177,7 @@ Populerer eksisterende informasjon om personid i 'need' meldingen over
             }
         }
     }
-```
+----
 - 'EventSourceProducerKonsument' - Må lage en event melding på eventsource køen, og også persistere denne i base. Event hendelsen vil være enten en 'OPPRETT'. Selv om det er en ifra før, for å oppdatere eksisterende info.
 
 === Kafka

@@ -216,13 +216,15 @@ En midlertidig feil med docker-oppsettet er at kafka topic på en ny container i
 pgAdmin er satt opp lokalt på adressen http://localhost:8089/ med bruker/passord = `user@domain.com/password`.
 For å nå en lokal nom database velg 'Create server' og gi den ett navn på 'General' tabben.
 På 'Connection' tabben sett opp følgende:
-```
+
+[source]
+----
 Host name:  enhet-db/ressurs-db/skjermet-db (velg en)
 port: 5432/5433/5434 (henholdsvis)
 Maintenance database: postgres-enheter/postgres-ressurs/postgres-skjermet (henholdsvis)
 Username: postgres
 Password: password
-```
+----
 Kryss gjerne av for lagre passord.
 
 På 'Advanced' tabben må 'Host Address' være ip adressen til maskinen din. Eksempelvis 192.168.39.139. Altså ip adressen til docker host. Dette kan ikke være localhost referanse, for det vil bare peke på ip adressen som pgAdmin docker container har fått.
@@ -235,20 +237,24 @@ pgAdmin har fått en docker volume for config oppsett slik at denne konfigurasjo
 `org.testcontainers` klarer ikke ut av boksen å benytte Colima docker.
 
 Lag filen: ~/.testcontainers.properties
-```
+
+[source]
+----
 docker.host=unix\:///Users/g155033/.colima/docker.sock
 docker.tls.verify=0
-```
+----
 host referansen finner du med:
 `docker context ls`
 
 Eks:
-```
+
+[source]
+----
 ❯ docker context ls
 NAME       DESCRIPTION                               DOCKER ENDPOINT                             KUBERNETES ENDPOINT                        ORCHESTRATOR
 colima *   colima                                    unix:///Users/g155033/.colima/docker.sock
 default    Current DOCKER_HOST based configuration   unix:///var/run/docker.sock                 https://apiserver.prod-fss.nais.io (org)   swarm
-```
+----
 
 Til slutt må Ryuk skrus av siden den vil ha elevated rettigheter for å rydde bort testcontainere. Sett følgende environment variable:
 `TESTCONTAINERS_RYUK_DISABLED=true`

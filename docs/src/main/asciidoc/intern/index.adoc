@@ -88,7 +88,7 @@ Remedy  --> DVH --> TDV --> NOM
 
 == Konsumenter
 
-include::tips&tricks.adoc[leveloffset=1]
+include::tips-n-tricks.adoc[leveloffset=1]
 
 include::veivalg.adoc[leveloffset=1]
 

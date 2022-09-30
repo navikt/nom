@@ -119,11 +119,26 @@ Dette vil være et edge case, men greit å være obs på det.
 
 === Utforming av hendelser
 
-==== Data Access Object
+==== Data Access Objects
 
 [source,java]
 ----
-include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/repository/Hendelse.java[tag:class]
+include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/IHendelse.java[tag:class]
+----
+
+[source,java]
+----
+include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseType.java[tag:class]
+----
+
+[source,java]
+----
+include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseDataType.java[tag:class]
+----
+
+[source,java]
+----
+include::../../../../../apps/api/src/main/java/no/nav/nom/apps/api/hendelse/contract/HendelseMetadata.java[tag:class]
 ----
 
 Note:
