@@ -4,10 +4,7 @@ import setupAcuators from './routes/actuators.js';
 import setupAuth from './auth/auth.js';
 import setupStaticRoutes from "./routes/frontendRoute.js";
 import cors from "cors";
-import morgan from 'morgan'
-import ecsFormat from '@elastic/ecs-morgan-format'
 import config from "./config.js";
-import {setupSessionRoutes} from "./routes/sessionRoutes.js";
 import setupUiDevEndpoint from "./routes/uiDev.js";
 import {setupGqlPlaygroundProxy} from "./routes/gqlplaygroundproxy.js";
 
@@ -33,8 +30,6 @@ await setupAuth.setupAuth(app);
 
 nomApiSetupProxy(app);
 teamcatApiSetupProxy(app)
-
-setupSessionRoutes(app);
 
 setupUiDevEndpoint(app);
 

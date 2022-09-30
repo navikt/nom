@@ -32,6 +32,8 @@ authentication:
     issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
     clientId: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
+  groups:
+    nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
 
 graphql:
   playground:

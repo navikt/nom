@@ -88,8 +88,8 @@ const NavHeader = () => {
 
   useEffect(() => {
     (async () => {
-      const res = await getSession();
-      setSession(res);
+      const { navident } = await getSession();
+      setSession(navident);
     })();
   }, []);
 

@@ -25,6 +25,8 @@ spec:
       value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
     - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
       value: noone
+    - name: NOM_WRITE_GROUPID
+      value: "1334a91a-c4e0-409e-a497-3c4453869874"
   envFrom:
     - secret: nom-sluttdato-override-json
   image: {{image}}
@@ -60,7 +62,10 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: true
       claims:
+        groups:
+          - id: "1334a91a-c4e0-409e-a497-3c4453869874"
         extra:
           - azp_name
           - NAVident
