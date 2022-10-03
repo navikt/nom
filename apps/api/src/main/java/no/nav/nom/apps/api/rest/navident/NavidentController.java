@@ -86,7 +86,7 @@ public class NavidentController {
 
                     responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
 
-                    return ressursService.opprettRessurs0(request.getPersonident(), data, metadata);
+                    return ressursService.opprettRessurs(request.getPersonident(), data, metadata);
                 }
 
                 responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());

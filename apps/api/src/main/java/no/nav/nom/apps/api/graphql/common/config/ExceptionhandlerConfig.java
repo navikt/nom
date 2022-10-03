@@ -4,6 +4,8 @@ import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
+import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.DataFetcherExceptionResolver;
@@ -17,21 +19,19 @@ import static java.util.Collections.singletonMap;
 @Configuration(proxyBeanMethods = false)
 public class ExceptionhandlerConfig {
 
-//    @Bean
-//    public DataFetcherExceptionResolver NIKResponseExceptionResolver() {
-//        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleNIKException);
-//    }
+    @Bean
+    public DataFetcherExceptionResolver NIKResponseExceptionResolver() {
+        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleNIKException);
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver OpprettRessursExceptionResolver() {
+        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleOpprettRessursException);
+    }
 
     @Bean
     public DataFetcherExceptionResolver PDLResponseExceptionResolver() {
-        return forMultipleErrors((throwable, environment) -> {
-            if (throwable instanceof PDLBolkException exception) {
-                return exception.getErrors().stream()
-                        .map(error -> exception.getErrorCode().construct(environment, exception.getMessage()))
-                        .toList();
-            }
-            return null;
-        });
+        return forMultipleErrors(PersonBatchLoader::handlePDLBolkException);
     }
 
     /**

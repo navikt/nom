@@ -1,47 +1,32 @@
 package no.nav.nom.apps.api.graphql.common.resolver;
 
-//import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
-import no.nav.nom.contract.nom.api.graphql.PersonResult;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
+
+import static java.util.Collections.singletonList;
 
 
 @Component
 public class FolkeregisterPersonResolver {
 
-    private final PersonBatchLoader batchLoader;
+    private final PersonBatchLoader personBatchLoader;
 
-    public FolkeregisterPersonResolver(PersonBatchLoader batchLoader) {
-        this.batchLoader = batchLoader;
+    //
+    public FolkeregisterPersonResolver(PersonBatchLoader personBatchLoader) {
+        this.personBatchLoader = personBatchLoader;
     }
 
-    public FolkeregisterPerson folkeregisterPerson(PersonResult person) {
-        return null;
-//        return LoaderUtils.get(env, PersonBatchLoader.PERSON_DATALOADER, ressurs.getPersonIdent());
+    public <T> DataFetcherResult<FolkeregisterPerson> folkeregisterPerson(T ressurs, Function<T, String> identResolver) {
+        return folkeregisterPerson(singletonList(ressurs), identResolver).get(ressurs);
     }
 
-    public List<FolkeregisterPerson> folkeregisterPerson(Set<PersonResult> personer) {
-        return null;
-    }
-
-    public FolkeregisterPerson folkeregisterPerson(Ressurs ressurs) {
-        return null;
-//        return LoaderUtils.get(env, PersonBatchLoader.PERSON_DATALOADER, ressurs.getPersonIdent());
-    }
-
-    public Map<Ressurs, FolkeregisterPerson> folkeregisterPerson(Set<Ressurs> ressurser) {
-        return null;
-    }
-
-
-    public Map<String, FolkeregisterPerson> folkeregisterPerson(Set<String> personidenter) {
-
-        return null;
+    public <T> Map<T, DataFetcherResult<FolkeregisterPerson>> folkeregisterPerson(List<T> ressurser, Function<T, String> identResolver) {
+        return personBatchLoader.load(ressurser, identResolver, null);
     }
 }

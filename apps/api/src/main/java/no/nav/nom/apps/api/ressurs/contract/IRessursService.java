@@ -19,7 +19,8 @@ public interface IRessursService {
     Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter);
     List<IRessurs> getAll();
     IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
-    IRessurs opprettRessurs0(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    IRessurs opprettRessurs(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata);
     Ressurs convertToGraphQlResponse(IRessurs ressurs);
     List<IRessurs> matchByNavident(String navident);
 }

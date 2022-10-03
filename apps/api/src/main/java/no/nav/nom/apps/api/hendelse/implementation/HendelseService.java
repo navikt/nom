@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -39,6 +40,11 @@ public class HendelseService implements IHendelseService {
     }
 
     @Override
+    public IHendelse createOpprettHendelse(Map<String, Object> data, HendelseMetadata hendelseMetadata, HendelseDataType hendelseDataType) {
+        return createOpprettHendelse((JsonNode) objectMapper.valueToTree(data), hendelseMetadata, hendelseDataType);
+    }
+
+    @Override
     public IHendelse createEndreHendelse(UUID fid, JsonNode data, HendelseMetadata hendelseMetadata, HendelseDataType hendelseDataType) {
         return  HendelseV1.builder()
                 .id(UUID.randomUUID())
@@ -52,11 +58,16 @@ public class HendelseService implements IHendelseService {
     }
 
     @Override
+    public IHendelse createEndreHendelse(UUID fid, Map<String, Object> data, HendelseMetadata hendelseMetadata, HendelseDataType hendelseDataType) {
+        return createEndreHendelse(fid, (JsonNode) objectMapper.valueToTree(data), hendelseMetadata, hendelseDataType);
+    }
+
+    @Override
     public GenericStorageElement convert(IHendelse hendelse){
         return GenericStorageElement.builder()
                 .id(hendelse.getId())
                 .dataType(GenericStorageElement.DataType.HENDELSE_V1)
-                .document(objectMapper.convertValue(hendelse, JsonNode.class))
+                .document(objectMapper.valueToTree(hendelse))
                 .storedDate(LocalDateTime.now())
                 .build();
     }

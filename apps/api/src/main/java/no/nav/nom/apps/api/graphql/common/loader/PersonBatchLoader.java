@@ -1,105 +1,131 @@
 package no.nav.nom.apps.api.graphql.common.loader;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.execution.DataFetcherResult;
-import graphql.kickstart.execution.GraphQLRequest;
 import graphql.schema.DataFetchingEnvironment;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;
-import org.dataloader.MappedBatchLoaderWithContext;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.dataloader.DataLoaderRegistry;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.graphql.client.HttpGraphQlClient;
+import org.springframework.graphql.execution.BatchLoaderRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toUnmodifiableMap;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, DataFetcherResult<FolkeregisterPerson>> {
+public class PersonBatchLoader {
+
     public static String PERSON_DATALOADER = "PersonDataLoader";
-
-
     private final TokenRepository tokenRepository;
-    private final AppProperties appProperties;
-    private final RestTemplate restTemplate;
+    private final AppProperties.Pdl pdlProperties;
+    private final HttpGraphQlClient graphQlClient;
 
-    @Override
-    public CompletionStage<Map<String, DataFetcherResult<FolkeregisterPerson>>> load(Set<String> set, BatchLoaderEnvironment batchLoaderEnvironment) {
-        return CompletableFuture.supplyAsync(() -> getNameBatch(set, batchLoaderEnvironment));
+    private final static String PDL_BOLK_HENT_PERSON_QUERY = // language=graphql
+            """
+                query($identer: [ID!]!) {
+                    hentPersonBolk(identer: $identer) {
+                        ident
+                        person {
+                            navn(historikk: false) {
+                                fornavn
+                                etternavn
+                                mellomnavn
+                            }
+                        }
+                        code
+                    }
+                }
+                """;
+
+    public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient webClient) {
+        this.tokenRepository = tokenRepository;
+        this.pdlProperties = appProperties.getPdl();
+        this.graphQlClient = HttpGraphQlClient.builder(webClient)
+                .url(pdlProperties.getBaseUrl() + "/graphql")
+                .headers(headers -> {
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.add("Tema", pdlProperties.getTema());
+                })
+                .build();
+    }
+
+    public <T> Map<T, DataFetcherResult<FolkeregisterPerson>> load(Collection<T> ressurser, Function<T, String> identResolver, BatchLoaderEnvironment batchLoaderEnvironment) {
+        final var batch = getNameBatch(ressurser.stream().map(identResolver).collect(toSet()), batchLoaderEnvironment);
+        return ressurser.stream()
+                        .collect(
+                                toUnmodifiableMap(
+                                        Function.identity(),
+                                        ressurs -> batch.getOrDefault(identResolver.apply(ressurs), DataFetcherResult.<FolkeregisterPerson>newResult().build())
+                                )
+                        );
     }
 
     @SneakyThrows
     public Map<String, DataFetcherResult<FolkeregisterPerson>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
-        val headers = new HttpHeaders();
-        val token = tokenRepository.getSystemAadToken(appProperties.getPdl().getAadClientId());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token.serialize());
-        headers.add("Tema", appProperties.getPdl().getTema());
+        var response = graphQlClient.mutate()
+                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.getAadClientId()).serialize()))
+                .build()
+                .document(PDL_BOLK_HENT_PERSON_QUERY)
+                .variable("identer", personidenter)
+                .execute()
+                .block();
 
-        val body = new GraphQLRequest();
-        body.setQuery("query($identer: [ID!]!){\n" +
-                "    hentPersonBolk(identer: $identer){\n" +
-                "            ident\n" +
-                "            person{\n" +
-                "                navn(historikk: false){\n" +
-                "                    fornavn\n" +
-                "                    etternavn\n" +
-                "                    mellomnavn\n" +
-                "                }\n" +
-                "            }\n" +
-                "            code\n" +
-                "    }\n" +
-                "}");
-        body.getVariables().put("identer", personidenter);
-
-        try {
-            val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
-
-            if (result.getBody().hasNonNull("data")) {
-                val navnResult = result.getBody().get("data").get("hentPersonBolk");
-                return StreamSupport.stream(navnResult.spliterator(), false)
-                        .collect(Collectors.toUnmodifiableMap(o -> o.get("ident").asText(), o -> convert(o, (DataFetchingEnvironment) batchLoaderEnvironment.getKeyContexts().get(o.get("ident").asText()))));
-            }
-            throw new GraphQLException(result.getBody().get("errors").toPrettyString());
-
-        } catch (Exception exception) {
-            log.error("Feil i oppslag mot PDL", exception);
-            return personidenter.stream()
-                    .collect(Collectors.toUnmodifiableMap(p -> p,
-                            p -> convertToError("server_error", "Oppslag mot PDL feilet", (DataFetchingEnvironment) batchLoaderEnvironment.getKeyContexts().get(p))));
+        if (response != null && !response.isValid()) {
+            log.error("Feil i oppslag mot PDL: {}", response.getErrors());
+            throw new PDLBolkException("Oppslag mot PDL feilet", response, ErrorCode.SERVER_ERROR);
         }
+
+        final var data = Objects.requireNonNull(response)
+                .field("hentPersonBolk")
+                .toEntity(JsonNode.class); // TODO: Check if we can use toEntityList(JsonNode.class)
+
+        return StreamSupport.stream(data.spliterator(), false)
+                .collect(
+                        toUnmodifiableMap(
+                                o -> o.get("ident").asText(), // Fragile if the key comes back as empty string
+                                o -> convert(o, (DataFetchingEnvironment) batchLoaderEnvironment.getKeyContexts().get(o.get("ident").asText()))
+                        )
+                );
+
     }
 
     private DataFetcherResult<FolkeregisterPerson> convert(JsonNode personResult, DataFetchingEnvironment env) {
-        val code = personResult.get("code").asText();
-        if (personResult.get("code").asText().equals("ok")) {
-            val navn = personResult.get("person").get("navn").get(0);
-            val mellomnavn = navn.hasNonNull("mellomnavn") ? navn.get("mellomnavn").asText() : null;
+        final var code = personResult.get("code").asText();
+        if ("ok".equals(code)) {
+            final var navn = personResult.get("person").get("navn").get(0);
+            final var mellomnavn = navn.get("mellomnavn");
 
             return DataFetcherResult.<FolkeregisterPerson>newResult()
                     .data(FolkeregisterPerson.builder()
                             .navn(
                                     RessursNavn.builder()
                                             .fornavn(navn.get("fornavn").asText())
-                                            .mellomnavn(mellomnavn)
+                                            .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
                                             .etternavn(navn.get("etternavn").asText())
                                             .build()
                             )
@@ -115,5 +141,14 @@ public class PersonBatchLoader implements MappedBatchLoaderWithContext<String, D
         return DataFetcherResult.<FolkeregisterPerson>newResult()
                 .error(ErrorCode.valueOf(code.toUpperCase()).construct(env, message))
                 .build();
+    }
+
+    public static List<GraphQLError> handlePDLBolkException(Throwable throwable, DataFetchingEnvironment environment) {
+        if (throwable instanceof PDLBolkException exception) {
+            return exception.getErrors().stream()
+                    .map(error -> exception.getErrorCode().construct(environment, exception.getMessage()))
+                    .toList();
+        }
+        return null;
     }
 }

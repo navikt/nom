@@ -115,7 +115,7 @@ public class RessursService implements IRessursService {
 
     @Override
     @Transactional
-    public IRessurs opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
+    public IRessurs opprettRessurs(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
         return findByPersonIdent(personident).orElseGet(() -> {
             val event = hendelseService.createOpprettHendelse(data, hendelseMetadataSerialize, HendelseDataType.RESSURS_V1);
             repository.save(hendelseService.convert(event));
@@ -123,6 +123,11 @@ public class RessursService implements IRessursService {
             return findByFid(event.getFid()).orElse(null);
 
         });
+    }
+
+    @Override
+    public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
+        return opprettRessurs(personerident, (JsonNode) objectMapper.valueToTree(data), metadata);
     }
 
     @Override
