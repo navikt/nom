@@ -26,6 +26,8 @@ import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
@@ -80,8 +82,8 @@ public class GraphQLRessursController {
     }
 
     @MutationMapping
-    public Optional<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request) {
-        return Optional.empty();
+    public DataFetcherResult<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token) {
+        return ressursResolver.opprettRessurs(request, environment, token);
     }
 
     @Deprecated
