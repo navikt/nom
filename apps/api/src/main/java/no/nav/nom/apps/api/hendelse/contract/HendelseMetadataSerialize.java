@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Value
 public class HendelseMetadataSerialize extends HendelseMetadata{
 
-    private JsonNode rawInputData;
+    JsonNode rawInputData;
 
     @Builder
     public HendelseMetadataSerialize(OpprettetAv opprettetAv, LocalDateTime opprettetTidspunkt, JsonNode rawInputData) {

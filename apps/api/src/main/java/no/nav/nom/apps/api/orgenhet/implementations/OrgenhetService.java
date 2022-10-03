@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,7 @@ public class OrgenhetService implements IOrgenhetService {
     }
 
     @Override
-    public List<IOrgenhet> findEnheterByAgressoIdIn(List<String> agressoIds) {
+    public List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds) {
         return orgenhetHendelseRepository.findByAgressoIdIn(agressoIds).stream()
                 .map(hendelseService::convert)
                 .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()

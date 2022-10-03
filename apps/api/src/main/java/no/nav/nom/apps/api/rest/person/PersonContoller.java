@@ -30,7 +30,7 @@ public class PersonContoller {
 
     private final PdlConsumer pdlConsumer;
 
-    @Value("${app.graphql.preauth.query.person}")
+    @Value("${app.graphql.preauth.query.person:''}")
     private List<String> preAuth;
 
     @PostMapping("/getPerson")

@@ -43,7 +43,7 @@ public class NavidentController {
     private final IRessursService ressursService;
     private final PdlConsumer pdlConsumer;
 
-    @Value("${app.graphql.preauth.query.person}")
+    @Value("${app.graphql.preauth.query.person:''}")
     private List<String> preAuth;
 
     public static final String BASE_URL = "api/v1/navident";

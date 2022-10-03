@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface OrgenhetHendelseRepository extends HendelseRepository {
@@ -33,5 +34,5 @@ public interface OrgenhetHendelseRepository extends HendelseRepository {
             "   WHERE DOCUMENT -> 'hendelseData' ->> 'agressoId' IN :agressoId" +
             ")"
             , nativeQuery = true)
-    List<GenericStorageElement> findByAgressoIdIn(List<String> agressoId);
+    List<GenericStorageElement> findByAgressoIdIn(Set<String> agressoId);
 }
