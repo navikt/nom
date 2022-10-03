@@ -309,6 +309,7 @@ public class E2ENavIdent {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
         headers.set(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));
+        headers.set(HEADER_X_REQUEST_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
         headers.setBearerAuth(testJWT);
 
         NavidentRequestDTO reqDTO = NavidentRequestDTO.builder()

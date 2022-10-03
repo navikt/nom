@@ -17,9 +17,15 @@ public class RestMdcInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String callId = extractAndValidateHeaderValue(request, HEADER_CALL_ID_KEY);
         String consumerId = extractAndValidateHeaderValue(request, HEADER_CONSUMER_ID_KEY);
+        var xRequestId = Optional.ofNullable(request.getHeader(HEADER_X_REQUEST_ID_KEY));
 
         MDC.put(MDC_CALL_ID_KEY, callId);
         MDC.put(MDC_CONSUMER_ID_KEY, consumerId);
+        if (xRequestId.isPresent()) {
+            MDC.put(MDC_X_REQUEST_ID_KEY, xRequestId.get());
+        } else {
+            MDC.put(MDC_X_REQUEST_ID_KEY,callId);
+        }
 
         return true;
     }
@@ -28,6 +34,7 @@ public class RestMdcInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         MDC.remove(MDC_CONSUMER_ID_KEY);
         MDC.remove(MDC_CALL_ID_KEY);
+        MDC.remove(MDC_X_REQUEST_ID_KEY);
     }
 
     private String extractAndValidateHeaderValue(HttpServletRequest request, String headerName) {

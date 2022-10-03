@@ -16,8 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CALL_ID_KEY;
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
 
 @Component
 @RequiredArgsConstructor
@@ -84,6 +83,8 @@ public class PdlServiceImpl implements PdlService {
                 .uri(pdlConfig.getBaseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.add(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
+                    headers.add(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));
+                    headers.add(HEADER_X_REQUEST_ID_KEY, MDC.get(HEADER_X_REQUEST_ID_KEY));
                     headers.setBearerAuth(token);
                 })
                 .body(Mono.just(qryBody), String.class)
