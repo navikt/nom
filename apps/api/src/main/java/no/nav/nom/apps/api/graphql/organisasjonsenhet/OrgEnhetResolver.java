@@ -1,11 +1,13 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
+import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.Organisering;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,6 +29,11 @@ public class OrgEnhetResolver {
                     .map(OrgEnhetResolver::convertToOrgEnhet);
         }
         return Optional.empty();
+    }
+    public OrgEnhet orgEnhet(Organisering organisering) {
+        return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
+                .map(OrgEnhetResolver::convertToOrgEnhet)
+                .orElseThrow();
     }
 
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch search) {

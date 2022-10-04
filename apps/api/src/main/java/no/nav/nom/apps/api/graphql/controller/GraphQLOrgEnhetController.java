@@ -4,9 +4,13 @@ import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
+import no.nav.nom.contract.nom.api.graphql.Kode;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
@@ -23,13 +27,19 @@ import java.util.Optional;
 public class GraphQLOrgEnhetController {
 
     private final OrgEnhetResolver orgEnhetResolver;
+    private final OrgEnhetKoblingResolver koblingResolver;
+    private final OrganiseringResolver organiseringResolver;
     private final GraphQLFieldConsumptionCounter counter;
 
     public GraphQLOrgEnhetController(
             OrgEnhetResolver orgEnhetResolver,
+            OrgEnhetKoblingResolver koblingResolver,
+            OrganiseringResolver organiseringResolver,
             GraphQLFieldConsumptionCounter counter
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
+        this.koblingResolver = koblingResolver;
+        this.organiseringResolver = organiseringResolver;
         this.counter = counter;
     }
 
@@ -57,10 +67,9 @@ public class GraphQLOrgEnhetController {
         return orgEnhetResolver.orgEnheter(orgEnheterSearch);
     }
 
-    // OrgEnhet schema resolver starts here
-    @SchemaMapping(typeName = "OrgEnhet", field = "organisering")
+    @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")
     public List<Organisering> organisering(OrgEnhet orgEnhet, @Argument("retning") OrganiseringRetning retning) {
-        return Collections.emptyList();
+        return organiseringResolver.organiseringer(orgEnhet, retning);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "leder")
@@ -69,4 +78,12 @@ public class GraphQLOrgEnhetController {
     }
 
 
+    @SchemaMapping(typeName = "Organisering", field = "organisasjonsenhet")
+    public OrgEnhet organisasjonsenhet(Organisering organisering) {
+        return orgEnhet(organisering);
+    }
+    @SchemaMapping(typeName = "Organisering", field = "orgEnhet")
+    public OrgEnhet orgEnhet(Organisering organisering) {
+        return orgEnhetResolver.orgEnhet(organisering);
+    }
 }
