@@ -1,17 +1,15 @@
 package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class DvhRessursInterface {
 
     public static final String EKSTERN = "Eksternt";
@@ -20,25 +18,29 @@ public class DvhRessursInterface {
     public static final String ANNEN_STATLIG = "Annen Statlig";
     private final DvhRepository dvhRepository;
 
+    public DvhRessursInterface(DvhRepository dvhRepository) {
+        this.dvhRepository = dvhRepository;
+    }
+
     public Optional<DvhRessurs> getRessurs(String navIdent){
         return Optional.ofNullable(dvhRepository.getRessursByNavIdent().get(navIdent));
     }
 
-    public List<Sektor> getRessurstypeGraphQlResponse(String navIdent){
-        val ressurstype = getRessurs(navIdent)
+    public List<Sektor> getRessurstypeGraphQlResponse(String navIdent) {
+        return getRessurs(navIdent)
                 .map(r -> switch (r.getRemedyAnsattType()) {
-                            case STATLIG -> Sektor.NAV_STATLIG;
-                            case KOMMUNAL -> Sektor.NAV_KOMMUNAL;
-                            case EKSTERN, ANNEN_STATLIG -> Sektor.EKSTERN;
-                            default -> null;
-                        })
-                .orElse(null);
-
-        return ressurstype != null ? List.of(ressurstype) : List.of();
+                    case STATLIG -> Sektor.NAV_STATLIG;
+                    case KOMMUNAL -> Sektor.NAV_KOMMUNAL;
+                    case EKSTERN, ANNEN_STATLIG -> Sektor.EKSTERN;
+                    default -> null;
+                })
+                .map(Collections::singletonList)
+                .orElseGet(Collections::emptyList);
     }
 
-    public LocalDate getSluttdatoForPersonident(String personIdent){
+    public LocalDate getSluttdatoForPersonident(String personIdent) {
         return Optional.ofNullable(dvhRepository.getRessursByPersonident().get(personIdent))
-                .map(DvhRessurs::getSluttdato).orElse(null);
+                .map(DvhRessurs::getSluttdato)
+                .orElse(null);
     }
 }

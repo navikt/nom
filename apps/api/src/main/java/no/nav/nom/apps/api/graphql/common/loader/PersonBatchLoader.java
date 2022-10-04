@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
@@ -40,7 +39,6 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 @Component
 public class PersonBatchLoader {
 
-    public static String PERSON_DATALOADER = "PersonDataLoader";
     private final TokenRepository tokenRepository;
     private final AppProperties.Pdl pdlProperties;
     private final HttpGraphQlClient graphQlClient;

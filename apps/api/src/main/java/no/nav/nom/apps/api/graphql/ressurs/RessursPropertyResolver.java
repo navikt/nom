@@ -1,77 +1,72 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import graphql.execution.DataFetcherResult;
-import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.graphql.common.LoaderUtils;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.dataloader.BatchLoaderEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
-import static no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader.AD_RESSURS_DATALOADER;
-
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class RessursPropertyResolver {
 
-
+    private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
     private final boolean sendDummydata;
 
-    public RessursPropertyResolver(Environment env){
+    public RessursPropertyResolver(
+            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader,
+            Environment env
+    ) {
+        this.adRessursBatchLoader = activeDirectoryRessursBatchLoader;
         var naisClientId = env.getProperty("NAIS_CLUSTER_NAME");
         // Sliter med at AD fungerer dårlig i dev-miljø.
         sendDummydata = naisClientId != null && naisClientId.startsWith("dev");
     }
 
-    private CompletableFuture<DataFetcherResult<String>> respondWithDummydata(String data){
-        var o = DataFetcherResult.<String>newResult().data(data).build();
-        return CompletableFuture.completedFuture(o);
+    private Map<Ressurs, DataFetcherResult<String>> createDummyResponse(String fieldSpec, List<Ressurs> source) {
+        return source.stream()
+                .collect(toMap(Function.identity(), ressurs -> respondWithDummydata(fieldSpec + ressurs.getNavIdent())));
     }
 
-    public CompletableFuture<DataFetcherResult<String>> epost(Ressurs ressurs, DataFetchingEnvironment env) {
-        if(sendDummydata){
-            return respondWithDummydata("dummy-epost@i-dev." + ressurs.getNavIdent());
-        }
-        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getEmail);
+    private DataFetcherResult<String> respondWithDummydata(String data) {
+        return DataFetcherResult.<String>newResult()
+                .data(data)
+                .build();
     }
 
-    public CompletableFuture<DataFetcherResult<String>> visningsnavn(Ressurs ressurs, DataFetchingEnvironment env) {
-        if(sendDummydata){
-            return respondWithDummydata("dummy-visningsnavn-i-dev" + ressurs.getNavIdent());
+    public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+        if (sendDummydata) {
+            return createDummyResponse("dummy-epost@i-dev.", ressurser);
         }
-        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getDisplayName);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail, env);
     }
 
-    public CompletableFuture<DataFetcherResult<String>> visningsNavn(Ressurs ressurs, DataFetchingEnvironment env) {
-        return visningsnavn(ressurs, env);
+    public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+        if (sendDummydata) {
+            return createDummyResponse("dummy-visningsnavn-i-dev-", ressurser);
+        }
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getDisplayName, env);
     }
 
-    public CompletableFuture<DataFetcherResult<String>> fornavn(Ressurs ressurs, DataFetchingEnvironment env) {
-        if(ressurs.getFornavn() != null){
-            return CompletableFuture.completedFuture(DataFetcherResult.<String>newResult()
-                            .data(ressurs.getFornavn())
-                            .build()
-            );
+    public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+        if (sendDummydata) {
+            return createDummyResponse("dummy-fornavn-i-dev-", ressurser);
         }
-        if(sendDummydata){
-            return respondWithDummydata("dummy-fornavn-i-dev-" + ressurs.getNavIdent());
-        }
-        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getGivenName);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getGivenName, env);
     }
 
-    public CompletableFuture<DataFetcherResult<String>> etternavn(Ressurs ressurs, DataFetchingEnvironment env) {
-        if(ressurs.getEtternavn() != null){
-            return CompletableFuture.completedFuture(DataFetcherResult.<String>newResult()
-                    .data(ressurs.getEtternavn())
-                    .build()
-            );
+    public Map<Ressurs, DataFetcherResult<String>> etternavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+        if (sendDummydata) {
+            return createDummyResponse("dummy-etternnavn-i-dev-", ressurser);
         }
-        if(sendDummydata){
-            return respondWithDummydata("dummy-etternnavn-i-dev-" + ressurs.getNavIdent());
-        }
-        return LoaderUtils.get(env, AD_RESSURS_DATALOADER, ressurs.getNavIdent(), AdRessurs::getSurname);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getSurname, env);
     }
 
 }

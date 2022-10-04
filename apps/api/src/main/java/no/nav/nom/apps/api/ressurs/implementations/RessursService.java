@@ -132,14 +132,15 @@ public class RessursService implements IRessursService {
 
     @Override
     public Ressurs convertToGraphQlResponse(IRessurs ressurs) {
+        var sektor = dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent());
         return Ressurs.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
                 .navident(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
                 .personident(ressurs.getPersonIdent())
-                .ressurstype(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
-                .sektor(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
+                .ressurstype(sektor)
+                .sektor(sektor)
                 .sluttdato(dvhRessursInterface.getSluttdatoForPersonident(ressurs.getPersonIdent()))
                 .fornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn().orElseThrow()+" "+m).orElse(ressurs.getVisningsfornavn().orElse(null)))
                 .etternavn(ressurs.getVisningsetternavn().orElse(null))

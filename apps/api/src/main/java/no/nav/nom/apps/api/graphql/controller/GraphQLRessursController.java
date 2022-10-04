@@ -3,12 +3,13 @@ package no.nav.nom.apps.api.graphql.controller;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
+import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
 import no.nav.nom.apps.api.graphql.ressurs.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.OrgTilknytningResolver;
+import no.nav.nom.apps.api.graphql.ressurs.RessursPropertyResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
-import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
-import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -18,8 +19,8 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import no.nav.nom.contract.nom.api.graphql.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
+import org.dataloader.BatchLoaderEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
@@ -31,12 +32,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static java.util.Collections.emptyList;
 
 
 @Controller
@@ -44,16 +42,17 @@ import static java.util.Collections.emptyList;
 public class GraphQLRessursController {
 
     private final RessursResolver ressursResolver;
+    private final RessursPropertyResolver propertyResolver;
     private final TelefonResolver telefonResolver;
     private final LederResolver lederResolver;
     private final OrgTilknytningResolver orgTilknytningResolver;
-
     private final FolkeregisterPersonResolver personResolver;
     private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
     @Autowired
     public GraphQLRessursController(
             RessursResolver ressursResolver,
+            RessursPropertyResolver propertyResolver,
             TelefonResolver telefonResolver,
             LederResolver lederResolver,
             GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter,
@@ -61,6 +60,7 @@ public class GraphQLRessursController {
             FolkeregisterPersonResolver personResolver
     ) {
         this.ressursResolver = ressursResolver;
+        this.propertyResolver = propertyResolver;
         this.telefonResolver = telefonResolver;
         this.lederResolver = lederResolver;
         this.graphQLFieldConsumptionCounter = graphQLFieldConsumptionCounter;
@@ -97,74 +97,56 @@ public class GraphQLRessursController {
         return Mono.fromSupplier(() -> orgTilknytningResolver.getOrgTilknytning(ressurser));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "lederFor")
-    public List<LederOrgEnhet> lederFor(Ressurs ressurs) {
-        return lederResolver.lederFor(ressurs);
+    @BatchMapping(typeName = "Ressurs", field = "lederFor")
+    public Mono<Map<Ressurs, List<LederOrgEnhet>>> lederFor(List<Ressurs> ressurser) {
+        return Mono.fromSupplier(() -> lederResolver.load(ressurser, lederResolver::lederFor));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "ledere")
-    public List<RessursLeder> ledere(Ressurs ressurs) {
-        return lederResolver.ledere(ressurs);
+    @BatchMapping(typeName = "Ressurs", field = "ledere")
+    public Mono<Map<Ressurs, List<RessursLeder>>> ledere(List<Ressurs> ressurser) {
+        return Mono.fromSupplier(() -> lederResolver.load(ressurser, lederResolver::ledere));
     }
 
     @Deprecated
     @BatchMapping(typeName = "Ressurs", field = "person")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> person(List<Ressurs> ressurser) {
-        return folkeregisterPerson(ressurser);
+    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> person(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return folkeregisterPerson(ressurser, environment);
     }
 
     @BatchMapping(typeName = "Ressurs", field = "folkeregisterPerson")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser) {
-        // TODO: Implement batch loading
-        return Mono.fromSupplier(() -> personResolver.folkeregisterPerson(ressurser, Ressurs::getPersonIdent));
+    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return Mono.fromSupplier(() -> personResolver.folkeregisterPerson(ressurser, Ressurs::getPersonIdent, environment));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "epost")
-    public Optional<String> epost(Ressurs ressurs) {
-        return Optional.empty();
+    @BatchMapping(typeName = "Ressurs", field = "epost")
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> epost(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return Mono.fromSupplier(() -> propertyResolver.epost(ressurser, environment));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "visningsNavn")
-    public Optional<String> visningsNavn(Ressurs ressurs) {
-        return visningsnavn(ressurs);
+    @Deprecated(forRemoval = true)
+    @BatchMapping(typeName = "Ressurs", field = "visningsNavn")
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> visningsNavn(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return visningsnavn(ressurser, environment);
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "visningsnavn")
-    public Optional<String> visningsnavn(Ressurs ressurs) {
-        return Optional.empty();
+    @BatchMapping(typeName = "Ressurs", field = "visningsnavn")
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> visningsnavn(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return Mono.fromSupplier(() -> propertyResolver.visningsnavn(ressurser, environment));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "fornavn")
-    public Optional<String> fornavn(Ressurs ressurs) {
-        return Optional.empty();
+    @BatchMapping(typeName = "Ressurs", field = "fornavn")
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> fornavn(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return Mono.fromSupplier(() -> propertyResolver.fornavn(ressurser, environment));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "etternavn")
-    public Optional<String> etternavn(Ressurs ressurs) {
-        return Optional.empty();
+    @BatchMapping(typeName = "Ressurs", field = "etternavn")
+    public Mono<Map<Ressurs, DataFetcherResult<String>>> etternavn(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
+        return Mono.fromSupplier(() -> propertyResolver.etternavn(ressurser, environment));
     }
 
-    @SchemaMapping(typeName = "Ressurs", field = "telefon")
-    public List<Telefon> telefon(Ressurs ressurs) {
-        return telefonResolver.telefon(ressurs);
-    }
-
-    @Deprecated
-    @SchemaMapping(typeName = "Ressurs", field = "ressurstype")
-    public List<Sektor> ressurstype(Ressurs ressurs) {
-        return sektor(ressurs);
-    }
-
-    @SchemaMapping(typeName = "Ressurs", field = "sektor")
-    public List<Sektor> sektor(Ressurs ressurs) {
-        return emptyList();
-    }
-
-    @Deprecated
-    @SchemaMapping(typeName = "Ressurs", field = "sluttdato")
-    public Optional<LocalDate> sluttdato(Ressurs ressurs) {
-        return Optional.empty();
+    @BatchMapping(typeName = "Ressurs", field = "telefon")
+    public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
+        return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
     }
 
 }
-

@@ -4,6 +4,7 @@ import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,11 @@ public class ExceptionhandlerConfig {
     @Bean
     public DataFetcherExceptionResolver OpprettRessursExceptionResolver() {
         return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleOpprettRessursException);
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver ADResponseExceptionResolver() {
+        return DataFetcherExceptionResolver.forSingleError(ActiveDirectoryRessursBatchLoader::handleADResponseException);
     }
 
     @Bean

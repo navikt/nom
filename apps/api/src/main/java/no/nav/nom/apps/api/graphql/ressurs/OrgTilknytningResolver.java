@@ -11,11 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 @Component
 public class OrgTilknytningResolver {
@@ -30,19 +35,18 @@ public class OrgTilknytningResolver {
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
+        final var tilknytninger = koblingService.getKoblingerByNavidenter(
+                ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()),
+                this::fromDvhKobling
+        );
+
         return ressurser.stream()
                 .collect(
                         toMap(
                                 Function.identity(),
-                                this::getOrgTilknytning
+                                ressurs -> tilknytninger.getOrDefault(ressurs.getNavIdent(), emptyList())
                         )
                 );
-    }
-
-    public List<RessursOrgTilknytning> getOrgTilknytning(Ressurs ressurs) {
-        return koblingService.getKoblingerByNavIdent(ressurs.getNavIdent()).stream()
-                .map(this::fromDvhKobling)
-                .toList();
     }
 
     private RessursOrgTilknytning fromDvhKobling(Kobling kobling) {

@@ -2,17 +2,20 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.graphql.controller.GraphQLRessursController;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
 import no.nav.nom.contract.nom.api.graphql.TelefonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toMap;
 
 
 @Component
@@ -23,6 +26,10 @@ public class TelefonResolver {
 
     public TelefonResolver(DvhRepository dvhRepository) {
         this.dvhRepository = dvhRepository;
+    }
+
+    public Map<Ressurs, List<Telefon>> load(Collection<Ressurs> ressurser) {
+        return ressurser.stream().collect(toMap(Function.identity(), this::telefon));
     }
 
     public List<Telefon> telefon(Ressurs ressurs) {
