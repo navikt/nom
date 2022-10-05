@@ -21,8 +21,10 @@ spec:
       value: https://nom-proxy.dev-fss-pub.nais.io
     - name: NOM_PROXY_CLIENT_ID
       value: dev-fss.nom.nom-proxy
+
+      # 6f1992.. er fullmaktsregister-web, for å muliggjøre lokalutvikling for team-nøf
     - name: GRAPHQL_PREAUTH_QUERY_PERSON
-      value: 92ab93bd-0782-40c0-902b-7758c8878cb4, af2f9386-07cf-4fb9-8612-c4724335a43c
+      value: 92ab93bd-0782-40c0-902b-7758c8878cb4, af2f9386-07cf-4fb9-8612-c4724335a43c, 6f1992f0-f425-4512-b1f6-97a7e840414c
     - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
       value: 744e4092-4215-4e02-87df-a61aaf1b95b5, b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b, af2f9386-07cf-4fb9-8612-c4724335a43c
     - name: NOM_WRITE_GROUPID
