@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch.EMPTY_SEARCH;
+
 @Controller
 public class GraphQLOrgEnhetController {
 
@@ -57,14 +59,14 @@ public class GraphQLOrgEnhetController {
 
     @Deprecated(forRemoval = true)
     @QueryMapping("organisasjonsenheter")
-    public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+    public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") Optional<OrgEnheterSearch> orgEnheterSearch, DataFetchingEnvironment environment) {
         return orgEnheter(orgEnheterSearch, environment);
     }
 
     @QueryMapping("orgEnheter")
-    public List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+    public List<OrgEnhetResult> orgEnheter(@Argument("where") Optional<OrgEnheterSearch> orgEnheterSearch, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return orgEnhetResolver.orgEnheter(orgEnheterSearch);
+        return orgEnhetResolver.orgEnheter(orgEnheterSearch.orElse(EMPTY_SEARCH));
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")

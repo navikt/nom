@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.graphql.common.projections.RessurserSearch.EMPTY_SEARCH;
+
 
 @Controller
 @SchemaMapping(typeName = "Ressurs")
@@ -68,20 +70,20 @@ public class GraphQLRessursController {
         this.personResolver = personResolver;
     }
 
-    @QueryMapping
+    @QueryMapping("ressurs")
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment environment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
         graphQLFieldConsumptionCounter.count(environment);
         return ressursResolver.ressurs(search);
     }
 
-    @QueryMapping
-    public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment environment) {
+    @QueryMapping("ressurser")
+    public List<RessursResult> ressurser(@Argument("where") Optional<RessurserSearch> search, DataFetchingEnvironment environment) {
         graphQLFieldConsumptionCounter.count(environment);
-        return ressursResolver.ressurser(search);
+        return ressursResolver.ressurser(search.orElse(EMPTY_SEARCH));
     }
 
-    @MutationMapping
+    @MutationMapping("opprettRessurs")
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token) {
         return ressursResolver.opprettRessurs(request, environment, token);
     }

@@ -5,6 +5,8 @@ import org.springframework.data.web.ProjectedPayload;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Collections.emptySet;
+
 /**
  * Projected payload for binding the graphql input type RessurserSearch
  * Use resolvePersonidenter() to resolve the list of personidenter to search for.
@@ -12,6 +14,7 @@ import java.util.Set;
  */
 @ProjectedPayload
 public interface RessurserSearch {
+    RessurserSearch EMPTY_SEARCH = emptyRessurserSearch();
     @Deprecated(forRemoval = true)
     Set<String> getPersonIdenter();
     Set<String> getPersonidenter();
@@ -40,5 +43,29 @@ public interface RessurserSearch {
             identer.addAll(getNavIdenter());
         }
         return identer;
+    }
+
+    static RessurserSearch emptyRessurserSearch() {
+        return new RessurserSearch() {
+            @Override
+            public Set<String> getPersonIdenter() {
+                return emptySet();
+            }
+
+            @Override
+            public Set<String> getPersonidenter() {
+                return emptySet();
+            }
+
+            @Override
+            public Set<String> getNavIdenter() {
+                return emptySet();
+            }
+
+            @Override
+            public Set<String> getNavidenter() {
+                return emptySet();
+            }
+        };
     }
 }
