@@ -9,13 +9,17 @@ import {
 } from "@navikt/ds-react";
 import { useForm } from "react-hook-form";
 import { css } from "@emotion/css";
-import { useState } from "react";
-import ModalResource from "./ModalResource";
+import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
 import * as Gq from "../../api/generated/graphql_generated";
 
 const rowStyles = css({
   display: "flex",
   marginTop: "1.2rem",
+  gap: "1rem",
+
+  "& > *": {
+    flex: 1,
+  },
 });
 
 export type InitialValuesResourceForm = {
@@ -35,7 +39,6 @@ const ResourceForm = (props: ResourceFormProps) => {
   const { register, handleSubmit, getValues } = useForm({
     defaultValues: { ...initialValues },
   });
-  const [showModal, setShowModal] = useState<boolean>(false);
 
   return (
     <form onSubmit={handleSubmit((form: any) => onSubmit(form))}>
@@ -55,14 +58,12 @@ const ResourceForm = (props: ResourceFormProps) => {
           <TextField
             type="text"
             label="Fornavn"
-            className={css({ width: "48%", marginRight: "1rem" })}
             autoComplete="off"
             {...register("visningsfornavn")}
           />
           <TextField
             type="text"
             label="Etternavn"
-            className={css({ width: "48%" })}
             autoComplete="off"
             {...register("visningsetternavn")}
           />
@@ -92,24 +93,13 @@ const ResourceForm = (props: ResourceFormProps) => {
         </div>
 
         <div className={rowStyles}>
-          <Button
-            type="button"
-            className={css({ marginRight: "1rem" })}
-            onClick={() =>
-              showModal ? setShowModal(false) : setShowModal(true)
-            }
-          >
-            Opprett ressurs
-          </Button>
+          <CreateResourceConfirmationModal
+            formValues={getValues()}
+            onSubmit={onSubmit}
+          />
           <Button variant="secondary">Avbryt</Button>
         </div>
       </div>
-      <ModalResource
-        isOpen={showModal}
-        formValues={getValues()}
-        onSubmit={onSubmit}
-        closeModal={() => setShowModal(false)}
-      />
     </form>
   );
 };
