@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.controller;
 
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.projections.PersonSearch;
 import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
 import no.nav.nom.apps.api.graphql.person.PersonResolver;

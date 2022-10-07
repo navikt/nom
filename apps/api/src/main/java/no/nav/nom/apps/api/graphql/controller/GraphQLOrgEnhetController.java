@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.controller;
 
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;

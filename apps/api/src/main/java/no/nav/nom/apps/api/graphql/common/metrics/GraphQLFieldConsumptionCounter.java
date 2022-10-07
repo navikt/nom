@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common;
+package no.nav.nom.apps.api.graphql.common.metrics;
 
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
