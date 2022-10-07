@@ -4,7 +4,8 @@
  * Makes it possible to preview webapp changes in a prod environment without having to deploy code.
  */
 
-let postedHtml = {}
+let postedHtml = {};
+
 
 export function setupUiDevEndpoint(app) {
     app.get('/uidev', (req, res, next) => {
@@ -15,14 +16,41 @@ export function setupUiDevEndpoint(app) {
                 return;
             }
             let {html: spaHtml, port: port} = postedHtml[req.query.ses]
+            spaHtml = spaHtml.replaceAll(
+                `import RefreshRuntime from "/@react-refresh"`,
+                `import RefreshRuntime from "` + "http://localhost:"+ port +  `/@react-refresh"`
+            )
             spaHtml = spaHtml.replaceAll("href=\"/","href=\"http://localhost:"+ port + "/")
             spaHtml = spaHtml.replaceAll("src=\"/","src=\"http://localhost:" + port + "/")
             res.send(spaHtml)
             return;
         }
         const sessionLinks = Object.keys(postedHtml).map(it => "<a href=\"/uidev?ses=" + it + "\">" + it + " (localhost:" + postedHtml[it].port + ")</a>").join("<br/>")
-        res.send(`
-            <!DOCTYPE html>
+        res.send(uidevWebHtml(sessionLinks));
+    });
+
+    app.post('/uidev', async (req, res, next) => {
+        const reqBody = await req.read();
+        if(Object.keys(postedHtml).length > 10) {
+            res.status(403).send("Too many uidev sessions. Cannot add more")
+            return;
+        }
+        const ses = req.query["ses"] || "default";
+        const port = req.query["port"] || "4173"
+        postedHtml[ses] = {html: reqBody.toLocaleString(), port};
+        res.redirect("/uidev?ses=" + ses);
+    })
+
+    app.delete('/uidev',(req,res,next) => {
+        const l = Object.keys(postedHtml).length;
+        postedHtml = {}
+        res.status(200).send("deleted " + l + " html entries.")
+    })
+}
+
+
+function uidevWebHtml(sessionLinks) {
+    return `<!DOCTYPE html>
             <html lang="en">
             <head>
                 <script>
@@ -65,26 +93,7 @@ export function setupUiDevEndpoint(app) {
             </div>
 
             </body>
-            </html>`);
-    });
-
-    app.post('/uidev', async (req, res, next) => {
-        const reqBody = await req.read();
-        if(Object.keys(postedHtml).length > 10) {
-            res.status(403).send("Too many uidev sessions. Cannot add more")
-            return;
-        }
-        const ses = req.query["ses"] || "default";
-        const port = req.query["port"] || "4173"
-        postedHtml[ses] = {html: reqBody.toLocaleString(), port};
-        res.redirect("/uidev?ses=" + ses);
-    })
-
-    app.delete('/uidev',(req,res,next) => {
-        const l = Object.keys(postedHtml).length;
-        postedHtml = {}
-        res.status(200).send("deleted " + l + " html entries.")
-    })
+            </html>`;
 }
 
 
