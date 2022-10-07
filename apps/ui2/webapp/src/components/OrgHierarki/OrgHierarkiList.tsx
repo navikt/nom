@@ -18,20 +18,23 @@ import { useEffect, useRef } from "react";
 const scrollToRef = (ref: any) =>
   window.scrollTo(0, ref.current.offsetTop - 100);
 
-const linkStyles = css({ textDecoration: "none", color: "#262626" });
+const linkStyles = css({
+  textDecoration: "none",
+  color: "var(--navds-global-color-gray-900)",
+});
 
 const ressursLinkStyles = css({
   display: "flex",
   marginTop: "30px",
   fontWeight: "600",
   textDecoration: "none",
-  color: "#262626",
+  color: "var(--navds-global-color-gray-900)",
 });
 const dividerStyles = css({
-  background: "#00347D",
+  background: "var(--navds-global-color-blue-800)",
   height: "20px",
   width: "2px",
-  border: "1px solid #00347D",
+  border: "1px solid var(--navds-global-color-blue-800)",
   margin: "0 auto",
 });
 const Divider = () => <div className={dividerStyles}></div>;

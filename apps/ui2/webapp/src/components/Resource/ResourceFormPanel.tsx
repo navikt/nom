@@ -6,8 +6,8 @@ const panelStyles = css({
   margin: "0 auto",
   width: "70%",
   padding: "2rem",
-  border: "1px solid #B0B0B0",
-  borderTop: "5px solid #236B7D",
+  border: "1px solid  var(--navds-global-color-gray-400)",
+  borderTop: "5px solid var(--navds-global-color-lightblue-800)",
   borderRadius: "5px",
 });
 

@@ -46,7 +46,10 @@ const LabelAndText = (props: {
     {!props.linkTo && <Label>{props.text}</Label>}
 
     {props.linkTo && (
-      <Link to={props.linkTo} className={css({ color: "#262626" })}>
+      <Link
+        to={props.linkTo}
+        className={css({ color: "var(--navds-global-color-gray-900)" })}
+      >
         <Label>{props.text}</Label>
       </Link>
     )}

@@ -7,7 +7,7 @@ const titleStyles = css({
   fontWeight: "800",
   lineHeight: "24px",
   letterSpacing: "0em",
-  color: "#262626",
+  color: "var(--navds-global-color-gray-900)",
 });
 
 type PageTitleProps = {

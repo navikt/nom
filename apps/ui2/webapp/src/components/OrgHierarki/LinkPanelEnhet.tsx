@@ -15,7 +15,7 @@ const commonCss = css({
 });
 
 const linkPanelCurrentStyles = css(commonCss, {
-  backgroundColor: "#DEECEF",
+  backgroundColor: "var(--nom-secondary-hover)",
   height: "150px",
 });
 const linkPanelLargeStyles = css(commonCss, {

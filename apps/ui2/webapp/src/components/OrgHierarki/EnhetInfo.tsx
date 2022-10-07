@@ -56,7 +56,9 @@ const EnhetInfo = (props: EnhetInfoProps) => {
               leder ? (
                 <Link
                   to={getUrlForLeder()}
-                  className={css({ color: "#262626" })}
+                  className={css({
+                    color: "var(--navds-global-color-gray-900)",
+                  })}
                 >
                   <Label>{lederNavn}</Label>
                 </Link>

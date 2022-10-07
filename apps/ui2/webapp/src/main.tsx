@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
+import "./resources/designSystemColorsOverrides.css";
 import { BrowserRouter } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./api/apolloclient";
@@ -12,7 +13,7 @@ import Footer, { footerHeigth } from "./components/Footer";
 import PilotBanner from "./components/PilotBanner";
 
 const layoutStyle = css({
-  backgroundColor: "#F1F1F1",
+  backgroundColor: "var(--navds-global-color-gray-100)",
   minHeight: `calc(100vh - ${headerHeight} - ${footerHeigth})`,
   width: "100%",
   display: "flex",

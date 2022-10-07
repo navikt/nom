@@ -18,7 +18,7 @@ const commonCss = css({
   gridAutoFlow: "column",
   gridTemplateColumns: "min-content 1fr min-content",
   alignItems: "center",
-  border: "1px solid #B0B0B0",
+  border: "1px solid var(--navds-global-color-gray-400)",
   borderRadius: "5px",
   marginBottom: "15px",
 });
@@ -28,35 +28,35 @@ const innerCommonCss = css({
 });
 
 const linkPanelCurrentStyles = css(commonCss, {
-  backgroundColor: "#DEECEF",
+  backgroundColor: "var(--nom-secondary-hover)",
   minHeight: "160px",
   gridAutoFlow: "row",
   gridTemplateColumns: "1fr",
 });
 const linkPanelLargeStyles = css(commonCss, {
-  backgroundColor: "#FFFFFF",
+  backgroundColor: "var(--navds-global-color-white)",
   minHeight: "130px",
   width: "100%",
 });
 const linkPanelOverenhetStyles = css(commonCss, {
-  backgroundColor: "#FFFFFF",
+  backgroundColor: "var(--navds-global-color-white)",
   minHeight: "90px",
   width: "100%",
   marginBottom: "0px",
 });
 const linkPanelKoblingStyles = css(commonCss, {
-  backgroundColor: "#FFFFFF",
+  backgroundColor: "var(--navds-global-color-white)",
   minHeight: "70px",
   width: "100%",
 });
 const linkPanelRessursStyles = css({
-  backgroundColor: "#DEECEF",
+  backgroundColor: "var(--nom-secondary-hover)",
   width: "100%",
-  borderTop: "5px solid #236B7D",
+  borderTop: "5px solid var(--navds-global-color-lightblue-800)",
   borderRadius: "5px",
-  borderLeft: "1px solid #B0B0B0",
-  borderRight: "1px solid #B0B0B0",
-  borderBottom: "1px solid #B0B0B0",
+  borderLeft: "1px solid var(--navds-global-color-gray-400)",
+  borderRight: "1px solid var(--navds-global-color-gray-400)",
+  borderBottom: "1px solid var(--navds-global-color-gray-400)",
 });
 
 const iconStyle = css({
@@ -64,7 +64,7 @@ const iconStyle = css({
   display: "grid",
   justifyItems: "center",
   alignItems: "center",
-  backgroundColor: "#236B7D",
+  backgroundColor: "var(--navds-global-color-lightblue-800)",
   color: "white",
   img: {
     padding: "0.2rem",

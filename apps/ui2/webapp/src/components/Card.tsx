@@ -3,10 +3,10 @@ import { ReactNode } from "react";
 import { titleStyles } from "./Styles";
 
 const cardStyles = css({
-  background: "#FFFFFF",
+  background: "var(--navds-global-color-white)",
   width: "100%",
   padding: "20px 35px",
-  border: "1px solid #707070",
+  border: "1px solid var(--navds-global-color-gray-600)",
   borderRadius: "5px",
   marginTop: "25px",
 });

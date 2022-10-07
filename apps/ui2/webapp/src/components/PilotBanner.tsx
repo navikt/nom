@@ -7,9 +7,9 @@ import { InfoIcon } from "./Images";
 const outerDivStyles = css({
   width: "100%",
   minHeight: "50px",
-  backgroundColor: "#DEECEF",
-  borderBottom: "1px solid #236B7D",
-  borderTop: "1px solid #236B7D",
+  backgroundColor: "var(--nom-secondary-hover)",
+  borderBottom: "1px solid var(--navds-global-color-lightblue-800)",
+  borderTop: "1px solid var(--navds-global-color-lightblue-800)",
 });
 
 const bannerStyles = css({

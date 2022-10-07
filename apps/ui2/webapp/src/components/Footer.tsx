@@ -7,7 +7,7 @@ const outerDiv = css({
   width: "100%",
   bottom: "0",
   height: footerHeigth,
-  background: "#134852",
+  background: "var(--navds-global-color-lightblue-900)",
 });
 
 const innerDiv = css({
@@ -17,7 +17,7 @@ const innerDiv = css({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  color: "#ffffff",
+  color: "var(--navds-global-color-white)",
   textAlign: "center",
 });
 

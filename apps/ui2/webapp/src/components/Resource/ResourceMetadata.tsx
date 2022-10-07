@@ -3,8 +3,8 @@ import { BodyShort, Heading, Label } from "@navikt/ds-react";
 import { FolkeregisterPerson as Person } from "../../api/generated/graphql_generated";
 
 const contentStyles = css({
-  backgroundColor: "#DEECEF",
-  border: "1px solid #B0B0B0",
+  backgroundColor: "var(--nom-secondary-hover)",
+  border: "1px solid var(--navds-global-color-gray-400)",
   borderRadius: "4px",
   marginTop: "2rem",
   padding: "1rem",

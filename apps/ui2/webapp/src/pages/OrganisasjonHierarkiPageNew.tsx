@@ -16,11 +16,11 @@ import {
 } from "../api/transformations/hierarchy";
 
 const colorPalette = {
-  rim: "#236B7D",
-  focusedBackground: "#DEECEF",
-  unfocusedBackground: "#FFFFFF",
-  panelBorder: "#B0B0B0",
-  font: "#262626",
+  rim: "var(--navds-global-color-lightblue-800)",
+  focusedBackground: "var(--nom-secondary-hover)",
+  unfocusedBackground: "var(--navds-global-color-white)",
+  panelBorder: "var(--navds-global-color-gray-400)",
+  font: "var(--navds-global-color-gray-900)",
 };
 
 const BuildingSvg = (props: { className?: string }) => (

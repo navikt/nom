@@ -1,0 +1,17 @@
+
+:root {
+    /*Define the primary color used in nom*/
+    --nom-primary: var(--navds-global-color-lightblue-800);
+    --nom-primary-hover: var(--navds-global-color-lightblue-900);
+    --nom-primary-active: var(--navds-global-color-deepblue-500);
+    --nom-secondary-hover: #DEECEF;
+
+    --navds-button-color-primary-background: var(--nom-primary);
+    --navds-button-color-primary-background-active: var(--nom-primary-active);
+
+    --navds-semantic-color-interaction-primary: var(--nom-primary);
+    --navds-semantic-color-interaction-primary-hover: var(--nom-primary-hover);
+    --navds-semantic-color-interaction-primary-hover-subtle: var(--nom-secondary-hover);
+    --navds-semantic-color-focus: var(--nom-primary);
+    --navds-text-field-color-border-hover: var(--nom-primary);
+}

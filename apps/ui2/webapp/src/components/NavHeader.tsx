@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { nomLogoCircle } from "./Images";
 import { Search } from "@navikt/ds-react";
 import { PeopleFilled } from "@navikt/ds-icons";
-import { mediaQueryContentWidth, NomColors } from "../resources/NomStyles";
+import { mediaQueryContentWidth } from "../resources/NomStyles";
 
 export const headerHeight = "6rem";
 
@@ -51,36 +51,12 @@ const userText = css({
   fontWeight: "700",
   fontSize: "16px",
   lineHeight: "30px",
-  color: NomColors.primaryColor,
+  color: "var(--nom-interaction-primary)",
   marginRight: "1rem",
 });
 
 const verticallyCenter = css({
   textAlign: "center",
-});
-
-const searchBarStyle = css({
-  minWidth: "18rem",
-  color: NomColors.primaryColor,
-  ":hover": {
-    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
-    border: NomColors.primaryColor,
-  },
-  ":focus": {
-    boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
-  },
-
-  button: {
-    color: NomColors.primaryColor,
-
-    ":hover": {
-      backgroundColor: NomColors.primaryAccent,
-      color: NomColors.primaryColor,
-    },
-    ":focus": {
-      boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
-    },
-  },
 });
 
 const NavHeader = () => {
@@ -103,7 +79,6 @@ const NavHeader = () => {
         <Search
           disabled={true}
           placeholder={"Søkefunksjonalitet kommer"}
-          className={searchBarStyle}
           label={"Søk etter ressurser"}
           variant="secondary"
           size="medium"
@@ -118,7 +93,7 @@ const NavHeader = () => {
             className={css({
               minWidth: "2rem",
             })}
-            color="#236B7D"
+            color="var(--nom-primary)"
             fontSize={"2rem"}
           />
           <span className={userText}>{session}</span>

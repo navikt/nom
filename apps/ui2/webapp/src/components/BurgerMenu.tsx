@@ -4,22 +4,21 @@ import { Button, Label } from "@navikt/ds-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { addPerson, hierarchy2 } from "./Images";
-import { NomColors } from "../resources/NomStyles";
 
 const BurgerButton = css({
   display: "flex",
   width: "6.3rem",
   height: "2.5rem",
   padding: "0.5rem",
-  color: NomColors.primaryColor,
+  color: "var(--nom-interaction-primary)",
   borderRadius: "0.25rem",
-  boxShadow: `inset 0 0 0 2px ${NomColors.primaryColor}`,
+  boxShadow: `inset 0 0 0 2px var(--nom-interaction-primary)`,
   ":hover": {
-    backgroundColor: NomColors.primaryAccent,
-    color: NomColors.primaryColor,
+    backgroundColor: "var(--nom-interaction-primary-hover)",
+    color: "var(--nom-interaction-primary)",
   },
   ":focus": {
-    boxShadow: `inset 0 0 0 4px ${NomColors.primaryColor}`,
+    boxShadow: `inset 0 0 0 4px var(--nom-interaction-primary)`,
   },
 });
 
@@ -30,14 +29,14 @@ const buttonIcon = css({
 const linkStyle = css({
   display: "flex",
   textDecoration: "none",
-  color: "#262626",
+  color: "var(--navds-global-color-gray-900)",
   padding: "1rem",
-  borderBottom: "solid 1px #E5E5E5",
+  borderBottom: "solid 1px var(--navds-global-color-gray-200)",
 });
 
 const dropdownContent = css({
   position: "absolute",
-  backgroundColor: "#ffffff",
+  backgroundColor: "var(--navds-global-color-white)",
   minWidth: "160px",
   boxShadow: "0px 8px 16px 0px rgba(0,0,0,0.2)",
   zIndex: "1",

@@ -4,10 +4,10 @@ import ContentWrapper from "./ContentWrapper";
 import { nomLogo } from "./Images";
 
 const bannerStyles = css({
-  background: "#134852",
+  background: "var(--navds-global-color-lightblue-900)",
   width: "100%",
   height: "100px",
-  color: "#FFFFFF",
+  color: "var(--navds-global-color-white)",
   display: "flex",
   marginRight: "2.5rem",
 });
