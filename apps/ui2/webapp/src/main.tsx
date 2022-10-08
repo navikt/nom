@@ -1,5 +1,4 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
 import "./resources/designSystemColorsOverrides.css";
@@ -8,9 +7,11 @@ import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./api/apolloclient";
 import { css } from "@emotion/css";
 import AppRoutes from "./routes";
-import NavHeader, { headerHeight } from "./components/NavHeader";
 import Footer, { footerHeigth } from "./components/Footer";
 import PilotBanner from "./components/PilotBanner";
+import { getSession, SessionInterface } from "./api/getSession";
+import NavHeader, { headerHeight } from "./components/NavHeader";
+import { Loader } from "@navikt/ds-react";
 
 const layoutStyle = css({
   backgroundColor: "var(--navds-global-color-gray-100)",
@@ -19,22 +20,54 @@ const layoutStyle = css({
   display: "flex",
 });
 
-const container = document.getElementById("root");
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const root = createRoot(container!);
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <ApolloProvider client={apolloClient}>
-        <NavHeader />
-        <PilotBanner />
-        <div className={layoutStyle}>
-          <div className={css({ width: "100%" })}>
-            <AppRoutes />
-          </div>
-        </div>
-        <Footer />
-      </ApolloProvider>
-    </BrowserRouter>
-  </React.StrictMode>
-);
+export enum UserRole {
+  ROLE_NONE = "ROLE_NONE",
+  ROLE_WRITE = "ROLE_WRITE",
+  ROLE_ADMIN = "ROLE_ADMIN",
+}
+
+const UserSessionContext = React.createContext<SessionInterface>({
+  roles: [],
+  navident: "?",
+  name: "",
+});
+
+export function useSessionContext() {
+  return React.useContext(UserSessionContext);
+}
+
+export function Main() {
+  const [rolesFetched, setRolesFetched] = React.useState(false);
+  const [sessionInfo, setSessionInfo] = React.useState<SessionInterface | null>(
+    null
+  );
+
+  React.useEffect(() => {
+    getSession()
+      .then((j) => setSessionInfo(j as any))
+      .finally(() => setRolesFetched(true));
+  }, []);
+
+  if (!rolesFetched || !sessionInfo) {
+    return <Loader />;
+  }
+
+  return (
+    <React.StrictMode>
+      <BrowserRouter>
+        <ApolloProvider client={apolloClient}>
+          <UserSessionContext.Provider value={sessionInfo}>
+            <NavHeader />
+            <PilotBanner />
+            <div className={layoutStyle}>
+              <div className={css({ width: "100%" })}>
+                <AppRoutes />
+              </div>
+            </div>
+            <Footer />
+          </UserSessionContext.Provider>
+        </ApolloProvider>
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+}
