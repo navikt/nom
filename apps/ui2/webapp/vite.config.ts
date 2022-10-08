@@ -18,6 +18,11 @@ export default defineConfig({
         target: "http://localhost:8080/",
         changeOrigin: true
       }
-    }
+    },
+    hmr: {
+      // necessary to make hot reloading work in uidev mode in prod and dev environments
+      // otherwise secure web sockets protocol (wss) will be inferred from https prefix
+      protocol: "ws"
+    },
   }
 })

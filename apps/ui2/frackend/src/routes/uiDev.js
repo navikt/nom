@@ -51,7 +51,7 @@ export function setupUiDevEndpoint(app) {
         spaHtml = spaHtml.replaceAll("href=\"/","href=\"http://localhost:"+ port + "/")
         spaHtml = spaHtml.replaceAll("src=\"/","src=\"http://localhost:" + port + "/")
         spaHtml = spaHtml.replace("<body>",
-            `<body><a id="nom-uidev-warning-banner" href=\"/uidev\"><strong>UIDEVMODE!</strong></a>`
+            `<body><a tabindex="-1" id="nom-uidev-warning-banner" href=\"/uidev\">UIDEV MODE</a>`
             )
         postedHtml[ses] = {html: spaHtml, port};
         res.redirect("/uidev?ses=" + ses);
@@ -79,7 +79,8 @@ export function setupUiDevEndpoint(app) {
             next()
             return
         }
-        if(!postedHtml[uidevSessionValue]){
+        const sessionIsFound = !!postedHtml[uidevSessionValue]
+        if(!sessionIsFound){
             res.status(404).send(`
                 <h1>Error: uidev session is empty</h1>
                 <div>Found uidev cookie, but its value is not associated with any uploaded html</div>
@@ -207,7 +208,16 @@ function pageHtml(currentSession) {
                     <li>Upload index.html from dev server to this host with the upload button</li>
                     <li>Click the uidev session button to set a cookie that will enable uidev mode</li>
                 </ol>
-                <div>Note: Only tested with vite.js</div>
+                <div><strong>Notes...</strong></div>
+                <ul>
+                <li>Only tested with vite.js</li>
+                <li><span>CHROME USERS!</span>
+                <small>Some functionality may be missing because redirects to <code>http://localhost/...</code> 
+                are changed into <code>https://localhost/...</code> by the chrome browser. 
+                To bypass this, click the padlock icon next to the nom URL, open site specific settings, 
+                then change the "unsafe content" setting from "blocked" to "allowed"
+                </small></li>
+                </ul>
                 <hr/>
                 <div>Dev server portnumber on localhost:<br/><input id="input-portnumber" value="5173"/></div>
                 <div>Session id:<br/><input id="input-sesid" value="default"/></div>
