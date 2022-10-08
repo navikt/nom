@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { Hamburger } from "@navikt/ds-icons";
 import { Button, Label } from "@navikt/ds-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { addPerson, hierarchy2 } from "./Images";
 
 const BurgerButton = css({
@@ -55,12 +55,41 @@ const linkImage = css({
 const ListItem = (props: { label: string; url: string; icon: string }) => (
   <Link to={props.url} className={linkStyle}>
     <img src={props.icon} alt={props.label + "- icon"} className={linkImage} />
-    <Label>{props.label}</Label>
+    <Label
+      className={css`
+        cursor: pointer;
+      `}
+    >
+      {props.label}
+    </Label>
   </Link>
 );
 
 const BurgerMenu = () => {
   const [showMenu, setShowMenu] = React.useState<boolean>(false);
+  const menuContent = React.useRef<HTMLDivElement>(null);
+  const mouseLeaveListenerRef = React.useRef(() => {
+    setShowMenu(false);
+  });
+  const loc = useLocation();
+  const path = loc.pathname;
+
+  React.useEffect(() => {
+    if (menuContent.current) {
+      const el = menuContent.current;
+      el.addEventListener("mouseleave", mouseLeaveListenerRef.current);
+      return () =>
+        el.removeEventListener("mouseleave", mouseLeaveListenerRef.current);
+    }
+  }, [showMenu, menuContent]);
+
+  React.useEffect(
+    function hideMenuOnPathChange() {
+      setShowMenu(false);
+    },
+    [path]
+  );
+
   return (
     <div className={dropDown}>
       <Button
@@ -74,7 +103,7 @@ const BurgerMenu = () => {
       </Button>
 
       {showMenu && (
-        <div className={dropdownContent}>
+        <div ref={menuContent} className={dropdownContent}>
           <ListItem
             label="Organisasjonshierarki"
             url="/org"

@@ -1,11 +1,12 @@
-import { getSession } from "../api/getSession";
-import React, { useEffect } from "react";
+import React from "react";
 import { css } from "@emotion/css";
 import { Link } from "react-router-dom";
 import { nomLogoCircle } from "./Images";
 import { Search } from "@navikt/ds-react";
 import { PeopleFilled } from "@navikt/ds-icons";
 import { mediaQueryContentWidth } from "../resources/NomStyles";
+import { UserRole, useSessionContext } from "../main";
+import BurgerMenu from "./BurgerMenu";
 
 export const headerHeight = "6rem";
 
@@ -60,14 +61,8 @@ const verticallyCenter = css({
 });
 
 const NavHeader = () => {
-  const [session, setSession] = React.useState<any>();
-
-  useEffect(() => {
-    (async () => {
-      const { navident } = await getSession();
-      setSession(navident);
-    })();
-  }, []);
+  const ses = useSessionContext();
+  const hasWrite = ses.roles.includes(UserRole.ROLE_WRITE);
 
   return (
     <div className={outerDiv}>
@@ -96,9 +91,9 @@ const NavHeader = () => {
             color="var(--nom-primary)"
             fontSize={"2rem"}
           />
-          <span className={userText}>{session}</span>
+          <span className={userText}>{ses.navident}</span>
+          {hasWrite && <BurgerMenu />}
         </span>
-        {/* <BurgerMenu /> */}
       </div>
     </div>
   );
