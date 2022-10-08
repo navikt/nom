@@ -31,9 +31,9 @@ await setupAuth.setupAuth(app);
 nomApiSetupProxy(app);
 teamcatApiSetupProxy(app)
 
-setupUiDevEndpoint(app);
-
 setupGqlPlaygroundProxy(app);
+
+setupUiDevEndpoint(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);
