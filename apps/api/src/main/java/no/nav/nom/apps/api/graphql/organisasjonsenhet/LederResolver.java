@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 
-@Component
+@Component("OrgEnhetsLeder")
 public class LederResolver {
 
     private final DvhRepository dvhRepository;

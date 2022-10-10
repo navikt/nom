@@ -43,12 +43,13 @@ public class GraphQLPersonController {
 
     @Deprecated
     @SchemaMapping(typeName = "PersonResult", field = "person")
-    public DataFetcherResult<FolkeregisterPerson> person(PersonResult person) {
-        return folkeregisterPerson(person);
+    public DataFetcherResult<FolkeregisterPerson> person(PersonResult person, DataFetchingEnvironment environment) {
+        return folkeregisterPerson(person, environment);
     }
 
+    // TODO: Consider changing to BatchMapping to avoid having to figure out how to create a new BatchLoaderEnvironment
     @SchemaMapping(typeName = "PersonResult", field = "folkeregisterPerson")
-    public DataFetcherResult<FolkeregisterPerson> folkeregisterPerson(PersonResult person) {
-        return folkeregisterPersonResolver.folkeregisterPerson(person, PersonResult::getPersonIdent);
+    public DataFetcherResult<FolkeregisterPerson> folkeregisterPerson(PersonResult person, DataFetchingEnvironment environment) {
+        return folkeregisterPersonResolver.folkeregisterPerson(person, PersonResult::getPersonIdent, environment);
     }
 }

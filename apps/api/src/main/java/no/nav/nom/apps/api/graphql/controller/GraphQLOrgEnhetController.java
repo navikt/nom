@@ -14,6 +14,7 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
@@ -37,7 +38,7 @@ public class GraphQLOrgEnhetController {
             OrgEnhetResolver orgEnhetResolver,
             OrgEnhetKoblingResolver koblingResolver,
             OrganiseringResolver organiseringResolver,
-            LederResolver lederResolver,
+            @Qualifier("OrgEnhetsLeder") LederResolver lederResolver,
             GraphQLFieldConsumptionCounter counter
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
