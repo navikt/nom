@@ -20,10 +20,9 @@ public class OrganiseringResolver {
 
     public List<Organisering> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
         return  dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn()).stream()
-                .map(o -> convert(o, orgEnhet))
-                .filter(o -> retning == null || o.getRetning() == retning)
+                .map(organisering -> convert(organisering, orgEnhet))
+                .filter(organisering -> retning == null || organisering.getRetning() == retning)
                 .toList();
-
     }
 
     private Organisering convert(DvhOrganisering organisering, OrgEnhet orgEnhet) {

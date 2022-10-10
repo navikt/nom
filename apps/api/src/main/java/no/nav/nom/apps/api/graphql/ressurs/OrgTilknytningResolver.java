@@ -50,7 +50,7 @@ public class OrgTilknytningResolver {
     }
 
     private RessursOrgTilknytning fromDvhKobling(Kobling kobling) {
-        final var orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(kobling.getAgressoId(), kobling.getOrgNiv(), null).get();
+        final var orgenhet = orgenhetService.getEnhetByAgressoIdAndOrgniv(kobling.getAgressoId(), kobling.getOrgNiv()).get();
         final var orgEnhetGqlResponse = OrgEnhetResolver.convertToOrgEnhet(orgenhet);
 
         return RessursOrgTilknytning.builder()

@@ -30,11 +30,6 @@ public class OrgEnhetResolver {
         }
         return Optional.empty();
     }
-    public OrgEnhet orgEnhet(Organisering organisering) {
-        return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
-                .map(OrgEnhetResolver::convertToOrgEnhet)
-                .orElseThrow();
-    }
 
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch search) {
         Stream<IOrgenhet> result;
@@ -56,6 +51,12 @@ public class OrgEnhetResolver {
                 orgEnhetResults,
                 agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv))
         ).toList();
+    }
+
+    public OrgEnhet orgEnhet(Organisering organisering) {
+        return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
+                .map(OrgEnhetResolver::convertToOrgEnhet)
+                .orElseThrow();
     }
 
     public static OrgEnhet convertToOrgEnhet(IOrgenhet orgenhet) {
