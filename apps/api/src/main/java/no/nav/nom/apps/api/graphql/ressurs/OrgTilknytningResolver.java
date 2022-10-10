@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
@@ -11,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;

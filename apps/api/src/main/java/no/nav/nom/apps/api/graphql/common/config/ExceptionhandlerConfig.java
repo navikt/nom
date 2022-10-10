@@ -4,6 +4,7 @@ import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,11 @@ public class ExceptionhandlerConfig {
     @Bean
     public DataFetcherExceptionResolver ADResponseExceptionResolver() {
         return DataFetcherExceptionResolver.forSingleError(ActiveDirectoryRessursBatchLoader::handleADResponseException);
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver LederNotFoundExceptionResolver() {
+        return DataFetcherExceptionResolver.forSingleError(LederResolver::handleLederNotFoundException);
     }
 
     @Bean

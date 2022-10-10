@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
-import no.nav.nom.apps.api.graphql.common.ConverterUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
