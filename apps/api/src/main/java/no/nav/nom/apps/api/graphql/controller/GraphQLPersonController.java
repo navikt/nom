@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.graphql.common.resolver.FolkeregisterPersonResolver;
 import no.nav.nom.apps.api.graphql.person.PersonResolver;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
-import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;

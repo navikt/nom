@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
-import no.nav.nom.contract.nom.api.graphql.Kode;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.common.loader;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import graphql.GraphQLError;
 import graphql.GraphQLException;
@@ -13,13 +12,9 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;
-import org.dataloader.DataLoaderRegistry;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.graphql.client.HttpGraphQlClient;
-import org.springframework.graphql.execution.BatchLoaderRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;

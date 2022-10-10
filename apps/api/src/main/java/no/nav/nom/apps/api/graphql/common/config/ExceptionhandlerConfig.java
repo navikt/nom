@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.graphql.common.config;
 
 import graphql.GraphQLError;
-import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
-import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
@@ -14,8 +12,6 @@ import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter
 
 import java.util.List;
 import java.util.function.BiFunction;
-
-import static java.util.Collections.singletonMap;
 
 @Configuration(proxyBeanMethods = false)
 public class ExceptionhandlerConfig {

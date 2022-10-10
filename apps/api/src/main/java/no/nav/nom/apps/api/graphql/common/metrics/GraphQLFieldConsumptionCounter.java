@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @Component
 public class GraphQLFieldConsumptionCounter {
-//    private final SecurityUtil securityUtil;
     private final MeterRegistry meterRegistry;
     private final Map<String, Counter> counterByNameAndTagValues = new HashMap<>();
 
