@@ -78,6 +78,10 @@ public class GraphQLOrgEnhetController {
         return Collections.emptyList();
     }
 
+    @SchemaMapping(typeName = "OrgEnhet", field = "koblinger")
+    public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
+        return koblingResolver.koblinger(orgEnhet);
+    }
 
     @SchemaMapping(typeName = "Organisering", field = "organisasjonsenhet")
     public OrgEnhet organisasjonsenhet(Organisering organisering) {

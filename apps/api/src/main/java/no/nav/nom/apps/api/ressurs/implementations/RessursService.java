@@ -43,10 +43,11 @@ public class RessursService implements IRessursService {
     }
 
     @Override
-    public Optional<IRessurs> findByNavIdent(String navIdent){
+    public <T> Optional<T> findByNavIdent(String navIdent, Function<IRessurs, T> converter) {
         return Optional.ofNullable(
-                convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
-        );
+                        convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
+                )
+                .map(converter);
     }
 
     @Override

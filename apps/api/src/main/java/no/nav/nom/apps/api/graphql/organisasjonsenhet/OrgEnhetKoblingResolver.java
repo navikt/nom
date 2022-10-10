@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.kobling.contract.Kobling;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -22,16 +24,17 @@ public class OrgEnhetKoblingResolver {
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
         return dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
-                .map(kobling -> ressursService.findByNavIdent(kobling.getNavIdent())
-                        .map(ressurs -> OrgEnhetsKobling.builder()
-                                .ressurs(ressursService.convertToGraphQlResponse(ressurs))
-                                .gyldigFom(kobling.getGyldigFom())
-                                .gyldigTom(kobling.getGyldigTom().orElse(null))
-                                .build()
-                        )
-                )
+                .map(kobling -> ressursService.findByNavIdent(kobling.getNavIdent(), ressurs -> tilOrgEnhetsKobling(ressurs, kobling)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private OrgEnhetsKobling tilOrgEnhetsKobling(IRessurs ressurs, Kobling kobling) {
+        return OrgEnhetsKobling.builder()
+                .ressurs(ressursService.convertToGraphQlResponse(ressurs))
+                .gyldigFom(kobling.getGyldigFom())
+                .gyldigTom(kobling.getGyldigTom().orElse(null))
+                .build();
     }
 }
