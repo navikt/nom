@@ -7,6 +7,10 @@ import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +37,10 @@ public class PersonTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som ikke er ressurs")
     void scenario2() {
+        // This is currently for debugging the server side response as we need some time to explore,
+        // and the default timeout of 5 seconds is not enough to do that.
+        setClientResponseTimeout(Duration.of(60, SECONDS));
+
         // TODO: This test fails, figure out why
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3");
 
