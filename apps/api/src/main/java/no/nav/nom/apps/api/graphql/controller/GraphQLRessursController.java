@@ -27,6 +27,7 @@ import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -40,7 +41,7 @@ import static no.nav.nom.apps.api.graphql.common.projections.RessurserSearch.EMP
 
 
 @Controller
-@SchemaMapping(typeName = "Ressurs")
+@PreAuthorize("isAuthenticated()")
 public class GraphQLRessursController {
 
     private final RessursResolver ressursResolver;

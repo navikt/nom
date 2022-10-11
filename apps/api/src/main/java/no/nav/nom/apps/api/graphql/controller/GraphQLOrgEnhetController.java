@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch.EMPTY_SEARCH;
 
 @Controller
+@PreAuthorize("isAuthenticated()")
 public class GraphQLOrgEnhetController {
 
     private final OrgEnhetResolver orgEnhetResolver;

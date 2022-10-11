@@ -5,11 +5,13 @@ import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
 @Controller
+@PreAuthorize("isAuthenticated()")
 public class GraphQLSearchController {
 
     private final SearchResolver searchResolver;
