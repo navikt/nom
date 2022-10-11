@@ -18,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -27,11 +26,11 @@ import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
 import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@AutoConfigureGraphQlTester // Me thinks this is right
+@AutoConfigureGraphQlTester
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class GraphQLTestBase extends TestBase {
 
-    private ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> Duration.of(5, SECONDS));
+    private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> Duration.of(5, SECONDS));
 
     @Autowired
     HttpGraphQlTester graphQlTester;
@@ -54,12 +53,7 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
     @SneakyThrows
-    private GraphQlTester.Response postForResource(String resource, boolean hasErrors, Map<String, Object> vars, boolean includeValidAzp) {
-        final var claims = includeValidAzp ? validJwtWithAzpClaim() : securityTestUtils.validJwtClaims();
-        claims.claim("azp_name", "test");
-        claims.claim("NAVident", "A321321");
-        final var token = securityTestUtils.createToken(claims);
-
+    public GraphQlTester.Response postForResource(String resource, String token, boolean hasErrors, Map<String, Object> vars) {
         final var client = graphQlTester.mutate()
                 .webTestClient(builder -> builder.responseTimeout(responseTimeout.get()))
                 .headers(httpHeaders -> httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token))
@@ -75,13 +69,18 @@ public abstract class GraphQLTestBase extends TestBase {
     }
 
     @SneakyThrows
+    protected GraphQlTester.Response postForResource(String resource, String token, boolean hasErrors) {
+        return postForResource(resource, token, hasErrors, emptyMap());
+    }
+
+    @SneakyThrows
     protected GraphQlTester.Response postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
-        return postForResource(resource, hasErrors, vars, true);
+        return postForResource(resource, createJwtForTest(true), hasErrors, vars);
     }
 
     @SneakyThrows
     protected GraphQlTester.Response postForResourceWithoutAzp(String resource, boolean hasErrors) {
-        return postForResource(resource, hasErrors, emptyMap(), false);
+        return postForResource(resource, createJwtForTest(false), hasErrors, emptyMap());
     }
 
     @BeforeEach
@@ -93,6 +92,13 @@ public abstract class GraphQLTestBase extends TestBase {
         this.responseTimeout.set(duration);
     }
 
+    private String createJwtForTest(boolean includeValidAzp) {
+        final var claims = includeValidAzp ? validJwtWithAzpClaim() : securityTestUtils.validJwtClaims();
+        claims.claim("azp_name", "test");
+        claims.claim("NAVident", "A321321");
+
+        return securityTestUtils.createToken(claims);
+    }
 
     protected IRessurs createRessursHendelse(String suffix) {
         final var metadata = HendelseMetadataSerialize.builder()
