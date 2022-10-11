@@ -7,10 +7,6 @@ import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,19 +33,14 @@ public class PersonTest extends GraphQLTestBase {
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som ikke er ressurs")
     void scenario2() {
-        // This is currently for debugging the server side response as we need some time to explore,
-        // and the default timeout of 5 seconds is not enough to do that.
-        setClientResponseTimeout(Duration.of(60, SECONDS));
-
-        // TODO: This test fails, figure out why
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3");
 
         final var response = postForResource("person/scenario1.graphql", false, singletonMap("fnr", "testPersonIdent3"));
 
         response.path("person").entity(JsonNode.class)
                 .satisfies(person -> assertThat(person.get("personIdent").textValue()).isEqualTo("testPersonIdent3"))
-                //.satisfies(person -> assertThat(person.get("nomId").textValue()).isNotNull())
-                .satisfies(person -> assertThat(person.get("navIdent").textValue()).isNotNull())
+                //.satisfies(person -> assertThat(person.get("nomId").textValue()).isNull())
+                .satisfies(person -> assertThat(person.get("navIdent").textValue()).isNull())
                 .satisfies(person -> pdlUtils.assertNavn(person.get("personIdent").textValue(), person.get("person").get("navn")));
     }
 

@@ -21,8 +21,16 @@ public class PersonResolver {
             return Optional.empty();
         }
         return ressursService.findByPersonIdent(personident)
-                .map(PersonResolver::fromRessurs);
+                .map(PersonResolver::fromRessurs)
+                .or(() -> Optional.of(baseRessurs(personident)));
 
+    }
+
+    private static PersonResult baseRessurs(String personIdent) {
+        return PersonResult.builder()
+                .personIdent(personIdent)
+                .personident(personIdent)
+                .build();
     }
 
     public static PersonResult fromRessurs(IRessurs ressurs) {

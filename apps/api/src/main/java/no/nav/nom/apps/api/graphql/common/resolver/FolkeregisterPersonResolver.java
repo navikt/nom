@@ -25,7 +25,13 @@ public class FolkeregisterPersonResolver {
     }
 
     public <T> DataFetcherResult<FolkeregisterPerson> folkeregisterPerson(T ressurs, Function<T, String> identResolver, DataFetchingEnvironment environment) {
-        var env = newBatchLoaderEnvironment().context(environment.getGraphQlContext()).build(); // Hack to get around the PersonBatchLoaders need for a BatchLoaderEnvironment
+        var env = newBatchLoaderEnvironment()
+                .context(environment.getGraphQlContext())
+                .keyContexts(
+                        singletonList(identResolver.apply(ressurs)),
+                        singletonList(environment)
+                )
+                .build(); // Hack to get around the PersonBatchLoaders need for a BatchLoaderEnvironment
         return folkeregisterPerson(singletonList(ressurs), identResolver, env).get(ressurs);
     }
 
