@@ -26,11 +26,11 @@ public class NIKConsumer {
                 .build();
 
         return webClient.post()
-                .uri(String.format("%s/navident", appProperties.getNik().getBaseUrl()))
+                .uri(String.format("%s/navident", appProperties.nik().baseUrl()))
                 .headers(httpHeaders -> {
-                    httpHeaders.add("Nav-Consumer-Id", appProperties.getAppName());
-                    httpHeaders.add("Nav-Call-Id", appProperties.getAppName());
-                    httpHeaders.setBearerAuth(tokenRepository.getAadToken(appProperties.getNik().getAadClientId(), OBO).serialize());
+                    httpHeaders.add("Nav-Consumer-Id", appProperties.appName());
+                    httpHeaders.add("Nav-Call-Id", appProperties.appName());
+                    httpHeaders.setBearerAuth(tokenRepository.getAadToken(appProperties.nik().aadClientId(), OBO).serialize());
                 })
                 .body(Mono.just(body), OpprettNavidentRequest.class)
                 .retrieve()

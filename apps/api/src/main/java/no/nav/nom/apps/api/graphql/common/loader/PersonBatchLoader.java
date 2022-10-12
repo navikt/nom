@@ -57,12 +57,12 @@ public class PersonBatchLoader {
 
     public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient webClient) {
         this.tokenRepository = tokenRepository;
-        this.pdlProperties = appProperties.getPdl();
+        this.pdlProperties = appProperties.pdl();
         this.graphQlClient = HttpGraphQlClient.builder(webClient)
-                .url(pdlProperties.getBaseUrl() + "/graphql")
+                .url(pdlProperties.baseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.add("Tema", pdlProperties.getTema());
+                    headers.add("Tema", pdlProperties.tema());
                 })
                 .build();
     }
@@ -81,7 +81,7 @@ public class PersonBatchLoader {
     @SneakyThrows
     public Map<String, DataFetcherResult<FolkeregisterPerson>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
         var response = graphQlClient.mutate()
-                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.getAadClientId()).serialize()))
+                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
                 .build()
                 .document(PDL_BOLK_HENT_PERSON_QUERY)
                 .variable("identer", personidenter)

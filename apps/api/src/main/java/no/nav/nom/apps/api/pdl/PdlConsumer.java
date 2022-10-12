@@ -40,20 +40,20 @@ public class PdlConsumer {
             TokenRepository tokenRepository,
             WebClient webClient
     ) {
-        this.pdlProperties = appProperties.getPdl();
+        this.pdlProperties = appProperties.pdl();
         this.tokenRepository = tokenRepository;
         this.graphQlClient = HttpGraphQlClient.builder(webClient)
-                .url(pdlProperties.getBaseUrl() + "/graphql")
+                .url(pdlProperties.baseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.add("Tema", pdlProperties.getTema());
+                    headers.add("Tema", pdlProperties.tema());
                 })
                 .build();
     }
 
     public Optional<Person> hentPerson(String personIdent) {
         var response = graphQlClient.mutate()
-                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.getAadClientId()).serialize()))
+                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
                 .build()
                 .document(PDL_HENT_PERSON_QUERY)
                 .variable("ident", personIdent)

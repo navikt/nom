@@ -26,7 +26,7 @@ public class DvhOrgenhetMockUtils {
     private final DvhDataLoader dvhDataLoader;
 
     private void mockDvhOrgenhetResponse(String response){
-        stubFor(get(appProperties.getProxy().getEnhetPath())
+        stubFor(get(appProperties.proxy().enhetPath())
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withBody(response)));

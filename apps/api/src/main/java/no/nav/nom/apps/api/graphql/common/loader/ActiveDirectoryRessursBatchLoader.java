@@ -39,7 +39,7 @@ public class ActiveDirectoryRessursBatchLoader {
 
     public ActiveDirectoryRessursBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, RestTemplate restTemplate) {
         this.tokenRepository = tokenRepository;
-        this.proxyProperties = appProperties.getProxy();
+        this.proxyProperties = appProperties.proxy();
         this.restTemplate = restTemplate;
     }
 
@@ -57,12 +57,12 @@ public class ActiveDirectoryRessursBatchLoader {
     @SneakyThrows
     public <T> Map<String, DataFetcherResult<T>> getAdRessurser(Set<String> navIdenter, Function<AdRessurs, T> propertyResolver, BatchLoaderEnvironment batchEnvironment) {
         final var headers = new HttpHeaders();
-        final var token = tokenRepository.getSystemAadToken(proxyProperties.getAadClientId());
+        final var token = tokenRepository.getSystemAadToken(proxyProperties.aadClientId());
         headers.setBearerAuth(token.serialize());
 
         try {
             var result = restTemplate.exchange(
-                    proxyProperties.getBaseUrl() + "/proxy/ad",
+                    proxyProperties.baseUrl() + "/proxy/ad",
                     HttpMethod.POST,
                     new HttpEntity<>(navIdenter, headers),
                     AdRessurser.class
