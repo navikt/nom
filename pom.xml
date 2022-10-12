@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.3</version>
+        <version>2.7.4</version>
         <relativePath/>
     </parent>
 
@@ -22,8 +22,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>
 
-        <spring-boot-starter-data-jpa.version>2.7.3</spring-boot-starter-data-jpa.version>
-        <spring-boot-starter-webflux.version>2.7.3</spring-boot-starter-webflux.version>
+        <spring-boot-starter-data-jpa.version>2.7.4</spring-boot-starter-data-jpa.version>
+        <spring-boot-starter-webflux.version>2.7.4</spring-boot-starter-webflux.version>
 
         <asciidoc.version>2.2.2</asciidoc.version>
         <javassist.version>3.29.1-GA</javassist.version>
@@ -72,6 +72,7 @@
         <!-- SNYK Security warnings -->
         <postgresql.version>42.5.0</postgresql.version>
         <snakeyaml.version>1.32</snakeyaml.version>
+        <kafka-clients.version>3.1.2</kafka-clients.version>
     </properties>
 
     <modules>
@@ -152,7 +153,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
 
             <dependency>
                 <groupId>com.graphql-java-kickstart</groupId>
