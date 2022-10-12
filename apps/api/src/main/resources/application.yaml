@@ -11,12 +11,16 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
-#  graphql:
-#    preauth:
-#      query:
-#        person: ${GRAPHQL_PREAUTH_QUERY_PERSON}
-#      mutation:
-#        ressurs: ${GRAPHQL_PREAUTH_MUTATION_RESSURS}
+  graphql:
+    preauth:
+      query:
+        person:
+          accessing-client: ${GRAPHQL_PREAUTH_QUERY_PERSON:NO_ONE}
+          scope: QUERY_PERSON
+      mutation:
+        ressurs:
+          accessing-client: ${GRAPHQL_PREAUTH_MUTATION_RESSURS:NO_ONE}
+          scope: MUTATE_RESSURS
 
 nom:
   libs:
@@ -35,28 +39,6 @@ authentication:
   groups:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
 
-
-
-#graphql:
-#  playground:
-#    tabs:
-#      - name: Enhet
-#        query: classpath:playground/organisasjonsenhet.graphql
-#      - name: Ressurs
-#        query: classpath:playground/ressurs.graphql
-#      - name: Person
-#        query: classpath:playground/person.graphql
-#    enabled: true
-#  voyager:
-#    enabled: true
-#  servlet:
-#    mapping: /graphql
-#    enabled: true
-#    corsEnabled: true
-#    cors:
-#      allowed-origins: "*"
-#    actuator-metrics: true
-#    tracing-enabled: false
 
 # Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
 management.endpoints.web.exposure.include: health,prometheus
