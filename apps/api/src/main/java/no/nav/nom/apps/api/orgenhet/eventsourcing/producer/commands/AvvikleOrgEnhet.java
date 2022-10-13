@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public record AvvikleOrgEnhet(
-        String fid,
         LocalDate gyldigTom,
         InputMetadata inputMetadata
 ) {}

@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet.implementations.dvh.v2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +16,20 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import org.springframework.context.annotation.Import;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -38,7 +49,11 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class DvhDataLoader {
+
+    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing";
+    private final Unleash unleash;
 
     private final TokenRepository tokenRepository;
     private final ObjectMapper objectMapper;
@@ -48,6 +63,7 @@ public class DvhDataLoader {
     private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
+    private final OrgEnhetCommandService orgEnhetCommandService;
 
 
     /*
@@ -122,12 +138,24 @@ public class DvhDataLoader {
 
             if (matchingEnheter.size() < 2) {
                 matchingEnheter.stream().findAny().ifPresentOrElse((p) -> {
+                    if (unleash.isEnabled(UNLEASH_TOGGLE)) {// Eventsourcing block
+                        // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
+                        if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(p.getGyldigTom())) {
+                            avvikleOrgEnhet(p.getFid().toString(), parsedEnhet); // TODO:!! Use FID, not UUID.STRING When state is from eventSource
+                        }
+                    }
                     val endreHendelse = createEndreHendelse(parsedEnhet, p, getOpprettetAv());
                     if (endreHendelse != null) {
                         hendelserToSave.add(endreHendelse);
                         ((EventBasedOrgenhet) p).addHendelse(endreHendelse);
                     }
                 }, () -> {
+                    if (unleash.isEnabled(UNLEASH_TOGGLE)) { // Eventsourcing block
+                        String fid = opprettOrgEnhet(parsedEnhet);
+                        if (parsedEnhet.getGyldigTom().isPresent()) {
+                            avvikleOrgEnhet(fid, parsedEnhet);
+                        }
+                    }
                     hendelserToSave.add(createOpprettHendelse(parsedEnhet, getOpprettetAv()));
                 });
             } else {
@@ -184,6 +212,26 @@ public class DvhDataLoader {
                 dvhOrgenhetV2Two.getGyldigFom().withDayOfMonth(1),
                 dvhOrgenhetV2One.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
         )) <= 1);
+    }
+
+    private String opprettOrgEnhet(DvhOrgenhetV2 dvhOrgenhetV2) {
+        final var opprettOrgEnhet = new OpprettOrgEnhet(
+                "Intern_id_" + dvhOrgenhetV2.getAgressoId(), // TODO:!! Create NOM id - ikke bruk agressoId
+                dvhOrgenhetV2.getNavn(),
+                dvhOrgenhetV2.getGyldigFom(),
+                Optional.empty(),
+                Optional.empty(),
+                new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
+        );
+        return orgEnhetCommandService.createOrgEnhet(opprettOrgEnhet);
+    }
+
+    private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2) {
+        final var avvikleOrgEnhet = new AvvikleOrgEnhet(
+                dvhOrgenhetV2.getGyldigTom().get(),
+                new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
+        );
+        orgEnhetCommandService.terminateOrgEnhet(fid, avvikleOrgEnhet);
     }
 
     @SneakyThrows

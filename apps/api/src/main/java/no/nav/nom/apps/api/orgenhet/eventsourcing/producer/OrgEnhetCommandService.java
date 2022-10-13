@@ -43,7 +43,6 @@ public class OrgEnhetCommandService {
         return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
                 fid,
                 new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
-                        avvikleOrgEnhet.fid(),
                         avvikleOrgEnhet.gyldigTom()
                 ),
                 avvikleOrgEnhet.inputMetadata()

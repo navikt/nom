@@ -6,15 +6,20 @@ import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class OrgenhetTestBase extends TestBase {
 
@@ -23,6 +28,9 @@ public class OrgenhetTestBase extends TestBase {
 
     @Autowired
     private IOrgenhetService orgenhetService;
+
+    @MockBean
+    private OrgEnhetCommandService orgEnhetCommandService;
 
     @Test
     @SneakyThrows
@@ -49,6 +57,7 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -97,6 +106,8 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
+
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -145,6 +156,7 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -212,6 +224,8 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(1)).createOrgEnhet(any());
+
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -259,6 +273,9 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
+        verify(orgEnhetCommandService, times(2)).terminateOrgEnhet(any(), any());
+
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -321,6 +338,9 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet2);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(1)).createOrgEnhet(any());
+        verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -391,6 +411,9 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
+        verify(orgEnhetCommandService, times(2)).terminateOrgEnhet(any(), any());
+
 
         historicOutputEnhet = orgenhetService.getByFid(historicFid);
         assertTrue(historicOutputEnhet.isPresent());
@@ -443,6 +466,10 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
         dvhRestConsumer.loadFromDvh();
 
+        verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
+        verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+
+
         allEnheter = orgenhetService.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
@@ -487,6 +514,9 @@ public class OrgenhetTestBase extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
 
         dvhRestConsumer.loadFromDvh();
+        verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
+        verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+
 
         var allEnheter = orgenhetService.getAllEnheter();
         assertEquals(2, allEnheter.size());
@@ -517,5 +547,4 @@ public class OrgenhetTestBase extends TestBase {
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
         assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
     }
-
 }

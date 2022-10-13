@@ -17,7 +17,6 @@ public class OrgEnhetAvvikletEventV1 extends OrgEnhetEvent {
     }
 
     public record OrgEnhetAvvikletEventData(
-            String fid,
             LocalDate gyldigTom
     ) implements Data{ }
 }
