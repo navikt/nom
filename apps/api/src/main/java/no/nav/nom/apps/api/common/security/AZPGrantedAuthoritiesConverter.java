@@ -84,6 +84,6 @@ public final class AZPGrantedAuthoritiesConverter implements Converter<Jwt, Coll
     }
 
     private void addGrantedAuthorities(Collection<GrantedAuthority> grantedAuthorities, Set<GraphQLAccessScope> scopes) {
-        scopes.forEach(scope -> grantedAuthorities.add(new SimpleGrantedAuthority(scope.getScopeWithPrefix(AUTHORITY_PREFIX))));
+        scopes.forEach(scope -> grantedAuthorities.add(new SimpleGrantedAuthority(scope.getScope())));
     }
 }

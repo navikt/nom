@@ -41,7 +41,7 @@ import static no.nav.nom.apps.api.graphql.common.projections.RessurserSearch.EMP
 
 
 @Controller
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLRessursController {
 
     private final RessursResolver ressursResolver;

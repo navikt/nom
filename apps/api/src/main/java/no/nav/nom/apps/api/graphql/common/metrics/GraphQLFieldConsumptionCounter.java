@@ -4,28 +4,28 @@ import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class GraphQLFieldConsumptionCounter {
     private final MeterRegistry meterRegistry;
+    private final SecurityUtil securityUtil;
     private final Map<String, Counter> counterByNameAndTagValues = new HashMap<>();
 
     @Autowired
-    public GraphQLFieldConsumptionCounter(MeterRegistry meterRegistry) {
+    public GraphQLFieldConsumptionCounter(MeterRegistry meterRegistry, SecurityUtil securityUtil) {
         this.meterRegistry = meterRegistry;
+        this.securityUtil = securityUtil;
     }
 
     public void count(DataFetchingEnvironment env) {
-        final var consumer = getAzpName().orElse("unknown");
+        final var consumer = securityUtil.getAzpName().orElse("unknown");
         final var operationName = env.getOperationDefinition().getName();
         count(null, env.getField(), consumer, operationName != null && !operationName.isEmpty() ? operationName : "unknown");
     }
@@ -62,12 +62,5 @@ public class GraphQLFieldConsumptionCounter {
         final var counterBuilder = Counter.builder(name);
         tagsAndValues.forEach(counterBuilder::tag);
         return counterBuilder.register(meterRegistry);
-    }
-
-    private Optional<String> getAzpName() {
-        // TODO: add security enabled switch?
-        final var auth = SecurityContextHolder.getContext().getAuthentication();
-        final var azp_name = auth instanceof JwtAuthenticationToken ? ((JwtAuthenticationToken) auth).getTokenAttributes().get("azp_name") : null;
-        return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
     }
 }

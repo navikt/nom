@@ -90,8 +90,7 @@ public abstract class TestBase {
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
         final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
         final var subject = jwtClaimsBuilder.getClaims().get("sub");
-        return securityTestUtils.validJwtClaims()
-                .claim("azp", subject);
+        return securityTestUtils.validJwtClaims().claim("azp", subject);
     }
 
     /**

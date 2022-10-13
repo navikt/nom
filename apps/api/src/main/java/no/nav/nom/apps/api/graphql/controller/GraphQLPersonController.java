@@ -18,7 +18,7 @@ import org.springframework.stereotype.Controller;
 import java.util.Optional;
 
 @Controller
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLPersonController {
 
     private final PersonResolver personResolver;

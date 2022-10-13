@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 
 @Controller
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLSearchController {
 
     private final SearchResolver searchResolver;

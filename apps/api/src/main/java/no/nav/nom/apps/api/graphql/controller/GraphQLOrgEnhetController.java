@@ -27,7 +27,7 @@ import java.util.Optional;
 import static no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch.EMPTY_SEARCH;
 
 @Controller
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLOrgEnhetController {
 
     private final OrgEnhetResolver orgEnhetResolver;
