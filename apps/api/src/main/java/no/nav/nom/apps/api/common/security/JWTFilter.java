@@ -23,10 +23,7 @@ import static org.springframework.security.core.context.SecurityContextHolder.cr
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
-    // TODO: Map azp or azp_name to roles/scopes and use @RolesAllowed or @Preauthorize with it
-    //  - Add a similar class to CustomJwtGrantedAuthoritiesConverter from axsys (https://github.com/navikt/axsys/blob/master/src/main/java/no/nav/axsys/config/SecurityConfig.java)
-    //  - Inject the GrantedAuthoritiesConverter and create a new JwtAuthenticationConvert
-    //  - Set the GrantedAuthoritiesConverter on the AuthenticationConverter, and finally set the AuthenticationConverter on the AuthenticationProvider
+    // TODO: Use azp or azp_name with @RolesAllowed or @Preauthorize
 
     private final static Logger log = LoggerFactory.getLogger(JWTFilter.class);
 

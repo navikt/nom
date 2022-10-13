@@ -10,4 +10,12 @@ public enum GraphQLAccessScope {
     GraphQLAccessScope(String scope) {
         this.scope = scope;
     }
+
+    public String getScopeWithPrefix(String scopePrefix) {
+        return scopePrefix + scope;
+    }
+
+    public String getScope() {
+        return scope;
+    }
 }

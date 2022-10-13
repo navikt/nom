@@ -15,12 +15,12 @@ app:
     preauth:
       query:
         person:
-          accessing-client: ${GRAPHQL_PREAUTH_QUERY_PERSON:NO_ONE}
-          scope: QUERY_PERSON
+          client-id: ${GRAPHQL_PREAUTH_QUERY_PERSON:NO_ONE}
+          scopes: QUERY_PERSON
       mutation:
         ressurs:
-          accessing-client: ${GRAPHQL_PREAUTH_MUTATION_RESSURS:NO_ONE}
-          scope: MUTATE_RESSURS
+          client-id: ${GRAPHQL_PREAUTH_MUTATION_RESSURS:NO_ONE}
+          scopes: MUTATE_RESSURS
 
 nom:
   libs:
