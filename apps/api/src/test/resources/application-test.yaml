@@ -9,9 +9,11 @@ app:
   graphql:
     preauth:
       query:
-        person: testSubject
+        person:
+          client-id: testSubject
       mutation:
-        ressurs: testSubject
+        ressurs:
+          client-id: testSubject
 
 authentication:
   aad:
