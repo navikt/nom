@@ -262,8 +262,8 @@ public class DvhDataLoader {
     }
 
     @SneakyThrows
-    private HendelseMetadata.OpprettetAv getOpprettetAv(){
-        val jwt = tokenRepository.getSystemAadToken("api://"+authenticationProperties.getAad().getClientId()+"/.default");
+    private HendelseMetadata.OpprettetAv getOpprettetAv() {
+        val jwt = tokenRepository.getSystemAadToken("api://" + authenticationProperties.aad().clientId() + "/.default");
         return new HendelseMetadata.OpprettetAv(jwt.getJWTClaimsSet().getClaim("azp_name").toString(), jwt.getJWTClaimsSet().getClaim("azp_name").toString());
     }
 }
