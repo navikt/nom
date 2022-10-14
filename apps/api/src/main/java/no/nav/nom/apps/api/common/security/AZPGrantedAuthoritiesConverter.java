@@ -27,8 +27,8 @@ public final class AZPGrantedAuthoritiesConverter implements Converter<Jwt, Coll
     private final static Logger log = LoggerFactory.getLogger(AZPGrantedAuthoritiesConverter.class);
     private static final String AUTHORITY_PREFIX = "SCOPE_";
 
-    public static String GRAPHQL_QUERY_PERSON = "QUERY_PERSON";
-    public static String GRAPHQL_MUTATE_RESSURS = "MUTATE_RESSURS";
+    public static final String GRAPHQL_QUERY_PERSON = "QUERY_PERSON";
+    public static final String GRAPHQL_MUTATE_RESSURS = "MUTATE_RESSURS";
 
     private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();
     private final GraphQLSecurityProperties securityProperties;
