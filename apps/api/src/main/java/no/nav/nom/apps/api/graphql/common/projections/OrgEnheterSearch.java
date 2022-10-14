@@ -13,20 +13,20 @@ import static java.util.Collections.emptySet;
 @ProjectedPayload
 public interface OrgEnheterSearch {
     OrgEnheterSearch EMPTY_SEARCH = emptyOrgEnheterSearch();
-    Set<String> getagressoIder();
+    Set<String> getAgressoIder();
     String getOrgNiv();
 
     default Set<String> resolveAgressoIder() {
-        if(getagressoIder() == null) {
+        if(getAgressoIder() == null) {
             return emptySet();
         }
-        return getagressoIder();
+        return getAgressoIder();
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
         return new OrgEnheterSearch() {
             @Override
-            public Set<String> getagressoIder() {
+            public Set<String> getAgressoIder() {
                 return emptySet();
             }
 
