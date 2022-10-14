@@ -48,7 +48,7 @@
         <org.jboss.logging-version>2.2.1.Final</org.jboss.logging-version>
         <com.google.code.findbugs.jsr305>3.0.2</com.google.code.findbugs.jsr305>
         <org.jetbrains.annotations.version>23.0.0</org.jetbrains.annotations.version>
-        <graphql.java-version>19.1</graphql.java-version>
+        <graphql.java-version>19.2</graphql.java-version>
         <nimbus.jose.jwt-version>9.25.5</nimbus.jose.jwt-version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
 
@@ -153,27 +153,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
-
-<!--            <dependency>-->
-<!--                <groupId>com.graphql-java-kickstart</groupId>-->
-<!--                <artifactId>graphql-spring-boot-starter</artifactId>-->
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>com.graphql-java</groupId>-->
-<!--                        <artifactId>graphql-java-extended-scalars</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.jetbrains</groupId>-->
-<!--                        <artifactId>annotations</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>com.graphql-java</groupId>-->
-<!--                        <artifactId>graphql-java</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
-<!--                <version>${spring.graphql-version}</version>-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -375,23 +354,6 @@
                 <version>${org.testcontainers-version}</version>
                 <scope>test</scope>
             </dependency>
-
-<!--            <dependency>-->
-<!--                <groupId>com.graphql-java-kickstart</groupId>-->
-<!--                <artifactId>graphql-spring-boot-starter-test</artifactId>-->
-<!--                <version>${spring.graphql-version}</version>-->
-<!--                <exclusions>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>com.graphql-java</groupId>-->
-<!--                        <artifactId>graphql-java-extended-scalars</artifactId>-->
-<!--                    </exclusion>-->
-<!--                    <exclusion>-->
-<!--                        <groupId>org.jetbrains</groupId>-->
-<!--                        <artifactId>annotations</artifactId>-->
-<!--                    </exclusion>-->
-<!--                </exclusions>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>commons-cli</groupId>
