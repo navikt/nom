@@ -84,7 +84,7 @@ const CreateResourceView = () => {
               className={css({ marginBottom: "0.5rem" })}
             >
               Fyll inn personnummer/D-nummer så finner vi personen i
-              folkeregisteret
+              Folkeregisteret
             </BodyShort>
             <Search
               label="Søk alle NAV sine sider"
@@ -119,7 +119,7 @@ const CreateResourceView = () => {
           query.data.person?.person &&
           !query.data.person?.navIdent && (
             <>
-              {/* Viser opplysninger fra folkeregisteret */}
+              {/* Viser opplysninger fra Folkeregisteret */}
               <ResourceMetadata
                 resource={query.data.person.person as Gq.FolkeregisterPerson}
               />

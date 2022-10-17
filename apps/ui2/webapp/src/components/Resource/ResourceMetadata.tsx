@@ -32,7 +32,7 @@ const ResourceMetadata = (props: ResourceMetadataProps) => {
 
   return (
     <div className={contentStyles}>
-      <Heading size="small">Opplysninger fra folkeregisteret</Heading>
+      <Heading size="small">Opplysninger fra Folkeregisteret</Heading>
 
       <div className={rowStyles}>
         <TextWithLabelVertical
