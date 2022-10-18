@@ -71,16 +71,18 @@ public class GraphQLRessursController {
         this.personResolver = personResolver;
     }
 
+    @PreAuthorize("@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)")
     @QueryMapping("ressurs")
-    public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment environment) {
+    public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
-        graphQLFieldConsumptionCounter.count(environment);
+        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
         return ressursResolver.ressurs(search);
     }
 
+    @PreAuthorize("@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)")
     @QueryMapping("ressurser")
-    public List<RessursResult> ressurser(@Argument("where") Optional<RessurserSearch> search, DataFetchingEnvironment environment) {
-        graphQLFieldConsumptionCounter.count(environment);
+    public List<RessursResult> ressurser(@Argument("where") Optional<RessurserSearch> search, DataFetchingEnvironment dataFetchingEnvironment) {
+        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search.orElse(EMPTY_SEARCH));
     }
 

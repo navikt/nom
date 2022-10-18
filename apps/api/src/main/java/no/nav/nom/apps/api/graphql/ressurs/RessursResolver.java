@@ -47,12 +47,8 @@ public class RessursResolver {
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
     private final IRessursService ressursService;
     private final NIKConsumer nikConsumer;
-//  private final SecurityUtil securityUtil;
     private final ObjectMapper objectMapper;
     private final PdlConsumer pdlConsumer;
-
-    @Value("${app.graphql.preauth.query.person:''}")
-    private List<String> personPreAuth;
 
     @Value("${app.graphql.preauth.mutation.ressurs:''}")
     private List<String> mutationPreauth;
@@ -195,12 +191,6 @@ public class RessursResolver {
         }
         return null;
     }
-
-//    private <T> Optional<DataFetcherResult<T>> checkAuthRessurs(DataFetchingEnvironment env){
-//        //TODO: Can checkAuthRessurs be replaced by spring security annotations?
-//        var personIdentRequested = env.getSelectionSet().contains("**/personIdent") || env.getSelectionSet().contains("**/personident");
-//        return securityUtil.<T>checkAuth(env, personIdentRequested ? this.personPreAuth : null);
-//    }
 
     private HendelseMetadataSerialize metadataFromToken(JwtAuthenticationToken token, Map<String, Object> rawData) {
         return HendelseMetadataSerialize.builder()
