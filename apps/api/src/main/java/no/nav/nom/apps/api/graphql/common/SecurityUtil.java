@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.common;
 
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
-import no.nav.nom.apps.api.common.security.AZPGrantedAuthoritiesConverter;
+import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -58,7 +58,7 @@ public class SecurityUtil {
                 authentication,
                 fieldSelectionSet,
                 new String[]{"**/personIdent", "**/personident"},
-                new String[]{AZPGrantedAuthoritiesConverter.AUTH_QUERY_PERSON}
+                new String[]{AZPAuthoritiesConverter.AUTH_QUERY_PERSON}
         );
     }
 

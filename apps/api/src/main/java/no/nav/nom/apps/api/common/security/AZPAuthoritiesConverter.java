@@ -22,9 +22,9 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 
 @Component
-public final class AZPGrantedAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
-    private final static Logger log = LoggerFactory.getLogger(AZPGrantedAuthoritiesConverter.class);
+    private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);
     private static final String AUTHORITY_PREFIX = "SCOPE_";
 
     public static final String AUTH_QUERY_PERSON = "QUERY_PERSON";
@@ -34,7 +34,7 @@ public final class AZPGrantedAuthoritiesConverter implements Converter<Jwt, Coll
     private final GraphQLSecurityProperties securityProperties;
     private final Map<String, Set<GraphQLAccessScope>> accessMap = new HashMap<>();
 
-    public AZPGrantedAuthoritiesConverter(GraphQLSecurityProperties securityProperties) {
+    public AZPAuthoritiesConverter(GraphQLSecurityProperties securityProperties) {
         defaultConverter.setAuthorityPrefix(AUTHORITY_PREFIX);
         this.securityProperties = securityProperties;
 

@@ -39,7 +39,7 @@ public class PersonContoller {
                     description = "Success"
             )
     )
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPGrantedAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
         return ResponseEntity.ok(
                 pdlConsumer.hentPerson(request.getPersonident())

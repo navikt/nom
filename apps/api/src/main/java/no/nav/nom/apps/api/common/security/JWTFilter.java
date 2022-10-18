@@ -32,7 +32,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     public JWTFilter(
             JwtAuthenticationProvider jwtAuthenticationProvider,
-            AZPGrantedAuthoritiesConverter authoritiesConverter
+            AZPAuthoritiesConverter authoritiesConverter
     ) {
         this.jwtAuthenticationProvider = jwtAuthenticationProvider;
         var authenticationConverter = new JwtAuthenticationConverter();
