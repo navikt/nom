@@ -259,17 +259,18 @@ const Ressurs = (props: { children: ReactNode }) => (
 );
 
 const OrgenhetLederLink = (props: {
-  navident: string;
+  navident?: string;
   name: string;
   orgenhetCtxUrl: string;
-}) => (
-  <Link
-    className={lederStyling.lederTekst}
-    to={`${props.orgenhetCtxUrl}/${props.navident}`}
-  >
-    {props.name}
-  </Link>
-);
+}) =>
+  (props.navident && (
+    <Link
+      className={lederStyling.lederTekst}
+      to={`${props.orgenhetCtxUrl}/${props.navident}`}
+    >
+      {props.name}
+    </Link>
+  )) || <span>Ingen leder</span>;
 
 const BackFromRessurs = (props: {
   valgtEnhetUrl: string;
@@ -436,7 +437,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
                     <span>
                       Leder:{" "}
                       <OrgenhetLederLink
-                        navident={valgtEnhet.ledere[0].navident}
+                        navident={valgtEnhet.ledere[0]?.navident}
                         orgenhetCtxUrl={valgtEnhetUrl}
                         name={valgtEnhet.ledere[0]?.name}
                       />
