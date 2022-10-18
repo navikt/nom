@@ -58,7 +58,7 @@ public class SecurityUtil {
                 authentication,
                 fieldSelectionSet,
                 new String[]{"**/personIdent", "**/personident"},
-                new String[]{AZPGrantedAuthoritiesConverter.GRAPHQL_QUERY_PERSON}
+                new String[]{AZPGrantedAuthoritiesConverter.AUTH_QUERY_PERSON}
         );
     }
 

@@ -63,11 +63,9 @@ public class PdlConsumer {
         return response
                 .blockOptional()
                 .map(person -> {
-                    System.out.println("pdlresult\n" + person.asText());
                     final var navn = person.get("navn").get(0);
-                    System.out.println("Person:\n" + navn.asText());
                     final var mellomnavn = navn.get("mellomnavn");
-                    final var kjonn = navn.get("kjoenn").get(0).get("kjoenn").asText();
+                    final var kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
 
                     return Person.builder()
                             .fornavn(navn.get("fornavn").asText())
