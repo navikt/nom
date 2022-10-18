@@ -459,7 +459,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
           >
             {underEnheter.map((ue) => (
               <Link className={hierarkiCss.link} key={ue.url} to={ue.url}>
-                <Enhet navIdentForImg={ue.ledere[0].navident}>
+                <Enhet navIdentForImg={ue.ledere[0]?.navident}>
                   <Heading size={"medium"}>{ue.name}</Heading>
                   <span>
                     Leder:{" "}
