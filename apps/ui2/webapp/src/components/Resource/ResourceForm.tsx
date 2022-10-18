@@ -2,6 +2,7 @@ import {
   Alert,
   Button,
   Heading,
+  Loader,
   Radio,
   RadioGroup,
   Search,
@@ -9,40 +10,129 @@ import {
 } from "@navikt/ds-react";
 import { useForm } from "react-hook-form";
 import { css } from "@emotion/css";
+import { Navigate, useNavigate, useParams } from "react-router";
+import ResourceMetadata from "./ResourceMetadata";
+import {
+  FolkeregisterPerson,
+  Sektor,
+  useHentPersonQuery,
+  useOpprettRessursMutation,
+} from "../../api/generated/graphql_generated";
 import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
-import * as Gq from "../../api/generated/graphql_generated";
 
 const rowStyles = css({
   display: "flex",
-  marginTop: "1.2rem",
   gap: "1rem",
+  alignItems: "flex-start",
 
   "& > *": {
     flex: 1,
   },
 });
 
-export type InitialValuesResourceForm = {
-  visningsfornavn: string;
-  mellomnavn?: string;
-  visningsetternavn: string;
-  sektorTxt: string;
-};
+export default function ResourceForm() {
+  const { personIdent } = useParams();
 
-type ResourceFormProps = {
-  initialValues: InitialValuesResourceForm;
-  onSubmit: (values: Gq.OpprettRessursRequest) => void;
-};
-
-const ResourceForm = (props: ResourceFormProps) => {
-  const { initialValues, onSubmit } = props;
-  const { register, handleSubmit, getValues } = useForm({
-    defaultValues: { ...initialValues },
+  const hentPersonQuery = useHentPersonQuery({
+    variables: { personIdent: personIdent ?? "" },
+    errorPolicy: "all",
   });
 
+  if (hentPersonQuery.loading) {
+    return (
+      <Loader
+        className={css`
+          align-self: center;
+        `}
+        size="2xlarge"
+        title={`Søker etter ${personIdent}`}
+      />
+    );
+  }
+
+  if (hentPersonQuery.error) {
+    return <Alert variant="error">{hentPersonQuery.error.message}</Alert>;
+  }
+
+  const personResult = hentPersonQuery.data?.person;
+
+  if (personResult?.navIdent) {
+    return <Navigate to={`/ressurs/${personResult.navIdent}`} replace />;
+  }
+
+  if (personResult?.person) {
+    return (
+      <>
+        <ResourceMetadata person={personResult.person} />
+        <ResourceFormInner
+          personResult={personResult.person}
+          personIdent={personResult.personIdent}
+        />
+      </>
+    );
+  }
+
+  return null;
+}
+
+export type OpprettRessursFormTypes = {
+  fornavn: string;
+  etternavn: string;
+  sektor: string;
+};
+
+function ResourceFormInner({
+  personResult,
+  personIdent,
+}: {
+  personResult: FolkeregisterPerson;
+  personIdent: string;
+}) {
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<OpprettRessursFormTypes>({
+    defaultValues: {
+      fornavn: personResult?.navn.fornavn ?? "",
+      etternavn: personResult?.navn.etternavn ?? "",
+      sektor: "NAV_STATLIG",
+    },
+  });
+
+  const [opprettRessursMutation, { loading, error }] =
+    useOpprettRessursMutation({
+      onCompleted: (data) => {
+        navigate(`/ressurs/${data.opprettRessurs?.navident}`, {
+          replace: true,
+        });
+      },
+    });
+
+  const handleOpprettRessurs = (submittedValues: OpprettRessursFormTypes) =>
+    opprettRessursMutation({
+      variables: {
+        request: {
+          personident: personIdent,
+          visningsfornavn: submittedValues.fornavn,
+          visningsetternavn: submittedValues.etternavn,
+          sektor: submittedValues.sektor as Sektor,
+        },
+      },
+    });
+
   return (
-    <form onSubmit={handleSubmit((form: any) => onSubmit(form))}>
-      <div className={css({ marginTop: "2rem" })}>
+    <form>
+      <div
+        className={css`
+          display: flex;
+          flex-direction: column;
+          gap: var(--navds-spacing-5);
+          margin-top: var(--navds-spacing-8);
+        `}
+      >
         <Heading size="small">Opplysninger til NOM</Heading>
         <Alert
           variant="info"
@@ -58,50 +148,54 @@ const ResourceForm = (props: ResourceFormProps) => {
           <TextField
             type="text"
             label="Fornavn"
+            error={errors.fornavn?.message}
             autoComplete="off"
-            {...register("visningsfornavn")}
+            {...register("fornavn", { required: "Må oppgis" })}
           />
           <TextField
             type="text"
             label="Etternavn"
+            error={errors.etternavn?.message}
             autoComplete="off"
-            {...register("visningsetternavn")}
+            {...register("etternavn", { required: "Må oppgis" })}
           />
         </div>
 
-        <div className={rowStyles}>
-          <Search
-            label="Org.enhet"
-            variant="secondary"
-            hideLabel={false}
-            disabled
-          />
-        </div>
+        <Search
+          label="Org.enhet"
+          variant="secondary"
+          hideLabel={false}
+          disabled
+        />
 
-        <div className={rowStyles}>
-          <RadioGroup legend="Sektor" size="medium" {...register("sektorTxt")}>
-            <Radio value="NAV_STATLIG" checked>
-              NAV statlig
-            </Radio>
-            <Radio value="NAV_KOMMUNAL" disabled>
-              NAV kommunal
-            </Radio>
-            <Radio value="EKSTERN" disabled>
-              Ekstern
-            </Radio>
-          </RadioGroup>
-        </div>
+        <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
+          <Radio value="NAV_STATLIG" checked>
+            NAV statlig
+          </Radio>
+          <Radio value="NAV_KOMMUNAL" disabled>
+            NAV kommunal
+          </Radio>
+          <Radio value="EKSTERN" disabled>
+            Ekstern
+          </Radio>
+        </RadioGroup>
 
         <div className={rowStyles}>
           <CreateResourceConfirmationModal
-            formValues={getValues()}
-            onSubmit={onSubmit}
+            loading={loading}
+            onConfirm={() => handleSubmit(handleOpprettRessurs)()}
+            formValues={watch()}
           />
-          <Button variant="secondary">Avbryt</Button>
+          <Button
+            variant="secondary"
+            onClick={() => navigate("/ressurs/create", { replace: true })}
+          >
+            Avbryt
+          </Button>
         </div>
+
+        {error ? <Alert variant="error">{error.message}</Alert> : null}
       </div>
     </form>
   );
-};
-
-export default ResourceForm;
+}

@@ -1,14 +1,17 @@
 import { Navigate, Route, Routes } from "react-router";
-import CreateResourceView from "./pages/CreateResourceView";
+import { SearchForPerson } from "./pages/CreateResourcePage";
 import { NotfoundPage } from "./pages/NotfoundPage";
 import ResourceView from "./pages/ResourceView";
 import OrganisasjonHierarkiPageNew from "./pages/OrganisasjonHierarkiPageNew";
+import ResourceForm from "./components/Resource/ResourceForm";
 
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Navigate to="/org/0_NAV_NAV" />} />
     <Route path="/ressurs/:id" element={<ResourceView />} />
-    <Route path="/ressurs/create" element={<CreateResourceView />} />
+    <Route path="/ressurs/create" element={<SearchForPerson />}>
+      <Route path=":personIdent" element={<ResourceForm />} />
+    </Route>
 
     <Route path={"*"} element={<NotfoundPage />} />
 

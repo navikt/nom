@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { BodyShort, Button, Heading, Label, Modal } from "@navikt/ds-react";
 import { useState } from "react";
+import { OpprettRessursFormTypes } from "./ResourceForm";
 
 const TextWithLabelHorizontal = (props: { label: string; text: string }) => {
   return (
@@ -17,19 +18,24 @@ const TextWithLabelHorizontal = (props: { label: string; text: string }) => {
   );
 };
 
-type ModalResourceProps = {
-  formValues: any;
-  onSubmit: (values: any) => void;
-};
-
-const CreateResourceConfirmationModal = (props: ModalResourceProps) => {
-  const { formValues, onSubmit } = props;
-
+const CreateResourceConfirmationModal = ({
+  formValues,
+  onConfirm,
+  loading,
+}: {
+  formValues: OpprettRessursFormTypes;
+  onConfirm: () => void;
+  loading: boolean;
+}) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
     <>
-      <Button type="button" onClick={() => setShowModal(true)}>
+      <Button
+        loading={loading}
+        type="button"
+        onClick={() => setShowModal(true)}
+      >
         Opprett ressurs
       </Button>
       <Modal
@@ -46,10 +52,7 @@ const CreateResourceConfirmationModal = (props: ModalResourceProps) => {
           </BodyShort>
           <TextWithLabelHorizontal
             label="Navn: "
-            text={
-              formValues.visningsfornavn + " " + formValues.visningsetternavn ||
-              "-"
-            }
+            text={formValues.fornavn + " " + formValues.etternavn}
           />
           <TextWithLabelHorizontal label="Org.enhet: " text="Mangler enhet" />
           <TextWithLabelHorizontal label="Sektor: " text="Statlig" />
@@ -68,7 +71,7 @@ const CreateResourceConfirmationModal = (props: ModalResourceProps) => {
             <Button
               className={css({ marginRight: "1rem" })}
               onClick={() => {
-                onSubmit(formValues);
+                onConfirm();
                 setShowModal(false);
               }}
             >

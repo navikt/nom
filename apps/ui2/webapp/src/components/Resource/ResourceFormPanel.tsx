@@ -9,6 +9,9 @@ const panelStyles = css({
   border: "1px solid  var(--navds-global-color-gray-400)",
   borderTop: "5px solid var(--navds-global-color-lightblue-800)",
   borderRadius: "5px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "1rem",
 });
 
 type ResourceFormPanelProps = {
