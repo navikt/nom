@@ -134,7 +134,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(5, response.path("$organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
+        assertEquals(5, response.path("organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
     }
 
     @Test
