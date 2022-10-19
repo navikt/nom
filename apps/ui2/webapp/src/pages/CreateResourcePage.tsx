@@ -5,12 +5,7 @@ import ContentWrapper from "../components/ContentWrapper";
 import ResourceFormPanel from "../components/Resource/ResourceFormPanel";
 import { BodyShort, Heading, Search } from "@navikt/ds-react";
 import { opprettRessursIkon } from "../components/Images";
-/*
-  FLYT
-  1. søk opp person
-  Hvis personen finnes som en ressurs fra før, naviger til den ressursen
-  Hvis ikke vis skjema for å fylle ut detaljer  
- */
+
 export function SearchForPerson() {
   const { personIdent } = useParams();
   const { handleSubmit, control, reset } = useForm({

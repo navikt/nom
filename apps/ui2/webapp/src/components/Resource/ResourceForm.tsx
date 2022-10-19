@@ -5,13 +5,12 @@ import {
   Loader,
   Radio,
   RadioGroup,
-  Search,
   TextField,
 } from "@navikt/ds-react";
 import { useForm } from "react-hook-form";
 import { css } from "@emotion/css";
 import { Navigate, useNavigate, useParams } from "react-router";
-import ResourceMetadata from "./ResourceMetadata";
+import { ResourceMetadata } from "./ResourceMetadata";
 import {
   FolkeregisterPerson,
   Sektor,
@@ -77,6 +76,7 @@ export default function ResourceForm() {
 
 export type OpprettRessursFormTypes = {
   fornavn: string;
+  mellomnavn?: string;
   etternavn: string;
   sektor: string;
 };
@@ -97,6 +97,7 @@ function ResourceFormInner({
   } = useForm<OpprettRessursFormTypes>({
     defaultValues: {
       fornavn: personResult?.navn.fornavn ?? "",
+      mellomnavn: personResult?.navn.mellomnavn ?? "",
       etternavn: personResult?.navn.etternavn ?? "",
       sektor: "NAV_STATLIG",
     },
@@ -117,6 +118,7 @@ function ResourceFormInner({
         request: {
           personident: personIdent,
           visningsfornavn: submittedValues.fornavn,
+          visningsmellomnavn: submittedValues.mellomnavn,
           visningsetternavn: submittedValues.etternavn,
           sektor: submittedValues.sektor as Sektor,
         },
@@ -154,19 +156,19 @@ function ResourceFormInner({
           />
           <TextField
             type="text"
+            label="Mellomnavn"
+            error={errors.mellomnavn?.message}
+            autoComplete="off"
+            {...register("mellomnavn")}
+          />
+          <TextField
+            type="text"
             label="Etternavn"
             error={errors.etternavn?.message}
             autoComplete="off"
             {...register("etternavn", { required: "Må oppgis" })}
           />
         </div>
-
-        <Search
-          label="Org.enhet"
-          variant="secondary"
-          hideLabel={false}
-          disabled
-        />
 
         <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
           <Radio value="NAV_STATLIG" checked>

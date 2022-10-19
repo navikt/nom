@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { BodyShort, Heading, Label } from "@navikt/ds-react";
+import { Heading } from "@navikt/ds-react";
 import { FolkeregisterPerson } from "../../api/generated/graphql_generated";
 
 const contentStyles = css({
@@ -9,49 +9,33 @@ const contentStyles = css({
   padding: "1rem",
 });
 
-const rowStyles = css({
-  display: "flex",
-  justifyContent: "space-between",
-  marginTop: "1rem",
-});
-
-const TextWithLabelVertical = (props: { label: string; text: string }) => (
-  <div>
-    <BodyShort>{props.label}</BodyShort>
-    <Label>{props.text}</Label>
-  </div>
-);
-
-const ResourceMetadata = ({ person }: { person: FolkeregisterPerson }) => {
+export const ResourceMetadata = ({
+  person,
+}: {
+  person: FolkeregisterPerson;
+}) => {
   return (
     <div className={contentStyles}>
       <Heading size="small">Opplysninger fra Folkeregisteret</Heading>
-
-      <div className={rowStyles}>
-        <TextWithLabelVertical
-          label="Fornavn"
-          text={person.navn.fornavn || ""}
-        />
-        {person.navn.mellomnavn && (
+      <div
+        className={css`
+          margin-top: var(--navds-spacing-6);
+          display: grid;
+          grid-auto-flow: column;
+          grid-template-rows: 1fr 1fr;
+        `}
+      >
+        <span>Fornavn</span>
+        <b>{person.navn.fornavn}</b>
+        {person.navn.mellomnavn ? (
           <>
-            <TextWithLabelVertical
-              label="Mellomnavn"
-              text={person.navn.mellomnavn}
-            />
+            <span>Mellomnavn</span>
+            <b>{person.navn.mellomnavn}</b>
           </>
-        )}
-        {/* <TextWithLabelVertical
-          label='Mellomnavn'
-          text={person.navn.mellomnavn || ''}
-        /> */}
-        <TextWithLabelVertical
-          label="Etternavn"
-          text={person.navn.etternavn || ""}
-        />
-        <TextWithLabelVertical label="Kjønn" text="" />
+        ) : null}
+        <span>Etternavn</span>
+        <b>{person.navn.etternavn}</b>
       </div>
     </div>
   );
 };
-
-export default ResourceMetadata;
