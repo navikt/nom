@@ -41,7 +41,7 @@ export function SearchForPerson() {
         >
           <BodyShort size="medium">
             Fyll inn personnummer/D-nummer så finner vi personen i
-            folkeregisteret
+            Folkeregisteret
           </BodyShort>
           <div
             className={css(
