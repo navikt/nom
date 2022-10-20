@@ -16,8 +16,9 @@ import {
   Sektor,
   useHentPersonQuery,
   useOpprettRessursMutation,
-} from "../../api/generated/graphql_generated";
+} from "../../../api/generated/graphql_generated";
 import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
+import { decode } from "js-base64";
 
 const rowStyles = css({
   display: "flex",
@@ -29,8 +30,9 @@ const rowStyles = css({
   },
 });
 
-export default function ResourceForm() {
-  const { personIdent } = useParams();
+export default function CreateResourceForm() {
+  const { personIdentInBase64 } = useParams();
+  const personIdent = decode(personIdentInBase64 ?? "");
 
   const hentPersonQuery = useHentPersonQuery({
     variables: { personIdent: personIdent ?? "" },
@@ -63,7 +65,7 @@ export default function ResourceForm() {
     return (
       <>
         <ResourceMetadata person={personResult.person} />
-        <ResourceFormInner
+        <CreateResourceFormInner
           personResult={personResult.person}
           personIdent={personResult.personIdent}
         />
@@ -81,7 +83,7 @@ export type OpprettRessursFormTypes = {
   sektor: string;
 };
 
-function ResourceFormInner({
+function CreateResourceFormInner({
   personResult,
   personIdent,
 }: {
@@ -106,9 +108,12 @@ function ResourceFormInner({
   const [opprettRessursMutation, { loading, error }] =
     useOpprettRessursMutation({
       onCompleted: (data) => {
-        navigate(`/ressurs/${data.opprettRessurs?.navident}`, {
-          replace: true,
-        });
+        navigate(
+          `/ressurs/create/${data.opprettRessurs?.navident ?? ""}/receipt`,
+          {
+            replace: true,
+          }
+        );
       },
     });
 

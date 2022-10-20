@@ -38,3 +38,10 @@ export function isNotDuplicate<T>(
   }
   return !wasDuplicate;
 }
+
+/**
+ * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
+ */
+export function isInDev() {
+  return window.location.hostname.match(/localhost|\.dev\./);
+}

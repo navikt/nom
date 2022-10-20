@@ -87,7 +87,6 @@ type RessursInfoProps = {
 
 const RessursInfo = (props: RessursInfoProps) => {
   const { ressurs } = props;
-  console.log(ressurs, "RESSURS");
 
   return (
     <div className={css({ marginTop: "1rem" })}>

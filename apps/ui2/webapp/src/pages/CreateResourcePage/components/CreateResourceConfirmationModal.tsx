@@ -1,7 +1,7 @@
 import { css } from "@emotion/css";
 import { BodyShort, Button, Heading, Label, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { OpprettRessursFormTypes } from "./ResourceForm";
+import { OpprettRessursFormTypes } from "./CreateResourceForm";
 
 const TextWithLabelHorizontal = (props: { label: string; text: string }) => {
   return (
@@ -28,6 +28,11 @@ const CreateResourceConfirmationModal = ({
   loading: boolean;
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const { fornavn, etternavn, mellomnavn } = formValues;
+
+  const formattedName = [fornavn, mellomnavn, etternavn]
+    .filter((navn) => !!navn)
+    .join(" ");
 
   return (
     <>
@@ -50,10 +55,7 @@ const CreateResourceConfirmationModal = ({
           <BodyShort className={css({ marginBottom: "1rem" })}>
             Du er nå i ferd med å opprette ressurs:{" "}
           </BodyShort>
-          <TextWithLabelHorizontal
-            label="Navn: "
-            text={formValues.fornavn + " " + formValues.etternavn}
-          />
+          <TextWithLabelHorizontal label="Navn: " text={formattedName} />
           <TextWithLabelHorizontal label="Org.enhet: " text="Mangler enhet" />
           <TextWithLabelHorizontal label="Sektor: " text="Statlig" />
 

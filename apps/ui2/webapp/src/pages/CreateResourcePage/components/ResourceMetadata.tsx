@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import { Heading } from "@navikt/ds-react";
-import { FolkeregisterPerson } from "../../api/generated/graphql_generated";
+import { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
 
 const contentStyles = css({
   backgroundColor: "var(--nom-secondary-hover)",
