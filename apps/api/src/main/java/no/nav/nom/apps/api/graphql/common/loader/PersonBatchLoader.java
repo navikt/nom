@@ -12,11 +12,12 @@ import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
-import org.dataloader.BatchLoaderEnvironment;
 import org.springframework.graphql.client.ClientGraphQlResponse;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -54,16 +55,28 @@ public class PersonBatchLoader {
                 }
                 """;
 
-    public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient webClient) {
+    public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient.Builder webClientBuilder) {
         this.tokenRepository = tokenRepository;
         this.pdlProperties = appProperties.pdl();
-        this.graphQlClient = HttpGraphQlClient.builder(webClient)
+        this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
                 .url(pdlProperties.baseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.add("Tema", pdlProperties.tema());
                 })
+                .webClient(builder -> builder.filter(setBearerAuth()))
                 .build();
+    }
+
+    private  ExchangeFilterFunction setBearerAuth() {
+        // Utility outbound exchange filter on webclient to set the authorization header
+        return ExchangeFilterFunction.ofRequestProcessor(
+                request -> Mono.just(
+                        ClientRequest.from(request)
+                                .headers(headers -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
+                                .build()
+                )
+        );
     }
 
     public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> loadMany(Collection<T> ressurser, Function<T, String> identResolver) {
@@ -96,9 +109,7 @@ public class PersonBatchLoader {
     }
 
     private Mono<ClientGraphQlResponse> executePDLRequest(Collection<String> personidenter) {
-        return graphQlClient.mutate()
-                .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
-                .build()
+        return graphQlClient
                 .document(PDL_BOLK_HENT_PERSON_QUERY)
                 .variable("identer", personidenter)
                 .execute();
