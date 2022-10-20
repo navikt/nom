@@ -43,9 +43,15 @@ export function isInDevelopment() {
  * Every letter after a space or "-" is capitalized.
  */
 export function capitalizeName(name: string) {
-  const nameParts = name.split(/[^a-åA-Å]/);
-  return nameParts
-    .map((part) => part.toLowerCase())
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  let nameInProgress = "";
+
+  for (const currentChar of name.toLowerCase()) {
+    const lastChar = nameInProgress.slice(-1);
+    nameInProgress =
+      lastChar === " " || lastChar === "-" || lastChar === ""
+        ? nameInProgress + currentChar.toUpperCase()
+        : nameInProgress + currentChar;
+  }
+
+  return nameInProgress;
 }
