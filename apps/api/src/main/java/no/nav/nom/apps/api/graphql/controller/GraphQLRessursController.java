@@ -26,11 +26,11 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -114,13 +114,13 @@ public class GraphQLRessursController {
 
     @Deprecated
     @BatchMapping(typeName = "Ressurs", field = "person")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> person(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
-        return folkeregisterPerson(ressurser, environment);
+    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> person(List<Ressurs> ressurser) {
+        return folkeregisterPerson(ressurser);
     }
 
     @BatchMapping(typeName = "Ressurs", field = "folkeregisterPerson")
-    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser, BatchLoaderEnvironment environment) {
-        return Mono.fromSupplier(() -> personResolver.folkeregisterPerson(ressurser, Ressurs::getPersonIdent, environment));
+    public Mono<Map<Ressurs, DataFetcherResult<FolkeregisterPerson>>> folkeregisterPerson(List<Ressurs> ressurser) {
+        return personResolver.folkeregisterPerson(ressurser, Ressurs::getPersonIdent);
     }
 
     @BatchMapping(typeName = "Ressurs", field = "epost")

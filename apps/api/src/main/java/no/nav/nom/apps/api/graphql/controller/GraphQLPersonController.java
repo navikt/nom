@@ -14,6 +14,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -45,13 +46,13 @@ public class GraphQLPersonController {
 
     @Deprecated
     @SchemaMapping(typeName = "PersonResult", field = "person")
-    public DataFetcherResult<FolkeregisterPerson> person(PersonResult person, DataFetchingEnvironment environment) {
-        return folkeregisterPerson(person, environment);
+    public Mono<DataFetcherResult<FolkeregisterPerson>> person(PersonResult person) {
+        return folkeregisterPerson(person);
     }
 
     // TODO: Consider changing to BatchMapping to avoid having to figure out how to create a new BatchLoaderEnvironment
     @SchemaMapping(typeName = "PersonResult", field = "folkeregisterPerson")
-    public DataFetcherResult<FolkeregisterPerson> folkeregisterPerson(PersonResult person, DataFetchingEnvironment environment) {
-        return folkeregisterPersonResolver.folkeregisterPerson(person, PersonResult::getPersonIdent, environment);
+    public Mono<DataFetcherResult<FolkeregisterPerson>> folkeregisterPerson(PersonResult person) {
+        return folkeregisterPersonResolver.folkeregisterPerson(person, PersonResult::getPersonIdent);
     }
 }

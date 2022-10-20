@@ -30,4 +30,12 @@ public enum ErrorCode {
                 .extensions(singletonMap("code", text))
                 .build();
     }
+
+    public GraphQLError construct(String message) {
+        return GraphqlErrorBuilder.newError()
+                .message(message)
+                .errorType(type)
+                .extensions(singletonMap("code", text))
+                .build();
+    }
 }

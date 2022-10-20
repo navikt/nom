@@ -5,7 +5,6 @@ import graphql.GraphQLError;
 import graphql.GraphQLException;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
@@ -14,21 +13,21 @@ import no.nav.nom.apps.api.graphql.common.exception.PDLBolkException;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.RessursNavn;
 import org.dataloader.BatchLoaderEnvironment;
+import org.springframework.graphql.client.ClientGraphQlResponse;
 import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Collectors.toUnmodifiableMap;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Component
@@ -67,47 +66,45 @@ public class PersonBatchLoader {
                 .build();
     }
 
-    public <T> Map<T, DataFetcherResult<FolkeregisterPerson>> load(Collection<T> ressurser, Function<T, String> identResolver, BatchLoaderEnvironment batchLoaderEnvironment) {
-        final var batch = getNameBatch(ressurser.stream().map(identResolver).collect(toSet()), batchLoaderEnvironment);
-        return ressurser.stream()
-                        .collect(
-                                toUnmodifiableMap(
-                                        Function.identity(),
-                                        ressurs -> batch.getOrDefault(identResolver.apply(ressurs), DataFetcherResult.<FolkeregisterPerson>newResult().build())
-                                )
-                        );
+    public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> loadMany(Collection<T> ressurser, Function<T, String> identResolver) {
+        // TODO: Consider reintroducing BatchLoaderEnvironment parameter if the DataFetchingEnvironment is added to the keycontext, https://github.com/spring-projects/spring-graphql/issues/517
+        return getPDLBatch(ressurser.stream().collect(toMap(identResolver, Function.identity())));
     }
 
-    @SneakyThrows
-    public Map<String, DataFetcherResult<FolkeregisterPerson>> getNameBatch(Set<String> personidenter, BatchLoaderEnvironment batchLoaderEnvironment) {
-        var response = graphQlClient.mutate()
+    public <T> Mono<DataFetcherResult<FolkeregisterPerson>> loadSingle(T ressurs, Function<T, String> identResolver) {
+        return getPDLBatch(Map.of(identResolver.apply(ressurs), ressurs)).map(map -> map.get(ressurs));
+    }
+
+    public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> getPDLBatch(Map<String, T> ressurser) {
+        return executePDLRequest(ressurser.keySet())
+                .map(response -> {
+                    if (response != null && !response.isValid()) {
+                        log.error("Feil i oppslag mot PDL: {}", response.getErrors());
+                        throw new PDLBolkException("Oppslag mot PDL feilet", response, ErrorCode.SERVER_ERROR);
+                    }
+
+                    return requireNonNull(response)
+                            .field("hentPersonBolk")
+                            .toEntity(JsonNode.class);
+                })
+                .flatMapIterable(Function.identity())
+                .map(person -> Map.entry(person.get("ident").asText(), convert(person)))
+                .reduce(new HashMap<>(), (results, entry) -> {
+                    results.putIfAbsent(ressurser.get(entry.getKey()), entry.getValue());
+                    return results;
+                });
+    }
+
+    private Mono<ClientGraphQlResponse> executePDLRequest(Collection<String> personidenter) {
+        return graphQlClient.mutate()
                 .headers((headers) -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
                 .build()
                 .document(PDL_BOLK_HENT_PERSON_QUERY)
                 .variable("identer", personidenter)
-                .execute()
-                .block();
-
-        if (response != null && !response.isValid()) {
-            log.error("Feil i oppslag mot PDL: {}", response.getErrors());
-            throw new PDLBolkException("Oppslag mot PDL feilet", response, ErrorCode.SERVER_ERROR);
-        }
-
-        final var data = Objects.requireNonNull(response)
-                .field("hentPersonBolk")
-                .toEntity(JsonNode.class); // TODO: Check if we can use toEntityList(JsonNode.class)
-
-        return StreamSupport.stream(data.spliterator(), false)
-                .collect(
-                        toUnmodifiableMap(
-                                o -> o.get("ident").asText(), // Fragile if the key comes back as empty string
-                                o -> convert(o, (DataFetchingEnvironment) batchLoaderEnvironment.getKeyContexts().get(o.get("ident").asText()))
-                        )
-                );
-
+                .execute();
     }
 
-    private DataFetcherResult<FolkeregisterPerson> convert(JsonNode personResult, DataFetchingEnvironment env) {
+    private DataFetcherResult<FolkeregisterPerson> convert(JsonNode personResult) {
         final var code = personResult.get("code").asText();
         if ("ok".equals(code)) {
             final var navn = personResult.get("person").get("navn").get(0);
@@ -127,12 +124,12 @@ public class PersonBatchLoader {
                     .build();
         }
         log.warn("Manglende data fra PDL", new GraphQLException("Manglende data fra PDL med kode: " + code));
-        return convertToError(code, "PDL har ingen data på denne personidenten", env);
+        return convertToError(code, "PDL har ingen data på denne personidenten");
     }
 
-    private DataFetcherResult<FolkeregisterPerson> convertToError(String code, String message, DataFetchingEnvironment env) {
+    private DataFetcherResult<FolkeregisterPerson> convertToError(String code, String message) {
         return DataFetcherResult.<FolkeregisterPerson>newResult()
-                .error(ErrorCode.valueOf(code.toUpperCase()).construct(env, message))
+                .error(ErrorCode.valueOf(code.toUpperCase()).construct(message))
                 .build();
     }
 
