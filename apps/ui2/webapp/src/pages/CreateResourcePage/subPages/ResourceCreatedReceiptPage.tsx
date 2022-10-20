@@ -107,7 +107,7 @@ function Unit4Link() {
   const { navIdent } = useParams();
   const navIdentWithoutFirstLetter = navIdent?.slice(1);
   const unit4BaseUrl = isInDevelopment()
-    ? "https://agresso.test.local"
+    ? "https://d26isvw00022.test.local"
     : "https://agresso.adeo.no";
 
   return (
@@ -116,7 +116,7 @@ function Unit4Link() {
       className={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/BusinessWorldDemoM7/ContentContainer.aspx?type=topgen&menu_id=00912225&activityStepId=1-1&attribute_id=S108&client=EN&personId=${navIdentWithoutFirstLetter}&PersonellType=F`}
+      href={`${unit4BaseUrl}/agrt01/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR&personId=${navIdentWithoutFirstLetter}&PersonellType=F`}
       icon={<ExternalLink aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"
