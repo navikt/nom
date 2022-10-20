@@ -38,11 +38,11 @@ public class PdlConsumer {
     public PdlConsumer(
             AppProperties appProperties,
             TokenRepository tokenRepository,
-            WebClient webClient
+            WebClient.Builder webClientBuilder
     ) {
         this.pdlProperties = appProperties.pdl();
         this.tokenRepository = tokenRepository;
-        this.graphQlClient = HttpGraphQlClient.builder(webClient)
+        this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
                 .url(pdlProperties.baseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);

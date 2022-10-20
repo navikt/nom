@@ -34,8 +34,6 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class PersonBatchLoader {
 
-    private final TokenRepository tokenRepository;
-    private final AppProperties.Pdl pdlProperties;
     private final HttpGraphQlClient graphQlClient;
 
     private final static String PDL_BOLK_HENT_PERSON_QUERY = // language=graphql
@@ -56,24 +54,23 @@ public class PersonBatchLoader {
                 """;
 
     public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient.Builder webClientBuilder) {
-        this.tokenRepository = tokenRepository;
-        this.pdlProperties = appProperties.pdl();
+        var pdlProperties = appProperties.pdl();
         this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
                 .url(pdlProperties.baseUrl() + "/graphql")
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.add("Tema", pdlProperties.tema());
                 })
-                .webClient(builder -> builder.filter(setBearerAuth()))
+                .webClient(builder -> builder.filter(setBearerAuthWith(tokenRepository, pdlProperties.aadClientId())))
                 .build();
     }
 
-    private  ExchangeFilterFunction setBearerAuth() {
+    private  ExchangeFilterFunction setBearerAuthWith(TokenRepository tokenRepository, String clientId) {
         // Utility outbound exchange filter on webclient to set the authorization header
         return ExchangeFilterFunction.ofRequestProcessor(
                 request -> Mono.just(
                         ClientRequest.from(request)
-                                .headers(headers -> headers.setBearerAuth(tokenRepository.getSystemAadToken(pdlProperties.aadClientId()).serialize()))
+                                .headers(headers -> headers.setBearerAuth(tokenRepository.getSystemAadToken(clientId).serialize()))
                                 .build()
                 )
         );
