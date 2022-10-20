@@ -1,8 +1,8 @@
 import { css } from "@emotion/css";
 import { Back } from "@navikt/ds-icons";
-import { BodyShort } from "@navikt/ds-react";
+import { Alert, BodyShort } from "@navikt/ds-react";
 import { useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import * as Gq from "../api/generated/graphql_generated";
 import ContentWrapper from "../components/ContentWrapper";
@@ -16,6 +16,7 @@ const linkStyles = css({
 
 const ResourceView = () => {
   const { id } = useParams();
+  const { state } = useLocation();
   const query = Gq.useHentRessursMedNavIdentQuery({
     variables: { navIdent: id },
   });
@@ -28,6 +29,12 @@ const ResourceView = () => {
 
           {query.data && (
             <>
+              {state?.alreadyExists ? (
+                <Alert variant="info">
+                  Ressurs finnes allerede i NAV. Endringer kan gjøres i Remedy
+                  og Unit4
+                </Alert>
+              ) : undefined}
               <RessursInfo ressurs={query.data.ressurs as Gq.Ressurs} />
             </>
           )}

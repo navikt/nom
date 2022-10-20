@@ -62,7 +62,13 @@ export default function CreateResourceForm() {
   const personResult = hentPersonQuery.data?.person;
 
   if (personResult?.navIdent) {
-    return <Navigate replace to={`/ressurs/${personResult.navIdent}`} />;
+    return (
+      <Navigate
+        replace
+        state={{ alreadyExists: true }}
+        to={`/ressurs/${personResult.navIdent}`}
+      />
+    );
   }
 
   if (personResult?.person) {
