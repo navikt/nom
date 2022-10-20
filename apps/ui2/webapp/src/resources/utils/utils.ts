@@ -37,3 +37,15 @@ export function isNotDuplicate<T>(
 export function isInDevelopment() {
   return window.location.hostname.match(/localhost|\.dev\./);
 }
+
+/**
+ * Best effort made to capitalize a name.
+ * Every letter after a space or "-" is capitalized.
+ */
+export function capitalizeName(name: string) {
+  const nameParts = name.split(/[^a-åA-Å]/);
+  return nameParts
+    .map((part) => part.toLowerCase())
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+}

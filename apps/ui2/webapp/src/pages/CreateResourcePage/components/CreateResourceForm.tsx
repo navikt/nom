@@ -20,6 +20,7 @@ import {
   useHentPersonQuery,
   useOpprettRessursMutation,
 } from "../../../api/generated/graphql_generated";
+import { capitalizeName } from "../../../resources/utils/utils";
 import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
 import { ResourceMetadata } from "./ResourceMetadata";
 
@@ -101,9 +102,9 @@ function CreateResourceFormInner({
     formState: { errors },
   } = useForm<OpprettRessursFormTypes>({
     defaultValues: {
-      fornavn: personResult?.navn.fornavn ?? "",
-      mellomnavn: personResult?.navn.mellomnavn ?? "",
-      etternavn: personResult?.navn.etternavn ?? "",
+      fornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
+      mellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
+      etternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
       sektor: "NAV_STATLIG",
     },
   });
