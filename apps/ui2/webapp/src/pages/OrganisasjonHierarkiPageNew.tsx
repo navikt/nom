@@ -101,8 +101,7 @@ const panelCss = {
     row-gap: 0.5rem;
     min-height: 10rem;
     margin-bottom: 0;
-    padding: 2rem;
-    padding-bottom: 0;
+    padding: var(--navds-spacing-8) var(--navds-spacing-8) 0;
   `),
   underEnhet: css(
     commonPanelCss,
@@ -404,8 +403,7 @@ const OrganisasjonHierarkiPageInner = function (properties: {
               </div>
               <div
                 className={css`
-                  padding: 2.5rem;
-                  padding-bottom: 0;
+                  padding: var(--navds-spacing-10) var(--navds-spacing-10) 0;
                 `}
               >
                 <UserImage

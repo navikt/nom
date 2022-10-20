@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { Panel } from "@navikt/ds-react";
+import type { ReactNode } from "react";
 
 const panelStyles = css({
   minHeight: "300px",
@@ -15,7 +16,7 @@ const panelStyles = css({
 });
 
 type ResourceFormPanelProperties = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 const ResourceFormPanel = (properties: ResourceFormPanelProperties) => (

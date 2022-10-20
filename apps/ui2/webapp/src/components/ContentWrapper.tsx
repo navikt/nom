@@ -1,18 +1,17 @@
 import { css } from "@emotion/css";
+import type { ReactElement } from "react";
 
 import { mediaQueryContentWidth } from "../resources/NomStyles";
 
 const contentStyle = css(
   mediaQueryContentWidth,
   css`
-    margin: 0 auto 2.5rem;
-    margin-top: 2rem;
-    margin-bottom: 5rem;
+    margin: var(--navds-spacing-8) auto var(--navds-spacing-20);
   `
 );
 
 type ContentWrapperProperties = {
-  children: React.ReactElement;
+  children: ReactElement;
 };
 
 const ContentWrapper = (properties: ContentWrapperProperties) => (

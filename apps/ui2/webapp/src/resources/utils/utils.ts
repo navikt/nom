@@ -7,13 +7,6 @@ export const sortItems = (a: string, b: string) => {
   return 0;
 };
 
-export function structuredClone<T>(argument: T): T {
-  const cloneFunction = window.structuredClone;
-  return cloneFunction
-    ? cloneFunction(argument)
-    : JSON.parse(JSON.stringify(argument));
-}
-
 export function functionIsNotDuplicateByKey<T>(extractKey: (it: T) => string) {
   return (it: T, index: number, arrayContext: T[]) =>
     isNotDuplicate<T>(it, index, arrayContext, extractKey);

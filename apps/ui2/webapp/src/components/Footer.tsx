@@ -30,16 +30,13 @@ const Footer = () => {
   return (
     <div className={outerDiv}>
       <div className={innerDiv}>
-        {/* <div className={FooterStyle}>
-          <BodyLong> {footerText}</BodyLong>
-        </div> */}
         <a
           className={slackLink}
           href="https://nav-it.slack.com/archives/C0362LA7ZLN"
           rel="noopener noreferrer"
           target="_blank"
         >
-          <img src={slackNom}></img>
+          <img alt="nom slack" src={slackNom}></img>
         </a>
       </div>
     </div>

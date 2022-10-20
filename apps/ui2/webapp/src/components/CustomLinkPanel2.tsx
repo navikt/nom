@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { Next } from "@navikt/ds-icons";
+import type { ReactNode } from "react";
 
 import { building2Icon, peopleFilledIcon } from "./Images";
 
@@ -73,7 +74,7 @@ const iconStyle = css({
 });
 
 type CustomLinkPanel2Properties = {
-  children: React.ReactNode;
+  children: ReactNode;
   type: LinkPanelType;
 };
 
@@ -125,11 +126,13 @@ const CustomLinkPanel2 = (properties: CustomLinkPanel2Properties) => {
   };
 
   const icon = type2Icon(type);
-
+  console.log(icon);
   return (
     <>
       <div className={setLinkPanelStyles()}>
-        <div className={iconStyle}>{icon && <img src={icon} />}</div>
+        <div className={iconStyle}>
+          {icon && <img alt="paneltype" src={icon} />}
+        </div>
         <div className={innerCommonCss}>{children}</div>
         {type !== LinkPanelType.CURRENT && type !== LinkPanelType.RESSURS && (
           <Next className="navds-link-panel__chevron" />

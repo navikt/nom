@@ -34,7 +34,7 @@ const UserImage = (properties: UserImageProperties) => {
   if (!navIdent) {
     return (
       <div>
-        <img className={stl} src={questionMarkIcon} />
+        <img alt="manglende nav ident" className={stl} src={questionMarkIcon} />
       </div>
     );
   }
