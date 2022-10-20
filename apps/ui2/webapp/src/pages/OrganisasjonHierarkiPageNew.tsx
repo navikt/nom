@@ -14,6 +14,7 @@ import {
 } from "../api/transformations/hierarchy";
 import ContentWrapper from "../components/ContentWrapper";
 import { building2Icon, peopleFilledIcon } from "../components/Images";
+import { PageBanner } from "../components/PageBanner";
 import UserImage from "../components/UserImage";
 import { agressoUrlToData } from "../resources/utils/url_utils";
 
@@ -567,48 +568,50 @@ function OrganisasjonsHierarkiPageOuter() {
     (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk);
 
   return (
-    <ContentWrapper>
-      <div
-        className={css`
-          display: grid;
-        `}
-      >
-        <Heading className={css({ marginBottom: "20px" })} size="xlarge">
-          NAV Organisasjon
-        </Heading>
-        {showAlert && (
-          <>
-            <Alert variant={"info"}>Uventet data i graphql-respons</Alert>
-            <hr />
-          </>
-        )}
-        {!gotHierarkiData && !gotRessursData && (
-          <>
-            <div>Loading...</div>
-          </>
-        )}
-        {missingData && (
-          <Alert variant={"warning"}>
-            Fant ikke data på IDer <br />
-            {JSON.stringify(
-              resourceId
-                ? { orgenhetId: id, ressursId: resourceId }
-                : { orgenhetId: id },
-              undefined,
-              2
-            )}
-          </Alert>
-        )}
-        {gotHierarkiData && gotRessursData && enhetHierarchyOk && (
-          <OrganisasjonHierarkiPageInner
-            data={enhetHierarchy}
-            focusedRessurs={
-              focusedResourceHierarchyOk ? focusedResourceHierarchy : undefined
-            }
-          />
-        )}
-      </div>
-    </ContentWrapper>
+    <>
+      <PageBanner text="NAV organisasjon" />
+      <ContentWrapper>
+        <div
+          className={css`
+            display: grid;
+          `}
+        >
+          {showAlert && (
+            <>
+              <Alert variant={"info"}>Uventet data i graphql-respons</Alert>
+              <hr />
+            </>
+          )}
+          {!gotHierarkiData && !gotRessursData && (
+            <>
+              <div>Loading...</div>
+            </>
+          )}
+          {missingData && (
+            <Alert variant={"warning"}>
+              Fant ikke data på IDer <br />
+              {JSON.stringify(
+                resourceId
+                  ? { orgenhetId: id, ressursId: resourceId }
+                  : { orgenhetId: id },
+                undefined,
+                2
+              )}
+            </Alert>
+          )}
+          {gotHierarkiData && gotRessursData && enhetHierarchyOk && (
+            <OrganisasjonHierarkiPageInner
+              data={enhetHierarchy}
+              focusedRessurs={
+                focusedResourceHierarchyOk
+                  ? focusedResourceHierarchy
+                  : undefined
+              }
+            />
+          )}
+        </div>
+      </ContentWrapper>
+    </>
   );
 }
 
