@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { Next } from "@navikt/ds-icons";
+
 import { building2Icon, peopleFilledIcon } from "./Images";
 
 export enum LinkPanelType {
@@ -71,37 +72,56 @@ const iconStyle = css({
   },
 });
 
-type CustomLinkPanel2Props = {
+type CustomLinkPanel2Properties = {
   children: React.ReactNode;
   type: LinkPanelType;
 };
 
 function type2Icon(t: LinkPanelType) {
   switch (t) {
-    case LinkPanelType.CURRENT:
+    case LinkPanelType.CURRENT: {
       return building2Icon;
-    case LinkPanelType.OVERENHET:
+    }
+    case LinkPanelType.OVERENHET: {
       return building2Icon;
-    case LinkPanelType.KOBLING:
+    }
+    case LinkPanelType.KOBLING: {
       return peopleFilledIcon;
-    case LinkPanelType.RESSURS:
+    }
+    case LinkPanelType.RESSURS: {
       return peopleFilledIcon;
-    case LinkPanelType.LARGE:
+    }
+    case LinkPanelType.LARGE: {
       return building2Icon;
-    case LinkPanelType.SMALL:
+    }
+    case LinkPanelType.SMALL: {
       return building2Icon;
+    }
   }
 }
 
-const CustomLinkPanel2 = (props: CustomLinkPanel2Props) => {
-  const { children, type } = props;
+const CustomLinkPanel2 = (properties: CustomLinkPanel2Properties) => {
+  const { children, type } = properties;
 
   const setLinkPanelStyles = () => {
-    if (type === LinkPanelType.CURRENT) return linkPanelCurrentStyles;
-    else if (type === LinkPanelType.OVERENHET) return linkPanelOverenhetStyles;
-    else if (type === LinkPanelType.LARGE) return linkPanelLargeStyles;
-    else if (type === LinkPanelType.KOBLING) return linkPanelKoblingStyles;
-    else if (type === LinkPanelType.RESSURS) return linkPanelRessursStyles;
+    switch (type) {
+      case LinkPanelType.CURRENT: {
+        return linkPanelCurrentStyles;
+      }
+      case LinkPanelType.OVERENHET: {
+        return linkPanelOverenhetStyles;
+      }
+      case LinkPanelType.LARGE: {
+        return linkPanelLargeStyles;
+      }
+      case LinkPanelType.KOBLING: {
+        return linkPanelKoblingStyles;
+      }
+      case LinkPanelType.RESSURS: {
+        return linkPanelRessursStyles;
+      }
+      // No default
+    }
   };
 
   const icon = type2Icon(type);

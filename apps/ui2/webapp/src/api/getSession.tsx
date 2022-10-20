@@ -7,6 +7,8 @@ export interface SessionInterface {
 }
 
 export const getSession = async function (): Promise<SessionInterface> {
-  const res = await axios.get<SessionInterface>("/nom-api/api/v1/sessioninfo");
-  return res.data;
+  const response = await axios.get<SessionInterface>(
+    "/nom-api/api/v1/sessioninfo"
+  );
+  return response.data;
 };

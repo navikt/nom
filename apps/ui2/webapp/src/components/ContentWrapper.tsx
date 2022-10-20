@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+
 import { mediaQueryContentWidth } from "../resources/NomStyles";
 
 const contentStyle = css(
@@ -10,12 +11,12 @@ const contentStyle = css(
   `
 );
 
-type ContentWrapperProps = {
+type ContentWrapperProperties = {
   children: React.ReactElement;
 };
 
-const ContentWrapper = (props: ContentWrapperProps) => (
-  <div className={contentStyle}>{props.children}</div>
+const ContentWrapper = (properties: ContentWrapperProperties) => (
+  <div className={contentStyle}>{properties.children}</div>
 );
 
 export default ContentWrapper;

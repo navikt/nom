@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+
 import { slackNom } from "./Images";
 
 export const footerHeigth = "9.5rem";
@@ -33,10 +34,10 @@ const Footer = () => {
           <BodyLong> {footerText}</BodyLong>
         </div> */}
         <a
-          rel="noopener noreferrer"
-          href="https://nav-it.slack.com/archives/C0362LA7ZLN"
-          target="_blank"
           className={slackLink}
+          href="https://nav-it.slack.com/archives/C0362LA7ZLN"
+          rel="noopener noreferrer"
+          target="_blank"
         >
           <img src={slackNom}></img>
         </a>

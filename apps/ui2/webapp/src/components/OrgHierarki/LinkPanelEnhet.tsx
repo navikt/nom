@@ -1,5 +1,5 @@
-import { LinkPanel } from "@navikt/ds-react";
 import { css } from "@emotion/css";
+import { LinkPanel } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
 
 export enum LinkPanelType {
@@ -23,15 +23,15 @@ const linkPanelLargeStyles = css(commonCss, {
   height: "100px",
 });
 
-type LinkPanelEnhetProps = {
+type LinkPanelEnhetProperties = {
   enhetsNavn: string;
   lederNavn: string;
   panelType: LinkPanelType;
   linkTo?: string;
 };
 
-const LinkPanelEnhet = (props: LinkPanelEnhetProps) => {
-  const { enhetsNavn, lederNavn, panelType, linkTo } = props;
+const LinkPanelEnhet = (properties: LinkPanelEnhetProperties) => {
+  const { enhetsNavn, lederNavn, panelType, linkTo } = properties;
   const setLinkPanelStyles = () => {
     if (panelType === LinkPanelType.CURRENT) return linkPanelCurrentStyles;
     else if (panelType === LinkPanelType.LARGE) return linkPanelLargeStyles;
@@ -39,8 +39,8 @@ const LinkPanelEnhet = (props: LinkPanelEnhetProps) => {
 
   return (
     <Link
-      to={"/org/" + linkTo || "#"}
       className={css({ textDecoration: "none" })}
+      to={"/org/" + linkTo || "#"}
     >
       <LinkPanel className={setLinkPanelStyles()}>
         <div>

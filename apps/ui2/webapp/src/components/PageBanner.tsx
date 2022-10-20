@@ -1,6 +1,7 @@
-import { Heading } from "@navikt/ds-react";
-import { mediaQueryContentWidth } from "../resources/NomStyles";
 import { css } from "@emotion/css";
+import { Heading } from "@navikt/ds-react";
+
+import { mediaQueryContentWidth } from "../resources/NomStyles";
 
 export function PageBanner({ text }: { text: string }) {
   return (

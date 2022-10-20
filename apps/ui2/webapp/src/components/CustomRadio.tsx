@@ -15,7 +15,7 @@ const radioStyles = css({
 
 const CustomRadio = () => {
   return (
-    <Radio value="10" className={radioStyles}>
+    <Radio className={radioStyles} value="10">
       Tekst
     </Radio>
   );

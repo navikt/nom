@@ -14,12 +14,12 @@ const panelStyles = css({
   gap: "1rem",
 });
 
-type ResourceFormPanelProps = {
+type ResourceFormPanelProperties = {
   children: React.ReactNode;
 };
 
-const ResourceFormPanel = (props: ResourceFormPanelProps) => (
-  <Panel className={panelStyles}>{props.children}</Panel>
+const ResourceFormPanel = (properties: ResourceFormPanelProperties) => (
+  <Panel className={panelStyles}>{properties.children}</Panel>
 );
 
 export default ResourceFormPanel;

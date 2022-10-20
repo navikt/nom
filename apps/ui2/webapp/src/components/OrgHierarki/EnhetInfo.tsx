@@ -1,7 +1,8 @@
 import { css } from "@emotion/css";
 import { BodyShort, Heading, Label, LinkPanel } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
-import { Ressurs } from "../../api/generated/graphql_generated";
+
+import type { Ressurs } from "../../api/generated/graphql_generated";
 import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import { LinkPanelType } from "../CustomLinkPanel2";
 import UserImage from "../UserImage";
@@ -14,7 +15,7 @@ const enhetInfoStyles = css({
   justifyContent: "space-between",
 });
 
-type EnhetInfoProps = {
+type EnhetInfoProperties = {
   title: string;
   type: LinkPanelType;
   leder?: Ressurs;
@@ -23,12 +24,11 @@ type EnhetInfoProps = {
   icon?: string | undefined;
 };
 
-const EnhetInfo = (props: EnhetInfoProps) => {
-  const { title, lederNavn, ident, type, leder } = props;
+const EnhetInfo = (properties: EnhetInfoProperties) => {
+  const { title, lederNavn, ident, type, leder } = properties;
 
   const getSize = () => {
-    if (type === LinkPanelType.CURRENT) return "130px";
-    else return undefined;
+    return type === LinkPanelType.CURRENT ? "130px" : undefined;
   };
 
   const getUrlForLeder = () => {
@@ -55,10 +55,10 @@ const EnhetInfo = (props: EnhetInfoProps) => {
             {type === LinkPanelType.CURRENT ? (
               leder ? (
                 <Link
-                  to={getUrlForLeder()}
                   className={css({
                     color: "var(--navds-global-color-gray-900)",
                   })}
+                  to={getUrlForLeder()}
                 >
                   <Label>{lederNavn}</Label>
                 </Link>
@@ -73,15 +73,15 @@ const EnhetInfo = (props: EnhetInfoProps) => {
       </div>
       {type !== LinkPanelType.OVERENHET ? (
         <UserImage
+          altText={`Fotografi av ${lederNavn}`}
           navIdent={ident}
           size={getSize()}
-          altText={`Fotografi av ${lederNavn}`}
         />
       ) : (
         <UserImage
+          altText={`Fotografi av ${leder?.visningsNavn}`}
           navIdent={leder?.navIdent}
           size={getSize()}
-          altText={`Fotografi av ${leder?.visningsNavn}`}
         />
       )}
     </div>

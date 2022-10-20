@@ -1,10 +1,11 @@
 import { css } from "@emotion/css";
+import { BodyShort, Heading, Search } from "@navikt/ds-react";
+import { encode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
 import { Outlet, useNavigate, useParams } from "react-router";
-import ResourceFormPanel from "../../../components/Resource/ResourceFormPanel";
-import { BodyShort, Heading, Search } from "@navikt/ds-react";
+
 import { opprettRessursIkon } from "../../../components/Images";
-import { encode } from "js-base64";
+import ResourceFormPanel from "../../../components/Resource/ResourceFormPanel";
 
 export function SearchForPerson() {
   const { personIdent } = useParams();
@@ -16,20 +17,20 @@ export function SearchForPerson() {
   return (
     <ResourceFormPanel>
       <img
+        alt="Opprett ressurs ikon"
         className={css`
           height: 65px;
           width: 65px;
           align-self: center;
           color: var(--nom-primary);
         `}
-        alt="Opprett ressurs ikon"
         src={opprettRessursIkon}
       />
       <Heading
-        size="large"
         className={css`
           align-self: center;
         `}
+        size="large"
       >
         Personalopplysninger
       </Heading>
@@ -53,24 +54,24 @@ export function SearchForPerson() {
           <Controller
             control={control}
             name="personIdent"
-            rules={{
-              validate: (value) => value?.length === 11 || "Må være 11 siffer",
-            }}
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <Search
-                value={value}
-                type="number"
-                onChange={(newValue) => onChange(newValue)}
-                label=""
-                variant="secondary"
-                hideLabel={false}
                 error={error?.message}
+                hideLabel={false}
+                label=""
+                onChange={(newValue) => onChange(newValue)}
                 onClear={() => {
                   reset({ personIdent: "" });
                   navigate("/ressurs/create");
                 }}
+                type="number"
+                value={value}
+                variant="secondary"
               />
             )}
+            rules={{
+              validate: (value) => value?.length === 11 || "Må være 11 siffer",
+            }}
           />
         </div>
       </form>

@@ -1,17 +1,20 @@
-import React from "react";
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
 import "./resources/designSystemColorsOverrides.css";
-import { BrowserRouter } from "react-router-dom";
+
 import { ApolloProvider } from "@apollo/client";
-import { apolloClient } from "./api/apolloclient";
 import { css } from "@emotion/css";
-import AppRoutes from "./routes";
-import Footer, { footerHeigth } from "./components/Footer";
-import PilotBanner from "./components/PilotBanner";
-import { getSession, SessionInterface } from "./api/getSession";
-import NavHeader, { headerHeight } from "./components/NavHeader";
 import { Loader } from "@navikt/ds-react";
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+
+import { apolloClient } from "./api/apolloclient";
+import type { SessionInterface } from "./api/getSession";
+import { getSession } from "./api/getSession";
+import Footer, { footerHeigth } from "./components/Footer";
+import NavHeader, { headerHeight } from "./components/NavHeader";
+import PilotBanner from "./components/PilotBanner";
+import AppRoutes from "./routes";
 
 const layoutStyle = css({
   backgroundColor: "var(--navds-global-color-gray-100)",
@@ -38,13 +41,11 @@ export function useSessionContext() {
 
 export function Main() {
   const [rolesFetched, setRolesFetched] = React.useState(false);
-  const [sessionInfo, setSessionInfo] = React.useState<SessionInterface | null>(
-    null
-  );
+  const [sessionInfo, setSessionInfo] = React.useState<SessionInterface>();
 
   React.useEffect(() => {
     getSession()
-      .then((j) => setSessionInfo(j as any))
+      .then((index) => setSessionInfo(index))
       .finally(() => setRolesFetched(true));
   }, []);
 

@@ -3,6 +3,7 @@ import { Hamburger } from "@navikt/ds-icons";
 import { Button, Label } from "@navikt/ds-react";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+
 import { addPerson, hierarchy2 } from "./Images";
 
 const BurgerButton = css({
@@ -52,15 +53,19 @@ const linkImage = css({
   marginRight: "1rem",
 });
 
-const ListItem = (props: { label: string; url: string; icon: string }) => (
-  <Link to={props.url} className={linkStyle}>
-    <img src={props.icon} alt={props.label + "- icon"} className={linkImage} />
+const ListItem = (properties: { label: string; url: string; icon: string }) => (
+  <Link className={linkStyle} to={properties.url}>
+    <img
+      alt={properties.label + "- icon"}
+      className={linkImage}
+      src={properties.icon}
+    />
     <Label
       className={css`
         cursor: pointer;
       `}
     >
-      {props.label}
+      {properties.label}
     </Label>
   </Link>
 );
@@ -68,7 +73,7 @@ const ListItem = (props: { label: string; url: string; icon: string }) => (
 const BurgerMenu = () => {
   const [showMenu, setShowMenu] = React.useState<boolean>(false);
   const menuContent = React.useRef<HTMLDivElement>(null);
-  const mouseLeaveListenerRef = React.useRef(() => {
+  const mouseLeaveListenerReference = React.useRef(() => {
     setShowMenu(false);
   });
   const loc = useLocation();
@@ -76,10 +81,16 @@ const BurgerMenu = () => {
 
   React.useEffect(() => {
     if (menuContent.current) {
-      const el = menuContent.current;
-      el.addEventListener("mouseleave", mouseLeaveListenerRef.current);
+      const element = menuContent.current;
+      element.addEventListener(
+        "mouseleave",
+        mouseLeaveListenerReference.current
+      );
       return () =>
-        el.removeEventListener("mouseleave", mouseLeaveListenerRef.current);
+        element.removeEventListener(
+          "mouseleave",
+          mouseLeaveListenerReference.current
+        );
     }
   }, [showMenu, menuContent]);
 
@@ -93,26 +104,26 @@ const BurgerMenu = () => {
   return (
     <div className={dropDown}>
       <Button
-        size="medium"
-        variant="secondary"
         className={BurgerButton}
         onClick={() => (showMenu ? setShowMenu(false) : setShowMenu(true))}
+        size="medium"
+        variant="secondary"
       >
         <Hamburger className={buttonIcon} />
         <b>Meny</b>
       </Button>
 
       {showMenu && (
-        <div ref={menuContent} className={dropdownContent}>
+        <div className={dropdownContent} ref={menuContent}>
           <ListItem
+            icon={hierarchy2}
             label="Organisasjonshierarki"
             url="/org"
-            icon={hierarchy2}
           />
           <ListItem
+            icon={addPerson}
             label="Opprett ressurs"
             url="/ressurs/create"
-            icon={addPerson}
           />
         </div>
       )}

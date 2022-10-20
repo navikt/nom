@@ -7,32 +7,31 @@ export const sortItems = (a: string, b: string) => {
   return 0;
 };
 
-export function structuredClone<T>(arg: T): T {
-  // @typescript-eslint/ban-ts-comment
-  const cloneFunc = window.structuredClone;
-  if (cloneFunc) {
-    return cloneFunc(arg);
-  } else {
-    return JSON.parse(JSON.stringify(arg));
-  }
+export function structuredClone<T>(argument: T): T {
+  const cloneFunction = window.structuredClone;
+  return cloneFunction
+    ? cloneFunction(argument)
+    : JSON.parse(JSON.stringify(argument));
 }
 
-export function funcIsNotDuplicateByKey<T>(extractKey: (it: T) => string) {
-  return (it: T, idx: number, arrCtx: T[]) =>
-    isNotDuplicate<T>(it, idx, arrCtx, extractKey);
+export function functionIsNotDuplicateByKey<T>(extractKey: (it: T) => string) {
+  return (it: T, index: number, arrayContext: T[]) =>
+    isNotDuplicate<T>(it, index, arrayContext, extractKey);
 }
 
 export function isNotDuplicate<T>(
   it: T,
-  idx: number,
-  arrCtx: T[],
+  index: number,
+  arrayContext: T[],
   extractKey: (it: T) => string
 ): boolean {
-  const seen = arrCtx.slice(0, idx).map(extractKey);
+  const seen = arrayContext
+    .slice(0, index)
+    .map((element) => extractKey(element));
   const wasDuplicate = seen.includes(extractKey(it));
   if (wasDuplicate) {
     console.warn(
-      { arrCtx, dupKey: extractKey(it), idx },
+      { arrCtx: arrayContext, dupKey: extractKey(it), idx: index },
       "Duplicate removed: Key was seen more than once -> "
     );
   }
@@ -42,6 +41,6 @@ export function isNotDuplicate<T>(
 /**
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
  */
-export function isInDev() {
+export function isInDevelopment() {
   return window.location.hostname.match(/localhost|\.dev\./);
 }

@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
-import { PersonResult } from "../../api/generated/graphql_generated";
+
+import type { PersonResult } from "../../api/generated/graphql_generated";
 import Card from "../Card";
 import TextWithLabel from "../TextWithLabel";
 
@@ -10,13 +11,13 @@ const rowStyle = css({
   justifyContent: "space-between",
 });
 
-type PersonDetailCardProps = {
+type PersonDetailCardProperties = {
   cardTitle: string;
   person: PersonResult;
 };
 
-const PersonDetailCard = (props: PersonDetailCardProps) => {
-  const { cardTitle, person } = props;
+const PersonDetailCard = (properties: PersonDetailCardProperties) => {
+  const { cardTitle, person } = properties;
   return (
     <Card title={cardTitle}>
       {person.person && (

@@ -1,4 +1,8 @@
-// eslint-disable-next-line no-undef
+const IGNORED_UNICORN_RULES = {
+  "unicorn/filename-case": "off",
+};
+
+// eslint-disable-next-line unicorn/prefer-module,no-undef
 module.exports = {
   parser: "@typescript-eslint/parser",
   env: {
@@ -6,23 +10,26 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    // 'plugin:react/recommended',
-    // 'standard-with-typescript'
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier",
+    "plugin:unicorn/recommended",
   ],
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "prettier", "@typescript-eslint"],
+  plugins: ["react", "prettier", "@typescript-eslint", "simple-import-sort"],
   rules: {
+    "react/jsx-key": "error",
+    "react/jsx-sort-props": "error",
     "prettier/prettier": ["error"],
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/prefer-namespace-keyword": "off",
-    "@typescript-eslint/no-namespace": "off"
+    "import/prefer-default-export": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "@typescript-eslint/consistent-type-imports": ["warn"],
+    ...IGNORED_UNICORN_RULES,
   },
   ignorePatterns: ["**/graphql_generated.ts"],
 };

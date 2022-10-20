@@ -1,22 +1,23 @@
-import { SearchForPerson } from "./components/SearchForPerson";
-import { Outlet, Route, Routes, useMatch } from "react-router";
-import CreateResourceForm from "./components/CreateResourceForm";
-import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
-import ContentWrapper from "../../components/ContentWrapper";
 import { css } from "@emotion/css";
 import { SuccessStroke } from "@navikt/ds-icons";
+import { Outlet, Route, Routes, useMatch } from "react-router";
+
+import ContentWrapper from "../../components/ContentWrapper";
 import { PageBanner } from "../../components/PageBanner";
+import CreateResourceForm from "./components/CreateResourceForm";
+import { SearchForPerson } from "./components/SearchForPerson";
+import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
 
 export function CreateResourcePageRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Wrapper />}>
-        <Route path="/" element={<SearchForPerson />}>
-          <Route path=":personIdentInBase64" element={<CreateResourceForm />} />
+      <Route element={<Wrapper />} path="/">
+        <Route element={<SearchForPerson />} path="/">
+          <Route element={<CreateResourceForm />} path=":personIdentInBase64" />
         </Route>
         <Route
-          path=":navIdent/receipt"
           element={<ResourceCreatedReceiptPage />}
+          path=":navIdent/receipt"
         />
       </Route>
     </Routes>

@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { Heading } from "@navikt/ds-react";
-import { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
+
+import type { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
 
 const contentStyles = css({
   backgroundColor: "var(--nom-secondary-hover)",
@@ -32,7 +33,7 @@ export const ResourceMetadata = ({
             <span>Mellomnavn</span>
             <b>{person.navn.mellomnavn}</b>
           </>
-        ) : null}
+        ) : undefined}
         <span>Etternavn</span>
         <b>{person.navn.etternavn}</b>
       </div>

@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 
-const Breadcrumbs = (props: {
+const Breadcrumbs = (properties: {
   url: string;
   previousSite: string;
   currentSite: string;
@@ -9,7 +9,8 @@ const Breadcrumbs = (props: {
     <div className={css({ marginBottom: "2em" })}>
       <span>
         {" "}
-        <a href={props.url}>{props.previousSite}</a> {">"} {props.currentSite}
+        <a href={properties.url}>{properties.previousSite}</a> {">"}{" "}
+        {properties.currentSite}
       </span>
     </div>
   );

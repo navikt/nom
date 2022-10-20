@@ -1,3 +1,4 @@
+import { css } from "@emotion/css";
 import {
   Alert,
   Button,
@@ -7,18 +8,20 @@ import {
   RadioGroup,
   TextField,
 } from "@navikt/ds-react";
+import { decode } from "js-base64";
 import { useForm } from "react-hook-form";
-import { css } from "@emotion/css";
 import { Navigate, useNavigate, useParams } from "react-router";
-import { ResourceMetadata } from "./ResourceMetadata";
-import {
+
+import type {
   FolkeregisterPerson,
   Sektor,
+} from "../../../api/generated/graphql_generated";
+import {
   useHentPersonQuery,
   useOpprettRessursMutation,
 } from "../../../api/generated/graphql_generated";
 import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
-import { decode } from "js-base64";
+import { ResourceMetadata } from "./ResourceMetadata";
 
 const rowStyles = css({
   display: "flex",
@@ -58,7 +61,7 @@ export default function CreateResourceForm() {
   const personResult = hentPersonQuery.data?.person;
 
   if (personResult?.navIdent) {
-    return <Navigate to={`/ressurs/${personResult.navIdent}`} replace />;
+    return <Navigate replace to={`/ressurs/${personResult.navIdent}`} />;
   }
 
   if (personResult?.person) {
@@ -66,14 +69,14 @@ export default function CreateResourceForm() {
       <>
         <ResourceMetadata person={personResult.person} />
         <CreateResourceFormInner
-          personResult={personResult.person}
           personIdent={personResult.personIdent}
+          personResult={personResult.person}
         />
       </>
     );
   }
 
-  return null;
+  return <></>;
 }
 
 export type OpprettRessursFormTypes = {
@@ -142,9 +145,9 @@ function CreateResourceFormInner({
       >
         <Heading size="small">Opplysninger til NOM</Heading>
         <Alert
-          variant="info"
-          size="medium"
           className={css({ marginTop: "1rem" })}
+          size="medium"
+          variant="info"
         >
           Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle
           navn du ikke vil ha med. Ressursen må ha minst ett fornavn og minst
@@ -153,55 +156,55 @@ function CreateResourceFormInner({
 
         <div className={rowStyles}>
           <TextField
-            type="text"
-            label="Fornavn"
-            error={errors.fornavn?.message}
             autoComplete="off"
+            error={errors.fornavn?.message}
+            label="Fornavn"
+            type="text"
             {...register("fornavn", { required: "Må oppgis" })}
           />
           <TextField
-            type="text"
-            label="Mellomnavn"
-            error={errors.mellomnavn?.message}
             autoComplete="off"
+            error={errors.mellomnavn?.message}
+            label="Mellomnavn"
+            type="text"
             {...register("mellomnavn")}
           />
           <TextField
-            type="text"
-            label="Etternavn"
-            error={errors.etternavn?.message}
             autoComplete="off"
+            error={errors.etternavn?.message}
+            label="Etternavn"
+            type="text"
             {...register("etternavn", { required: "Må oppgis" })}
           />
         </div>
 
         <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
-          <Radio value="NAV_STATLIG" checked>
+          <Radio checked value="NAV_STATLIG">
             NAV statlig
           </Radio>
-          <Radio value="NAV_KOMMUNAL" disabled>
+          <Radio disabled value="NAV_KOMMUNAL">
             NAV kommunal
           </Radio>
-          <Radio value="EKSTERN" disabled>
+          <Radio disabled value="EKSTERN">
             Ekstern
           </Radio>
         </RadioGroup>
 
         <div className={rowStyles}>
           <CreateResourceConfirmationModal
+            formValues={watch()}
             loading={loading}
             onConfirm={() => handleSubmit(handleOpprettRessurs)()}
-            formValues={watch()}
           />
           <Button
-            variant="secondary"
             onClick={() => navigate("/ressurs/create", { replace: true })}
+            variant="secondary"
           >
             Avbryt
           </Button>
         </div>
 
-        {error ? <Alert variant="error">{error.message}</Alert> : null}
+        {error ? <Alert variant="error">{error.message}</Alert> : undefined}
       </div>
     </form>
   );

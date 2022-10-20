@@ -1,39 +1,18 @@
-import navLogo from "../resources/navLogo.svg";
-import searchIcon from "../resources/searchIcon.svg";
-import ressursLogo from "../resources/ressursLogo.svg";
-import nomLogo from "../resources/nomLogo.svg";
-import orghierarkietLogo from "../resources/orghierarkietLogo.svg";
-import person from "../resources/person.svg";
-import nomLogoCircle from "../resources/nomLogoCircle.svg";
-import nomLogoCircle2 from "../resources/nomLogoCircle2.svg";
-import orgIcon from "../resources/orgIcon.svg";
-import opprettRessursIcon from "../resources/opprettRessursIcon.svg";
-import slackNom from "../resources/slackNom.svg";
-import opprettRessursIkon from "../resources/opprettRessursIkon.svg";
-import addPerson from "../resources/addPerson.svg";
-import hierarchy2 from "../resources/hierarchy2.svg";
-import InfoIcon from "../resources/InfoIcon.svg";
-import building2Icon from "../resources/building-2.svg";
-import peopleFilledIcon from "../resources/people-filled.svg";
-import questionMarkIcon from "../resources/questionmark.svg";
-
-export {
-  navLogo,
-  searchIcon,
-  ressursLogo,
-  nomLogo,
-  orghierarkietLogo,
-  nomLogoCircle,
-  nomLogoCircle2,
-  orgIcon,
-  opprettRessursIcon,
-  slackNom,
-  person,
-  opprettRessursIkon,
-  addPerson,
-  hierarchy2,
-  InfoIcon,
-  peopleFilledIcon,
-  building2Icon,
-  questionMarkIcon,
-};
+export { default as addPerson } from "../resources/addPerson.svg";
+export { default as building2Icon } from "../resources/building-2.svg";
+export { default as hierarchy2 } from "../resources/hierarchy2.svg";
+export { default as InfoIcon } from "../resources/InfoIcon.svg";
+export { default as navLogo } from "../resources/navLogo.svg";
+export { default as nomLogo } from "../resources/nomLogo.svg";
+export { default as nomLogoCircle } from "../resources/nomLogoCircle.svg";
+export { default as nomLogoCircle2 } from "../resources/nomLogoCircle2.svg";
+export { default as opprettRessursIcon } from "../resources/opprettRessursIcon.svg";
+export { default as opprettRessursIkon } from "../resources/opprettRessursIkon.svg";
+export { default as orghierarkietLogo } from "../resources/orghierarkietLogo.svg";
+export { default as orgIcon } from "../resources/orgIcon.svg";
+export { default as peopleFilledIcon } from "../resources/people-filled.svg";
+export { default as person } from "../resources/person.svg";
+export { default as questionMarkIcon } from "../resources/questionmark.svg";
+export { default as ressursLogo } from "../resources/ressursLogo.svg";
+export { default as searchIcon } from "../resources/searchIcon.svg";
+export { default as slackNom } from "../resources/slackNom.svg";

@@ -1,11 +1,12 @@
 import { css } from "@emotion/css";
 import { BodyShort, Heading, Label } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
-import {
+
+import type {
   OrgEnhet as Organisasjonsenhet,
   Ressurs,
-  RessursOrgTilknytning as RessursKobling,
   RessursLeder,
+  RessursOrgTilknytning as RessursKobling,
 } from "../../api/generated/graphql_generated";
 import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
 import CustomLinkPanel2, { LinkPanelType } from "../CustomLinkPanel2";
@@ -29,7 +30,7 @@ const metadataColumnStyles = css({
   marginTop: "1rem",
 });
 
-const LabelAndText = (props: {
+const LabelAndText = (properties: {
   label: string;
   text: string;
   linkTo?: string;
@@ -37,37 +38,32 @@ const LabelAndText = (props: {
 }) => (
   <div
     className={
-      props.alignAtEnd
+      properties.alignAtEnd
         ? css(metadataStyles, { justifyContent: "end" })
         : metadataStyles
     }
   >
-    <BodyShort>{props.label} &nbsp;</BodyShort>
-    {!props.linkTo && <Label>{props.text}</Label>}
+    <BodyShort>{properties.label} &nbsp;</BodyShort>
+    {!properties.linkTo && <Label>{properties.text}</Label>}
 
-    {props.linkTo && (
+    {properties.linkTo && (
       <Link
-        to={props.linkTo}
         className={css({ color: "var(--navds-global-color-gray-900)" })}
+        to={properties.linkTo}
       >
-        <Label>{props.text}</Label>
+        <Label>{properties.text}</Label>
       </Link>
     )}
   </div>
 );
 
 const getLink = (orgenhet: Organisasjonsenhet, lederIdent?: string) => {
-  if (!lederIdent)
-    return (
-      "/org/" +
-      agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn)
-    );
-  else
-    return (
-      "/org/" +
-      agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn) +
-      `/${lederIdent}`
-    );
+  return !lederIdent
+    ? "/org/" +
+        agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn)
+    : "/org/" +
+        agressoIdDataToUrl(orgenhet.agressoId, orgenhet.orgNiv, orgenhet.navn) +
+        `/${lederIdent}`;
 };
 
 const getLink2 = (
@@ -81,12 +77,12 @@ const getLink2 = (
   );
 };
 
-type RessursInfoProps = {
+type RessursInfoProperties = {
   ressurs: Ressurs;
 };
 
-const RessursInfo = (props: RessursInfoProps) => {
-  const { ressurs } = props;
+const RessursInfo = (properties: RessursInfoProperties) => {
+  const { ressurs } = properties;
 
   return (
     <div className={css({ marginTop: "1rem" })}>
@@ -113,13 +109,13 @@ const RessursInfo = (props: RessursInfoProps) => {
               {ressurs.koblinger &&
                 ressurs.koblinger.map((kobling: RessursKobling) => (
                   <LabelAndText
-                    key={JSON.stringify(kobling)}
                     alignAtEnd
+                    key={JSON.stringify(kobling)}
                     label="Org.enhet: "
+                    linkTo={getLink(kobling.organisasjonsenhet)}
                     text={
                       kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"
                     }
-                    linkTo={getLink(kobling.organisasjonsenhet)}
                   />
                 ))}
             </div>

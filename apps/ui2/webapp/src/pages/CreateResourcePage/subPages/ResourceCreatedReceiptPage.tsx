@@ -1,3 +1,6 @@
+import { css } from "@emotion/css";
+import { SuccessFilled } from "@navikt/ds-icons";
+import { ExternalLink } from "@navikt/ds-icons";
 import {
   Alert,
   BodyShort,
@@ -6,17 +9,13 @@ import {
   Link,
   Loader,
 } from "@navikt/ds-react";
-import RessursInfo from "../../../components/OrgHierarki/RessursInfo";
-import { useParams } from "react-router";
-import {
-  Ressurs,
-  useHentRessursMedNavIdentQuery,
-} from "../../../api/generated/graphql_generated";
-import { css } from "@emotion/css";
-import { SuccessFilled } from "@navikt/ds-icons";
-import { ExternalLink } from "@navikt/ds-icons";
 import type { ReactNode } from "react";
-import { isInDev } from "../../../resources/utils/utils";
+import { useParams } from "react-router";
+
+import type { Ressurs } from "../../../api/generated/graphql_generated";
+import { useHentRessursMedNavIdentQuery } from "../../../api/generated/graphql_generated";
+import RessursInfo from "../../../components/OrgHierarki/RessursInfo";
+import { isInDevelopment as isInDevelopment } from "../../../resources/utils/utils";
 
 export function ResourceCreatedReceiptPage() {
   const { navIdent } = useParams();
@@ -47,7 +46,7 @@ export function ResourceCreatedReceiptPage() {
     return <InnerResourceCreatedPage ressurs={ressurs as Ressurs} />;
   }
 
-  return null;
+  return <></>;
 }
 function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
   return (
@@ -106,23 +105,23 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
 
 function Unit4Link() {
   const { navIdent } = useParams();
-  const navIdentWithoutFirstLetter = navIdent?.substring(1);
-  const unit4BaseUrl = isInDev()
+  const navIdentWithoutFirstLetter = navIdent?.slice(1);
+  const unit4BaseUrl = isInDevelopment()
     ? "https://agresso.test.local"
     : "https://agresso.adeo.no";
 
   return (
     <Button
       as="a"
-      href={`${unit4BaseUrl}/BusinessWorldDemoM7/ContentContainer.aspx?type=topgen&menu_id=00912225&activityStepId=1-1&attribute_id=S108&client=EN&personId=${navIdentWithoutFirstLetter}&PersonellType=F`}
-      rel="noopener noreferrer"
-      target="_blank"
-      variant="primary"
-      icon={<ExternalLink aria-hidden />}
-      iconPosition="right"
       className={css`
         width: max-content;
       `}
+      href={`${unit4BaseUrl}/BusinessWorldDemoM7/ContentContainer.aspx?type=topgen&menu_id=00912225&activityStepId=1-1&attribute_id=S108&client=EN&personId=${navIdentWithoutFirstLetter}&PersonellType=F`}
+      icon={<ExternalLink aria-hidden />}
+      iconPosition="right"
+      rel="noopener noreferrer"
+      target="_blank"
+      variant="primary"
     >
       Registrer lønnsopplysninger i Unit4
     </Button>
@@ -130,8 +129,8 @@ function Unit4Link() {
 }
 
 function RemedyLink() {
-  if (isInDev()) {
-    return null;
+  if (isInDevelopment()) {
+    return <></>;
   }
 
   return (
@@ -142,9 +141,9 @@ function RemedyLink() {
     >
       Tilganger tildeles i{" "}
       <Link
+        href="https://it-hjelpa.adeo.no/arsys/home"
         rel="noopener noreferrer"
         target="_blank"
-        href="https://it-hjelpa.adeo.no/arsys/home"
       >
         identrutina i Remedy
       </Link>

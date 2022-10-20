@@ -1,18 +1,19 @@
 import { Navigate, Route, Routes } from "react-router";
-import { NotfoundPage } from "./pages/NotfoundPage";
-import ResourceView from "./pages/ResourceView";
-import OrganisasjonHierarkiPageNew from "./pages/OrganisasjonHierarkiPageNew";
+
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
+import { NotfoundPage } from "./pages/NotfoundPage";
+import OrganisasjonHierarkiPageNew from "./pages/OrganisasjonHierarkiPageNew";
+import ResourceView from "./pages/ResourceView";
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Navigate to="/org/0_NAV_NAV" />} />
-    <Route path="/ressurs/:id" element={<ResourceView />} />
-    <Route path="/ressurs/create/*" element={<CreateResourcePageRoutes />} />
-    <Route path="*" element={<NotfoundPage />} />
-    <Route path="/org" element={<Navigate to="/org/0_NAV_NAV" />} />
-    <Route path="/org/:id" element={<OrganisasjonHierarkiPageNew />}>
-      <Route path=":resourceId" element={<OrganisasjonHierarkiPageNew />} />
+    <Route element={<Navigate to="/org/0_NAV_NAV" />} path="/" />
+    <Route element={<ResourceView />} path="/ressurs/:id" />
+    <Route element={<CreateResourcePageRoutes />} path="/ressurs/create/*" />
+    <Route element={<NotfoundPage />} path="*" />
+    <Route element={<Navigate to="/org/0_NAV_NAV" />} path="/org" />
+    <Route element={<OrganisasjonHierarkiPageNew />} path="/org/:id">
+      <Route element={<OrganisasjonHierarkiPageNew />} path=":resourceId" />
     </Route>
   </Routes>
 );

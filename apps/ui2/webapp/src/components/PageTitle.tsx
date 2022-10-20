@@ -10,12 +10,12 @@ const titleStyles = css({
   color: "var(--navds-global-color-gray-900)",
 });
 
-type PageTitleProps = {
+type PageTitleProperties = {
   title: string;
 };
 
-const PageTitle = (props: PageTitleProps) => (
-  <span className={titleStyles}>{props.title}</span>
+const PageTitle = (properties: PageTitleProperties) => (
+  <span className={titleStyles}>{properties.title}</span>
 );
 
 export default PageTitle;

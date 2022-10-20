@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+
 import { boldText, regularText } from "./Styles";
 
 const labelStyles = css({
@@ -6,15 +7,15 @@ const labelStyles = css({
   marginBottom: "5px",
 });
 
-type TextWithLabelProps = {
+type TextWithLabelProperties = {
   label: string;
   text: string;
 };
 
-const TextWithLabel = (props: TextWithLabelProps) => (
+const TextWithLabel = (properties: TextWithLabelProperties) => (
   <div>
-    <div className={labelStyles}>{props.label}</div>
-    <div className={boldText}>{props.text}</div>
+    <div className={labelStyles}>{properties.label}</div>
+    <div className={boldText}>{properties.text}</div>
   </div>
 );
 

@@ -1,8 +1,9 @@
-import * as Gq from "../generated/graphql_generated";
-import { Sektor } from "../generated/graphql_generated";
 import { agressoIdDataToUrl } from "../../resources/utils/url_utils";
-import { funcIsNotDuplicateByKey } from "../../resources/utils/utils";
+import { functionIsNotDuplicateByKey as functionIsNotDuplicateByKey } from "../../resources/utils/utils";
+import type * as Gq from "../generated/graphql_generated";
+import { Sektor } from "../generated/graphql_generated";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ApiTypes {
   export type ApiRessurs = Pick<
     Gq.Ressurs,
@@ -13,6 +14,7 @@ export namespace ApiTypes {
   export type ApiEnhet = Pick<Gq.OrgEnhet, "orgNiv" | "agressoId" | "navn">;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Hierarchy {
   export type OrgEnhet = {
     name: string;
@@ -23,7 +25,6 @@ export namespace Hierarchy {
   export type Ressurs = {
     name: string;
     navident: string;
-
     url: string;
   };
 
@@ -51,9 +52,8 @@ export namespace Hierarchy {
     focusedRessurs: FocusedRessurs;
   };
 
-  export type Err = {
+  export type Error = {
     kind: "err";
-    ctx?: any;
     msg: string;
   };
 }
@@ -73,7 +73,7 @@ function gqlEnhetToUrl(enhet: ApiTypes.ApiEnhet) {
 
 function translateRessurs(
   ress: ApiTypes.ApiRessurs,
-  enhetCtx: ApiTypes.ApiEnhet
+  enhetContext: ApiTypes.ApiEnhet
 ): Hierarchy.Ressurs {
   const name =
     ress.fornavn && ress.etternavn
@@ -81,39 +81,43 @@ function translateRessurs(
       : "Uten navn";
   return {
     name,
-    url: gqlEnhetToUrl(enhetCtx) + "/" + ress.navident,
+    url: gqlEnhetToUrl(enhetContext) + "/" + ress.navident,
     navident: ress.navident,
   };
 }
 
 function sektorToTxt(sektor: Gq.Sektor) {
   switch (sektor) {
-    case Sektor.Ekstern:
+    case Sektor.Ekstern: {
       return "Eksternt ansatt";
-    case Sektor.NavKommunal:
+    }
+    case Sektor.NavKommunal: {
       return "Kommunalt ansatt";
-    case Sektor.NavStatlig:
+    }
+    case Sektor.NavStatlig: {
       return "Statlig ansatt";
+    }
   }
 }
 
 function formatTlf(nr: string) {
-  const tmpNr = nr.startsWith("47") && nr.length === 10 ? nr.substring(2) : nr;
+  const temporaryNumber =
+    nr.startsWith("47") && nr.length === 10 ? nr.slice(2) : nr;
   const out = [];
   for (let k = 0; k < 8; k += 2) {
-    out.push(tmpNr.substring(k, k + 2));
+    out.push(temporaryNumber.slice(k, k + 2));
   }
   return out.join(" ");
 }
 
 export function focusedEnhetHierarchy(
-  qryRes: Gq.HentHierarkiQueryResult
-): Hierarchy.OrgHierarchy | Hierarchy.Err {
-  if (!qryRes.data) {
+  hentHierarkiQuery: Gq.HentHierarkiQueryResult
+): Hierarchy.OrgHierarchy | Hierarchy.Error {
+  if (!hentHierarkiQuery.data) {
     throw "Wrong usage focusedenhethierarchy";
   }
 
-  const qryData = structuredClone(qryRes.data);
+  const qryData = structuredClone(hentHierarkiQuery.data);
 
   if (!qryData.enhet) return { kind: "err", msg: "mangler enhet" };
 
@@ -123,9 +127,11 @@ export function focusedEnhetHierarchy(
     let currentOverenhet = extractOverEnhet();
     let out: NonNullable<ReturnType<typeof extractOverEnhet>>[] = [];
     while (currentOverenhet) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       out = [currentOverenhet as any, ...out];
-      currentOverenhet = currentOverenhet.organiseringer[0]
-        ?.organisasjonsenhet as any;
+      currentOverenhet =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentOverenhet.organiseringer[0]?.organisasjonsenhet as any;
     }
     return out;
   })();
@@ -145,13 +151,15 @@ export function focusedEnhetHierarchy(
   const underenheter = !qryData.enhetsKoblinger?.underenheter
     ? []
     : qryData.enhetsKoblinger.underenheter.filter(
-        funcIsNotDuplicateByKey((it) => gqlEnhetToUrl(it.organisasjonsenhet))
+        functionIsNotDuplicateByKey((it) =>
+          gqlEnhetToUrl(it.organisasjonsenhet)
+        )
       );
 
   const ressurser = !qryData.ressursKoblinger?.koblinger
     ? []
     : qryData.ressursKoblinger?.koblinger.filter(
-        funcIsNotDuplicateByKey((it) => it.ressurs.navident)
+        functionIsNotDuplicateByKey((it) => it.ressurs.navident)
       );
 
   const enhet = qryData.enhet;
@@ -186,12 +194,12 @@ export function focusedEnhetHierarchy(
 export function focusedRessursHierarchy(
   orgdata: Hierarchy.OrgHierarchy,
   qryData: Gq.HentRessursQueryResult
-): Hierarchy.OrgHierarchyWithFocusedRessurs | Hierarchy.Err {
+): Hierarchy.OrgHierarchyWithFocusedRessurs | Hierarchy.Error {
   if (!qryData.data) {
     throw "Wrong usage focusedressurs";
   }
-  const res = qryData.data.ressurs;
-  if (!res) {
+  const ressurs = qryData.data.ressurs;
+  if (!ressurs) {
     return { kind: "err", msg: "null ressurs" };
   }
 
@@ -200,7 +208,7 @@ export function focusedRessursHierarchy(
     leder: Hierarchy.Ressurs;
     orgenhet: Hierarchy.OrgEnhet;
   }[] = [];
-  for (const l of res.ledere) {
+  for (const l of ressurs.ledere) {
     const closestOverenhet = overEnheter[overEnheter.length - 1];
     const isImplicitLederOfClosestOverenhet = overEnheter.some((it) =>
       it.ledere.some((it2) => it2.navident === l.ressurs.navident)
@@ -244,14 +252,14 @@ export function focusedRessursHierarchy(
     kind: "hierarchy_focused_ressurs",
     overEnheter: [...orgdata.overEnheter, orgdata.enhet],
     focusedRessurs: {
-      sektor: sektorToTxt(res.sektor[0]),
-      name: nameFromRessurs({ ...res }),
+      sektor: sektorToTxt(ressurs.sektor[0]),
+      name: nameFromRessurs({ ...ressurs }),
       tel:
-        res.telefon.map((it) => formatTlf(it.nummer)).join(", ") ||
+        ressurs.telefon.map((it) => formatTlf(it.nummer)).join(", ") ||
         "Mangler tlf",
-      email: res.epost || "Mangler epost",
-      navident: res.navident,
-      url: orgdata.enhet.url + "/" + res.navident,
+      email: ressurs.epost || "Mangler epost",
+      navident: ressurs.navident,
+      url: orgdata.enhet.url + "/" + ressurs.navident,
       tilknytninger: tilknytninger,
     },
   };

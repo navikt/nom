@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { Heading } from "@navikt/ds-react";
+
 import ContentWrapper from "./ContentWrapper";
 import { nomLogo } from "./Images";
 
@@ -18,18 +19,18 @@ const headerStyles = css({
   marginLeft: "20px",
 });
 
-type BannerSmallProps = {
+type BannerSmallProperties = {
   title: string;
 };
 
-const BannerSmall = (props: BannerSmallProps) => {
+const BannerSmall = (properties: BannerSmallProperties) => {
   return (
     <div className={bannerStyles}>
       <ContentWrapper>
         <div className={css({ display: "flex", marginBottom: "20px" })}>
-          <img src={nomLogo} alt="nom logo" height="55px" />
-          <Heading size="large" className={headerStyles}>
-            {props.title}
+          <img alt="nom logo" height="55px" src={nomLogo} />
+          <Heading className={headerStyles} size="large">
+            {properties.title}
           </Heading>
         </div>
       </ContentWrapper>

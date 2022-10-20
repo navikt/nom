@@ -1,19 +1,21 @@
-import ContentWrapper from "../components/ContentWrapper";
-import * as Gq from "../api/generated/graphql_generated";
-import { useParams } from "react-router";
-import { agressoUrlToData } from "../resources/utils/url_utils";
-import { Alert, BodyShort, Heading } from "@navikt/ds-react";
 import { css } from "@emotion/css";
-import React, { Fragment, ReactNode } from "react";
-import { building2Icon, peopleFilledIcon } from "../components/Images";
-import { Link } from "react-router-dom";
 import { Back, Next } from "@navikt/ds-icons";
-import UserImage from "../components/UserImage";
+import { Alert, BodyShort, Heading } from "@navikt/ds-react";
+import type { ReactNode, RefObject } from "react";
+import React, { Fragment } from "react";
+import { useParams } from "react-router";
+import { Link } from "react-router-dom";
+
+import * as Gq from "../api/generated/graphql_generated";
+import type { Hierarchy } from "../api/transformations/hierarchy";
 import {
   focusedEnhetHierarchy,
   focusedRessursHierarchy,
-  Hierarchy,
 } from "../api/transformations/hierarchy";
+import ContentWrapper from "../components/ContentWrapper";
+import { building2Icon, peopleFilledIcon } from "../components/Images";
+import UserImage from "../components/UserImage";
+import { agressoUrlToData } from "../resources/utils/url_utils";
 
 const colorPalette = {
   rim: "var(--navds-global-color-lightblue-800)",
@@ -23,17 +25,16 @@ const colorPalette = {
   font: "var(--navds-global-color-gray-900)",
 };
 
-const BuildingSvg = (props: { className?: string }) => (
+const BuildingSvg = (properties: { className?: string }) => (
   <svg
-    className={props.className || ""}
-    width="24"
+    className={properties.className || ""}
+    fill="none"
     height="24"
     viewBox="0 0 18 18"
-    fill="none"
+    width="24"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fillRule="evenodd"
       clipRule="evenodd"
       d={`M15.6405 1.611C15.6405 1.611 15.6397 1.6095 15.639 1.6095L14.1397 
         0.11025C14.07 0.03975 13.9747 0 13.875 0H4.125C4.02525 0 3.93 0.03975 3.8595 0.11025L2.3595 1.6095C2.35875
@@ -44,6 +45,7 @@ const BuildingSvg = (props: { className?: string }) => (
         V5.25ZM10.5 12.75H7.5V10.5H10.5V12.75ZM10.5
         9H7.5V6.75H10.5V9ZM10.5 5.25H7.5V3H10.5V5.25ZM14.25 12.75H12V10.5H14.25V12.75ZM14.25 9H12V6.75H14.25V9ZM14.25
         5.25H12V3H14.25V5.25ZM3.53025 1.5L4.28025 0.75H13.7198L14.4698 1.5H3.53025Z`}
+      fillRule="evenodd"
     />
   </svg>
 );
@@ -210,69 +212,69 @@ function OverenheterDivider() {
   );
 }
 
-const HorizontallyAlignedPanel = (props: {
+const HorizontallyAlignedPanel = (properties: {
   children: ReactNode;
   iconSrc: string;
   className: string;
   navidentForImg?: string;
   fornavnAndEtternavnForImg?: string;
 }) => (
-  <div className={props.className}>
+  <div className={properties.className}>
     <div className={panelCss.panelRim}>
-      {props.iconSrc && (
-        <img src={props.iconSrc} alt={"src=" + props.iconSrc} />
+      {properties.iconSrc && (
+        <img alt={"src=" + properties.iconSrc} src={properties.iconSrc} />
       )}
     </div>
-    <div className={panelCss.panelContent}>{props.children}</div>
-    {props.navidentForImg && (
+    <div className={panelCss.panelContent}>{properties.children}</div>
+    {properties.navidentForImg && (
       <UserImage
-        navIdent={props.navidentForImg}
-        navn={props.fornavnAndEtternavnForImg}
+        navIdent={properties.navidentForImg}
+        navn={properties.fornavnAndEtternavnForImg}
       />
     )}
-    <Next height={undefined} width={undefined} className={nextChevronCss} />
+    <Next className={nextChevronCss} height={undefined} width={undefined} />
   </div>
 );
 
-const Enhet = (props: {
+const Enhet = (properties: {
   children: ReactNode;
   navIdentForImg: string;
   fornavnAndEtternavnForImg?: string;
 }) => (
   <HorizontallyAlignedPanel
     className={panelCss.underEnhet}
+    fornavnAndEtternavnForImg={properties.fornavnAndEtternavnForImg}
     iconSrc={building2Icon}
-    navidentForImg={props.navIdentForImg}
-    fornavnAndEtternavnForImg={props.fornavnAndEtternavnForImg}
+    navidentForImg={properties.navIdentForImg}
   >
-    {props.children}
+    {properties.children}
   </HorizontallyAlignedPanel>
 );
 
-const Ressurs = (props: { children: ReactNode }) => (
+const Ressurs = (properties: { children: ReactNode }) => (
   <HorizontallyAlignedPanel
     className={css(commonPanelCss, panelCss.fullHeight)}
     iconSrc={peopleFilledIcon}
   >
-    {props.children}
+    {properties.children}
   </HorizontallyAlignedPanel>
 );
 
-const OrgenhetLederLink = (props: {
+const OrgenhetLederLink = (properties: {
   navident?: string;
   name: string;
   orgenhetCtxUrl: string;
 }) =>
-  (props.navident && (
+  (properties.navident && (
     <Link
       className={lederStyling.lederTekst}
-      to={`${props.orgenhetCtxUrl}/${props.navident}`}
+      to={`${properties.orgenhetCtxUrl}/${properties.navident}`}
     >
-      {props.name}
+      {properties.name}
     </Link>
   )) || <span>Ingen leder</span>;
 
-const BackFromRessurs = (props: {
+const BackFromRessurs = (properties: {
   valgtEnhetUrl: string;
   ressursIsLeder?: boolean;
 }) => (
@@ -281,56 +283,59 @@ const BackFromRessurs = (props: {
       display: grid;
       grid-template-columns: min-content auto;
     `}
-    to={props.valgtEnhetUrl}
+    to={properties.valgtEnhetUrl}
   >
     <Back className="navds-link-panel__chevron" color={colorPalette.font} />
     <BodyShort
-      size="medium"
       className={css({ fontWeight: "600", color: colorPalette.font })}
+      size="medium"
     >
-      {props.ressursIsLeder
+      {properties.ressursIsLeder
         ? "Se alle underenhetene for enheten "
         : "Se alle ressurser i enheten"}
     </BodyShort>
   </Link>
 );
 
-const scrollToRef = (ref: any) =>
-  window.scrollTo(0, ref.current.offsetTop - 100);
+const scrollToReference = (reference: RefObject<HTMLDivElement>) => {
+  if (reference.current) {
+    window.scrollTo(0, reference.current.offsetTop - 100);
+  }
+};
 
-const OrganisasjonHierarkiPageInner = function (props: {
+const OrganisasjonHierarkiPageInner = function (properties: {
   data: Hierarchy.OrgHierarchy;
   focusedRessurs?: Hierarchy.OrgHierarchyWithFocusedRessurs;
 }) {
   const overEnheter =
-    props.focusedRessurs?.overEnheter || props.data.overEnheter;
-  const scrollRef = React.useRef<any>();
+    properties.focusedRessurs?.overEnheter || properties.data.overEnheter;
+  const scrollReference = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    if (overEnheter.length !== 0) scrollRef.current && scrollToRef(scrollRef);
+    if (overEnheter.length > 0) scrollToReference(scrollReference);
   }, []);
 
-  const underEnheter = props.data.underEnheter;
-  const valgtEnhet = props.data.enhet;
-  const ressurser = props.data.ressurser;
+  const underEnheter = properties.data.underEnheter;
+  const valgtEnhet = properties.data.enhet;
+  const ressurser = properties.data.ressurser;
 
-  const focusedRessurs = props.focusedRessurs?.focusedRessurs;
+  const focusedRessurs = properties.focusedRessurs?.focusedRessurs;
   const valgtEnhetUrl = valgtEnhet.url;
 
   return (
     <div>
-      {overEnheter.map((oe) => {
+      {overEnheter.map((overEnhet) => {
         return (
-          <Fragment key={oe.url}>
-            <Link className={hierarkiCss.link} to={oe.url}>
+          <Fragment key={overEnhet.url}>
+            <Link className={hierarkiCss.link} to={overEnhet.url}>
               <Enhet
-                navIdentForImg={oe.ledere[0].navident}
-                fornavnAndEtternavnForImg={oe.ledere[0].name}
+                fornavnAndEtternavnForImg={overEnhet.ledere[0].name}
+                navIdentForImg={overEnhet.ledere[0].navident}
               >
-                <Heading size={"medium"}>{oe.name}</Heading>
+                <Heading size={"medium"}>{overEnhet.name}</Heading>
                 <div>
                   Leder:{" "}
                   <span className={lederStyling.lederTekst}>
-                    {oe.ledere[0]?.name || "Leder ikke funnet"}
+                    {overEnhet.ledere[0]?.name || "Leder ikke funnet"}
                   </span>
                 </div>
               </Enhet>
@@ -342,7 +347,7 @@ const OrganisasjonHierarkiPageInner = function (props: {
 
       {focusedRessurs && (
         <>
-          <div ref={scrollRef} className={panelCss.currentEnhet}>
+          <div className={panelCss.currentEnhet} ref={scrollReference}>
             <div className={panelCss.panelRim} />
             <div
               className={css`
@@ -376,8 +381,8 @@ const OrganisasjonHierarkiPageInner = function (props: {
                     </strong>
                   </span>
 
-                  {focusedRessurs.tilknytninger.map((tilkn) => {
-                    const { orgenhet: oe, leder: l } = tilkn;
+                  {focusedRessurs.tilknytninger.map((tilknytning) => {
+                    const { orgenhet: oe, leder: l } = tilknytning;
                     return (
                       <Fragment key={l.navident + "_" + oe.url}>
                         <span>
@@ -404,23 +409,23 @@ const OrganisasjonHierarkiPageInner = function (props: {
                 `}
               >
                 <UserImage
-                  size={"150px"}
                   navIdent={focusedRessurs.navident}
                   navn={focusedRessurs.name}
+                  size={"150px"}
                 />
               </div>
             </div>
           </div>
           <BackFromRessurs
-            valgtEnhetUrl={valgtEnhetUrl}
             ressursIsLeder={ressurser.length === 0}
+            valgtEnhetUrl={valgtEnhetUrl}
           />
         </>
       )}
       {!focusedRessurs && (
         <>
           {valgtEnhet && (
-            <div ref={scrollRef} className={panelCss.currentEnhet}>
+            <div className={panelCss.currentEnhet} ref={scrollReference}>
               <div className={panelCss.panelRim}></div>
               <div className={panelCss.currentEnhetPanelContent}>
                 <div
@@ -437,17 +442,17 @@ const OrganisasjonHierarkiPageInner = function (props: {
                     <span>
                       Leder:{" "}
                       <OrgenhetLederLink
+                        name={valgtEnhet.ledere[0]?.name}
                         navident={valgtEnhet.ledere[0]?.navident}
                         orgenhetCtxUrl={valgtEnhetUrl}
-                        name={valgtEnhet.ledere[0]?.name}
                       />
                     </span>
                   </div>
                 </div>
                 <UserImage
-                  size={"130px"}
                   navIdent={valgtEnhet.ledere[0]?.navident}
                   navn={valgtEnhet.ledere[0]?.name}
+                  size={"130px"}
                 />
               </div>
             </div>
@@ -458,14 +463,18 @@ const OrganisasjonHierarkiPageInner = function (props: {
               underEnheter.length > 5 && hierarkiCss.dynamicSecondColumn
             )}
           >
-            {underEnheter.map((ue) => (
-              <Link className={hierarkiCss.link} key={ue.url} to={ue.url}>
-                <Enhet navIdentForImg={ue.ledere[0]?.navident}>
-                  <Heading size={"medium"}>{ue.name}</Heading>
+            {underEnheter.map((underEnhet) => (
+              <Link
+                className={hierarkiCss.link}
+                key={underEnhet.url}
+                to={underEnhet.url}
+              >
+                <Enhet navIdentForImg={underEnhet.ledere[0]?.navident}>
+                  <Heading size={"medium"}>{underEnhet.name}</Heading>
                   <span>
                     Leder:{" "}
                     <span className={lederStyling.lederTekst}>
-                      {ue.ledere[0]?.name || "Leder ikke funnet"}
+                      {underEnhet.ledere[0]?.name || "Leder ikke funnet"}
                     </span>
                   </span>
                 </Enhet>
@@ -478,21 +487,21 @@ const OrganisasjonHierarkiPageInner = function (props: {
               ressurser.length > 5 && hierarkiCss.dynamicSecondColumn
             )}
           >
-            {ressurser.map((it) => (
+            {ressurser.map((ressurs) => (
               <Link
                 className={hierarkiCss.link}
-                key={it.navident}
-                to={valgtEnhetUrl + "/" + it.navident}
+                key={ressurs.navident}
+                to={valgtEnhetUrl + "/" + ressurs.navident}
               >
                 <Ressurs>
                   <Heading
-                    size={"medium"}
                     className={css`
                       font-size: 24px;
                       font-weight: 600;
                     `}
+                    size={"medium"}
                   >
-                    {it.name}
+                    {ressurs.name}
                   </Heading>
                 </Ressurs>
               </Link>
@@ -508,7 +517,7 @@ function OrganisasjonsHierarkiPageOuter() {
   const { id, resourceId } = useParams();
   const agrId = agressoUrlToData(id || "");
 
-  const qry = Gq.useHentHierarkiQuery({
+  const hentHierarkiQuery = Gq.useHentHierarkiQuery({
     variables: {
       agressoId: agrId.agressoId,
       orgNiv: agrId.agressoNiva,
@@ -523,34 +532,40 @@ function OrganisasjonsHierarkiPageOuter() {
     skip: !resourceId,
   });
 
-  const gotHierarkiData = !!(qry.data && !qry.loading);
+  const gotHierarkiData = !!(
+    hentHierarkiQuery.data && !hentHierarkiQuery.loading
+  );
   const gotRessursData =
     !resourceId || !!(ressursQry.data?.ressurs && !ressursQry.loading);
 
-  if (qry.error) {
-    console.error(qry.error, "GRAPHQL ERROR");
+  if (hentHierarkiQuery.error) {
+    console.error(hentHierarkiQuery.error, "GRAPHQL ERROR");
   }
   if (ressursQry.error) {
     console.error(ressursQry.error, "GRAPHQL ERROR");
   }
 
-  const enhetHierarchy = gotHierarkiData ? focusedEnhetHierarchy(qry) : null;
+  const enhetHierarchy = gotHierarkiData
+    ? focusedEnhetHierarchy(hentHierarkiQuery)
+    : undefined;
   const enhetHierarchyOk = enhetHierarchy && enhetHierarchy.kind !== "err";
 
   const focusedResourceHierarchy =
     resourceId && gotRessursData && enhetHierarchyOk
       ? focusedRessursHierarchy(enhetHierarchy, ressursQry)
-      : null;
+      : undefined;
   const focusedResourceHierarchyOk =
     focusedResourceHierarchy && focusedResourceHierarchy?.kind !== "err";
 
   const missingData =
-    !qry.loading && !ressursQry.loading && (!gotRessursData || !gotRessursData);
+    !hentHierarkiQuery.loading &&
+    !ressursQry.loading &&
+    (!gotRessursData || !gotRessursData);
 
   const showAlert =
-    qry.error ||
+    hentHierarkiQuery.error ||
     ressursQry.error ||
-    (!qry.loading && !enhetHierarchyOk) ||
+    (!hentHierarkiQuery.loading && !enhetHierarchyOk) ||
     (resourceId && !ressursQry.loading && !focusedResourceHierarchyOk);
 
   return (
@@ -560,7 +575,7 @@ function OrganisasjonsHierarkiPageOuter() {
           display: grid;
         `}
       >
-        <Heading size="xlarge" className={css({ marginBottom: "20px" })}>
+        <Heading className={css({ marginBottom: "20px" })} size="xlarge">
           NAV Organisasjon
         </Heading>
         {showAlert && (
@@ -581,7 +596,7 @@ function OrganisasjonsHierarkiPageOuter() {
               resourceId
                 ? { orgenhetId: id, ressursId: resourceId }
                 : { orgenhetId: id },
-              null,
+              undefined,
               2
             )}
           </Alert>

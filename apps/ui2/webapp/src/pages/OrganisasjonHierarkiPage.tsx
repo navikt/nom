@@ -1,10 +1,11 @@
-import ContentWrapper from "../components/ContentWrapper";
-import * as Gq from "../api/generated/graphql_generated";
-import { useParams } from "react-router";
-import { agressoUrlToData } from "../resources/utils/url_utils";
-import OrgHierarkiList from "../components/OrgHierarki/OrgHierarkiList";
-import { Heading, Loader } from "@navikt/ds-react";
 import { css } from "@emotion/css";
+import { Heading, Loader } from "@navikt/ds-react";
+import { useParams } from "react-router";
+
+import * as Gq from "../api/generated/graphql_generated";
+import ContentWrapper from "../components/ContentWrapper";
+import OrgHierarkiList from "../components/OrgHierarki/OrgHierarkiList";
+import { agressoUrlToData } from "../resources/utils/url_utils";
 
 const mapOverEnheter = (data: Gq.HentOrganisasjonsEnheterHierarkiQuery) => {
   if (!data.organisasjonsenhet) return [];
@@ -65,7 +66,7 @@ const OrganisasjonHierarkiPage = () => {
     <>
       <ContentWrapper>
         <>
-          <Heading size="xlarge" className={css({ marginBottom: "20px" })}>
+          <Heading className={css({ marginBottom: "20px" })} size="xlarge">
             NAV Organisasjon
           </Heading>
 
@@ -76,14 +77,14 @@ const OrganisasjonHierarkiPage = () => {
           {query.data && (
             <OrgHierarkiList
               currentEnhet={extractCurrentEnhet(query.data)}
-              underEnheter={
-                query.data.organisasjonsenhet?.underenheter as Gq.Organisering[]
-              }
               overEnheter={mapOverEnheter(query.data)}
               ressurs={
                 resourceQuery.data
                   ? (resourceQuery.data.ressurs as Gq.Ressurs)
                   : undefined
+              }
+              underEnheter={
+                query.data.organisasjonsenhet?.underenheter as Gq.Organisering[]
               }
             />
           )}

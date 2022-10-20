@@ -1,6 +1,7 @@
-import ContentWrapper from "../components/ContentWrapper";
-import BannerSmall from "../components/BannerSmall";
 import { Table } from "@navikt/ds-react";
+
+import BannerSmall from "../components/BannerSmall";
+import ContentWrapper from "../components/ContentWrapper";
 
 const ResourcePage = () => {
   return (

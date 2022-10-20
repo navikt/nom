@@ -1,9 +1,13 @@
 import { css } from "@emotion/css";
 import { BodyShort, Button, Heading, Label, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { OpprettRessursFormTypes } from "./CreateResourceForm";
 
-const TextWithLabelHorizontal = (props: { label: string; text: string }) => {
+import type { OpprettRessursFormTypes } from "./CreateResourceForm";
+
+const TextWithLabelHorizontal = (properties: {
+  label: string;
+  text: string;
+}) => {
   return (
     <div
       className={css({
@@ -12,8 +16,8 @@ const TextWithLabelHorizontal = (props: { label: string; text: string }) => {
         marginTop: "0.7rem",
       })}
     >
-      <BodyShort>{props.label}</BodyShort>&nbsp;
-      <Label>{props.text}</Label>
+      <BodyShort>{properties.label}</BodyShort>&nbsp;
+      <Label>{properties.text}</Label>
     </div>
   );
 };
@@ -38,18 +42,18 @@ const CreateResourceConfirmationModal = ({
     <>
       <Button
         loading={loading}
-        type="button"
         onClick={() => setShowModal(true)}
+        type="button"
       >
         Opprett ressurs
       </Button>
       <Modal
-        open={showModal}
-        onClose={() => setShowModal(false)}
         className={css({ minWidth: "500px", padding: "1rem" })}
+        onClose={() => setShowModal(false)}
+        open={showModal}
       >
         <Modal.Content>
-          <Heading spacing level="1" size="medium">
+          <Heading level="1" size="medium" spacing>
             Opprett ressurs
           </Heading>
           <BodyShort className={css({ marginBottom: "1rem" })}>

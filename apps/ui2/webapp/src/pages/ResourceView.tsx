@@ -1,11 +1,12 @@
-import * as Gq from "../api/generated/graphql_generated";
-import { useLocation, useParams } from "react-router";
 import { css } from "@emotion/css";
+import { Back } from "@navikt/ds-icons";
 import { BodyShort } from "@navikt/ds-react";
+import { useParams } from "react-router";
+import { Link } from "react-router-dom";
+
+import * as Gq from "../api/generated/graphql_generated";
 import ContentWrapper from "../components/ContentWrapper";
 import RessursInfo from "../components/OrgHierarki/RessursInfo";
-import { Back } from "@navikt/ds-icons";
-import { Link } from "react-router-dom";
 
 const linkStyles = css({
   marginTop: "20px",
@@ -14,8 +15,7 @@ const linkStyles = css({
 });
 
 const ResourceView = () => {
-  const { id } = useParams<any>();
-  useLocation() as any;
+  const { id } = useParams();
   const query = Gq.useHentRessursMedNavIdentQuery({
     variables: { navIdent: id },
   });
@@ -35,7 +35,7 @@ const ResourceView = () => {
           <Link to={"/ressurs/create"}>
             <div className={linkStyles}>
               <Back className="navds-link-panel__chevron" />
-              <BodyShort size="medium" className={css({ fontWeight: "600" })}>
+              <BodyShort className={css({ fontWeight: "600" })} size="medium">
                 Gå til oppretting av ressurser
               </BodyShort>
             </div>

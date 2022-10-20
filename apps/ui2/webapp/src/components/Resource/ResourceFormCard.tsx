@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { Alert, Button, Radio, RadioGroup, TextField } from "@navikt/ds-react";
 import { useForm } from "react-hook-form";
+
 import Card from "../Card";
 import { radioStyles } from "../Styles";
 
@@ -14,17 +15,17 @@ const rowStyles = css({
   marginBottom: "1em",
 });
 
-type ResourceFormProps = {
+type ResourceFormProperties = {
   cardTitle: string;
-  handleCreate: (values: any) => void;
+  handleCreate: (values: unknown) => void;
 };
 
-const ResourceFormCard = (props: ResourceFormProps) => {
-  const { cardTitle, handleCreate } = props;
+const ResourceFormCard = (properties: ResourceFormProperties) => {
+  const { cardTitle, handleCreate } = properties;
   const { register, handleSubmit } = useForm();
 
   return (
-    <form onSubmit={handleSubmit((form: any) => handleCreate(form))}>
+    <form onSubmit={handleSubmit((form) => handleCreate(form))}>
       <Card title={cardTitle}>
         <div className={css({ marginTop: rowMarginTop })}>
           <Alert variant="info">
@@ -35,26 +36,26 @@ const ResourceFormCard = (props: ResourceFormProps) => {
 
           <div className={rowStyles}>
             <TextField
-              type="text"
-              label="Fornavn"
-              className={css({ width: "48%", marginRight: "5px" })}
               autoComplete="off"
+              className={css({ width: "48%", marginRight: "5px" })}
+              label="Fornavn"
+              type="text"
               {...register("fornavn")}
             />
             <TextField
-              type="text"
-              label="Etternavn"
-              className={css({ width: "48%" })}
               autoComplete="off"
+              className={css({ width: "48%" })}
+              label="Etternavn"
+              type="text"
               {...register("etternavn")}
             />
           </div>
 
           <div className={css({ display: "flex", marginTop: "2m" })}>
             <TextField
-              type="text"
-              label="Org.enhet"
               className={css({ width: "90%" })}
+              label="Org.enhet"
+              type="text"
               {...register("USIKKER")} // USIKKER HVA SOM SKAL FYLLES INN HER
             />
             {/*<Button variant="tertiary"><img src={searchIcon} className={css({scale: "90%"})}/></Button>*/}
@@ -80,13 +81,13 @@ const ResourceFormCard = (props: ResourceFormProps) => {
 
       <div className={css({ display: "flex", marginTop: "15px" })}>
         <Button
+          className={css({ marginRight: "10px" })}
           type="submit"
           variant="primary"
-          className={css({ marginRight: "10px" })}
         >
           Opprett ressurs
         </Button>
-        <Button type="button" variant="secondary" disabled>
+        <Button disabled type="button" variant="secondary">
           Avbryt
         </Button>
       </div>

@@ -8,8 +8,8 @@
     "start": "vite",
     "build": "eslint src/**/*.ts src/**/*.tsx && tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src/**/*.ts src/**/*.tsx",
-    "lint:fix": "eslint --fix src/**/*.ts src/**/*.tsx"
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
   },
   "dependencies": {
     "@apollo/client": "^3.7.0",
@@ -51,6 +51,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.8",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
+    "eslint-plugin-unicorn": "^44.0.2",
     "graphql": "^16.6.0",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4",

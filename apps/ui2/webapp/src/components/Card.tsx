@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
+
 import { titleStyles } from "./Styles";
 
 const cardStyles = css({
@@ -11,13 +12,13 @@ const cardStyles = css({
   marginTop: "25px",
 });
 
-type CardProps = {
+type CardProperties = {
   title?: string;
   children: ReactNode;
 };
 
-const Card = (props: CardProps) => {
-  const { title, children } = props;
+const Card = (properties: CardProperties) => {
+  const { title, children } = properties;
   return (
     <div className={cardStyles}>
       {title && <span className={titleStyles}>{title}</span>}

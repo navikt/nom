@@ -7,22 +7,24 @@ const customLinkPanelStyles = css({
   padding: "15px",
 });
 
-type CustomLinkPanelProps = {
+type CustomLinkPanelProperties = {
   title?: string;
   description?: string;
   icon?: string;
   linkTo?: string;
 };
 
-const CustomLinkPanel = (props: CustomLinkPanelProps) => {
+const CustomLinkPanel = (properties: CustomLinkPanelProperties) => {
   return (
     <div>
-      <LinkPanel href={props.linkTo}>
+      <LinkPanel href={properties.linkTo}>
         <div className={customLinkPanelStyles}>
-          <img src={props.icon} className={css({ marginRight: "50px" })} />
+          <img className={css({ marginRight: "50px" })} src={properties.icon} />
           <div>
-            <LinkPanel.Title>{props.title}</LinkPanel.Title>
-            <LinkPanel.Description>{props.description}</LinkPanel.Description>
+            <LinkPanel.Title>{properties.title}</LinkPanel.Title>
+            <LinkPanel.Description>
+              {properties.description}
+            </LinkPanel.Description>
           </div>
         </div>
       </LinkPanel>

@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { Collapse, Expand } from "@navikt/ds-icons";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import { useState } from "react";
+
 import { InfoIcon } from "./Images";
 
 const outerDivStyles = css({
@@ -48,7 +49,7 @@ const PilotBanner = () => {
         className={bannerStyles}
         onClick={() => (!isOpen ? setIsOpen(true) : setIsOpen(false))}
       >
-        <img src={InfoIcon} alt="Pilot info" className={iconStyles} />
+        <img alt="Pilot info" className={iconStyles} src={InfoIcon} />
         <Heading size="small">Løsningen er i pilot</Heading>
         <div className={buttonDivStyles}>
           {isOpen && <Collapse fontSize="32px" />}
@@ -58,7 +59,7 @@ const PilotBanner = () => {
 
       {isOpen && (
         <div className={textDivStyles}>
-          <BodyShort size="medium" className={css({ lineHeight: "28px" })}>
+          <BodyShort className={css({ lineHeight: "28px" })} size="medium">
             NOM presenterer det formelle organisasjonshierarkiet i NAV.
             Hierarkiet hentes per idag fra lønnssystemet, og oppsettet i
             lønnssystemet gjør at ansatte må knyttes til laveste nivå i

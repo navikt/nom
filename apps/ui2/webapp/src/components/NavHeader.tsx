@@ -1,12 +1,13 @@
-import React from "react";
 import { css } from "@emotion/css";
-import { Link } from "react-router-dom";
-import { nomLogoCircle } from "./Images";
-import { Search } from "@navikt/ds-react";
 import { PeopleFilled } from "@navikt/ds-icons";
-import { mediaQueryContentWidth } from "../resources/NomStyles";
+import { Search } from "@navikt/ds-react";
+import React from "react";
+import { Link } from "react-router-dom";
+
 import { UserRole, useSessionContext } from "../main";
+import { mediaQueryContentWidth } from "../resources/NomStyles";
 import BurgerMenu from "./BurgerMenu";
+import { nomLogoCircle } from "./Images";
 
 export const headerHeight = "6rem";
 
@@ -67,16 +68,16 @@ const NavHeader = () => {
   return (
     <div className={outerDiv}>
       <div className={innerDiv}>
-        <Link to="/" className={verticallyCenter}>
-          <img src={nomLogoCircle} alt="logo" />
+        <Link className={verticallyCenter} to="/">
+          <img alt="logo" src={nomLogoCircle} />
         </Link>
 
         <Search
           disabled={true}
-          placeholder={"Søkefunksjonalitet kommer"}
           label={"Søk etter ressurser"}
-          variant="secondary"
+          placeholder={"Søkefunksjonalitet kommer"}
           size="medium"
+          variant="secondary"
         ></Search>
         <span
           className={css`
