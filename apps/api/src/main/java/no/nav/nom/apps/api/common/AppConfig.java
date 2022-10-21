@@ -22,14 +22,12 @@ public class AppConfig {
         return new RestTemplate();
     }
 
-    @Value("${proxy.host:DEFAULT_NONE}")
-    private String proxyHost;
-    @Value("${proxy.port:0}")
-    private Integer proxyPort;
-
     @Bean
     @Profile("proxy")
-    public WebClientCustomizer insecureProxyWebClientCustomizer() throws SSLException {
+    public WebClientCustomizer insecureProxyWebClientCustomizer(
+            @Value("${proxy.host:DEFAULT_NONE}") String proxyHost,
+            @Value("${proxy.port:0}") Integer proxyPort
+    ) throws SSLException {
         SslContext insecureContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         HttpClient httpClient = HttpClient.create()
                         .secure(spec -> spec.sslContext(insecureContext))
