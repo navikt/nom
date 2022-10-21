@@ -43,8 +43,8 @@ public class ActiveDirectoryRessursBatchLoader {
         this.restTemplate = restTemplate;
     }
 
-    public <T> Map<Ressurs, DataFetcherResult<T>> load(Collection<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver, BatchLoaderEnvironment batchEnvironment) {
-        final var adRessurser = getAdRessurser(ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver, batchEnvironment);
+    public <T> Map<Ressurs, DataFetcherResult<T>> load(Collection<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
+        final var adRessurser = getAdRessurser(ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver);
         return ressurser.stream()
                 .collect(
                         toMap(
@@ -55,7 +55,7 @@ public class ActiveDirectoryRessursBatchLoader {
     }
 
     @SneakyThrows
-    public <T> Map<String, DataFetcherResult<T>> getAdRessurser(Set<String> navIdenter, Function<AdRessurs, T> propertyResolver, BatchLoaderEnvironment batchEnvironment) {
+    public <T> Map<String, DataFetcherResult<T>> getAdRessurser(Set<String> navIdenter, Function<AdRessurs, T> propertyResolver) {
         final var headers = new HttpHeaders();
         final var token = tokenRepository.getSystemAadToken(proxyProperties.aadClientId());
         headers.setBearerAuth(token.serialize());
@@ -73,7 +73,7 @@ public class ActiveDirectoryRessursBatchLoader {
                         .collect(
                                 toMap(
                                         AdRessurs::getNavIdent,
-                                        o -> convert(o, propertyResolver, getEnv(batchEnvironment, o.getNavIdent()))
+                                        o -> convert(o, propertyResolver)
                                 )
                         );
             }
@@ -81,24 +81,29 @@ public class ActiveDirectoryRessursBatchLoader {
 
         } catch (Exception exception) {
             log.error("Feil i oppslag mot AD i proxy", exception);
-            return navIdenter.stream().collect(toMap(p -> p,
-                    p -> convertToError(ErrorCode.SERVER_ERROR, "Oppslag mot AD feilet", getEnv(batchEnvironment, p))));
+            return navIdenter.stream()
+                    .collect(
+                            toMap(
+                                    Function.identity(),
+                                    p -> convertToError(ErrorCode.SERVER_ERROR, "Oppslag mot AD feilet")
+                            )
+                    );
         }
     }
 
-    private <T> DataFetcherResult<T> convert(AdRessurs ressurs, Function<AdRessurs, T> propertyResolver, DataFetchingEnvironment env) {
+    private <T> DataFetcherResult<T> convert(AdRessurs ressurs, Function<AdRessurs, T> propertyResolver) {
         if (ressurs.getStatus() == AdStatus.OK) {
             return DataFetcherResult.<T>newResult()
                     .data(propertyResolver.apply(ressurs))
                     .build();
         }
         log.warn("Manglende data fra AD", new GraphQLException("Manglende data fra AD for ident=" + ressurs.getNavIdent()));
-        return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på denne navIdent", env);
+        return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på denne navIdent");
     }
 
-    private <T> DataFetcherResult<T> convertToError(ErrorCode errorCode, String message, DataFetchingEnvironment env) {
+    private <T> DataFetcherResult<T> convertToError(ErrorCode errorCode, String message) {
         return DataFetcherResult.<T>newResult()
-                .error(errorCode.construct(env, message))
+                .error(errorCode.construct(message))
                 .build();
     }
 
@@ -107,9 +112,5 @@ public class ActiveDirectoryRessursBatchLoader {
             return exc.getErrorCode().construct(environment, exc.getMessage());
         }
         return null;
-    }
-
-    private DataFetchingEnvironment getEnv(BatchLoaderEnvironment batchLoaderEnvironment, String navIdent) {
-        return (DataFetchingEnvironment) batchLoaderEnvironment.getKeyContexts().get(navIdent);
     }
 }

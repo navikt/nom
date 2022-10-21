@@ -41,32 +41,32 @@ public class RessursPropertyResolver {
                 .build();
     }
 
-    public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+    public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser) {
         if (sendDummydata) {
             return createDummyResponse("dummy-epost@i-dev.", ressurser);
         }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail, env);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail);
     }
 
-    public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+    public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser) {
         if (sendDummydata) {
             return createDummyResponse("dummy-visningsnavn-i-dev-", ressurser);
         }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getDisplayName, env);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getDisplayName);
     }
 
-    public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+    public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser) {
         if (sendDummydata) {
             return createDummyResponse("dummy-fornavn-i-dev-", ressurser);
         }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getGivenName, env);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getGivenName);
     }
 
-    public Map<Ressurs, DataFetcherResult<String>> etternavn(List<Ressurs> ressurser, BatchLoaderEnvironment env) {
+    public Map<Ressurs, DataFetcherResult<String>> etternavn(List<Ressurs> ressurser) {
         if (sendDummydata) {
             return createDummyResponse("dummy-etternnavn-i-dev-", ressurser);
         }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getSurname, env);
+        return adRessursBatchLoader.load(ressurser, AdRessurs::getSurname);
     }
 
 }
