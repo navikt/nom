@@ -31,7 +31,6 @@ class SecurityTest extends SecurityTestBase {
     @SneakyThrows
     @DisplayName("Gitt manglende token, får man Unauthenticated error i responsen")
     public void scenario11() {
-        setClientResponseTimeout(Duration.of(600, ChronoUnit.SECONDS));
         testToken("");
     }
 

@@ -224,7 +224,6 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("2");
         createRessursHendelse("3");
 
-
         final var response = postForResource("ressurs/scenario8.graphql", true);
 
         final var ressurser = response.path("ressurser")
@@ -319,7 +318,6 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
         dvhRestConsumer.loadFromDvh();
-        setClientResponseTimeout(Duration.of(60, ChronoUnit.SECONDS));
         final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql", true);
 //        assertThat(res.isOk());
     }
