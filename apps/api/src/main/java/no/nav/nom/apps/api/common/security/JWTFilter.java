@@ -23,8 +23,6 @@ import static org.springframework.security.core.context.SecurityContextHolder.cr
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
-    // TODO: Use azp or azp_name with @RolesAllowed or @Preauthorize
-
     private final static Logger log = LoggerFactory.getLogger(JWTFilter.class);
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
