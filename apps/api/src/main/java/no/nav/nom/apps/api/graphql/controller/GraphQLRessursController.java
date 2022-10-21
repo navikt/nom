@@ -86,6 +86,7 @@ public class GraphQLRessursController {
         return ressursResolver.ressurser(search.orElse(EMPTY_SEARCH));
     }
 
+    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)")
     @MutationMapping("opprettRessurs")
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token) {
         return ressursResolver.opprettRessurs(request, environment, token);
