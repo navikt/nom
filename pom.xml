@@ -233,6 +233,18 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-security</artifactId>
+                <version>${springdoc-openapi.version}</version>
+                <exclusions>
+                    <exclusion>  <!-- Snyk security warning -->
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
                 <groupId>io.getunleash</groupId>
                 <artifactId>unleash-client-java</artifactId>
                 <version>${unleash.version}</version>

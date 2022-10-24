@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.common.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
@@ -29,10 +30,10 @@ public class JWTFilter extends OncePerRequestFilter {
     private final BearerTokenResolver tokenResolver = new DefaultBearerTokenResolver(); // Leverage Spring to resolve the Bearer-token for us.
 
     public JWTFilter(
-            JwtAuthenticationProvider jwtAuthenticationProvider,
+            JwtDecoder jwtDecoder,
             AZPAuthoritiesConverter authoritiesConverter
     ) {
-        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
+        this.jwtAuthenticationProvider = new JwtAuthenticationProvider(jwtDecoder);
         var authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter); // This should probably be configured throught the SecurityConfigurerAdapter/FilterChain
 
