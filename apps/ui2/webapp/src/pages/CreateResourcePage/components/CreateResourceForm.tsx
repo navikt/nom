@@ -12,16 +12,14 @@ import { decode } from "js-base64";
 import { useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
 
-import type {
-  FolkeregisterPerson,
-  Sektor,
-} from "../../../api/generated/graphql_generated";
+import type { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
 import {
+  Sektor,
   useHentPersonQuery,
   useOpprettRessursMutation,
 } from "../../../api/generated/graphql_generated";
 import { capitalizeName } from "../../../resources/utils/utils";
-import CreateResourceConfirmationModal from "./CreateResourceConfirmationModal";
+import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";
 import { ResourceMetadata } from "./ResourceMetadata";
 
 const rowStyles = css({
@@ -86,11 +84,17 @@ export default function CreateResourceForm() {
   return <></>;
 }
 
+export const SektorNameMapping = {
+  [Sektor.Ekstern]: "Ekstern",
+  [Sektor.NavKommunal]: "Kommunal",
+  [Sektor.NavStatlig]: "Statlig",
+};
+
 export type OpprettRessursFormTypes = {
   fornavn: string;
   mellomnavn?: string;
   etternavn: string;
-  sektor: string;
+  sektor: Sektor;
 };
 
 function CreateResourceFormInner({
@@ -111,7 +115,7 @@ function CreateResourceFormInner({
       fornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
       mellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
       etternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
-      sektor: "NAV_STATLIG",
+      sektor: Sektor.NavStatlig,
     },
   });
 
@@ -186,14 +190,14 @@ function CreateResourceFormInner({
         </div>
 
         <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
-          <Radio checked value="NAV_STATLIG">
-            NAV statlig
+          <Radio checked value={Sektor.NavStatlig}>
+            {SektorNameMapping[Sektor.NavStatlig]}
           </Radio>
-          <Radio disabled value="NAV_KOMMUNAL">
-            NAV kommunal
+          <Radio disabled value={Sektor.NavKommunal}>
+            {SektorNameMapping[Sektor.NavKommunal]}
           </Radio>
-          <Radio disabled value="EKSTERN">
-            Ekstern
+          <Radio disabled value={Sektor.Ekstern}>
+            {SektorNameMapping[Sektor.Ekstern]}
           </Radio>
         </RadioGroup>
 

@@ -59,13 +59,7 @@ function Wrapper() {
                     `}
                   />
                 ) : (
-                  <b
-                    className={css`
-                      color: var(--navds-global-color-white);
-                    `}
-                  >
-                    1
-                  </b>
+                  <b>1</b>
                 )}
               </FilledCircle>
               <div
@@ -76,15 +70,7 @@ function Wrapper() {
                 `}
               />
               <FilledCircle filled={isAtReceiptPage}>
-                <b
-                  className={css`
-                    color: ${isAtReceiptPage
-                      ? "var(--navds-global-color-white"
-                      : "var(--navds-global-color-lightblue-800)"};
-                  `}
-                >
-                  2
-                </b>
+                <b>2</b>
               </FilledCircle>
             </div>
             <div
@@ -94,7 +80,7 @@ function Wrapper() {
                 color: var(--navds-global-color-lightblue-800);
               `}
             >
-              <b>Personalopplysninger</b>
+              <b>Personopplysninger</b>
               <b>Lønnsopplysninger i Unit4</b>
             </div>
           </div>
@@ -114,18 +100,26 @@ function FilledCircle({
 }) {
   return (
     <div
-      className={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid var(--navds-global-color-lightblue-800);
-        border-radius: 50%;
-        height: 42px;
-        width: 42px;
-        background: ${filled
-          ? "var(--navds-global-color-lightblue-800)"
-          : "var(--navds-global-color-white"};
-      `}
+      className={css(
+        css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid var(--navds-global-color-lightblue-800);
+          border-radius: 50%;
+          height: 42px;
+          width: 42px;
+        `,
+        filled
+          ? css`
+              background: var(--navds-global-color-lightblue-800);
+              color: var(--navds-global-color-white);
+            `
+          : css`
+              background: var(--navds-global-color-white);
+              color: var(--navds-global-color-lightblue-800);
+            `
+      )}
     >
       {children}
     </div>

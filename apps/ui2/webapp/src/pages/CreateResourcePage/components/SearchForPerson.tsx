@@ -32,7 +32,7 @@ export function SearchForPerson() {
         `}
         size="large"
       >
-        Personalopplysninger
+        Personopplysninger
       </Heading>
       <form
         onSubmit={handleSubmit((values) =>

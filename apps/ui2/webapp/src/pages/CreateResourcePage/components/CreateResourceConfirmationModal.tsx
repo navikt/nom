@@ -1,28 +1,11 @@
 import { css } from "@emotion/css";
-import { BodyShort, Button, Heading, Label, Modal } from "@navikt/ds-react";
+import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
 import { useState } from "react";
 
 import type { OpprettRessursFormTypes } from "./CreateResourceForm";
+import { SektorNameMapping } from "./CreateResourceForm";
 
-const TextWithLabelHorizontal = (properties: {
-  label: string;
-  text: string;
-}) => {
-  return (
-    <div
-      className={css({
-        display: "flex",
-        alignContent: "center",
-        marginTop: "0.7rem",
-      })}
-    >
-      <BodyShort>{properties.label}</BodyShort>&nbsp;
-      <Label>{properties.text}</Label>
-    </div>
-  );
-};
-
-const CreateResourceConfirmationModal = ({
+export function CreateResourceConfirmationModal({
   formValues,
   onConfirm,
   loading,
@@ -30,9 +13,9 @@ const CreateResourceConfirmationModal = ({
   formValues: OpprettRessursFormTypes;
   onConfirm: () => void;
   loading: boolean;
-}) => {
+}) {
   const [showModal, setShowModal] = useState(false);
-  const { fornavn, etternavn, mellomnavn } = formValues;
+  const { fornavn, etternavn, mellomnavn, sektor } = formValues;
 
   const formattedName = [fornavn, mellomnavn, etternavn]
     .filter((navn) => !!navn)
@@ -56,17 +39,23 @@ const CreateResourceConfirmationModal = ({
           <Heading level="1" size="medium" spacing>
             Opprett ressurs
           </Heading>
-          <BodyShort className={css({ marginBottom: "1rem" })}>
-            Du er nå i ferd med å opprette ressurs:{" "}
-          </BodyShort>
-          <TextWithLabelHorizontal label="Navn: " text={formattedName} />
-          <TextWithLabelHorizontal label="Org.enhet: " text="Mangler enhet" />
-          <TextWithLabelHorizontal label="Sektor: " text="Statlig" />
-
-          <BodyShort className={css({ marginTop: "2rem" })}>
-            Du kan ikke endre opplysningene etter at ressursen er opprettet.
-          </BodyShort>
-
+          <div
+            className={css`
+              margin: var(--navds-spacing-7) 0;
+              display: grid;
+              grid-template-columns: min-content 1fr;
+              column-gap: var(--navds-spacing-4);
+              row-gap: var(--navds-spacing-2);
+            `}
+          >
+            <span>Navn:</span>
+            <b>{formattedName}</b>
+            <span>Sektor:</span>
+            <b>{SektorNameMapping[sektor]}</b>
+          </div>
+          <Alert variant="warning">
+            Du kan ikke endre opplysningene etter at ressursen er opprettet
+          </Alert>
           <div
             className={css({
               display: "flex",
@@ -91,6 +80,4 @@ const CreateResourceConfirmationModal = ({
       </Modal>
     </>
   );
-};
-
-export default CreateResourceConfirmationModal;
+}
