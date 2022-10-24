@@ -1,6 +1,7 @@
 import { css } from "@emotion/css";
 import { Back, Next } from "@navikt/ds-icons";
 import { Alert, BodyShort, Heading } from "@navikt/ds-react";
+import partition from "lodash/partition";
 import type { ReactNode, RefObject } from "react";
 import React, { Fragment } from "react";
 import { useParams } from "react-router";
@@ -303,6 +304,21 @@ const scrollToReference = (reference: RefObject<HTMLDivElement>) => {
   }
 };
 
+function sortUnderenheterForHierarchyFrontPage(
+  orgHierarchy: Hierarchy.OrgHierarchy
+) {
+  if (orgHierarchy.enhet.name !== "NAV") {
+    return orgHierarchy.underEnheter;
+  }
+
+  const [direktoratet, linjene] = partition(
+    orgHierarchy.underEnheter,
+    (enhet) => enhet.name === "Arbeids- og velferdsdirektoratet"
+  );
+
+  return [...direktoratet, ...linjene];
+}
+
 const OrganisasjonHierarkiPageInner = function (properties: {
   data: Hierarchy.OrgHierarchy;
   focusedRessurs?: Hierarchy.OrgHierarchyWithFocusedRessurs;
@@ -314,7 +330,7 @@ const OrganisasjonHierarkiPageInner = function (properties: {
     if (overEnheter.length > 0) scrollToReference(scrollReference);
   }, []);
 
-  const underEnheter = properties.data.underEnheter;
+  const underEnheter = sortUnderenheterForHierarchyFrontPage(properties.data);
   const valgtEnhet = properties.data.enhet;
   const ressurser = properties.data.ressurser;
 
@@ -462,22 +478,30 @@ const OrganisasjonHierarkiPageInner = function (properties: {
               underEnheter.length > 5 && hierarkiCss.dynamicSecondColumn
             )}
           >
-            {underEnheter.map((underEnhet) => (
-              <Link
-                className={hierarkiCss.link}
-                key={underEnhet.url}
-                to={underEnhet.url}
-              >
-                <Enhet navIdentForImg={underEnhet.ledere[0]?.navident}>
-                  <Heading size={"medium"}>{underEnhet.name}</Heading>
-                  <span>
-                    Leder:{" "}
-                    <span className={lederStyling.lederTekst}>
-                      {underEnhet.ledere[0]?.name || "Leder ikke funnet"}
+            {underEnheter.map((underEnhet, index) => (
+              <>
+                {valgtEnhet.name === "NAV" && index === 0 && (
+                  <Heading size="small">Direktoratet</Heading>
+                )}
+                {valgtEnhet.name === "NAV" && index === 1 && (
+                  <Heading size="small">Linjene</Heading>
+                )}
+                <Link
+                  className={hierarkiCss.link}
+                  key={underEnhet.url}
+                  to={underEnhet.url}
+                >
+                  <Enhet navIdentForImg={underEnhet.ledere[0]?.navident}>
+                    <Heading size={"medium"}>{underEnhet.name}</Heading>
+                    <span>
+                      Leder:{" "}
+                      <span className={lederStyling.lederTekst}>
+                        {underEnhet.ledere[0]?.name || "Leder ikke funnet"}
+                      </span>
                     </span>
-                  </span>
-                </Enhet>
-              </Link>
+                  </Enhet>
+                </Link>
+              </>
             ))}
           </div>
           <div

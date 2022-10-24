@@ -11,6 +11,7 @@ module.exports = {
   },
   extends: [
     "eslint:recommended",
+    "plugin:you-dont-need-lodash-underscore/all",
     "plugin:@typescript-eslint/recommended",
     "prettier",
     "plugin:unicorn/recommended",
@@ -20,8 +21,15 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "prettier", "@typescript-eslint", "simple-import-sort"],
+  plugins: [
+    "lodash",
+    "react",
+    "prettier",
+    "@typescript-eslint",
+    "simple-import-sort",
+  ],
   rules: {
+    "lodash/import-scope": ["error", "method"],
     "react/jsx-key": "error",
     "react/jsx-sort-props": "error",
     "prettier/prettier": ["error"],

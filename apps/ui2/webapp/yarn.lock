@@ -1458,6 +1458,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/lodash@^4.14.186":
+  version "4.14.186"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.186.tgz#862e5514dd7bd66ada6c70ee5fce844b06c8ee97"
+  integrity sha512-eHcVlLXP0c2FlMPm56ITode2AgLMSa6aJ05JTTbYbI+7EMkCEE5qk2E41d5g2lCVTqRe0GnnRFurmlCsDODrPw==
+
 "@types/node@*":
   version "18.8.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.4.tgz#54be907698f40de8a45770b48486aa3cbd3adff7"
@@ -2719,6 +2724,13 @@ eslint-plugin-import@^2.26.0:
     resolve "^1.22.0"
     tsconfig-paths "^3.14.1"
 
+eslint-plugin-lodash@^7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-lodash/-/eslint-plugin-lodash-7.4.0.tgz#14a761547f126c92ff56789662a20a44f8bb6290"
+  integrity sha512-Tl83UwVXqe1OVeBRKUeWcfg6/pCW1GTRObbdnbEJgYwjxp5Q92MEWQaH9+dmzbRt6kvYU1Mp893E79nJiCSM8A==
+  dependencies:
+    lodash "^4.17.21"
+
 eslint-plugin-n@^15.3.0:
   version "15.3.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-n/-/eslint-plugin-n-15.3.0.tgz#3e1ad236a17dce7ecc0760621c46cc251ef99560"
@@ -2789,6 +2801,13 @@ eslint-plugin-unicorn@^44.0.2:
     safe-regex "^2.1.1"
     semver "^7.3.7"
     strip-indent "^3.0.0"
+
+eslint-plugin-you-dont-need-lodash-underscore@^6.12.0:
+  version "6.12.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-you-dont-need-lodash-underscore/-/eslint-plugin-you-dont-need-lodash-underscore-6.12.0.tgz#7a977c1cf4ba4d26a0484a4c4a2087221cb9bb8a"
+  integrity sha512-WF4mNp+k2532iswT6iUd1BX6qjd3AV4cFy/09VC82GY9SsRtvkxhUIx7JNGSe0/bLyd57oTr4inPFiIaENXhGw==
+  dependencies:
+    kebab-case "^1.0.0"
 
 eslint-scope@^5.1.1:
   version "5.1.1"
@@ -3742,6 +3761,11 @@ jws@^3.2.2:
   dependencies:
     jwa "^1.4.1"
     safe-buffer "^5.0.1"
+
+kebab-case@^1.0.0:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/kebab-case/-/kebab-case-1.0.2.tgz#5eac97d5d220acf606d40e3c0ecfea21f1f9e1eb"
+  integrity sha512-7n6wXq4gNgBELfDCpzKc+mRrZFs7D+wgfF5WRFLNAr4DA/qtr9Js8uOAVAfHhuLMfAcQ0pRKqbpjx+TcJVdE1Q==
 
 levn@^0.4.1:
   version "0.4.1"
