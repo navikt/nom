@@ -22,9 +22,6 @@ import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasNoErrors;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @AutoConfigureGraphQlTester
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -48,12 +45,12 @@ public abstract class GraphQLTestBase extends TestBase {
     protected IRessursService ressursService;
 
     @SneakyThrows
-    protected GraphQlTester.Response postForResource(String resource, boolean hasErrors) {
-        return postForResource(resource, hasErrors, emptyMap());
+    protected GraphQlTester.Response postForResource(String resource) {
+        return postForResource(resource, emptyMap());
     }
 
     @SneakyThrows
-    public GraphQlTester.Response postForResource(String resource, String token, boolean hasErrors, Map<String, Object> vars) {
+    public GraphQlTester.Response postForResource(String resource, String token, Map<String, Object> vars) {
         final var client = graphQlTester.mutate()
                 .webTestClient(builder -> builder.responseTimeout(responseTimeout.get()))
                 .headers(httpHeaders -> httpHeaders.add(HttpHeaders.AUTHORIZATION, "Bearer " + token))
@@ -62,25 +59,22 @@ public abstract class GraphQLTestBase extends TestBase {
         var query = client.document(loadResourceFromClasspath(resource)); // Load the resource
         vars.forEach(query::variable); // Load variables into the query
 
-        final var response = query.execute();
-        assertThat(response, hasErrors ? hasErrors() : hasNoErrors());
-
-        return response;
+        return query.execute();
     }
 
     @SneakyThrows
-    protected GraphQlTester.Response postForResource(String resource, String token, boolean hasErrors) {
-        return postForResource(resource, token, hasErrors, emptyMap());
+    protected GraphQlTester.Response postForResource(String resource, String token) {
+        return postForResource(resource, token, emptyMap());
     }
 
     @SneakyThrows
-    protected GraphQlTester.Response postForResource(String resource, boolean hasErrors, Map<String, Object> vars) {
-        return postForResource(resource, createJwtForTest(true), hasErrors, vars);
+    protected GraphQlTester.Response postForResource(String resource, Map<String, Object> vars) {
+        return postForResource(resource, createJwtForTest(true), vars);
     }
 
     @SneakyThrows
-    protected GraphQlTester.Response postForResourceWithoutAzp(String resource, boolean hasErrors) {
-        return postForResource(resource, createJwtForTest(false), hasErrors, emptyMap());
+    protected GraphQlTester.Response postForResourceWithoutAzp(String resource) {
+        return postForResource(resource, createJwtForTest(false), emptyMap());
     }
 
     @BeforeEach

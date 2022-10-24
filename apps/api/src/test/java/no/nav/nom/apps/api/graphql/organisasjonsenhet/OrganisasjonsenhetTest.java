@@ -15,8 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -47,7 +45,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false)
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql")
                 .path("organisasjonsenhet")
                 .entity(OrgEnhet.class)
                 .get();
@@ -63,7 +61,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false)
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql")
                 .path("organisasjonsenheter")
                 .entityList(OrgEnhetResult.class)
                 .get();
@@ -84,7 +82,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql", false)
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql")
                 .path("organisasjonsenheter")
                 .entityList(OrgEnhetResult.class)
                 .get();
@@ -101,7 +99,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        final var outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql", false)
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql")
                 .path("organisasjonsenheter")
                 .entityList(OrgEnhetResult.class)
                 .get();
@@ -133,7 +131,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario2.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario2.graphql");
         assertEquals(5, response.path("organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
     }
 
@@ -146,7 +144,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2, mockEnhet3);
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario3.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -170,7 +168,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2);
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario33.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario33.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
@@ -193,7 +191,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario4.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
 
@@ -208,7 +206,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario32.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario32.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 //        final var ledere = response.path("organisasjonsenhet.leder").entity(new ParameterizedTypeReference<OrgEnhetsLeder>() {}).get();
@@ -228,7 +226,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var lederNavn = outputEnhetJson.get("leder")
@@ -250,7 +248,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         IRessurs ressurs = createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario41.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario41.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
@@ -275,7 +273,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario42.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario42.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();
@@ -291,7 +289,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
         final var lederNavn = outputEnhetJson.get("koblinger")

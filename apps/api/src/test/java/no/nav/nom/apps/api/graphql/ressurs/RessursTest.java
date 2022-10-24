@@ -4,19 +4,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.libs.test.RsaStub;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 
@@ -40,7 +41,7 @@ class RessursTest extends RessursTestBase {
     void scenario11() {
         IRessurs ressurs = createRessursHendelse("");
 
-        final var response = postForResource("ressurs/scenario1.graphql", false);
+        final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
@@ -53,21 +54,23 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("1");
         createRessursHendelse("2");
 
-        final var response = postForResource("ressurs/scenario12.graphql", false);
+        final var response = postForResource("ressurs/scenario12.graphql")
+                .path("ressurser")
+                .entityList(RessursResult.class)
+                .get();
 
-        final var outputRessurs = response.path("ressurser").entityList(RessursResult.class).get();
-        assertThat(outputRessurs).hasSize(4);
-        RessursResult navIdent = get(outputRessurs, "testNavIdent1");
+        assertThat(response).hasSize(4);
+        RessursResult navIdent = get(response, "testNavIdent1");
         assertEquals(navIdent.getId(), "testNavIdent1");
         assertEquals(navIdent.getCode(), ResultCode.OK);
-        RessursResult navIdentNotFound = get(outputRessurs, "notFoundNavIdent");
+        RessursResult navIdentNotFound = get(response, "notFoundNavIdent");
         assertEquals(navIdentNotFound.getId(), "notFoundNavIdent");
         assertEquals(navIdentNotFound.getCode(), ResultCode.NOT_FOUND);
 
-        RessursResult personIdent = get(outputRessurs, "testPersonIdent2");
+        RessursResult personIdent = get(response, "testPersonIdent2");
         assertEquals(personIdent.getId(), "testPersonIdent2");
         assertEquals(personIdent.getCode(), ResultCode.OK);
-        RessursResult personIdentNotFound = get(outputRessurs, "notFoundPersonIdent");
+        RessursResult personIdentNotFound = get(response, "notFoundPersonIdent");
         assertEquals(personIdentNotFound.getId(), "notFoundPersonIdent");
         assertEquals(personIdentNotFound.getCode(), ResultCode.NOT_FOUND);
     }
@@ -81,7 +84,7 @@ class RessursTest extends RessursTestBase {
     void scenario12() {
         IRessurs ressurs = createRessursHendelse("");
 
-        final var response = postForResource("ressurs/scenario2.graphql", false);
+        final var response = postForResource("ressurs/scenario2.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
@@ -89,14 +92,15 @@ class RessursTest extends RessursTestBase {
     }
 
     @Test
-    @DisplayName("Leser inn med graphql uten parameter")
+    @DisplayName("Leser inn med graphql uten parameter bulk")
     void scenario13() {
         createRessursHendelse("1");
         createRessursHendelse("2");
         createRessursHendelse("3");
 
 
-        final var response = postForResource("ressurs/scenario3.graphql", false);
+        final var response = postForResource("ressurs/scenario3.graphql");
+        // TODO assertNoError
 
         final var outputRessurs = response.path("ressurser").entityList(Ressurs.class).get();
         assertEquals(3, outputRessurs.size());
@@ -110,7 +114,8 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("ressurs/scenario42.graphql", false);
+        final var response = postForResource("ressurs/scenario42.graphql");
+        // TODO assertNoError
 
         final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
         final var actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
@@ -122,7 +127,8 @@ class RessursTest extends RessursTestBase {
     void scenario22() {
         createRessursHendelse("2");
 
-        final var response = postForResource("ressurs/scenario42.graphql", false);
+        final var response = postForResource("ressurs/scenario42.graphql");
+        // TODO assertNoError
 
         final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
         assertTrue(ressurs.get("koblinger").isEmpty());
@@ -134,7 +140,8 @@ class RessursTest extends RessursTestBase {
         IRessurs ressurs = createRessursHendelse("");
         final var sluttdato = LocalDate.parse("2020-12-31");
 
-        final var response = postForResource("ressurs/scenario1.graphql", false);
+        final var response = postForResource("ressurs/scenario1.graphql");
+        // TODO assertNoError
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
@@ -143,7 +150,7 @@ class RessursTest extends RessursTestBase {
     }
 
     @Nested
-    @WireMockStubs
+    @WireMockStubs(RsaStub.class)
     class Navn {
 
         @Test
@@ -154,7 +161,8 @@ class RessursTest extends RessursTestBase {
 
             pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
-            final var response = postForResource("ressurs/scenario5.graphql", false);
+            final var response = postForResource("ressurs/scenario5.graphql");
+            // TODO assertNoError
 
             final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
             assertEquals(2, ressurser.size());
@@ -171,7 +179,8 @@ class RessursTest extends RessursTestBase {
 
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
-            final var response = postForResource("ressurs/scenario5.graphql", false);
+            final var response = postForResource("ressurs/scenario5.graphql");
+            // TODO assertNoError
 
             final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
             assertEquals(2, ressurser.size());
@@ -189,7 +198,8 @@ class RessursTest extends RessursTestBase {
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
             stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
-            final var response = postForResource("ressurs/scenario5.graphql", true);
+            final var response = postForResource("ressurs/scenario5.graphql");
+            // TODO assertNoError
 
             response.errors().satisfy(errors -> assertEquals(2, errors.size()));
 
@@ -207,7 +217,8 @@ class RessursTest extends RessursTestBase {
             pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
             pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
 
-            final var response = postForResource("ressurs/scenario5.graphql", true);
+            final var response = postForResource("ressurs/scenario5.graphql");
+            // TODO assertHasError
 
             response.errors().satisfy(errors -> assertEquals(2, errors.size()));
 
@@ -224,7 +235,8 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("2");
         createRessursHendelse("3");
 
-        final var response = postForResource("ressurs/scenario8.graphql", true);
+        final var response = postForResource("ressurs/scenario8.graphql");
+        MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
 
         final var ressurser = response.path("ressurser")
                 .entityList(JsonNode.class)
@@ -255,7 +267,8 @@ class RessursTest extends RessursTestBase {
         );
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("ressurs/scenario6.graphql", false);
+        final var response = postForResource("ressurs/scenario6.graphql");
+        // TODO assertNoError
 
         final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
         assertThat(lederFor.size()).isEqualTo(1);
@@ -275,7 +288,8 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("ressurs/scenario7.graphql", false);
+        final var response = postForResource("ressurs/scenario7.graphql");
+        // TODO assertNoError
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);
@@ -297,7 +311,8 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("ressurs/scenario71.graphql", false);
+        final var response = postForResource("ressurs/scenario71.graphql");
+        // TODO assertNoError
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);
@@ -318,7 +333,7 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
         dvhRestConsumer.loadFromDvh();
-        final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql", true);
+        final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql");
 //        assertThat(res.isOk());
     }
 }

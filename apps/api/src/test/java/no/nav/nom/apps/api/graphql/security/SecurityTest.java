@@ -8,15 +8,15 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static java.util.Objects.requireNonNullElse;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisplayName("GraphQL.Sikkerhet")
 class SecurityTest extends SecurityTestBase {
@@ -104,8 +104,9 @@ class SecurityTest extends SecurityTestBase {
 
     @SneakyThrows
     private void postAndAssertResponse(String resource, String token, String path) {
-        var response = postForResource(resource, token, true);
+        var response = postForResource(resource, token);
 
+        assertThat(response, GraphQLMatchers.hasErrors());
         response.path(requireNonNullElse(path, "")).valueIsNull();
         //response.assertThatListOfErrors().hasSize(1);
     }

@@ -20,7 +20,7 @@ public class PersonTest extends GraphQLTestBase {
         IRessurs ressurs = createRessursHendelse("3");
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
 
-        final var response = postForResource("person/scenario1.graphql", false, singletonMap("fnr", "testPersonIdent3"));
+        final var response = postForResource("person/scenario1.graphql", singletonMap("fnr", "testPersonIdent3"));
 
         response.path("person").entity(JsonNode.class)
                 .satisfies(person -> assertThat(person.get("personIdent").textValue()).isEqualTo("testPersonIdent3"))
@@ -35,7 +35,7 @@ public class PersonTest extends GraphQLTestBase {
     void scenario2() {
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3");
 
-        final var response = postForResource("person/scenario1.graphql", false, singletonMap("fnr", "testPersonIdent3"));
+        final var response = postForResource("person/scenario1.graphql", singletonMap("fnr", "testPersonIdent3"));
 
         response.path("person").entity(JsonNode.class)
                 .satisfies(person -> assertThat(person.get("personIdent").textValue()).isEqualTo("testPersonIdent3"))

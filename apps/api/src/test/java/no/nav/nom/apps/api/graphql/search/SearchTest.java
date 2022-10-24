@@ -34,7 +34,7 @@ public class SearchTest extends GraphQLTestBase {
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
-        final var response = postForResource("search/scenario1.graphql", false);
+        final var response = postForResource("search/scenario1.graphql");
         final var searchResults = response.path("search").entityList(Ressurs.class).get();
 
         assertThat(searchResults, hasSize(2));
@@ -51,7 +51,7 @@ public class SearchTest extends GraphQLTestBase {
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
 
-        final var response = postForResource("search/scenario2.graphql", false);
+        final var response = postForResource("search/scenario2.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
@@ -69,7 +69,7 @@ public class SearchTest extends GraphQLTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("search/scenario3.graphql", false);
+        final var response = postForResource("search/scenario3.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
@@ -88,7 +88,7 @@ public class SearchTest extends GraphQLTestBase {
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadFromDvh();
 
-        final var response = postForResource("search/scenario4.graphql", false);
+        final var response = postForResource("search/scenario4.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
         final var resultTypes = StreamSupport
