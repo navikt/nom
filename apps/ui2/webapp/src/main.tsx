@@ -11,14 +11,14 @@ import { BrowserRouter } from "react-router-dom";
 import { apolloClient } from "./api/apolloclient";
 import type { SessionInterface } from "./api/getSession";
 import { getSession } from "./api/getSession";
-import Footer, { footerHeigth } from "./components/Footer";
+import { Footer, footerHeight } from "./components/Footer";
 import NavHeader, { headerHeight } from "./components/NavHeader";
-import PilotBanner from "./components/PilotBanner";
+import PilotBanner, { pilotBannerHeight } from "./components/PilotBanner";
 import AppRoutes from "./routes";
 
 const layoutStyle = css({
   backgroundColor: "var(--navds-global-color-gray-100)",
-  minHeight: `calc(100vh - ${headerHeight} - ${footerHeigth})`,
+  minHeight: `calc(100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight})`,
   width: "100%",
   display: "flex",
 });

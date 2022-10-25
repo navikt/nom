@@ -5,9 +5,11 @@ import { useState } from "react";
 
 import { InfoIcon } from "./Images";
 
+export const pilotBannerHeight = "50px";
+
 const outerDivStyles = css({
   width: "100%",
-  minHeight: "50px",
+  minHeight: pilotBannerHeight,
   backgroundColor: "var(--nom-secondary-hover)",
   borderBottom: "1px solid var(--navds-global-color-lightblue-800)",
   borderTop: "1px solid var(--navds-global-color-lightblue-800)",
@@ -41,7 +43,7 @@ const buttonDivStyles = css({
 });
 
 const PilotBanner = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className={outerDivStyles}>

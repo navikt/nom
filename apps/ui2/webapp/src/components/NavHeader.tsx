@@ -36,17 +36,6 @@ const innerDiv = css(
   mediaQueryContentWidth
 );
 
-// const titleStyle = css({
-//   fontFamily: 'Source Sans Pro',
-//   fontStyle: 'normal',
-//   fontWeight: '700',
-//   fontSize: '24px',
-//   lineHeight: '30px',
-//   color: NomColors.primaryColor,
-//   marginLeft: '1rem',
-//   marginRight: '4rem',
-// })
-
 const userText = css({
   fontFamily: "Source Sans Pro",
   fontStyle: "normal",

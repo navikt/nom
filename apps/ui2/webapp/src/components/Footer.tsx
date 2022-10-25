@@ -1,46 +1,48 @@
 import { css } from "@emotion/css";
+import { EmailFilled } from "@navikt/ds-icons";
 
 import { slackNom } from "./Images";
 
-export const footerHeigth = "9.5rem";
+export const footerHeight = "150px";
 
-const outerDiv = css({
-  width: "100%",
-  bottom: "0",
-  height: footerHeigth,
-  background: "var(--navds-global-color-lightblue-900)",
-});
-
-const innerDiv = css({
-  height: "100%",
-  width: "100%",
-  margin: "0 auto",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  color: "var(--navds-global-color-white)",
-  textAlign: "center",
-});
-
-const slackLink = css({
-  marginLeft: "3rem",
-});
-
-const Footer = () => {
+export function Footer() {
   return (
-    <div className={outerDiv}>
-      <div className={innerDiv}>
+    <div
+      className={css`
+        display: flex;
+        height: ${footerHeight};
+        background: var(--navds-global-color-lightblue-900);
+        color: var(--navds-global-color-white);
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+      `}
+    >
+      <a
+        href="https://nav-it.slack.com/archives/C0362LA7ZLN"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <img alt="nom slack" src={slackNom}></img>
+      </a>
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+          gap: var(--navds-spacing-2);
+        `}
+      >
+        <EmailFilled />
+        Spørsmål eller tilbakemeldinger? Send oss en{" "}
         <a
-          className={slackLink}
-          href="https://nav-it.slack.com/archives/C0362LA7ZLN"
-          rel="noopener noreferrer"
-          target="_blank"
+          className={css`
+            color: var(--navds-global-color-white);
+          `}
+          href="mailto:mugunthan.dharmadas@nav.no,linn.renate.fredriksen@nav.no"
         >
-          <img alt="nom slack" src={slackNom}></img>
+          e-post
         </a>
       </div>
     </div>
   );
-};
-
-export default Footer;
+}
