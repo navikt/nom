@@ -16,8 +16,6 @@ export type Scalars = {
   Int: number;
   Float: number;
   Date: any;
-  DateTime: any;
-  JSON: any;
 };
 
 export type FolkeregisterPerson = {
@@ -44,25 +42,7 @@ export type LederOrgEnhet = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  /**
-   * Ordre
-   *    removeRequestFromOrdre(ordreId: ID!, ordreLinjeId: ID!): ResultCode!
-   *    editOrdre(ordreId: ID!, metadata: EditOrdreRequest!): ResultCode!
-   */
-  godkjennOrdre: ResultCode;
-  /** OrdreLinje */
-  opprettEnhet: OrdreLinjeResponse;
   opprettRessurs?: Maybe<OpprettRessursResponse>;
-};
-
-
-export type MutationGodkjennOrdreArgs = {
-  ordreId: Scalars['ID'];
-};
-
-
-export type MutationOpprettEnhetArgs = {
-  request: OpprettEnhetRequest;
 };
 
 
@@ -75,12 +55,6 @@ export type Navn = {
   etternavn: Scalars['String'];
   fornavn: Scalars['String'];
   mellomnavn?: Maybe<Scalars['String']>;
-};
-
-export type OpprettEnhetRequest = {
-  agressoId?: InputMaybe<Scalars['String']>;
-  metadata: OrdreLinjeRequestMetadata;
-  navn: Scalars['String'];
 };
 
 /** Requests */
@@ -103,46 +77,6 @@ export type OpprettRessursResponse = {
   visningsetternavn: Scalars['String'];
   visningsfornavn: Scalars['String'];
 };
-
-export type Ordre = {
-  __typename?: 'Ordre';
-  beskrivelse?: Maybe<Scalars['String']>;
-  endretTidspunkt: Scalars['DateTime'];
-  ordreId: Scalars['ID'];
-  ordreLinjer: Array<OrdreLinje>;
-};
-
-export type OrdreLinje = {
-  __typename?: 'OrdreLinje';
-  /** define explicitly? */
-  data?: Maybe<Scalars['JSON']>;
-  metadata?: Maybe<OrdreLinjeMetadata>;
-  ordreId: Scalars['ID'];
-  ordreLinjeId: Scalars['ID'];
-  type?: Maybe<OrdreLinjeType>;
-};
-
-export type OrdreLinjeMetadata = {
-  __typename?: 'OrdreLinjeMetadata';
-  beskrivelse?: Maybe<Scalars['String']>;
-  ordreId: Scalars['ID'];
-};
-
-export type OrdreLinjeRequestMetadata = {
-  beskrivelse?: InputMaybe<Scalars['String']>;
-  /** Request set/Endringspakke, valgfri, bruk for å legge til eksisterende pakke */
-  ordreId?: InputMaybe<Scalars['ID']>;
-};
-
-export type OrdreLinjeResponse = {
-  __typename?: 'OrdreLinjeResponse';
-  ordreLinje: OrdreLinje;
-};
-
-export enum OrdreLinjeType {
-  OpprettEnhet = 'OPPRETT_ENHET',
-  OpprettRessurs = 'OPPRETT_RESSURS'
-}
 
 export type OrgEnhet = {
   __typename?: 'OrgEnhet';
@@ -227,8 +161,6 @@ export type PersonSearch = {
 
 export type Query = {
   __typename?: 'Query';
-  ordre?: Maybe<Ordre>;
-  ordreBulk: Array<Ordre>;
   orgEnhet?: Maybe<OrgEnhet>;
   orgEnheter: Array<OrgEnhetResult>;
   /** @deprecated Bruk orgEnhet query med samme parametre */
@@ -239,16 +171,6 @@ export type Query = {
   ressurs?: Maybe<Ressurs>;
   ressurser: Array<RessursResult>;
   search: Array<SearchResult>;
-};
-
-
-export type QueryOrdreArgs = {
-  ordreId: Scalars['ID'];
-};
-
-
-export type QueryOrdreBulkArgs = {
-  ordreId?: InputMaybe<Array<Scalars['ID']>>;
 };
 
 
@@ -573,23 +495,14 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   FolkeregisterPerson: ResolverTypeWrapper<FolkeregisterPerson>;
   ID: ResolverTypeWrapper<Scalars['ID']>;
-  JSON: ResolverTypeWrapper<Scalars['JSON']>;
   Kode: ResolverTypeWrapper<Kode>;
   LederOrgEnhet: ResolverTypeWrapper<LederOrgEnhet>;
   Mutation: ResolverTypeWrapper<{}>;
   Navn: ResolverTypeWrapper<Navn>;
-  OpprettEnhetRequest: OpprettEnhetRequest;
   OpprettRessursRequest: OpprettRessursRequest;
   OpprettRessursResponse: ResolverTypeWrapper<OpprettRessursResponse>;
-  Ordre: ResolverTypeWrapper<Ordre>;
-  OrdreLinje: ResolverTypeWrapper<OrdreLinje>;
-  OrdreLinjeMetadata: ResolverTypeWrapper<OrdreLinjeMetadata>;
-  OrdreLinjeRequestMetadata: OrdreLinjeRequestMetadata;
-  OrdreLinjeResponse: ResolverTypeWrapper<OrdreLinjeResponse>;
-  OrdreLinjeType: OrdreLinjeType;
   OrgEnhet: ResolverTypeWrapper<OrgEnhet>;
   OrgEnhetResult: ResolverTypeWrapper<OrgEnhetResult>;
   OrgEnhetSearch: OrgEnhetSearch;
@@ -619,22 +532,14 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   Date: Scalars['Date'];
-  DateTime: Scalars['DateTime'];
   FolkeregisterPerson: FolkeregisterPerson;
   ID: Scalars['ID'];
-  JSON: Scalars['JSON'];
   Kode: Kode;
   LederOrgEnhet: LederOrgEnhet;
   Mutation: {};
   Navn: Navn;
-  OpprettEnhetRequest: OpprettEnhetRequest;
   OpprettRessursRequest: OpprettRessursRequest;
   OpprettRessursResponse: OpprettRessursResponse;
-  Ordre: Ordre;
-  OrdreLinje: OrdreLinje;
-  OrdreLinjeMetadata: OrdreLinjeMetadata;
-  OrdreLinjeRequestMetadata: OrdreLinjeRequestMetadata;
-  OrdreLinjeResponse: OrdreLinjeResponse;
   OrgEnhet: OrgEnhet;
   OrgEnhetResult: OrgEnhetResult;
   OrgEnhetSearch: OrgEnhetSearch;
@@ -660,18 +565,10 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Date';
 }
 
-export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
-  name: 'DateTime';
-}
-
 export type FolkeregisterPersonResolvers<ContextType = any, ParentType extends ResolversParentTypes['FolkeregisterPerson'] = ResolversParentTypes['FolkeregisterPerson']> = {
   navn?: Resolver<ResolversTypes['Navn'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
-
-export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
-  name: 'JSON';
-}
 
 export type KodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Kode'] = ResolversParentTypes['Kode']> = {
   gyldigFom?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
@@ -690,8 +587,6 @@ export type LederOrgEnhetResolvers<ContextType = any, ParentType extends Resolve
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  godkjennOrdre?: Resolver<ResolversTypes['ResultCode'], ParentType, ContextType, RequireFields<MutationGodkjennOrdreArgs, 'ordreId'>>;
-  opprettEnhet?: Resolver<ResolversTypes['OrdreLinjeResponse'], ParentType, ContextType, RequireFields<MutationOpprettEnhetArgs, 'request'>>;
   opprettRessurs?: Resolver<Maybe<ResolversTypes['OpprettRessursResponse']>, ParentType, ContextType, RequireFields<MutationOpprettRessursArgs, 'request'>>;
 };
 
@@ -708,34 +603,6 @@ export type OpprettRessursResponseResolvers<ContextType = any, ParentType extend
   sektor?: Resolver<ResolversTypes['Sektor'], ParentType, ContextType>;
   visningsetternavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   visningsfornavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type OrdreResolvers<ContextType = any, ParentType extends ResolversParentTypes['Ordre'] = ResolversParentTypes['Ordre']> = {
-  beskrivelse?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  endretTidspunkt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  ordreId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  ordreLinjer?: Resolver<Array<ResolversTypes['OrdreLinje']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type OrdreLinjeResolvers<ContextType = any, ParentType extends ResolversParentTypes['OrdreLinje'] = ResolversParentTypes['OrdreLinje']> = {
-  data?: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
-  metadata?: Resolver<Maybe<ResolversTypes['OrdreLinjeMetadata']>, ParentType, ContextType>;
-  ordreId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  ordreLinjeId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  type?: Resolver<Maybe<ResolversTypes['OrdreLinjeType']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type OrdreLinjeMetadataResolvers<ContextType = any, ParentType extends ResolversParentTypes['OrdreLinjeMetadata'] = ResolversParentTypes['OrdreLinjeMetadata']> = {
-  beskrivelse?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  ordreId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type OrdreLinjeResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['OrdreLinjeResponse'] = ResolversParentTypes['OrdreLinjeResponse']> = {
-  ordreLinje?: Resolver<ResolversTypes['OrdreLinje'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -795,8 +662,6 @@ export type PersonResultResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  ordre?: Resolver<Maybe<ResolversTypes['Ordre']>, ParentType, ContextType, RequireFields<QueryOrdreArgs, 'ordreId'>>;
-  ordreBulk?: Resolver<Array<ResolversTypes['Ordre']>, ParentType, ContextType, Partial<QueryOrdreBulkArgs>>;
   orgEnhet?: Resolver<Maybe<ResolversTypes['OrgEnhet']>, ParentType, ContextType, Partial<QueryOrgEnhetArgs>>;
   orgEnheter?: Resolver<Array<ResolversTypes['OrgEnhetResult']>, ParentType, ContextType, Partial<QueryOrgEnheterArgs>>;
   organisasjonsenhet?: Resolver<Maybe<ResolversTypes['OrgEnhet']>, ParentType, ContextType, Partial<QueryOrganisasjonsenhetArgs>>;
@@ -865,18 +730,12 @@ export type TelefonResolvers<ContextType = any, ParentType extends ResolversPare
 
 export type Resolvers<ContextType = any> = {
   Date?: GraphQLScalarType;
-  DateTime?: GraphQLScalarType;
   FolkeregisterPerson?: FolkeregisterPersonResolvers<ContextType>;
-  JSON?: GraphQLScalarType;
   Kode?: KodeResolvers<ContextType>;
   LederOrgEnhet?: LederOrgEnhetResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Navn?: NavnResolvers<ContextType>;
   OpprettRessursResponse?: OpprettRessursResponseResolvers<ContextType>;
-  Ordre?: OrdreResolvers<ContextType>;
-  OrdreLinje?: OrdreLinjeResolvers<ContextType>;
-  OrdreLinjeMetadata?: OrdreLinjeMetadataResolvers<ContextType>;
-  OrdreLinjeResponse?: OrdreLinjeResponseResolvers<ContextType>;
   OrgEnhet?: OrgEnhetResolvers<ContextType>;
   OrgEnhetResult?: OrgEnhetResultResolvers<ContextType>;
   OrgEnhetsKobling?: OrgEnhetsKoblingResolvers<ContextType>;

@@ -7,9 +7,11 @@ import {
   Radio,
   RadioGroup,
   TextField,
+  UNSAFE_DatePicker,
+  UNSAFE_useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
 
 import type { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
@@ -90,13 +92,6 @@ export const SektorNameMapping = {
   [Sektor.NavStatlig]: "Statlig",
 };
 
-export type OpprettRessursFormTypes = {
-  fornavn: string;
-  mellomnavn?: string;
-  etternavn: string;
-  sektor: Sektor;
-};
-
 function CreateResourceFormInner({
   personResult,
   personIdent,
@@ -108,15 +103,22 @@ function CreateResourceFormInner({
   const {
     register,
     handleSubmit,
+    control,
     watch,
     formState: { errors },
-  } = useForm<OpprettRessursFormTypes>({
+  } = useForm({
     defaultValues: {
-      fornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
-      mellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
-      etternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
+      personident: personIdent,
+      visningsfornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
+      visningsmellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
+      visningsetternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
       sektor: Sektor.NavStatlig,
+      startDato: new Date(),
     },
+  });
+
+  const { datepickerProps, inputProps } = UNSAFE_useDatepicker({
+    defaultSelected: watch("startDato"),
   });
 
   const [opprettRessursMutation, { loading, error }] =
@@ -128,19 +130,6 @@ function CreateResourceFormInner({
             replace: true,
           }
         );
-      },
-    });
-
-  const handleOpprettRessurs = (submittedValues: OpprettRessursFormTypes) =>
-    opprettRessursMutation({
-      variables: {
-        request: {
-          personident: personIdent,
-          visningsfornavn: submittedValues.fornavn,
-          visningsmellomnavn: submittedValues.mellomnavn,
-          visningsetternavn: submittedValues.etternavn,
-          sektor: submittedValues.sektor as Sektor,
-        },
       },
     });
 
@@ -168,24 +157,24 @@ function CreateResourceFormInner({
         <div className={rowStyles}>
           <TextField
             autoComplete="off"
-            error={errors.fornavn?.message}
+            error={errors.visningsfornavn?.message}
             label="Fornavn"
             type="text"
-            {...register("fornavn", { required: "Må oppgis" })}
+            {...register("visningsfornavn", { required: "Må oppgis" })}
           />
           <TextField
             autoComplete="off"
-            error={errors.mellomnavn?.message}
+            error={errors.visningsmellomnavn?.message}
             label="Mellomnavn"
             type="text"
-            {...register("mellomnavn")}
+            {...register("visningsmellomnavn")}
           />
           <TextField
             autoComplete="off"
-            error={errors.etternavn?.message}
+            error={errors.visningsetternavn?.message}
             label="Etternavn"
             type="text"
-            {...register("etternavn", { required: "Må oppgis" })}
+            {...register("visningsetternavn", { required: "Må oppgis" })}
           />
         </div>
 
@@ -201,11 +190,37 @@ function CreateResourceFormInner({
           </Radio>
         </RadioGroup>
 
+        <Controller
+          control={control}
+          name="startDato"
+          render={({ field: { onChange } }) => (
+            <UNSAFE_DatePicker {...datepickerProps} onSelect={onChange}>
+              <UNSAFE_DatePicker.Input
+                {...inputProps}
+                label="Første arbeidsdag"
+              />
+            </UNSAFE_DatePicker>
+          )}
+        />
+
         <div className={rowStyles}>
           <CreateResourceConfirmationModal
             formValues={watch()}
             loading={loading}
-            onConfirm={() => handleSubmit(handleOpprettRessurs)()}
+            onConfirm={() =>
+              handleSubmit((submittedValues) => {
+                opprettRessursMutation({
+                  variables: {
+                    request: {
+                      ...submittedValues,
+                      startDato: submittedValues.startDato
+                        .toISOString()
+                        .slice(0, 10),
+                    },
+                  },
+                });
+              })()
+            }
           />
           <Button
             onClick={() => navigate("/ressurs/create", { replace: true })}

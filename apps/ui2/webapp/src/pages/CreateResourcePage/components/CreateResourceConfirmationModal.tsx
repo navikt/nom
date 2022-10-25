@@ -2,7 +2,7 @@ import { css } from "@emotion/css";
 import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
 import { useState } from "react";
 
-import type { OpprettRessursFormTypes } from "./CreateResourceForm";
+import type { OpprettRessursRequest } from "../../../api/generated/graphql_generated";
 import { SektorNameMapping } from "./CreateResourceForm";
 
 export function CreateResourceConfirmationModal({
@@ -10,14 +10,20 @@ export function CreateResourceConfirmationModal({
   onConfirm,
   loading,
 }: {
-  formValues: OpprettRessursFormTypes;
+  formValues: OpprettRessursRequest;
   onConfirm: () => void;
   loading: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
-  const { fornavn, etternavn, mellomnavn, sektor } = formValues;
+  const {
+    visningsfornavn,
+    visningsetternavn,
+    visningsmellomnavn,
+    sektor,
+    startDato,
+  } = formValues;
 
-  const formattedName = [fornavn, mellomnavn, etternavn]
+  const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
     .filter((navn) => !!navn)
     .join(" ");
 
@@ -43,7 +49,7 @@ export function CreateResourceConfirmationModal({
             className={css`
               margin: var(--navds-spacing-7) 0;
               display: grid;
-              grid-template-columns: min-content 1fr;
+              grid-template-columns: max-content 1fr;
               column-gap: var(--navds-spacing-4);
               row-gap: var(--navds-spacing-2);
             `}
@@ -52,6 +58,8 @@ export function CreateResourceConfirmationModal({
             <b>{formattedName}</b>
             <span>Sektor:</span>
             <b>{SektorNameMapping[sektor]}</b>
+            <span>Første arbeidsdag:</span>
+            <b>{startDato.toLocaleDateString()}</b>
           </div>
           <Alert variant="warning">
             Du kan ikke endre opplysningene etter at ressursen er opprettet
