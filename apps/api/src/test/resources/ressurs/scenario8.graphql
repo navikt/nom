@@ -1,5 +1,5 @@
 query {
-    ressurser {
+    ressurser(where: {}) {
         id
         ressurs {
             personIdent

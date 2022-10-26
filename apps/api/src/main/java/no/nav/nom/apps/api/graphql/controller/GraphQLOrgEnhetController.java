@@ -64,14 +64,14 @@ public class GraphQLOrgEnhetController {
 
     @Deprecated(forRemoval = true)
     @QueryMapping("organisasjonsenheter")
-    public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") Optional<OrgEnheterSearch> orgEnheterSearch, DataFetchingEnvironment environment) {
+    public List<OrgEnhetResult> organisasjonsenheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
         return orgEnheter(orgEnheterSearch, environment);
     }
 
     @QueryMapping("orgEnheter")
-    public List<OrgEnhetResult> orgEnheter(@Argument("where") Optional<OrgEnheterSearch> orgEnheterSearch, DataFetchingEnvironment environment) {
+    public List<OrgEnhetResult> orgEnheter(@Argument("where") OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return orgEnhetResolver.orgEnheter(orgEnheterSearch.orElse(EMPTY_SEARCH));
+        return orgEnhetResolver.orgEnheter(orgEnheterSearch);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "organiseringer")

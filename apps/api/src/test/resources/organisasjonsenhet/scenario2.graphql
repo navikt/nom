@@ -1,5 +1,5 @@
 query {
-    organisasjonsenheter {
+    organisasjonsenheter(where: {}) {
         id
         code
     }

@@ -81,9 +81,9 @@ public class GraphQLRessursController {
 
     @PreAuthorize("@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)")
     @QueryMapping("ressurser")
-    public List<RessursResult> ressurser(@Argument("where") Optional<RessurserSearch> search, DataFetchingEnvironment dataFetchingEnvironment) {
+    public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
-        return ressursResolver.ressurser(search.orElse(EMPTY_SEARCH));
+        return ressursResolver.ressurser(search);
     }
 
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)")

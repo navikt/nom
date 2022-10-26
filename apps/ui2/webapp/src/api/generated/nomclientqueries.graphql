@@ -106,7 +106,7 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
 }
 
 query HentAlleRessurser {
-  ressurser {
+  ressurser(where: {}) {
     ressurs {
       navIdent
     }
@@ -155,7 +155,7 @@ query HentRessursMedNavIdent($navIdent: String) {
 }
 
 query HentAlleOrganisasjonsenheter {
-  organisasjonsenheter {
+  organisasjonsenheter(where: {}) {
     id
     orgNiv
     organisasjonsenhet {
