@@ -39,7 +39,7 @@ export default function CreateResourceForm() {
   const personIdent = decode(personIdentInBase64 ?? "");
 
   const hentPersonQuery = useHentPersonQuery({
-    variables: { personIdent: personIdent ?? "" },
+    variables: { personident: personIdent ?? "" },
     errorPolicy: "all",
   });
 
