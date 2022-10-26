@@ -22,15 +22,6 @@ app:
           client-id: ${GRAPHQL_PREAUTH_MUTATION_RESSURS:NO_ONE}
           scopes: MUTATE_RESSURS
 
-nom:
-  libs:
-    utils:
-      common:
-        kafka:
-          load-properties: false
-        app:
-          load-properties: true
-
 authentication:
   aad:
     issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
@@ -39,13 +30,15 @@ authentication:
   groups:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
 
-
-# Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
-management.endpoints.web.exposure.include: health,prometheus
+server:
+  shutdown: graceful
 
 spring:
+  application:
+    name: "nom-api"
   main:
-    allow-bean-definition-overriding: true
+    banner-mode: off
+    cloud-platform: kubernetes
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
     username: ${DATABASE_USERNAME}
@@ -67,5 +60,22 @@ spring:
     schema:
       printer:
         enabled: true #
-      introspection:
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus,health
+  endpoint:
+    health:
+      show-details: always
+      probes:
         enabled: true
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api
