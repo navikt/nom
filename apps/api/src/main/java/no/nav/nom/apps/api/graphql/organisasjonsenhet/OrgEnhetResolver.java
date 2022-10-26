@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+
 @Component
 public class OrgEnhetResolver {
 
@@ -33,23 +35,23 @@ public class OrgEnhetResolver {
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch search) {
         Stream<IOrgenhet> result;
         final var agressoIder = search.resolveAgressoIder();
-        final var orgNiv = search.getOrgNiv();
         if (agressoIder.isEmpty()) {
             result = orgenhetService.getAllEnheter().stream();
         } else {
             result = orgenhetService.findEnheterByAgressoIdIn(agressoIder).stream();
         }
 
+        final var orgNiv = search.getOrgNiv();
         final var orgEnhetResults = result
                 .filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
                 .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
                 .map(OrgEnhetResolver::convertToOrgEnhet)
-                .map(OrgEnhetResult::new);
+                .map(OrgEnhetResult::new)
+                .collect(toList());
 
-        return Stream.concat(
-                orgEnhetResults,
-                agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv))
-        ).toList();
+        orgEnhetResults.addAll(agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv)).toList());
+
+        return orgEnhetResults;
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
