@@ -329,12 +329,12 @@ export type HentAlleRessurserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HentAlleRessurserQuery = { __typename?: 'Query', ressurser: Array<{ __typename?: 'RessursResult', ressurs?: { __typename?: 'Ressurs', navident: string } | null }> };
 
-export type HentRessursMednavidentQueryVariables = Exact<{
+export type HentRessursMedNavidentQueryVariables = Exact<{
   navident?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type HentRessursMednavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, personident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, personident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, personident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, personident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1039,8 +1039,8 @@ export function useHentAlleRessurserLazyQuery(baseOptions?: Apollo.LazyQueryHook
 export type HentAlleRessurserQueryHookResult = ReturnType<typeof useHentAlleRessurserQuery>;
 export type HentAlleRessurserLazyQueryHookResult = ReturnType<typeof useHentAlleRessurserLazyQuery>;
 export type HentAlleRessurserQueryResult = Apollo.QueryResult<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>;
-export const HentRessursMednavidentDocument = gql`
-    query HentRessursMednavident($navident: String) {
+export const HentRessursMedNavidentDocument = gql`
+    query HentRessursMedNavident($navident: String) {
   ressurs(where: {navident: $navident}) {
     navident
     personident
@@ -1083,32 +1083,32 @@ export const HentRessursMednavidentDocument = gql`
     `;
 
 /**
- * __useHentRessursMednavidentQuery__
+ * __useHentRessursMedNavidentQuery__
  *
- * To run a query within a React component, call `useHentRessursMednavidentQuery` and pass it any options that fit your needs.
- * When your component renders, `useHentRessursMednavidentQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useHentRessursMedNavidentQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHentRessursMedNavidentQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useHentRessursMednavidentQuery({
+ * const { data, loading, error } = useHentRessursMedNavidentQuery({
  *   variables: {
  *      navident: // value for 'navident'
  *   },
  * });
  */
-export function useHentRessursMednavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentRessursMednavidentQuery, HentRessursMednavidentQueryVariables>) {
+export function useHentRessursMedNavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentRessursMednavidentQuery, HentRessursMednavidentQueryVariables>(HentRessursMednavidentDocument, options);
+        return Apollo.useQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
       }
-export function useHentRessursMednavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentRessursMednavidentQuery, HentRessursMednavidentQueryVariables>) {
+export function useHentRessursMedNavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentRessursMednavidentQuery, HentRessursMednavidentQueryVariables>(HentRessursMednavidentDocument, options);
+          return Apollo.useLazyQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
         }
-export type HentRessursMednavidentQueryHookResult = ReturnType<typeof useHentRessursMednavidentQuery>;
-export type HentRessursMednavidentLazyQueryHookResult = ReturnType<typeof useHentRessursMednavidentLazyQuery>;
-export type HentRessursMednavidentQueryResult = Apollo.QueryResult<HentRessursMednavidentQuery, HentRessursMednavidentQueryVariables>;
+export type HentRessursMedNavidentQueryHookResult = ReturnType<typeof useHentRessursMedNavidentQuery>;
+export type HentRessursMedNavidentLazyQueryHookResult = ReturnType<typeof useHentRessursMedNavidentLazyQuery>;
+export type HentRessursMedNavidentQueryResult = Apollo.QueryResult<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>;
 export const HentAlleOrganisasjonsenheterDocument = gql`
     query HentAlleOrganisasjonsenheter {
   organisasjonsenheter(where: {}) {

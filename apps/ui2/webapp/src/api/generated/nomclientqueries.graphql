@@ -113,7 +113,7 @@ query HentAlleRessurser {
   }
 }
 
-query HentRessursMednavident($navident: String) {
+query HentRessursMedNavident($navident: String) {
   ressurs(where: { navident: $navident }) {
     navident
     personident

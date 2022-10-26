@@ -18,7 +18,7 @@ const ResourceView = () => {
   const { id } = useParams();
   const { state } = useLocation();
   const query = Gq.useHentRessursMedNavIdentQuery({
-    variables: { navIdent: id },
+    variables: { navident: id },
   });
   return (
     <div>
