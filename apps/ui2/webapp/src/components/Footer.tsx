@@ -39,7 +39,7 @@ export function Footer() {
             className={css`
               color: var(--navds-global-color-white);
             `}
-            href="mailto:mugunthan.dharmadas@nav.no,linn.renate.fredriksen@nav.no"
+            href="mailto:mugunthan.dharmadas@nav.no;linn.renate.fredriksen@nav.no"
           >
             e-post
           </a>
