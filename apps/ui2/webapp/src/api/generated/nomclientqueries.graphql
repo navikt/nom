@@ -74,8 +74,8 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
     }
     leder {
       ressurs {
-        navIdent
-        personIdent
+        navident
+        personident
         person {
           navn {
             fornavn
@@ -87,8 +87,8 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
     }
     koblinger {
       ressurs {
-        navIdent
-        personIdent
+        navident
+        personident
         person {
           navn {
             fornavn
@@ -108,22 +108,22 @@ query hentOrganiasjonsEnheterMedHierarki($aid: String, $oniv: String) {
 query HentAlleRessurser {
   ressurser(where: {}) {
     ressurs {
-      navIdent
+      navident
     }
   }
 }
 
-query HentRessursMedNavIdent($navIdent: String) {
-  ressurs(where: { navIdent: $navIdent }) {
-    navIdent
-    personIdent
+query HentRessursMednavident($navident: String) {
+  ressurs(where: { navident: $navident }) {
+    navident
+    personident
     fornavn
     etternavn
     epost
     visningsNavn
     ledere {
       ressurs {
-        navIdent
+        navident
         visningsNavn
         fornavn
         etternavn
@@ -143,8 +143,8 @@ query HentRessursMedNavIdent($navIdent: String) {
         orgNiv
         leder {
           ressurs {
-            navIdent
-            personIdent
+            navident
+            personident
             fornavn
             etternavn
           }
@@ -164,8 +164,8 @@ query HentAlleOrganisasjonsenheter {
       navn
       leder {
         ressurs {
-          navIdent
-          personIdent
+          navident
+          personident
         }
       }
     }
@@ -173,10 +173,10 @@ query HentAlleOrganisasjonsenheter {
   }
 }
 
-query hentPerson($personIdent: String!) {
-  person(where: { personIdent: $personIdent }) {
-    navIdent
-    personIdent
+query hentPerson($personident: String!) {
+  person(where: { personident: $personident }) {
+    navident
+    personident
     person {
       navn {
         fornavn
@@ -190,8 +190,8 @@ query hentPerson($personIdent: String!) {
 query searchRessurs($term: String!) {
   search(term: $term) {
     ... on Ressurs {
-      navIdent
-      visningsNavn
+      navident
+      visningsnavn
     }
   }
 }
@@ -220,8 +220,8 @@ query HentOrganisasjonsenhetOgOrganisering(
     }
     leder {
       ressurs {
-        navIdent
-        personIdent
+        navident
+        personident
       }
     }
   }
@@ -239,7 +239,7 @@ query HentOrganisasjonsenhetMedOverenhet(
         orgNiv
         leder {
           ressurs {
-            navIdent
+            navident
           }
         }
       }
@@ -260,7 +260,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
         orgNiv
         leder {
           ressurs {
-            navIdent
+            navident
             visningsNavn
             fornavn
             etternavn
@@ -283,7 +283,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
         orgNiv
         leder {
           ressurs {
-            navIdent
+            navident
             visningsNavn
             fornavn
             etternavn
@@ -296,7 +296,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
             orgNiv
             leder {
               ressurs {
-                navIdent
+                navident
                 visningsNavn
                 fornavn
                 etternavn
@@ -309,7 +309,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
                 orgNiv
                 leder {
                   ressurs {
-                    navIdent
+                    navident
                     visningsNavn
                     fornavn
                     etternavn
@@ -322,7 +322,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
                     orgNiv
                     leder {
                       ressurs {
-                        navIdent
+                        navident
                         visningsNavn
                         fornavn
                         etternavn
@@ -335,7 +335,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
                         orgNiv
                         leder {
                           ressurs {
-                            navIdent
+                            navident
                             visningsNavn
                             fornavn
                             etternavn
@@ -348,7 +348,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
                             orgNiv
                             leder {
                               ressurs {
-                                navIdent
+                                navident
                                 visningsNavn
                                 fornavn
                                 etternavn
@@ -373,7 +373,7 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
     gyldigTom
     leder {
       ressurs {
-        navIdent
+        navident
         visningsNavn
         fornavn
         etternavn
@@ -388,8 +388,8 @@ query HentOrganisasjonsEnheterHierarki($agressoId: String!, $orgNiv: String!) {
     }
     koblinger {
       ressurs {
-        navIdent
-        personIdent
+        navident
+        personident
         visningsNavn
         fornavn
         etternavn
@@ -555,12 +555,12 @@ query HentHierarki($agressoId: String!, $orgNiv: String!) {
   }
 }
 
-query HentLederForNavident($navident: String) {
-  ressurs(where: { navIdent: $navident }) {
-    navIdent
+query HentLederFornavident($navident: String) {
+  ressurs(where: { navident: $navident }) {
+    navident
     ledere {
       ressurs {
-        navIdent
+        navident
         visningsNavn
         fornavn
         etternavn
