@@ -80,8 +80,8 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
         >
           <SuccessFilled
             className={css`
-              height: var(--navds-spacing-6);
-              width: var(--navds-spacing-6);
+              height: 28px;
+              width: 28px;
               color: var(--navds-global-color-lightblue-700);
             `}
           />
@@ -153,17 +153,21 @@ function RemedyLink() {
 
 function CircleWithNumber({ children }: { children: ReactNode }) {
   return (
-    <span
+    <div
       className={css`
-        border: 1px solid black;
+        border: 2px solid var(--nom-primary);
+        color: var(--nom-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
-        height: var(--navds-spacing-6);
-        width: var(--navds-spacing-6);
+        height: 30px;
+        width: 30px;
         text-align: center;
         padding-left: 1px;
       `}
     >
       {children}
-    </span>
+    </div>
   );
 }

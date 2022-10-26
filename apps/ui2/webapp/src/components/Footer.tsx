@@ -33,15 +33,17 @@ export function Footer() {
         `}
       >
         <EmailFilled />
-        Spørsmål eller tilbakemeldinger? Send oss en{" "}
-        <a
-          className={css`
-            color: var(--navds-global-color-white);
-          `}
-          href="mailto:mugunthan.dharmadas@nav.no,linn.renate.fredriksen@nav.no"
-        >
-          e-post
-        </a>
+        <div>
+          Spørsmål eller tilbakemeldinger? Send oss en{" "}
+          <a
+            className={css`
+              color: var(--navds-global-color-white);
+            `}
+            href="mailto:mugunthan.dharmadas@nav.no,linn.renate.fredriksen@nav.no"
+          >
+            e-post
+          </a>
+        </div>
       </div>
     </div>
   );
