@@ -1,7 +1,8 @@
 import session from 'express-session';
 import { v4 as uuidv4 } from 'uuid'
 
-const SESSION_MAX_AGE_MILLISECONDS = 60 * 60 * 1000;
+// A valid session last 24 hours
+const SESSION_MAX_AGE_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 const setup = (app) => {
     app.set('trust proxy', 1);
