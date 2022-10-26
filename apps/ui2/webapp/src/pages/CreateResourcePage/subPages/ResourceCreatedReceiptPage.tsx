@@ -21,7 +21,7 @@ export function ResourceCreatedReceiptPage() {
   const { navIdent } = useParams();
 
   const hentRessursQuery = useHentRessursMedNavidentQuery({
-    variables: { navIdent },
+    variables: { navident: navIdent },
   });
 
   if (hentRessursQuery.loading) {
