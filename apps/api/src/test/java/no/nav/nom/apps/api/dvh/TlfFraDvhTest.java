@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
 import lombok.val;
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -67,8 +66,8 @@ public class TlfFraDvhTest extends DvhTestBase {
     }
 
 
-    @Language("json")
-    private static final String resourceInitDvhPayload = """
+    private static final String resourceInitDvhPayload = // language=json
+            """
             {
                   "NOM_ANSATTE_BUCKETS_v1Result": [
                     {
@@ -155,8 +154,8 @@ public class TlfFraDvhTest extends DvhTestBase {
                 }
                 """;
 
-    @Language("JSON")
-    private static final String tlfDvhPayload = """
+    private static final String tlfDvhPayload = // language=json
+            """
             {
               "NOM_TLF_v1Result": [
                 {
