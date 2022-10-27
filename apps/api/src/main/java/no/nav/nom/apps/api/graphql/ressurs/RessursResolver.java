@@ -89,7 +89,6 @@ public class RessursResolver {
 
 
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(OpprettRessursRequest request, DataFetchingEnvironment env, JwtAuthenticationToken token) {
-        // TODO: Check secured/preauth against mutation-required role
         final var response = DataFetcherResult.<OpprettRessursResponse>newResult();
 
         var ressurs = ressursService.findByPersonIdent(request.getPersonident());

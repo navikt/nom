@@ -100,7 +100,6 @@ class RessursTest extends RessursTestBase {
 
 
         final var response = postForResource("ressurs/scenario3.graphql");
-        // TODO assertNoError
 
         final var outputRessurs = response.path("ressurser").entityList(Ressurs.class).get();
         assertEquals(3, outputRessurs.size());
@@ -115,7 +114,6 @@ class RessursTest extends RessursTestBase {
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("ressurs/scenario42.graphql");
-        // TODO assertNoError
 
         final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
         final var actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
@@ -128,7 +126,6 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("2");
 
         final var response = postForResource("ressurs/scenario42.graphql");
-        // TODO assertNoError
 
         final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
         assertTrue(ressurs.get("koblinger").isEmpty());
@@ -141,7 +138,6 @@ class RessursTest extends RessursTestBase {
         final var sluttdato = LocalDate.parse("2020-12-31");
 
         final var response = postForResource("ressurs/scenario1.graphql");
-        // TODO assertNoError
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
         assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
@@ -162,7 +158,6 @@ class RessursTest extends RessursTestBase {
             pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
             final var response = postForResource("ressurs/scenario5.graphql");
-            // TODO assertNoError
 
             final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
             assertEquals(2, ressurser.size());
@@ -180,7 +175,6 @@ class RessursTest extends RessursTestBase {
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
             final var response = postForResource("ressurs/scenario5.graphql");
-            // TODO assertNoError
 
             final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
             assertEquals(2, ressurser.size());
@@ -199,7 +193,6 @@ class RessursTest extends RessursTestBase {
             stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
             final var response = postForResource("ressurs/scenario5.graphql");
-            // TODO assertNoError
 
             response.errors().satisfy(errors -> assertEquals(2, errors.size()));
 
@@ -218,7 +211,6 @@ class RessursTest extends RessursTestBase {
             pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
 
             final var response = postForResource("ressurs/scenario5.graphql");
-            // TODO assertHasError
 
             response.errors().satisfy(errors -> assertEquals(2, errors.size()));
 
@@ -268,7 +260,6 @@ class RessursTest extends RessursTestBase {
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("ressurs/scenario6.graphql");
-        // TODO assertNoError
 
         final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
         assertThat(lederFor.size()).isEqualTo(1);
@@ -289,7 +280,6 @@ class RessursTest extends RessursTestBase {
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("ressurs/scenario7.graphql");
-        // TODO assertNoError
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);
@@ -312,7 +302,6 @@ class RessursTest extends RessursTestBase {
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("ressurs/scenario71.graphql");
-        // TODO assertNoError
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);

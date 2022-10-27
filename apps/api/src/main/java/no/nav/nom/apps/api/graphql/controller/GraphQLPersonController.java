@@ -39,7 +39,6 @@ public class GraphQLPersonController {
 
     @QueryMapping("person")
     public Optional<PersonResult> person(@Argument("where") PersonSearch personSearch, DataFetchingEnvironment environment) {
-        // TODO: Add security check for preauth?
         graphQLFieldConsumptionCounter.count(environment);
         return personSearch.resolveIdent().flatMap(personResolver::person);
     }
@@ -50,7 +49,6 @@ public class GraphQLPersonController {
         return folkeregisterPerson(person);
     }
 
-    // TODO: Consider changing to BatchMapping to avoid having to figure out how to create a new BatchLoaderEnvironment
     @SchemaMapping(typeName = "PersonResult", field = "folkeregisterPerson")
     public Mono<DataFetcherResult<FolkeregisterPerson>> folkeregisterPerson(PersonResult person) {
         return folkeregisterPersonResolver.folkeregisterPerson(person, PersonResult::getPersonIdent);

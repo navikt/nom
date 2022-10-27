@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
-    // TODO: Wait for answer on https://github.com/spring-projects/spring-graphql/issues/506
-    //  - Fix failing tests on orgenheter, issue with using an optional, secondary failure is a ConcurrentModificationException
+    // TODO: Wait for answer on https://github.com/spring-projects/spring-graphql/issues/506 to add support for optional arguments using ProjectedPayload
 
     @Autowired
     private ObjectMapper objectMapper;
