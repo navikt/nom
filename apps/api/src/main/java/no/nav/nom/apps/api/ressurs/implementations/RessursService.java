@@ -127,6 +127,7 @@ public class RessursService implements IRessursService {
     }
 
     @Override
+    @Transactional
     public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
         return opprettRessurs(personerident, (JsonNode) objectMapper.valueToTree(data), metadata);
     }

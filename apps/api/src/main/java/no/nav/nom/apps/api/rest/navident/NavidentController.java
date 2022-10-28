@@ -6,9 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
@@ -17,71 +15,101 @@ import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
+
+import static java.util.Map.entry;
 
 @Slf4j
 @Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
-@RequiredArgsConstructor
 public class NavidentController {
 
-    private final NIKConsumer nikConsumer;
-    private final ObjectMapper mapper;
+    // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
+    public static final String BASE_URL = "/api/v1/navident";
+
     private final IRessursService ressursService;
+    private final NIKConsumer nikConsumer;
     private final PdlConsumer pdlConsumer;
+    private final ObjectMapper mapper;
 
-    @Value("${app.graphql.preauth.query.person:''}")
-    private List<String> preAuth;
+    public NavidentController(
+            IRessursService ressursService,
+            NIKConsumer nikConsumer,
+            PdlConsumer pdlConsumer,
+            ObjectMapper mapper
+    ) {
+        this.nikConsumer = nikConsumer;
+        this.mapper = mapper;
+        this.ressursService = ressursService;
+        this.pdlConsumer = pdlConsumer;
+    }
 
-    public static final String BASE_URL = "api/v1/navident";
-
+    @ExceptionHandler({AccessDeniedException.class})
+    @ResponseBody
+    public ResponseEntity<NavidentResponse> handleAccessDeniedException() {
+        return ResponseEntity.ok(
+                NavidentResponse.builder()
+                        .status(String.valueOf(HttpStatus.FORBIDDEN.value()))
+                        .feilmelding("Forbidden")
+                        .build()
+        );
+    }
 
     @PostMapping
     @Transactional
     @Operation(
             description = "Henter en eksisterende eller oppretter en ny navident",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN))
-    @ApiResponses(value = @ApiResponse(responseCode = "200", description = "Success"))
-    public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
-        val token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-
-        if (token == null || !preAuth.contains(token.getTokenAttributes().get("azp"))) {
-            return ResponseEntity.ok(NavidentResponse.builder().status(String.valueOf(HttpStatus.FORBIDDEN.value())).feilmelding("Forbidden").build());
-        }
-
-        val responseBody = NavidentResponse.builder()
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+            value = @ApiResponse(
+                    responseCode = "200",
+                    description = "Success"
+            )
+    )
+    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    public ResponseEntity<NavidentResponse> opprettNavident(
+            @RequestBody NavidentRequest request,
+            @AuthenticationPrincipal JwtAuthenticationToken token
+    ) {
+        final var responseBody = NavidentResponse.builder()
                 .status(Integer.toString(HttpStatus.OK.value()));
 
-        val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
+        final var ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
             try {
-                val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
+                final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
 
-                if (List.of(HttpStatus.OK, HttpStatus.CREATED).contains(nikResponse.getStatusCode())) {
-                    val data = mapper.createObjectNode()
-                            .put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident())
-                            .put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident())
-                            .put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn())
-                            .put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn())
-                            .put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn())
-                            .put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor())
-                            .put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
-                    val metadata = HendelseMetadataSerialize.builder()
+                if (nikResponse.getStatusCode().is2xxSuccessful()) {
+                    Map<String, Object> data = Map.ofEntries(
+                            entry(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident()),
+                            entry(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident()),
+                            entry(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn()),
+                            entry(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn()),
+                            entry(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn()),
+                            entry(EventBasedRessurs.SEKTOR_FIELD, request.getSektor()),
+                            entry(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()))
+                    );
+
+                    final var metadata = HendelseMetadataSerialize.builder()
                             .opprettetAv(new HendelseMetadata.OpprettetAv(token))
                             .opprettetTidspunkt(LocalDateTime.now())
-                            .rawInputData(data)
+                            .rawInputData(mapper.valueToTree(data))
                             .build();
 
                     responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
@@ -115,8 +143,8 @@ public class NavidentController {
             return Kjonn.UKJENT.name();
         }
 
-        val person = pdlConsumer.hentPerson(personident).orElse(null);
-
-        return person != null ? person.getKjonn().name() : Kjonn.UKJENT.name();
+        return pdlConsumer.hentPerson(personident)
+                .map(pers -> pers.getKjonn().name())
+                .orElseGet(Kjonn.UKJENT::name);
     }
 }

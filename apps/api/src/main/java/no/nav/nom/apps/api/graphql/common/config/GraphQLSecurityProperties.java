@@ -27,7 +27,11 @@ public record GraphQLSecurityProperties(
             String clientAlias,
             Set<GraphQLAccessScope> scopes
     ) {
-        public ScopedAccess(@DefaultValue("") String clientId, @DefaultValue("") String clientAlias, Set<GraphQLAccessScope> scopes) {
+        public ScopedAccess(
+                @DefaultValue("") String clientId,
+                @DefaultValue("") String clientAlias,
+                @DefaultValue Set<GraphQLAccessScope> scopes
+        ) {
             if (!StringUtils.hasText(clientId) && !StringUtils.hasText(clientAlias)) {
                 throw new IllegalArgumentException("One of client-id or client-alias must be set!");
             }
