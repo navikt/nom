@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router";
 
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
 import { NotfoundPage } from "./pages/NotfoundPage";
-import OrganisasjonHierarkiPageNew from "./pages/OrganisasjonHierarkiPageNew";
+import OrganisasjonHierarkiPageNew from "./pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPageNew";
 import ResourceView from "./pages/ResourceView";
 
 const AppRoutes = () => (
