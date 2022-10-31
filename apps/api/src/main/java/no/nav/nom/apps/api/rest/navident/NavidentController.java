@@ -62,7 +62,9 @@ public class NavidentController {
             return ResponseEntity.ok(NavidentResponse.builder().status(String.valueOf(HttpStatus.FORBIDDEN.value())).feilmelding("Forbidden").build());
         }
 
-        val responseBody = NavidentResponse.builder();
+        val responseBody = NavidentResponse.builder()
+                .status(Integer.toString(HttpStatus.OK.value()));
+
         val ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
             try {
                 val nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
@@ -98,7 +100,6 @@ public class NavidentController {
 
         if (ressurs != null) {
             responseBody
-                    .status(Integer.toString(HttpStatus.OK.value()))
                     .personident(ressurs.getPersonIdent())
                     .navident(ressurs.getNavIdent())
                     .fornavn(ressurs.getVisningsfornavn().orElse(null))
