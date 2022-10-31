@@ -75,6 +75,7 @@ spring:
   config:
     activate:
       on-profile: dev && !prod
+
 app:
   graphql:
     auth:
@@ -111,6 +112,10 @@ spring:
   config:
     activate:
       on-profile: prod && !dev
+  graphql:
+    graphiql:
+      enabled: false # Disable graphiql in production
+
 app:
   graphql:
     auth:
