@@ -479,18 +479,14 @@ const OrganisasjonHierarkiPageInner = function (properties: {
             )}
           >
             {underEnheter.map((underEnhet, index) => (
-              <>
+              <Fragment key={underEnhet.url}>
                 {valgtEnhet.name === "NAV" && index === 0 && (
                   <Heading size="small">Direktoratet</Heading>
                 )}
                 {valgtEnhet.name === "NAV" && index === 1 && (
                   <Heading size="small">Linjene</Heading>
                 )}
-                <Link
-                  className={hierarkiCss.link}
-                  key={underEnhet.url}
-                  to={underEnhet.url}
-                >
+                <Link className={hierarkiCss.link} to={underEnhet.url}>
                   <Enhet navIdentForImg={underEnhet.ledere[0]?.navident}>
                     <Heading size={"medium"}>{underEnhet.name}</Heading>
                     <span>
@@ -501,7 +497,7 @@ const OrganisasjonHierarkiPageInner = function (properties: {
                     </span>
                   </Enhet>
                 </Link>
-              </>
+              </Fragment>
             ))}
           </div>
           <div

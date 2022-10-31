@@ -1,12 +1,11 @@
 import { css } from "@emotion/css";
 import { PeopleFilled } from "@navikt/ds-icons";
 import { Search } from "@navikt/ds-react";
-import React from "react";
 import { Link } from "react-router-dom";
 
 import { UserRole, useSessionContext } from "../main";
 import { mediaQueryContentWidth } from "../resources/NomStyles";
-import BurgerMenu from "./BurgerMenu";
+import { BurgerMenu } from "./BurgerMenu";
 import { nomLogoCircle } from "./Images";
 
 export const headerHeight = "6rem";
