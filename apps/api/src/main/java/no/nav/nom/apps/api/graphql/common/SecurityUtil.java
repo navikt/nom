@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.graphql.common;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -20,6 +22,8 @@ import java.util.Optional;
 
 @Component
 public class SecurityUtil {
+
+    private final static Logger logger = LoggerFactory.getLogger(SecurityUtil.class);
 
     private final boolean securityEnabled;
     private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
@@ -70,15 +74,20 @@ public class SecurityUtil {
      * @param authentication    the user we're checking if it has access
      * @param fieldSelectionSet the DataFetchingFieldSelectionSet we're checking
      * @param fieldGlobPatterns the fields we'd like to check if a user has access to
-     * @param requiredRole      the roles required to access the fields from fieldGlobPatterns
+     * @param requiredRoles     the roles required to access the fields from fieldGlobPatterns
      * @return true if the user has access, or if security is disabled
      * @throws AccessDeniedException if user does not have access to the fields specified
      */
-    public boolean hasRequiredAccess(Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet, String[] fieldGlobPatterns, String[] requiredRole) {
+    public boolean hasRequiredAccess(Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet, String[] fieldGlobPatterns, String[] requiredRoles) {
         if (securityEnabled) {
             var authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+            if(logger.isTraceEnabled()) {
+                logger.trace("Checking access to fields {} with required roles {} for current authorities {}", fieldGlobPatterns, requiredRoles, authorities);
+            }
+
             if (fieldSelectionSet.containsAnyOf("", fieldGlobPatterns)
-                    && Arrays.stream(requiredRole).noneMatch(authorities::contains)) {
+                    && Arrays.stream(requiredRoles).noneMatch(authorities::contains)) {
                 throw new AccessDeniedException(String.format("User does not have the correct access rights for fields %s", List.of(fieldGlobPatterns)));
             }
         }

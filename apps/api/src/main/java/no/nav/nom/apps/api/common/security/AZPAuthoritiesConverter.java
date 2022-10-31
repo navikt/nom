@@ -27,6 +27,8 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
     private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);
     private static final String AUTHORITY_PREFIX = "SCOPE_";
 
+    private final static Set<String> AZP_CLAIM_NAMES = Set.of("azp", "azp_name");
+
     public static final String AUTH_QUERY_PERSON = "QUERY_PERSON";
     public static final String AUTH_MUTATE_RESSURS = "MUTATE_RESSURS";
 
@@ -72,14 +74,17 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
     public Collection<GrantedAuthority> convert(Jwt jwt) {
         final var grantedAuthorities = defaultConverter.convert(jwt);
 
-        addGrantedAuthorities(
-                grantedAuthorities,
-                accessMap.getOrDefault((String) jwt.getClaim("azp"), emptySet())
-        );
-        addGrantedAuthorities(
-                grantedAuthorities,
-                accessMap.getOrDefault((String) jwt.getClaim("azp_name"), emptySet())
-        );
+        AZP_CLAIM_NAMES.forEach( claim -> {
+            String claimProperty = jwt.getClaim(claim);
+            var scopes = accessMap.getOrDefault(claimProperty, emptySet());
+
+            if(log.isTraceEnabled()) {
+                log.trace("Mapping claims from \"{}\" = \"{}\" with resolved scopes: {}", claim, claimProperty, scopes);
+            }
+
+            addGrantedAuthorities(grantedAuthorities, scopes);
+        });
+
         return grantedAuthorities;
     }
 
