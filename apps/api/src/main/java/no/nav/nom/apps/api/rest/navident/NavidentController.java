@@ -97,7 +97,9 @@ public class NavidentController {
         });
 
         if (ressurs != null) {
-            responseBody.personident(ressurs.getPersonIdent())
+            responseBody
+                    .status(Integer.toString(HttpStatus.OK.value()))
+                    .personident(ressurs.getPersonIdent())
                     .navident(ressurs.getNavIdent())
                     .fornavn(ressurs.getVisningsfornavn().orElse(null))
                     .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
