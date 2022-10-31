@@ -9,10 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 @ConstructorBinding
-@ConfigurationProperties("app.graphql.preauth")
+@ConfigurationProperties("app.graphql.auth")
 public record GraphQLSecurityProperties(
-        Map<String, ScopedAccess> query,
-        Map<String, ScopedAccess> mutation
+        @DefaultValue Map<String, ScopedAccess> clients
 ) {
     /**
      * Limits the access of a given client to the default scope and other additional scopes
@@ -30,7 +29,7 @@ public record GraphQLSecurityProperties(
         public ScopedAccess(
                 @DefaultValue("") String clientId,
                 @DefaultValue("") String clientAlias,
-                @DefaultValue Set<GraphQLAccessScope> scopes
+                Set<GraphQLAccessScope> scopes
         ) {
             if (!StringUtils.hasText(clientId) && !StringUtils.hasText(clientAlias)) {
                 throw new IllegalArgumentException("One of client-id or client-alias must be set!");

@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 
 @Component
 public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
@@ -40,19 +39,16 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
         defaultConverter.setAuthorityPrefix(AUTHORITY_PREFIX);
         this.securityProperties = securityProperties;
 
-        preComputeAccessFor(securityProperties.query(), GraphQLAccessScope.QUERY_PERSON);
-        preComputeAccessFor(securityProperties.mutation(), GraphQLAccessScope.MUTATE_RESSURS);
+        preComputeAccessFor(securityProperties.clients());
     }
 
-    private void preComputeAccessFor(Map<String, GraphQLSecurityProperties.ScopedAccess> accessors, GraphQLAccessScope defaultScope) {
+    private void preComputeAccessFor(Map<String, GraphQLSecurityProperties.ScopedAccess> accessors) {
         accessors.forEach((client, scopedAccess) -> {
             if(StringUtils.hasText(scopedAccess.clientId())) {
-                calculateScopes(client, scopedAccess.clientId(), false, singleton(defaultScope));
                 calculateScopes(client, scopedAccess.clientId(), false, scopedAccess.scopes());
             }
 
             if(StringUtils.hasText(scopedAccess.clientAlias())) {
-                calculateScopes(client, scopedAccess.clientAlias(), true, singleton(defaultScope));
                 calculateScopes(client, scopedAccess.clientAlias(), true, scopedAccess.scopes());
             }
         });
@@ -61,11 +57,11 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
     private void calculateScopes(String client, String clientId, boolean isAlias, Set<GraphQLAccessScope> newScopes) {
         accessMap.compute(clientId, (key, scopes) -> {
             if (scopes == null) {
-                log.debug("Adding scopes {} from \"{}\" with client{} \"{}\"", newScopes, client, isAlias ? "Alias": "Id", clientId);
+                log.debug("Adding authorities {} from client-configuration \"{}\" with client{} \"{}\"", newScopes, client, isAlias ? "Alias": "Id", clientId);
                 return new HashSet<>(newScopes);
             }
             scopes.addAll(newScopes);
-            log.trace("Current scopes associated with client{} \"{}\" is {}", isAlias ? "Alias": "Id", clientId, scopes);
+            log.trace("Current authorities associated with client{} \"{}\" is {}", isAlias ? "Alias": "Id", clientId, scopes);
             return scopes;
         });
     }
@@ -74,12 +70,12 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
     public Collection<GrantedAuthority> convert(Jwt jwt) {
         final var grantedAuthorities = defaultConverter.convert(jwt);
 
-        AZP_CLAIM_NAMES.forEach( claim -> {
-            String claimProperty = jwt.getClaim(claim);
+        AZP_CLAIM_NAMES.forEach( claimName -> {
+            String claimProperty = jwt.getClaim(claimName);
             var scopes = accessMap.getOrDefault(claimProperty, emptySet());
 
             if(log.isTraceEnabled()) {
-                log.trace("Mapping claims from \"{}\" = \"{}\" with resolved scopes: {}", claim, claimProperty, scopes);
+                log.trace("Mapping claims from \"{}\" = \"{}\" with resolved authorities: {}", claimName, claimProperty, scopes);
             }
 
             addGrantedAuthorities(grantedAuthorities, scopes);

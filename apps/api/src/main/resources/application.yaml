@@ -11,16 +11,6 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
-  graphql:
-    preauth:
-      query:
-        person:
-          client-id: ${GRAPHQL_PREAUTH_QUERY_PERSON:NO_ONE}
-          scopes: QUERY_PERSON
-      mutation:
-        ressurs:
-          client-id: ${GRAPHQL_PREAUTH_MUTATION_RESSURS:NO_ONE}
-          scopes: MUTATE_RESSURS
 
 authentication:
   aad:
@@ -79,3 +69,67 @@ management:
 unleash:
   endpoint:
     url: https://unleash.nais.io/api
+
+--- # This is the same as having an application-dev.yaml file
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+app:
+  graphql:
+    auth:
+      clients:
+        nom-ui2:
+          client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
+          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        ida:
+          client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
+          scopes: ["MUTATE_RESSURS"]
+        dolly:
+          client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
+          scopes: [ "MUTATE_RESSURS" ]
+        remedy:
+          client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
+          scopes: ["QUERY_PERSON"]
+        fullmaktsregister-web:
+          client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
+          scopes: ["QUERY_PERSON"]
+
+NIK_BASEURL: "https://nav-ident.dev.intern.nav.no"
+NIK_CLIENT_ID: "dev-gcp.org.nav-ident"
+
+PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io"
+PDL_CLIENT_ID: "dev-fss.pdl.pdl-api"
+
+NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
+NOM_PROXY_CLIENT_ID: "dev-fss.nom.nom-proxy"
+
+NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
+
+--- # This is the same as having an application-prod.yaml file
+spring:
+  config:
+    activate:
+      on-profile: prod && !dev
+app:
+  graphql:
+    auth:
+      clients:
+        nom-ui2:
+          client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
+          scopes: ["QUERY_PERSON"]
+        remedy:
+          client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
+          scopes: [ "QUERY_PERSON" ]
+
+NIK_BASEURL: "https://nav-ident.intern.nav.no"
+NIK_CLIENT_ID: "prod-gcp.org.nav-ident"
+
+PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
+PDL_CLIENT_ID: "prod-fss.pdl.pdl-api"
+
+NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
+NOM_PROXY_CLIENT_ID: "prod-fss.nom.nom-proxy"
+
+NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
+
