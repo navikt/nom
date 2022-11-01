@@ -7,11 +7,13 @@ app:
   nik:
     baseUrl: http://localhost:${wiremock.server.port}
   graphql:
-    preauth:
-      query:
-        person: testSubject
-      mutation:
-        ressurs: testSubject
+    auth:
+      clients:
+        test:
+          client-id: testSubject
+          scopes:
+            - QUERY_PERSON
+            - MUTATE_RESSURS
 
 authentication:
   aad:

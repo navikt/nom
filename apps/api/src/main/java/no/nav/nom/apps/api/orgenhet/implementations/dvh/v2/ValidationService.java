@@ -29,7 +29,7 @@ public class ValidationService {
                 diffValidation(validations).stream()
                         .map(v -> GenericStorageElement.builder()
                                 .id(UUID.randomUUID())
-                                .document(objectMapper.convertValue(v, JsonNode.class))
+                                .document(objectMapper.valueToTree(v))
                                 .storedDate(LocalDateTime.now())
                                 .dataType(GenericStorageElement.DataType.VALIDATION_V1)
                                 .build()

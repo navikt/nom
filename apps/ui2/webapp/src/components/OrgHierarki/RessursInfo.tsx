@@ -89,7 +89,7 @@ const RessursInfo = (properties: RessursInfoProperties) => {
       <CustomLinkPanel2 type={LinkPanelType.RESSURS}>
         <div className={ressursInfoStyles}>
           <div className={css({ marginTop: "2rem", marginBottom: "0.5rem" })}>
-            <UserImage navIdent={ressurs.navIdent} size="130px" />
+            <UserImage navIdent={ressurs.navident} size="130px" />
           </div>
 
           <Heading size="large">
@@ -98,7 +98,7 @@ const RessursInfo = (properties: RessursInfoProperties) => {
           <BodyShort
             className={css({ fontWeight: "600" })}
             size="medium"
-          >{`(${ressurs.navIdent})`}</BodyShort>
+          >{`(${ressurs.navident})`}</BodyShort>
 
           <div className={css({ display: "flex", marginBottom: "1.5rem" })}>
             <div
@@ -106,15 +106,15 @@ const RessursInfo = (properties: RessursInfoProperties) => {
             >
               <LabelAndText alignAtEnd label="Tlf: " text="Mangler tlf" />
 
-              {ressurs.koblinger &&
-                ressurs.koblinger.map((kobling: RessursKobling) => (
+              {ressurs.orgTilknytning &&
+                ressurs.orgTilknytning.map((kobling: RessursKobling) => (
                   <LabelAndText
                     alignAtEnd
                     key={JSON.stringify(kobling)}
                     label="Org.enhet: "
-                    linkTo={getLink(kobling.organisasjonsenhet)}
+                    linkTo={getLink(kobling.orgEnhet)}
                     text={
-                      kobling.organisasjonsenhet.navn || "Mangler enhetsnavn"
+                      kobling.orgEnhet.navn || "Mangler enhetsnavn"
                     }
                   />
                 ))}
@@ -131,7 +131,7 @@ const RessursInfo = (properties: RessursInfoProperties) => {
                   let lederNavn = "Uten navn";
                   if (l.fornavn && l.etternavn)
                     lederNavn = l.fornavn + " " + l.etternavn;
-                  const oe = l.koblinger[0].organisasjonsenhet;
+                  const oe = l.orgTilknytning[0].orgEnhet;
                   return (
                     <LabelAndText
                       key={JSON.stringify(leder)}
@@ -140,7 +140,7 @@ const RessursInfo = (properties: RessursInfoProperties) => {
                         oe.agressoId,
                         oe.orgNiv,
                         oe.navn,
-                        l.navIdent
+                        l.navident
                       )}
                       text={lederNavn}
                     />

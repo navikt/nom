@@ -8,13 +8,14 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Date;
 
-import static no.nav.nom.apps.api.graphql.GraphQLMatchers.hasErrors;
+import static java.util.Objects.requireNonNullElse;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisplayName("GraphQL.Sikkerhet")
@@ -103,13 +104,10 @@ class SecurityTest extends SecurityTestBase {
 
     @SneakyThrows
     private void postAndAssertResponse(String resource, String token, String path) {
-        val response = graphQLTestTemplate.withBearerAuth(token).postForResource(resource);
-        assertThat(response, hasErrors());
-        if (path == null) {
-            response.assertThatDataField().isNull();
-        } else {
-            response.assertThatField("$.data." + path).isNull();
-        }
+        var response = postForResource(resource, token);
+
+        assertThat(response, GraphQLMatchers.hasErrors());
+        response.path(requireNonNullElse(path, "")).valueIsNull();
         //response.assertThatListOfErrors().hasSize(1);
     }
 

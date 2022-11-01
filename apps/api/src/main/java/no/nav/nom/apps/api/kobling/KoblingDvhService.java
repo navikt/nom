@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.kobling;
 
-import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
@@ -10,13 +9,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 @Service
-@RequiredArgsConstructor
 public class KoblingDvhService implements KoblingService {
 
     private final DvhRepository dvhRepository;
+
+    public KoblingDvhService(DvhRepository dvhRepository) {
+        this.dvhRepository = dvhRepository;
+    }
 
     @Override
     public Collection<Kobling> getAllKoblinger() {
@@ -31,10 +37,15 @@ public class KoblingDvhService implements KoblingService {
     }
 
     @Override
-    public Map<String, List<Kobling>> getKoblingerByNavidenter(Set<String> navidenter) {
+    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Kobling, T> transformer) {
         return getAllKoblinger().stream()
                 .filter(kobling -> navidenter.contains(kobling.getNavIdent()))
-                .collect(Collectors.groupingBy(Kobling::getNavIdent));
+                .collect(
+                        groupingBy(
+                                Kobling::getNavIdent,
+                                mapping(transformer, toList())
+                        )
+                );
     }
 
 }

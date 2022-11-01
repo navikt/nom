@@ -1,69 +1,91 @@
 package no.nav.nom.apps.api.pdl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import graphql.kickstart.execution.GraphQLRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
-import no.nav.nom.contract.nom.api.graphql.RessursNavn;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.graphql.GraphQlResponse;
+import org.springframework.graphql.client.ClientGraphQlResponse;
+import org.springframework.graphql.client.HttpGraphQlClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class PdlConsumer {
 
-    private final AppProperties appProperties;
-    private final TokenRepository tokenRepository;
-    private final RestTemplate restTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(PdlConsumer.class);
 
-    public Optional<Person> hentPerson(String personIdent){
-        val headers = new HttpHeaders();
-        val token = tokenRepository.getSystemAadToken(appProperties.getPdl().getAadClientId());
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token.serialize());
-        headers.add("Tema", appProperties.getPdl().getTema());
+    private final HttpGraphQlClient graphQlClient;
 
-        val body = new GraphQLRequest();
-        body.setQuery("query($ident: ID!){\n" +
-                "  hentPerson(ident: $ident) {\n" +
-                "       navn {\n" +
-                "           fornavn\n" +
-                "           mellomnavn\n" +
-                "           etternavn\n" +
-                "       }\n" +
-                "       kjoenn {\n" +
-                "           kjoenn\n" +
-                "       }\n" +
-                "   }\n" +
-                "}");
-        body.getVariables().put("ident", personIdent);
+    private final static String PDL_HENT_PERSON_QUERY = // language=graphql
+            """
+                query($ident: ID!) {
+                       hentPerson(ident: $ident) {
+                            navn {
+                                fornavn
+                                mellomnavn
+                                etternavn
+                            }
+                            kjoenn {
+                                kjoenn
+                            }
+                       }
+                }
+                """;
 
-        val result = restTemplate.exchange(appProperties.getPdl().getBaseUrl() + "/graphql", HttpMethod.POST, new HttpEntity<>(body, headers), JsonNode.class);
+    @Autowired
+    public PdlConsumer(
+            AppProperties appProperties,
+            TokenRepository tokenRepository,
+            WebClient.Builder webClientBuilder
+    ) {
+        final var pdlProperties = appProperties.pdl();
+        this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
+                .url(pdlProperties.baseUrl() + "/graphql")
+                .headers(headers -> {
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.add("Tema", pdlProperties.tema());
+                })
+                .webClient(builder -> builder.filter(PersonBatchLoader.setBearerAuthWith(tokenRepository, pdlProperties.aadClientId())))
+                .build();
+    }
 
-        if (result.getBody().get("data").hasNonNull("hentPerson")) {
-            val person = result.getBody().get("data").get("hentPerson");
-            val navn = person.get("navn").get(0);
-            val mellomnavn = navn.hasNonNull("mellomnavn") ? navn.get("mellomnavn").asText() : null;
-            val kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
+    public Optional<Person> hentPerson(String personIdent) {
+        return executePDLRequest(personIdent)
+                .filter(GraphQlResponse::isValid)
+                .map(res -> res.field("hentPerson").toEntity(JsonNode.class))
+                .onErrorResume(throwable -> {
+                    logger.warn("Error in lookup from PDL", throwable);
+                    return null;
+                })
+                .blockOptional()
+                .map(this::convertToApiPerson);
+    }
 
-            return Optional.of(Person.builder()
-                    .fornavn(navn.get("fornavn").asText())
-                    .mellomnavn(mellomnavn)
-                    .etternavn(navn.get("etternavn").asText())
-                    .kjonn(Kjonn.valueOf(kjonn))
-                    .build());
-        }
+    private Mono<ClientGraphQlResponse> executePDLRequest(String personident) {
+        return graphQlClient
+                .document(PDL_HENT_PERSON_QUERY)
+                .variable("ident", personident)
+                .execute();
+    }
 
-        return Optional.empty();
+    private Person convertToApiPerson(JsonNode person) {
+        final var navn = person.get("navn").get(0);
+        final var mellomnavn = navn.get("mellomnavn");
+        final var kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
+
+        return Person.builder()
+                .fornavn(navn.get("fornavn").asText())
+                .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
+                .etternavn(navn.get("etternavn").asText())
+                .kjonn(Kjonn.valueOf(kjonn))
+                .build();
     }
 }

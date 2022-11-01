@@ -72,9 +72,9 @@ public class LegacyRessursLoader {
                 .toString();
 
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
 
-        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + url, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.proxy().baseUrl() + url, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
     @Getter

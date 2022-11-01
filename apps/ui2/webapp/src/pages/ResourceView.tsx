@@ -17,8 +17,8 @@ const linkStyles = css({
 const ResourceView = () => {
   const { id } = useParams();
   const { state } = useLocation();
-  const query = Gq.useHentRessursMedNavIdentQuery({
-    variables: { navIdent: id },
+  const query = Gq.useHentRessursMedNavidentQuery({
+    variables: { navident: id },
   });
   return (
     <div>

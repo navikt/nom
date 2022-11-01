@@ -42,7 +42,7 @@ public class PdlUtils {
 
     private void mockPdlResponse(String response) {
         stubFor(post("/graphql")
-                .withHeader("Tema", equalTo(appProperties.getPdl().getTema()))
+                .withHeader("Tema", equalTo(appProperties.pdl().tema()))
                 .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(response)));

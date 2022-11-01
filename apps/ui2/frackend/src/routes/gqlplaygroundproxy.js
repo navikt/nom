@@ -1,60 +1,120 @@
-function gqlPlayground(){
+import axios from "axios";
 
-    return `<!DOCTYPE html>
-    <html lang="en">
+const graphiqlSrc = {
+    reactdev: "https://unpkg.com/react@16/umd/react.development.js",
+    reactdomdev: "https://unpkg.com/react-dom@16/umd/react-dom.development.js",
+    graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
+    graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
+};
 
-    <head>
-        <meta charset="utf-8"/>
-        <meta name="viewport"
-              content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
-        <title>Playground</title>
-        <link rel="stylesheet" href="/nom-api/vendor/playground/static/css/index.css"/>
-        <link rel="shortcut icon" href="/nom-api/vendor/playground/favicon.png"/>
-        <script src="/nom-api/vendor/playground/static/js/middleware.js"></script>
-    </head>
+const extractPath = (url) => url.substring("https://unpkg.com".length);
 
-    <body>
-    <div id="root">
-        <img src="/nom-api/vendor/playground/logo.png" alt="Logo">
-        <div class="loading"> Loading
-            <span class="title">GraphQL Playground</span>
-        </div>
-    </div>
+let vendorStorage = {};
 
-    <script>
-        let csrf = null;
-        let properties = {"enabled":true,"endpoint":"/nom-api/graphql","subscriptionEndpoint":"/subscriptions","tabs":[{"endpoint":"/nom-api/graphql","query":'#',"name":"Mytab","variables":null,"responses":null,"headers":null}]};
-        properties["settings"] = {
-                "request.credentials": "include"
+async function initVendorStorage() {
+    try {
+        const fetches = {};
+        for (const s of Object.keys(graphiqlSrc)) {
+            fetches[s] = axios.get(graphiqlSrc[s]);
         }
-        if (!properties.headers) {
-            properties.headers = {};
-        }
-        if (csrf) {
-            properties.headers[csrf.headerName] = csrf.token;
-        }
-        if (properties.tabs) {
-            properties.tabs.forEach(
-                    tab => tab.headers = Object.assign({}, properties.headers || {}, tab.headers || {}));
-        }
-        properties.setTitle = false;
-        window.addEventListener('load', function (event) {
-            GraphQLPlayground.init(document.getElementById('root'), properties)
-        });
-    </script>
-    </body>
+        await Promise.allSettled(Object.values(fetches));
 
-    </html>
-`
+        const bodies = {};
+        for (const s of Object.keys(fetches)) {
+            bodies[s] = (await fetches[s]).data;
+        }
+        await Promise.allSettled(Object.values(bodies));
+
+        for (const s of Object.keys(bodies)) {
+            vendorStorage[s] = await bodies[s];
+        }
+    } catch (e) {
+        vendorStorage = {};
+        console.error("Could not vendor graphql js and css from unpkg.com");
+    }
 }
 
-export function setupGqlPlaygroundProxy(app){
-    app.get('/nom-gql-playground', (req, res, next) => {
-        const sesCookieStr = req.headers.cookie.split(";").find(it => it.startsWith(" nom-ui-session") || it.startsWith("nom-ui-session")).split("=")[1]
-        const out = gqlPlayground()
-        res.send(
-            out
-        );
+initVendorStorage();
+
+const htmlForGqlGraphiql = `<!DOCTYPE html>
+<html lang="en">
+<head title="NOM graphiql">
+    <style>
+        body {
+            height: 100%;
+            margin: 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #graphiql {
+            height: 100vh;
+        }
+    </style>
+    <script crossorigin src="/vendor${extractPath(
+    graphiqlSrc.reactdev
+)}"></script>
+    <script crossorigin src="/vendor${extractPath(
+    graphiqlSrc.reactdomdev
+)}"></script>
+    <link rel="stylesheet" href="/vendor${extractPath(
+    graphiqlSrc.graphiqlcss
+)}"/><title></title>
+</head>
+
+<body>
+<div id="graphiql">Loading...</div>
+<script src="/vendor${extractPath(
+    graphiqlSrc.graphiqljs
+)}" type="application/javascript"></script>
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    const path = params.get("path") || "/nom-api/graphql";
+    const url = location.protocol + "//" + location.host + path;
+
+    const wsPath = params.get("wsPath") || "/nom-api/graphql";
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const subscriptionUrl = wsProtocol + "//" + location.host + wsPath;
+
+    const gqlFetcher = GraphiQL.createFetcher({
+        url,
+        subscriptionUrl,
+    });
+
+    ReactDOM.render(
+        React.createElement(GraphiQL, {
+            fetcher: gqlFetcher,
+            defaultVariableEditorOpen: true,
+            headerEditorEnabled: true,
+            shouldPersistHeaders: true
+        }),
+        document.getElementById('graphiql'),
+    );
+</script>
+</body>
+</html>
+`;
+
+export function setupGqlPlaygroundProxy(app) {
+    app.get("/nom-gql-playground", (req, res) => {
+        res.send("<h1>Playground is replaced</h1><p style='font-size: 200%'>Use <a href='/nom-gql-graphiql'>graphiql</a> instead</</p>")
+    });
+
+    app.get("/nom-gql-graphiql", (req, res) => {
+        if (!vendorStorage) {
+            res.status(404).send("graphiql currently unavailable");
+        }
+        res.send(htmlForGqlGraphiql);
+    });
+
+    Object.keys(graphiqlSrc).forEach((s) => {
+        const path = extractPath(graphiqlSrc[s]);
+        app.get("/vendor" + path, (req, res) => {
+            const mimeType = path.endsWith(".css")
+                ? "text/css"
+                : "application/javascript";
+            res.type(mimeType).send(vendorStorage[s]);
+        });
     });
 }
-

@@ -43,10 +43,11 @@ public class RessursService implements IRessursService {
     }
 
     @Override
-    public Optional<IRessurs> findByNavIdent(String navIdent){
+    public <T> Optional<T> findByNavIdent(String navIdent, Function<IRessurs, T> converter) {
         return Optional.ofNullable(
-                convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
-        );
+                        convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
+                )
+                .map(converter);
     }
 
     @Override
@@ -115,7 +116,7 @@ public class RessursService implements IRessursService {
 
     @Override
     @Transactional
-    public IRessurs opprettRessurs0(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
+    public IRessurs opprettRessurs(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
         return findByPersonIdent(personident).orElseGet(() -> {
             val event = hendelseService.createOpprettHendelse(data, hendelseMetadataSerialize, HendelseDataType.RESSURS_V1);
             repository.save(hendelseService.convert(event));
@@ -126,15 +127,22 @@ public class RessursService implements IRessursService {
     }
 
     @Override
+    @Transactional
+    public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
+        return opprettRessurs(personerident, (JsonNode) objectMapper.valueToTree(data), metadata);
+    }
+
+    @Override
     public Ressurs convertToGraphQlResponse(IRessurs ressurs) {
+        var sektor = dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent());
         return Ressurs.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
                 .navident(ressurs.getNavIdent())
                 .personIdent(ressurs.getPersonIdent())
                 .personident(ressurs.getPersonIdent())
-                .ressurstype(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
-                .sektor(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()))
+                .ressurstype(sektor)
+                .sektor(sektor)
                 .sluttdato(dvhRessursInterface.getSluttdatoForPersonident(ressurs.getPersonIdent()))
                 .fornavn(ressurs.getVisningsmellomnavn().map(m -> ressurs.getVisningsfornavn().orElseThrow()+" "+m).orElse(ressurs.getVisningsfornavn().orElse(null)))
                 .etternavn(ressurs.getVisningsetternavn().orElse(null))

@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.rest.navident;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 @Data
 @Builder

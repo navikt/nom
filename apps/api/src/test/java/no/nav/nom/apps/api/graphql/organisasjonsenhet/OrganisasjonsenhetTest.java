@@ -3,8 +3,6 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
-import lombok.val;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
@@ -19,15 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
+
+    // TODO: Wait for answer on https://github.com/spring-projects/spring-graphql/issues/506 to add support for optional arguments using ProjectedPayload
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -36,29 +36,34 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     private DvhRestConsumer dvhRestConsumer;
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
                 .ENHETTYPE_NAVN("TYPEEE").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql", false).get("$.data.organisasjonsenhet", OrgEnhet.class);
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql")
+                .path("organisasjonsenhet")
+                .entity(OrgEnhet.class)
+                .get();
+
         assertEquals(mockedEnhet.getORGENHET_KODE(), outputEnhet.getAgressoId());
         assertEquals(mockedEnhet.getENHETTYPE_NAVN(), outputEnhet.getAgressoOrgenhetType());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter bulk")
     void scenario112() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql")
+                .path("organisasjonsenheter")
+                .entityList(OrgEnhetResult.class)
+                .get();
 
         assertTrue(getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).isPresent());
         assertEquals(mockedEnhet.getORGENHET_KODE(), getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet).get().getId());
@@ -70,30 +75,36 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå")
     void scenario113() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql")
+                .path("organisasjonsenheter")
+                .entityList(OrgEnhetResult.class)
+                .get();
+
         assertEquals(mockedEnhet.getORGENHET_KODE(), outputEnhet.get(0).getId());
         assertEquals(ResultCode.OK, outputEnhet.get(0).getCode());
         assertEquals(mockedEnhet.getORGNODE_NIV(), outputEnhet.get(0).getOrgNiv());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
     void scenario114() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        val outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql", false).getList("$.data.organisasjonsenheter", OrgEnhetResult.class);
-        val actualTestId4 = getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet);
-        val actualNotFound = getEnhetInList("notFoundId", outputEnhet);
+        final var outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql")
+                .path("organisasjonsenheter")
+                .entityList(OrgEnhetResult.class)
+                .get();
+
+        final var actualTestId4 = getEnhetInList(mockedEnhet.getORGENHET_KODE(), outputEnhet);
+        final var actualNotFound = getEnhetInList("notFoundId", outputEnhet);
 
         assertTrue(actualTestId4.isPresent());
         assertEquals(mockedEnhet.getORGENHET_KODE(), actualTestId4.get().getId());
@@ -107,7 +118,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql uten id parameter")
     void scenario12() {
         dvhOrgenhetMockUtils.addToResponse(
@@ -120,47 +130,48 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario2.graphql", false);
-        assertEquals(5, response.getList("$.data.organisasjonsenheter", OrgEnhetResult.class).size());
+        final var response = postForResource("organisasjonsenhet/scenario2.graphql");
+        assertEquals(5, response.path("organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21() {
-        val mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
-        val mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
-        val mockEnhet3 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
+        final var mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
+        final var mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
+        final var mockEnhet3 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2, mockEnhet3);
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario3.graphql", false);
-        val enhetResponse = response.get("$.data.organisasjonsenhet", JsonNode.class);
+        final var response = postForResource("organisasjonsenhet/scenario3.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
-                .collect(Collectors.toMap(
-                        o -> o.get("retning").asText(),
-                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)));
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+                .collect(
+                        toMap(
+                                o -> o.get("retning").asText(),
+                                o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                        )
+                );
 
         assertEquals(mockEnhet1.getORGENHET_KODE(), organiserteEnheter.get("over").getAgressoId());
         assertEquals(mockEnhet2.getORGENHET_KODE(), organiserteEnheter.get("under").getAgressoId());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33() {
-        val mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        val mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        final var mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
 
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2);
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario33.graphql", false);
-        val enhetResponse = response.get("$.data.organisasjonsenhet", JsonNode.class);
+        final var response = postForResource("organisasjonsenhet/scenario33.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        val organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
-                .collect(Collectors.toMap(
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+                .collect(toMap(
                         o -> o.get("retning").asText(),
                         o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)));
 
@@ -169,10 +180,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
     void scenario31() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         IRessurs ressurs = createRessursHendelse("");
@@ -180,114 +190,117 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario4.graphql", false);
-
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
-        }).get(0);
+        final var response = postForResource("organisasjonsenhet/scenario4.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
 
         assertEquals(ressurs.getNavIdent(), outputLeder.getRessurs().getNavIdent());
         assertEquals(ressurs.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario32.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario32.graphql");
 
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+//        final var ledere = response.path("organisasjonsenhet.leder").entity(new ParameterizedTypeReference<OrgEnhetsLeder>() {}).get();
+        final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
         });
 
         assertEquals(0, outputLedere.size());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
     void scenario34() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         IRessurs ressurs = createRessursHendelse("");
 
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val lederNavn = outputEnhetJson.get("leder")
-                .get(0).get("ressurs").get("person").get("navn");
+        final var lederNavn = outputEnhetJson.get("leder")
+                .get(0)
+                .get("ressurs")
+                .get("person")
+                .get("navn");
+
         pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
     }
 
 
     @Test
-    @SneakyThrows
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         IRessurs ressurs = createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario41.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario41.graphql");
 
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
         });
 
         assertEquals(1, outputKoblinger.size());
-        val outputKobling = outputKoblinger.get(0);
+
+        final var outputKobling = outputKoblinger.get(0);
         assertEquals("2021-01-01", outputKobling.getGyldigFom().toString());
         assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
 
-        val outputRessurs = outputKoblinger.get(0).getRessurs();
+        final var outputRessurs = outputKoblinger.get(0).getRessurs();
         assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
         assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario42.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario42.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
         assertThat(outputEnhetJson.get("koblinger")).isEmpty();
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        val mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         IRessurs ressurs = createRessursHendelse("");
         pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("organisasjonsenhet/scenario34.graphql", false);
+        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
+        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 
-        val outputEnhetJson = response.get("$.data.organisasjonsenhet", JsonNode.class);
-        val lederNavn = outputEnhetJson.get("koblinger")
-                .get(0).get("ressurs").get("person").get("navn");
+        final var lederNavn = outputEnhetJson.get("koblinger")
+                .get(0)
+                .get("ressurs")
+                .get("person")
+                .get("navn");
+
         pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
     }
 
-    private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult){
+    private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {
         return organisasjonsenhetResult.stream()
                 .filter(e -> e.getId().equals(id))
                 .findFirst();

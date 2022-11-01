@@ -8,18 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 public interface IRessursService {
     Optional<IRessurs> findByPersonIdent(String personIdent);
 
     Optional<IRessurs> findByFid(UUID fid);
 
-    Optional<IRessurs> findByNavIdent(String navIdent);
+    default Optional<IRessurs> findByNavIdent(String navIdent) {
+        return findByNavIdent(navIdent, Function.identity());
+    }
+    <T> Optional<T> findByNavIdent(String navIdent, Function<IRessurs, T> converter);
     Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter);
     Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter);
     List<IRessurs> getAll();
     IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
-    IRessurs opprettRessurs0(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    IRessurs opprettRessurs(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata);
     Ressurs convertToGraphQlResponse(IRessurs ressurs);
     List<IRessurs> matchByNavident(String navident);
 }

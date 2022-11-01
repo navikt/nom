@@ -1,9 +1,5 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
-import graphql.execution.DataFetcherResult;
-import graphql.kickstart.tools.GraphQLResolver;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -13,28 +9,28 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 @Component
-@RequiredArgsConstructor
-public class OrganiseringResolver implements GraphQLResolver<OrgEnhet> {
+public class OrganiseringResolver {
 
     private final DvhRepository dvhRepository;
 
-    public DataFetcherResult<List<Organisering>> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
-        val dvhOrganiseringer = dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn()).stream()
-                .map(o -> convert(o, orgEnhet))
-                .filter(o -> retning == null || o.getRetning() == retning)
-                .collect(toUnmodifiableList());
+    public OrganiseringResolver(DvhRepository dvhRepository) {
+        this.dvhRepository = dvhRepository;
+    }
 
-        return DataFetcherResult.<List<Organisering>>newResult()
-                .data(dvhOrganiseringer)
-                .build();
+    public List<Organisering> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
+        return  dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn()).stream()
+                .map(organisering -> convert(organisering, orgEnhet))
+                .filter(organisering -> retning == null || organisering.getRetning() == retning)
+                .toList();
     }
 
     private Organisering convert(DvhOrganisering organisering, OrgEnhet orgEnhet) {
-        val retning = organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) && organisering.getOrgNivOver().equals(orgEnhet.getOrgNiv()) && organisering.getNavnOver().equals(orgEnhet.getNavn())
-                ? OrganiseringRetning.under : OrganiseringRetning.over;
+        var retning = OrganiseringRetning.over;
+
+        if(organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) && organisering.getOrgNivOver().equals(orgEnhet.getOrgNiv()) && organisering.getNavnOver().equals(orgEnhet.getNavn())) {
+            retning = OrganiseringRetning.under;
+        }
 
         return Organisering.builder()
                 .id("")

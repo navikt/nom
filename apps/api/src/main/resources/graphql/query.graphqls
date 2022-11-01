@@ -4,11 +4,11 @@ scalar JSON
 
 type Query {
     search(term: String!): [SearchResult!]!
-    organisasjonsenhet(where: OrgEnhetSearch): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")
-    orgEnhet(where: OrgEnhetSearch): OrgEnhet
+    organisasjonsenhet(where: OrgEnhetSearch!): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")
+    orgEnhet(where: OrgEnhetSearch!): OrgEnhet
     organisasjonsenheter(where: OrgEnheterSearch): [OrgEnhetResult!]! @deprecated(reason: "Bruk orgEnheter query med samme parametre")
     orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
-    ressurs(where: RessursSearch): Ressurs
+    ressurs(where: RessursSearch!): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
     person(where: PersonSearch): PersonResult
 }

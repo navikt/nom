@@ -186,9 +186,9 @@ public class DvhRestConsumer {
 
     private JsonNode dvhExchange(String urlPath) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
 
-        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.proxy().baseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
     private boolean determineEnhetActive(JsonNode e) {

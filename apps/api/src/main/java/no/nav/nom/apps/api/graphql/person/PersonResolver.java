@@ -1,52 +1,45 @@
 package no.nav.nom.apps.api.graphql.person;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import graphql.execution.DataFetcherResult;
-import graphql.kickstart.tools.GraphQLQueryResolver;
-import graphql.schema.DataFetchingEnvironment;
-import lombok.RequiredArgsConstructor;
-import no.nav.nom.apps.api.graphql.common.GraphQLFieldConsumptionCounter;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
-public class PersonResolver implements GraphQLQueryResolver {
+public class PersonResolver {
 
     private final IRessursService ressursService;
-    private final SecurityUtil securityUtil;
-    private final GraphQLFieldConsumptionCounter graphQLFieldConsumptionCounter;
 
+    public PersonResolver(IRessursService ressursService) {
+        this.ressursService = ressursService;
+    }
 
-    @Value("${app.graphql.preauth.query.person}")
-    private List<String> preauth;
+    public Optional<PersonResult> person(String personident) {
+        if (personident == null) {
+            return Optional.empty();
+        }
+        return ressursService.findByPersonIdent(personident)
+                .map(PersonResolver::fromRessurs)
+                .or(() -> Optional.of(baseRessurs(personident)));
 
-    public DataFetcherResult<PersonResult> person(ObjectNode objectNode, DataFetchingEnvironment env) {
-        return securityUtil.<PersonResult>checkAuth(env, preauth).orElseGet(() -> {
-            graphQLFieldConsumptionCounter.count(env);
-            var personIdentOptional = Optional.ofNullable(objectNode).map(n ->
-                    Optional.of(n.findValue("personIdent"))
-                            .orElse(n.findValue("personident")).asText());
-            if (personIdentOptional.isEmpty()) {
-                return DataFetcherResult.<PersonResult>newResult()
-                        .data(null)
-                        .build();
-            }
-            String personIdent = personIdentOptional.get();
-            var ressursResult = ressursService.findByPersonIdent(personIdent);
+    }
 
-            var personResult = PersonResult.builder().personIdent(personIdent).personident(personIdent);
-            ressursResult.ifPresent(res -> personResult.nomId(res.getId()).navIdent(res.getNavIdent()).navident(res.getNavIdent()));
+    private static PersonResult baseRessurs(String personIdent) {
+        return PersonResult.builder()
+                .personIdent(personIdent)
+                .personident(personIdent)
+                .build();
+    }
 
-            return DataFetcherResult.<PersonResult>newResult()
-                    .data(personResult.build())
-                    .build();
-        });
+    public static PersonResult fromRessurs(IRessurs ressurs) {
+        return PersonResult.builder()
+                .personident(ressurs.getPersonIdent())
+                .personIdent(ressurs.getPersonIdent())
+                .nomId(ressurs.getId())
+                .navident(ressurs.getNavIdent())
+                .navIdent(ressurs.getNavIdent())
+                .build();
     }
 }

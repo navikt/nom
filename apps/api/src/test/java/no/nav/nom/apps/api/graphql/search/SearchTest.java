@@ -1,10 +1,7 @@
 package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.SneakyThrows;
-import lombok.val;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
-import no.nav.nom.apps.api.DvhOrgenhetMockUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -30,7 +27,6 @@ public class SearchTest extends GraphQLTestBase {
     private DvhRestConsumer dvhRestConsumer;
 
     @Test
-    @SneakyThrows
     @DisplayName("Søk på navident")
     public void scenario1() {
         createRessursHendelse("1");
@@ -38,27 +34,26 @@ public class SearchTest extends GraphQLTestBase {
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
-        val response = postForResource("search/scenario1.graphql", false);
-        val searchResults = response.getList("$.data.search", Ressurs.class);
+        final var response = postForResource("search/scenario1.graphql");
+        final var searchResults = response.path("search").entityList(Ressurs.class).get();
 
         assertThat(searchResults, hasSize(2));
 
-        val navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
+        final var navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
         assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
-        val mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
+        final var mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
 
-        val response = postForResource("search/scenario2.graphql", false);
-        val searchResults = response.getList("$.data.search", OrgEnhet.class);
-        val agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
+        final var response = postForResource("search/scenario2.graphql");
+        final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
+        final var agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
         assertThat(searchResults.size(), greaterThan(1));
         assertThat(agressoIds, hasItem(mockedEnhet.getORGENHET_KODE()));
@@ -67,26 +62,24 @@ public class SearchTest extends GraphQLTestBase {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("search/scenario3.graphql", false);
-        val searchResults = response.getList("$.data.search", OrgEnhet.class);
-        val enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
+        final var response = postForResource("search/scenario3.graphql");
+        final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
+        final var enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
         assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
-        val mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         createRessursHendelse("1");
@@ -95,10 +88,10 @@ public class SearchTest extends GraphQLTestBase {
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadFromDvh();
 
-        val response = postForResource("search/scenario4.graphql", false);
-        val searchResults = response.get("$.data.search", JsonNode.class);
+        final var response = postForResource("search/scenario4.graphql");
+        final var searchResults = response.path("search").entity(JsonNode.class).get();
 
-        val resultTypes = StreamSupport
+        final var resultTypes = StreamSupport
                 .stream(searchResults.spliterator(), false)
                 .map(result -> result.get("__typename").asText())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));

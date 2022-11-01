@@ -18,13 +18,13 @@ public class NomProxyRestClient {
     private final AppProperties appProperties;
 
     public JsonNode getEnheterResponse(){
-        return dvhExchange(appProperties.getProxy().getEnhetPath()).get("NOM_HRORG_ORGENHETResponse").get("NOM_HRORG_ORGENHETResult");
+        return dvhExchange(appProperties.proxy().enhetPath()).get("NOM_HRORG_ORGENHETResponse").get("NOM_HRORG_ORGENHETResult");
     }
 
     private JsonNode dvhExchange(String path) {
         val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
 
-        return restTemplate.exchange(appProperties.getProxy().getBaseUrl() + path, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return restTemplate.exchange(appProperties.proxy().baseUrl() + path, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 }

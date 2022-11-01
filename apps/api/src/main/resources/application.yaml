@@ -11,21 +11,6 @@ app:
     tema: GEN
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
-  graphql:
-    preauth:
-      query:
-        person: ${GRAPHQL_PREAUTH_QUERY_PERSON}
-      mutation:
-        ressurs: ${GRAPHQL_PREAUTH_MUTATION_RESSURS}
-
-nom:
-  libs:
-    utils:
-      common:
-        kafka:
-          load-properties: false
-        app:
-          load-properties: true
 
 authentication:
   aad:
@@ -35,33 +20,15 @@ authentication:
   groups:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
 
-graphql:
-  playground:
-    tabs:
-      - name: Enhet
-        query: classpath:playground/organisasjonsenhet.graphql
-      - name: Ressurs
-        query: classpath:playground/ressurs.graphql
-      - name: Person
-        query: classpath:playground/person.graphql
-    enabled: true
-  voyager:
-    enabled: true
-  servlet:
-    mapping: /graphql
-    enabled: true
-    corsEnabled: true
-    cors:
-      allowed-origins: "*"
-    actuator-metrics: true
-    tracing-enabled: false
-
-# Av en eller annen grunn, så vil ikke dette feltet være satt ved lasting i GCP, fungerer on-prem så får se litt mer på det senere, men spring boot oppgradering burde gå først siden de endrer litt på lasting av properties.
-management.endpoints.web.exposure.include: health,prometheus
+server:
+  shutdown: graceful
 
 spring:
+  application:
+    name: "nom-api"
   main:
-    allow-bean-definition-overriding: true
+    banner-mode: off
+    cloud-platform: kubernetes
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
     username: ${DATABASE_USERNAME}
@@ -75,3 +42,99 @@ spring:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+  graphql:
+    graphiql:
+      enabled: true # Enable playground
+    cors:
+      allowed-origins: "*" # Allow all origins
+    schema:
+      printer:
+        enabled: true #
+
+management:
+  metrics:
+    tags:
+      app: ${app.appName}
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus,health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api
+
+--- # This is the same as having an application-dev.yaml file
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+
+app:
+  graphql:
+    auth:
+      clients:
+        nom-ui2:
+          client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
+          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        ida:
+          client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
+          scopes: ["MUTATE_RESSURS"]
+        dolly:
+          client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
+          scopes: [ "MUTATE_RESSURS" ]
+        remedy:
+          client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
+          scopes: ["QUERY_PERSON"]
+        fullmaktsregister-web:
+          client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
+          scopes: ["QUERY_PERSON"]
+
+NIK_BASEURL: "https://nav-ident.dev.intern.nav.no"
+NIK_CLIENT_ID: "dev-gcp.org.nav-ident"
+
+PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io"
+PDL_CLIENT_ID: "dev-fss.pdl.pdl-api"
+
+NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
+NOM_PROXY_CLIENT_ID: "dev-fss.nom.nom-proxy"
+
+NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
+
+--- # This is the same as having an application-prod.yaml file
+spring:
+  config:
+    activate:
+      on-profile: prod && !dev
+  graphql:
+    graphiql:
+      enabled: false # Disable graphiql in production
+
+app:
+  graphql:
+    auth:
+      clients:
+        nom-ui2:
+          client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
+          scopes: ["QUERY_PERSON"]
+        remedy:
+          client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
+          scopes: [ "QUERY_PERSON" ]
+
+NIK_BASEURL: "https://nav-ident.intern.nav.no"
+NIK_CLIENT_ID: "prod-gcp.org.nav-ident"
+
+PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
+PDL_CLIENT_ID: "prod-fss.pdl.pdl-api"
+
+NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
+NOM_PROXY_CLIENT_ID: "prod-fss.nom.nom-proxy"
+
+NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
+

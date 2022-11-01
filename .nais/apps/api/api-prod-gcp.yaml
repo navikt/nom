@@ -8,25 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
-    - name: NIK_BASEURL
-      value: https://nav-ident.intern.nav.no
-    - name: NIK_CLIENT_ID
-      value: prod-gcp.org.nav-ident
-    - name: PDL_BASEURL
-      value: https://pdl-api.prod-fss-pub.nais.io
-    - name: PDL_CLIENT_ID
-      value: prod-fss.pdl.pdl-api
-    - name: NOM_PROXY_BASEURL
-      value: https://nom-proxy.prod-fss-pub.nais.io
-    - name: NOM_PROXY_CLIENT_ID
-      value: prod-fss.nom.nom-proxy
-    - name: GRAPHQL_PREAUTH_QUERY_PERSON
-      value: 78847351-6ee0-43cc-9c17-b92bc1eb076d, 407c569a-a2e9-4530-9d9d-0270f4db8cf3
-    - name: GRAPHQL_PREAUTH_MUTATION_RESSURS
-      value: noone
-    - name: NOM_WRITE_GROUPID
-      value: "1334a91a-c4e0-409e-a497-3c4453869874"
+      value: log-logstash, prod
   envFrom:
     - secret: nom-sluttdato-override-json
   image: {{image}}

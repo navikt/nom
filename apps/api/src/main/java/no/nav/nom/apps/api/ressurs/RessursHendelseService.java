@@ -79,7 +79,7 @@ public class RessursHendelseService {
 
     @SneakyThrows
     public void createOpprettetHendelser(List<DvhRessurs> dvhRessursList) {
-        val jwt = tokenRepository.getSystemAadToken("api://"+authenticationProperties.getAad().getClientId()+"/.default");
+        val jwt = tokenRepository.getSystemAadToken("api://" + authenticationProperties.aad().clientId() + "/.default");
         HendelseMetadata.OpprettetAv opprettetAv = new HendelseMetadata.OpprettetAv(jwt.getJWTClaimsSet().getClaim("azp_name").toString(), jwt.getJWTClaimsSet().getClaim("azp_name").toString());
         LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
@@ -104,7 +104,7 @@ public class RessursHendelseService {
 
     @SneakyThrows
     public void createEndreTilNyttPersonnummerHendelser(Map<UUID, DvhRessurs> dvhRessursByFid) {
-        val jwt = tokenRepository.getSystemAadToken("api://"+authenticationProperties.getAad().getClientId()+"/.default");
+        val jwt = tokenRepository.getSystemAadToken("api://" + authenticationProperties.aad().clientId() + "/.default");
         HendelseMetadata.OpprettetAv opprettetAv = new HendelseMetadata.OpprettetAv(jwt.getJWTClaimsSet().getClaim("azp_name").toString(), jwt.getJWTClaimsSet().getClaim("azp_name").toString());
         LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 

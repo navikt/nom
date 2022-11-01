@@ -2,34 +2,46 @@ package no.nav.nom.apps.api;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.libs.test.SecurityTestUtils;
-import org.junit.ClassRule;
 import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.StreamUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@ActiveProfiles({"test", "log-console-error"})
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+@ActiveProfiles({
+        "test",
+        "log-console-error"
+})
 @WireMockStubs(RsaStub.class)
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = TestConfig.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = {TestBase.Initializer.class})
+@SpringBootTest(
+        classes = TestConfig.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@ContextConfiguration(
+        initializers = TestBase.Initializer.class
+)
+@Testcontainers
 public abstract class TestBase {
 
-    @ClassRule
-    public static PostgreSQLContainer postgreSQLContainer = CustomPostgreSQLContainer.getInstance();
+    // Singleton pattern with static start and custom spring initializer
+    public static PostgreSQLContainer<?> postgreSQLContainer = CustomPostgreSQLContainer.getInstance();
 
     static {
         postgreSQLContainer.start();
@@ -37,6 +49,9 @@ public abstract class TestBase {
 
     @Autowired
     private SecurityTestUtils securityTestUtils;
+
+    @Autowired
+    protected ResourceLoader resourceLoader;
 
     @Autowired
     private DvhRepository dvhRepository;
@@ -51,7 +66,6 @@ public abstract class TestBase {
     protected PdlUtils pdlUtils;
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void reset() {
         dvhRepository.clearRepository();
         genericStorage.deleteAll();
@@ -70,10 +84,26 @@ public abstract class TestBase {
         }
     }
 
-    protected JWTClaimsSet.Builder validJwtWithAzpClaim(){
-        val jwtClaimsBuilder = securityTestUtils.validJwtClaims();
-        val subject = jwtClaimsBuilder.getClaims().get("sub");
-        return securityTestUtils.validJwtClaims()
-                .claim("azp", subject);
+    protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
+        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
+        final var subject = jwtClaimsBuilder.getClaims().get("sub");
+        return securityTestUtils.validJwtClaims().claim("azp", subject);
+    }
+
+    /**
+     * Loads a given resource from the test classpath using ResourceLoader
+     * @param location path to the resource
+     * @return The string content of the resource
+     * @throws IOException
+     */
+    protected String loadResourceFromClasspath(String location) throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:" + location);
+        return loadResource(resource);
+    }
+
+    private String loadResource(Resource resource) throws IOException {
+        try (InputStream inputStream = resource.getInputStream()) {
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        }
     }
 }

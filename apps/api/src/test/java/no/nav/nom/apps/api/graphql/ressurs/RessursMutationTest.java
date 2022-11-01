@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,20 +16,17 @@ public class RessursMutationTest extends RessursTestBase {
     //@Test
     @DisplayName("Opprett ressurs")
     void scenario11() {
-        val personIdent = "12345678901";
+        final var personIdent = "12345678901";
         pdlUtils.mockSinglePersonResponse(personIdent);
 
-        var response = postForResource("ressurs/opprettRessurs.graphql", false, Map.of("personIdent", personIdent));
-        //assertThat(response.get("$.data.opprettRessurs.nomId")).isNotNull();
-        assertThat(response.get("$.data.opprettRessurs.navIdent")).isEqualTo("E000000");
-        assertThat(response.get("$.data.opprettRessurs.personIdent")).isEqualTo(personIdent);
+        var response = postForResource("ressurs/opprettRessurs.graphql", Map.of("personIdent", personIdent));
+        //assertThat(response.path("opprettRessurs.nomId").entity(String.class).get()).isNotNull();
+        assertThat(response.path("opprettRessurs.navIdent").entity(String.class).get()).isEqualTo("E000000");
+        assertThat(response.path("opprettRessurs.personIdent").entity(String.class).get()).isEqualTo(personIdent);
 
-        assertThat(response.get("$.data.opprettRessurs.person.navn.fornavn")).isEqualTo("fornavn");
-        assertThat(response.get("$.data.opprettRessurs.person.navn.mellomnavn")).isEqualTo("mellomnavn");
-        assertThat(response.get("$.data.opprettRessurs.person.navn.etternavn")).isEqualTo("etternavn");
+        assertThat(response.path("opprettRessurs.person.navn.fornavn").entity(String.class).get()).isEqualTo("fornavn");
+        assertThat(response.path("opprettRessurs.person.navn.mellomnavn").entity(String.class).get()).isEqualTo("mellomnavn");
+        assertThat(response.path("opprettRessurs.person.navn.etternavn").entity(String.class).get()).isEqualTo("etternavn");
 
     }
-
-
-
 }

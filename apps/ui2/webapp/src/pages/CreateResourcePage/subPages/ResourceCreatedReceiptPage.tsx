@@ -13,15 +13,15 @@ import type { ReactNode } from "react";
 import { useParams } from "react-router";
 
 import type { Ressurs } from "../../../api/generated/graphql_generated";
-import { useHentRessursMedNavIdentQuery } from "../../../api/generated/graphql_generated";
+import { useHentRessursMedNavidentQuery } from "../../../api/generated/graphql_generated";
 import RessursInfo from "../../../components/OrgHierarki/RessursInfo";
 import { isInDevelopment as isInDevelopment } from "../../../resources/utils/utils";
 
 export function ResourceCreatedReceiptPage() {
   const { navIdent } = useParams();
 
-  const hentRessursQuery = useHentRessursMedNavIdentQuery({
-    variables: { navIdent },
+  const hentRessursQuery = useHentRessursMedNavidentQuery({
+    variables: { navident: navIdent },
   });
 
   if (hentRessursQuery.loading) {
@@ -86,8 +86,8 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
             `}
           />
           <span>
-            Opprettelse av ressurs er vellykket! NAV-ident {ressurs.navIdent} er
-            opprettet for {ressurs.visningsNavn}. Personens e-post og
+            Opprettelse av ressurs er vellykket! NAV-ident {ressurs.navident} er
+            opprettet for {ressurs.visningsnavn}. Personens e-post og
             telefonnummer vil være synlig om noen dager.
           </span>
           <CircleWithNumber>2</CircleWithNumber>
