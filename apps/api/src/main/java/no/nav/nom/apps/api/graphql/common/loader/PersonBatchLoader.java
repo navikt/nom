@@ -65,7 +65,7 @@ public class PersonBatchLoader {
                 .build();
     }
 
-    private  ExchangeFilterFunction setBearerAuthWith(TokenRepository tokenRepository, String clientId) {
+    public static ExchangeFilterFunction setBearerAuthWith(TokenRepository tokenRepository, String clientId) {
         // Utility outbound exchange filter on webclient to set the authorization header
         return ExchangeFilterFunction.ofRequestProcessor(
                 request -> Mono.just(
