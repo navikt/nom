@@ -20,18 +20,13 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 public class EventAggregateListener {
-
-    public static final String CACHE = "cache-source-kafka";
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
     private final KafkaStateRessursService kafkaStateRessursService;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     public EventAggregateListener(@Value("${app.kafka.stateTopic}") String stateTopic, KafkaStateRessursService kafkaStateRessursService, ObjectMapper objectMapper, ApplicationEventPublisher applicationEventPublisher){
         this.stateTopic = stateTopic;
         this.kafkaStateRessursService = kafkaStateRessursService;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @KafkaListener(topicPartitions =
@@ -43,9 +38,6 @@ public class EventAggregateListener {
                 .forEach(r -> {
                     kafkaStateRessursService.putEventAggregate(r.value());
                 });
-
-        kafkaStateRessursService.getAll();
-
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> {
             log.info("Kafka state listener initial load finished");

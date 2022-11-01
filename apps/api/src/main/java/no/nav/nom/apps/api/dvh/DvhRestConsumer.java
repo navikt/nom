@@ -16,8 +16,6 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,18 +39,15 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
-
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final ApplicationEventPublisher appEventPublisher;
     private final EventAggregateListener eventAggregateListener;
     private final RessursHendelseService ressursHendelseService;
     private final LeaderElection leaderElection;
-    private final Environment environment;
     private final DvhDataLoader dvhDataLoader;
 
     public boolean initloadComplete(){
@@ -60,8 +55,7 @@ public class DvhRestConsumer {
     }
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void loadFromDvh() {
-
+    public void scheduledLoadlFromDvh(){
         while (!eventAggregateListener.initloadComplete()){
             try {
                 Thread.sleep(5*1000);
@@ -70,7 +64,10 @@ public class DvhRestConsumer {
             }
 
         }
+        loadFromDvh();
+    }
 
+    public void loadFromDvh() {
         log.info("Laster ressurser fra dvh");
         loadRessurserFromDvh();
         if (leaderElection.isLeader()) {

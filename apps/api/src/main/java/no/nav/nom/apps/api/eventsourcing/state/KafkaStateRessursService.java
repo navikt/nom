@@ -13,12 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KafkaStateRessursService {
     private final Map<UUID, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
+    private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
+
     public Optional<RessursState> findByFid(UUID fid) {
         return Optional.ofNullable(ressursByFid.get(fid));
     }
 
     public Optional<RessursState> findByPersonident(String personident) {
         return Optional.ofNullable(ressursByPersonident.get(personident));
+    }
+
+    public Optional<RessursState> findByNavident(String navident) {
+        return Optional.ofNullable(ressursByPersonident.get(navident));
     }
 
     public Collection<RessursState> getAll() {
@@ -28,5 +34,6 @@ public class KafkaStateRessursService {
     public void putEventAggregate(RessursState ressursEventData){
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
+        ressursByNavident.put(ressursEventData.navident(), ressursEventData);
     }
 }
