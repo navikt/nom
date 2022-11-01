@@ -6,12 +6,11 @@ import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 import static no.nav.nom.apps.api.dvh.DvhRestConsumer.CACHE;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class ReadinessChanger {
     private final ApplicationEventPublisher appEventPublisher;

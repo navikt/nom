@@ -1,0 +1,10 @@
+app:
+  kafka:
+    eventsourceTopic: nom-eventsource-v1
+    stateTopic: nom-state-v1
+
+spring:
+  kafka:
+    streams:
+      application-id: nom-kafka-aggreagte-converter
+      bootstrap-servers: localhost:39092

@@ -1,4 +1,7 @@
 app:
+  kafka:
+    stateTopic: nom-state-v1
+    eventsourceTopic: nom-eventsource-v1
   appName: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
@@ -50,6 +53,14 @@ spring:
     schema:
       printer:
         enabled: true #
+  kafka:
+    producer:
+      bootstrap-servers: localhost:39092
+    consumer:
+      bootstrap-servers: localhost:39092
+      max-poll-records: 1000
+      auto-offset-reset: earliest
+      enable-auto-commit: false
 
 management:
   metrics:

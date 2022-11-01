@@ -21,6 +21,8 @@ public class DvhRessurs implements IRessurs {
 
     String navIdent;
     String personIdent;
+    String fornavn;
+    String etternavn;
     String remedyAnsattType;
     Boolean remedyAktiv;
     JsonNode rawData;
@@ -32,6 +34,8 @@ public class DvhRessurs implements IRessurs {
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
+        fornavn = node.get("FORNAVN").asText();
+        etternavn = node.get("ETTERNAVN").asText();
         remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
         remedyAnsattType = node.get("ANSATT_TYPE").asText();
         this.rawData = node;

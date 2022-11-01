@@ -20,5 +20,6 @@
         <module>nom-ressurser</module>
         <module>unit4</module>
         <module>nav-ident</module>
+        <module>kafka-aggregate-converter</module>
     </modules>
 </project>
