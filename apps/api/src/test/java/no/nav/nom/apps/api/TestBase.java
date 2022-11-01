@@ -5,8 +5,8 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import no.nav.nom.libs.test.RsaStub;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
@@ -38,6 +39,7 @@ import java.nio.charset.StandardCharsets;
         initializers = TestBase.Initializer.class
 )
 @Testcontainers
+@EmbeddedKafka(partitions = 1, topics = {"nom-eventsource"}, controlledShutdown = true)
 public abstract class TestBase {
 
     // Singleton pattern with static start and custom spring initializer
@@ -65,12 +67,16 @@ public abstract class TestBase {
     @Autowired
     protected PdlUtils pdlUtils;
 
+    @Autowired
+    protected KafkaUtils kafkaUtils;
+
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
+        kafkaUtils.clearKafka();
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

@@ -40,6 +40,7 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
         IRessurs ressurs = createRessursHendelse("");
+        createRessursHendelse2("");
 
         final var response = postForResource("ressurs/scenario1.graphql");
 

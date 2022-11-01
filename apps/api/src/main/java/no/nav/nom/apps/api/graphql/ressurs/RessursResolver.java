@@ -38,7 +38,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonMap;
 import static java.util.Map.entry;
 
 @Component
