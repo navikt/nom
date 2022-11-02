@@ -121,6 +121,11 @@ query HentRessursMedNavident($navident: String) {
     epost
     sektor
     visningsNavn
+    telefon {
+      beskrivelse
+      nummer
+      type
+    }
     ledere {
       ressurs {
         navident

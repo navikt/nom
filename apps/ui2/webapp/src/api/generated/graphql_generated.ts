@@ -334,7 +334,7 @@ export type HentRessursMedNavidentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsNavn?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsNavn?: string | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsNavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, orgNiv: string, agressoId: string } }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, navn: string, orgNiv: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1049,6 +1049,11 @@ export const HentRessursMedNavidentDocument = gql`
     epost
     sektor
     visningsNavn
+    telefon {
+      beskrivelse
+      nummer
+      type
+    }
     ledere {
       ressurs {
         navident
