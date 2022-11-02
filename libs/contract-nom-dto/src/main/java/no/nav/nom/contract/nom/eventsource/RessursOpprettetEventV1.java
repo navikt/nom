@@ -13,6 +13,10 @@ public class RessursOpprettetEventV1 extends Event {
         super(fid, data, metadata);
     }
 
+    public RessursOpprettetEventV1(UUID fid, RessursRegisteredEventData data, InputMetadata inputMetadata) {
+        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()));
+    }
+
     public RessursOpprettetEventV1(RessursRegisteredEventData data, InputMetadata inputMetadata) {
         super(UUID.randomUUID(), data, new Metadata(inputMetadata, LocalDateTime.now()));
     }

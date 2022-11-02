@@ -12,6 +12,10 @@ import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
@@ -21,6 +25,8 @@ public class EventAggregateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
     private final KafkaStateRessursService kafkaStateRessursService;
+
+    private final Map<UUID, CompletableFuture<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
 
     public EventAggregateListener(@Value("${app.kafka.stateTopic}") String stateTopic, KafkaStateRessursService kafkaStateRessursService){
         this.stateTopic = stateTopic;
@@ -35,6 +41,9 @@ public class EventAggregateListener {
         StreamSupport.stream(records.spliterator(), false)
                 .forEach(r -> {
                     kafkaStateRessursService.putEventAggregate(r.value());
+                    if(waitingMapByFid.containsKey(UUID.fromString(r.key()))) {
+                        waitingMapByFid.remove(UUID.fromString(r.key())).complete(r.value());
+                    }
                 });
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka state listener initial load finished"));
@@ -42,5 +51,9 @@ public class EventAggregateListener {
 
     public boolean initloadComplete(){
         return initialLoadComplete.get();
+    }
+
+    public CompletableFuture<RessursState> waitForAggregate(UUID fid){
+        return waitingMapByFid.put(fid, new CompletableFuture<>());
     }
 }

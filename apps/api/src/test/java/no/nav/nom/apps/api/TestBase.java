@@ -39,7 +39,7 @@ import java.nio.charset.StandardCharsets;
         initializers = TestBase.Initializer.class
 )
 @Testcontainers
-@EmbeddedKafka(partitions = 1, topics = {"nom-eventsource"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
 public abstract class TestBase {
 
     // Singleton pattern with static start and custom spring initializer

@@ -55,12 +55,15 @@ spring:
         enabled: true #
   kafka:
     producer:
-      bootstrap-servers: localhost:39092
+      bootstrap-servers: ${KAFKA_BROKERS}
     consumer:
-      bootstrap-servers: localhost:39092
+      bootstrap-servers: ${KAFKA_BROKERS}
       max-poll-records: 1000
       auto-offset-reset: earliest
       enable-auto-commit: false
+    listener:
+      missing-topics-fatal: true
+    client-id: ${spring.application.name}
 
 management:
   metrics:
