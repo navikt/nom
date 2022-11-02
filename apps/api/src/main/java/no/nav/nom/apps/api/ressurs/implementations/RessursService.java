@@ -139,7 +139,7 @@ public class RessursService implements IRessursService {
         var sektor = Optional.ofNullable(ressurs.getSektor())
                 .map(Sektor::valueOf)
                 .map(Collections::singletonList)
-                .orElseGet(() -> dvhRessursIntersface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()));
+                .orElseGet(() -> dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()));
 
         return Ressurs.builder()
                 .nomId(ressurs.getId())
