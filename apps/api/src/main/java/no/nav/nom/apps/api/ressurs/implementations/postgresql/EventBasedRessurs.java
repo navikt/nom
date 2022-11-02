@@ -59,7 +59,7 @@ public class EventBasedRessurs implements IRessurs {
     }
     @Override
     public String getSektor() {
-        return getLast(SEKTOR_FIELD).orElseThrow();
+        return getLast(SEKTOR_FIELD).orElse(null);
     }
 
     private Optional<String> getLast(String property) {

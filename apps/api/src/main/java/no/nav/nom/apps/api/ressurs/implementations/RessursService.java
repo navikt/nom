@@ -15,9 +15,11 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessursInterface;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.api.graphql.Sektor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,7 +136,11 @@ public class RessursService implements IRessursService {
 
     @Override
     public Ressurs convertToGraphQlResponse(IRessurs ressurs) {
-        var sektor = dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent());
+        var sektor = Optional.ofNullable(ressurs.getSektor())
+                .map(Sektor::valueOf)
+                .map(Collections::singletonList)
+                .orElseGet(() -> dvhRessursIntersface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()));
+
         return Ressurs.builder()
                 .nomId(ressurs.getId())
                 .navIdent(ressurs.getNavIdent())
