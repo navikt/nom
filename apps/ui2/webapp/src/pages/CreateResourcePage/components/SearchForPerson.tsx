@@ -25,6 +25,7 @@ export function SearchForPerson() {
         border-radius: 5px;
         display: flex;
         flex-direction: column;
+        background: white;
         gap: var(--navds-spacing-4);
       `}
     >
