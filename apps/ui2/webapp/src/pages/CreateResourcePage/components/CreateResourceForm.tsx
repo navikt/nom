@@ -35,11 +35,11 @@ const rowStyles = css({
 });
 
 export default function CreateResourceForm() {
-  const { personIdentInBase64 } = useParams();
-  const personIdent = decode(personIdentInBase64 ?? "");
+  const { personidentInBase64 } = useParams();
+  const personident = decode(personidentInBase64 ?? "");
 
   const hentPersonQuery = useHentPersonQuery({
-    variables: { personident: personIdent ?? "" },
+    variables: { personident: personident ?? "" },
     errorPolicy: "all",
   });
 
@@ -50,7 +50,7 @@ export default function CreateResourceForm() {
           align-self: center;
         `}
         size="2xlarge"
-        title={`Søker etter ${personIdent}`}
+        title={`Søker etter ${personident}`}
       />
     );
   }
@@ -76,8 +76,8 @@ export default function CreateResourceForm() {
       <>
         <ResourceMetadata person={personResult.person} />
         <CreateResourceFormInner
-          personIdent={personResult.personident}
           personResult={personResult.person}
+          personident={personResult.personident}
         />
       </>
     );
@@ -94,10 +94,10 @@ export const SektorNameMapping = {
 
 function CreateResourceFormInner({
   personResult,
-  personIdent,
+  personident,
 }: {
   personResult: FolkeregisterPerson;
-  personIdent: string;
+  personident: string;
 }) {
   const navigate = useNavigate();
   const {
@@ -108,7 +108,7 @@ function CreateResourceFormInner({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      personident: personIdent,
+      personident: personident,
       visningsfornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
       visningsmellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
       visningsetternavn: capitalizeName(personResult?.navn.etternavn ?? ""),

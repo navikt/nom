@@ -14,14 +14,14 @@ import { useParams } from "react-router";
 
 import type { Ressurs } from "../../../api/generated/graphql_generated";
 import { useHentRessursMedNavidentQuery } from "../../../api/generated/graphql_generated";
-import RessursInfo from "../../../components/OrgHierarki/RessursInfo";
 import { isInDevelopment as isInDevelopment } from "../../../resources/utils/utils";
+import { FocusedRessursView } from "../../OrganisasjonsHierarkiPage/components/FocusedRessursView";
 
 export function ResourceCreatedReceiptPage() {
-  const { navIdent } = useParams();
+  const { navident } = useParams();
 
   const hentRessursQuery = useHentRessursMedNavidentQuery({
-    variables: { navident: navIdent },
+    variables: { navident },
   });
 
   if (hentRessursQuery.loading) {
@@ -31,7 +31,7 @@ export function ResourceCreatedReceiptPage() {
           align-self: center;
         `}
         size="2xlarge"
-        title={`Søker etter ${navIdent}`}
+        title={`Søker etter ${navident}`}
       />
     );
   }
@@ -57,7 +57,7 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
         gap: var(--navds-spacing-6);
       `}
     >
-      <RessursInfo ressurs={ressurs} />
+      <FocusedRessursView focusedRessurs={ressurs} />
       <div
         className={css`
           display: flex;
@@ -104,8 +104,8 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Unit4Link() {
-  const { navIdent } = useParams();
-  const navIdentWithoutFirstLetter = navIdent?.slice(1);
+  const { navident } = useParams();
+  const navidentWithoutFirstLetter = navident?.slice(1);
   const unit4BaseUrl = isInDevelopment()
     ? "https://d26isvw00022.test.local"
     : "https://agresso.adeo.no";
@@ -116,7 +116,7 @@ function Unit4Link() {
       className={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/agrt01/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR&personId=${navIdentWithoutFirstLetter}&PersonellType=F`}
+      href={`${unit4BaseUrl}/agrt01/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
       icon={<ExternalLink aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"

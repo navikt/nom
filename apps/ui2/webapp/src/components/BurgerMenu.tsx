@@ -35,7 +35,7 @@ export function BurgerMenu() {
             <span>Opprett ressurs</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item onClick={() => navigate("org")}>
-            <img src={hierarchy2} />
+            <img alt="hierarki" src={hierarchy2} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
         </Dropdown.Menu.List>
