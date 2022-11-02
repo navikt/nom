@@ -28,6 +28,7 @@ export const FocusedRessursView = ({
       />
       <div
         className={css`
+          justify-content: space-between;
           display: flex;
           background: var(--nom-secondary-hover);
           border: 1px solid var(--navds-global-color-gray-500);
