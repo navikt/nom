@@ -30,9 +30,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Map.entry;
 
 @Slf4j
 @Tag(name = "Navident")
@@ -96,15 +95,15 @@ public class NavidentController {
                 final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
 
                 if (nikResponse.getStatusCode().is2xxSuccessful()) {
-                    Map<String, Object> data = Map.ofEntries(
-                            entry(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident()),
-                            entry(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident()),
-                            entry(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn()),
-                            entry(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn()),
-                            entry(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn()),
-                            entry(EventBasedRessurs.SEKTOR_FIELD, request.getSektor()),
-                            entry(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()))
-                    );
+                    Map<String, Object> data = new HashMap<>();
+
+                    data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
+                    data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
+                    data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn());
+                    data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn());
+                    data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn());
+                    data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
+                    data.put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
 
                     final var metadata = HendelseMetadataSerialize.builder()
                             .opprettetAv(new HendelseMetadata.OpprettetAv(token))

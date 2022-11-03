@@ -32,14 +32,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static java.util.Collections.singletonMap;
-import static java.util.Map.entry;
 
 @Component
 public class RessursResolver {
@@ -135,15 +133,15 @@ public class RessursResolver {
                 .map(pers -> pers.getKjonn().name())
                 .orElseGet(Kjonn.UKJENT::name);
 
-        Map<String, Object> data = Map.ofEntries(
-                entry(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident()),
-                entry(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident()),
-                entry(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn()),
-                entry(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn()),
-                entry(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn()),
-                entry(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name()),
-                entry(EventBasedRessurs.KJONN_FIELD, kjoenn)
-        );
+        Map<String, Object> data = new HashMap<>();
+
+        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
+        data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
+        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn());
+        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn());
+        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn());
+        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
+        data.put(EventBasedRessurs.KJONN_FIELD, kjoenn);
 
         return ressursService.opprettRessurs(request.getPersonident(), data, metadataFromToken(token, data));
     }
