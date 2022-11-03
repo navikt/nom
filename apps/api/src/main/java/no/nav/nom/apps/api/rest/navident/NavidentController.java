@@ -118,8 +118,8 @@ public class NavidentController {
                 }
 
                 responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());
-            } catch (Exception e) {
-                log.info(e.getCause().getMessage());
+            } catch (Exception exception) {
+                log.info("Unhandled exception during creation of navident: " + exception.getMessage(), exception);
                 responseBody.status(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value())).feilmelding("Intern feil inntraff");
             }
 
