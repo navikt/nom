@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -85,7 +86,7 @@ public class NavidentController {
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
     public ResponseEntity<NavidentResponse> opprettNavident(
             @RequestBody NavidentRequest request,
-            @AuthenticationPrincipal JwtAuthenticationToken token
+            @NonNull JwtAuthenticationToken token
     ) {
         final var responseBody = NavidentResponse.builder()
                 .status(Integer.toString(HttpStatus.OK.value()));
