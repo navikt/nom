@@ -20,7 +20,7 @@ public class NavidentResponse {
 
 
     public static NavidentResponse medFeilmelding(HttpStatus status, String feilmelding) {
-        medFeilmelding(Integer.toString(status.value()), feilmelding);
+        return medFeilmelding(Integer.toString(status.value()), feilmelding);
     }
 
     public static NavidentResponse medFeilmelding(String status, String feilmelding) {
