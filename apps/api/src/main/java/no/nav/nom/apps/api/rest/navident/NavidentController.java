@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Tag(name = "Navident")
@@ -59,6 +61,7 @@ public class NavidentController {
         this.ressursService = ressursService;
         this.pdlConsumer = pdlConsumer;
     }
+
 
     @ExceptionHandler({AccessDeniedException.class})
     @ResponseBody
@@ -88,54 +91,61 @@ public class NavidentController {
             @RequestBody NavidentRequest request,
             @NonNull JwtAuthenticationToken token
     ) {
-        final var responseBody = NavidentResponse.builder()
-                .status(Integer.toString(HttpStatus.OK.value()));
+        final var funnetRessurs = ressursService.findByPersonIdent(request.getPersonident());
 
-        final var ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
-            try {
-                final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
-
-                if (nikResponse.getStatusCode().is2xxSuccessful()) {
-                    Map<String, Object> data = new HashMap<>();
-
-                    data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
-                    data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
-                    data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn());
-                    data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn());
-                    data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn());
-                    data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
-                    data.put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
-
-                    final var metadata = HendelseMetadataSerialize.builder()
-                            .opprettetAv(new HendelseMetadata.OpprettetAv(token))
-                            .opprettetTidspunkt(LocalDateTime.now())
-                            .rawInputData(mapper.valueToTree(data))
-                            .build();
-
-                    responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
-
-                    return ressursService.opprettRessurs(request.getPersonident(), data, metadata);
-                }
-
-                responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());
-            } catch (Exception exception) {
-                log.info("Unhandled exception during creation of navident: " + exception.getMessage(), exception);
-                responseBody.status(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value())).feilmelding("Intern feil inntraff");
-            }
-
-            return null;
-        });
-
-        if (ressurs != null) {
-            responseBody
-                    .personident(ressurs.getPersonIdent())
-                    .navident(ressurs.getNavIdent())
-                    .fornavn(ressurs.getVisningsfornavn().orElse(null))
-                    .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
-                    .etternavn(ressurs.getVisningsetternavn().orElse(null));
+        if (funnetRessurs.isPresent()) {
+            return funnetRessurs.map(this::toNavidentResponse)
+                    .map(ResponseEntity::ok)
+                    .get();
         }
 
-        return ResponseEntity.ok(responseBody.build());
+        String opprettetNavident;
+        try {
+            final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
+
+            if (!nikResponse.getStatusCode().is2xxSuccessful()) {
+                return ResponseEntity.ok(
+                        NavidentResponse.medFeilmelding(
+                                nikResponse.getStatusCode(),
+                                nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
+                        )
+                );
+            }
+
+            opprettetNavident = nikResponse.getBody().getNavident();
+
+        } catch (Exception exception) {
+            log.warn("Unhandled exception during call to nav-ident: " + exception.getMessage(), exception);
+            return ResponseEntity.ok(
+                    NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff")
+            );
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
+        data.put(EventBasedRessurs.NAVIDENT_FIELD, opprettetNavident);
+        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn());
+        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn());
+        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn());
+        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
+        data.put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
+
+        try {
+            final var metadata = HendelseMetadataSerialize.builder()
+                    .opprettetAv(new HendelseMetadata.OpprettetAv(token)) // This can throw a NullPointerException if JwtAuthenticationToken is null
+                    .opprettetTidspunkt(LocalDateTime.now())
+                    .rawInputData(mapper.valueToTree(data))
+                    .build();
+
+            final var opprettetRessurs = ressursService.opprettRessurs(request.getPersonident(), data, metadata);
+            return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
+
+        } catch (Exception exception) {
+            log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
+            return ResponseEntity.ok(
+                    NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff")
+            );
+        }
     }
 
     private String getKjonn(String personident, String identType) {
@@ -144,7 +154,19 @@ public class NavidentController {
         }
 
         return pdlConsumer.hentPerson(personident)
-                .map(pers -> pers.getKjonn().name())
+                .map(person -> person.getKjonn().name())
                 .orElseGet(Kjonn.UKJENT::name);
+    }
+
+
+    private NavidentResponse toNavidentResponse(IRessurs ressurs) {
+        return NavidentResponse.builder()
+                .status(Integer.toString(HttpStatus.OK.value()))
+                .personident(ressurs.getPersonIdent())
+                .navident(ressurs.getNavIdent())
+                .fornavn(ressurs.getVisningsfornavn().orElse(null))
+                .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
+                .etternavn(ressurs.getVisningsetternavn().orElse(null))
+                .build();
     }
 }
