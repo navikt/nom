@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,14 @@ public class PdlServiceImpl implements PdlService {
 
         String qryBody = getQuery(pdlHentIdentQry, "ident", id).toPrettyString();
 
-        String pdlResponse = postToPdl(qryBody, token);
+        String pdlResponse = null;
+
+        try {
+            pdlResponse = postToPdl(qryBody, token);
+        } catch (RuntimeException e) {
+            log.error("PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}***. Exception message: {}", pdlHentIdentQry, id.substring(0,5), e.getMessage());
+            return Collections.emptyList();
+        }
 
         if (pdlResponse == null) {
             log.error(String.format("PDL GraphQL returned empty response for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
@@ -90,7 +98,7 @@ public class PdlServiceImpl implements PdlService {
                 .body(Mono.just(qryBody), String.class)
                 .retrieve()
                 .bodyToMono(String.class)
-                .block();
+                .block(Duration.ofMillis(pdlConfig.getTimeoutInMillis()));
     }
 
     private JsonNode getQuery(String qry, String varialbleName, String variableValue) {

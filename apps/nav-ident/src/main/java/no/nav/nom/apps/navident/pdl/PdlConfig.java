@@ -11,7 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static no.nav.nom.apps.navident.common.ResourceReader.readFileToString;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 
 @Getter
@@ -23,6 +22,7 @@ public class PdlConfig {
     String tema;
     String aadClientId;
     String baseUrl;
+    int timeoutInMillis;
 
     @Value("${app.name}") private String appName;
 

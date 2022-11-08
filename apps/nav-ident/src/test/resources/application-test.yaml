@@ -51,6 +51,7 @@ app:
     tema: GEN
     baseUrl: http://localhost:${wiremock.server.port}
     aadClientId: test
+    timeoutInMillis: 500
 
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache

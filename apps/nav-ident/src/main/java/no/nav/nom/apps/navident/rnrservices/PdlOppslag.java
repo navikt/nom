@@ -50,7 +50,7 @@ public class PdlOppslag {
         List<String> pdlIder = pdlService.getKnownPersonider(need.personid);
 
         if (pdlIder == null || pdlIder.size() == 0) {
-            log.error("PDL kjenner ikke til personId som er angitt");
+            log.error("PDL kjenner ikke til personId som er angitt, eller oppslag feilet");
             pdlIder = Collections.emptyList();
         } else {
             need.setPdlGjeldendePersonid(pdlIder.get(0));   // Ta den første i listen. Skal være sortert slik at gjeldende folkeregistrert id er først

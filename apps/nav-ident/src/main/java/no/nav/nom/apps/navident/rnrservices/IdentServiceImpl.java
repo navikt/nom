@@ -104,7 +104,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
             if (latch != null) latch.countDown();
             if (latch == null)
-                log.error("Got final rnr ResponseProducer=visited message, but latch is not present in the request map. I thought this would not be possible when synchronized.. :(");
+                log.debug("Got final rnr ResponseProducer=visited message, but latch is not present in the request map. Got to be in a different pod - ignoring");
         }
 
         MDC.clear();

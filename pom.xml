@@ -331,7 +331,6 @@
                 <artifactId>wiremock-junit-extension</artifactId>
                 <version>${wiremock-extension.version}</version>
             </dependency>
-<!--   ^        Lagt inn pga dårlig dependency management i spring versjon 2.6.3-->
 
         </dependencies>
     </dependencyManagement>
