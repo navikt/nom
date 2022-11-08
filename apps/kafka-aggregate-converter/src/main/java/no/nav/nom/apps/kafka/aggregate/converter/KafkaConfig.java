@@ -27,7 +27,7 @@ class KafkaConfig {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, objectSerde.getClass().getName());
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 0);
 
-        props.putAll(kafkaProperties.getStreams().buildProperties());
+        props.putAll(kafkaProperties.buildStreamsProperties());
 
         return new KafkaStreamsConfiguration(props);
     }

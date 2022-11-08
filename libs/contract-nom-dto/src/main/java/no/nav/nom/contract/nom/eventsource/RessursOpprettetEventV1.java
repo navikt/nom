@@ -2,8 +2,6 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 public class RessursOpprettetEventV1 extends Event {
@@ -14,11 +12,11 @@ public class RessursOpprettetEventV1 extends Event {
     }
 
     public RessursOpprettetEventV1(UUID fid, RessursRegisteredEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()));
+        this(fid, data, Metadata.from(inputMetadata));
     }
 
     public RessursOpprettetEventV1(RessursRegisteredEventData data, InputMetadata inputMetadata) {
-        super(UUID.randomUUID(), data, new Metadata(inputMetadata, LocalDateTime.now()));
+        this(UUID.randomUUID(), data, Metadata.from(inputMetadata));
     }
 
     public record RessursRegisteredEventData(
@@ -27,17 +25,6 @@ public class RessursOpprettetEventV1 extends Event {
             Sektor sektor,
             Visningsnavn visningsnavn
     ) implements Data{
-
-        @Override
-        public Map<String, Object> toMap() {
-            return Map.of(
-                    "personident", personident,
-                    "navident", navident,
-                    "sektor", sektor,
-                    "visningsnavn", visningsnavn
-            );
-        }
-
         public record Visningsnavn(
                 String fornavn,
                 String mellomnavn,
@@ -49,5 +36,17 @@ public class RessursOpprettetEventV1 extends Event {
             NAV_KOMMUNAL,
             EKSTERN
         }
+    }
+
+    public record RessursOpprettetAdditionalData(
+            String navident,
+            String kjoenn,
+            FolkeregistrertNavn visningsnavn
+    ) implements Data{
+        public record FolkeregistrertNavn(
+                String fornavn,
+                String mellomnavn,
+                String etternavn
+        ){}
     }
 }

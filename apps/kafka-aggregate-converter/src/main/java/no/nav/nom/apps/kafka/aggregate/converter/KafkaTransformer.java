@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -37,6 +38,9 @@ class KafkaTransformer {
                 .aggregate(
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
+                            if(event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data){
+                                state.put("navident", data.navident());
+                            }
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;
                         },
@@ -58,7 +62,7 @@ class KafkaTransformer {
                         Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
                         visningsnavn.get("etternavn").asText()
                 ),
-                Optional.ofNullable(visningsnavn.hasNonNull("sluttdato") ? LocalDate.parse(visningsnavn.get("mellomnavn").asText()) : null)
+                Optional.ofNullable(eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null)
         );
     }
 }

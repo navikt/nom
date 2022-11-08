@@ -43,6 +43,7 @@ public class RessursCommadService {
         // TODO validate command
         return eventProducer.sendMessage(
                 new RessursSluttetEventV1(
+                        opprettRessursCommand.fid(),
                         new RessursSluttetEventV1.RessursSluttetEventData(
                                 opprettRessursCommand.sluttdato()
                         ),

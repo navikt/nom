@@ -1,10 +1,39 @@
 app:
   kafka:
-    eventsourceTopic: nom-eventsource-v1
+    eventsourceTopic: nom-eventsource
     stateTopic: nom-state-v1
 
 spring:
   kafka:
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     streams:
-      application-id: nom-kafka-aggreagte-converter
-    bootstrap-servers: localhost:39092
+      application-id: ${KAFKA_STREAMS_APPLICATION_ID}
+    bootstrap-servers: ${KAFKA_BROKERS}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, info, health
+      base-path: /internal
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true

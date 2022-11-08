@@ -53,9 +53,18 @@ public class RessursHendelseService {
     }
 
     public void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
-        if(dvhRessurs.getSluttdato() != null && !dvhRessurs.getSluttdato().equals(ressursState.sluttdato())){
-            ressursSluttet(ressursState.fid(), dvhRessurs);
-        }
+        ressursState.sluttdato().ifPresentOrElse(
+                (s) -> {
+                    if (!s.equals(dvhRessurs.getSluttdato())){
+                        ressursSluttet(ressursState.fid(), dvhRessurs);
+                    }
+                },
+                () -> {
+                    if (dvhRessurs.getSluttdato() != null){
+                        ressursSluttet(ressursState.fid(), dvhRessurs);
+                    }
+                }
+        );
     }
 
     public void ressursSluttet(UUID fid, DvhRessurs dvhRessurs){

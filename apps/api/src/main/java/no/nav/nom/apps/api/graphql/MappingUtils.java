@@ -19,7 +19,7 @@ public class MappingUtils {
                 .personIdent(ressursState.personident())
                 .ressurstype(sektor)
                 .sektor(sektor)
-                .sluttdato(ressursState.sluttdato())
+                .sluttdato(ressursState.sluttdato().orElse(null))
                 .fornavn(ressursState.visningsnavn().mellomnavn().map(m -> ressursState.visningsnavn().fornavn()+" "+m).orElse(ressursState.visningsnavn().fornavn()))
                 .etternavn(ressursState.visningsnavn().etternavn())
                 .build();
