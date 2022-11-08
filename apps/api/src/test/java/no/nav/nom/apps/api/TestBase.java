@@ -27,7 +27,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -137,11 +136,15 @@ public abstract class TestBase {
                         Optional.of("mellomnavn"+suffix),
                         "etternavn"+suffix
                 ),
-                LocalDate.now().plusDays(10)
+                null
         );
 
-        kafkaUtils.send(ressursState.fid().toString(), ressursState);
+        createRessursHendelse(ressursState);
 
         return ressursState;
+    }
+
+    protected void createRessursHendelse(RessursState ressursState) {
+        kafkaUtils.send(ressursState.fid().toString(), ressursState);
     }
 }

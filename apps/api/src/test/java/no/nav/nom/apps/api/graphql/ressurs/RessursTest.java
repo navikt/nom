@@ -18,8 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -133,14 +136,27 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
-        RessursState ressurs = createRessursHendelse("");
+        RessursState ressursState = new RessursState(
+                UUID.randomUUID(),
+                "testPersonIdent",
+                "testNavIdent",
+                RessursState.Sektor.NAV_STATLIG,
+                new RessursState.Visningsnavn(
+                        "fornavn",
+                        Optional.of("mellomnavn"),
+                        "etternavn"
+                ),
+                Optional.of(LocalDate.now().plusDays(10))
+        );
+
+        createRessursHendelse(ressursState);
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
-        assertEquals(ressurs.sluttdato(), outputRessurs.getSluttdato());
+        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
     }
 
     @Nested
