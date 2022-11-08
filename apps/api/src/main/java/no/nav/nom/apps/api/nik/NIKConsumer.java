@@ -2,8 +2,10 @@ package no.nav.nom.apps.api.nik;
 
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -26,18 +28,18 @@ public class NIKConsumer {
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(String personid, String forbokstav, String identType, boolean OBO) {
-        final var body = Mono.just(
+        final var body =
                 OpprettNavidentRequest.builder()
                         .personid(personid)
                         .identPrefix(forbokstav)
                         .identType(identType)
-                        .build()
-        );
+                        .build();
 
         return webClient.post()
                 .headers(httpHeaders -> httpHeaders.setBearerAuth(tokenRepository.getAadToken(nikProperties.aadClientId(), OBO).serialize()))
-                .body(body, OpprettNavidentRequest.class)
+                .body(BodyInserters.fromValue(body))
                 .retrieve()
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.
                 .toEntity(OpprettNavidentResponse.class)
                 .block();
     }

@@ -5,8 +5,11 @@ import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -17,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import({SecurityTestUtils.class})
+@ExtendWith(OutputCaptureExtension.class)
 class PdlServiceImplTest extends SpringBootTestBase {
     @Autowired
     protected PdlService pdlService;
@@ -58,6 +62,18 @@ class PdlServiceImplTest extends SpringBootTestBase {
         assertEquals(3, pldIdenter.size());
         assertEquals(ident, pldIdenter.get(0));
     }
+
+    @Test
+    public void pldTimeout_LogError_Return_empty(CapturedOutput output) {
+        String ident = "01019000004";
+
+        setSecurityContextAuthentication();
+        List<String> pldIdenter = pdlService.getKnownPersonider(ident); // 4 returnert, hvorav en aktorid, og 01019000003 er gjeldende
+
+        assertEquals(0, pldIdenter.size());
+        assertTrue(output.getOut().contains("Timeout on blocking read"));
+    }
+
 
     public void setSecurityContextAuthentication() {
         val builder = securityTestUtils.validJwtClaims();

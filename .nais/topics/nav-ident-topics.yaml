@@ -17,6 +17,9 @@ spec:
     - team: org
       application: nav-ident
       access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
 
 ---
 
@@ -39,3 +42,6 @@ spec:
     - team: org
       application: nav-ident
       access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read

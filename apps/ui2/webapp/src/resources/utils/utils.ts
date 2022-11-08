@@ -55,3 +55,13 @@ export function capitalizeName(name: string) {
 
   return nameInProgress;
 }
+
+export function formatTlf(nr: string) {
+  const temporaryNumber =
+    nr.startsWith("47") && nr.length === 10 ? nr.slice(2) : nr;
+  const out = [];
+  for (let k = 0; k < 8; k += 2) {
+    out.push(temporaryNumber.slice(k, k + 2));
+  }
+  return out.join(" ");
+}

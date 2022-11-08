@@ -63,7 +63,7 @@ public class PdlConsumer {
                 .map(res -> res.field("hentPerson").toEntity(JsonNode.class))
                 .onErrorResume(throwable -> {
                     logger.warn("Error in lookup from PDL", throwable);
-                    return null;
+                    return Mono.empty();
                 })
                 .blockOptional()
                 .map(this::convertToApiPerson);

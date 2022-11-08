@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.rest.navident;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 @Data
 @Builder
@@ -16,4 +17,16 @@ public class NavidentResponse {
     private String mellomnavn;
     private String etternavn;
     private String feilmelding;
+
+
+    public static NavidentResponse medFeilmelding(HttpStatus status, String feilmelding) {
+        return medFeilmelding(Integer.toString(status.value()), feilmelding);
+    }
+
+    public static NavidentResponse medFeilmelding(String status, String feilmelding) {
+        return NavidentResponse.builder()
+                .status(status)
+                .feilmelding(feilmelding)
+                .build();
+    }
 }

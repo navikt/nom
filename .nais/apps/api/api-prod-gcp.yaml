@@ -8,7 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash, prod
+      value: log-logstash-mdc, prod
   envFrom:
     - secret: nom-sluttdato-override-json
   image: {{image}}

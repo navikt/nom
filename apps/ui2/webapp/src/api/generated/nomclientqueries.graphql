@@ -116,11 +116,16 @@ query HentAlleRessurser {
 query HentRessursMedNavident($navident: String) {
   ressurs(where: { navident: $navident }) {
     navident
-    personident
     fornavn
     etternavn
     epost
+    sektor
     visningsNavn
+    telefon {
+      beskrivelse
+      nummer
+      type
+    }
     ledere {
       ressurs {
         navident
@@ -144,7 +149,6 @@ query HentRessursMedNavident($navident: String) {
         leder {
           ressurs {
             navident
-            personident
             fornavn
             etternavn
           }
@@ -416,6 +420,7 @@ fragment RessursStandalone on Ressurs {
   navident
   fornavn
   etternavn
+  visningsnavn
   epost
   telefon {
     beskrivelse

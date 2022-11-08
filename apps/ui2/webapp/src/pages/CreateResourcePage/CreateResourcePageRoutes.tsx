@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { SuccessStroke } from "@navikt/ds-icons";
+import type { ReactNode } from "react";
 import { Outlet, Route, Routes, useMatch } from "react-router";
 
 import ContentWrapper from "../../components/ContentWrapper";
@@ -13,11 +14,11 @@ export function CreateResourcePageRoutes() {
     <Routes>
       <Route element={<Wrapper />} path="/">
         <Route element={<SearchForPerson />} path="/">
-          <Route element={<CreateResourceForm />} path=":personIdentInBase64" />
+          <Route element={<CreateResourceForm />} path=":personidentInBase64" />
         </Route>
         <Route
           element={<ResourceCreatedReceiptPage />}
-          path=":navIdent/receipt"
+          path=":navident/receipt"
         />
       </Route>
     </Routes>
@@ -26,7 +27,7 @@ export function CreateResourcePageRoutes() {
 
 function Wrapper() {
   const isAtReceiptPage = !!useMatch(
-    "ressurs/create/:navIdentInBase64/receipt"
+    "ressurs/create/:navidentInBase64/receipt"
   );
   return (
     <>
@@ -96,7 +97,7 @@ function FilledCircle({
   filled,
 }: {
   filled: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div

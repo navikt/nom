@@ -8,7 +8,7 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash, dev
+      value: log-logstash-mdc, dev
   image: {{image}}
   port: 8080
   ingresses:

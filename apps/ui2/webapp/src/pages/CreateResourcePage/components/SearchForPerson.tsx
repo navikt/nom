@@ -5,17 +5,30 @@ import { Controller, useForm } from "react-hook-form";
 import { Outlet, useNavigate, useParams } from "react-router";
 
 import { opprettRessursIkon } from "../../../components/Images";
-import ResourceFormPanel from "../../../components/Resource/ResourceFormPanel";
 
 export function SearchForPerson() {
-  const { personIdent } = useParams();
+  const { personident } = useParams();
   const { handleSubmit, control, reset } = useForm({
-    defaultValues: { personIdent },
+    defaultValues: { personident },
   });
   const navigate = useNavigate();
 
   return (
-    <ResourceFormPanel>
+    <div
+      className={css`
+        min-height: 300px;
+        margin: 0 auto;
+        width: 70%;
+        padding: var(--navds-spacing-8);
+        border: 1px solid var(--navds-global-color-gray-400);
+        border-top: 5px solid var(--navds-global-color-lightblue-800);
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        gap: var(--navds-spacing-4);
+      `}
+    >
       <img
         alt="Opprett ressurs ikon"
         className={css`
@@ -36,7 +49,7 @@ export function SearchForPerson() {
       </Heading>
       <form
         onSubmit={handleSubmit((values) =>
-          navigate(`/ressurs/create/${encode(values.personIdent ?? "")}`)
+          navigate(`/ressurs/create/${encode(values.personident ?? "")}`)
         )}
       >
         <BodyShort size="medium">
@@ -53,7 +66,7 @@ export function SearchForPerson() {
         >
           <Controller
             control={control}
-            name="personIdent"
+            name="personident"
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <Search
                 error={error?.message}
@@ -61,7 +74,7 @@ export function SearchForPerson() {
                 label=""
                 onChange={(newValue) => onChange(newValue)}
                 onClear={() => {
-                  reset({ personIdent: "" });
+                  reset({ personident: "" });
                   navigate("/ressurs/create");
                 }}
                 type="number"
@@ -76,6 +89,6 @@ export function SearchForPerson() {
         </div>
       </form>
       <Outlet />
-    </ResourceFormPanel>
+    </div>
   );
 }

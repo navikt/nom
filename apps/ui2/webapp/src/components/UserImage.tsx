@@ -4,26 +4,26 @@ import React, { useEffect } from "react";
 
 import { person, questionMarkIcon } from "./Images";
 
-const imageSource = (navIdent: string) => `/teamcat/resource/${navIdent}/photo`;
+const imageSource = (navident: string) => `/teamcat/resource/${navident}/photo`;
 
 type UserImageProperties = {
-  navIdent?: string;
+  navident?: string;
   navn?: string;
   size?: string;
   altText?: string;
 };
 
 const UserImage = (properties: UserImageProperties) => {
-  const { navIdent, size, altText, navn } = properties;
+  const { navident, size, altText, navn } = properties;
   const [image, setImage] = React.useState<string>();
   const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
     setLoading(true);
-    if (navIdent) {
-      setImage(imageSource(navIdent));
+    if (navident) {
+      setImage(imageSource(navident));
     }
-  }, [navIdent]);
+  }, [navident]);
 
   const stl = css({
     height: size || "65px",
@@ -31,19 +31,17 @@ const UserImage = (properties: UserImageProperties) => {
     borderRadius: "100%",
   });
 
-  if (!navIdent) {
+  if (!navident) {
     return (
-      <div>
-        <img alt="manglende nav ident" className={stl} src={questionMarkIcon} />
-      </div>
+      <img alt="manglende nav ident" className={stl} src={questionMarkIcon} />
     );
   }
 
   return (
-    <div>
+    <>
       {loading && <Loader className={stl} />}
       <img
-        alt={altText || "Fotografi av " + (navn || navIdent)}
+        alt={altText || "Fotografi av " + (navn || navident)}
         className={stl}
         hidden={loading}
         onError={() => {
@@ -53,7 +51,7 @@ const UserImage = (properties: UserImageProperties) => {
         onLoad={() => setLoading(false)}
         src={image}
       />
-    </div>
+    </>
   );
 };
 
