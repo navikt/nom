@@ -15,7 +15,7 @@ import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -29,10 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -92,7 +88,7 @@ public class NavidentController {
             @RequestBody NavidentRequest request,
             @NonNull JwtAuthenticationToken token
     ) {
-        final var funnetRessurs = ressursService.findByPersonIdent(request.getPersonident());
+        final var funnetRessurs = ressursStateService.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
             return funnetRessurs.map(this::toNavidentResponse)
@@ -122,23 +118,19 @@ public class NavidentController {
             );
         }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
-        data.put(EventBasedRessurs.NAVIDENT_FIELD, opprettetNavident);
-        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn());
-        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn());
-        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn());
-        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
-        data.put(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()));
+        final var opprettRessursCommand = new OpprettRessursCommand(
+                request.getPersonident(),
+                opprettetNavident,
+                RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.valueOf(request.getSektor()),
+                new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
+                        request.getFornavn(),
+                        request.getMellomnavn(),
+                        request.getEtternavn()
+                )
+        );
 
         try {
-            final var metadata = HendelseMetadataSerialize.builder()
-                    .opprettetAv(new HendelseMetadata.OpprettetAv(token)) // This can throw a NullPointerException if JwtAuthenticationToken is null
-                    .opprettetTidspunkt(LocalDateTime.now())
-                    .rawInputData(mapper.valueToTree(data))
-                    .build();
-
-            final var opprettetRessurs = ressursService.opprettRessurs(request.getPersonident(), data, metadata);
+            final var opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand, null);
             return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
 
         } catch (Exception exception) {
@@ -147,69 +139,6 @@ public class NavidentController {
                     NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff")
             );
         }
-    }
-
-
-    @PostMapping
-    @Transactional
-    @Operation(
-            description = "Henter en eksisterende eller oppretter en ny navident",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-            value = @ApiResponse(
-                    responseCode = "200",
-                    description = "Success"
-            )
-    )
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
-    public ResponseEntity<NavidentResponse> opprettNavident2(
-            @RequestBody NavidentRequest request,
-            @AuthenticationPrincipal JwtAuthenticationToken token
-    ) {
-        final var responseBody = NavidentResponse.builder()
-                .status(Integer.toString(HttpStatus.OK.value()));
-
-        final var ressurs = ressursStateService.findByPersonident(request.getPersonident()).orElseGet(() -> {
-            try {
-                final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
-
-                if (nikResponse.getStatusCode().is2xxSuccessful()) {
-                    final var opprettRessursCommand = new OpprettRessursCommand(
-                            request.getPersonident(),
-                            nikResponse.getBody().getNavident(),
-                            RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.valueOf(request.getSektor()),
-                            new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
-                                    request.getFornavn(),
-                                    request.getMellomnavn(),
-                                    request.getEtternavn()
-                            )
-                    );
-
-                    responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
-
-                    return ressursCommadService.createRessursSync(opprettRessursCommand, null);
-                }
-
-                responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());
-            } catch (Exception e) {
-                log.info(e.getCause().getMessage());
-                responseBody.status(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value())).feilmelding("Intern feil inntraff");
-            }
-
-            return null;
-        });
-
-        if (ressurs != null) {
-            responseBody
-                    .personident(ressurs.personident())
-                    .navident(ressurs.navident())
-                    .fornavn(ressurs.visningsnavn().fornavn())
-                    .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
-                    .etternavn(ressurs.visningsnavn().etternavn());
-        }
-
-        return ResponseEntity.ok(responseBody.build());
     }
 
     private String getKjonn(String personident, String identType) {
@@ -223,14 +152,14 @@ public class NavidentController {
     }
 
 
-    private NavidentResponse toNavidentResponse(IRessurs ressurs) {
+    private NavidentResponse toNavidentResponse(RessursState ressurs) {
         return NavidentResponse.builder()
                 .status(Integer.toString(HttpStatus.OK.value()))
-                .personident(ressurs.getPersonIdent())
-                .navident(ressurs.getNavIdent())
-                .fornavn(ressurs.getVisningsfornavn().orElse(null))
-                .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
-                .etternavn(ressurs.getVisningsetternavn().orElse(null))
+                .personident(ressurs.personident())
+                .navident(ressurs.navident())
+                .fornavn(ressurs.visningsnavn().fornavn())
+                .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
+                .etternavn(ressurs.visningsnavn().etternavn())
                 .build();
     }
 }
