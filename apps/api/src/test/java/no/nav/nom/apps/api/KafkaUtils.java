@@ -34,17 +34,18 @@ public class KafkaUtils {
     private KafkaTemplate<String, Object> eventsourceKafkaTemplate;
 
     @Autowired
-    public KafkaUtils(EmbeddedKafkaBroker embeddedKafkaBroker,
-                      EventAggregateListener eventAggregateListener,
-                      @Value("${app.kafka.stateTopic}") String eventSourceTopic
-    ){
+    public KafkaUtils(
+            EmbeddedKafkaBroker embeddedKafkaBroker,
+            EventAggregateListener eventAggregateListener,
+            @Value("${app.kafka.stateTopic}") String eventSourceTopic
+    ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
         this.eventAggregateListener = eventAggregateListener;
         this.eventSourceTopic = eventSourceTopic;
         eventsourceKafkaTemplate = skjermedeKafkaTemplate();
     }
 
-    public synchronized void send(String key, Object data){
+    public synchronized void send(String key, Object data) {
         CountDownLatch latch = new CountDownLatch(1);
 
         Mockito.doAnswer(invocation -> {
@@ -53,21 +54,22 @@ public class KafkaUtils {
             return null;
         }).when(eventAggregateListener).onMessage(Mockito.any(), Mockito.any());
 
+
         eventsourceKafkaTemplate.sendDefault(key, data);
         try {
-            if (!latch.await(2, TimeUnit.SECONDS)){
+            if (!latch.await(900, TimeUnit.SECONDS)) {
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
             }
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void sendBulk(Map<String, Boolean> data){
+    public void sendBulk(Map<String, Boolean> data) {
         data.forEach(this::send);
     }
 
-    public void clearKafka(){
+    public void clearKafka() {
         embeddedKafkaBroker.doWithAdmin(adminClient -> {
             try {
                 Map<TopicPartition, RecordsToDelete> collect = adminClient.listPartitionReassignments()
@@ -83,7 +85,7 @@ public class KafkaUtils {
         });
     }
 
-    private KafkaTemplate<String, Object> skjermedeKafkaTemplate(){
+    private KafkaTemplate<String, Object> skjermedeKafkaTemplate() {
         Map<String, Object> producerProperties = KafkaTestUtils.producerProps(embeddedKafkaBroker);
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);

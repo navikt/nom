@@ -1,125 +1,86 @@
 package no.nav.nom.apps.api.dvh.dvhdiff;
 
-import lombok.val;
+import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("dvh-diffing")
 public class RessursEndringFraDvhTest extends DvhTestBase {
 
+    @SpyBean
+    private KafkaTemplate<String, Event> eventProducerTemplate;
+
     @Test
-    @DisplayName("Ressurser fra datavarehus blir tilgjengelige i ressurs repo")
+    @DisplayName("Ressurser fra datavarehus trigger opprett event")
     public void test1() {
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvh();
+        final var response = List.of(
+                new DvhRessursUtils.RessursMock(
+                        "O123456",
+                        "12345678901",
+                        "Navn 1",
+                        "ENavn 1",
+                        "NAV Statlig"
+                ),
+                new DvhRessursUtils.RessursMock(
+                        "O123457",
+                        "12345678902",
+                        "Navn 2",
+                        "ENavn 2",
+                        "NAV Statlig"
+                )
+        );
+        dvhRessursUtils.addToResponse(response);
 
-        val alleRessurserAntall = ressursService.getAll().size();
-        assertThat(alleRessurserAntall).isEqualTo(4);
+        ArgumentCaptor<RessursOpprettetEventV1> eventArgumentCaptor = ArgumentCaptor.forClass(RessursOpprettetEventV1.class);
+
+        loadFromDvh();
+        Mockito.verify(eventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        final var eventsByNavident = eventArgumentCaptor.getAllValues()
+                .stream()
+                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursRegisteredEventData) e.getData()).navident(), Function.identity()));
+
+        response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByNavident.get(r.NAV_IDENT()), r));
     }
 
     @Test
-    @DisplayName("1 ny ressurs og 1 endring av personnummer gir riktig antall på hendelser og ressurser")
+    @DisplayName("Prøver ikke opprette hvis eksisterende Ressurs")
     public void test2() {
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvh();
+        RessursState existingRessurs = createRessursHendelse("");
 
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_After1.json");
+        dvhRessursUtils.addToResponse(
+                new DvhRessursUtils.RessursMock(
+                        existingRessurs.navident(),
+                        existingRessurs.personident(),
+                        existingRessurs.visningsnavn().fornavn(),
+                        existingRessurs.visningsnavn().etternavn(),
+                        "NAV Statlig"
+                )
+        );
         loadFromDvh();
-
-        val alleRessurser = ressursService.getAll();
-        assertThat(alleRessurser.size()).isEqualTo(5);
+        Mockito.verifyNoInteractions(eventProducerTemplate);
     }
-
-    @Test
-    @DisplayName("endring av personnummer i dvh snapshot blir oppdaget")
-    public void test3() {
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvh();
-        val fnrPre = ressursService.findByNavIdent("O123459").get().getPersonIdent();
-
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_After2.json");
-        loadFromDvh();
-        val fnrAfter = ressursService.findByNavIdent("O123459").get().getPersonIdent();
-
-        assertThat(fnrPre).isNotEqualTo(fnrAfter);
-        assertThat(fnrAfter).isEqualTo("92345678904");
-    }
-
-    @Test
-    @DisplayName("ny navident på eksisterende personnummer har ingen effekt")
-    public void test4() {
-        stubRessurser("responses/dvhdiff/dvhAnsatt2_SinglePre.json");
-        loadFromDvh();
-        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
-
-        stubRessurser("responses/dvhdiff/dvhAnsatt2_SingleEndretNavIdent.json");
-        loadFromDvh();
-        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
-
-        val antallRessurserIRepo = ressursService.getAll().size();
-
-        assertThat(antallRessurserIRepo).isEqualTo(1);
-        assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
-    }
-
-    @Test
-    @DisplayName("navident/rad fjernet fra dvh har ingen effekt")
-    public void test5() {
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
-        loadFromDvh();
-        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
-
-        stubRessurser("responses/dvhdiff/dvhAnsatt1_After3.json");
-        loadFromDvh();
-        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
-
-        val antallRessurserIRepo = ressursService.getAll().size();;
-
-        assertThat(antallRessurserIRepo).isEqualTo(4);
-        assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
-    }
-
-    @Test
-    @DisplayName("Duplikat rader i responsen blir behandlet")
-    public void test6(){
-        stubRessurser("responses/dvh/dvhAnsatt3_duplikaterader.json");
-        loadFromDvh();
-
-        assertThat(ressursService.findByNavIdent("O123456").isPresent()).isTrue();
-        assertThat(ressursService.getAll().size()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("Navidenter mappet til ulike personidenter blir filtrert bort")
-    public void test7(){
-        stubRessurser("responses/dvh/dvhAnsatt3_sammeNavidentForskjelligPnr.json");
-        loadFromDvh();
-
-        assertThat(ressursService.findByNavIdent("O123456").isEmpty()).isTrue();
-        assertThat(ressursService.getAll().size()).isEqualTo(0);
-
-    }
-
-    @Test
-    @DisplayName("Personidenter mappet til ulike navIdenter blir filtrert bort")
-    public void test8(){
-        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
-        loadFromDvh();
-
-        assertThat(ressursService.findByPersonIdent("12345678901").isEmpty()).isTrue();
-        assertThat(ressursService.findByPersonIdent("12345678933").isEmpty()).isTrue();
-    }
+/*
 
     @Test
     @DisplayName("Personidenter med flere navidenter, så velges den som er aktiv i remedy")
@@ -128,7 +89,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         loadFromDvh();
 
         assertThat(ressursService.findByNavIdent("B123456").isPresent()).isTrue();
-    }
+    }*/
 
     // test helpers
 
@@ -149,5 +110,18 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 .stream().map(this::hashRessurs).collect(Collectors.toCollection(ArrayList::new));
     }
 
+    private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock){
+
+        Assertions.assertNotNull(ressursSluttetEvent.getFid());
+
+        RessursOpprettetEventV1.RessursRegisteredEventData eventData = (RessursOpprettetEventV1.RessursRegisteredEventData) ressursSluttetEvent.getData();
+
+        Assertions.assertEquals(ressursMock.NAV_IDENT(), eventData.navident());
+        Assertions.assertEquals(ressursMock.FNR(), eventData.personident());
+        Assertions.assertEquals(DvhRessurs.toSektor(ressursMock.ANSATT_TYPE()), eventData.sektor());
+        Assertions.assertEquals(ressursMock.FORNAVN(), eventData.visningsnavn().fornavn());
+        Assertions.assertEquals(ressursMock.ETTERNAVN(), eventData.visningsnavn().etternavn());
+        Assertions.assertNull(eventData.visningsnavn().mellomnavn());
+    }
 
 }

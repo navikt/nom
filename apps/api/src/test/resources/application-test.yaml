@@ -14,7 +14,7 @@ app:
           scopes:
             - QUERY_PERSON
             - MUTATE_RESSURS
-            -
+
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 
 authentication:

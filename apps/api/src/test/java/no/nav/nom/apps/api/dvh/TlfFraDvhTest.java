@@ -43,7 +43,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
         val resourceList = this.ressursService.getAll();
         for(val r : resourceList){
-            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.getNavIdent())).hasSize(1);
+            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.navident())).hasSize(1);
         }
 
     }

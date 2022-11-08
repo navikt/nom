@@ -1,10 +1,12 @@
 package no.nav.nom.apps.api.eventsourcing.producer;
 
+import no.nav.nom.apps.api.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,18 @@ public class RessursCommadService {
         );
     }
 
+    public ListenableFuture<SendResult<String, Event>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
+        // TODO validate command
+        return eventProducer.sendMessage(
+                new RessursSluttetEventV1(
+                        new RessursSluttetEventV1.RessursSluttetEventData(
+                                opprettRessursCommand.sluttdato()
+                        ),
+                        inputMetadata
+                )
+        );
+    }
+
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
         final var fid = UUID.randomUUID();
         final var response = eventAggregateListener.waitForAggregate(fid);
@@ -52,11 +66,7 @@ public class RessursCommadService {
                         inputMetadata
                 )
         );
-        try {
-            return response.get();
-        } catch (Exception exception){
-            return null;
-        }
+        return response.block();
     }
 
 }

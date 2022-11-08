@@ -1,6 +1,5 @@
 package no.nav.nom.contract.dvh;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -12,5 +11,5 @@ public class DvhEvent {
     long offset;
     @NonNull
     String type;
-    JsonNode data;
+    //JsonNode data;
 }

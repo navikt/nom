@@ -1,5 +1,7 @@
 package no.nav.nom.contract.nom.state;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 public record RessursState(
@@ -7,12 +9,13 @@ public record RessursState(
         String personident,
         String navident,
         Sektor sektor,
-        Visningsnavn visningsnavn
+        Visningsnavn visningsnavn,
+        Optional<LocalDate> sluttdato
 ) {
 
     public record Visningsnavn(
             String fornavn,
-            String mellomnavn,
+            Optional<String> mellomnavn,
             String etternavn
     ){}
 

@@ -3,8 +3,10 @@ package no.nav.nom.apps.api;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 
 @ActiveProfiles({
         "test",
@@ -65,10 +70,16 @@ public abstract class TestBase {
     public DvhOrgenhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
+    public DvhRessursUtils dvhRessursUtils;
+
+    @Autowired
     protected PdlUtils pdlUtils;
 
     @Autowired
     protected KafkaUtils kafkaUtils;
+
+    @Autowired
+    protected RessursStateService ressursStateService;
 
     @BeforeEach
     void reset() {
@@ -77,6 +88,8 @@ public abstract class TestBase {
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
         kafkaUtils.clearKafka();
+        ressursStateService.clear();
+        dvhRessursUtils.createEmptyResponse();
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -111,5 +124,24 @@ public abstract class TestBase {
         try (InputStream inputStream = resource.getInputStream()) {
             return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
         }
+    }
+
+    protected RessursState createRessursHendelse(String suffix) {
+        final var ressursState = new RessursState(
+                UUID.randomUUID(),
+                "testPersonIdent"+suffix,
+                "testNavIdent"+suffix,
+                RessursState.Sektor.NAV_STATLIG,
+                new RessursState.Visningsnavn(
+                        "fornavn"+suffix,
+                        Optional.of("mellomnavn"+suffix),
+                        "etternavn"+suffix
+                ),
+                LocalDate.now().plusDays(10)
+        );
+
+        kafkaUtils.send(ressursState.fid().toString(), ressursState);
+
+        return ressursState;
     }
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -92,5 +93,15 @@ public class DvhRessurs implements IRessurs {
 
     private LocalDate getDateOrNull(final LocalDate dato) {
         return !D2099.equals(dato) ? dato : null;
+    }
+
+    public static RessursOpprettetEventV1.RessursRegisteredEventData.Sektor toSektor(String remedyAnsattType){
+        if (remedyAnsattType.equals("NAV Statlig")){
+            return RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.NAV_STATLIG;
+        } else if (remedyAnsattType.equals("NAV Kommunalt")){
+            return RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.NAV_KOMMUNAL;
+        } else {
+            return RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.EKSTERN;
+        }
     }
 }

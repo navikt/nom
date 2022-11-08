@@ -1,9 +1,10 @@
 package no.nav.nom.apps.api.graphql.search;
 
+import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,11 +15,11 @@ import static java.util.stream.Collectors.toSet;
 @Component
 public class SearchResolver {
 
-    private final IRessursService ressursService;
+    private final RessursStateService ressursStateService;
     private final IOrgenhetService orgenhetService;
 
-    public SearchResolver(IRessursService ressursService, IOrgenhetService orgenhetService) {
-        this.ressursService = ressursService;
+    public SearchResolver(RessursStateService ressursStateService, IOrgenhetService orgenhetService) {
+        this.ressursStateService = ressursStateService;
         this.orgenhetService = orgenhetService;
     }
 
@@ -32,7 +33,7 @@ public class SearchResolver {
 
         return Stream.concat(
                         orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet),
-                        ressursService.matchByNavident(term).stream().map(ressursService::convertToGraphQlResponse)
+                        ressursStateService.matchByNavident(term).stream().map(MappingUtils::toRessurs)
                 )
                 .toList();
 

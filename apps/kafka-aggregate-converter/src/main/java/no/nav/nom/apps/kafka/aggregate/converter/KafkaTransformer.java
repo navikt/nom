@@ -1,5 +1,6 @@
 package no.nav.nom.apps.kafka.aggregate.converter;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.Event;
@@ -14,9 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -29,43 +29,36 @@ class KafkaTransformer {
             JsonSerde<Object> objectSerde,
             StreamsBuilder streamsBuilder
     ){
-        final var eventSerde = objectSerde.copyWithType(Event.class);
-        final var eventDataSerde = objectSerde.copyWithType(EventStateAggregate.class);
-        final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         final var stringSerde = Serdes.String();
-
-        final var objectNodeSerde = objectSerde.copyWithType(ObjectNode.class);
-
-
+        final var eventSerde = objectSerde.copyWithType(Event.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
                 .groupBy((k, v) -> v.getFid().toString(), Grouped.with(stringSerde, eventSerde))
                 .aggregate(
-                        () -> new EventStateAggregate(new LinkedHashMap<>(), new LinkedList<>()),
+                        objectMapper::createObjectNode,
                         (key, event, state) -> {
-                            state.data().putAll(event.getData().toMap());
-                            state.events().add(event);
+                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;
                         },
-                        Materialized.with(stringSerde, eventDataSerde)
+                        Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
                 )
                 .mapValues((readOnlyKey, value) -> toRessursState(UUID.fromString(readOnlyKey), value))
-                .toStream().to(stateTopic, Produced.with(stringSerde, ressursStateSerde));
+                .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
-    public RessursState toRessursState(UUID fid, EventStateAggregate eventStateAggregate){
-        Map<String, String> visningsnavn = (Map<String, String>)eventStateAggregate.data().get("visningsnavn");
-
+    public RessursState toRessursState(UUID fid, JsonNode eventStateAggregate){
+        final var visningsnavn = eventStateAggregate.get("visningsnavn");
         return new RessursState(
                 fid,
-                eventStateAggregate.getAsOptional("personident").map(Object::toString).orElseThrow(),
-                eventStateAggregate.getAsOptional("navident").map(Object::toString).orElseThrow(),
-                eventStateAggregate.getAsOptional("sektor").map(Object::toString).map(RessursState.Sektor::valueOf).orElseThrow(),
+                eventStateAggregate.get("personident").asText(),
+                eventStateAggregate.get("navident").asText(),
+                RessursState.Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
                 new RessursState.Visningsnavn(
-                        visningsnavn.get("fornavn"),
-                        visningsnavn.get("mellomnavn"),
-                        visningsnavn.get("etternavn")
-                )
+                        visningsnavn.get("fornavn").asText(),
+                        Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
+                        visningsnavn.get("etternavn").asText()
+                ),
+                Optional.ofNullable(visningsnavn.hasNonNull("sluttdato") ? LocalDate.parse(visningsnavn.get("mellomnavn").asText()) : null)
         );
     }
 }

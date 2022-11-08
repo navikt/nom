@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
+import no.nav.nom.apps.api.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
-import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,11 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
-import static java.util.Map.entry;
-
 @Slf4j
 @Tag(name = "Navident")
 @RestController
@@ -42,21 +37,22 @@ public class NavidentController {
 
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
     public static final String BASE_URL = "/api/v1/navident";
-
-    private final IRessursService ressursService;
+    private final RessursCommadService ressursCommadService;
+    private final RessursStateService ressursStateService;
     private final NIKConsumer nikConsumer;
     private final PdlConsumer pdlConsumer;
     private final ObjectMapper mapper;
 
     public NavidentController(
-            IRessursService ressursService,
+            RessursCommadService ressursCommadService, RessursStateService ressursStateService,
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
             ObjectMapper mapper
     ) {
+        this.ressursCommadService = ressursCommadService;
+        this.ressursStateService = ressursStateService;
         this.nikConsumer = nikConsumer;
         this.mapper = mapper;
-        this.ressursService = ressursService;
         this.pdlConsumer = pdlConsumer;
     }
 
@@ -91,30 +87,25 @@ public class NavidentController {
         final var responseBody = NavidentResponse.builder()
                 .status(Integer.toString(HttpStatus.OK.value()));
 
-        final var ressurs = ressursService.findByPersonIdent(request.getPersonident()).orElseGet(() -> {
+        final var ressurs = ressursStateService.findByPersonident(request.getPersonident()).orElseGet(() -> {
             try {
                 final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
 
                 if (nikResponse.getStatusCode().is2xxSuccessful()) {
-                    Map<String, Object> data = Map.ofEntries(
-                            entry(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident()),
-                            entry(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident()),
-                            entry(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn()),
-                            entry(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn()),
-                            entry(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn()),
-                            entry(EventBasedRessurs.SEKTOR_FIELD, request.getSektor()),
-                            entry(EventBasedRessurs.KJONN_FIELD, getKjonn(request.getPersonident(), request.getIdentType()))
+                    final var opprettRessursCommand = new OpprettRessursCommand(
+                            request.getPersonident(),
+                            nikResponse.getBody().getNavident(),
+                            RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.valueOf(request.getSektor()),
+                            new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
+                                    request.getFornavn(),
+                                    request.getMellomnavn(),
+                                    request.getEtternavn()
+                            )
                     );
-
-                    final var metadata = HendelseMetadataSerialize.builder()
-                            .opprettetAv(new HendelseMetadata.OpprettetAv(token))
-                            .opprettetTidspunkt(LocalDateTime.now())
-                            .rawInputData(mapper.valueToTree(data))
-                            .build();
 
                     responseBody.status(String.valueOf(nikResponse.getStatusCode().value()));
 
-                    return ressursService.opprettRessurs(request.getPersonident(), data, metadata);
+                    return ressursCommadService.createRessursSync(opprettRessursCommand, null);
                 }
 
                 responseBody.status(String.valueOf(nikResponse.getStatusCode().value())).feilmelding(nikResponse.getBody().getFeilmelding());
@@ -128,11 +119,11 @@ public class NavidentController {
 
         if (ressurs != null) {
             responseBody
-                    .personident(ressurs.getPersonIdent())
-                    .navident(ressurs.getNavIdent())
-                    .fornavn(ressurs.getVisningsfornavn().orElse(null))
-                    .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
-                    .etternavn(ressurs.getVisningsetternavn().orElse(null));
+                    .personident(ressurs.personident())
+                    .navident(ressurs.navident())
+                    .fornavn(ressurs.visningsnavn().fornavn())
+                    .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
+                    .etternavn(ressurs.visningsnavn().etternavn());
         }
 
         return ResponseEntity.ok(responseBody.build());

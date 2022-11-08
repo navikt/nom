@@ -4,11 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +13,7 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Collections.emptyMap;
@@ -42,9 +35,6 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     protected ObjectMapper objectMapper;
-
-    @Autowired
-    protected IRessursService ressursService;
 
     @SneakyThrows
     protected GraphQlTester.Response postForResource(String resource) {
@@ -95,34 +85,4 @@ public abstract class GraphQLTestBase extends TestBase {
 
         return securityTestUtils.createToken(claims);
     }
-
-    protected IRessurs createRessursHendelse(String suffix) {
-        final var metadata = HendelseMetadataSerialize.builder()
-                .opprettetAv(new HendelseMetadata.OpprettetAv("test", "test"))
-                .rawInputData(objectMapper.createObjectNode().put("suffix", suffix))
-                .opprettetTidspunkt(LocalDateTime.now())
-                .build();
-        return ressursService.opprettRessurs("testPersonIdent" + suffix, "testNavIdent" + suffix, null, metadata);
-    }
-
-
-    protected RessursState createRessursHendelse2(String suffix) {
-        final var ressursState = new RessursState(
-                UUID.randomUUID(),
-                "personident"+suffix,
-                "testNavIdent"+suffix,
-                RessursState.Sektor.NAV_STATLIG,
-                new RessursState.Visningsnavn(
-                        "fornavn"+suffix,
-                        "mellomnavn"+suffix,
-                        "etternavn"+suffix
-                )
-        );
-
-        kafkaUtils.send(ressursState.fid().toString(), ressursState);
-
-
-        return ressursState;
-    }
-
 }

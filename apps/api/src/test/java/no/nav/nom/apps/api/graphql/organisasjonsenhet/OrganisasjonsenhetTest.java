@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +185,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        IRessurs ressurs = createRessursHendelse("");
+        RessursState ressurs = createRessursHendelse("");
 
 
         dvhRestConsumer.loadFromDvh();
@@ -194,8 +194,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
         final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
 
-        assertEquals(ressurs.getNavIdent(), outputLeder.getRessurs().getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
+        assertEquals(ressurs.navident(), outputLeder.getRessurs().getNavIdent());
+        assertEquals(ressurs.personident(), outputLeder.getRessurs().getPersonIdent());
     }
 
     @Test
@@ -220,9 +220,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario34() {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        IRessurs ressurs = createRessursHendelse("");
+        RessursState ressurs = createRessursHendelse("");
 
-        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
+        pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
@@ -234,7 +234,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                 .get("person")
                 .get("navn");
 
-        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
+        pdlUtils.assertNavn(ressurs.personident(), lederNavn);
     }
 
 
@@ -244,7 +244,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        IRessurs ressurs = createRessursHendelse("");
+        RessursState ressurs = createRessursHendelse("");
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
@@ -260,8 +260,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
 
         final var outputRessurs = outputKoblinger.get(0).getRessurs();
-        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -284,8 +284,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        IRessurs ressurs = createRessursHendelse("");
-        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
+        RessursState ressurs = createRessursHendelse("");
+        pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
         dvhRestConsumer.loadFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
@@ -297,7 +297,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
                 .get("person")
                 .get("navn");
 
-        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
+        pdlUtils.assertNavn(ressurs.personident(), lederNavn);
     }
 
     private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {

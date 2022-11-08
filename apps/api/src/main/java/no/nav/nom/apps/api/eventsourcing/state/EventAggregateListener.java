@@ -11,10 +11,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
@@ -24,25 +24,26 @@ import java.util.stream.StreamSupport;
 public class EventAggregateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
-    private final KafkaStateRessursService kafkaStateRessursService;
+    private final RessursStateService ressursStateService;
 
-    private final Map<UUID, CompletableFuture<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
+    private final Map<UUID, Mono<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
 
-    public EventAggregateListener(@Value("${app.kafka.stateTopic}") String stateTopic, KafkaStateRessursService kafkaStateRessursService){
+    public EventAggregateListener(@Value("${app.kafka.stateTopic}") String stateTopic, RessursStateService ressursStateService){
         this.stateTopic = stateTopic;
-        this.kafkaStateRessursService = kafkaStateRessursService;
+        this.ressursStateService = ressursStateService;
     }
 
-    @KafkaListener(topicPartitions =
-            @TopicPartition(topic = "${app.kafka.stateTopic}",
+    @KafkaListener(
+            topicPartitions = @TopicPartition(topic = "${app.kafka.stateTopic}",
             partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")),
-    groupId = "nom-api")
+            groupId = "nom-api"
+    )
     public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer){
         StreamSupport.stream(records.spliterator(), false)
                 .forEach(r -> {
-                    kafkaStateRessursService.putEventAggregate(r.value());
+                    ressursStateService.putEventAggregate(r.value());
                     if(waitingMapByFid.containsKey(UUID.fromString(r.key()))) {
-                        waitingMapByFid.remove(UUID.fromString(r.key())).complete(r.value());
+                        waitingMapByFid.remove(UUID.fromString(r.key())).thenReturn(r.value());
                     }
                 });
 
@@ -53,7 +54,7 @@ public class EventAggregateListener {
         return initialLoadComplete.get();
     }
 
-    public CompletableFuture<RessursState> waitForAggregate(UUID fid){
-        return waitingMapByFid.put(fid, new CompletableFuture<>());
+    public Mono<RessursState> waitForAggregate(UUID fid){
+        return waitingMapByFid.put(fid, Mono.empty());
     }
 }

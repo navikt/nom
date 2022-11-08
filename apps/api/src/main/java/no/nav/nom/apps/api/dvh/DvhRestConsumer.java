@@ -68,22 +68,27 @@ public class DvhRestConsumer {
     }
 
     public void loadFromDvh() {
-        log.info("Laster ressurser fra dvh");
-        loadRessurserFromDvh();
-        if (leaderElection.isLeader()) {
-            log.info("Laster orgenheter fra dvh");
-            dvhDataLoader.load();
-        }
-        log.info("Laster koblinger fra dvh");
-        loadKoblingerFromDvh();
-        loadLedereAndOrganiseringerFromDvh();
-        log.info("Laster legacy ressurser fra dvh");
-        log.info("Laster tlf fra dvh");
-        loadTlfFromDvh();
+        try {
+            log.info("Laster ressurser fra dvh");
+            loadRessurserFromDvh();
+            if (leaderElection.isLeader()) {
+                log.info("Laster orgenheter fra dvh");
+                dvhDataLoader.load();
+            }
+            log.info("Laster koblinger fra dvh");
+            loadKoblingerFromDvh();
+            loadLedereAndOrganiseringerFromDvh();
+            log.info("Laster legacy ressurser fra dvh");
+            log.info("Laster tlf fra dvh");
+            loadTlfFromDvh();
 
-        if (!initialLoadComplete.get()) {
-            initialLoadComplete.set(true);
-            log.info("Dvh load complete");
+
+            if (!initialLoadComplete.get()) {
+                initialLoadComplete.set(true);
+                log.info("Dvh load complete");
+            }
+        } catch (Exception e){
+            log.error("Failure loading data from DVH", e);
         }
     }
 

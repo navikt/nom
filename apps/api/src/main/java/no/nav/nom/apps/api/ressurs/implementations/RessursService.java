@@ -9,15 +9,15 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.postgresql.NavIdentService;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessursInterface;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.RessursHendelseRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,9 +25,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Service
+//@Service
 @RequiredArgsConstructor
-public class RessursService implements IRessursService {
+public class RessursService implements IRessursService<IRessurs> {
 
     private final DvhRessursInterface dvhRessursInterface;
     private final RessursHendelseRepository repository;
@@ -43,9 +43,9 @@ public class RessursService implements IRessursService {
     }
 
     @Override
-    public <T> Optional<T> findByNavIdent(String navIdent, Function<IRessurs, T> converter) {
+    public <T> Optional<T> findByNavident(String navident, Function<IRessurs, T> converter) {
         return Optional.ofNullable(
-                        convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navIdent).stream().map(hendelseService::convert).toList())
+                        convert(repository.findHendelseByJson(EventBasedRessurs.NAVIDENT_FIELD, navident).stream().map(hendelseService::convert).toList())
                 )
                 .map(converter);
     }
@@ -61,13 +61,12 @@ public class RessursService implements IRessursService {
     }
 
     @Override
-    public Optional<IRessurs> findByPersonIdent(String personIdent){
+    public Optional<IRessurs> findByPersonident(String personIdent){
         return Optional.ofNullable(
                 convert(repository.findHendelseByJson(EventBasedRessurs.PERSONIDENT_FIELD, personIdent).stream().map(hendelseService::convert).toList())
         );
     }
 
-    @Override
     public Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter){
         return repository.findHendelseByJsonBulk(EventBasedRessurs.NAVIDENT_FIELD, navIdenter).stream()
                 .map(hendelseService::convert)
@@ -77,7 +76,6 @@ public class RessursService implements IRessursService {
                 .collect(Collectors.toUnmodifiableMap(IRessurs::getNavIdent, Function.identity()));
     }
 
-    @Override
     public Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter){
         return repository.findHendelseByJsonBulk(EventBasedRessurs.PERSONIDENT_FIELD, personIdenter).stream()
                 .map(hendelseService::convert)
@@ -88,7 +86,7 @@ public class RessursService implements IRessursService {
     }
 
     @Override
-    public List<IRessurs> getAll(){
+    public Collection<IRessurs> getAll(){
         return repository.findAllByDataType(HendelseDataType.RESSURS_V1.getDataType()).stream()
                 .map(hendelseService::convert)
                 .collect(Collectors.groupingBy(IHendelse::getFid))
@@ -98,10 +96,9 @@ public class RessursService implements IRessursService {
                 .collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize hendelseMetadata) {
-        return findByPersonIdent(personIdent).orElseGet(() -> {
+        return findByPersonident(personIdent).orElseGet(() -> {
             var data = objectMapper.createObjectNode();
 
             data.put(EventBasedRessurs.NAVIDENT_FIELD, navIdent != null ? navIdent : navIdentService.generateNavIdent(navIdentForbokstav));
@@ -114,10 +111,9 @@ public class RessursService implements IRessursService {
         });
     }
 
-    @Override
     @Transactional
     public IRessurs opprettRessurs(String personident, JsonNode data, HendelseMetadataSerialize hendelseMetadataSerialize) {
-        return findByPersonIdent(personident).orElseGet(() -> {
+        return findByPersonident(personident).orElseGet(() -> {
             val event = hendelseService.createOpprettHendelse(data, hendelseMetadataSerialize, HendelseDataType.RESSURS_V1);
             repository.save(hendelseService.convert(event));
 
@@ -126,13 +122,11 @@ public class RessursService implements IRessursService {
         });
     }
 
-    @Override
     @Transactional
     public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
         return opprettRessurs(personerident, (JsonNode) objectMapper.valueToTree(data), metadata);
     }
 
-    @Override
     public Ressurs convertToGraphQlResponse(IRessurs ressurs) {
         var sektor = dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent());
         return Ressurs.builder()
