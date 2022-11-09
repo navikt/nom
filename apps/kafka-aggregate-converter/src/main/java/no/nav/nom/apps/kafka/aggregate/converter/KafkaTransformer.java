@@ -39,7 +39,9 @@ class KafkaTransformer {
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
                             if(event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data){
-                                state.put("navident", data.navident());
+                                if(data.navident().isPresent()){
+                                    state.put("navident", data.navident().get());
+                                }
                             }
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;

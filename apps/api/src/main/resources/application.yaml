@@ -54,13 +54,13 @@ spring:
       printer:
         enabled: true #
   kafka:
-    producer:
-      bootstrap-servers: ${KAFKA_BROKERS}
+    bootstrap-servers: ${KAFKA_BROKERS}
     consumer:
       bootstrap-servers: ${KAFKA_BROKERS}
       max-poll-records: 1000
       auto-offset-reset: earliest
       enable-auto-commit: false
+      group-id: ${app.appName}
     listener:
       missing-topics-fatal: true
     client-id: ${spring.application.name}

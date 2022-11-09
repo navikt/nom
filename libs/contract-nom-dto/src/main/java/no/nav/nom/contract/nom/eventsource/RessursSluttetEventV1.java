@@ -10,11 +10,11 @@ public class RessursSluttetEventV1 extends Event {
 
     @JsonCreator
     public RessursSluttetEventV1(UUID fid, RessursSluttetEventData data, Metadata metadata){
-        super(fid, data, metadata);
+        super(fid, data, metadata, null);
     }
 
     public RessursSluttetEventV1(UUID fid, RessursSluttetEventData data, InputMetadata inputMetadata) {
-        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()));
+        super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
     }
 
     public record RessursSluttetEventData(

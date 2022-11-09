@@ -46,9 +46,9 @@ public class RessursHendelseService {
                                 ressurs.getFornavn(),
                                 null,
                                 ressurs.getEtternavn()
-                        )
-                ),
-                createInputMetadata(ressurs.getRawData())
+                        ),
+                        createInputMetadata(ressurs.getRawData())
+                )
         );
     }
 
@@ -82,7 +82,6 @@ public class RessursHendelseService {
                 "nom-api BatchJob",
                 "Datavarehus",
                 rawData,
-                null,
                 new Origination("nom-api", "nom-api")
         );
     }

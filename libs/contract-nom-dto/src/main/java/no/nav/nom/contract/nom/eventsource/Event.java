@@ -19,12 +19,13 @@ public abstract class Event {
     private final Data data;
     private final Metadata metadata;
 
-    private Data additionalData;
+    private final Data additionalData;
 
-    public Event(UUID fid, Data data, Metadata metadata) {
+    public Event(UUID fid, Data data, Metadata metadata, Data additionalData) {
         this.fid = fid;
         this.data = data;
         this.metadata = metadata;
+        this.additionalData = additionalData;
     }
 
     public UUID getFid() {

@@ -56,11 +56,11 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
 
         loadFromDvh();
         Mockito.verify(eventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-        final var eventsByNavident = eventArgumentCaptor.getAllValues()
+        final var eventsByPersonident = eventArgumentCaptor.getAllValues()
                 .stream()
-                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursRegisteredEventData) e.getData()).navident(), Function.identity()));
+                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursRegisteredEventData) e.getData()).personident(), Function.identity()));
 
-        response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByNavident.get(r.NAV_IDENT()), r));
+        response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByPersonident.get(r.FNR()), r));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
 
         RessursOpprettetEventV1.RessursRegisteredEventData eventData = (RessursOpprettetEventV1.RessursRegisteredEventData) ressursSluttetEvent.getData();
 
-        Assertions.assertEquals(ressursMock.NAV_IDENT(), eventData.navident());
+        Assertions.assertEquals(ressursMock.NAV_IDENT(), ((RessursOpprettetEventV1.RessursOpprettetAdditionalData)ressursSluttetEvent.getAdditionalData()).navident().get());
         Assertions.assertEquals(ressursMock.FNR(), eventData.personident());
         Assertions.assertEquals(DvhRessurs.toSektor(ressursMock.ANSATT_TYPE()), eventData.sektor());
         Assertions.assertEquals(ressursMock.FORNAVN(), eventData.visningsnavn().fornavn());

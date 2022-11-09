@@ -11,9 +11,12 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
@@ -126,11 +129,20 @@ public class NavidentController {
                         request.getFornavn(),
                         request.getMellomnavn(),
                         request.getEtternavn()
+                ),
+                new InputMetadata(
+                        "",
+                        "",
+                        null,
+                        new Origination(
+                                SecurityUtil.getUserFromToken(token).orElseThrow(),
+                                SecurityUtil.getSystemFromToken(token).orElseThrow()
+                        )
                 )
         );
 
         try {
-            final var opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand, null);
+            final var opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand);
             return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
 
         } catch (Exception exception) {

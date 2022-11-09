@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
@@ -21,6 +22,8 @@ import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
@@ -138,15 +141,21 @@ public class RessursResolver {
                         request.getVisningsfornavn(),
                         request.getVisningsmellomnavn(),
                         request.getVisningsetternavn()
+                ),
+                new InputMetadata(
+                        "",
+                        "",
+                        null,
+                        new Origination(
+                                SecurityUtil.getUserFromToken(token).orElseThrow(),
+                                SecurityUtil.getSystemFromToken(token).orElseThrow()
+                        )
                 )
         );
 
 
         //TODO Add kjoenn og folkeregistrertnavn to additional data
-        return ressursCommadService.createRessursSync(
-                opprettRessursCommand,
-                null
-        );
+        return ressursCommadService.createRessursSync(opprettRessursCommand);
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {
