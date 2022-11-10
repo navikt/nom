@@ -24,19 +24,7 @@ public class RessursOpprettetEventV1 extends Event {
             String personident,
             Sektor sektor,
             Visningsnavn visningsnavn
-    ) implements Data{
-        public record Visningsnavn(
-                String fornavn,
-                String mellomnavn,
-                String etternavn
-        ){}
-
-        public enum Sektor{
-            NAV_STATLIG,
-            NAV_KOMMUNAL,
-            EKSTERN
-        }
-    }
+    ) implements Data{ }
 
     public record RessursOpprettetAdditionalData(
             Optional<String> navident,

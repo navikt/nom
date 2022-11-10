@@ -24,7 +24,7 @@ import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,9 +137,9 @@ public class RessursResolver {
                 request.getPersonident(),
                 nikResponse.getBody().getNavident(),
                 Sektor.toEventStateSektor(request.getSektor()),
-                new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
+                new Visningsnavn(
                         request.getVisningsfornavn(),
-                        request.getVisningsmellomnavn(),
+                        Optional.ofNullable(request.getVisningsmellomnavn()),
                         request.getVisningsetternavn()
                 ),
                 new InputMetadata(

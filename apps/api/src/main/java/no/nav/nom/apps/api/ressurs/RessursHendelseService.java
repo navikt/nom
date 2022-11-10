@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ public class RessursHendelseService {
                         ressurs.getPersonIdent(),
                         ressurs.getNavIdent(),
                         DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
-                        new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
+                        new Visningsnavn(
                                 ressurs.getFornavn(),
                                 null,
                                 ressurs.getEtternavn()

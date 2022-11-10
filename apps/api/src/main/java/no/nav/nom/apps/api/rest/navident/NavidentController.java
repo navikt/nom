@@ -17,7 +17,8 @@ import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -124,10 +127,10 @@ public class NavidentController {
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 opprettetNavident,
-                RessursOpprettetEventV1.RessursRegisteredEventData.Sektor.valueOf(request.getSektor()),
-                new RessursOpprettetEventV1.RessursRegisteredEventData.Visningsnavn(
+                Sektor.valueOf(request.getSektor()),
+                new Visningsnavn(
                         request.getFornavn(),
-                        request.getMellomnavn(),
+                        Optional.ofNullable(request.getMellomnavn()),
                         request.getEtternavn()
                 ),
                 new InputMetadata(

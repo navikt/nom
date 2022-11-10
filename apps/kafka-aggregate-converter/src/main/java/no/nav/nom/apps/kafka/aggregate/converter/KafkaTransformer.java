@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -12,6 +14,8 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
@@ -22,6 +26,8 @@ import java.util.UUID;
 
 @Component
 class KafkaTransformer {
+
+    private final static Logger log = LoggerFactory.getLogger(KafkaTransformer.class);
 
     public KafkaTransformer(
             @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
@@ -53,18 +59,24 @@ class KafkaTransformer {
     }
 
     public RessursState toRessursState(UUID fid, JsonNode eventStateAggregate){
-        final var visningsnavn = eventStateAggregate.get("visningsnavn");
-        return new RessursState(
-                fid,
-                eventStateAggregate.get("personident").asText(),
-                eventStateAggregate.get("navident").asText(),
-                RessursState.Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
-                new RessursState.Visningsnavn(
-                        visningsnavn.get("fornavn").asText(),
-                        Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
-                        visningsnavn.get("etternavn").asText()
-                ),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null)
-        );
+        try {
+            final var visningsnavn = eventStateAggregate.get("visningsnavn");
+
+            return new RessursState(
+                    fid,
+                    eventStateAggregate.get("personident").asText(),
+                    eventStateAggregate.get("navident").asText(),
+                    Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
+                    new Visningsnavn(
+                            visningsnavn.get("fornavn").asText(),
+                            Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
+                            visningsnavn.get("etternavn").asText()
+                    ),
+                    Optional.ofNullable(eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null)
+            );
+        } catch (Exception e){
+            log.error("Error mapping to RessursState", e);
+            throw e;
+        }
     }
 }

@@ -1,5 +1,8 @@
 package no.nav.nom.contract.nom.state;
 
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,17 +14,4 @@ public record RessursState(
         Sektor sektor,
         Visningsnavn visningsnavn,
         Optional<LocalDate> sluttdato
-) {
-
-    public record Visningsnavn(
-            String fornavn,
-            Optional<String> mellomnavn,
-            String etternavn
-    ){}
-
-    public enum Sektor{
-        NAV_STATLIG,
-        NAV_KOMMUNAL,
-        EKSTERN
-    }
-}
+) { }

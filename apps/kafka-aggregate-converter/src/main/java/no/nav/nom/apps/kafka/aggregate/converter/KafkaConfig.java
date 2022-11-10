@@ -2,6 +2,7 @@ package no.nav.nom.apps.kafka.aggregate.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -36,6 +37,7 @@ class KafkaConfig {
     public JsonSerde<Object> objectSerde(ObjectMapper objectMapper){
         final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         return objectSerde;
     }
 

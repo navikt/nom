@@ -8,6 +8,8 @@ import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import org.hamcrest.MatcherAssert;
@@ -140,8 +142,8 @@ class RessursTest extends RessursTestBase {
                 UUID.randomUUID(),
                 "testPersonIdent",
                 "testNavIdent",
-                RessursState.Sektor.NAV_STATLIG,
-                new RessursState.Visningsnavn(
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(
                         "fornavn",
                         Optional.of("mellomnavn"),
                         "etternavn"
