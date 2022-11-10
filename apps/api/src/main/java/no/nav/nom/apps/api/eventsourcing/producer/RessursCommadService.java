@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.eventsourcing.producer;
 
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class RessursCommadService {
@@ -30,6 +30,7 @@ public class RessursCommadService {
         // TODO validate command
         return eventProducer.sendMessage(
                 new RessursOpprettetEventV1(
+                        PrefixedUlidCreator.createRessursUlid(),
                         new RessursOpprettetEventV1.RessursOpprettetEventData(
                                 opprettRessursCommand.personident(),
                                 opprettRessursCommand.sektor(),
@@ -58,7 +59,7 @@ public class RessursCommadService {
     }
 
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand){
-        final var fid = UUID.randomUUID();
+        final var fid = PrefixedUlidCreator.createRessursUlid();
         final var response = eventAggregateListener.waitForAggregate(fid);
 
         eventProducer.sendMessage(

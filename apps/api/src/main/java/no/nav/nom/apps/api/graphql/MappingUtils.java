@@ -12,7 +12,6 @@ public class MappingUtils {
         final var sektor = singletonList(Sektor.from(ressursState.sektor()));
 
         return Ressurs.builder()
-                .nomId(ressursState.fid())
                 .navident(ressursState.navident())
                 .navIdent(ressursState.navident())
                 .personident(ressursState.personident())

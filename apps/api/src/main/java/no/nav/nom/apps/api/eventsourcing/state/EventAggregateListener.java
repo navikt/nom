@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +31,7 @@ public class EventAggregateListener {
     private final String stateTopic;
     private final RessursStateService ressursStateService;
 
-    private final Map<UUID, Mono<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
+    private final Map<String, Mono<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
 
     private final AdminClient adminClient;
     private final KafkaProperties kafkaProperties;
@@ -57,8 +56,8 @@ public class EventAggregateListener {
         StreamSupport.stream(records.spliterator(), false)
                 .forEach(r -> {
                     ressursStateService.putEventAggregate(r.value());
-                    if(waitingMapByFid.containsKey(UUID.fromString(r.key()))) {
-                        waitingMapByFid.remove(UUID.fromString(r.key())).thenReturn(r.value());
+                    if(waitingMapByFid.containsKey(r.key())) {
+                        waitingMapByFid.remove(r.key()).thenReturn(r.value());
                     }
                 });
 
@@ -78,7 +77,7 @@ public class EventAggregateListener {
         return initialLoadComplete.get();
     }
 
-    public Mono<RessursState> waitForAggregate(UUID fid){
+    public Mono<RessursState> waitForAggregate(String fid){
         return waitingMapByFid.put(fid, Mono.empty());
     }
 

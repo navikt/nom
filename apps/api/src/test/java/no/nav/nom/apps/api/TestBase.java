@@ -2,6 +2,7 @@ package no.nav.nom.apps.api;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.UUID;
 
 @ActiveProfiles({
         "test",
@@ -129,7 +129,7 @@ public abstract class TestBase {
 
     protected RessursState createRessursHendelse(String suffix) {
         final var ressursState = new RessursState(
-                UUID.randomUUID(),
+                PrefixedUlidCreator.createRessursUlid(),
                 "testPersonIdent"+suffix,
                 "testNavIdent"+suffix,
                 Sektor.NAV_STATLIG,

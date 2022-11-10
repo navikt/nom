@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class RessursStateService implements IRessursService<RessursState> {
-    private final Map<UUID, RessursState> ressursByFid = new ConcurrentHashMap<>();
+    private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
 

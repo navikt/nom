@@ -37,7 +37,6 @@ public class PersonResolver {
         return PersonResult.builder()
                 .personident(ressurs.personident())
                 .personIdent(ressurs.personident())
-                .nomId(ressurs.fid())
                 .navident(ressurs.navident())
                 .navIdent(ressurs.navident())
                 .build();

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -15,20 +14,20 @@ import java.util.UUID;
         @Type(value = RessursOpprettetEventV1.class)
 )
 public abstract class Event {
-    private final UUID fid;
+    private final String fid;
     private final Data data;
     private final Metadata metadata;
 
     private final Data additionalData;
 
-    public Event(UUID fid, Data data, Metadata metadata, Data additionalData) {
+    public Event(String fid, Data data, Metadata metadata, Data additionalData) {
         this.fid = fid;
         this.data = data;
         this.metadata = metadata;
         this.additionalData = additionalData;
     }
 
-    public UUID getFid() {
+    public String getFid() {
         return fid;
     }
 

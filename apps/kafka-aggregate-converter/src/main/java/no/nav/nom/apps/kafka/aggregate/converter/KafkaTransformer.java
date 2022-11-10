@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 class KafkaTransformer {
@@ -54,11 +53,11 @@ class KafkaTransformer {
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
                 )
-                .mapValues((readOnlyKey, value) -> toRessursState(UUID.fromString(readOnlyKey), value))
+                .mapValues(this::toRessursState)
                 .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
-    public RessursState toRessursState(UUID fid, JsonNode eventStateAggregate){
+    public RessursState toRessursState(String fid, JsonNode eventStateAggregate){
         try {
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
 

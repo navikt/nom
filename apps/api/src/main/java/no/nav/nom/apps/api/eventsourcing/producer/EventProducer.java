@@ -1,12 +1,11 @@
 package no.nav.nom.apps.api.eventsourcing.producer;
 
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.contract.nom.eventsource.Event;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
-
-import java.util.UUID;
 
 @Service
 public class EventProducer {
@@ -18,6 +17,6 @@ public class EventProducer {
     }
 
     public ListenableFuture<SendResult<String, Event>> sendMessage(Event event) {
-        return eventProducerTemplate.sendDefault(UUID.randomUUID().toString(), event);
+        return eventProducerTemplate.sendDefault(PrefixedUlidCreator.createEventUlid(), event);
     }
 }

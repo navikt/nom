@@ -15,7 +15,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -76,7 +75,7 @@ public class RessursHendelseService {
         );
     }
 
-    public void ressursSluttet(UUID fid, DvhRessurs dvhRessurs){
+    public void ressursSluttet(String fid, DvhRessurs dvhRessurs){
         ressursCommadService.avsluttRessursEvent(
                 new OpphorRessursCommand(
                         fid,

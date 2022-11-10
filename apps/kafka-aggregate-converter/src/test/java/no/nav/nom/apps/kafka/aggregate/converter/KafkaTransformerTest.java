@@ -59,7 +59,7 @@ public class KafkaTransformerTest {
         );
 
         final Event event = new RessursOpprettetEventV1(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 eventData,
                 (Event.Metadata) null,
                 additionalData
@@ -109,7 +109,7 @@ public class KafkaTransformerTest {
         );
 
         final Event event = new RessursOpprettetEventV1(
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
                 eventData,
                 (Event.Metadata) null,
                 additionalData

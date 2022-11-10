@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class RessursSluttetEventV1 extends Event {
 
     @JsonCreator
-    public RessursSluttetEventV1(UUID fid, RessursSluttetEventData data, Metadata metadata){
+    public RessursSluttetEventV1(String fid, RessursSluttetEventData data, Metadata metadata){
         super(fid, data, metadata, null);
     }
 
-    public RessursSluttetEventV1(UUID fid, RessursSluttetEventData data, InputMetadata inputMetadata) {
+    public RessursSluttetEventV1(String fid, RessursSluttetEventData data, InputMetadata inputMetadata) {
         super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
     }
 

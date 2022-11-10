@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -24,7 +25,6 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -139,7 +139,7 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
         RessursState ressursState = new RessursState(
-                UUID.randomUUID(),
+                PrefixedUlidCreator.createRessursUlid(),
                 "testPersonIdent",
                 "testNavIdent",
                 Sektor.NAV_STATLIG,
