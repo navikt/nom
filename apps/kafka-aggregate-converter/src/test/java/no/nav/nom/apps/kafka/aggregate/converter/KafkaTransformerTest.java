@@ -1,11 +1,13 @@
 package no.nav.nom.apps.kafka.aggregate.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
@@ -38,7 +41,7 @@ public class KafkaTransformerTest {
 
     @Test
     @DisplayName("RessursOpprettetEventV1 oppretter RessursState i output topic")
-    public void test(){
+    public void test11(){
         final RessursOpprettetEventV1.RessursRegisteredEventData eventData = new RessursOpprettetEventV1.RessursRegisteredEventData(
                 "personident",
                 Sektor.NAV_STATLIG,
@@ -85,6 +88,80 @@ public class KafkaTransformerTest {
                 );
     }
 
+
+    @Test
+    @DisplayName("Merger RessursSluttet event merges sammen inn i state")
+    public void test21(){
+        final RessursOpprettetEventV1.RessursRegisteredEventData eventData = new RessursOpprettetEventV1.RessursRegisteredEventData(
+                "personident",
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(
+                        "fornavn",
+                        null,
+                        "etternavn"
+                )
+        );
+
+        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+                Optional.of("navident"),
+                null,
+                null
+        );
+
+        final Event event = new RessursOpprettetEventV1(
+                UUID.randomUUID(),
+                eventData,
+                (Event.Metadata) null,
+                additionalData
+
+        );
+
+        final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
+        final Event sluttetEvent = new RessursSluttetEventV1(
+                event.getFid(),
+                sluttetEventData,
+                (Event.Metadata) null
+        );
+
+
+        final RessursState expectedOpprettet = new RessursState(
+                event.getFid(),
+                eventData.personident(),
+                additionalData.navident().get(),
+                eventData.sektor(),
+                new Visningsnavn(
+                        "fornavn",
+                        Optional.empty(),
+                        "etternavn"
+                ),
+                Optional.empty()
+        );
+
+        final RessursState expectedSluttet = new RessursState(
+                event.getFid(),
+                eventData.personident(),
+                additionalData.navident().get(),
+                eventData.sektor(),
+                new Visningsnavn(
+                        "fornavn",
+                        Optional.empty(),
+                        "etternavn"
+                ),
+                Optional.of(sluttetEventData.sluttdato())
+        );
+
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
+        inputTopic.pipeInput(UUID.randomUUID().toString(), sluttetEvent);
+
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+                .containsExactly(
+                        KeyValue.pair(event.getFid().toString(), expectedOpprettet),
+                        KeyValue.pair(event.getFid().toString(), expectedSluttet)
+                );
+    }
+
     private void setupKafkaTransformer(){
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
@@ -116,6 +193,7 @@ public class KafkaTransformerTest {
         return objectMapper.findAndRegisterModules()
                 .registerModule(new ParameterNamesModule())
                 .registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule());
+                .registerModule(new JavaTimeModule())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 }
