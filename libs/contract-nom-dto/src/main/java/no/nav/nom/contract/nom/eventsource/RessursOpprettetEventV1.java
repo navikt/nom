@@ -8,19 +8,19 @@ import java.util.UUID;
 public class RessursOpprettetEventV1 extends Event {
 
     @JsonCreator
-    public RessursOpprettetEventV1(UUID fid, RessursRegisteredEventData data, Metadata metadata, RessursOpprettetAdditionalData additionalData){
+    public RessursOpprettetEventV1(UUID fid, RessursOpprettetEventData data, Metadata metadata, RessursOpprettetAdditionalData additionalData){
         super(fid, data, metadata, additionalData);
     }
 
-    public RessursOpprettetEventV1(UUID fid, RessursRegisteredEventData data, InputMetadata inputMetadata, RessursOpprettetAdditionalData additionalData) {
+    public RessursOpprettetEventV1(UUID fid, RessursOpprettetEventData data, InputMetadata inputMetadata, RessursOpprettetAdditionalData additionalData) {
         this(fid, data, Metadata.from(inputMetadata), additionalData);
     }
 
-    public RessursOpprettetEventV1(RessursRegisteredEventData data, InputMetadata inputMetadata, RessursOpprettetAdditionalData additionalData) {
+    public RessursOpprettetEventV1(RessursOpprettetEventData data, InputMetadata inputMetadata, RessursOpprettetAdditionalData additionalData) {
         this(UUID.randomUUID(), data, Metadata.from(inputMetadata), additionalData);
     }
 
-    public record RessursRegisteredEventData(
+    public record RessursOpprettetEventData(
             String personident,
             Sektor sektor,
             Visningsnavn visningsnavn

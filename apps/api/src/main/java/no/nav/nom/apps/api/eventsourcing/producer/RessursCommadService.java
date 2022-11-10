@@ -30,7 +30,7 @@ public class RessursCommadService {
         // TODO validate command
         return eventProducer.sendMessage(
                 new RessursOpprettetEventV1(
-                        new RessursOpprettetEventV1.RessursRegisteredEventData(
+                        new RessursOpprettetEventV1.RessursOpprettetEventData(
                                 opprettRessursCommand.personident(),
                                 opprettRessursCommand.sektor(),
                                 opprettRessursCommand.visningsnavn()),
@@ -64,7 +64,7 @@ public class RessursCommadService {
         eventProducer.sendMessage(
                 new RessursOpprettetEventV1(
                         fid,
-                        new RessursOpprettetEventV1.RessursRegisteredEventData(
+                        new RessursOpprettetEventV1.RessursOpprettetEventData(
                                 opprettRessursCommand.personident(),
                                 opprettRessursCommand.sektor(),
                                 opprettRessursCommand.visningsnavn()),

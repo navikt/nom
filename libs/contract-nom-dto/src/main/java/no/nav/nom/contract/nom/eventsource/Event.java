@@ -57,7 +57,7 @@ public abstract class Event {
             use = JsonTypeInfo.Id.NAME,
             property = "type")
     @JsonSubTypes({
-            @Type(value = RessursOpprettetEventV1.RessursRegisteredEventData.class),
+            @Type(value = RessursOpprettetEventV1.RessursOpprettetEventData.class),
             @Type(value = RessursOpprettetEventV1.RessursOpprettetAdditionalData.class)
     })
     public interface Data{ }

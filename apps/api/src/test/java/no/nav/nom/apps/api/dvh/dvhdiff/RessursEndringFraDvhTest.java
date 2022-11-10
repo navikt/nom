@@ -59,7 +59,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         Mockito.verify(eventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
         final var eventsByPersonident = eventArgumentCaptor.getAllValues()
                 .stream()
-                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursRegisteredEventData) e.getData()).personident(), Function.identity()));
+                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursOpprettetEventData) e.getData()).personident(), Function.identity()));
 
         response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByPersonident.get(r.FNR()), r));
     }
@@ -167,7 +167,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
 
         Assertions.assertNotNull(ressursSluttetEvent.getFid());
 
-        RessursOpprettetEventV1.RessursRegisteredEventData eventData = (RessursOpprettetEventV1.RessursRegisteredEventData) ressursSluttetEvent.getData();
+        RessursOpprettetEventV1.RessursOpprettetEventData eventData = (RessursOpprettetEventV1.RessursOpprettetEventData) ressursSluttetEvent.getData();
 
         Assertions.assertEquals(ressursMock.NAV_IDENT(), ((RessursOpprettetEventV1.RessursOpprettetAdditionalData)ressursSluttetEvent.getAdditionalData()).navident().get());
         Assertions.assertEquals(ressursMock.FNR(), eventData.personident());

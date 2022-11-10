@@ -42,7 +42,7 @@ public class KafkaTransformerTest {
     @Test
     @DisplayName("RessursOpprettetEventV1 oppretter RessursState i output topic")
     public void test11(){
-        final RessursOpprettetEventV1.RessursRegisteredEventData eventData = new RessursOpprettetEventV1.RessursRegisteredEventData(
+        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
                 "personident",
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(
@@ -92,7 +92,7 @@ public class KafkaTransformerTest {
     @Test
     @DisplayName("Merger RessursSluttet event merges sammen inn i state")
     public void test21(){
-        final RessursOpprettetEventV1.RessursRegisteredEventData eventData = new RessursOpprettetEventV1.RessursRegisteredEventData(
+        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
                 "personident",
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(
