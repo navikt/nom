@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -42,6 +43,9 @@ public class SecurityUtil {
     public boolean checkAuth(Authentication authentication) {
         if (securityEnabled) {
             if (trustResolver.isAnonymous(authentication)) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Anonymous user blocked: {}", authentication);
+                }
                 throw new InvalidBearerTokenException("Missing or invalid token");
             }
         }
@@ -90,38 +94,24 @@ public class SecurityUtil {
                     && Arrays.stream(requiredRoles).noneMatch(authorities::contains)) {
                 throw new AccessDeniedException(String.format("User does not have the correct access rights for fields %s", List.of(fieldGlobPatterns)));
             }
+
+            if (logger.isTraceEnabled()) {
+                logger.trace("User did not query any of {}, granting access!", List.of(fieldGlobPatterns));
+            }
         }
+
         return true;
     }
 
     public Optional<String> getAzpName() {
         if (securityEnabled) {
             final var auth = SecurityContextHolder.getContext().getAuthentication();
-            var azp_name = ((JwtAuthenticationToken) auth).getTokenAttributes().get("azp_name");
 
-            return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
+            if(auth instanceof  JwtAuthenticationToken token) {
+                var azp_name = token.getTokenAttributes().get("azp_name");
+                return Optional.ofNullable(azp_name).map(Objects::toString);
+            }
         }
-        return Optional.empty();
-    }
-
-    public Optional<String> getAzp() {
-        if (securityEnabled) {
-            final var auth = SecurityContextHolder.getContext().getAuthentication();
-            var azp_name = ((JwtAuthenticationToken) auth).getTokenAttributes().get("azp");
-
-            return Optional.ofNullable(azp_name != null ? azp_name.toString() : null);
-        }
-        return Optional.empty();
-    }
-
-    public Optional<String> getToken(DataFetchingEnvironment env) {
-        if (securityEnabled) {
-            final var auth = SecurityContextHolder.getContext().getAuthentication();
-            var token = ((JwtAuthenticationToken) auth).getToken();
-
-            return Optional.of(token.getTokenValue());
-        }
-
         return Optional.empty();
     }
 }

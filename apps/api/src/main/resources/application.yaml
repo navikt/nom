@@ -95,6 +95,10 @@ app:
         fullmaktsregister-web:
           client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
           scopes: ["QUERY_PERSON"]
+      groups:
+        nom-write:
+          group-id: "${NOM_WRITE_GROUPID}"
+          scopes: [ "MUTATE_RESSURS" ]
 
 NIK_BASEURL: "https://nav-ident.dev.intern.nav.no"
 NIK_CLIENT_ID: "dev-gcp.org.nav-ident"
@@ -126,6 +130,10 @@ app:
         remedy:
           client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
           scopes: [ "QUERY_PERSON" ]
+      groups:
+        write:
+          group-id: "${NOM_WRITE_GROUPID}"
+          scopes: [ "MUTATE_RESSURS" ]
 
 NIK_BASEURL: "https://nav-ident.intern.nav.no"
 NIK_CLIENT_ID: "prod-gcp.org.nav-ident"

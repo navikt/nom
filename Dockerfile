@@ -9,7 +9,13 @@ RUN java -Djarmode=layertools -jar app.jar extract
 FROM ghcr.io/navikt/baseimages/temurin:17
 LABEL maintainer="Team Org"
 
+# Temporary until temurin base image include updated run-script
+USER root
 COPY /docker_run-java.sh /run-java.sh
+RUN chown apprunner:root /run-java.sh && \
+    chmod +x /run-java.sh && \
+    chmod 0755 /run-java.sh
+USER apprunner
 
 COPY --from=builder --chown=apprunner:apprunner application/dependencies/ ./
 COPY --from=builder --chown=apprunner:apprunner application/spring-boot-loader/ ./

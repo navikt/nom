@@ -106,7 +106,7 @@ class SecurityTest extends SecurityTestBase {
     private void postAndAssertResponse(String resource, String token, String path) {
         var response = postForResource(resource, token);
 
-        assertThat(response, GraphQLMatchers.hasErrors());
+        response.errors().expect(responseError -> "Unauthorized".equals(responseError.getMessage()));
         response.path(requireNonNullElse(path, "")).valueIsNull();
         //response.assertThatListOfErrors().hasSize(1);
     }

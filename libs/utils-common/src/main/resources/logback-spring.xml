@@ -17,8 +17,7 @@
         </logger>
 
         <logger name="org.springframework" level="INFO"/>
-        <logger name="no.nav.nom.apps.api.common.security" level="trace"/>
-        <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>
+        <logger name="no.nav.nom.apps.api.common.security" level="debug"/>
     </springProfile>
 
 <!--    json appender for nais deploy - Med MDC -->
@@ -39,8 +38,7 @@
         </logger>
 
         <logger name="org.springframework" level="INFO"/>
-        <logger name="no.nav.nom.apps.api.common.security" level="trace"/>
-        <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>
+        <logger name="no.nav.nom.apps.api.common.security" level="debug"/>
     </springProfile>
 
     <!-- console appender for test og lokalkjøring - uten MDC -->

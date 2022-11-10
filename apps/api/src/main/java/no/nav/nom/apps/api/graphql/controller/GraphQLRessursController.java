@@ -30,14 +30,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static no.nav.nom.apps.api.graphql.common.projections.RessurserSearch.EMPTY_SEARCH;
 
 
 @Controller
@@ -71,7 +68,11 @@ public class GraphQLRessursController {
         this.personResolver = personResolver;
     }
 
-    @PreAuthorize("@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)")
+    @PreAuthorize("""
+                @securityUtil.checkAuth(authentication) &&
+                @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
+                """
+    )
     @QueryMapping("ressurs")
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         // Using @Argument("where") to tell Spring to bind the RessursSearch projected payload on the values below the "where" key.
@@ -79,14 +80,22 @@ public class GraphQLRessursController {
         return ressursResolver.ressurs(search);
     }
 
-    @PreAuthorize("@securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)")
+    @PreAuthorize("""
+                @securityUtil.checkAuth(authentication) &&
+                @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
+                """
+    )
     @QueryMapping("ressurser")
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search);
     }
 
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)")
+    @PreAuthorize("""
+                @securityUtil.checkAuth(authentication) &&
+                hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)
+                """
+    )
     @MutationMapping("opprettRessurs")
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token) {
         return ressursResolver.opprettRessurs(request, environment, token);
