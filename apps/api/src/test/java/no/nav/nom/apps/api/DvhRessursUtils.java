@@ -60,19 +60,20 @@ public class DvhRessursUtils {
         @JsonProperty("FORNAVN") String FORNAVN,
         @JsonProperty("ETTERNAVN") String ETTERNAVN,
         @JsonProperty("ANSATT_TYPE") String ANSATT_TYPE,
-        @JsonProperty("ANSATT_RESSURS_KODE") String ANSATT_RESSURS_KODE,// = "F",
-        @JsonProperty("REMEDY_AKTIV") String REMEDY_AKTIV,// = "JA",
-        @JsonProperty("REMEDY_PERMISJON") String REMEDY_PERMISJON,// = "NEI",
-        @JsonProperty("REMEDY_START_DATO") LocalDate REMEDY_START_DATO,// = LocalDate.now(),
-        @JsonProperty("REMEDY_SLUTT_DATO") LocalDate REMEDY_SLUTT_DATO,// = LocalDate.parse("2099-12-31"),
-        @JsonProperty("AGRESSO_SLUTT_DATO") LocalDate AGRESSO_SLUTT_DATO// = LocalDate.parse("2099-12-31")
+        @JsonProperty("ANSATT_RESSURS_KODE") String ANSATT_RESSURS_KODE,
+        @JsonProperty("REMEDY_AKTIV") String REMEDY_AKTIV,
+        @JsonProperty("REMEDY_PERMISJON") String REMEDY_PERMISJON,
+        @JsonProperty("REMEDY_START_DATO") LocalDate REMEDY_START_DATO,
+        @JsonProperty("REMEDY_SLUTT_DATO") LocalDate REMEDY_SLUTT_DATO,
+        @JsonProperty("AGRESSO_SLUTT_DATO") LocalDate AGRESSO_SLUTT_DATO
     ){
         public RessursMock(
                 String NAV_IDENT,
                 String FNR,
                 String FORNAVN,
                 String ETTERNAVN,
-                String ANSATT_TYPE
+                String ANSATT_TYPE,
+                LocalDate REMEDY_SLUTT_DATO
         ){
             this(
                     NAV_IDENT,
@@ -84,7 +85,7 @@ public class DvhRessursUtils {
                     "JA",
                     "NEI",
                     LocalDate.now(),
-                    LocalDate.parse("2099-12-31"),
+                    REMEDY_SLUTT_DATO,
                     LocalDate.parse("2099-12-31")
             );
         }

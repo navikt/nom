@@ -6,6 +6,8 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
@@ -130,8 +132,8 @@ public abstract class TestBase {
                 UUID.randomUUID(),
                 "testPersonIdent"+suffix,
                 "testNavIdent"+suffix,
-                RessursState.Sektor.NAV_STATLIG,
-                new RessursState.Visningsnavn(
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(
                         "fornavn"+suffix,
                         Optional.of("mellomnavn"+suffix),
                         "etternavn"+suffix

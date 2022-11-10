@@ -49,6 +49,15 @@ public class RessursHendelseService {
                         ),
                         createInputMetadata(ressurs.getRawData())
                 )
+        ).addCallback(
+                (result) -> {
+                    if(ressurs.getSluttdato() != null) {
+                        ressursSluttet(result.getProducerRecord().value().getFid(), ressurs);
+                    }
+                },
+                (ex) -> {
+                    log.error("Error sending RessursOpprettetEvent");
+                }
         );
     }
 

@@ -2,10 +2,12 @@ package no.nav.nom.apps.api.dvh.dvhdiff;
 
 import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -15,15 +17,12 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 
 @DisplayName("dvh-diffing")
 public class RessursEndringFraDvhTest extends DvhTestBase {
@@ -40,14 +39,16 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         "12345678901",
                         "Navn 1",
                         "ENavn 1",
-                        "NAV Statlig"
+                        "NAV Statlig",
+                        LocalDate.parse("2099-12-31")
                 ),
                 new DvhRessursUtils.RessursMock(
                         "O123457",
                         "12345678902",
                         "Navn 2",
                         "ENavn 2",
-                        "NAV Statlig"
+                        "NAV Statlig",
+                        LocalDate.parse("2099-12-31")
                 )
         );
         dvhRessursUtils.addToResponse(response);
@@ -74,40 +75,92 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         existingRessurs.personident(),
                         existingRessurs.visningsnavn().fornavn(),
                         existingRessurs.visningsnavn().etternavn(),
-                        "NAV Statlig"
+                        "NAV Statlig",
+                        LocalDate.parse("2099-12-31")
                 )
         );
         loadFromDvh();
         Mockito.verifyNoInteractions(eventProducerTemplate);
     }
-/*
 
     @Test
-    @DisplayName("Personidenter med flere navidenter, så velges den som er aktiv i remedy")
-    public void test9(){
-        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
+    @DisplayName("Sluttet ansatt trigger opprett og sluttet event")
+    public void test3() {
+        final var response = List.of(
+                new DvhRessursUtils.RessursMock(
+                        "O123456",
+                        "12345678901",
+                        "Navn 1",
+                        "ENavn 1",
+                        "NAV Statlig",
+                        LocalDate.parse("2021-12-31")
+                )
+        );
+        dvhRessursUtils.addToResponse(response);
+
+        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+
+        loadFromDvh();
+        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
+
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
+    }
+
+    @Test
+    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event")
+    public void test4() {
+        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+
+        final var response = List.of(
+                new DvhRessursUtils.RessursMock(
+                        "O123456",
+                        "12345678901",
+                        "Navn 1",
+                        "ENavn 1",
+                        "NAV Statlig",
+                        LocalDate.parse("2099-12-31")
+                )
+        );
+        dvhRessursUtils.addToResponse(response);
         loadFromDvh();
 
-        assertThat(ressursService.findByNavIdent("B123456").isPresent()).isTrue();
-    }*/
 
-    // test helpers
+        createRessursHendelse(
+                new RessursState(
+                        UUID.randomUUID(),
+                        "12345678901",
+                        "O123456",
+                        Sektor.NAV_STATLIG,
+                        new Visningsnavn(
+                                "Navn 1",
+                                Optional.empty(),
+                                "ENavn 1"
+                        ),
+                        Optional.empty()
+                )
+        );
 
-    private void stubRessurser(String fileName) {
-        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json;charset=UTF-8")
-                .withBodyFile(fileName)
-        ));
-    }
+        dvhRessursUtils.createEmptyResponse();
 
-    private int hashRessurs(IRessurs r) {
-        return r.getId().hashCode() ^ r.getNavIdent().hashCode() ^ r.getPersonIdent().hashCode();
-    }
+        final var response2 = List.of(
+                new DvhRessursUtils.RessursMock(
+                        "O123456",
+                        "12345678901",
+                        "Navn 1",
+                        "ENavn 1",
+                        "NAV Statlig",
+                        LocalDate.now()
+                )
+        );
+        dvhRessursUtils.addToResponse(response2);
+        loadFromDvh();
 
-    private Collection<Integer> hashedRessurser(Collection<IRessurs> ressurser) {
-        return ressurser
-                .stream().map(this::hashRessurs).collect(Collectors.toCollection(ArrayList::new));
+        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
     }
 
     private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock){
