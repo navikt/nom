@@ -82,7 +82,10 @@ public class EventAggregateListener {
     }
 
     public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {
-        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer().getGroupId()).partitionsToOffsetAndMetadata().get(10, TimeUnit.SECONDS);
+        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer()
+                .getGroupId())
+                .partitionsToOffsetAndMetadata().get(10, TimeUnit.SECONDS);
+        
         return topicPartitions.entrySet().stream()
                 .anyMatch(entry -> entry.getKey().topic().equals(topic));
     }

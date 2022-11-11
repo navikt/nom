@@ -39,7 +39,7 @@ class KafkaTransformer {
         final var eventSerde = objectSerde.copyWithType(Event.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
-                .groupBy((k, v) -> v.getFid().toString(), Grouped.with(stringSerde, eventSerde))
+                .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
                 .aggregate(
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
