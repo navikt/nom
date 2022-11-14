@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.graphql.common.config;
 
 import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum GraphQLAccessScope {
     QUERY_PERSON(AZPAuthoritiesConverter.AUTH_QUERY_PERSON),
@@ -13,5 +15,9 @@ public enum GraphQLAccessScope {
 
     public String getScope() {
         return scope;
+    }
+
+    public GrantedAuthority asGrantedAuthority() {
+        return new SimpleGrantedAuthority(scope);
     }
 }
