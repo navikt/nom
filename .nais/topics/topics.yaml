@@ -33,6 +33,8 @@ metadata:
   namespace: nom
   labels:
     team: nom
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafka-pool}}
   config:
@@ -44,4 +46,53 @@ spec:
   acl:
     - team: nom
       application: nom-api
+      access: readwrite
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: ressurs-eventsource
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: nom
+      application: kafka-aggregate-converter
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.ressurs-state-v1
+  namespace: nom
+  labels:
+    team: nom
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: nom
+      application: nom-api
+      access: read
+    - team: nom
+      application: kafka-aggregate-converter
       access: readwrite

@@ -1,7 +1,7 @@
 app:
   kafka:
-    stateTopic: nom-state-v1
-    eventsourceTopic: nom-eventsource
+    stateTopic: nom.ressurs-state-v1
+    eventsourceTopic: nom.ressurs-eventsource
   appName: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
