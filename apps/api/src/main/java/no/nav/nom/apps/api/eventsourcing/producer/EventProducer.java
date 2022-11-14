@@ -17,6 +17,7 @@ public class EventProducer {
     }
 
     public ListenableFuture<SendResult<String, Event>> sendMessage(Event event) {
+        // TODO: Save to DB
         return eventProducerTemplate.sendDefault(PrefixedUlidCreator.createEventUlid(), event);
     }
 }

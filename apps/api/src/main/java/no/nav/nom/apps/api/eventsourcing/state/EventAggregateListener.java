@@ -16,6 +16,8 @@ import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +33,7 @@ public class EventAggregateListener {
     private final String stateTopic;
     private final RessursStateService ressursStateService;
 
-    private final Map<String, Mono<RessursState>> waitingMapByFid = new ConcurrentHashMap<>();
+    private final Map<String, Mono<RessursState>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
 
     private final AdminClient adminClient;
     private final KafkaProperties kafkaProperties;
