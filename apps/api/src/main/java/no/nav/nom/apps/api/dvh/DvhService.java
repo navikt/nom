@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.implementations.RessursService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -44,10 +42,11 @@ public class DvhService {
         val bulkSize = 10000;
         for(int i = 0; i<koblinger.size(); i+=bulkSize){
             val selection = koblinger.subList(i, Math.min(i + bulkSize, koblinger.size()));
+            val ressursByNavIdent = unleashRessursServiceSelector.findByNavidentBulk(selection.stream().map(Kobling::getNavIdent).toList());
 
             selection.forEach(k -> {
                         val organisasjonsenhet = cachedEnheter.get(k.getAgressoId()+""+k.getOrgNiv());
-                        val dvhRessurs = unleashRessursServiceSelector.findByNavident(k.getNavIdent());
+                        val dvhRessurs = ressursByNavIdent.get(k.getNavIdent());
                         if (organisasjonsenhet == null && dvhRessurs == null) {
                             log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
                         } else if (organisasjonsenhet == null) {

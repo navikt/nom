@@ -29,6 +29,7 @@ public class MappingUtils {
         final var sektor = singletonList(Sektor.valueOf(iressurs.getSektor()));
 
         return Ressurs.builder()
+                .nomId(iressurs.getId())
                 .navident(iressurs.getNavIdent())
                 .navIdent(iressurs.getNavIdent())
                 .personident(iressurs.getPersonIdent())

@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.graphql.person;
 
-import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -10,17 +10,17 @@ import java.util.Optional;
 @Component
 public class PersonResolver {
 
-    private final RessursStateService ressursStateService;
+    private final UnleashRessursServiceSelector ressursService;
 
-    public PersonResolver(RessursStateService ressursStateService) {
-        this.ressursStateService = ressursStateService;
+    public PersonResolver(UnleashRessursServiceSelector ressursService) {
+        this.ressursService = ressursService;
     }
 
     public Optional<PersonResult> person(String personident) {
         if (personident == null) {
             return Optional.empty();
         }
-        return ressursStateService.findByPersonident(personident)
+        return ressursService.findByPersonident(personident)
                 .map(PersonResolver::fromRessurs)
                 .or(() -> Optional.of(baseRessurs(personident)));
 
@@ -33,12 +33,13 @@ public class PersonResolver {
                 .build();
     }
 
-    public static PersonResult fromRessurs(RessursState ressurs) {
+    public static PersonResult fromRessurs(IRessurs ressurs) {
         return PersonResult.builder()
-                .personident(ressurs.personident())
-                .personIdent(ressurs.personident())
-                .navident(ressurs.navident())
-                .navIdent(ressurs.navident())
+                .personident(ressurs.getPersonIdent())
+                .personIdent(ressurs.getPersonIdent())
+                .nomId(ressurs.getId())
+                .navident(ressurs.getNavIdent())
+                .navIdent(ressurs.getNavIdent())
                 .build();
     }
 }

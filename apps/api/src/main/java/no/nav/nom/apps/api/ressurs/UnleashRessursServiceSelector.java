@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -66,6 +67,28 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
             return ressursStateService.matchByNavident(navident).stream().map(Ressurs::new).collect(Collectors.toList());
         } else {
             return ressursService.matchByNavident(navident);
+        }
+    }
+
+    @Override
+    public Map<String, IRessurs> findByPersonidentBulk(List<String> personIdenter) {
+        if (eventSourceToggle()) {
+            return ressursStateService.findByPersonidentBulk(personIdenter).entrySet().stream()
+                    .map(entry -> Map.entry(entry.getKey(), new Ressurs(entry.getValue())))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            return ressursService.findByPersonidentBulk(personIdenter);
+        }
+    }
+
+    @Override
+    public Map<String, IRessurs> findByNavidentBulk(List<String> navIdenter) {
+        if (eventSourceToggle()) {
+            return ressursStateService.findByNavidentBulk(navIdenter).entrySet().stream()
+                    .map(entry -> Map.entry(entry.getKey(), new Ressurs(entry.getValue())))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            return ressursService.findByNavidentBulk(navIdenter);
         }
     }
 

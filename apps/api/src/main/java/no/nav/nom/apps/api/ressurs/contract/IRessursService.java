@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.contract;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -15,4 +16,7 @@ public interface IRessursService<TYPE> {
     }
     Collection<TYPE> getAll();
     List<TYPE> matchByNavident(String navident);
+
+    Map<String, TYPE> findByPersonidentBulk(List<String> personIdenter);
+    Map<String, TYPE> findByNavidentBulk(List<String> navIdenter);
 }

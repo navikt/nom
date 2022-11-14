@@ -72,7 +72,8 @@ public class RessursService implements IRessursService<IRessurs> {
         );
     }
 
-    public Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter){
+    @Override
+    public Map<String, IRessurs> findByNavidentBulk(List<String> navIdenter){
         return repository.findHendelseByJsonBulk(EventBasedRessurs.NAVIDENT_FIELD, navIdenter).stream()
                 .map(hendelseService::convert)
                 .collect(Collectors.groupingBy(IHendelse::getFid))
@@ -81,7 +82,8 @@ public class RessursService implements IRessursService<IRessurs> {
                 .collect(Collectors.toUnmodifiableMap(IRessurs::getNavIdent, Function.identity()));
     }
 
-    public Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter){
+    @Override
+    public Map<String, IRessurs> findByPersonidentBulk(List<String> personIdenter){
         return repository.findHendelseByJsonBulk(EventBasedRessurs.PERSONIDENT_FIELD, personIdenter).stream()
                 .map(hendelseService::convert)
                 .collect(Collectors.groupingBy(IHendelse::getFid))

@@ -1,14 +1,12 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

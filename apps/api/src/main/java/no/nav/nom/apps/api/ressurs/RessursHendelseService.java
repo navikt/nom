@@ -40,8 +40,8 @@ public class RessursHendelseService {
         val bulkSize = 1000;
         for(int i = 0; i<dvhRessurs.size(); i+=bulkSize){
             val selection = dvhRessurs.subList(i, Math.min(i + bulkSize, dvhRessurs.size()));
-            val ressursByNavIdent = ressursService.findByNavIdentBulk(selection.stream().map(DvhRessurs::getNavIdent).toList());
-            val ressursByPersonIdent = ressursService.findByPersonIdentBulk(selection.stream().map(DvhRessurs::getPersonIdent).toList());
+            val ressursByNavIdent = ressursService.findByNavidentBulk(selection.stream().map(DvhRessurs::getNavIdent).toList());
+            val ressursByPersonIdent = ressursService.findByPersonidentBulk(selection.stream().map(DvhRessurs::getPersonIdent).toList());
 
             val opprettInserts = new LinkedList<DvhRessurs>();
             val endreinserts = new HashMap<UUID, DvhRessurs>();

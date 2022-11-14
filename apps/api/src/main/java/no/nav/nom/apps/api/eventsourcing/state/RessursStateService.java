@@ -46,6 +46,20 @@ public class RessursStateService implements IRessursService<RessursState> {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Map<String, RessursState> findByPersonidentBulk(List<String> personIdenter) {
+        return ressursByPersonident.entrySet().stream()
+                .filter(entry -> personIdenter.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public Map<String, RessursState> findByNavidentBulk(List<String> navIdenter) {
+        return ressursByNavident.entrySet().stream()
+                .filter(entry -> navIdenter.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
     public void putEventAggregate(RessursState ressursEventData){
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
