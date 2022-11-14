@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//@Service
+@Service
 @RequiredArgsConstructor
 public class RessursService implements IRessursService<IRessurs> {
 
