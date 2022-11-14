@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -47,6 +48,7 @@ public class DvhRestConsumer {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final EventAggregateListener eventAggregateListener;
     private final RessursHendelseService ressursHendelseService;
+    private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
 
@@ -121,6 +123,7 @@ public class DvhRestConsumer {
 
         dvhRepository.setRessurs(dvhRessurs);
         if (leaderElection.isLeader()) {
+            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
         }
     }
