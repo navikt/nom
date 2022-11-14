@@ -26,7 +26,7 @@
 
         <asciidoc.version>2.2.2</asciidoc.version>
         <ow2-asm.version>9.4</ow2-asm.version>
-        <spring-cloud.version>2021.0.4</spring-cloud.version>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
         <checker-qual.version>3.26.0</checker-qual.version>
         <graphql.extended.scalars-version>19.1</graphql.extended.scalars-version>
         <graphql-java.version>19.2</graphql-java.version>
