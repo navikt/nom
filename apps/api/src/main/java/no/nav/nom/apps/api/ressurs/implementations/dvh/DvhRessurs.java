@@ -64,6 +64,7 @@ public class DvhRessurs implements IRessurs {
         }
     }
 
+    @Override
     public LocalDate getSluttdato(){
         if(!hasPermisjon()) {
             if ("E".equals(ansattRessursKode) ||

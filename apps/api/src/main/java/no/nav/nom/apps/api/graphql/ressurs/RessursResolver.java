@@ -18,7 +18,6 @@ import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -34,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -112,11 +110,6 @@ public class RessursResolver {
             log.error("Intern feil ved opprettelse av ny ressurs", exc);
             throw new OpprettRessursException("Intern feil", exc, ErrorCode.SERVER_ERROR);
         }
-    }
-
-    public LocalDate getSluttdato(Ressurs ressurs) {
-        DvhRessurs dvhRessurs = dvhRepository.getRessursByPersonident().get(ressurs.getPersonident());
-        return dvhRessurs != null ? dvhRessurs.getSluttdato()  : null;
     }
 
     private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {

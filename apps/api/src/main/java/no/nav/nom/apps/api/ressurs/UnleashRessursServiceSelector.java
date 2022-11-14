@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.ressurs.implementations.RessursService;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -112,6 +113,11 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
         @Override
         public  String getSektor() {
             return ressursState.sektor().toString();
+        }
+
+        @Override
+        public LocalDate getSluttdato() {
+            return ressursState.sluttdato().orElse(null);
         }
     }
 }

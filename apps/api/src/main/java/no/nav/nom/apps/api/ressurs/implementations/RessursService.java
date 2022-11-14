@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.hendelse.contract.HendelseDataType;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
@@ -37,6 +38,7 @@ public class RessursService implements IRessursService<IRessurs> {
     private final IHendelseService hendelseService;
     private final ObjectMapper objectMapper;
     private final NavIdentService navIdentService;
+    private final DvhRepository dvhRepository;
 
     @Override
     public Optional<IRessurs> findByFid(UUID fid){
@@ -95,7 +97,7 @@ public class RessursService implements IRessursService<IRessurs> {
                 .collect(Collectors.groupingBy(IHendelse::getFid))
                 .values()
                 .stream()
-                .map(EventBasedRessurs::new)
+                .map(this::toRessurs)
                 .collect(Collectors.toList());
     }
 
@@ -151,6 +153,13 @@ public class RessursService implements IRessursService<IRessurs> {
     }
 
     private IRessurs convert(List<IHendelse> hendelser){
-        return hendelser == null || hendelser.isEmpty() ? null : new EventBasedRessurs(hendelser);
+        return hendelser == null || hendelser.isEmpty() ? null : toRessurs(hendelser);
+    }
+
+    private IRessurs toRessurs(List<IHendelse> hendelser){
+        final var ressurs = new EventBasedRessurs(hendelser);
+        final var dvhRessurs = dvhRepository.getRessursByPersonident().get(ressurs.getPersonIdent());
+        ressurs.setSluttdato(dvhRessurs != null ? dvhRessurs.getSluttdato() : null);
+        return ressurs;
     }
 }

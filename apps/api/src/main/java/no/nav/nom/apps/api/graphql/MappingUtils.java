@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.graphql;
 
-import lombok.AllArgsConstructor;
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
@@ -37,6 +35,7 @@ public class MappingUtils {
                 .personIdent(iressurs.getPersonIdent())
                 .ressurstype(sektor)
                 .sektor(sektor)
+                .sluttdato(iressurs.getSluttdato())
                 .build();
     }
 

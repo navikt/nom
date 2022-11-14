@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.contract;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,5 @@ public interface IRessurs {
     default String getSektor() {
         return null;
     }
+    LocalDate getSluttdato();
 }
