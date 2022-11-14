@@ -31,6 +31,10 @@
                     <groupId>org.rocksdb</groupId>
                     <artifactId>rocksdbjni</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
