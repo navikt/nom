@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.eventsourcing.state;
 
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.admin.AdminClient;

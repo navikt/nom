@@ -21,16 +21,14 @@ import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.BatchMapping;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -148,7 +146,7 @@ public class GraphQLRessursController {
         return Mono.fromSupplier(() -> propertyResolver.visningsnavn(ressurser));
     }
 
-    /*@BatchMapping(typeName = "Ressurs", field = "fornavn")
+    @BatchMapping(typeName = "Ressurs", field = "fornavn")
     public Mono<Map<Ressurs, DataFetcherResult<String>>> fornavn(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> propertyResolver.fornavn(ressurser));
     }
@@ -156,11 +154,15 @@ public class GraphQLRessursController {
     @BatchMapping(typeName = "Ressurs", field = "etternavn")
     public Mono<Map<Ressurs, DataFetcherResult<String>>> etternavn(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> propertyResolver.etternavn(ressurser));
-    }*/
+    }
 
     @BatchMapping(typeName = "Ressurs", field = "telefon")
     public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
     }
 
+    @SchemaMapping(typeName = "Ressurs", field = "sluttdato")
+    public LocalDate sluttdato(Ressurs ressurs) {
+        return ressursResolver.getSluttdato(ressurs);
+    }
 }

@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
@@ -17,6 +18,7 @@ import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -32,6 +34,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -47,16 +50,19 @@ public class RessursResolver {
     private final PdlConsumer pdlConsumer;
     private final RessursStateService ressursStateService;
     private final RessursCommadService ressursCommadService;
+    private final DvhRepository dvhRepository;
 
     RessursResolver(
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
             RessursStateService ressursStateService,
-            RessursCommadService ressursCommadService) {
+            RessursCommadService ressursCommadService,
+            DvhRepository dvhRepository) {
         this.nikConsumer = nikConsumer;
         this.pdlConsumer = pdlConsumer;
         this.ressursStateService = ressursStateService;
         this.ressursCommadService = ressursCommadService;
+        this.dvhRepository = dvhRepository;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
@@ -108,6 +114,11 @@ public class RessursResolver {
         }
     }
 
+    public LocalDate getSluttdato(Ressurs ressurs) {
+        DvhRessurs dvhRessurs = dvhRepository.getRessursByPersonident().get(ressurs.getPersonident());
+        return dvhRessurs != null ? dvhRessurs.getSluttdato()  : null;
+    }
+
     private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {
         final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1), "STANDARD", true);
 
@@ -157,6 +168,7 @@ public class RessursResolver {
         //TODO Add kjoenn og folkeregistrertnavn to additional data
         return ressursCommadService.createRessursSync(opprettRessursCommand);
     }
+
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {
         return toResponse(Optional.ofNullable(ressurs));

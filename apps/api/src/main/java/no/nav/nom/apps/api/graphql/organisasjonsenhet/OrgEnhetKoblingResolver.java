@@ -4,6 +4,8 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -16,22 +18,22 @@ import java.util.Optional;
 public class OrgEnhetKoblingResolver {
 
     private final DvhRepository dvhRepository;
-    private final RessursStateService ressursStateService;
+    private final UnleashRessursServiceSelector ressursService;
 
-    public OrgEnhetKoblingResolver(DvhRepository dvhRepository, RessursStateService ressursStateService) {
+    public OrgEnhetKoblingResolver(DvhRepository dvhRepository, UnleashRessursServiceSelector ressursService) {
         this.dvhRepository = dvhRepository;
-        this.ressursStateService = ressursStateService;
+        this.ressursService = ressursService;
     }
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
         return dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
-                .map(kobling -> ressursStateService.findByNavident(kobling.getNavIdent(), ressurs -> tilOrgEnhetsKobling(ressurs, kobling)))
+                .map(kobling -> ressursService.findByNavident(kobling.getNavIdent(), ressurs -> tilOrgEnhetsKobling(ressurs, kobling)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private OrgEnhetsKobling tilOrgEnhetsKobling(RessursState ressurs, Kobling kobling) {
+    private OrgEnhetsKobling tilOrgEnhetsKobling(IRessurs ressurs, Kobling kobling) {
         return OrgEnhetsKobling.builder()
                 .ressurs(MappingUtils.toRessurs(ressurs))
                 .gyldigFom(kobling.getGyldigFom())
