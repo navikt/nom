@@ -84,7 +84,7 @@ public class KafkaTransformerTest {
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid().toString(), expected)
+                        KeyValue.pair(event.getFid(), expected)
                 );
     }
 
@@ -157,8 +157,8 @@ public class KafkaTransformerTest {
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid().toString(), expectedOpprettet),
-                        KeyValue.pair(event.getFid().toString(), expectedSluttet)
+                        KeyValue.pair(event.getFid(), expectedOpprettet),
+                        KeyValue.pair(event.getFid(), expectedSluttet)
                 );
     }
 
