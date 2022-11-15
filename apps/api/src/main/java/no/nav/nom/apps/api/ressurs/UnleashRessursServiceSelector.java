@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs;
 
 import com.github.f4b6a3.ulid.Ulid;
+import io.getunleash.Unleash;
 import lombok.AllArgsConstructor;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class UnleashRessursServiceSelector implements IRessursService<IRessurs> {
 
+    private static final String UNLEASH_TOGGLE = "nom.ressurs.eventsourcing_toggle";
+    private Unleash unleash;
     private final RessursService ressursService;
     private final RessursStateService ressursStateService;
 
@@ -93,7 +96,7 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
     }
 
     private boolean eventSourceToggle() {
-        return false;
+        return unleash.isEnabled(UNLEASH_TOGGLE);
     }
 
     class Ressurs implements IRessurs {
