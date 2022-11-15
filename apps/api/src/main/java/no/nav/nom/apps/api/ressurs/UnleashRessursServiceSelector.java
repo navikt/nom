@@ -4,6 +4,7 @@ import com.github.f4b6a3.ulid.Ulid;
 import io.getunleash.Unleash;
 import lombok.AllArgsConstructor;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.RessursService;
@@ -95,6 +96,10 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
         } else {
             return ressursService.findByNavidentBulk(navIdenter);
         }
+    }
+    @Override
+    public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
+        return ressursService.opprettRessurs(personerident, data, metadata);
     }
 
     private boolean eventSourceToggle() {

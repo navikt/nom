@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.eventsourcing.state;
 
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,11 @@ public class RessursStateService implements IRessursService<RessursState> {
         return ressursByNavident.entrySet().stream()
                 .filter(entry -> navIdenter.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @Override
+    public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
+        return null;
     }
 
     public void putEventAggregate(RessursState ressursEventData){

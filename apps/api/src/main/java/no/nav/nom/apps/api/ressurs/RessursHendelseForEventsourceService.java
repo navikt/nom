@@ -20,6 +20,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +75,7 @@ public class RessursHendelseForEventsourceService {
                         new OpprettRessursCommand(
                                 ressurs.getPersonIdent(),
                                 ressurs.getNavIdent(),
+                                Optional.empty(),
                                 DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
                                 new Visningsnavn(
                                         ressurs.getFornavn(),

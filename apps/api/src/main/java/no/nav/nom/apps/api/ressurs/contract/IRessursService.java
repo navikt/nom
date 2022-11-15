@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.ressurs.contract;
 
+import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,4 +21,5 @@ public interface IRessursService<TYPE> {
 
     Map<String, TYPE> findByPersonidentBulk(List<String> personIdenter);
     Map<String, TYPE> findByNavidentBulk(List<String> navIdenter);
+    IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata);
 }

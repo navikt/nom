@@ -28,21 +28,7 @@ public class RessursCommadService {
 
     public ListenableFuture<SendResult<String, Event>> createRessursEvent(OpprettRessursCommand opprettRessursCommand){
         // TODO validate command
-        return eventProducer.sendMessage(
-                new RessursOpprettetEventV1(
-                        PrefixedUlidCreator.createRessursUlid(),
-                        new RessursOpprettetEventV1.RessursOpprettetEventData(
-                                opprettRessursCommand.personident(),
-                                opprettRessursCommand.sektor(),
-                                opprettRessursCommand.visningsnavn()),
-                        opprettRessursCommand.inputMetadata(),
-                        new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                                Optional.ofNullable(opprettRessursCommand.navident()),
-                                Optional.empty(),
-                                Optional.empty()
-                        )
-                )
-        );
+        return createRessurs(PrefixedUlidCreator.createRessursUlid(), opprettRessursCommand);
     }
 
     public ListenableFuture<SendResult<String, Event>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
@@ -61,8 +47,13 @@ public class RessursCommadService {
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand){
         final var fid = PrefixedUlidCreator.createRessursUlid();
         final var response = eventAggregateListener.waitForAggregate(fid);
+        createRessurs(fid, opprettRessursCommand);
 
-        eventProducer.sendMessage(
+        return response.block();
+    }
+
+    private ListenableFuture<SendResult<String, Event>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand){
+        return eventProducer.sendMessage(
                 new RessursOpprettetEventV1(
                         fid,
                         new RessursOpprettetEventV1.RessursOpprettetEventData(
@@ -72,12 +63,17 @@ public class RessursCommadService {
                         opprettRessursCommand.inputMetadata(),
                         new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
                                 Optional.ofNullable(opprettRessursCommand.navident()),
-                                Optional.empty(),
-                                Optional.empty()
+                                opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
+                                opprettRessursCommand.pdlPerson().map(pdlPerson ->
+                                        new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
+                                                pdlPerson.getFornavn(),
+                                                pdlPerson.getMellomnavn(),
+                                                pdlPerson.getEtternavn()
+                                        )
+                                )
                         )
                 )
         );
-        return response.block();
     }
 
 }

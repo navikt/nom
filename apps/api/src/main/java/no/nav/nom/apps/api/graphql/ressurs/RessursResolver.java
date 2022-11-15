@@ -17,10 +17,11 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
-import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -36,6 +37,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -135,13 +137,28 @@ public class RessursResolver {
             );
         }
 
-        final var kjoenn = pdlConsumer.hentPerson(request.getPersonident())
-                .map(pers -> pers.getKjonn().name())
-                .orElseGet(Kjonn.UKJENT::name);
+        final var pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
+        Map<String, Object> data = new HashMap<>();
+        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
+        data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
+        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn());
+        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn());
+        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn());
+        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
+        data.put(EventBasedRessurs.KJONN_FIELD, pdlPerson.map(pers -> pers.getKjonn().name()).orElseThrow());
+
+
+        createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
+        return ressursService.opprettRessurs(request.getPersonident(), data, metadataFromToken(token, data));
+    }
+
+
+    private void createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
-                nikResponse.getBody().getNavident(),
+                navident,
+                pdlPerson,
                 Sektor.toEventStateSektor(request.getSektor()),
                 new Visningsnavn(
                         request.getVisningsfornavn(),
@@ -149,9 +166,9 @@ public class RessursResolver {
                         request.getVisningsetternavn()
                 ),
                 new InputMetadata(
-                        "",
-                        "",
-                        null,
+                        "GraphQL",
+                        "opprettRessurs",
+                        request,
                         new Origination(
                                 SecurityUtil.getUserFromToken(token).orElseThrow(),
                                 SecurityUtil.getSystemFromToken(token).orElseThrow()
@@ -161,8 +178,7 @@ public class RessursResolver {
 
 
         //TODO Add kjoenn og folkeregistrertnavn to additional data
-        //return ressursCommadService.createRessursSync(opprettRessursCommand);
-        return null;
+        ressursCommadService.createRessursEvent(opprettRessursCommand);
     }
 
 
