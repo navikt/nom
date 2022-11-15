@@ -21,8 +21,8 @@ public class NIKConsumer {
         this.webClient = webClientBuilder
                 .baseUrl(appProperties.nik().baseUrl() + "/navident")
                 .defaultHeaders(headers -> {
-                    headers.add("Nav-Consumer-Id", appProperties.appName());
-                    headers.add("Nav-Call-Id", appProperties.appName());
+                    headers.add("Nav-Consumer-Id", appProperties.name());
+                    headers.add("Nav-Call-Id", appProperties.name());
                 })
                 .build();
     }

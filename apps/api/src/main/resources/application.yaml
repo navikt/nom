@@ -2,7 +2,7 @@ app:
   kafka:
     stateTopic: nom.ressurs-state-v1
     eventsourceTopic: nom.ressurs-eventsource
-  appName: ${NAIS_APP_NAME:nom-api}
+  name: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
     enhetPath: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET

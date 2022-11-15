@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.RessursService;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
+@Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class UnleashRessursServiceSelector implements IRessursService<IRessurs> {
 
     private static final String UNLEASH_TOGGLE = "nom.ressurs.eventsourcing_toggle";

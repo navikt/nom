@@ -9,11 +9,11 @@ public record AppProperties(
         Proxy proxy,
         Pdl pdl,
         Nik nik,
-        String appName
+        String name
 ) {
 
     public boolean isSandbox() {
-        return appName.equals("nom-sandbox-api");
+        return name.equals("nom-sandbox-api");
     }
 
     public record Proxy(
