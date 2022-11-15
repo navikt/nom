@@ -4,7 +4,7 @@ NOM tilbyr integrasjon via GraphQL. Kafka er planlagt på sikt.
 
 == GraphQL
 
-GraphQL kan prøves ut i dev https://nom-api.dev.intern.nav.no/playground[her] (krever naisdevice eller via utviklerimage).
+GraphQL kan prøves ut i dev https://nom.dev.nav.no/nom-gql-graphiql[her] (krever naisdevice, Chrome SKSS eller via utviklerimage).
 Det ligger lastet inn pre-utfylte forespørsler som kan bygges videre på.
-Skjema kan utforskes ved å gå https://nom-api.dev.intern.nav.no/voyager[her].
+
 
