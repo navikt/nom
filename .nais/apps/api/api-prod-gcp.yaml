@@ -94,6 +94,9 @@ spec:
         - application: veilarbveileder
           namespace: pto
           cluster: prod-fss
+        - application: fullmaktsregister-api
+          namespace: team-nof
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

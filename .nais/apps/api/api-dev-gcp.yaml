@@ -122,6 +122,9 @@ spec:
         - application: fullmaktsregister-web
           namespace: team-nof
           cluster: dev-gcp
+        - application: fullmaktsregister-api
+          namespace: team-nof
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
