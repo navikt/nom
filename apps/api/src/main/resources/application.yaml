@@ -66,15 +66,13 @@ spring:
     admin:
       client-id: ${HOSTNAME}
     consumer:
-      bootstrap-servers: ${KAFKA_BROKERS}
       max-poll-records: 1000
       auto-offset-reset: earliest
       enable-auto-commit: false
-      group-id: ${app.appName}
-      client-id: ${HOSTNAME}
+      group-id: ${HOSTNAME}
     listener:
       missing-topics-fatal: true
-    client-id: ${spring.application.name}
+    client-id: ${HOSTNAME}
 
 management:
   metrics:
