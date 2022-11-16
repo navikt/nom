@@ -54,9 +54,9 @@ apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
   name: ressurs-eventsource
-  namespace: nom
+  namespace: org
   labels:
-    team: nom
+    team: org
 spec:
   pool: {{kafka-pool}}
   config:
@@ -69,7 +69,7 @@ spec:
     - team: nom
       application: nom-api
       access: readwrite
-    - team: nom
+    - team: org
       application: kafka-aggregate-converter
       access: read
 
@@ -79,9 +79,9 @@ apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
   name: ressurs-state-v1
-  namespace: nom
+  namespace: org
   labels:
-    team: nom
+    team: org
 spec:
   pool: {{kafka-pool}}
   config:
@@ -93,6 +93,6 @@ spec:
     - team: nom
       application: nom-api
       access: read
-    - team: nom
+    - team: org
       application: kafka-aggregate-converter
       access: readwrite
