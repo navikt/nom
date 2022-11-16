@@ -33,6 +33,9 @@ public class RessursHendelseForEventsourceService {
 
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
+        log.info("Ressurser to process "+dvhRessurs.size());
+        log.info("Sender meldinger ut på kafka");
+        log.info("State repository size "+ressursStateService.getAll().size());
         Map<DvhRessurs, ListenableFuture<SendResult<String, Event>>> opprettetRessuser = new ConcurrentHashMap<>();
 
         dvhRessurs.forEach(ressurs -> {
