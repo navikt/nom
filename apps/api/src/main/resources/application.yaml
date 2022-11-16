@@ -79,6 +79,9 @@ management:
         include: prometheus,health
   endpoint:
     health:
+      group:
+        readiness:
+          include: "readinessState,customCheck"
       show-details: always
       probes:
         enabled: true

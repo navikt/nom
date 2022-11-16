@@ -44,6 +44,8 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  kafka:
+    pool: nav-dev
   azure:
     application:
       enabled: true
