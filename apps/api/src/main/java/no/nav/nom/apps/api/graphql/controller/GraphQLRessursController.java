@@ -162,4 +162,5 @@ public class GraphQLRessursController {
     public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> telefonResolver.load(ressurser));
     }
+
 }

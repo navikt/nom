@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.implementations.RessursService;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class DvhService {
 
     private final DvhRepository dvhRepository;
-    private final RessursService ressursService;
+    private final UnleashRessursServiceSelector ressursService;
     private final IOrgenhetService orgenhetService;
 
     public void saveKoblinger(List<DvhKobling> koblinger) {
