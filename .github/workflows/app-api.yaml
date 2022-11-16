@@ -52,7 +52,7 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
-          build-args: JAR_PATH=apps/kafka-aggregate-converter/target/app.jar
+          build-args: JAR_PATH=apps/api/target/app.jar
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
