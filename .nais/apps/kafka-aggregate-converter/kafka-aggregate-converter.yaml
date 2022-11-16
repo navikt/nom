@@ -7,6 +7,9 @@ metadata:
     team: org
 spec:
   image: {{image}}
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: log-logstash
   port: 8080
   replicas:
     min: 1
