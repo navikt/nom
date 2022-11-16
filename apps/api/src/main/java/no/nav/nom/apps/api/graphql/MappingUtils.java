@@ -5,6 +5,10 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static java.util.Collections.singletonList;
 
 public class MappingUtils {
@@ -26,7 +30,10 @@ public class MappingUtils {
     }
 
     public static Ressurs toRessurs(IRessurs iressurs){
-        final var sektor = singletonList(Sektor.valueOf(iressurs.getSektor()));
+        final List<Sektor> sektor = Optional.ofNullable(iressurs.getSektor())
+                .map(Sektor::valueOf)
+                .map(Collections::singletonList)
+                .orElse(Collections.emptyList());
 
         return Ressurs.builder()
                 .nomId(iressurs.getId())

@@ -3,15 +3,13 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
-import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +22,6 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -44,13 +41,13 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        RessursState ressursState = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -87,13 +84,13 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        RessursState ressurs = createRessursHendelse("");
+        IRessurs ressurs = createRessursHendelse("");
 
         final var response = postForResource("ressurs/scenario2.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
     }
 
     @Test
@@ -102,6 +99,7 @@ class RessursTest extends RessursTestBase {
         createRessursHendelse("1");
         createRessursHendelse("2");
         createRessursHendelse("3");
+
 
         final var response = postForResource("ressurs/scenario3.graphql");
 
@@ -138,27 +136,28 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
-        RessursState ressursState = new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "testPersonIdent",
-                "testNavIdent",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.of("mellomnavn"),
-                        "etternavn"
-                ),
-                Optional.of(LocalDate.now().plusDays(10))
+        IRessurs ressurs = createRessursHendelse("");
+        final var sluttdato = LocalDate.parse("2020-12-31");
+        final var dvhResponse = List.of(
+                new DvhRessursUtils.RessursMock(
+                        ressurs.getNavIdent(),
+                        ressurs.getPersonIdent(),
+                        "Fornavn",
+                        "Etternavn",
+                        "NAV Statlig",
+                        sluttdato
+                )
         );
+        dvhRessursUtils.addToResponse(dvhResponse);
+        dvhRestConsumer.loadFromDvh();
 
-        createRessursHendelse(ressursState);
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
-        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
-        assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
+        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(sluttdato, outputRessurs.getSluttdato());
     }
 
     @Nested

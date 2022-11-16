@@ -23,6 +23,8 @@ public class EventBasedRessurs implements IRessurs {
     private final List<IHendelse> hendelser;
     private LocalDate sluttdato;
 
+    private String sektor;
+
     public EventBasedRessurs(List<IHendelse> hendelser) {
         this.hendelser = hendelser.stream()
                 .sorted(comparing(h -> h.getHendelseMetadata().getOpprettetTidspunkt())).toList();
@@ -61,7 +63,7 @@ public class EventBasedRessurs implements IRessurs {
     }
     @Override
     public String getSektor() {
-        return getLast(SEKTOR_FIELD).orElse(null);
+        return getLast(SEKTOR_FIELD).orElse(sektor);
     }
 
     @Override
@@ -71,6 +73,10 @@ public class EventBasedRessurs implements IRessurs {
 
     public void setSluttdato(LocalDate sluttdato){
         this.sluttdato = sluttdato;
+    }
+
+    public void setSektor(String sektor){
+        this.sektor = sektor;
     }
 
     private Optional<String> getLast(String property) {

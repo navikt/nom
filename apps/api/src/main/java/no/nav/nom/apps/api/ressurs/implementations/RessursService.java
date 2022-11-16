@@ -138,7 +138,12 @@ public class RessursService implements IRessursService<IRessurs> {
         var sektor = Optional.ofNullable(ressurs.getSektor())
                 .map(Sektor::valueOf)
                 .map(Collections::singletonList)
-                .orElseGet(() -> dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()));
+                .orElseGet(() ->
+                        dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent())
+                                .map(Sektor::valueOf)
+                                .map(Collections::singletonList)
+                                .orElse(Collections.emptyList())
+                );
 
         return Ressurs.builder()
                 .nomId(ressurs.getId())
@@ -162,6 +167,9 @@ public class RessursService implements IRessursService<IRessurs> {
         final var ressurs = new EventBasedRessurs(hendelser);
         final var dvhRessurs = dvhRepository.getRessursByPersonident().get(ressurs.getPersonIdent());
         ressurs.setSluttdato(dvhRessurs != null ? dvhRessurs.getSluttdato() : null);
+        if(ressurs.getSektor() == null){
+            ressurs.setSektor(dvhRessursInterface.getRessurstypeGraphQlResponse(ressurs.getNavIdent()).orElse(null));
+        }
         return ressurs;
     }
 }

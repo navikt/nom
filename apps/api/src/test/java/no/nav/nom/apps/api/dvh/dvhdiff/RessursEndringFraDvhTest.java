@@ -1,180 +1,153 @@
 package no.nav.nom.apps.api.dvh.dvhdiff;
 
-import no.nav.nom.apps.api.DvhRessursUtils;
-import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import lombok.val;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.RessursState;
-import org.junit.jupiter.api.Assertions;
+import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.kafka.core.KafkaTemplate;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.stream.Collectors;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("dvh-diffing")
 public class RessursEndringFraDvhTest extends DvhTestBase {
 
-    @SpyBean
-    private KafkaTemplate<String, Event> eventProducerTemplate;
-
     @Test
-    @DisplayName("Ressurser fra datavarehus trigger opprett event")
+    @DisplayName("Ressurser fra datavarehus blir tilgjengelige i ressurs repo")
     public void test1() {
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                ),
-                new DvhRessursUtils.RessursMock(
-                        "O123457",
-                        "12345678902",
-                        "Navn 2",
-                        "ENavn 2",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
-
-        ArgumentCaptor<RessursOpprettetEventV1> eventArgumentCaptor = ArgumentCaptor.forClass(RessursOpprettetEventV1.class);
-
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
         loadFromDvh();
-        Mockito.verify(eventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
-        final var eventsByPersonident = eventArgumentCaptor.getAllValues()
-                .stream()
-                .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursOpprettetEventData) e.getData()).personident(), Function.identity()));
 
-        response.forEach(r -> assertOpprettetEventFromDvhRessurs(eventsByPersonident.get(r.FNR()), r));
+        val alleRessurserAntall = ressursService.getAll().size();
+        assertThat(alleRessurserAntall).isEqualTo(4);
     }
 
     @Test
-    @DisplayName("Prøver ikke opprette hvis eksisterende Ressurs")
+    @DisplayName("1 ny ressurs og 1 endring av personnummer gir riktig antall på hendelser og ressurser")
     public void test2() {
-        RessursState existingRessurs = createRessursHendelse("");
-
-        dvhRessursUtils.addToResponse(
-                new DvhRessursUtils.RessursMock(
-                        existingRessurs.navident(),
-                        existingRessurs.personident(),
-                        existingRessurs.visningsnavn().fornavn(),
-                        existingRessurs.visningsnavn().etternavn(),
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
         loadFromDvh();
-        Mockito.verifyNoInteractions(eventProducerTemplate);
+
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_After1.json");
+        loadFromDvh();
+
+        val alleRessurser = ressursService.getAll();
+        assertThat(alleRessurser.size()).isEqualTo(5);
     }
 
     @Test
-    @DisplayName("Sluttet ansatt trigger opprett og sluttet event")
+    @DisplayName("endring av personnummer i dvh snapshot blir oppdaget")
     public void test3() {
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2021-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
-
-        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
         loadFromDvh();
-        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        val fnrPre = ressursService.findByNavident("O123459").get().getPersonIdent();
 
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_After2.json");
+        loadFromDvh();
+        val fnrAfter = ressursService.findByNavident("O123459").get().getPersonIdent();
 
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
+        assertThat(fnrPre).isNotEqualTo(fnrAfter);
+        assertThat(fnrAfter).isEqualTo("92345678904");
     }
 
     @Test
-    @DisplayName("Ansatt som slutter i etterkant trigger sluttet event")
+    @DisplayName("ny navident på eksisterende personnummer har ingen effekt")
     public void test4() {
-        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
-
-        final var response = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.parse("2099-12-31")
-                )
-        );
-        dvhRessursUtils.addToResponse(response);
+        stubRessurser("responses/dvhdiff/dvhAnsatt2_SinglePre.json");
         loadFromDvh();
+        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
 
-
-        createRessursHendelse(
-                new RessursState(
-                        PrefixedUlidCreator.createRessursUlid(),
-                        "12345678901",
-                        "O123456",
-                        Sektor.NAV_STATLIG,
-                        new Visningsnavn(
-                                "Navn 1",
-                                Optional.empty(),
-                                "ENavn 1"
-                        ),
-                        Optional.empty()
-                )
-        );
-
-        dvhRessursUtils.createEmptyResponse();
-
-        final var response2 = List.of(
-                new DvhRessursUtils.RessursMock(
-                        "O123456",
-                        "12345678901",
-                        "Navn 1",
-                        "ENavn 1",
-                        "NAV Statlig",
-                        LocalDate.now()
-                )
-        );
-        dvhRessursUtils.addToResponse(response2);
+        stubRessurser("responses/dvhdiff/dvhAnsatt2_SingleEndretNavIdent.json");
         loadFromDvh();
+        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
 
-        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        val antallRessurserIRepo = ressursService.getAll().size();
 
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
-        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
+        assertThat(antallRessurserIRepo).isEqualTo(1);
+        assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
     }
 
-    private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock){
+    @Test
+    @DisplayName("navident/rad fjernet fra dvh har ingen effekt")
+    public void test5() {
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
+        loadFromDvh();
+        val hashedRessursDataPre = hashedRessurser(ressursService.getAll());
 
-        Assertions.assertNotNull(ressursSluttetEvent.getFid());
+        stubRessurser("responses/dvhdiff/dvhAnsatt1_After3.json");
+        loadFromDvh();
+        val hashedRessursDataPost = hashedRessurser(ressursService.getAll());
 
-        RessursOpprettetEventV1.RessursOpprettetEventData eventData = (RessursOpprettetEventV1.RessursOpprettetEventData) ressursSluttetEvent.getData();
+        val antallRessurserIRepo = ressursService.getAll().size();;
 
-        Assertions.assertEquals(ressursMock.NAV_IDENT(), ((RessursOpprettetEventV1.RessursOpprettetAdditionalData)ressursSluttetEvent.getAdditionalData()).navident().get());
-        Assertions.assertEquals(ressursMock.FNR(), eventData.personident());
-        Assertions.assertEquals(DvhRessurs.toSektor(ressursMock.ANSATT_TYPE()), eventData.sektor());
-        Assertions.assertEquals(ressursMock.FORNAVN(), eventData.visningsnavn().fornavn());
-        Assertions.assertEquals(ressursMock.ETTERNAVN(), eventData.visningsnavn().etternavn());
-        Assertions.assertNull(eventData.visningsnavn().mellomnavn());
+        assertThat(antallRessurserIRepo).isEqualTo(4);
+        assertThat(hashedRessursDataPre).hasSameElementsAs(hashedRessursDataPost);
     }
+
+    @Test
+    @DisplayName("Duplikat rader i responsen blir behandlet")
+    public void test6(){
+        stubRessurser("responses/dvh/dvhAnsatt3_duplikaterader.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavident("O123456").isPresent()).isTrue();
+        assertThat(ressursService.getAll().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Navidenter mappet til ulike personidenter blir filtrert bort")
+    public void test7(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammeNavidentForskjelligPnr.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavident("O123456").isEmpty()).isTrue();
+        assertThat(ressursService.getAll().size()).isEqualTo(0);
+
+    }
+
+    @Test
+    @DisplayName("Personidenter mappet til ulike navIdenter blir filtrert bort")
+    public void test8(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByPersonident("12345678901").isEmpty()).isTrue();
+        assertThat(ressursService.findByPersonident("12345678933").isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Personidenter med flere navidenter, så velges den som er aktiv i remedy")
+    public void test9(){
+        stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
+        loadFromDvh();
+
+        assertThat(ressursService.findByNavident("B123456").isPresent()).isTrue();
+    }
+
+    // test helpers
+
+    private void stubRessurser(String fileName) {
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json;charset=UTF-8")
+                .withBodyFile(fileName)
+        ));
+    }
+
+    private int hashRessurs(IRessurs r) {
+        return r.getId().hashCode() ^ r.getNavIdent().hashCode() ^ r.getPersonIdent().hashCode();
+    }
+
+    private Collection<Integer> hashedRessurser(Collection<IRessurs> ressurser) {
+        return ressurser
+                .stream().map(this::hashRessurs).collect(Collectors.toCollection(ArrayList::new));
+    }
+
 
 }

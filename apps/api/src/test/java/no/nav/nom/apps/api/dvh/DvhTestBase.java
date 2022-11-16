@@ -2,8 +2,6 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,9 +9,6 @@ public abstract class DvhTestBase extends TestBase {
 
     @Autowired
     protected DvhRestConsumer dvhRestConsumer;
-
-    @Autowired
-    protected IRessursService<RessursState> ressursService;
 
     @Autowired
     protected ObjectMapper om;

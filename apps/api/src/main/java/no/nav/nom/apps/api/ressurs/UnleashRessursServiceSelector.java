@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class UnleashRessursServiceSelector implements IRessursService<IRessurs> {
 
-    private static final String UNLEASH_TOGGLE = "nom.ressurs.eventsourcing_toggle";
+    public static final String UNLEASH_TOGGLE = "nom.ressurs.eventsourcing_toggle";
     private Unleash unleash;
     private final RessursService ressursService;
     private final RessursStateService ressursStateService;
@@ -100,6 +100,10 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
     @Override
     public IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata) {
         return ressursService.opprettRessurs(personerident, data, metadata);
+    }
+
+    public IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata){
+        return ressursService.opprettRessurs(personIdent, navIdent, navIdentForbokstav, metadata);
     }
 
     private boolean eventSourceToggle() {
