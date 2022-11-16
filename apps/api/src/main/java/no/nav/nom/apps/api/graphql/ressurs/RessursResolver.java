@@ -149,6 +149,7 @@ public class RessursResolver {
         data.put(EventBasedRessurs.KJONN_FIELD, pdlPerson.map(pers -> pers.getKjonn().name()).orElseThrow());
 
 
+        log.debug("createRessurs for {} - {}", nikResponse.getBody().getNavident(), request.getVisningsetternavn());
         createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
         return ressursService.opprettRessurs(request.getPersonident(), data, metadataFromToken(token, data));
     }
@@ -175,7 +176,6 @@ public class RessursResolver {
                         )
                 )
         );
-
 
         //TODO Add kjoenn og folkeregistrertnavn to additional data
         ressursCommadService.createRessursEvent(opprettRessursCommand);
