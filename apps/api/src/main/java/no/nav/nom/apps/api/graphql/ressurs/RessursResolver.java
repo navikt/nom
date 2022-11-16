@@ -139,6 +139,9 @@ public class RessursResolver {
 
         final var pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
+        if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
+            request.setVisningsmellomnavn(null);
+        }
         Map<String, Object> data = new HashMap<>();
         data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
         data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
