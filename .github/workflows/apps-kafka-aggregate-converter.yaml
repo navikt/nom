@@ -46,7 +46,7 @@ jobs:
       - name: Build and push Docker container
         uses: docker/build-push-action@v3
         with:
-          context: ./apps/kafka-aggregate-converter
+          context: .
           push: true
           tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
           build-args: JAR_PATH=target/kafka-aggregate-converter.jar
