@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 import lombok.Value;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.contract.Orgenhetskategori;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -77,6 +78,11 @@ public class EventBasedOrgenhet implements IOrgenhet {
     }
 
     @Override
+    public Optional<Orgenhetskategori> getOrgenhetskategori() {
+        return Optional.ofNullable(StaticOrgenhetkategoriMapping.resolveFor(getAgressoId(), getOrgNiv()));
+    }
+
+    @Override
     public String getUniqueAgressoId() {
         return getAgressoId()+"-"+getNavn()+"-"+getOrgNiv();
     }
@@ -95,5 +101,38 @@ public class EventBasedOrgenhet implements IOrgenhet {
 
     public List<IHendelse> getHendelser(){
         return Collections.unmodifiableList(hendelser);
+    }
+
+    private class StaticOrgenhetkategoriMapping {
+        static Orgenhetskategori resolveFor(String agressoId, String orgniv){
+            return switch (orgniv) {
+                case "ORGNIV1" -> {
+                    if ("1".equals(agressoId) || "4".equals(agressoId)) {
+                        yield Orgenhetskategori.LINJEENHET;
+                    } else if ("80".equals(agressoId)) {
+                        yield Orgenhetskategori.DRIFTSENHET;
+                    } else {
+                        yield null;
+                    }
+                }
+                case "ORGNIV2" -> {
+                    if ("821".equals(agressoId)) {
+                        yield Orgenhetskategori.ARBEIDSOMRAADE;
+                    } else if ("48".equals(agressoId) || "R10".equals(agressoId)) {
+                        yield Orgenhetskategori.DRIFTSENHET;
+                    } else {
+                        yield null;
+                    }
+                }
+                case "ORGNIV3" -> {
+                    if ("480600".equals(agressoId) || "090600".equals(agressoId)) {
+                        yield Orgenhetskategori.ARBEIDSOMRAADE;
+                    } else {
+                        yield null;
+                    }
+                }
+                default -> null;
+            };
+        }
     }
 }

@@ -12,5 +12,6 @@ public interface IOrgenhet {
     String getOrgNiv();
     LocalDate getGyldigFom();
     Optional<LocalDate> getGyldigTom();
+    Optional<Orgenhetskategori> getOrgenhetskategori();
     String getUniqueAgressoId();
 }

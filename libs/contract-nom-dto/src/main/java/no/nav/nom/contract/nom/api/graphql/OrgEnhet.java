@@ -16,4 +16,5 @@ public class OrgEnhet {
     LocalDate gyldigFom;
     LocalDate gyldigTom;
     Kode type;
+    Orgenhetskategori orgenhetskategori;
 }

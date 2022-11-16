@@ -23,6 +23,7 @@ input OrgEnhetSearch {
 
 input OrgEnheterSearch {
     agressoIder: [String!]
+    orgenhetskategori: [Orgenhetskategori!]
     orgNiv: String
 }
 
