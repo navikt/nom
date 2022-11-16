@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v3.1.0
       - uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
           RESOURCE: .nais/apps/kafka-aggregate-converter/kafka-aggregate-converter.yaml
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v3.1.0
       - uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           VAR: kafka-pool=nav-prod
           RESOURCE: .nais/apps/kafka-aggregate-converter/kafka-aggregate-converter.yaml
