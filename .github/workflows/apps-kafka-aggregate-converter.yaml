@@ -1,4 +1,4 @@
-name: Build, Deploy Fullmakt-state-converter
+name: Build, Deploy Kafka-aggregate-converter
 
 on:
   push:
