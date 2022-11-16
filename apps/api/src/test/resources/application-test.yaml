@@ -25,6 +25,9 @@ authentication:
     dvhScope: test
 
 spring:
+  kafka:
+    security:
+      protocol: PLAINTEXT
   security:
     oauth2:
       resourceserver:

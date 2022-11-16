@@ -54,6 +54,14 @@ spring:
       printer:
         enabled: true #
   kafka:
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     bootstrap-servers: ${KAFKA_BROKERS}
     admin:
       client-id: ${HOSTNAME}
