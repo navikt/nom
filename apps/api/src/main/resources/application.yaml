@@ -41,7 +41,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
-          accepted-audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
   graphql:
     graphiql:
       enabled: true # Enable playground
