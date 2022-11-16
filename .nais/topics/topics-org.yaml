@@ -20,6 +20,9 @@ spec:
     - team: org
       application: kafka-aggregate-converter
       access: read
+    - team: org
+      application: org-kafka-manager
+      access: read
 
 ---
 
@@ -44,3 +47,6 @@ spec:
     - team: org
       application: kafka-aggregate-converter
       access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
