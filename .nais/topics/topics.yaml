@@ -78,7 +78,7 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: nom.ressurs-state-v1
+  name: ressurs-state-v1
   namespace: nom
   labels:
     team: nom
