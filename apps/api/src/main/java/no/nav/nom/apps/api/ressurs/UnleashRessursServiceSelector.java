@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs;
 import com.github.f4b6a3.ulid.Ulid;
 import io.getunleash.Unleash;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 @Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class UnleashRessursServiceSelector implements IRessursService<IRessurs> {
 
@@ -107,6 +109,7 @@ public class UnleashRessursServiceSelector implements IRessursService<IRessurs> 
     }
 
     private boolean eventSourceToggle() {
+        log.debug("Looking up Ressurs in Ressursservice with toggle enbaled: {}", unleash.isEnabled(UNLEASH_TOGGLE));
         return unleash.isEnabled(UNLEASH_TOGGLE);
     }
 

@@ -102,6 +102,10 @@ spring:
     activate:
       on-profile: dev && !prod
 
+logging:
+  level:
+    no.nav.nom: DEBUG
+
 app:
   graphql:
     auth:
