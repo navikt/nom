@@ -11,6 +11,8 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash
   port: 8080
+  ingresses:
+    - https://kafka-aggregate-converter.dev.intern.nav.no
   replicas:
     min: 1
     max: 1
