@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan
 public class ApiStarter {
     public static void main(String[] args) {
+        
         SpringApplication.run(ApiStarter.class, args);
     }
 }
