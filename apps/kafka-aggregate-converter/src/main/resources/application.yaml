@@ -33,7 +33,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: prometheus, info, health
+        include: prometheus, info, health, metrics
       base-path: /internal
   metrics:
     web:
