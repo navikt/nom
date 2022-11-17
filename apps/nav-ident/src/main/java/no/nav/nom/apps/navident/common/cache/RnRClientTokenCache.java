@@ -1,33 +1,28 @@
 package no.nav.nom.apps.navident.common.cache;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
 @Component
-@RequiredArgsConstructor
 @Slf4j
 @EnableCaching
 public class RnRClientTokenCache {
     private final RedisCacheManager cacheManager;
-    private final OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
+    private final JwtDecoder jwtDecoder;
 
     @Value("${app.redis.rnrClientTokenCacheName}") private String cacheName;
+
+    public RnRClientTokenCache(RedisCacheManager cacheManager, JwtDecoder jwtDecoder) {
+        this.cacheManager = cacheManager;
+        this.jwtDecoder = jwtDecoder;
+    }
 
     public String getToken(String needUUID) {
         String token =  cacheManager.getCache(cacheName).get(needUUID, String.class);
@@ -70,7 +65,9 @@ public class RnRClientTokenCache {
         String token = getToken(needUUID);
         if (token != null) {
             // This will validate token from cache, and not just parse it as with SignedJwt.parse
-            return JwtUtils.jwtDecoder(oAuth2ResourceServerProperties).decode(token);
-        } else return null;
+
+            return jwtDecoder.decode(token);
+        }
+        return null;
     }
 }

@@ -13,14 +13,10 @@ import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import no.nav.nom.apps.navident.rnrservices.util.RnRTestNeedProducer;
-import no.nav.nom.libs.test.SecurityTestUtils;
-import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
-import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -28,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -76,7 +73,7 @@ public class E2ENavIdent {
     protected Map<String, Navident> navidenter;
 
     @Autowired
-    protected OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
+    protected JwtDecoder jwtDecoder;
 
     @Autowired
     protected SourceEventRepository sourceEventRepository;
@@ -292,7 +289,7 @@ public class E2ENavIdent {
     private boolean validateJWTforTestUser() {
         String tokenGenerationInIDA = "Create a valid token in IDA (https://ida.intern.nav.no/) under 'AAD On-Behalf-Of Token' bu first logging in to AAD and then 'generer on-behalf-of Token' for client id '%s'".formatted(navIdentClientId);
         try {
-            Jwt jwt = JwtUtils.jwtDecoder(oAuth2ResourceServerProperties).decode(testJWT);
+            Jwt jwt = jwtDecoder.decode(testJWT);
             if (jwt.getExpiresAt().isBefore(Instant.now().plusSeconds(60 * 5))) {
                 log.debug("JWT provided in local parameter 'e2e.aad.testJWT' expires soon. " + tokenGenerationInIDA);
             }

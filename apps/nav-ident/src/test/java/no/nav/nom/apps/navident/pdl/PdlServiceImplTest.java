@@ -3,15 +3,14 @@ package no.nav.nom.apps.navident.pdl;
 import lombok.val;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.libs.test.SecurityTestUtils;
-import no.nav.nom.libs.utils.common.security.spring.jwt.JwtUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.List;
@@ -26,7 +25,7 @@ class PdlServiceImplTest extends SpringBootTestBase {
     protected PdlService pdlService;
 
     @Autowired protected SecurityTestUtils securityTestUtils;
-    @Autowired private OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
+    @Autowired private JwtDecoder jwtDecoder;
 
     @Test
     public void getIdenter_01019000001() {
@@ -78,7 +77,7 @@ class PdlServiceImplTest extends SpringBootTestBase {
     public void setSecurityContextAuthentication() {
         val builder = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(builder);
-        val jwt = JwtUtils.jwtDecoder(oAuth2ResourceServerProperties).decode(token);
+        val jwt = jwtDecoder.decode(token);
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
