@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.contract.nom.eventsource.Sektor;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -21,6 +22,8 @@ public class DvhRessurs implements IRessurs {
 
     String navIdent;
     String personIdent;
+    String fornavn;
+    String etternavn;
     String remedyAnsattType;
     Boolean remedyAktiv;
     JsonNode rawData;
@@ -32,6 +35,8 @@ public class DvhRessurs implements IRessurs {
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
         personIdent = node.get("FNR").asText();
+        fornavn = node.get("FORNAVN").asText();
+        etternavn = node.get("ETTERNAVN").asText();
         remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
         remedyAnsattType = node.get("ANSATT_TYPE").asText();
         this.rawData = node;
@@ -59,6 +64,7 @@ public class DvhRessurs implements IRessurs {
         }
     }
 
+    @Override
     public LocalDate getSluttdato(){
         if(!hasPermisjon()) {
             if ("E".equals(ansattRessursKode) ||
@@ -88,5 +94,15 @@ public class DvhRessurs implements IRessurs {
 
     private LocalDate getDateOrNull(final LocalDate dato) {
         return !D2099.equals(dato) ? dato : null;
+    }
+
+    public static Sektor toSektor(String remedyAnsattType){
+        if (remedyAnsattType.equals("NAV Statlig")){
+            return Sektor.NAV_STATLIG;
+        } else if (remedyAnsattType.equals("NAV Kommunalt")){
+            return Sektor.NAV_KOMMUNAL;
+        } else {
+            return Sektor.EKSTERN;
+        }
     }
 }

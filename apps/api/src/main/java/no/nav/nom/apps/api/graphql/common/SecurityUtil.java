@@ -114,4 +114,12 @@ public class SecurityUtil {
         }
         return Optional.empty();
     }
+
+    public static Optional<String> getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken){
+        return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("NAVident"));
+    }
+
+    public static Optional<String> getSystemFromToken(JwtAuthenticationToken jwtAuthenticationToken){
+        return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("azp_name"));
+    }
 }

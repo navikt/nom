@@ -3,9 +3,10 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import graphql.GraphQLError;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -18,9 +19,9 @@ import java.util.List;
 public class LederResolver {
 
     private final DvhRepository dvhRepository;
-    private final IRessursService ressursService;
+    private final UnleashRessursServiceSelector ressursService;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService) {
+    public LederResolver(DvhRepository dvhRepository, UnleashRessursServiceSelector ressursService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
     }
@@ -28,7 +29,7 @@ public class LederResolver {
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
         return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
                 .map(leder -> tilOrgEnhetsLeder(
-                        ressursService.findByNavIdent(leder.getNavIdent(), ressursService::convertToGraphQlResponse)
+                        ressursService.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
                                 .orElseThrow(LederNotFoundException::new))
                 )
                 .toList();

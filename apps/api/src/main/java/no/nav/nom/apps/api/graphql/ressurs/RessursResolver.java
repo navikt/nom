@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
@@ -13,20 +17,21 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
-import no.nav.nom.apps.api.pdl.Kjonn;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -43,31 +48,34 @@ import java.util.stream.Stream;
 public class RessursResolver {
 
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
-    private final IRessursService ressursService;
     private final NIKConsumer nikConsumer;
-    private final ObjectMapper objectMapper;
     private final PdlConsumer pdlConsumer;
+    private final UnleashRessursServiceSelector ressursService;
+    private final RessursCommadService ressursCommadService;
+    private final ObjectMapper objectMapper;
 
-    @Value("${app.graphql.preauth.mutation.ressurs:''}")
-    private List<String> mutationPreauth;
-
-    @Autowired
-    RessursResolver(IRessursService ressursService, NIKConsumer nikConsumer, ObjectMapper objectMapper, PdlConsumer pdlConsumer) {
-        this.ressursService = ressursService;
+    RessursResolver(
+            NIKConsumer nikConsumer,
+            PdlConsumer pdlConsumer,
+            UnleashRessursServiceSelector ressursService,
+            RessursCommadService ressursCommadService,
+            ObjectMapper objectMapper) {
         this.nikConsumer = nikConsumer;
-        this.objectMapper = objectMapper;
         this.pdlConsumer = pdlConsumer;
+        this.ressursService = ressursService;
+        this.ressursCommadService = ressursCommadService;
+        this.objectMapper = objectMapper;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
         Optional<IRessurs> ident = Optional.empty();
         if (search.isNavidentPresent()) {
-            ident = search.resolveIdent().flatMap(ressursService::findByNavIdent);
+            ident = search.resolveIdent().flatMap(ressursService::findByNavident);
         } else if (search.isPersonidentPresent()) {
-            ident = search.resolveIdent().flatMap(ressursService::findByPersonIdent);
+            ident = search.resolveIdent().flatMap(ressursService::findByPersonident);
         }
 
-        return ident.map(ressursService::convertToGraphQlResponse);
+        return ident.map(MappingUtils::toRessurs);
     }
 
     public List<RessursResult> ressurser(RessurserSearch search) {
@@ -76,12 +84,12 @@ public class RessursResolver {
             results = ressursService.getAll().stream().map(Result::from);
         } else {
             results = Stream.concat(
-                    search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursService.findByNavIdent(ident).orElse(null))),
-                    search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursService.findByPersonIdent(ident).orElse(null)))
+                    search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursService.findByNavident(ident).orElse(null))),
+                    search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursService.findByPersonident(ident).orElse(null)))
             );
         }
         return results
-                .map(res -> new RessursResult(res.isEmpty() ? null : ressursService.convertToGraphQlResponse(res.ressurs), res.id))
+                .map(res -> new RessursResult(res.isEmpty() ? null : MappingUtils.toRessurs(res.ressurs), res.id))
                 .toList();
     }
 
@@ -89,7 +97,7 @@ public class RessursResolver {
     public DataFetcherResult<OpprettRessursResponse> opprettRessurs(OpprettRessursRequest request, DataFetchingEnvironment env, JwtAuthenticationToken token) {
         final var response = DataFetcherResult.<OpprettRessursResponse>newResult();
 
-        var ressurs = ressursService.findByPersonIdent(request.getPersonident());
+        var ressurs = ressursService.findByPersonident(request.getPersonident());
         if (ressurs.isPresent()) {
             return response.data(toResponse(ressurs)).build();
         }
@@ -129,22 +137,53 @@ public class RessursResolver {
             );
         }
 
-        final var kjoenn = pdlConsumer.hentPerson(request.getPersonident())
-                .map(pers -> pers.getKjonn().name())
-                .orElseGet(Kjonn.UKJENT::name);
+        final var pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
+        if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
+            request.setVisningsmellomnavn(null);
+        }
         Map<String, Object> data = new HashMap<>();
-
         data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
         data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
         data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn());
         data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn());
         data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn());
         data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
-        data.put(EventBasedRessurs.KJONN_FIELD, kjoenn);
+        data.put(EventBasedRessurs.KJONN_FIELD, pdlPerson.map(pers -> pers.getKjonn().name()).orElseThrow());
 
+
+        log.debug("createRessurs for {} - {}", nikResponse.getBody().getNavident(), request.getVisningsetternavn());
+        createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
         return ressursService.opprettRessurs(request.getPersonident(), data, metadataFromToken(token, data));
     }
+
+
+    private void createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
+        final var opprettRessursCommand = new OpprettRessursCommand(
+                request.getPersonident(),
+                navident,
+                pdlPerson,
+                Sektor.toEventStateSektor(request.getSektor()),
+                new Visningsnavn(
+                        request.getVisningsfornavn(),
+                        Optional.ofNullable(request.getVisningsmellomnavn()),
+                        request.getVisningsetternavn()
+                ),
+                new InputMetadata(
+                        "GraphQL",
+                        "opprettRessurs",
+                        request,
+                        new Origination(
+                                SecurityUtil.getUserFromToken(token).orElseThrow(),
+                                SecurityUtil.getSystemFromToken(token).orElseThrow()
+                        )
+                )
+        );
+
+        //TODO Add kjoenn og folkeregistrertnavn to additional data
+        ressursCommadService.createRessursEvent(opprettRessursCommand);
+    }
+
 
     private OpprettRessursResponse toResponse(IRessurs ressurs) {
         return toResponse(Optional.ofNullable(ressurs));
@@ -176,14 +215,14 @@ public class RessursResolver {
     }
 
     public static GraphQLError handleNIKException(Throwable throwable, DataFetchingEnvironment env) {
-        if(throwable instanceof NIKException exc ) {
+        if (throwable instanceof NIKException exc) {
             return exc.getErrorCode().construct(env, throwable.getMessage());
         }
         return null;
     }
 
     public static GraphQLError handleOpprettRessursException(Throwable throwable, DataFetchingEnvironment env) {
-        if(throwable instanceof OpprettRessursException exc ) {
+        if (throwable instanceof OpprettRessursException exc) {
             return exc.getErrorCode().construct(env, throwable.getMessage());
         }
         return null;

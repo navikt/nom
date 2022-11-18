@@ -46,11 +46,11 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
     public void test3() {
         stubRessurser("responses/dvhdiff/dvhAnsatt1_Pre.json");
         loadFromDvh();
-        val fnrPre = ressursService.findByNavIdent("O123459").get().getPersonIdent();
+        val fnrPre = ressursService.findByNavident("O123459").get().getPersonIdent();
 
         stubRessurser("responses/dvhdiff/dvhAnsatt1_After2.json");
         loadFromDvh();
-        val fnrAfter = ressursService.findByNavIdent("O123459").get().getPersonIdent();
+        val fnrAfter = ressursService.findByNavident("O123459").get().getPersonIdent();
 
         assertThat(fnrPre).isNotEqualTo(fnrAfter);
         assertThat(fnrAfter).isEqualTo("92345678904");
@@ -96,7 +96,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         stubRessurser("responses/dvh/dvhAnsatt3_duplikaterader.json");
         loadFromDvh();
 
-        assertThat(ressursService.findByNavIdent("O123456").isPresent()).isTrue();
+        assertThat(ressursService.findByNavident("O123456").isPresent()).isTrue();
         assertThat(ressursService.getAll().size()).isEqualTo(1);
     }
 
@@ -106,7 +106,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         stubRessurser("responses/dvh/dvhAnsatt3_sammeNavidentForskjelligPnr.json");
         loadFromDvh();
 
-        assertThat(ressursService.findByNavIdent("O123456").isEmpty()).isTrue();
+        assertThat(ressursService.findByNavident("O123456").isEmpty()).isTrue();
         assertThat(ressursService.getAll().size()).isEqualTo(0);
 
     }
@@ -117,8 +117,8 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
         loadFromDvh();
 
-        assertThat(ressursService.findByPersonIdent("12345678901").isEmpty()).isTrue();
-        assertThat(ressursService.findByPersonIdent("12345678933").isEmpty()).isTrue();
+        assertThat(ressursService.findByPersonident("12345678901").isEmpty()).isTrue();
+        assertThat(ressursService.findByPersonident("12345678933").isEmpty()).isTrue();
     }
 
     @Test
@@ -127,7 +127,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         stubRessurser("responses/dvh/dvhAnsatt3_sammePnrForskjelligNavident.json");
         loadFromDvh();
 
-        assertThat(ressursService.findByNavIdent("B123456").isPresent()).isTrue();
+        assertThat(ressursService.findByNavident("B123456").isPresent()).isTrue();
     }
 
     // test helpers

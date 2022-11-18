@@ -48,6 +48,23 @@ public class TlfFraDvhTest extends DvhTestBase {
 
     }
 
+    @Test
+    @DisplayName("hent telefonnr, sjekk flere eventsource")
+    public void test21(){
+        eventsourceEnabled(true);
+        stubTlfFromString(tlfDvhPayload);
+        stubResourcesFromString(resourceInitDvhPayload);
+
+        loadFromDvh();
+
+
+        val resourceList = this.ressursService.getAll();
+        for(val r : resourceList){
+            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.getNavIdent())).hasSize(1);
+        }
+
+    }
+
 
     private void stubTlfFromString(String payload) {
         stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1").willReturn(aResponse()

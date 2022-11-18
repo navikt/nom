@@ -33,6 +33,8 @@ metadata:
   namespace: nom
   labels:
     team: nom
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafka-pool}}
   config:

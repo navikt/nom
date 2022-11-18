@@ -1,30 +1,25 @@
 package no.nav.nom.apps.api.ressurs.contract;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
-import no.nav.nom.contract.nom.api.graphql.Ressurs;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-public interface IRessursService {
-    Optional<IRessurs> findByPersonIdent(String personIdent);
-
-    Optional<IRessurs> findByFid(UUID fid);
-
-    default Optional<IRessurs> findByNavIdent(String navIdent) {
-        return findByNavIdent(navIdent, Function.identity());
+public interface IRessursService<TYPE> {
+    Optional<TYPE> findByFid(UUID fid);
+    Optional<TYPE> findByPersonident(String personident);
+    <T> Optional<T> findByNavident(String navident, Function<TYPE, T> converter);
+    default Optional<TYPE> findByNavident(String navident){
+        return findByNavident(navident, Function.identity());
     }
-    <T> Optional<T> findByNavIdent(String navIdent, Function<IRessurs, T> converter);
-    Map<String, IRessurs> findByPersonIdentBulk(List<String> personIdenter);
-    Map<String, IRessurs> findByNavIdentBulk(List<String> navIdenter);
-    List<IRessurs> getAll();
-    IRessurs opprettRessurs(String personIdent, String navIdent, String navIdentForbokstav, HendelseMetadataSerialize metadata);
-    IRessurs opprettRessurs(String personerident, JsonNode data, HendelseMetadataSerialize metadata);
+    Collection<TYPE> getAll();
+    List<TYPE> matchByNavident(String navident);
+
+    Map<String, TYPE> findByPersonidentBulk(List<String> personIdenter);
+    Map<String, TYPE> findByNavidentBulk(List<String> navIdenter);
     IRessurs opprettRessurs(String personerident, Map<String, Object> data, HendelseMetadataSerialize metadata);
-    Ressurs convertToGraphQlResponse(IRessurs ressurs);
-    List<IRessurs> matchByNavident(String navident);
 }

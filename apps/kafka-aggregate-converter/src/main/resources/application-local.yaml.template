@@ -1,0 +1,10 @@
+KAFKA_BROKERS: localhost:39092
+KAFKA_STREAMS_APPLICATION_ID: ressurs-state-converter
+spring:
+  kafka:
+    security:
+      protocol: PLAINTEXT
+    streams:
+      cleanup:
+        on-shutdown: true
+        on-startup: true

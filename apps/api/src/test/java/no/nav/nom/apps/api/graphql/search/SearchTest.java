@@ -44,6 +44,24 @@ public class SearchTest extends GraphQLTestBase {
     }
 
     @Test
+    @DisplayName("Søk på navident eventsource")
+    public void scenario12() {
+        eventsourceEnabled(true);
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+
+        final var response = postForResource("search/scenario1.graphql");
+        final var searchResults = response.path("search").entityList(Ressurs.class).get();
+
+        assertThat(searchResults, hasSize(2));
+
+        final var navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
+        assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
+    }
+
+    @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
         final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
@@ -84,6 +102,31 @@ public class SearchTest extends GraphQLTestBase {
 
         createRessursHendelse("1");
         createRessursHendelse("2");
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+        dvhRestConsumer.loadFromDvh();
+
+        final var response = postForResource("search/scenario4.graphql");
+        final var searchResults = response.path("search").entity(JsonNode.class).get();
+
+        final var resultTypes = StreamSupport
+                .stream(searchResults.spliterator(), false)
+                .map(result -> result.get("__typename").asText())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
+        assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
+    }
+
+    @Test
+    @DisplayName("Søk på term som resulterer i både enheter og ressurser eventsource")
+    public void scenario42() {
+        eventsourceEnabled(true);
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadFromDvh();

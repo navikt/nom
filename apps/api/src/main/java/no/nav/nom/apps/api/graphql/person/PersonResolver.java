@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.person;
 
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
 import org.springframework.stereotype.Component;
 
@@ -10,9 +10,9 @@ import java.util.Optional;
 @Component
 public class PersonResolver {
 
-    private final IRessursService ressursService;
+    private final UnleashRessursServiceSelector ressursService;
 
-    public PersonResolver(IRessursService ressursService) {
+    public PersonResolver(UnleashRessursServiceSelector ressursService) {
         this.ressursService = ressursService;
     }
 
@@ -20,7 +20,7 @@ public class PersonResolver {
         if (personident == null) {
             return Optional.empty();
         }
-        return ressursService.findByPersonIdent(personident)
+        return ressursService.findByPersonident(personident)
                 .map(PersonResolver::fromRessurs)
                 .or(() -> Optional.of(baseRessurs(personident)));
 

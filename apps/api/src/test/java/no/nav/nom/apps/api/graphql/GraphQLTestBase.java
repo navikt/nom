@@ -6,8 +6,8 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.apps.api.ressurs.contract.IRessursService;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +40,6 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     protected ObjectMapper objectMapper;
-
-    @Autowired
-    protected IRessursService ressursService;
 
     @SneakyThrows
     protected GraphQlTester.Response postForResource(String resource) {

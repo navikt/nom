@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -136,6 +138,19 @@ class RessursTest extends RessursTestBase {
     void scenario31() {
         IRessurs ressurs = createRessursHendelse("");
         final var sluttdato = LocalDate.parse("2020-12-31");
+        final var dvhResponse = List.of(
+                new DvhRessursUtils.RessursMock(
+                        ressurs.getNavIdent(),
+                        ressurs.getPersonIdent(),
+                        "Fornavn",
+                        "Etternavn",
+                        "NAV Statlig",
+                        sluttdato
+                )
+        );
+        dvhRessursUtils.addToResponse(dvhResponse);
+        dvhRestConsumer.loadFromDvh();
+
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
@@ -147,6 +162,7 @@ class RessursTest extends RessursTestBase {
 
     @Nested
     @WireMockStubs(RsaStub.class)
+    @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
     class Navn {
 
         @Test

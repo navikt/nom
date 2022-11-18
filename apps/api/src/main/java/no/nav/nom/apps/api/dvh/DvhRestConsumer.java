@@ -10,16 +10,13 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.RessursHendelseService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.springframework.boot.availability.AvailabilityChangeEvent;
-import org.springframework.boot.availability.LivenessState;
-import org.springframework.boot.availability.ReadinessState;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,7 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,53 +37,60 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhRestConsumer {
 
-    public static final String CACHE = "cache-source";
+    public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
-
     private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final ApplicationEventPublisher appEventPublisher;
+    private final EventAggregateListener eventAggregateListener;
     private final RessursHendelseService ressursHendelseService;
+    private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
-    private final Environment environment;
     private final DvhDataLoader dvhDataLoader;
 
+    public boolean initloadComplete(){
+        return initialLoadComplete.get();
+    }
+
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void loadFromDvh() {
-        val qaEnv = Arrays.stream(environment.getActiveProfiles()).toList().contains("qa");
+    public void scheduledLoadlFromDvh(){
+        while (!eventAggregateListener.initloadComplete()){
             try {
-                log.info("Laster ressurser fra dvh");
-                loadRessurserFromDvh();
-                if(leaderElection.isLeader()) {
-                    log.info("Laster orgenheter fra dvh");
-                    dvhDataLoader.load();
-                }
-                log.info("Laster koblinger fra dvh");
-                loadKoblingerFromDvh();
-                loadLedereAndOrganiseringerFromDvh();
-                log.info("Laster legacy ressurser fra dvh");
-                log.info("Laster tlf fra dvh");
-                loadTlfFromDvh();
-            } catch (Exception e) {
-                boolean firstLoad = !initialLoadComplete.get();
-                if (firstLoad) {
-                    log.error("Failure loading data from DVH - setting LivenessState.BROKEN", e);
-                    AvailabilityChangeEvent.publish(appEventPublisher, CACHE, LivenessState.BROKEN);
-                } else {
-                    log.error("Failure loading data from DVH", e);
-                }
-                return;
+                Thread.sleep(5*1000);
+            } catch (Exception e){
+                // no-op
             }
 
-        if (!initialLoadComplete.get()) {
-            initialLoadComplete.set(true);
-            AvailabilityChangeEvent.publish(appEventPublisher, CACHE, ReadinessState.ACCEPTING_TRAFFIC);
-            log.info("Changing to ReadinessState.ACCEPTING_TRAFFIC");
+        }
+        loadFromDvh();
+    }
+
+    public void loadFromDvh() {
+        try {
+            log.info("Laster ressurser fra dvh");
+            loadRessurserFromDvh();
+            if (leaderElection.isLeader()) {
+                log.info("Laster orgenheter fra dvh");
+                dvhDataLoader.load();
+            }
+            log.info("Laster koblinger fra dvh");
+            loadKoblingerFromDvh();
+            loadLedereAndOrganiseringerFromDvh();
+            log.info("Laster legacy ressurser fra dvh");
+            log.info("Laster tlf fra dvh");
+            loadTlfFromDvh();
+
+
+            if (!initialLoadComplete.get()) {
+                initialLoadComplete.set(true);
+                log.info("Dvh load complete");
+            }
+        } catch (Exception e){
+            log.error("Failure loading data from DVH", e);
         }
     }
 
@@ -120,6 +123,7 @@ public class DvhRestConsumer {
 
         dvhRepository.setRessurs(dvhRessurs);
         if (leaderElection.isLeader()) {
+            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
         }
     }

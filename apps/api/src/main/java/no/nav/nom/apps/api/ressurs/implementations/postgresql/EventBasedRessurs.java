@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.implementations.postgresql;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +21,9 @@ public class EventBasedRessurs implements IRessurs {
     public final static String KJONN_FIELD = "kjonn";
 
     private final List<IHendelse> hendelser;
+    private LocalDate sluttdato;
+
+    private String sektor;
 
     public EventBasedRessurs(List<IHendelse> hendelser) {
         this.hendelser = hendelser.stream()
@@ -59,7 +63,20 @@ public class EventBasedRessurs implements IRessurs {
     }
     @Override
     public String getSektor() {
-        return getLast(SEKTOR_FIELD).orElse(null);
+        return getLast(SEKTOR_FIELD).orElse(sektor);
+    }
+
+    @Override
+    public LocalDate getSluttdato() {
+        return sluttdato;
+    }
+
+    public void setSluttdato(LocalDate sluttdato){
+        this.sluttdato = sluttdato;
+    }
+
+    public void setSektor(String sektor){
+        this.sektor = sektor;
     }
 
     private Optional<String> getLast(String property) {

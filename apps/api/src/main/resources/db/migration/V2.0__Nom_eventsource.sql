@@ -1,0 +1,4 @@
+CREATE TABLE T_EVENTSOURCE (
+    EVENT_KEY           TEXT         PRIMARY KEY,
+    PAYLOAD             JSONB        NOT NULL
+);

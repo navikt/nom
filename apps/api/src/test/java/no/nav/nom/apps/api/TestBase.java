@@ -2,19 +2,29 @@ package no.nav.nom.apps.api;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
+import io.getunleash.Unleash;
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
-import no.nav.nom.libs.test.SecurityTestUtils;
+import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
@@ -24,6 +34,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @ActiveProfiles({
         "test",
@@ -38,6 +49,7 @@ import java.nio.charset.StandardCharsets;
         initializers = TestBase.Initializer.class
 )
 @Testcontainers
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
 public abstract class TestBase {
 
     // Singleton pattern with static start and custom spring initializer
@@ -63,7 +75,22 @@ public abstract class TestBase {
     public DvhOrgenhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
+    public DvhRessursUtils dvhRessursUtils;
+
+    @Autowired
     protected PdlUtils pdlUtils;
+
+    @Autowired
+    protected KafkaUtils kafkaUtils;
+
+    @Autowired
+    protected UnleashRessursServiceSelector ressursService;
+
+    @Autowired
+    protected RessursStateService ressursStateService;
+
+    @MockBean
+    protected Unleash unleash;
 
     @BeforeEach
     void reset() {
@@ -71,6 +98,10 @@ public abstract class TestBase {
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
+        kafkaUtils.clearKafka();
+        ressursStateService.clear();
+        dvhRessursUtils.createEmptyResponse();
+        eventsourceEnabled(false);
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -105,5 +136,32 @@ public abstract class TestBase {
         try (InputStream inputStream = resource.getInputStream()) {
             return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
         }
+    }
+
+    protected RessursState createRessursHendelseEventSource(String suffix) {
+        final var ressursState = new RessursState(
+                PrefixedUlidCreator.createRessursUlid(),
+                "testPersonIdent"+suffix,
+                "testNavIdent"+suffix,
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(
+                        "fornavn"+suffix,
+                        Optional.of("mellomnavn"+suffix),
+                        "etternavn"+suffix
+                ),
+                null
+        );
+
+        createRessursHendelseEventSource(ressursState);
+
+        return ressursState;
+    }
+
+    protected void createRessursHendelseEventSource(RessursState ressursState) {
+        kafkaUtils.send(ressursState.fid(), ressursState);
+    }
+
+    protected void eventsourceEnabled(boolean toggle){
+        Mockito.when(unleash.isEnabled(UnleashRessursServiceSelector.UNLEASH_TOGGLE)).thenReturn(toggle);
     }
 }

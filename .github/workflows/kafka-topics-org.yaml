@@ -1,0 +1,35 @@
+name: Update Kafka Topics
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - '.nais/topics/topics-org.yaml'
+
+jobs:
+  deploy-kafka-topics-dev:
+    name: Deploy to Aiven Dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: dev-gcp
+          VAR: kafka-pool=nav-dev
+          RESOURCE: .nais/topics/topics-org.yaml
+
+  deploy-kafka-topics-prod:
+    name: Deploy to Aiven Prod
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: prod-gcp
+          VAR: kafka-pool=nav-prod
+          RESOURCE: .nais/topics/topics-org.yaml

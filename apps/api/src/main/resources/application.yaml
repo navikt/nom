@@ -1,5 +1,8 @@
 app:
-  appName: ${NAIS_APP_NAME:nom-api}
+  kafka:
+    stateTopic: org.ressurs-state-v1
+    eventsourceTopic: org.ressurs-eventsource
+  name: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}
     enhetPath: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
@@ -50,6 +53,26 @@ spring:
     schema:
       printer:
         enabled: true #
+  kafka:
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    admin:
+      client-id: ${HOSTNAME}
+    consumer:
+      max-poll-records: 1000
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      group-id: ${HOSTNAME}
+    listener:
+      missing-topics-fatal: true
+    client-id: ${HOSTNAME}
 
 management:
   metrics:
@@ -62,6 +85,9 @@ management:
         include: prometheus,health
   endpoint:
     health:
+      group:
+        readiness:
+          include: "readinessState,customCheck"
       show-details: always
       probes:
         enabled: true
@@ -75,6 +101,10 @@ spring:
   config:
     activate:
       on-profile: dev && !prod
+
+logging:
+  level:
+    no.nav.nom: DEBUG
 
 app:
   graphql:

@@ -5,8 +5,6 @@ import no.nav.nom.contract.nom.api.graphql.Sektor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,7 +24,7 @@ public class DvhRessursInterface {
         return Optional.ofNullable(dvhRepository.getRessursByNavIdent().get(navIdent));
     }
 
-    public List<Sektor> getRessurstypeGraphQlResponse(String navIdent) {
+    public Optional<String> getRessurstypeGraphQlResponse(String navIdent) {
         return getRessurs(navIdent)
                 .map(r -> switch (r.getRemedyAnsattType()) {
                     case STATLIG -> Sektor.NAV_STATLIG;
@@ -34,8 +32,7 @@ public class DvhRessursInterface {
                     case EKSTERN, ANNEN_STATLIG -> Sektor.EKSTERN;
                     default -> null;
                 })
-                .map(Collections::singletonList)
-                .orElseGet(Collections::emptyList);
+                .map(Sektor::name);
     }
 
     public LocalDate getSluttdatoForPersonident(String personIdent) {
