@@ -1,5 +1,6 @@
 ingresses:
   - https://nom-unit4.dev.intern.nav.no
+kafka-pool: nav-dev
 env:
   - name: UNIT4_BASEURL
     value: https://agresso.test.local

@@ -23,6 +23,10 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+    - team: org
+      application: nom-unit4
+      access: read
+
 
 ---
 
