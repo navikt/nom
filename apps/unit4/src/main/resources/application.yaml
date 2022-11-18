@@ -1,11 +1,10 @@
 app:
   kafka:
     listener:
-      enabled: false
       blockSecondsOnBail: 20
 
-  name: nom-unit4
-  ressurs.topic: nom-ressurser
+  name: ${NAIS_APP_NAME}
+  ressurs.topic: org.ressurs-eventsource
   unit4:
     baseUrl: ${UNIT4_BASEURL}
     employeesPath: /agrt01-web-api/v1/employees
@@ -49,8 +48,12 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: 'no.nav.nom.apps.nom.unit4.kafka'
+        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
       isolation-level: read_committed
+      group-id: ${app.name}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
 
 
   security:

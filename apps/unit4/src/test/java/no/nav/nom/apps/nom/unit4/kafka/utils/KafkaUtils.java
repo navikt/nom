@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.unit4.kafka.utils;
 
 import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursListener;
-import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursDto;
+import no.nav.nom.contract.nom.eventsource.Event;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +19,10 @@ public class KafkaUtils {
     @SpyBean
     private KafkaRessursListener kafkaRessursListener;
     @Autowired
-    private KafkaTemplate<String, KafkaRessursDto> ressursKafkaTemplate;
+    private KafkaTemplate<String, Event> ressursKafkaTemplate;
 
 
-    public synchronized void send(String key, KafkaRessursDto data){
+    public synchronized void send(String key, Event event){
         CountDownLatch latch = new CountDownLatch(1);
 
         Mockito.doAnswer(invocation -> {
@@ -31,7 +31,7 @@ public class KafkaUtils {
             return null;
         }).when(kafkaRessursListener).listener(Mockito.any(), Mockito.any());
 
-        ressursKafkaTemplate.send(ressursTopic, key, data);
+        ressursKafkaTemplate.send(ressursTopic, key, event);
         try {
             if (!latch.await(2, TimeUnit.SECONDS)){
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");

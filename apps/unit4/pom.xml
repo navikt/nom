@@ -26,6 +26,12 @@
         </dependency>
 
         <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>contract-nom-dto</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>

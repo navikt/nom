@@ -6,13 +6,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
-import no.nav.nom.apps.nom.unit4.kafka.KafkaRessursDto;
 import no.nav.nom.apps.nom.unit4.unit4.Utils;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetEventData;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Value
 @Builder
@@ -73,21 +78,37 @@ public class Unit4RessursDto {
         personId = ressursNr;
     }
 
-    public Unit4RessursDto(KafkaRessursDto record) {
-        String ressursNr = record.getNavident();
-        String firstName = record.getVisningsfornavn() + (record.getVisningsmellomnavn() != null ? (" " + record.getVisningsmellomnavn()) : "");
-        String surName = record.getVisningsetternavn();
+    public Unit4RessursDto(RessursOpprettetEventV1 record) throws IllegalArgumentException {
+        RessursOpprettetEventData eventData = (RessursOpprettetEventData) record.getData();
+        RessursOpprettetAdditionalData additionalData = (RessursOpprettetAdditionalData) record.getAdditionalData();
+
+        String navident = additionalData.navident().orElseThrow(() -> new NoSuchElementException("Navident is missing from event"));
+        String ressursNr = navident.substring(1);
+
+        String firstName = additionalData.folkeregistrertNavn().map(navn -> navn.fornavn() + Optional.ofNullable(navn.mellomnavn()).orElse(""))
+                .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
+
+        String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)
+                .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
+
+        String kjoenn = additionalData.kjoenn().map(k ->
+                switch (k){
+                    case "MANN" -> "M";
+                    case "KVINNE" -> "F";
+                    default -> null;
+                }
+        ).orElseThrow(() -> new NoSuchElementException("Folkeregistrert kjoenn is missing from event"));
 
         additionalInformation = AdditionalInformation.builder()
-                .relatedPersonId(record.getPersonident())
+                .relatedPersonId(eventData.personident())
                 .build();
 
-        val parsedBirthDate = LocalDate.parse(record.getPersonident().substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy"));
-
+        val parsedBirthDate = LocalDate.parse(eventData.personident().substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy"));
         birthDate = (parsedBirthDate.isAfter(LocalDate.now()) ? parsedBirthDate.minusYears(100) : parsedBirthDate).atStartOfDay();
+
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
-                .aliasName(record.getNavident())
+                .aliasName(navident)
                 .firstName(firstName)
                 .surname(surName)
                 .build();
@@ -95,8 +116,8 @@ public class Unit4RessursDto {
                 .supplierId(ressursNr)
                 .build();
         personalInformation = PersonalInformation.builder()
-                .gender(record.getKjoenn())
-                .nationalIdentityNo(record.getPersonident())
+                .gender(kjoenn)
+                .nationalIdentityNo(eventData.personident())
                 .build();
         personId = ressursNr;
     }
