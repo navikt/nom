@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
         use = JsonTypeInfo.Id.NAME,
         property = "type"
 )
-@JsonSubTypes(
-        @Type(value = RessursOpprettetEventV1.class)
-)
+@JsonSubTypes({
+        @Type(value = RessursOpprettetEventV1.class),
+        @Type(value = RessursSluttetEventV1.class)
+})
 public abstract class Event {
     private final String fid;
     private final Data data;

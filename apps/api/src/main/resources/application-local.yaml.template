@@ -25,6 +25,7 @@ DATABASE_DATABASE: postgres-api
 DATABASE_USERNAME: postgres
 DATABASE_PASSWORD: password
 
+HOSTNAME: "localhost"
 
 proxy:
   host: 127.0.0.1
