@@ -96,6 +96,11 @@ unleash:
   endpoint:
     url: https://unleash.nais.io/api
 
+
+logging:
+  level:
+    no.nav.nom: DEBUG
+
 --- # This is the same as having an application-dev.yaml file
 spring:
   config:
