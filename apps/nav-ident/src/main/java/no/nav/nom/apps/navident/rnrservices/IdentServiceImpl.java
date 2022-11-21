@@ -47,7 +47,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
         }
 
         try {
-            if (latch.await(5, TimeUnit.SECONDS)) { // First time after pod restart is usually slow.
+            if (latch.await(15, TimeUnit.SECONDS)) { // Often get 4-6 second delay on cold runs.
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
                     responses.remove(uuid);
