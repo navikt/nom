@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.postgresql.EventSource;
-import no.nav.nom.apps.api.postgresql.EventSourceRepository;
+import no.nav.nom.apps.api.ressurs.eventsourcing.postgresql.EventSource;
+import no.nav.nom.apps.api.ressurs.eventsourcing.postgresql.EventSourceRepository;
 import no.nav.nom.contract.nom.eventsource.Event;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;

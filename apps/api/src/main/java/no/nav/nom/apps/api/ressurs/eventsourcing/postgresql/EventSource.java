@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.postgresql;
+package no.nav.nom.apps.api.ressurs.eventsourcing.postgresql;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -18,7 +18,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Builder
-@Table(name = "T_EVENTSOURCE")
+@Table(name = "T_RESSURS_EVENTSOURCE")
 @AllArgsConstructor
 @NoArgsConstructor
 @TypeDefs({

@@ -247,7 +247,6 @@ public class DvhDataLoader {
         return null;
     }
 
-
     public enum ValidationType {
         HELFO("Navn inneholder HELFO"),
         ORGENHET_STATUS("Ugyldig orgenhetstatus"),
