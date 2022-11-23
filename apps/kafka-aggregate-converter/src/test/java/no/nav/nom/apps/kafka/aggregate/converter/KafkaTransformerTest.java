@@ -5,20 +5,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TestOutputTopic;
-import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.TopologyTestDriver;
+import org.apache.kafka.streams.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +22,7 @@ import java.util.UUID;
 
 public class KafkaTransformerTest {
     private ObjectMapper objectMapper = configureObjectMapper();
-    private TestInputTopic<String, Event> inputTopic;
+    private TestInputTopic<String, RessursEvent> inputTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
 
     @BeforeEach
@@ -58,7 +49,7 @@ public class KafkaTransformerTest {
                 null
         );
 
-        final Event event = new RessursOpprettetEventV1(
+        final RessursEvent event = new RessursOpprettetEventV1(
                 UUID.randomUUID().toString(),
                 eventData,
                 (Event.Metadata) null,
@@ -108,7 +99,7 @@ public class KafkaTransformerTest {
                 null
         );
 
-        final Event event = new RessursOpprettetEventV1(
+        final RessursEvent event = new RessursOpprettetEventV1(
                 UUID.randomUUID().toString(),
                 eventData,
                 (Event.Metadata) null,
@@ -117,7 +108,7 @@ public class KafkaTransformerTest {
         );
 
         final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
-        final Event sluttetEvent = new RessursSluttetEventV1(
+        final RessursEvent sluttetEvent = new RessursSluttetEventV1(
                 event.getFid(),
                 sluttetEventData,
                 (Event.Metadata) null
@@ -180,7 +171,7 @@ public class KafkaTransformerTest {
 
         TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
 
-        inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(Event.class).serializer());
+        inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
 
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());

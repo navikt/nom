@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
         property = "type"
 )
 @JsonSubTypes({
-        @Type(value = RessursOpprettetEventV1.class),
-        @Type(value = RessursSluttetEventV1.class)
+        @Type(value = RessursEvent.class),
+        @Type(value = OrgEnhetEvent.class)
 })
 public abstract class Event {
     private final String fid;
@@ -57,8 +57,8 @@ public abstract class Event {
             use = JsonTypeInfo.Id.NAME,
             property = "type")
     @JsonSubTypes({
-            @Type(value = RessursOpprettetEventV1.RessursOpprettetEventData.class),
-            @Type(value = RessursOpprettetEventV1.RessursOpprettetAdditionalData.class)
+            @Type(value = RessursEvent.Data.class),
+            @Type(value = OrgEnhetEvent.Data.class)
     })
     public interface Data{ }
 }

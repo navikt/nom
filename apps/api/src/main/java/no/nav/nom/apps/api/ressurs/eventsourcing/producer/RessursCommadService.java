@@ -4,10 +4,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -18,20 +15,20 @@ import java.util.Optional;
 @Service
 public class RessursCommadService {
 
-    private final EventProducer eventProducer;
+    private final RessursEventProducer eventProducer;
     private final EventAggregateListener eventAggregateListener;
 
-    public RessursCommadService(EventProducer eventProducer, EventAggregateListener eventAggregateListener) {
+    public RessursCommadService(RessursEventProducer eventProducer, EventAggregateListener eventAggregateListener) {
         this.eventProducer = eventProducer;
         this.eventAggregateListener = eventAggregateListener;
     }
 
-    public ListenableFuture<SendResult<String, Event>> createRessursEvent(OpprettRessursCommand opprettRessursCommand){
+    public ListenableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand){
         // TODO validate command
         return createRessurs(PrefixedUlidCreator.createRessursUlid(), opprettRessursCommand);
     }
 
-    public ListenableFuture<SendResult<String, Event>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
+    public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
         // TODO validate command
         return eventProducer.sendMessage(
                 new RessursSluttetEventV1(
@@ -52,7 +49,7 @@ public class RessursCommadService {
         return response.block();
     }
 
-    private ListenableFuture<SendResult<String, Event>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand){
+    private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand){
         return eventProducer.sendMessage(
                 new RessursOpprettetEventV1(
                         fid,

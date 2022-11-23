@@ -3,10 +3,7 @@ package no.nav.nom.apps.kafka.aggregate.converter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -36,7 +33,7 @@ class KafkaTransformer {
             StreamsBuilder streamsBuilder
     ){
         final var stringSerde = Serdes.String();
-        final var eventSerde = objectSerde.copyWithType(Event.class);
+        final var eventSerde = objectSerde.copyWithType(RessursEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
                 .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))

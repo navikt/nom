@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class RessursSluttetEventV1 extends Event {
+public class RessursSluttetEventV1 extends RessursEvent {
 
     @JsonCreator
     public RessursSluttetEventV1(String fid, RessursSluttetEventData data, Metadata metadata){

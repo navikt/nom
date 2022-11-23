@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import java.util.Optional;
 
-public class RessursOpprettetEventV1 extends Event {
+public class RessursOpprettetEventV1 extends RessursEvent {
 
     @JsonCreator
     public RessursOpprettetEventV1(String fid, RessursOpprettetEventData data, Metadata metadata, RessursOpprettetAdditionalData additionalData){
@@ -25,7 +25,7 @@ public class RessursOpprettetEventV1 extends Event {
             Optional<String> navident,
             Optional<String> kjoenn,
             Optional<FolkeregistrertNavn> folkeregistrertNavn
-    ) implements Data{
+    ) implements Data {
         public record FolkeregistrertNavn(
                 String fornavn,
                 String mellomnavn,

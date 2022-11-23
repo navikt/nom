@@ -3,14 +3,9 @@ package no.nav.nom.apps.nom.unit4.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4Exception;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4ServerException;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
+import no.nav.nom.apps.nom.unit4.unit4.*;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
-import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -27,7 +22,7 @@ public class KafkaRessursListener {
     @Value("${app.kafka.listener.blockSecondsOnBail}") int blockSeconds;
 
     @KafkaListener(topics = "${app.ressurs.topic}")
-    public void listener(Event record, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String uuid) {
+    public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String uuid) {
         log.info("Unit4 ressurs listener mottok melding for ressurs {} på meldings-key: {}", record.getFid(), uuid);
         if(record instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
             if(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedFrom().contains("nom-ui")) {

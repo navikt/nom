@@ -4,11 +4,7 @@ import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +24,7 @@ import java.util.stream.Collectors;
 public class RessursEndringFraDvhTestEventsource extends DvhTestBase {
 
     @SpyBean
-    private KafkaTemplate<String, Event> eventProducerTemplate;
+    private KafkaTemplate<String, RessursEvent> eventProducerTemplate;
 
     @Test
     @DisplayName("Ressurser fra datavarehus trigger opprett event")
@@ -98,7 +94,7 @@ public class RessursEndringFraDvhTestEventsource extends DvhTestBase {
         );
         dvhRessursUtils.addToResponse(response);
 
-        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
         loadFromDvh();
         Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
@@ -111,7 +107,7 @@ public class RessursEndringFraDvhTestEventsource extends DvhTestBase {
     @Test
     @DisplayName("Ansatt som slutter i etterkant trigger sluttet event")
     public void test4() {
-        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
         final var response = List.of(
                 new DvhRessursUtils.RessursMock(

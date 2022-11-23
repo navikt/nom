@@ -5,12 +5,7 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
-import no.nav.nom.contract.nom.eventsource.Event;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.Sektor;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.eventsource.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
@@ -90,7 +82,7 @@ class KafkaRessursListenerTest {
         assertTrue(output.getOut().contains("Bailer ut"));
     }
 
-    private Event createOpprettRessursEvent(String personident, String initiatedFrom){
+    private RessursEvent createOpprettRessursEvent(String personident, String initiatedFrom){
         return new RessursOpprettetEventV1(
                 "fid",
                 new RessursOpprettetEventV1.RessursOpprettetEventData(

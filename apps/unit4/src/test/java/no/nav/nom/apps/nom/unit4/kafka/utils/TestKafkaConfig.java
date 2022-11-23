@@ -2,7 +2,7 @@ package no.nav.nom.apps.nom.unit4.kafka.utils;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,13 +18,13 @@ public class TestKafkaConfig {
     /* Ressurs Topic */
 
     @Bean
-    public ProducerFactory<String, Event> producerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonSerializer<Event> eventJsonSerializer = new JsonSerializer<>(objectMapper);
+    public ProducerFactory<String, RessursEvent> producerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        JsonSerializer<RessursEvent> eventJsonSerializer = new JsonSerializer<>(objectMapper);
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), eventJsonSerializer);
     }
 
     @Bean
-    public KafkaTemplate<String, Event> kafkaTemplate(ProducerFactory<String, Event> producerFactory) {
+    public KafkaTemplate<String, RessursEvent> kafkaTemplate(ProducerFactory<String, RessursEvent> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 

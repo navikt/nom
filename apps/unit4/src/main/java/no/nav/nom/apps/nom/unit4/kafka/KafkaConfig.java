@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,15 +19,15 @@ public class KafkaConfig {
     /* Ressurs Topic */
 
     @Bean
-    public ConsumerFactory<String, Event> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        JsonDeserializer<Event> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
+    public ConsumerFactory<String, RessursEvent> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        JsonDeserializer<RessursEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Event>>
-            kafkaListenerContainerFactory(ConsumerFactory<String, Event> consumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, Event>();
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, RessursEvent>>
+            kafkaListenerContainerFactory(ConsumerFactory<String, RessursEvent> consumerFactory) {
+        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, RessursEvent>();
         concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
 
         return concurrentKafkaListenerContainerFactory;
