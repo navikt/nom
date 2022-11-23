@@ -13,18 +13,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-@EnableKafka
 @Configuration
 public class EventProducerConfig {
     @Bean
-    ProducerFactory<String, Event> producerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonSerializer = new JsonSerializer<Event>(objectMapper);
-
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
-    }
-
-    @Bean
-    KafkaTemplate<String, Event> eventProducerTemplate(ProducerFactory<String, Event> producerFactory, @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic) {
+    KafkaTemplate<String, Event> ressursEventProducerTemplate(ProducerFactory<String, Event> producerFactory, @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic) {
         final var eventsourceTemplate = new KafkaTemplate<>(producerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);
 

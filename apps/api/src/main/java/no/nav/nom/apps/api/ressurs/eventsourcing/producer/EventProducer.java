@@ -14,12 +14,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 public class EventProducer {
 
     private final KafkaTemplate<String, Event> eventProducerTemplate;
-    private final EventSourceRepository eventSourceRepository;
+    private final EventSourceRepository ressursEventProducerTemplate;
     private final ObjectMapper objectMapper;
 
     public EventProducer(KafkaTemplate<String, Event> eventProducerTemplate, EventSourceRepository eventSourceRepository, ObjectMapper objectMapper){
         this.eventProducerTemplate = eventProducerTemplate;
-        this.eventSourceRepository = eventSourceRepository;
+        this.ressursEventProducerTemplate = eventSourceRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -30,7 +30,7 @@ public class EventProducer {
     }
 
     private void saveToDB(Event event, String eventKey) {
-        eventSourceRepository.save(
+        ressursEventProducerTemplate.save(
                 EventSource.builder()
                         .eventKey(eventKey)
                         .payload(objectMapper.valueToTree(event))
