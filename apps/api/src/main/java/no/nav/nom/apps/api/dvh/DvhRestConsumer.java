@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;

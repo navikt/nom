@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api;
 
 import lombok.val;
-import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;

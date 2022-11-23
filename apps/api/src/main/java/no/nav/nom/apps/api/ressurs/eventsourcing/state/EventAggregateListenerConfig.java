@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.eventsourcing.state;
+package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.state.RessursState;

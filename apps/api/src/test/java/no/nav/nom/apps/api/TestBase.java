@@ -5,7 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;

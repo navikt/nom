@@ -4,7 +4,7 @@ import com.github.f4b6a3.ulid.Ulid;
 import io.getunleash.Unleash;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.contract.IRessursService;

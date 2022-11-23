@@ -28,6 +28,29 @@ NOM_PROXY_CLIENT_ID: dev-fss.nom.nom-proxy
 PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
 PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 
+app:
+  graphql:
+    auth:
+      clients:
+        nom-ui2:
+          client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
+          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        ida:
+          client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
+          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        dolly:
+          client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
+          scopes: [ "MUTATE_RESSURS" ]
+        remedy:
+          client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
+          scopes: ["QUERY_PERSON"]
+        fullmaktsregister-web:
+          client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
+          scopes: ["QUERY_PERSON"]
+      groups:
+        nom-write:
+          group-id: "${NOM_WRITE_GROUPID}"
+          scopes: [ "MUTATE_RESSURS" ]
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 
@@ -44,3 +67,17 @@ proxy:
   port: 8866
 
 server.port: 8081
+
+spring:
+  kafka:
+    security.protocol: PLAINTEXT
+
+logging:
+  level:
+    no.nav.nom: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,mappings,flyway,info,loggers,metrics

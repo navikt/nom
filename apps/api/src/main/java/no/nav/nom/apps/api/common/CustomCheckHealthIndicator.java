@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.common;
 
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import org.springframework.boot.actuate.availability.AvailabilityStateHealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.availability.ApplicationAvailability;

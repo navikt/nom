@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.eventsourcing.producer.commands;
+package no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands;
 
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;

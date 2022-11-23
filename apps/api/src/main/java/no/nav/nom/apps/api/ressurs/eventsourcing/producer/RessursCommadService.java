@@ -1,9 +1,9 @@
-package no.nav.nom.apps.api.eventsourcing.producer;
+package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.eventsourcing.producer.commands.OpphorRessursCommand;
-import no.nav.nom.apps.api.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.eventsourcing.producer;
+package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;

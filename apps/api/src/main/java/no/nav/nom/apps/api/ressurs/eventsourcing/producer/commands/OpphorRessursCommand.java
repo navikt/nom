@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.eventsourcing.producer.commands;
+package no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands;
 
 import java.time.LocalDate;
 

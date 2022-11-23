@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.eventsourcing.state;
+package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
