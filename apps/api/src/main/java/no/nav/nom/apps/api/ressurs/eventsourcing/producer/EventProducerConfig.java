@@ -16,7 +16,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Configuration
 public class EventProducerConfig {
     @Bean
-    KafkaTemplate<String, Event> ressursEventProducerTemplate(ProducerFactory<String, Event> producerFactory, @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic) {
+    KafkaTemplate<String, Event> ressursEventProducerTemplate(ProducerFactory<String, Event> producerFactory, @Value("${app.kafka.ressurs.eventsourceTopic}") String eventsourceTopic) {
         final var eventsourceTemplate = new KafkaTemplate<>(producerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);
 

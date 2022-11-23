@@ -24,7 +24,7 @@ import javax.persistence.Table;
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
-public class EventSource {
+public class RessursEventSource {
     @Id
     @Column(name = "EVENT_KEY", nullable = false, updatable = false)
     private String eventKey;

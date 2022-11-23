@@ -38,7 +38,7 @@ public class EventAggregateListener {
     private final KafkaProperties kafkaProperties;
 
     public EventAggregateListener(
-            @Value("${app.kafka.stateTopic}") String stateTopic,
+            @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
             RessursStateService ressursStateService,
             KafkaAdmin admin,
             KafkaProperties kafkaProperties
@@ -50,7 +50,7 @@ public class EventAggregateListener {
     }
 
     @KafkaListener(
-            topicPartitions = @TopicPartition(topic = "${app.kafka.stateTopic}",
+            topicPartitions = @TopicPartition(topic = "${app.kafka.ressurs.stateTopic}",
             partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))
     )
     public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer){
