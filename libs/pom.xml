@@ -18,6 +18,7 @@
         <module>contract-nom-dto</module>
         <module>utils-common</module>
         <module>utils-test</module>
+        <module>lucene-wrapper</module>
     </modules>
 
 
