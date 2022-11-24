@@ -6,4 +6,9 @@ public record Visningsnavn(
         String fornavn,
         Optional<String> mellomnavn,
         String etternavn
-){}
+){
+    public String toString(){
+        return fornavn + " " + mellomnavn.map(it -> " " + it).orElse("") + " " + etternavn;
+    }
+
+}
