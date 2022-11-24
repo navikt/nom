@@ -54,6 +54,7 @@ export const FocusedRessursView = ({
           <div
             className={css`
               display: grid;
+              grid-auto-flow: dense;
               grid-template-columns: 1fr 1fr;
               margin-top: var(--navds-spacing-8);
               gap: var(--navds-spacing-4);
