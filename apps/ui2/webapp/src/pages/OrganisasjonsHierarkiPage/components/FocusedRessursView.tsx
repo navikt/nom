@@ -89,13 +89,13 @@ export const FocusedRessursView = ({
             })}
 
             {focusedRessurs.ledere.map((leder) => {
-              const { navident, fornavn, orgTilknytning } = leder.ressurs;
+              const { navident, visningsnavn, orgTilknytning } = leder.ressurs;
               const { agressoId, orgNiv } = orgTilknytning[0]?.orgEnhet ?? {};
               return (
                 <span key={navident}>
                   Leder:{" "}
                   <Link to={`/org/${agressoId}/${orgNiv}/${navident}`}>
-                    <strong>{fornavn}</strong>
+                    <strong>{visningsnavn}</strong>
                   </Link>
                 </span>
               );
