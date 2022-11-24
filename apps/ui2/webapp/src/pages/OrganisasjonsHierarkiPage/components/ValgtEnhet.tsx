@@ -34,7 +34,7 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
       ref={reference}
       to={`/org/${agressoId}/${orgNiv}/${navident}`}
     >
-      {visningsnavn}
+      {visningsnavn ?? "Uten navn"}
     </Link>
   );
 };

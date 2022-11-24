@@ -16,8 +16,6 @@ export const FocusedRessursView = ({
   focusedRessurs: Ressurs;
   scrollReference?: RefObject<HTMLDivElement>;
 }) => {
-  const visningsNavn = `${focusedRessurs.fornavn} ${focusedRessurs.etternavn}`;
-
   return (
     <div ref={scrollReference}>
       <div
@@ -45,7 +43,7 @@ export const FocusedRessursView = ({
             `}
             size="large"
           >
-            {visningsNavn}
+            {focusedRessurs.visningsnavn ?? "Uten navn"}
           </Heading>
           {focusedRessurs.sektor[0] ? (
             <strong>
@@ -109,7 +107,7 @@ export const FocusedRessursView = ({
                 >
                   Leder:{" "}
                   <Link to={`/org/${agressoId}/${orgNiv}/${navident}`}>
-                    <strong>{visningsnavn}</strong>
+                    <strong>{visningsnavn ?? "Uten navn"}</strong>
                   </Link>
                 </span>
               );
@@ -119,7 +117,7 @@ export const FocusedRessursView = ({
 
         <UserImage
           navident={focusedRessurs.navident}
-          navn={visningsNavn ?? ""}
+          navn={focusedRessurs.visningsnavn ?? ""}
           size="126px"
         />
       </div>
