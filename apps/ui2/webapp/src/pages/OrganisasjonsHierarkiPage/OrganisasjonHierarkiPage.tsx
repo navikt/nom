@@ -205,7 +205,6 @@ function OrganisasjonsHierarkiPageOuter() {
               <Heading level="3" size="small">
                 Kunne ikke hente hierarki
               </Heading>
-              {hentHierarkiQuery.error.message}
             </Alert>
           )}
           {hentHierarkiQuery.data && (
