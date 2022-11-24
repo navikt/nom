@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { Heading } from "@navikt/ds-react";
+import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
 import { Link } from "react-router-dom";
 
@@ -76,10 +77,18 @@ export const FocusedRessursView = ({
               </strong>
             </span>
 
-            {focusedRessurs.koblinger.map((kobling) => {
+            {uniqBy(
+              focusedRessurs.koblinger,
+              (kobling) => kobling.organisasjonsenhet.agressoId
+            ).map((kobling) => {
               const { agressoId, navn, orgNiv } = kobling.organisasjonsenhet;
               return (
-                <span key={agressoId}>
+                <span
+                  className={css`
+                    grid-column-start: 1;
+                  `}
+                  key={agressoId}
+                >
                   Org.enhet:{" "}
                   <Link to={`/org/${agressoId}/${orgNiv}`}>
                     <strong>{navn}</strong>
@@ -92,7 +101,12 @@ export const FocusedRessursView = ({
               const { navident, visningsnavn, orgTilknytning } = leder.ressurs;
               const { agressoId, orgNiv } = orgTilknytning[0]?.orgEnhet ?? {};
               return (
-                <span key={navident}>
+                <span
+                  className={css`
+                    grid-column-start: 2;
+                  `}
+                  key={navident}
+                >
                   Leder:{" "}
                   <Link to={`/org/${agressoId}/${orgNiv}/${navident}`}>
                     <strong>{visningsnavn}</strong>
