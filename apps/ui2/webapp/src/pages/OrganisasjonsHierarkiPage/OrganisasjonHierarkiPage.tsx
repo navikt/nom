@@ -2,6 +2,7 @@ import { css } from "@emotion/css";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
 import partition from "lodash/partition";
 import sortBy from "lodash/sortBy";
+import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
 import { Fragment } from "react";
 import React from "react";
@@ -164,7 +165,10 @@ const OrganisasjonHierarkiPageInner = (properties: {
           <DynamicColumnContainer
             shouldUseDynamicSecondColumn={ressurser.length > 5}
           >
-            {sortBy(ressurser, "visningsnavn").map((ressurs) => (
+            {sortBy(
+              uniqBy(ressurser, (ressurs) => ressurs.navident),
+              "visningsnavn"
+            ).map((ressurs) => (
               <ResourceView
                 key={ressurs.navident}
                 ressurs={ressurs as Ressurs}
