@@ -32,7 +32,7 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
         color: var(--navds-global-color-gray-900);
       `}
       ref={reference}
-      to={`/org/${agressoId}/${orgNiv}`}
+      to={`/org/${agressoId}/${orgNiv}/${navident}`}
     >
       {visningsnavn}
     </Link>
