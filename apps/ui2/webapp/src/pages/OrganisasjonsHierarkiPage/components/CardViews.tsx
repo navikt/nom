@@ -86,7 +86,7 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
           `}
           size="medium"
         >
-          {ressurs.visningsnavn}
+          {ressurs.visningsnavn ?? "Uten navn"}
         </Heading>
         <div />
       </UnitContainerLink>
