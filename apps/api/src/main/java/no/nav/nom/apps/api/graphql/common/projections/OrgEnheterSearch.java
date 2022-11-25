@@ -14,7 +14,7 @@ import static java.util.Collections.emptySet;
 public interface OrgEnheterSearch {
     OrgEnheterSearch EMPTY_SEARCH = emptyOrgEnheterSearch();
     Set<String> getAgressoIder();
-    Set<String> getOrgenhetskategori();
+    Set<String> getOrgEnhetsKategori();
     String getOrgNiv();
 
     default Set<String> resolveAgressoIder() {
@@ -24,11 +24,11 @@ public interface OrgEnheterSearch {
         return getAgressoIder();
     }
 
-    default Set<String> resolveOrgenhetskategori() {
-        if(getOrgenhetskategori() == null){
+    default Set<String> resolveOrgEnhetsKategori() {
+        if(getOrgEnhetsKategori() == null){
             return emptySet();
         }
-        return getOrgenhetskategori();
+        return getOrgEnhetsKategori();
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
@@ -39,7 +39,7 @@ public interface OrgEnheterSearch {
             }
 
             @Override
-            public Set<String> getOrgenhetskategori() {
+            public Set<String> getOrgEnhetsKategori() {
                 return emptySet();
             }
 

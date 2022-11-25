@@ -10,7 +10,7 @@ type OrgEnhet {
     organiseringer (retning: Retning) : [Organisering!]!
     leder: [OrgEnhetsLeder!]!
     koblinger: [OrgEnhetsKobling!]!
-    orgenhetskategori: Orgenhetskategori
+    orgEnhetsKategori: OrgEnhetsKategori
     type: Kode
 }
 
@@ -114,7 +114,7 @@ enum Sektor {
     EKSTERN
 }
 
-enum Orgenhetskategori {
+enum OrgEnhetsKategori {
     LINJEENHET
     DRIFTSENHET
     ARBEIDSOMRAADE
