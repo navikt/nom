@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.contract.nom.api.graphql.Sektor;
+import no.nav.nom.contract.nom.Sektor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

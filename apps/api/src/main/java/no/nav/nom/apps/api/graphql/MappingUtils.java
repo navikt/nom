@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.graphql;
 
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import no.nav.nom.contract.nom.api.graphql.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 
 import java.util.Collections;
@@ -14,7 +14,7 @@ import static java.util.Collections.singletonList;
 public class MappingUtils {
 
     public static Ressurs toRessurs(RessursState ressursState){
-        final var sektor = singletonList(Sektor.from(ressursState.sektor()));
+        final var sektor = singletonList(ressursState.sektor());
 
         return Ressurs.builder()
                 .navident(ressursState.navident())

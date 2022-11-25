@@ -1,4 +1,4 @@
-package no.nav.nom.contract.nom.api.graphql;
+package no.nav.nom.contract.nom;
 
 public enum TelefonType {
     NAV_TJENESTE_TELEFON,

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.apps.api.ressurs.contract.IRessurs;
-import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
 import java.util.Arrays;

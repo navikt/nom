@@ -2,6 +2,7 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.Value;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 
 import java.time.LocalDate;
 

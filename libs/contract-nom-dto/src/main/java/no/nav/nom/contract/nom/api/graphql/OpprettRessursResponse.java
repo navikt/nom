@@ -2,7 +2,7 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.nom.contract.nom.api.graphql.Sektor;
+import no.nav.nom.contract.nom.Sektor;
 
 @Data
 @Builder

@@ -1,4 +1,4 @@
-package no.nav.nom.contract.nom.eventsource;
+package no.nav.nom.contract.nom;
 
 public enum Sektor{
     NAV_STATLIG,

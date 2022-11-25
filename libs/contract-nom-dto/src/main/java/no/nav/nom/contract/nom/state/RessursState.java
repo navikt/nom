@@ -1,6 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
-import no.nav.nom.contract.nom.eventsource.Sektor;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
