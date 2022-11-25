@@ -5,6 +5,7 @@ import com.github.f4b6a3.ulid.UlidCreator;
 public class PrefixedUlidCreator {
 
     private static final String RESSURS_ULID_PREFIX = "ressurs-";
+    private static final String ORGENHET_ULID_PREFIX = "orgEnhet-";
     private static final String EVENT_ULID_PREFIX = "event-";
 
     private static String createPrefixedUlid(String prefix){
@@ -13,6 +14,10 @@ public class PrefixedUlidCreator {
 
     public static String createRessursUlid(){
         return createPrefixedUlid(RESSURS_ULID_PREFIX);
+    }
+
+    public static String createOrgEnhetUlid(){
+        return createPrefixedUlid(ORGENHET_ULID_PREFIX);
     }
 
     public static String createEventUlid(){
