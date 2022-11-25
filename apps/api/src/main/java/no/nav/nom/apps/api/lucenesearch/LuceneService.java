@@ -45,8 +45,12 @@ public class LuceneService {
             var invalidatedNavIdentList = grabAndResetNavidentInvalidationList();
 
             var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
-            var luceneRessursStream = resMap.values().stream().map(it ->
-                    new LuceneRessurs(it.getNavIdent(), it.getVisningsfornavn().get(), "tlf-nr", "epost")
+            var luceneRessursStream = resMap.values().stream().map(it -> {
+                        var visningsNavn = it.getVisningsfornavn() + " "
+                                + it.getVisningsmellomnavn().map(mellomnavn -> mellomnavn + " ").orElse("")
+                                + it.getVisningsetternavn();
+                        return new LuceneRessurs(it.getNavIdent(), visningsNavn, "tlf-nr", "epost");
+                    }
             );
 
             searchRepo.upsertEntities(luceneRessursStream, LuceneRessurs.class);
