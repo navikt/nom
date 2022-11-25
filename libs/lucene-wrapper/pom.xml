@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>lucene-wrapper</artifactId>
+    <name>NOM :: Libs :: Lucene Wrapper</name>
     <packaging>pom</packaging>
 
     <modules>

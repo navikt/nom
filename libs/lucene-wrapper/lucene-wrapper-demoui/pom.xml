@@ -11,7 +11,8 @@
     </parent>
 
     <artifactId>lucene-wrapper-demoui</artifactId>
-    <version>${parent.version}</version>
+    <name>NOM :: Libs :: Lucene Wrapper Demo UI</name>
+    <version>${project.parent.version}</version>
 
     <dependencies>
         <dependency>

@@ -11,7 +11,8 @@
     </parent>
 
     <artifactId>lucene-wrapper-core</artifactId>
-    <version>${parent.version}</version>
+    <name>NOM :: Libs :: Lucene Wrapper Core</name>
+    <version>${project.parent.version}</version>
 
     <dependencies>
         <dependency>
