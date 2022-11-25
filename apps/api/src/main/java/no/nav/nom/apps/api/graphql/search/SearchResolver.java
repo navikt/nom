@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -46,8 +47,9 @@ public class SearchResolver {
         Stream<Object> ressurser;
 
         if(unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)){
-            var matchedNavidents = luceneService.search(term).stream().map(SearchResult::id);
-            ressurser = ressursService.findByNavidentBulk(matchedNavidents.toList()).values().stream().map(MappingUtils::toRessurs);
+            var matchedNavidentsSorted = luceneService.search(term).stream().map(SearchResult::id).toList();
+            var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted);
+            ressurser = matchedNavidentsSorted.stream().map(r -> MappingUtils.toRessurs(matchedNavidentsMap.get(r)));
         }else{
             ressurser = ressursService.matchByNavident(term).stream().map(MappingUtils::toRessurs);
         }
