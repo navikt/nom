@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -36,10 +37,12 @@ public class EventAggregateListener {
 
     private final AdminClient adminClient;
     private final KafkaProperties kafkaProperties;
+    private final LuceneService luceneService;
 
     public EventAggregateListener(
             @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
             RessursStateService ressursStateService,
+            LuceneService luceneService,
             KafkaAdmin admin,
             KafkaProperties kafkaProperties
     ){
@@ -47,6 +50,7 @@ public class EventAggregateListener {
         this.ressursStateService = ressursStateService;
         this.kafkaProperties = kafkaProperties;
         adminClient = AdminClient.create(admin.getConfigurationProperties());
+        this.luceneService = luceneService;
     }
 
     @KafkaListener(
@@ -55,10 +59,12 @@ public class EventAggregateListener {
     )
     public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer){
         StreamSupport.stream(records.spliterator(), false)
-                .forEach(r -> {
-                    ressursStateService.putEventAggregate(r.value());
-                    if(waitingMapByFid.containsKey(r.key())) {
-                        waitingMapByFid.remove(r.key()).thenReturn(r.value());
+                .forEach(it -> {
+                    var ressurs = it.value();
+                    ressursStateService.putEventAggregate(ressurs);
+                    this.luceneService.invalidateRessurs(ressurs.navident());
+                    if(waitingMapByFid.containsKey(it.key())) {
+                        waitingMapByFid.remove(it.key()).thenReturn(ressurs);
                     }
                 });
 

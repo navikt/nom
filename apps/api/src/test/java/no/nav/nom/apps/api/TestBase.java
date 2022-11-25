@@ -5,6 +5,8 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.search.SearchResolver;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
@@ -102,6 +104,7 @@ public abstract class TestBase {
         ressursStateService.clear();
         dvhRessursUtils.createEmptyResponse();
         eventsourceEnabled(false);
+        luceneEnabled(false);
     }
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -163,5 +166,9 @@ public abstract class TestBase {
 
     protected void eventsourceEnabled(boolean toggle){
         Mockito.when(unleash.isEnabled(UnleashRessursServiceSelector.UNLEASH_TOGGLE)).thenReturn(toggle);
+    }
+
+    protected void luceneEnabled(boolean toggle){
+        Mockito.when(unleash.isEnabled(SearchResolver.UNLEASH_LUCENE_TOGGLE)).thenReturn(toggle);
     }
 }

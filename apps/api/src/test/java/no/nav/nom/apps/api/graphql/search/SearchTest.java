@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.junit.jupiter.api.DisplayName;
@@ -15,16 +16,16 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 @DisplayName("GraphQL.Search")
 public class SearchTest extends GraphQLTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
+
+    @Autowired
+    private LuceneService luceneService;
 
     @Test
     @DisplayName("Søk på navident")
@@ -141,6 +142,28 @@ public class SearchTest extends GraphQLTestBase {
 
         assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
         assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
+    }
+
+    @Test
+    @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
+    public void scenario51(){
+        eventsourceEnabled(true);
+        luceneEnabled(true);
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        luceneService.addInvalidatedEntitiesToIndex();
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+        dvhRestConsumer.loadFromDvh();
+
+        final var response = postForResource("search/scenario5.graphql");
+        final var searchResults = response.path("search").entity(JsonNode.class).get();
+
+        assertThat(searchResults.toString(), containsString("fornavn"));
     }
 }
 

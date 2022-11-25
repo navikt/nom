@@ -1,10 +1,13 @@
 package no.nav.nom.apps.api.graphql.search;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,10 +20,17 @@ public class SearchResolver {
 
     private final UnleashRessursServiceSelector ressursService;
     private final IOrgenhetService orgenhetService;
+    private final LuceneService luceneService;
 
-    public SearchResolver(UnleashRessursServiceSelector ressursService, IOrgenhetService orgenhetService) {
+    public static final String UNLEASH_LUCENE_TOGGLE = "nom.ressurs.lucene_search_toggle";
+
+    private Unleash unleash;
+
+    public SearchResolver(UnleashRessursServiceSelector ressursService, IOrgenhetService orgenhetService, LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
+        this.luceneService = luceneService;
+        this.unleash = unleash;
     }
 
     public List<Object> search(String term) {
@@ -31,12 +41,18 @@ public class SearchResolver {
                 .map(IOrgenhet::getAgressoId)
                 .collect(toSet());
 
-        return Stream.concat(
-                        orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet),
-                        ressursService.matchByNavident(term).stream().map(MappingUtils::toRessurs)
-                )
-                .toList();
+        var orgenheter = orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet);
 
+        Stream<Object> ressurser;
+
+        if(unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)){
+            var matchedNavidents = luceneService.search(term).stream().map(SearchResult::id);
+            ressurser = ressursService.findByNavidentBulk(matchedNavidents.toList()).values().stream().map(MappingUtils::toRessurs);
+        }else{
+            ressurser = ressursService.matchByNavident(term).stream().map(MappingUtils::toRessurs);
+        }
+
+        return Stream.concat(orgenheter, ressurser).toList();
 
     }
 }
