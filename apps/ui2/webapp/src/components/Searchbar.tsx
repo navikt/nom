@@ -69,7 +69,7 @@ export function SearchBar() {
       loadOptions={searchRessurs}
       loadingMessage={() => "Søker..."}
       menuPortalTarget={document.body}
-      noOptionsMessage={({ inputValue }) =>
+      noOptionsMessage={({ inputValue }: { inputValue: string }) =>
         inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
           ? "Må skrive minst 3 tegn for å søke"
           : `Fant ingen resultater for "${inputValue}"`
