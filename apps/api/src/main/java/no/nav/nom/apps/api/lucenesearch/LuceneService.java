@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.lucenesearch;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
@@ -12,9 +13,11 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class LuceneService {
 
@@ -26,6 +29,8 @@ public class LuceneService {
 
     private final OrgenhetService orgenhetService;
 
+    private final String entTypeOrgenhet;
+    private final String entTypeRessurs;
 
     public LuceneService(UnleashRessursServiceSelector ressursService, OrgenhetService orgenhetService) {
         this.orgenhetService = orgenhetService;
@@ -33,12 +38,18 @@ public class LuceneService {
         var indexRessurs = new RessursIndexer();
         this.searchRepo = new SearchRepo(List.of(indexOrgEnhet, indexRessurs));
 
-        this.ressursService = ressursService;
+        this.entTypeOrgenhet = indexOrgEnhet.typeStr();
+        this.entTypeRessurs = indexRessurs.typeStr();
 
+        this.ressursService = ressursService;
     }
 
     @Scheduled(initialDelay = 5000L, fixedRate = 30_000L)
     public void addInvalidatedEntitiesToIndex(){
+        var ressurserCountToIndex = this.invalidatedNavidentList.size();
+        var orgenheterCountToIndex = 0;
+
+        log.info("Lucene indexing started. Number of entities:" + ressurserCountToIndex + orgenheterCountToIndex);
 
         // ressurser
         {
@@ -49,7 +60,8 @@ public class LuceneService {
                         var visningsNavn = it.getVisningsfornavn() + " "
                                 + it.getVisningsmellomnavn().map(mellomnavn -> mellomnavn + " ").orElse("")
                                 + it.getVisningsetternavn();
-                        return new LuceneRessurs(it.getNavIdent(), visningsNavn, "tlf-nr", "epost");
+                        var activeRessurs = it.getSluttdato() == null || it.getSluttdato().isAfter(LocalDate.now());
+                        return new LuceneRessurs(it.getNavIdent(), visningsNavn, "tlf-nr", "epost", activeRessurs);
                     }
             );
 
@@ -69,6 +81,22 @@ public class LuceneService {
 //            invalidatedOrgEnhetList.clear();
         }
 
+
+
+        log.info("Lucene indexing completed.");
+
+    }
+
+    @Scheduled(initialDelay = 20L * 1000L, fixedRate = 3600L*1000L*12L)
+    public void refreshOrgenhet() {
+        log.info("Lucene indexing started for orgenhet");
+        searchRepo.upsertEntities(orgenhetService.getAllEnheter().stream()
+                .map(it -> new LuceneOrgEnhet(
+                        it.getFid().toString(),
+                        it.getNavn(),
+                        it.getOrgEnhetsKategori().toString())
+                ), LuceneOrgEnhet.class);
+        log.info("Lucene indexing for orgenhet completed.");
 
     }
 
@@ -95,5 +123,12 @@ public class LuceneService {
         return this.searchRepo.search(term);
     }
 
+    public boolean filterOrgenhetResult(SearchResult searchResult){
+        return searchResult.entType().equals(this.entTypeOrgenhet);
+    }
+
+    public boolean filterRessursResult(SearchResult searchResult){
+        return searchResult.entType().equals(this.entTypeRessurs);
+    }
 
 }

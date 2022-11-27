@@ -7,11 +7,12 @@ import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -35,22 +36,33 @@ public class SearchResolver {
     }
 
     public List<Object> search(String term) {
-        var matchedOrgenhetIds = Stream.concat(
-                        orgenhetService.matchByAgressoId(term).stream(),
-                        orgenhetService.matchByNavn(term).stream()
-                )
-                .map(IOrgenhet::getAgressoId)
-                .collect(toSet());
-
-        var orgenheter = orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet);
-
+        Stream<OrgEnhet> orgenheter;
         Stream<Object> ressurser;
 
         if(unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)){
-            var matchedNavidentsSorted = luceneService.search(term).stream().map(SearchResult::id).toList();
+            var matchedNavidentsSorted = luceneService.search(term).stream()
+                    .filter(luceneService::filterRessursResult)
+                    .map(SearchResult::id).toList();
             var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted);
             ressurser = matchedNavidentsSorted.stream().map(r -> MappingUtils.toRessurs(matchedNavidentsMap.get(r)));
+
+            var matchedFidsSorted = luceneService.search(term).stream()
+                    .filter(luceneService::filterOrgenhetResult)
+                    .map(SearchResult::id).toList();
+            Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+            orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
+
+
         }else{
+            var matchedOrgenhetIds = Stream.concat(
+                            orgenhetService.matchByAgressoId(term).stream(),
+                            orgenhetService.matchByNavn(term).stream()
+                    )
+                    .map(IOrgenhet::getAgressoId)
+                    .collect(toSet());
+
+            orgenheter = orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet);
+
             ressurser = ressursService.matchByNavident(term).stream().map(MappingUtils::toRessurs);
         }
 

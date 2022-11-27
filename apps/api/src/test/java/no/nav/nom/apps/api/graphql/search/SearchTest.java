@@ -165,5 +165,30 @@ public class SearchTest extends GraphQLTestBase {
 
         assertThat(searchResults.toString(), containsString("fornavn"));
     }
+
+    @Test
+    @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
+    public void scenario61(){
+        luceneEnabled(true);
+        eventsourceEnabled(true);
+
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();
+        final var mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("Not-to-find").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        luceneService.addInvalidatedEntitiesToIndex();
+        luceneService.refreshOrgenhet();
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+        dvhRestConsumer.loadFromDvh();
+
+        final var response = postForResource("search/scenario6.graphql");
+        final var searchResults = response.path("search").entity(JsonNode.class).get();
+
+        assertThat(searchResults.toString(), containsString("NAV"));
+    }
 }
 

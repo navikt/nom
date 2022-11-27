@@ -11,7 +11,10 @@ import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -69,6 +72,18 @@ public class OrgenhetService implements IOrgenhetService {
     @Override
     public List<IOrgenhet> matchByNavn(String navn) {
         return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(EventBasedOrgenhet.NAVN_FIELD, navn, HendelseDataType.ORGENHET_V1.getDataType()).stream()).toList();
+    }
+
+    @Override
+    public Map<String, IOrgenhet> getByFidBulk(List<String> fidList) {
+        var tmp = orgenhetHendelseRepository.findByFidIn(new HashSet<>(fidList));
+
+        var out = new HashMap<String,IOrgenhet>(tmp.size());
+        var orgenhetStream = toIOrgEnhetStream(tmp.stream());
+        orgenhetStream.forEach(oe -> {
+            out.put(oe.getFid().toString(),oe);
+        });
+        return out;
     }
 
     private Stream<IOrgenhet> toIOrgEnhetStream(Stream<GenericStorageElement> elementStream) {

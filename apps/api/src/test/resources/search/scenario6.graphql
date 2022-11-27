@@ -1,0 +1,27 @@
+query {
+    search(term: "city") {
+        __typename
+        ... on Ressurs {
+            navIdent
+            personIdent
+            person {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+            }
+        }
+        __typename
+        ... on OrgEnhet {
+            agressoId
+            navn
+            gyldigFom
+            gyldigTom
+            type {
+                kode
+                navn
+            }
+        }
+    }
+}
