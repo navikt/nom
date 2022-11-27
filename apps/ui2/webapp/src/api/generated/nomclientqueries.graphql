@@ -120,7 +120,7 @@ query HentRessursMedNavident($navident: String) {
     etternavn
     epost
     sektor
-    visningsNavn
+    visningsnavn
     telefon {
       beskrivelse
       nummer
@@ -132,8 +132,8 @@ query HentRessursMedNavident($navident: String) {
         visningsNavn
         fornavn
         etternavn
-        koblinger {
-          organisasjonsenhet {
+        orgTilknytning {
+          orgEnhet {
             navn
             orgNiv
             agressoId
@@ -141,8 +141,8 @@ query HentRessursMedNavident($navident: String) {
         }
       }
     }
-    koblinger {
-      organisasjonsenhet {
+    orgTilknytning {
+      orgEnhet {
         agressoId
         navn
         orgNiv

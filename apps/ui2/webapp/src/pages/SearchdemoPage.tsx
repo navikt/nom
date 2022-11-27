@@ -1,5 +1,53 @@
 import { css } from "@emotion/css";
 import React from "react";
+import { Link } from "react-router-dom";
+
+type SearchResultRow =
+  | {
+      kind: "orgenhet";
+      agressoId: string;
+      orgNiv: string;
+      navn: string;
+      urlPath: string;
+    }
+  | {
+      kind: "ressurs";
+      navn: string;
+      navident: string;
+      urlPath: string;
+    };
+
+type SearchRowRaw = {
+  navident?: string;
+  visningsnavn?: string;
+  agressoId?: string;
+  navn?: string;
+  orgNiv: string;
+  __typename: "Ressurs" | "OrgEnhet";
+};
+
+function transform(inp: SearchRowRaw): SearchResultRow {
+  switch (inp.__typename) {
+    case "OrgEnhet": {
+      return {
+        kind: "orgenhet",
+        agressoId: inp.agressoId || "",
+        navn: inp.navn || "",
+        orgNiv: inp.orgNiv || "",
+        urlPath: "/org/" + inp.agressoId + "/" + inp.orgNiv,
+        // inp.navn,
+      };
+    }
+    case "Ressurs": {
+      return {
+        kind: "ressurs",
+        urlPath: "/ressurs/" + inp.navident || "",
+        navident: inp.navident || "[null]",
+        navn: inp.visningsnavn || "Uten navn",
+      };
+    }
+  }
+}
 
 function SearchdemoPage() {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -34,6 +82,7 @@ function SearchdemoPage() {
                 ... on OrgEnhet {
                   agressoId
                   navn
+                  orgNiv
                 }
               }
             }`,
@@ -47,21 +96,7 @@ function SearchdemoPage() {
     }
   }, [searchString]);
 
-  const txtOut = txt.map(
-    (it: {
-      navident?: string;
-      visningsnavn?: string;
-      agressoId?: string;
-      navn?: string;
-      __typename: string;
-    }) =>
-      it.__typename +
-      ", " +
-      (it.navident || it.agressoId) +
-      ", " +
-      (it.visningsnavn || it.navn) +
-      "\n"
-  );
+  const rows = txt.map((it: SearchRowRaw) => transform(it as SearchRowRaw));
 
   return (
     <div
@@ -70,19 +105,44 @@ function SearchdemoPage() {
       `}
     >
       <span>
-        <span>Søk etter ressurser her</span>
+        <span>Søk etter ressurser og enheter her: </span>
         <input
           onChange={(changeevent) => setDirtyString(changeevent.target.value)}
           ref={inputReference}
         ></input>
       </span>
-      <pre
+
+      <div
         className={css`
+          display: grid;
+          grid-template-columns: min-content min-content 1fr;
+          column-gap: 1rem;
+          row-gap: 1rem;
+          align-items: center;
           background-color: white;
         `}
       >
-        {txtOut}
-      </pre>
+        {rows.map((r: SearchResultRow) => (
+          <>
+            {r.kind === "ressurs" && (
+              <>
+                <span>{r.kind}</span>
+                <span>{r.navident}</span>
+                <Link to={r.urlPath}>{r.navn}</Link>
+              </>
+            )}
+            {r.kind === "orgenhet" && (
+              <>
+                <span>{r.kind}</span>
+                <span>
+                  {r.orgNiv}_{r.agressoId}
+                </span>
+                <Link to={r.urlPath}>{r.navn}</Link>
+              </>
+            )}
+          </>
+        ))}
+      </div>
     </div>
   );
 }

@@ -77,10 +77,10 @@ export const FocusedRessursView = ({
             </span>
 
             {uniqBy(
-              focusedRessurs.koblinger,
-              (kobling) => kobling.organisasjonsenhet.agressoId
-            ).map((kobling) => {
-              const { agressoId, navn, orgNiv } = kobling.organisasjonsenhet;
+              focusedRessurs.orgTilknytning,
+              (orgTilknytning) => orgTilknytning.orgEnhet.agressoId
+            ).map((orgTilknytning) => {
+              const { agressoId, navn, orgNiv } = orgTilknytning.orgEnhet;
               return (
                 <span
                   className={css`
