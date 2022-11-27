@@ -31,6 +31,10 @@ function SearchdemoPage() {
                   navident
                   visningsnavn
                 }
+                ... on OrgEnhet {
+                  agressoId
+                  navn
+                }
               }
             }`,
           variables: {},
@@ -43,12 +47,21 @@ function SearchdemoPage() {
     }
   }, [searchString]);
 
-  const txtOut = txt
-    .filter((it: { __typename: string }) => it.__typename === "Ressurs")
-    .map(
-      (it: { navident: string; visningsnavn: string }) =>
-        it.navident + ", " + it.visningsnavn + "\n"
-    );
+  const txtOut = txt.map(
+    (it: {
+      navident?: string;
+      visningsnavn?: string;
+      agressoId?: string;
+      navn?: string;
+      __typename: string;
+    }) =>
+      it.__typename +
+      ", " +
+      (it.navident || it.agressoId) +
+      ", " +
+      (it.visningsnavn || it.navn) +
+      "\n"
+  );
 
   return (
     <div

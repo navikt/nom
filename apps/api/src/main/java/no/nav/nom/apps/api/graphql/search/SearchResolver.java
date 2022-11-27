@@ -35,11 +35,14 @@ public class SearchResolver {
         this.unleash = unleash;
     }
 
-    public List<Object> search(String term) {
+    public List<Object> search(String term_inp) {
         Stream<OrgEnhet> orgenheter;
         Stream<Object> ressurser;
 
         if(unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)){
+            // termer ser ut til å fungere bedre når de er inneklemt med single-quotes
+            // men dette skjer kun i API/miljø. Rart at lokalt GUI skal oppføre seg annerledes.
+            var term = "'" + term_inp + "'";
             var matchedNavidentsSorted = luceneService.search(term).stream()
                     .filter(luceneService::filterRessursResult)
                     .map(SearchResult::id).toList();
@@ -51,19 +54,17 @@ public class SearchResolver {
                     .map(SearchResult::id).toList();
             Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
             orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-
-
         }else{
             var matchedOrgenhetIds = Stream.concat(
-                            orgenhetService.matchByAgressoId(term).stream(),
-                            orgenhetService.matchByNavn(term).stream()
+                            orgenhetService.matchByAgressoId(term_inp).stream(),
+                            orgenhetService.matchByNavn(term_inp).stream()
                     )
                     .map(IOrgenhet::getAgressoId)
                     .collect(toSet());
 
             orgenheter = orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet);
 
-            ressurser = ressursService.matchByNavident(term).stream().map(MappingUtils::toRessurs);
+            ressurser = ressursService.matchByNavident(term_inp).stream().map(MappingUtils::toRessurs);
         }
 
         return Stream.concat(orgenheter, ressurser).toList();

@@ -49,11 +49,13 @@ public class GuiSearchRepo {
         var f = new File(url.getFile());
         BufferedReader br = new BufferedReader(new FileReader(f));
 
-        var ressursStream = br.lines().map(it -> {
-            var row = it.split("\t");
-            var artificalActiveSplit = Integer.parseInt(row[0].substring(1)) > 150000;
-            return new LuceneRessurs(row[0], row[1], artificalActiveSplit);
-        });
+        var ressursStream = br.lines()
+                .filter(it -> !it.isEmpty())
+                .map(it -> {
+                    var row = it.split("\t");
+                    var artificalActiveSplit = Integer.parseInt(row[0].substring(1)) > 150000;
+                    return new LuceneRessurs(row[0], row[1], artificalActiveSplit);
+                });
         repo.upsertEntities(ressursStream, indexRessurs);
 
         return true;
@@ -67,10 +69,12 @@ public class GuiSearchRepo {
         var f = new File(url.getFile());
         BufferedReader br = new BufferedReader(new FileReader(f));
 
-        var orgEnhetStream = br.lines().map(it -> {
-            var row = it.split("\t");
-            return new LuceneOrgEnhet(row[0], row[1], "status: " + row[2]);
-        });
+        var orgEnhetStream = br.lines()
+                .filter(it -> !it.isEmpty())
+                .map(it -> {
+                    var row = it.split("\t");
+                    return new LuceneOrgEnhet(row[0], row[1], "status: " + row[2]);
+                });
         repo.upsertEntities(orgEnhetStream, indexOrgEnhet);
 
         return true;

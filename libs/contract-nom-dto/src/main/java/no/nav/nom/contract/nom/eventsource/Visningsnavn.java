@@ -8,7 +8,7 @@ public record Visningsnavn(
         String etternavn
 ){
     public String toString(){
-        return fornavn + " " + mellomnavn.map(it -> " " + it).orElse("") + " " + etternavn;
+        return fornavn + mellomnavn.map(it -> " " + it).orElse("") + (" " + etternavn);
     }
 
 }

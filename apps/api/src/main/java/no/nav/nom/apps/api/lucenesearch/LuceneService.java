@@ -57,9 +57,9 @@ public class LuceneService {
 
             var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
             var luceneRessursStream = resMap.values().stream().map(it -> {
-                        var visningsNavn = it.getVisningsfornavn() + " "
-                                + it.getVisningsmellomnavn().map(mellomnavn -> mellomnavn + " ").orElse("")
-                                + it.getVisningsetternavn();
+                        var visningsNavn = it.getVisningsfornavn()
+                                + it.getVisningsmellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
+                                + (" " + it.getVisningsetternavn());
                         var activeRessurs = it.getSluttdato() == null || it.getSluttdato().isAfter(LocalDate.now());
                         return new LuceneRessurs(it.getNavIdent(), visningsNavn, "tlf-nr", "epost", activeRessurs);
                     }
