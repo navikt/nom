@@ -1,12 +1,12 @@
 import { css } from "@emotion/css";
 import { PeopleFilled } from "@navikt/ds-icons";
-import { Search } from "@navikt/ds-react";
 import { Link } from "react-router-dom";
 
 import { UserRole, useSessionContext } from "../main";
 import { mediaQueryContentWidth } from "../resources/NomStyles";
 import { BurgerMenu } from "./BurgerMenu";
 import { nomLogoCircle } from "./Images";
+import { SearchBar } from "./Searchbar";
 
 export const headerHeight = "6rem";
 
@@ -60,13 +60,14 @@ const NavHeader = () => {
           <img alt="logo" src={nomLogoCircle} />
         </Link>
 
-        <Search
-          disabled={true}
-          label={"Søk etter ressurser"}
-          placeholder={"Søkefunksjonalitet kommer"}
-          size="medium"
-          variant="secondary"
-        ></Search>
+        {/*<Search*/}
+        {/*  disabled={true}*/}
+        {/*  label={"Søk etter ressurser"}*/}
+        {/*  placeholder={"Søkefunksjonalitet kommer"}*/}
+        {/*  size="medium"*/}
+        {/*  variant="secondary"*/}
+        {/*></Search>*/}
+        <SearchBar />
         <span
           className={css`
             display: flex;
