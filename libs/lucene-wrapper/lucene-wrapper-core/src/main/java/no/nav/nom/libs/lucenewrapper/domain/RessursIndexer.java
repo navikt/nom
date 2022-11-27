@@ -33,6 +33,7 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
 
         doc.add(new Field("epost", entity.epost(), TextField.TYPE_NOT_STORED));
         doc.add(new Field("tlf", entity.tlf(), TextField.TYPE_NOT_STORED));
+        doc.add(new Field("active", String.valueOf(entity.active()), TextField.TYPE_NOT_STORED));
         return doc;
     }
 
@@ -42,12 +43,18 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
         var qp2 = new QueryParser(IEntityIndexer.FIELD_NAME_METAPHONE, this.analyzer);
         var qp3 = new QueryParser(IEntityIndexer.FIELD_NAME_EXACT, this.analyzer);
         var qp4 = new QueryParser(this.idField(), this.analyzer);
+        var boostActiveQry = new BoostQuery(new TermQuery(new Term("active",String.valueOf(true))),10.0f);
 
-        return new BooleanQuery.Builder()
+        var coreQry = new BooleanQuery.Builder()
                 .add(new BooleanClause(qp1.parse(terms), BooleanClause.Occur.SHOULD))
                 .add(new BooleanClause(qp2.parse(terms), BooleanClause.Occur.SHOULD))
                 .add(new BooleanClause(new BoostQuery(qp3.parse(terms), 5.0f), BooleanClause.Occur.SHOULD))
                 .add(new BooleanClause(new BoostQuery(qp4.parse(terms), 40.0f), BooleanClause.Occur.SHOULD))
+                .build();
+
+        return new BooleanQuery.Builder()
+                .add(new BooleanClause(coreQry, BooleanClause.Occur.MUST))
+                .add(new BooleanClause(boostActiveQry, BooleanClause.Occur.SHOULD))
                 .build();
     }
 

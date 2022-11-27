@@ -4,11 +4,14 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.ByteBuffersDirectory;
 
 import java.io.IOException;
@@ -88,7 +91,15 @@ public class SearchRepo {
 
             var bqb = new BooleanQuery.Builder();
             for (var indexer : this.indexerList) {
-                bqb.add(new BooleanClause(indexer.toQuery(searchterms), BooleanClause.Occur.SHOULD));
+                var typeRestrictQry = new TermQuery(new Term(IEntityIndexer.FIELD_TYPE, indexer.typeStr()));
+                var actualQry = indexer.toQuery(searchterms);
+                var combinedQry =
+                        new BooleanQuery.Builder()
+                                .add(new BooleanClause(actualQry, BooleanClause.Occur.MUST))
+                                .add(new BooleanClause(new BoostQuery(typeRestrictQry,0.0f), BooleanClause.Occur.MUST))
+                                .build();
+
+                bqb.add(new BooleanClause(combinedQry, BooleanClause.Occur.SHOULD));
             }
             var bq = bqb.build();
 

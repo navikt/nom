@@ -11,7 +11,7 @@ import java.util.List;
 
 public class UpdatingTest {
     LuceneRessurs r1 = new LuceneRessurs("A1","Are Aslesen");
-    LuceneRessurs r1_2 = new LuceneRessurs("A1","Rick Ralfson");
+    LuceneRessurs r1_2 = new LuceneRessurs("A1","Rick Rudy");
     LuceneRessurs r2 = new LuceneRessurs("A2","Ulf Olsen");
 
     LuceneOrgEnhet oe1 = new LuceneOrgEnhet("oe1","NAV City 1","Vanlig");
@@ -31,6 +31,10 @@ public class UpdatingTest {
         repo.upsertEntity(r1_2);
         var resList2 = repo.search(r1.navn());
         Assertions.assertFalse(resList2.stream().anyMatch(it -> it.id().equals(r1.navident())));
+
+        Assertions.assertEquals(repo.search(r1_2.navn()).stream()
+                .filter(it -> it.id().equals(r1.navident()))
+                .findFirst().get().name(), r1_2.navn());
 
     }
 

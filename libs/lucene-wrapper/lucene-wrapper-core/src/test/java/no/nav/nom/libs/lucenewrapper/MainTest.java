@@ -26,25 +26,25 @@ public class MainTest {
     @Test
     void twoHitsTwoExcluded(){
         var res = Helpers.initScenario(List.of(r1,r2,oe1,oe2)).search("Are");
-        Assertions.assertEquals(res.size(),2);
+        Assertions.assertEquals(2, res.size());
     }
 
     @Test
     void oneHitThreeExcluded(){
         var res = Helpers.initScenario(List.of(r1,r2,oe1,oe2)).search("Aslesen");
-        Assertions.assertEquals(res.size(),1);
+        Assertions.assertEquals(1, res.size());
     }
 
     @Test
     void edgeNgramHit(){
         var res = Helpers.initScenario(List.of(r1,r2,oe1,oe2)).search("Asle");
-        Assertions.assertEquals(res.size(),1);
+        Assertions.assertEquals(1, res.size());
     }
 
     @Test
     void twoHitsTwoExcludedOrgenhet(){
         var res = Helpers.initScenario(List.of(r1,r2,oe1,oe2)).search("NAV");
-        Assertions.assertEquals(res.size(),2);
+        Assertions.assertEquals(2,res.size());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class MainTest {
     }
 
     @Test
-    void genericStuff(){
+    void genericDataSearch(){
         var entIndexer = new GenericEntityIndexer<GenericData>(GenericData.class, it -> it.id, it -> it.name, "t:GenericData");
         var repo = new SearchRepo(List.of(entIndexer));
 

@@ -18,8 +18,8 @@ public class GuiSearchRepo {
     private static final RessursIndexer indexRessurs = new RessursIndexer();
     private static final OrgEnhetIndexer indexOrgEnhet = new OrgEnhetIndexer();
 
-    public static SearchRepo guiSearchRepo(){
-        var out = new SearchRepo(List.of(indexRessurs,indexOrgEnhet));
+    public static SearchRepo guiSearchRepo() {
+        var out = new SearchRepo(List.of(indexRessurs, indexOrgEnhet));
 
         boolean ressurserFileLoadOk = false;
         boolean enheterFileLoadOk = false;
@@ -29,10 +29,10 @@ public class GuiSearchRepo {
         } catch (IOException ignored) {
 
         } finally {
-            if(!ressurserFileLoadOk){
+            if (!ressurserFileLoadOk) {
                 loadRessurserFromCode(out);
             }
-            if(!enheterFileLoadOk){
+            if (!enheterFileLoadOk) {
                 loadEnheterFromCode(out);
             }
         }
@@ -43,7 +43,7 @@ public class GuiSearchRepo {
 
     private static boolean loadRessurserFromFile(SearchRepo repo) throws IOException {
         var url = GuiSearchRepo.class.getClassLoader().getResource("ressurserForLucene.txt");
-        if(url == null){
+        if (url == null) {
             return false;
         }
         var f = new File(url.getFile());
@@ -51,7 +51,9 @@ public class GuiSearchRepo {
 
         var ressursStream = br.lines().map(it -> {
             var row = it.split("\t");
-            return new LuceneRessurs(row[0],row[1]);});
+            var artificalActiveSplit = Integer.parseInt(row[0].substring(1)) > 150000;
+            return new LuceneRessurs(row[0], row[1], artificalActiveSplit);
+        });
         repo.upsertEntities(ressursStream, indexRessurs);
 
         return true;
@@ -59,7 +61,7 @@ public class GuiSearchRepo {
 
     private static boolean loadEnheterFromFile(SearchRepo repo) throws FileNotFoundException {
         var url = GuiSearchRepo.class.getClassLoader().getResource("orgenheterForLucene.txt");
-        if(url == null){
+        if (url == null) {
             return false;
         }
         var f = new File(url.getFile());
@@ -67,30 +69,31 @@ public class GuiSearchRepo {
 
         var orgEnhetStream = br.lines().map(it -> {
             var row = it.split("\t");
-            return new LuceneOrgEnhet(row[0],row[1],"status: " + row[2]);});
+            return new LuceneOrgEnhet(row[0], row[1], "status: " + row[2]);
+        });
         repo.upsertEntities(orgEnhetStream, indexOrgEnhet);
 
         return true;
     }
 
-    private static void loadRessurserFromCode(SearchRepo repo){
-        repo.upsertEntity(new LuceneRessurs("A0","Leif Hansen"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A1","Tore Pettersen"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A2","Geir Nesby"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A3","Hans Treholt"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A4","Lise Treskehus"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A5","Vanja Ulsnes"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A6","Vidar Ulsnes"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A7","Are Pettersen"),indexRessurs);
-        repo.upsertEntity(new LuceneRessurs("A8","Åshild Østskæret"),indexRessurs);
+    private static void loadRessurserFromCode(SearchRepo repo) {
+        repo.upsertEntity(new LuceneRessurs("A0", "Leif Hansen"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A1", "Tore Pettersen"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A2", "Geir Nesby"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A3", "Hans Treholt"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A4", "Lise Treskehus"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A5", "Vanja Ulsnes"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A6", "Vidar Ulsnes"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A7", "Are Pettersen"), indexRessurs);
+        repo.upsertEntity(new LuceneRessurs("A8", "Åshild Østskæret"), indexRessurs);
     }
 
-    private static void loadEnheterFromCode(SearchRepo repo){
-        repo.upsertEntity(new LuceneOrgEnhet("oe1","NAV Oslo","Vanlig"), indexOrgEnhet);
-        repo.upsertEntity(new LuceneOrgEnhet("oe2","NAV Bergen","Vanlig"), indexOrgEnhet);
-        repo.upsertEntity(new LuceneOrgEnhet("oe3","NAV Trondheim","Vanlig"), indexOrgEnhet);
-        repo.upsertEntity(new LuceneOrgEnhet("oe4","NAV Tromsø","Vanlig"), indexOrgEnhet);
-        repo.upsertEntity(new LuceneOrgEnhet("oe5","NAV Oslo Gamle","Vanlig"), indexOrgEnhet);
-        repo.upsertEntity(new LuceneOrgEnhet("oe6","NAV Oslo Nye","Vanlig"), indexOrgEnhet);
+    private static void loadEnheterFromCode(SearchRepo repo) {
+        repo.upsertEntity(new LuceneOrgEnhet("oe1", "NAV Oslo", "Vanlig"), indexOrgEnhet);
+        repo.upsertEntity(new LuceneOrgEnhet("oe2", "NAV Bergen", "Vanlig"), indexOrgEnhet);
+        repo.upsertEntity(new LuceneOrgEnhet("oe3", "NAV Trondheim", "Vanlig"), indexOrgEnhet);
+        repo.upsertEntity(new LuceneOrgEnhet("oe4", "NAV Tromsø", "Vanlig"), indexOrgEnhet);
+        repo.upsertEntity(new LuceneOrgEnhet("oe5", "NAV Oslo Gamle", "Vanlig"), indexOrgEnhet);
+        repo.upsertEntity(new LuceneOrgEnhet("oe6", "NAV Oslo Nye", "Vanlig"), indexOrgEnhet);
     }
 }
