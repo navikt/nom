@@ -48,7 +48,7 @@ public class OrgEnhetIndexer implements IEntityIndexer<LuceneOrgEnhet> {
 
         return new BooleanQuery.Builder()
                 .add(new BooleanClause(qp1.parse(strterms), BooleanClause.Occur.SHOULD))
-                .add(new BooleanClause(qp2.parse(strterms), BooleanClause.Occur.SHOULD))
+                .add(new BooleanClause(new BoostQuery(qp2.parse(strterms),0.5f), BooleanClause.Occur.SHOULD))
                 .add(new BooleanClause(new BoostQuery(qp3.parse(strterms), 5.0f), BooleanClause.Occur.SHOULD))
                 .build();
 

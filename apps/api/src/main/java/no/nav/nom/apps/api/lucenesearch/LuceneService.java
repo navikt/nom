@@ -44,7 +44,7 @@ public class LuceneService {
         this.ressursService = ressursService;
     }
 
-    @Scheduled(initialDelay = 5000L, fixedRate = 30_000L)
+    @Scheduled(initialDelayString = "PT10S", fixedRateString = "PT30S")
     public void addInvalidatedEntitiesToIndex(){
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
         var orgenheterCountToIndex = 0;
@@ -87,7 +87,7 @@ public class LuceneService {
 
     }
 
-    @Scheduled(initialDelay = 20L * 1000L, fixedRate = 3600L*1000L*12L)
+    @Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
         searchRepo.upsertEntities(orgenhetService.getAllEnheter().stream()

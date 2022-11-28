@@ -43,18 +43,35 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
         var qp2 = new QueryParser(IEntityIndexer.FIELD_NAME_METAPHONE, this.analyzer);
         var qp3 = new QueryParser(IEntityIndexer.FIELD_NAME_EXACT, this.analyzer);
         var qp4 = new QueryParser(this.idField(), this.analyzer);
-        var boostActiveQry = new BoostQuery(new TermQuery(new Term("active",String.valueOf(false))),0.1f);
+
+        var activeQry = new TermQuery(new Term("active", String.valueOf(true)));
+        var inactiveQry = new TermQuery(new Term("active", String.valueOf(false)));
 
         var coreQry = new BooleanQuery.Builder()
-                .add(new BooleanClause(qp1.parse(terms), BooleanClause.Occur.SHOULD))
-                .add(new BooleanClause(qp2.parse(terms), BooleanClause.Occur.SHOULD))
-                .add(new BooleanClause(new BoostQuery(qp3.parse(terms), 5.0f), BooleanClause.Occur.SHOULD))
-                .add(new BooleanClause(new BoostQuery(qp4.parse(terms), 40.0f), BooleanClause.Occur.SHOULD))
+                .add(qp1.parse(terms), BooleanClause.Occur.SHOULD)
+                .add(new BoostQuery(qp2.parse(terms),0.5f), BooleanClause.Occur.SHOULD)
+                .add(new BoostQuery(qp3.parse(terms), 5.0f), BooleanClause.Occur.SHOULD)
+                .add(new BoostQuery(qp4.parse(terms), 40.0f), BooleanClause.Occur.SHOULD)
                 .build();
 
+        var normalWeightActiveQry = new BoostQuery(
+                new BooleanQuery.Builder()
+                        .add(activeQry, BooleanClause.Occur.MUST)
+                        .add(coreQry, BooleanClause.Occur.MUST)
+                        .build()
+        ,1.0f);
+
+
+        var reducedWeightInactiveQry = new BoostQuery(
+                new BooleanQuery.Builder()
+                        .add(inactiveQry, BooleanClause.Occur.MUST)
+                        .add(coreQry, BooleanClause.Occur.MUST)
+                        .build()
+        ,0.5f);
+
         return new BooleanQuery.Builder()
-                .add(new BooleanClause(coreQry, BooleanClause.Occur.MUST))
-                .add(new BooleanClause(boostActiveQry, BooleanClause.Occur.SHOULD))
+                .add(normalWeightActiveQry, BooleanClause.Occur.SHOULD)
+                .add(reducedWeightInactiveQry, BooleanClause.Occur.SHOULD)
                 .build();
     }
 
@@ -77,7 +94,7 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
     public Query toLookupQry(LuceneRessurs ent) {
         return new BooleanQuery.Builder()
                 .add(new TermQuery(new Term(this.idField(), ent.navident().toLowerCase())), BooleanClause.Occur.MUST)
-                .add(new TermQuery(new Term(IEntityIndexer.FIELD_TYPE,this.typeStr())), BooleanClause.Occur.MUST)
+                .add(new TermQuery(new Term(IEntityIndexer.FIELD_TYPE, this.typeStr())), BooleanClause.Occur.MUST)
                 .build();
     }
 
