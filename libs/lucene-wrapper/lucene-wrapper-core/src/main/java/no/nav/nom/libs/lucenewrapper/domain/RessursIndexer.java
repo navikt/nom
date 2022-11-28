@@ -43,7 +43,7 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
         var qp2 = new QueryParser(IEntityIndexer.FIELD_NAME_METAPHONE, this.analyzer);
         var qp3 = new QueryParser(IEntityIndexer.FIELD_NAME_EXACT, this.analyzer);
         var qp4 = new QueryParser(this.idField(), this.analyzer);
-        var boostActiveQry = new BoostQuery(new TermQuery(new Term("active",String.valueOf(true))),10.0f);
+        var boostActiveQry = new BoostQuery(new TermQuery(new Term("active",String.valueOf(false))),0.1f);
 
         var coreQry = new BooleanQuery.Builder()
                 .add(new BooleanClause(qp1.parse(terms), BooleanClause.Occur.SHOULD))
