@@ -82,7 +82,7 @@ public class DvhRestConsumer {
             loadLedereAndOrganiseringerFromDvh();
             log.info("Laster legacy ressurser fra dvh");
             log.info("Laster tlf fra dvh");
-//            loadTlfFromDvh();
+            loadTlfFromDvh();
 
 
             if (!initialLoadComplete.get()) {
