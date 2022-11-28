@@ -48,8 +48,11 @@ public class LuceneService {
     public void addInvalidatedEntitiesToIndex(){
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
         var orgenheterCountToIndex = 0;
-
-        log.info("Lucene indexing started. Number of entities:" + ressurserCountToIndex + orgenheterCountToIndex);
+        var sumCount = ressurserCountToIndex + orgenheterCountToIndex;
+        if(sumCount == 0) {
+            return;
+        }
+        log.info("Lucene indexing started. Number of entities:" + sumCount);
 
         // ressurser
         {
