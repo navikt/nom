@@ -141,7 +141,9 @@ const searchResultClassname2 = css`
 `;
 
 async function createOptions(inputValue: string): Promise<SearchOption[]> {
-  const results = await performSearch(inputValue);
+  // får bedre resultat av en eller annen grunn når man tar termene i single-quotes
+  const wrappedInputValue = "'" + inputValue + "'";
+  const results = await performSearch(wrappedInputValue);
 
   return results.map((r) => {
     switch (r.__typename) {
