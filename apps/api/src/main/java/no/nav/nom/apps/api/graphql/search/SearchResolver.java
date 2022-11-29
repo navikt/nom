@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 
 @Component
+@Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class SearchResolver {
 
     private final IRessursService ressursService;
