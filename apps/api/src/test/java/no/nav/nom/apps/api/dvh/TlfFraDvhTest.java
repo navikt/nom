@@ -31,27 +31,9 @@ public class TlfFraDvhTest extends DvhTestBase {
         Assertions.assertTrue(tlfList2.isEmpty());
     }
 
-
     @Test
     @DisplayName("hent telefonnr, sjekk flere")
-    public void test2(){
-        stubTlfFromString(tlfDvhPayload);
-        stubResourcesFromString(resourceInitDvhPayload);
-
-        loadFromDvh();
-
-
-        val resourceList = this.ressursService.getAll();
-        for(val r : resourceList){
-            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.getNavIdent())).hasSize(1);
-        }
-
-    }
-
-    @Test
-    @DisplayName("hent telefonnr, sjekk flere eventsource")
     public void test21(){
-        eventsourceEnabled(true);
         stubTlfFromString(tlfDvhPayload);
         stubResourcesFromString(resourceInitDvhPayload);
 
@@ -60,7 +42,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
         val resourceList = this.ressursService.getAll();
         for(val r : resourceList){
-            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.getNavIdent())).hasSize(1);
+            assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.navident())).hasSize(1);
         }
 
     }

@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 @Component
 public class SearchResolver {
 
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
     private final LuceneService luceneService;
 
@@ -28,7 +28,7 @@ public class SearchResolver {
 
     private final Unleash unleash;
 
-    public SearchResolver(UnleashRessursServiceSelector ressursService, IOrgenhetService orgenhetService, LuceneService luceneService, Unleash unleash) {
+    public SearchResolver(IRessursService ressursService, IOrgenhetService orgenhetService, LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.luceneService = luceneService;

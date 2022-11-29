@@ -4,18 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Value
 @Builder
 @RequiredArgsConstructor
-public class DvhRessurs implements IRessurs {
+public class DvhRessurs {
 
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
 
@@ -46,11 +44,6 @@ public class DvhRessurs implements IRessurs {
         remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
     }
 
-    @Override
-    public UUID getId() {
-        return null;
-    }
-
     public enum RemedyRessursType {
         EKSTERN("Eksternt"),
         STATLIG("NAV Statlig"),
@@ -64,7 +57,6 @@ public class DvhRessurs implements IRessurs {
         }
     }
 
-    @Override
     public LocalDate getSluttdato(){
         if(!hasPermisjon()) {
             if ("E".equals(ansattRessursKode) ||

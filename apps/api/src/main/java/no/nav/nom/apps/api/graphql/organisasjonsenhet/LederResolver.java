@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -19,9 +19,9 @@ import java.util.List;
 public class LederResolver {
 
     private final DvhRepository dvhRepository;
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
 
-    public LederResolver(DvhRepository dvhRepository, UnleashRessursServiceSelector ressursService) {
+    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
     }

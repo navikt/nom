@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -186,26 +185,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
-        IRessurs ressurs = createRessursHendelse("");
-
-
-        dvhRestConsumer.loadFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario4.graphql");
-        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputLeder = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {}).get(0);
-
-        assertEquals(ressurs.getNavIdent(), outputLeder.getRessurs().getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputLeder.getRessurs().getPersonIdent());
-    }
-
-    @Test
-    @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder eventsouce")
-    void scenario312() {
-        eventsourceEnabled(true);
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-
         RessursState ressurs = createRessursHendelseEventSource("");
 
 
@@ -241,29 +220,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     void scenario34() {
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-        IRessurs ressurs = createRessursHendelse("");
-
-        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
-        dvhRestConsumer.loadFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
-        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-
-        final var lederNavn = outputEnhetJson.get("leder")
-                .get(0)
-                .get("ressurs")
-                .get("person")
-                .get("navn");
-
-        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
-    }
-
-    @Test
-    @DisplayName("Henter ut person navn i kontekst av enhet leder spørring eventsource")
-    void scenario342() {
-        eventsourceEnabled(true);
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         RessursState ressurs = createRessursHendelseEventSource("");
 
         pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
@@ -281,37 +237,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         pdlUtils.assertNavn(ressurs.personident(), lederNavn);
     }
 
-
     @Test
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-
-        IRessurs ressurs = createRessursHendelse("");
-        dvhRestConsumer.loadFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario41.graphql");
-
-        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
-        });
-
-        assertEquals(1, outputKoblinger.size());
-
-        final var outputKobling = outputKoblinger.get(0);
-        assertEquals("2021-01-01", outputKobling.getGyldigFom().toString());
-        assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
-
-        final var outputRessurs = outputKoblinger.get(0).getRessurs();
-        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
-    }
-
-    @Test
-    @DisplayName("Leser kobling fra DVH og leser fra graphQl eventsouce")
-    void scenario412() {
-        eventsourceEnabled(true);
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
@@ -352,29 +280,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        dvhOrgenhetMockUtils.addToResponse(mockEnhet);
-
-        IRessurs ressurs = createRessursHendelse("");
-        pdlUtils.addPersonToPdlResponse(true, ressurs.getPersonIdent());
-        dvhRestConsumer.loadFromDvh();
-
-        final var response = postForResource("organisasjonsenhet/scenario34.graphql");
-        final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-
-        final var lederNavn = outputEnhetJson.get("koblinger")
-                .get(0)
-                .get("ressurs")
-                .get("person")
-                .get("navn");
-
-        pdlUtils.assertNavn(ressurs.getPersonIdent(), lederNavn);
-    }
-
-    @Test
-    @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring eventsource")
-    void scenario432() {
-        eventsourceEnabled(true);
         final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 

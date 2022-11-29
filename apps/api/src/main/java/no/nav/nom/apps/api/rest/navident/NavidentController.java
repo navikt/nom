@@ -9,20 +9,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -30,11 +27,13 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -48,14 +47,14 @@ public class NavidentController {
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
     public static final String BASE_URL = "/api/v1/navident";
     private final RessursCommadService ressursCommadService;
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
     private final NIKConsumer nikConsumer;
     private final PdlConsumer pdlConsumer;
     private final ObjectMapper mapper;
 
     public NavidentController(
             RessursCommadService ressursCommadService,
-            UnleashRessursServiceSelector ressursService,
+            IRessursService ressursService,
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
             ObjectMapper mapper
@@ -128,25 +127,9 @@ public class NavidentController {
 
         Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
-        Map<String, Object> data = new HashMap<>();
-        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
-        data.put(EventBasedRessurs.NAVIDENT_FIELD, opprettetNavident);
-        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getFornavn());
-        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getMellomnavn());
-        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getEtternavn());
-        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor());
-        data.put(EventBasedRessurs.KJONN_FIELD, pdlPerson.map(p -> p.getKjonn().name()).orElseThrow());
-
         try {
-            final var metadata = HendelseMetadataSerialize.builder()
-                    .opprettetAv(new HendelseMetadata.OpprettetAv(token)) // This can throw a NullPointerException if JwtAuthenticationToken is null
-                    .opprettetTidspunkt(LocalDateTime.now())
-                    .rawInputData(mapper.valueToTree(data))
-                    .build();
-
-            final var opprettetRessurs = ressursService.opprettRessurs(request.getPersonident(), data, metadata);
+            final var opprettetRessurs = opprettRessursHendelse(request, opprettetNavident, pdlPerson, token);
             return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
-
         } catch (Exception exception) {
             log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
             return ResponseEntity.ok(
@@ -156,7 +139,7 @@ public class NavidentController {
     }
 
 
-    private void opprettRessursHendelse(NavidentRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
+    private RessursState opprettRessursHendelse(NavidentRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 navident,
@@ -177,18 +160,18 @@ public class NavidentController {
                         )
                 )
         );
-        ressursCommadService.createRessursEvent(opprettRessursCommand);
+        return ressursCommadService.createRessursSync(opprettRessursCommand);
     }
 
 
-    private NavidentResponse toNavidentResponse(IRessurs ressurs) {
+    private NavidentResponse toNavidentResponse(RessursState ressurs) {
         return NavidentResponse.builder()
                 .status(Integer.toString(HttpStatus.OK.value()))
-                .personident(ressurs.getPersonIdent())
-                .navident(ressurs.getNavIdent())
-                .fornavn(ressurs.getVisningsfornavn().orElse(null))
-                .mellomnavn(ressurs.getVisningsmellomnavn().orElse(null))
-                .etternavn(ressurs.getVisningsetternavn().orElse(null))
+                .personident(ressurs.personident())
+                .navident(ressurs.navident())
+                .fornavn(ressurs.visningsnavn().fornavn())
+                .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
+                .etternavn(ressurs.visningsnavn().etternavn())
                 .build();
     }
 }

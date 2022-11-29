@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
@@ -28,11 +28,11 @@ import static no.nav.nom.libs.utils.common.util.StreamUtils.distinctByKey;
 public class LederResolver {
 
     private final DvhRepository dvhRepository;
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
     private final KoblingService koblingService;
 
-    public LederResolver(DvhRepository dvhRepository, UnleashRessursServiceSelector ressursService, IOrgenhetService orgenhetService, KoblingService koblingService) {
+    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService, KoblingService koblingService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
@@ -101,7 +101,7 @@ public class LederResolver {
                 .map(ressursService::findByNavident)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .filter(not(r -> r.getNavIdent().equals(excludeNavIdent)))
+                .filter(not(r -> r.navident().equals(excludeNavIdent)))
                 .map(MappingUtils::toRessurs)
                 .collect(Collectors.toList());
     }

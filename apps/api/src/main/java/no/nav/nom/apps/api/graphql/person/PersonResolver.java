@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.graphql.person;
 
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.PersonResult;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -10,9 +10,9 @@ import java.util.Optional;
 @Component
 public class PersonResolver {
 
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
 
-    public PersonResolver(UnleashRessursServiceSelector ressursService) {
+    public PersonResolver(IRessursService ressursService) {
         this.ressursService = ressursService;
     }
 
@@ -33,13 +33,13 @@ public class PersonResolver {
                 .build();
     }
 
-    public static PersonResult fromRessurs(IRessurs ressurs) {
+    public static PersonResult fromRessurs(RessursState ressurs) {
         return PersonResult.builder()
-                .personident(ressurs.getPersonIdent())
-                .personIdent(ressurs.getPersonIdent())
-                .nomId(ressurs.getId())
-                .navident(ressurs.getNavIdent())
-                .navIdent(ressurs.getNavIdent())
+                .personident(ressurs.personident())
+                .personIdent(ressurs.personident())
+                .nomId(ressurs.fid())
+                .navident(ressurs.navident())
+                .navIdent(ressurs.navident())
                 .build();
     }
 }

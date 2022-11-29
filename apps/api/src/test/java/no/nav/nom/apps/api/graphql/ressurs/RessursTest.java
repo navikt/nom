@@ -3,13 +3,15 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgenhetMock;
-import no.nav.nom.apps.api.DvhRessursUtils;
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +24,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -32,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@DisplayName("GraphQL.HentRessurs")
+@DisplayName("GraphQL.HentRessursEventsource")
 class RessursTest extends RessursTestBase {
 
     @Autowired
@@ -41,20 +44,20 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
     void scenario11() {
-        IRessurs ressurs = createRessursHendelse("");
+        RessursState ressursState = createRessursHendelseEventSource("");
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
     }
 
     @Test
     @DisplayName("Leser inn med graphql navIdent og personIdent parameter bulk")
     void scenario112() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
 
         final var response = postForResource("ressurs/scenario12.graphql")
                 .path("ressurser")
@@ -84,22 +87,21 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Leser inn med graphql personIdent parameter")
     void scenario12() {
-        IRessurs ressurs = createRessursHendelse("");
+        RessursState ressurs = createRessursHendelseEventSource("");
 
         final var response = postForResource("ressurs/scenario2.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
+        assertEquals(ressurs.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressurs.personident(), outputRessurs.getPersonIdent());
     }
 
     @Test
     @DisplayName("Leser inn med graphql uten parameter bulk")
     void scenario13() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-        createRessursHendelse("3");
-
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+        createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario3.graphql");
 
@@ -110,7 +112,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        createRessursHendelse("2");
+        createRessursHendelseEventSource("2");
         final var enhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadFromDvh();
@@ -125,7 +127,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        createRessursHendelse("2");
+        createRessursHendelseEventSource("2");
 
         final var response = postForResource("ressurs/scenario42.graphql");
 
@@ -136,28 +138,27 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
-        IRessurs ressurs = createRessursHendelse("");
-        final var sluttdato = LocalDate.parse("2020-12-31");
-        final var dvhResponse = List.of(
-                new DvhRessursUtils.RessursMock(
-                        ressurs.getNavIdent(),
-                        ressurs.getPersonIdent(),
-                        "Fornavn",
-                        "Etternavn",
-                        "NAV Statlig",
-                        sluttdato
-                )
+        RessursState ressursState = new RessursState(
+                PrefixedUlidCreator.createRessursUlid(),
+                "testPersonIdent",
+                "testNavIdent",
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(
+                        "fornavn",
+                        Optional.of("mellomnavn"),
+                        "etternavn"
+                ),
+                Optional.of(LocalDate.now().plusDays(10))
         );
-        dvhRessursUtils.addToResponse(dvhResponse);
-        dvhRestConsumer.loadFromDvh();
 
+        createRessursHendelseEventSource(ressursState);
 
         final var response = postForResource("ressurs/scenario1.graphql");
 
         final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
-        assertEquals(ressurs.getNavIdent(), outputRessurs.getNavIdent());
-        assertEquals(ressurs.getPersonIdent(), outputRessurs.getPersonIdent());
-        assertEquals(sluttdato, outputRessurs.getSluttdato());
+        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
     }
 
     @Nested
@@ -168,8 +169,8 @@ class RessursTest extends RessursTestBase {
         @Test
         @DisplayName("Kan hente fulle navn fra PDL")
         void scenario31() {
-            createRessursHendelse("3");
-            createRessursHendelse("4");
+            createRessursHendelseEventSource("3");
+            createRessursHendelseEventSource("4");
 
             pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
@@ -185,8 +186,8 @@ class RessursTest extends RessursTestBase {
         @Test
         @DisplayName("Kan hente navn uten mellomnavn fra PDL")
         void scenario32() {
-            createRessursHendelse("3");
-            createRessursHendelse("4");
+            createRessursHendelseEventSource("3");
+            createRessursHendelseEventSource("4");
 
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
 
@@ -202,8 +203,8 @@ class RessursTest extends RessursTestBase {
         @Test
         @DisplayName("Hente navn hvor PDL er utilgjengelig")
         void scenario33() {
-            createRessursHendelse("3");
-            createRessursHendelse("4");
+            createRessursHendelseEventSource("3");
+            createRessursHendelseEventSource("4");
 
             pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
             stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
@@ -220,8 +221,8 @@ class RessursTest extends RessursTestBase {
         @Test
         @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
         void scenario34() {
-            createRessursHendelse("3");
-            createRessursHendelse("4");
+            createRessursHendelseEventSource("3");
+            createRessursHendelseEventSource("4");
 
             pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
             pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
@@ -239,9 +240,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente email og visningsnavn fra AD")
     void scenario745() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-        createRessursHendelse("3");
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+        final var ressurs3 = createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario8.graphql");
         MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
@@ -257,15 +258,16 @@ class RessursTest extends RessursTestBase {
         assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 1");
         assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
         assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 2");
+        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().fornavn() + ressurs3.visningsnavn().mellomnavn().map(n -> " " + n).orElse("") + " " + ressurs3.visningsnavn().etternavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
-        response.errors().satisfy(errors -> assertEquals(2, errors.size()));
+        response.errors().satisfy(errors -> assertEquals(1, errors.size()));
     }
 
     @Test
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
-        createRessursHendelse("");
+        createRessursHendelseEventSource("");
         dvhOrgenhetMockUtils.addToResponse(
                 DvhOrgenhetMock.getBuilderWithDefault()
                         .ORGENHET_KODE("testId1")
@@ -290,8 +292,8 @@ class RessursTest extends RessursTestBase {
                 .ORGNODE_NIV("ORGENHET")
                 .build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        createRessursHendelse("1");
-        createRessursHendelse("2");
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
 
         dvhRestConsumer.loadFromDvh();
 
@@ -305,9 +307,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente leder for ressurs som er leder av sin enhet")
     void scenario37() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-        createRessursHendelse("4");
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+        createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
@@ -327,9 +329,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Ikke tillate henting av personNr uten riktig gruppemedlemskap")
     void scenario51() {
-        createRessursHendelse("1");
-        createRessursHendelse("2");
-        createRessursHendelse("4");
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+        createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()

@@ -10,11 +10,10 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
-import no.nav.nom.apps.api.ressurs.RessursHendelseService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.http.HttpEntity;
@@ -47,7 +46,6 @@ public class DvhRestConsumer {
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final EventAggregateListener eventAggregateListener;
-    private final RessursHendelseService ressursHendelseService;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
@@ -80,7 +78,6 @@ public class DvhRestConsumer {
             log.info("Laster koblinger fra dvh");
             loadKoblingerFromDvh();
             loadLedereAndOrganiseringerFromDvh();
-            log.info("Laster legacy ressurser fra dvh");
             log.info("Laster tlf fra dvh");
             loadTlfFromDvh();
 
@@ -124,7 +121,6 @@ public class DvhRestConsumer {
         dvhRepository.setRessurs(dvhRessurs);
         if (leaderElection.isLeader()) {
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
-            ressursHendelseService.handterRessursIderFraDvh(dvhRessurs);
         }
     }
 

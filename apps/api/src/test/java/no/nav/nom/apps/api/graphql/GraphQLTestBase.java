@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,6 @@ import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -89,14 +84,5 @@ public abstract class GraphQLTestBase extends TestBase {
         claims.claim("NAVident", "A321321");
 
         return securityTestUtils.createToken(claims);
-    }
-
-    protected IRessurs createRessursHendelse(String suffix) {
-        final var metadata = HendelseMetadataSerialize.builder()
-                .opprettetAv(new HendelseMetadata.OpprettetAv("test", "test"))
-                .rawInputData(objectMapper.createObjectNode().put("suffix", suffix))
-                .opprettetTidspunkt(LocalDateTime.now())
-                .build();
-        return ressursService.opprettRessurs("testPersonIdent" + suffix, "testNavIdent" + suffix, null, metadata);
     }
 }

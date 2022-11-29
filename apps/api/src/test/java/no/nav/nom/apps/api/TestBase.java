@@ -6,11 +6,9 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -86,10 +84,7 @@ public abstract class TestBase {
     protected KafkaUtils kafkaUtils;
 
     @Autowired
-    protected UnleashRessursServiceSelector ressursService;
-
-    @Autowired
-    protected RessursStateService ressursStateService;
+    protected IRessursService ressursService;
 
     @MockBean
     protected Unleash unleash;
@@ -101,9 +96,8 @@ public abstract class TestBase {
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
         kafkaUtils.clearKafka();
-        ressursStateService.clear();
+        ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
-        eventsourceEnabled(false);
         luceneEnabled(false);
     }
 
@@ -162,10 +156,6 @@ public abstract class TestBase {
 
     protected void createRessursHendelseEventSource(RessursState ressursState) {
         kafkaUtils.send(ressursState.fid(), ressursState);
-    }
-
-    protected void eventsourceEnabled(boolean toggle){
-        Mockito.when(unleash.isEnabled(UnleashRessursServiceSelector.UNLEASH_TOGGLE)).thenReturn(toggle);
     }
 
     protected void luceneEnabled(boolean toggle){

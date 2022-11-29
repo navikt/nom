@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
@@ -11,18 +10,13 @@ import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
-import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.implementations.postgresql.EventBasedRessurs;
-import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -30,16 +24,14 @@ import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,25 +42,23 @@ public class RessursResolver {
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
     private final NIKConsumer nikConsumer;
     private final PdlConsumer pdlConsumer;
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
-    private final ObjectMapper objectMapper;
 
     RessursResolver(
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
-            UnleashRessursServiceSelector ressursService,
-            RessursCommadService ressursCommadService,
-            ObjectMapper objectMapper) {
+            IRessursService ressursService,
+            RessursCommadService ressursCommadService
+    ) {
         this.nikConsumer = nikConsumer;
         this.pdlConsumer = pdlConsumer;
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
-        this.objectMapper = objectMapper;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
-        Optional<IRessurs> ident = Optional.empty();
+        Optional<RessursState> ident = Optional.empty();
         if (search.isNavidentPresent()) {
             ident = search.resolveIdent().flatMap(ressursService::findByNavident);
         } else if (search.isPersonidentPresent()) {
@@ -116,7 +106,7 @@ public class RessursResolver {
         }
     }
 
-    private IRessurs createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {
+    private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {
         final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1), "STANDARD", true);
 
         if (!nikResponse.getStatusCode().is2xxSuccessful()) {
@@ -142,23 +132,14 @@ public class RessursResolver {
         if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
             request.setVisningsmellomnavn(null);
         }
-        Map<String, Object> data = new HashMap<>();
-        data.put(EventBasedRessurs.PERSONIDENT_FIELD, request.getPersonident());
-        data.put(EventBasedRessurs.NAVIDENT_FIELD, nikResponse.getBody().getNavident());
-        data.put(EventBasedRessurs.VISNINGSFORNAVN_FIELD, request.getVisningsfornavn());
-        data.put(EventBasedRessurs.VISNINGSMELLOMNAVN_FIELD, request.getVisningsmellomnavn());
-        data.put(EventBasedRessurs.VISNINGSETTERNAVN_FIELD, request.getVisningsetternavn());
-        data.put(EventBasedRessurs.SEKTOR_FIELD, request.getSektor().name());
-        data.put(EventBasedRessurs.KJONN_FIELD, pdlPerson.map(pers -> pers.getKjonn().name()).orElseThrow());
-
 
         log.debug("createRessurs for {} - {}", nikResponse.getBody().getNavident(), request.getVisningsetternavn());
-        createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
-        return ressursService.opprettRessurs(request.getPersonident(), data, metadataFromToken(token, data));
+
+        return createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
     }
 
 
-    private void createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
+    private RessursState createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 navident,
@@ -180,27 +161,24 @@ public class RessursResolver {
                 )
         );
 
-        //TODO Add kjoenn og folkeregistrertnavn to additional data
-        ressursCommadService.createRessursEvent(opprettRessursCommand);
+        return ressursCommadService.createRessursSync(opprettRessursCommand);
     }
 
 
-    private OpprettRessursResponse toResponse(IRessurs ressurs) {
+    private OpprettRessursResponse toResponse(RessursState ressurs) {
         return toResponse(Optional.ofNullable(ressurs));
     }
 
-    private OpprettRessursResponse toResponse(Optional<IRessurs> ressurs) {
+    private OpprettRessursResponse toResponse(Optional<RessursState> ressurs) {
         return ressurs.map(
                         res -> OpprettRessursResponse.builder()
-                                .personident(res.getPersonIdent())
-                                .navident(res.getNavIdent())
+                                .personident(res.personident())
+                                .navident(res.navident())
                                 .visningsfornavn(
-                                        res.getVisningsmellomnavn().map(m -> res.getVisningsfornavn().orElseThrow() + " " + m).orElse(res.getVisningsfornavn().orElseThrow())
+                                        res.visningsnavn().mellomnavn().map(m -> res.visningsnavn().fornavn() + " " + m).orElse(res.visningsnavn().fornavn())
                                 )
-                                .visningsetternavn(
-                                        res.getVisningsetternavn().orElseThrow()
-                                )
-                                .sektor(Sektor.valueOf(res.getSektor()))
+                                .visningsetternavn(res.visningsnavn().etternavn())
+                                .sektor(res.sektor())
                                 .build()
                 )
                 .orElse(null);
@@ -228,27 +206,19 @@ public class RessursResolver {
         return null;
     }
 
-    private HendelseMetadataSerialize metadataFromToken(JwtAuthenticationToken token, Map<String, Object> rawData) {
-        return HendelseMetadataSerialize.builder()
-                .opprettetAv(new HendelseMetadata.OpprettetAv(token))
-                .opprettetTidspunkt(LocalDateTime.now())
-                .rawInputData(objectMapper.valueToTree(rawData))
-                .build();
-    }
-
     private record Result(
             String id,
-            IRessurs ressurs
+            RessursState ressurs
     ) {
         public boolean isEmpty() {
             return ressurs == null;
         }
 
-        public static Result from(IRessurs ressurs) {
-            return from(ressurs.getNavIdent(), ressurs);
+        public static Result from(RessursState ressurs) {
+            return from(ressurs.navident(), ressurs);
         }
 
-        public static Result from(String id, IRessurs ressurs) {
+        public static Result from(String id, RessursState ressurs) {
             return new Result(id, ressurs);
         }
     }

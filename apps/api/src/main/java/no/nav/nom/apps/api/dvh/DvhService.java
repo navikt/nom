@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -25,12 +25,10 @@ import java.util.stream.Collectors;
 public class DvhService {
 
     private final DvhRepository dvhRepository;
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
 
     public void saveKoblinger(List<DvhKobling> koblinger) {
-
-        val list = Collections.synchronizedList(new LinkedList<Kobling>());
         val cachedEnheter = orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(e -> e.getAgressoId()+""+e.getOrgNiv())).values().stream()
                 .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
@@ -38,30 +36,35 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(e -> e.getAgressoId()+""+e.getOrgNiv(), Function.identity()));
 
+        final var orgenhetAndRessursMissing = new LinkedList<Kobling>();
+        final var orgenhetMissing = new LinkedList<Kobling>();
+        final var ressursMissing = new LinkedList<Kobling>();
 
-        val bulkSize = 10000;
-        for(int i = 0; i<koblinger.size(); i+=bulkSize){
-            val selection = koblinger.subList(i, Math.min(i + bulkSize, koblinger.size()));
-            val ressursByNavIdent = ressursService.findByNavidentBulk(selection.stream().map(Kobling::getNavIdent).toList());
+        dvhRepository.saveKoblinger(
+                Collections.unmodifiableList(
+                    koblinger.stream()
+                            .filter(k -> {
+                                val organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + "" + k.getOrgNiv());
+                                val ressurs = ressursService.findByNavident(k.getNavIdent());
+                                if (organisasjonsenhet == null && ressurs.isEmpty()) {
+                                    orgenhetAndRessursMissing.add(k);
+                                } else if (organisasjonsenhet == null) {
+                                    orgenhetMissing.add(k);
+                                } else if (ressurs.isEmpty()) {
+                                    ressursMissing.add(k);
+                                } else {
+                                    k.setOrgenhetNavn(organisasjonsenhet.getNavn());
+                                    return true;
+                                }
+                                return false;
+                            })
+                            .collect(Collectors.toCollection(() -> new LinkedList<>()))
+                )
+        );
 
-            selection.forEach(k -> {
-                        val organisasjonsenhet = cachedEnheter.get(k.getAgressoId()+""+k.getOrgNiv());
-                        val dvhRessurs = ressursByNavIdent.get(k.getNavIdent());
-                        if (organisasjonsenhet == null && dvhRessurs == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet og ressurs mangler");
-                        } else if (organisasjonsenhet == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Enhet mangler");
-                        } else if (dvhRessurs == null) {
-                            log.info("Kobling relasjon mislyktes, enhet: "+k.getAgressoId() + ", navIdent: " + k.getNavIdent() + ", " + "Ressurs mangler");
-                        } else {
-                            k.setOrgenhetNavn(organisasjonsenhet.getNavn());
-                            list.add(k);
-                        }
-                    }
-            );
-        }
-
-        dvhRepository.saveKoblinger(list);
+        log.warn(orgenhetAndRessursMissing.size()+" koblinger hvor orgEnhet og ressurs mangler");
+        log.warn(orgenhetMissing.size()+" koblinger hvor orgEnhet");
+        log.warn(ressursMissing.size()+" hvor ressurs mangler");
     }
 
     public void saveLedere(List<DvhLeder> ledere) {

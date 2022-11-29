@@ -10,12 +10,12 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.contract.IRessurs;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -104,9 +104,7 @@ public class DvhRepository {
         if(organiseringer != null){
             organiseringer.clear();
         }
-        if(koblinger != null) {
-            koblinger.clear();
-        }
+        koblinger = Collections.unmodifiableList(new LinkedList<>());
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
@@ -116,9 +114,9 @@ public class DvhRepository {
 
     public void setRessurs(List<DvhRessurs> dvhRessurs){
         this.ressursByNavIdent = dvhRessurs.stream()
-                .collect(Collectors.toMap(IRessurs::getNavIdent, Function.identity()));
+                .collect(Collectors.toMap(DvhRessurs::getNavIdent, Function.identity()));
 
         this.ressursByPersonident = dvhRessurs.stream()
-                .collect(Collectors.toMap(IRessurs::getPersonIdent, Function.identity()));
+                .collect(Collectors.toMap(DvhRessurs::getPersonIdent, Function.identity()));
     }
 }

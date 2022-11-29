@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.UnleashRessursServiceSelector;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
@@ -23,7 +23,7 @@ public class LuceneService {
 
     private final WrappedLucene wrappedLucene;
 
-    private final UnleashRessursServiceSelector ressursService;
+    private final IRessursService ressursService;
 
     private List<String> invalidatedNavidentList = new ArrayList<>();
 
@@ -32,7 +32,7 @@ public class LuceneService {
     private final String entTypeOrgenhet;
     private final String entTypeRessurs;
 
-    public LuceneService(UnleashRessursServiceSelector ressursService, OrgenhetService orgenhetService) {
+    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService) {
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -60,11 +60,11 @@ public class LuceneService {
 
             var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
             var luceneRessursStream = resMap.values().stream().map(it -> {
-                        var visningsNavn = it.getVisningsfornavn()
-                                + it.getVisningsmellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
-                                + (" " + it.getVisningsetternavn());
-                        var activeRessurs = it.getSluttdato() == null || it.getSluttdato().isAfter(LocalDate.now());
-                        return new LuceneRessurs(it.getNavIdent(), visningsNavn, "tlf-nr", "epost", activeRessurs);
+                        var visningsNavn = it.visningsnavn().fornavn()
+                                + it.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
+                                + (" " + it.visningsnavn().etternavn());
+                        var activeRessurs = it.sluttdato().isEmpty() || it.sluttdato().get().isAfter(LocalDate.now());
+                        return new LuceneRessurs(it.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs);
                     }
             );
 

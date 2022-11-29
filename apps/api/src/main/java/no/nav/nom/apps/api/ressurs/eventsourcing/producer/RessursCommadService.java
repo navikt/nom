@@ -31,6 +31,14 @@ public class RessursCommadService {
         return createRessurs(PrefixedUlidCreator.createRessursUlid(), opprettRessursCommand);
     }
 
+    public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand){
+        final var fid = PrefixedUlidCreator.createRessursUlid();
+        final var response = eventAggregateListener.waitForAggregate(fid);
+        createRessurs(fid, opprettRessursCommand);
+
+        return response.block();
+    }
+
     public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata){
         // TODO validate command
         return eventProducer.sendMessage(
@@ -42,14 +50,6 @@ public class RessursCommadService {
                         inputMetadata
                 )
         );
-    }
-
-    public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand){
-        final var fid = PrefixedUlidCreator.createRessursUlid();
-        final var response = eventAggregateListener.waitForAggregate(fid);
-        createRessurs(fid, opprettRessursCommand);
-
-        return response.block();
     }
 
     private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand){
