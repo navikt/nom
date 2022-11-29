@@ -17,15 +17,18 @@ import org.apache.lucene.store.ByteBuffersDirectory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SearchRepo {
+public class WrappedLucene {
 
-    ByteBuffersDirectory bbdir = new ByteBuffersDirectory();
-    private final List<IEntityIndexer<?>> indexerList = new ArrayList<>();
+    private final ByteBuffersDirectory bbdir = new ByteBuffersDirectory();
+    private final Map<Class<?>,IEntityIndexer<?>> indexers;
 
-    public SearchRepo(List<IEntityIndexer<?>> indexerList) {
-        this.indexerList.addAll(indexerList);
+    public WrappedLucene(List<IEntityIndexer<?>> indexers) {
+        this.indexers = indexers.stream().collect(Collectors.toMap(IEntityIndexer::clazz, Function.identity()));
     }
 
     public <T> void upsertEntity(T ent, IEntityIndexer<T> indexEntity) {
@@ -33,23 +36,19 @@ public class SearchRepo {
     }
 
     public <T> void upsertEntity(T ent) {
-        for(var indexer : this.indexerList){
-            if(indexer.clazz().equals(ent.getClass())){
-                this.upsertEntity(ent, (IEntityIndexer<T>) indexer);
-                return;
-            }
+        var indexer = this.indexers.get(ent.getClass());
+        if (indexer == null) {
+            throw new IllegalStateException("No indexer registered for type " + ent.getClass().getName());
         }
-        throw new IllegalStateException("No indexer registered for type " + ent.getClass().getName());
+        this.upsertEntity(ent,(IEntityIndexer<T>) indexer);
     }
 
     public <T> void upsertEntities(Stream<T> entStream, Class<T> clazz){
-        for(var indexer : this.indexerList){
-            if(indexer.clazz().equals(clazz)){
-                this.upsertEntities(entStream, (IEntityIndexer<T>) indexer);
-                return;
-            }
+        var indexer = this.indexers.get(clazz);
+        if (indexer == null) {
+            throw new IllegalStateException("No indexer registered for type " + clazz.getName());
         }
-        throw new IllegalStateException("No indexer registered for type " + clazz.getName());
+        this.upsertEntities(entStream,(IEntityIndexer<T>) indexer);
     }
 
     public <T> void upsertEntities(Stream<T> entStream, IEntityIndexer<T> entityIndexer) {
@@ -76,7 +75,7 @@ public class SearchRepo {
     }
 
     private <T> void verifyPreRegistered(IEntityIndexer<T> entityIndexer) {
-        var indexerIsRecognized = this.indexerList.contains(entityIndexer);
+        var indexerIsRecognized = this.indexers.containsKey(entityIndexer.clazz());
         if (!indexerIsRecognized) {
             throw new IllegalStateException("Preregistration missing of " + entityIndexer);
         }
@@ -90,7 +89,7 @@ public class SearchRepo {
             IndexSearcher is = new IndexSearcher(ir);
 
             var bqb = new BooleanQuery.Builder();
-            for (var indexer : this.indexerList) {
+            for (var indexer : this.indexers.values()) {
                 var typeRestrictQry = new TermQuery(new Term(IEntityIndexer.FIELD_TYPE, indexer.typeStr()));
                 var actualQry = indexer.toQuery(searchterms);
                 var combinedQry =
@@ -120,7 +119,7 @@ public class SearchRepo {
         var doc = ir.document(d.doc);
         var entType = doc.getField(IEntityIndexer.FIELD_TYPE).stringValue();
         var nameFromDoc = doc.get(IEntityIndexer.FIELD_NAME_EXACT);
-        for (var indexer : indexerList) {
+        for (var indexer : indexers.values()) {
             if (indexer.typeStr().equals(entType)) {
                 var id = doc.getField(indexer.idField()).stringValue();
                 return new SearchResult(id, d.score, entType, nameFromDoc);

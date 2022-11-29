@@ -1,12 +1,22 @@
 package no.nav.nom.libs.lucenewrapper.gui;
 
 
-import no.nav.nom.libs.lucenewrapper.search.SearchRepo;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Collectors;
 
@@ -41,7 +51,7 @@ public class MainGui implements Runnable {
 
 
 
-    private void setupEventListeners(SearchRepo repo) {
+    private void setupEventListeners(WrappedLucene repo) {
         this.field.getDocument().addDocumentListener(new DocumentListener() {
 
             private void react() {

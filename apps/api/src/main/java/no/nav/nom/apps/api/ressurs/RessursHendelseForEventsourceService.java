@@ -8,7 +8,10 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessurs
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.eventsource.*;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;

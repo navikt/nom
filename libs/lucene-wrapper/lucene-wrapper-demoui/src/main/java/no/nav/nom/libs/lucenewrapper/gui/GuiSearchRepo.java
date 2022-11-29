@@ -4,7 +4,7 @@ import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
-import no.nav.nom.libs.lucenewrapper.search.SearchRepo;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,8 +18,8 @@ public class GuiSearchRepo {
     private static final RessursIndexer indexRessurs = new RessursIndexer();
     private static final OrgEnhetIndexer indexOrgEnhet = new OrgEnhetIndexer();
 
-    public static SearchRepo guiSearchRepo() {
-        var out = new SearchRepo(List.of(indexRessurs, indexOrgEnhet));
+    public static WrappedLucene guiSearchRepo() {
+        var out = new WrappedLucene(List.of(indexRessurs, indexOrgEnhet));
 
         boolean ressurserFileLoadOk = false;
         boolean enheterFileLoadOk = false;
@@ -41,7 +41,7 @@ public class GuiSearchRepo {
 
     }
 
-    private static boolean loadRessurserFromFile(SearchRepo repo) throws IOException {
+    private static boolean loadRessurserFromFile(WrappedLucene repo) throws IOException {
         var url = GuiSearchRepo.class.getClassLoader().getResource("ressurserForLucene.txt");
         if (url == null) {
             return false;
@@ -61,7 +61,7 @@ public class GuiSearchRepo {
         return true;
     }
 
-    private static boolean loadEnheterFromFile(SearchRepo repo) throws FileNotFoundException {
+    private static boolean loadEnheterFromFile(WrappedLucene repo) throws FileNotFoundException {
         var url = GuiSearchRepo.class.getClassLoader().getResource("orgenheterForLucene.txt");
         if (url == null) {
             return false;
@@ -80,7 +80,7 @@ public class GuiSearchRepo {
         return true;
     }
 
-    private static void loadRessurserFromCode(SearchRepo repo) {
+    private static void loadRessurserFromCode(WrappedLucene repo) {
         repo.upsertEntity(new LuceneRessurs("A0", "Leif Hansen"), indexRessurs);
         repo.upsertEntity(new LuceneRessurs("A1", "Tore Pettersen"), indexRessurs);
         repo.upsertEntity(new LuceneRessurs("A2", "Geir Nesby"), indexRessurs);
@@ -92,7 +92,7 @@ public class GuiSearchRepo {
         repo.upsertEntity(new LuceneRessurs("A8", "Åshild Østskæret"), indexRessurs);
     }
 
-    private static void loadEnheterFromCode(SearchRepo repo) {
+    private static void loadEnheterFromCode(WrappedLucene repo) {
         repo.upsertEntity(new LuceneOrgEnhet("oe1", "NAV Oslo", "Vanlig"), indexOrgEnhet);
         repo.upsertEntity(new LuceneOrgEnhet("oe2", "NAV Bergen", "Vanlig"), indexOrgEnhet);
         repo.upsertEntity(new LuceneOrgEnhet("oe3", "NAV Trondheim", "Vanlig"), indexOrgEnhet);

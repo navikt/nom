@@ -2,7 +2,8 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
-import no.nav.nom.contract.nom.eventsource.*;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;

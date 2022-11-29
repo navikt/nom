@@ -25,10 +25,10 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
     @Override
     public Document toDoc(LuceneRessurs entity) {
         var doc = new Document();
-        doc.add(new Field(IEntityIndexer.FIELD_TYPE, this.typeStr(), TextField.TYPE_STORED));
-        doc.add(new Field(IEntityIndexer.FIELD_NAME_NGRAM, entity.navn(), TextField.TYPE_NOT_STORED));
-        doc.add(new Field(IEntityIndexer.FIELD_NAME_METAPHONE, entity.navn(), TextField.TYPE_NOT_STORED));
-        doc.add(new Field(IEntityIndexer.FIELD_NAME_EXACT, entity.navn(), TextField.TYPE_STORED));
+        doc.add(new Field(FIELD_TYPE, this.typeStr(), TextField.TYPE_STORED));
+        doc.add(new Field(FIELD_NAME_NGRAM, entity.navn(), TextField.TYPE_NOT_STORED));
+        doc.add(new Field(FIELD_NAME_METAPHONE, entity.navn(), TextField.TYPE_NOT_STORED));
+        doc.add(new Field(FIELD_NAME_EXACT, entity.navn(), TextField.TYPE_STORED));
         doc.add(new Field(this.idField(), entity.navident(), TextField.TYPE_STORED));
 
         doc.add(new Field("epost", entity.epost(), TextField.TYPE_NOT_STORED));
@@ -39,10 +39,11 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
 
     @Override
     public Query toQuery(String terms) throws ParseException {
-        var qp1 = new QueryParser(IEntityIndexer.FIELD_NAME_NGRAM, this.analyzer);
-        var qp2 = new QueryParser(IEntityIndexer.FIELD_NAME_METAPHONE, this.analyzer);
-        var qp3 = new QueryParser(IEntityIndexer.FIELD_NAME_EXACT, this.analyzer);
-        var qp4 = new QueryParser(this.idField(), this.analyzer);
+
+        var qp1 = localQueryParser(FIELD_NAME_NGRAM);
+        var qp2 = localQueryParser(FIELD_NAME_METAPHONE);
+        var qp3 = localQueryParser(FIELD_NAME_EXACT);
+        var qp4 = localQueryParser(this.idField());
 
         var activeQry = new TermQuery(new Term("active", String.valueOf(true)));
         var inactiveQry = new TermQuery(new Term("active", String.valueOf(false)));
@@ -94,7 +95,7 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
     public Query toLookupQry(LuceneRessurs ent) {
         return new BooleanQuery.Builder()
                 .add(new TermQuery(new Term(this.idField(), ent.navident().toLowerCase())), BooleanClause.Occur.MUST)
-                .add(new TermQuery(new Term(IEntityIndexer.FIELD_TYPE, this.typeStr())), BooleanClause.Occur.MUST)
+                .add(new TermQuery(new Term(FIELD_TYPE, this.typeStr())), BooleanClause.Occur.MUST)
                 .build();
     }
 
@@ -108,9 +109,15 @@ public class RessursIndexer implements IEntityIndexer<LuceneRessurs> {
         analyzerPerField.put(this.idField(), Analyzers.createSimpleIgnoreCaseAnalyzer());
         analyzerPerField.put("epost", Analyzers.createNGramAnalyzer());
         analyzerPerField.put("tlf", Analyzers.createNGramAnalyzer());
-        analyzerPerField.put(IEntityIndexer.FIELD_NAME_METAPHONE, Analyzers.createMetaphoneAnalyzer());
-        analyzerPerField.put(IEntityIndexer.FIELD_NAME_NGRAM, Analyzers.createNGramAnalyzer());
+        analyzerPerField.put(FIELD_NAME_METAPHONE, Analyzers.createMetaphoneAnalyzer());
+        analyzerPerField.put(FIELD_NAME_NGRAM, Analyzers.createNGramAnalyzer());
         return new PerFieldAnalyzerWrapper(Analyzers.createSimpleIgnoreCaseAnalyzer(), analyzerPerField);
+    }
+
+    private QueryParser localQueryParser(String fieldname){
+        var out = new QueryParser(fieldname,this.analyzer);
+        out.setDefaultOperator(QueryParser.Operator.AND);
+        return out;
     }
 
 }

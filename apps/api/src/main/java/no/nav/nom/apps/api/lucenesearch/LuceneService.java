@@ -7,7 +7,7 @@ import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
-import no.nav.nom.libs.lucenewrapper.search.SearchRepo;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class LuceneService {
 
-    private final SearchRepo searchRepo;
+    private final WrappedLucene wrappedLucene;
 
     private final UnleashRessursServiceSelector ressursService;
 
@@ -36,7 +36,7 @@ public class LuceneService {
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
-        this.searchRepo = new SearchRepo(List.of(indexOrgEnhet, indexRessurs));
+        this.wrappedLucene = new WrappedLucene(List.of(indexOrgEnhet, indexRessurs));
 
         this.entTypeOrgenhet = indexOrgEnhet.typeStr();
         this.entTypeRessurs = indexRessurs.typeStr();
@@ -68,7 +68,7 @@ public class LuceneService {
                     }
             );
 
-            searchRepo.upsertEntities(luceneRessursStream, LuceneRessurs.class);
+            wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
 
             invalidatedNavidentList.clear(); // or just leave for GC?
         }
@@ -93,7 +93,7 @@ public class LuceneService {
     @Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
-        searchRepo.upsertEntities(orgenhetService.getAllEnheter().stream()
+        wrappedLucene.upsertEntities(orgenhetService.getAllEnheter().stream()
                 .map(it -> new LuceneOrgEnhet(
                         it.getFid().toString(),
                         it.getNavn(),
@@ -123,7 +123,7 @@ public class LuceneService {
 
 
     public List<SearchResult> search(String term){
-        return this.searchRepo.search(term);
+        return this.wrappedLucene.search(term);
     }
 
     public boolean filterOrgenhetResult(SearchResult searchResult){

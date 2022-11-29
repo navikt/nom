@@ -4,7 +4,7 @@ import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
-import no.nav.nom.libs.lucenewrapper.search.SearchRepo;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.junit.jupiter.api.Assertions;
 
@@ -13,10 +13,10 @@ import java.util.List;
 
 class Helpers {
 
-    static SearchRepo initScenario(List<Object> entities) {
+    static WrappedLucene initScenario(List<Object> entities) {
         var indexRessurs = new RessursIndexer();
         var indexOrgEnhet = new OrgEnhetIndexer();
-        var searchRepo = new SearchRepo(List.of(indexRessurs,indexOrgEnhet));
+        var searchRepo = new WrappedLucene(List.of(indexRessurs,indexOrgEnhet));
         for (var o : entities) {
             if (o instanceof LuceneRessurs) {
                 searchRepo.upsertEntity((LuceneRessurs) o, indexRessurs);

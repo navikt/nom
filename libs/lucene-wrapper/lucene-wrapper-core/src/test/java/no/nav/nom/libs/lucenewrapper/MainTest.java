@@ -5,7 +5,7 @@ import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.search.GenericEntityIndexer;
-import no.nav.nom.libs.lucenewrapper.search.SearchRepo;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -73,14 +73,20 @@ public class MainTest {
     @Test
     void fuzzySearch(){
         var repo = Helpers.initScenario(List.of(r1,r2,oe1,oe2));
-        var resList = repo.search("Aere Asle");
+        var resList = repo.search("Aere Aslesn");
         Assertions.assertTrue(resList.size() > 0, "results not empty");
     }
 
     @Test
     void genericDataSearch(){
-        var entIndexer = new GenericEntityIndexer<GenericData>(GenericData.class, it -> it.id, it -> it.name, "t:GenericData");
-        var repo = new SearchRepo(List.of(entIndexer));
+        var entIndexer = new GenericEntityIndexer<GenericData>(
+                GenericData.class,
+                entity -> entity.id,
+                entity -> entity.name,
+                "t:GenericData"
+        );
+
+        var repo = new WrappedLucene(List.of(entIndexer));
 
         var one = new GenericData("1", "one", 5);
         var two = new GenericData("2", "two", 67);

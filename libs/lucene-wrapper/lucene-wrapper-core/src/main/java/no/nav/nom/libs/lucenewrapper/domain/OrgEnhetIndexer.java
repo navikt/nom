@@ -10,7 +10,11 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 
 import java.util.HashMap;
 
@@ -42,9 +46,9 @@ public class OrgEnhetIndexer implements IEntityIndexer<LuceneOrgEnhet> {
 //            }
 //            return phr.build();
 
-        var qp1 = new QueryParser(IEntityIndexer.FIELD_NAME_NGRAM, this.analyzer);
-        var qp2 = new QueryParser(IEntityIndexer.FIELD_NAME_METAPHONE, this.analyzer);
-        var qp3 = new QueryParser(IEntityIndexer.FIELD_NAME_EXACT, this.analyzer);
+        var qp1 = localQueryParser(IEntityIndexer.FIELD_NAME_NGRAM);
+        var qp2 = localQueryParser(IEntityIndexer.FIELD_NAME_METAPHONE);
+        var qp3 = localQueryParser(IEntityIndexer.FIELD_NAME_EXACT);
 
         return new BooleanQuery.Builder()
                 .add(new BooleanClause(qp1.parse(strterms), BooleanClause.Occur.SHOULD))
@@ -88,6 +92,12 @@ public class OrgEnhetIndexer implements IEntityIndexer<LuceneOrgEnhet> {
         analyzerPerField.put(IEntityIndexer.FIELD_NAME_METAPHONE, Analyzers.createMetaphoneAnalyzer());
         analyzerPerField.put(IEntityIndexer.FIELD_NAME_NGRAM, Analyzers.createNGramAnalyzer());
         return new PerFieldAnalyzerWrapper(Analyzers.createSimpleIgnoreCaseAnalyzer(), analyzerPerField);
+    }
+
+    private QueryParser localQueryParser(String fieldname){
+        var out = new QueryParser(fieldname,this.analyzer);
+        out.setDefaultOperator(QueryParser.Operator.AND);
+        return out;
     }
 
 

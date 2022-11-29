@@ -45,7 +45,10 @@ public class UpdatingTest {
         Helpers.assertBestMatch(Helpers.fromOrgenhet(oe1, indexOrgEnhet.typeStr()),resList);
         repo.upsertEntity(oe1_2);
         var resList2 = repo.search(oe1.navn());
-        Assertions.assertTrue(resList2.size() != 0 && !resList2.get(0).id().equals(oe1.id()));
+        Assertions.assertTrue(resList2.size() == 0 || !resList2.get(0).id().equals(oe1.id()));
+
+        var resList3 = repo.search(oe1_2.navn());
+        Assertions.assertTrue(resList3.size() != 0 && resList3.get(0).id().equals(oe1.id()));
 
     }
 }
