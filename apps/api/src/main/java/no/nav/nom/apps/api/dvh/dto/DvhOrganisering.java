@@ -1,12 +1,7 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -23,9 +18,16 @@ public class DvhOrganisering {
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 
-    public DvhOrganisering(String agressoIdOver, String orgNivOver, String navnOver,
-                           String agressoIdUnder, String orgNivUnder, String navnUnder,
-                           LocalDate gyldigFom, LocalDate gyldigTom){
+    public DvhOrganisering(
+            String agressoIdOver,
+            String orgNivOver,
+            String navnOver,
+            String agressoIdUnder,
+            String orgNivUnder,
+            String navnUnder,
+            LocalDate gyldigFom,
+            LocalDate gyldigTom
+    ) {
         this.agressoIdOver = agressoIdOver;
         this.orgNivOver = orgNivOver;
         this.navnOver = navnOver;
@@ -50,8 +52,8 @@ public class DvhOrganisering {
         //gyldigTom = LocalDate.parse(node.get("GYLDIG_TIL_ORG").asText());
     }
 
-    public boolean containsEnhet(String agressoId, String orgNiv, String navn){
-        return (Objects.equals(agressoId, agressoIdOver) && Objects.equals(orgNiv, orgNivOver) && Objects.equals(navn, navnOver)) ||
-                (Objects.equals(agressoId, agressoIdUnder) && Objects.equals(orgNiv, orgNivUnder) && Objects.equals(navn, navnUnder));
+    public boolean containsEnhet(String agressoId, String orgNiv, String navn) {
+        return (Objects.equals(agressoId, agressoIdOver) && Objects.equals(orgNiv, orgNivOver) && Objects.equals(navn, navnOver))
+                || (Objects.equals(agressoId, agressoIdUnder) && Objects.equals(orgNiv, orgNivUnder) && Objects.equals(navn, navnUnder));
     }
 }

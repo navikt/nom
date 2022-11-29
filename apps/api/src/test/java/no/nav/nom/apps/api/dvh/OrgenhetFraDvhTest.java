@@ -1,10 +1,8 @@
 package no.nav.nom.apps.api.dvh;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 
 public class OrgenhetFraDvhTest extends DvhTestBase {
 
@@ -29,11 +27,9 @@ public class OrgenhetFraDvhTest extends DvhTestBase {
     }*/
 
     private void stubEnheter(String fileName) {
-        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json;charset=UTF-8")
-                .withBodyFile(fileName)
-        ));
+        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2").willReturn(aResponse().withStatus(200)
+                                                                                         .withHeader("Content-Type", "application/json;charset=UTF-8")
+                                                                                         .withBodyFile(fileName)));
     }
 
 }

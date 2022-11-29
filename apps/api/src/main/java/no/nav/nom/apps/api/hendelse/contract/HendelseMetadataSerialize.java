@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Value
-public class HendelseMetadataSerialize extends HendelseMetadata{
+public class HendelseMetadataSerialize extends HendelseMetadata {
 
     JsonNode rawInputData;
 

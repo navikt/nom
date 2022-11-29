@@ -48,13 +48,13 @@ public record GraphQLSecurityProperties(
         @Override
         public Set<String> identifiers() {
             final var set = new HashSet<String>();
-            if(StringUtils.hasText(clientId)) {
+            if (StringUtils.hasText(clientId)) {
                 set.add(clientId);
             }
             if (StringUtils.hasText(clientAlias)) {
                 set.add(clientAlias);
             }
-            if(set.isEmpty()) {
+            if (set.isEmpty()) {
                 throw new IllegalStateException("client-id and client-alias is missing, at least one must be present!");
             }
             return set;

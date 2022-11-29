@@ -9,12 +9,17 @@ import java.util.UUID;
 
 public interface IOrgenhetService {
     Optional<IOrgenhet> getByFid(UUID fid);
+
     Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name);
+
     Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv);
+
     List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds);
+
     Collection<IOrgenhet> getAllEnheter();
 
     List<IOrgenhet> matchByAgressoId(String agressoId);
+
     List<IOrgenhet> matchByNavn(String navn);
 
     Map<String, IOrgenhet> getByFidBulk(List<String> fidList);

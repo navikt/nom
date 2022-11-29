@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;

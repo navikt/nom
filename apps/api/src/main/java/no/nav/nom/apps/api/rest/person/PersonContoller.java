@@ -29,34 +29,26 @@ public class PersonContoller {
     @PostMapping("/getPerson")
     @Operation(
             description = "Personoppslag",
-            security = @SecurityRequirement(
-                    name = SwaggerConfig.BEARER_TOKEN
-            )
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses(
-            value = @ApiResponse(
-                    responseCode = "200",
-                    description = "Success"
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success")
+    })
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
-        return ResponseEntity.ok(
-                pdlConsumer.hentPerson(request.getPersonident())
-                        .map(this::convert)
-                        .orElse(null)
-        );
+        return ResponseEntity.ok(pdlConsumer.hentPerson(request.getPersonident())
+                                         .map(this::convert)
+                                         .orElse(null));
     }
 
 
     private PdlPersonDTO convert(Person person) {
         return PdlPersonDTO.builder()
-                .navn(
-                        PdlPersonDTO.Navn.builder()
-                                .fornavn(person.getFornavn())
-                                .mellomnavn(person.getMellomnavn())
-                                .etternavn(person.getEtternavn())
-                                .build())
+                .navn(PdlPersonDTO.Navn.builder()
+                              .fornavn(person.getFornavn())
+                              .mellomnavn(person.getMellomnavn())
+                              .etternavn(person.getEtternavn())
+                              .build())
                 .build();
     }
 }

@@ -27,18 +27,15 @@ public class LederResolver {
     }
 
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
-                .map(leder -> tilOrgEnhetsLeder(
-                        ressursService.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
-                                .orElseThrow(LederNotFoundException::new))
-                )
+        return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
+                .stream()
+                .map(leder -> tilOrgEnhetsLeder(ressursService.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
+                                                        .orElseThrow(LederNotFoundException::new)))
                 .toList();
     }
 
     private OrgEnhetsLeder tilOrgEnhetsLeder(Ressurs leder) {
-        return OrgEnhetsLeder.builder()
-                .ressurs(leder)
-                .build();
+        return OrgEnhetsLeder.builder().ressurs(leder).build();
     }
 
     public static GraphQLError handleLederNotFoundException(Throwable throwable, DataFetchingEnvironment environment) {

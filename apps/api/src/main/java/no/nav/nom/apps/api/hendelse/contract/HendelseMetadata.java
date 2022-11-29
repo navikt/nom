@@ -22,7 +22,7 @@ public class HendelseMetadata {
         String initiatorId;
         String originId;
 
-        public OpprettetAv(JwtAuthenticationToken jwtAuthenticationToken){
+        public OpprettetAv(JwtAuthenticationToken jwtAuthenticationToken) {
             Objects.requireNonNull(jwtAuthenticationToken);
             originId = jwtAuthenticationToken.getTokenAttributes().get("azp_name").toString();
             initiatorId = jwtAuthenticationToken.getToken().getClaims().get("NAVident") != null ?

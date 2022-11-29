@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.common;
 
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.DataFetchingFieldSelectionSet;
 import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import org.slf4j.Logger;
@@ -82,16 +81,17 @@ public class SecurityUtil {
      * @return true if the user has access, or if security is disabled
      * @throws AccessDeniedException if user does not have access to the fields specified
      */
-    public boolean hasRequiredAccess(Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet, String[] fieldGlobPatterns, String[] requiredRoles) {
+    public boolean hasRequiredAccess(
+            Authentication authentication, DataFetchingFieldSelectionSet fieldSelectionSet, String[] fieldGlobPatterns, String[] requiredRoles
+    ) {
         if (securityEnabled) {
             var authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-            if(logger.isTraceEnabled()) {
+            if (logger.isTraceEnabled()) {
                 logger.trace("Checking access to fields {} with required roles {} for current authorities {}", fieldGlobPatterns, requiredRoles, authorities);
             }
 
-            if (fieldSelectionSet.containsAnyOf("", fieldGlobPatterns)
-                    && Arrays.stream(requiredRoles).noneMatch(authorities::contains)) {
+            if (fieldSelectionSet.containsAnyOf("", fieldGlobPatterns) && Arrays.stream(requiredRoles).noneMatch(authorities::contains)) {
                 throw new AccessDeniedException(String.format("User does not have the correct access rights for fields %s", List.of(fieldGlobPatterns)));
             }
 
@@ -107,7 +107,7 @@ public class SecurityUtil {
         if (securityEnabled) {
             final var auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if(auth instanceof  JwtAuthenticationToken token) {
+            if (auth instanceof JwtAuthenticationToken token) {
                 var azp_name = token.getTokenAttributes().get("azp_name");
                 return Optional.ofNullable(azp_name).map(Objects::toString);
             }
@@ -115,11 +115,11 @@ public class SecurityUtil {
         return Optional.empty();
     }
 
-    public static Optional<String> getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken){
+    public static Optional<String> getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
         return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("NAVident"));
     }
 
-    public static Optional<String> getSystemFromToken(JwtAuthenticationToken jwtAuthenticationToken){
+    public static Optional<String> getSystemFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
         return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("azp_name"));
     }
 }

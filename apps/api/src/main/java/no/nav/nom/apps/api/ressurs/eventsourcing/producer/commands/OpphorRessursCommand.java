@@ -5,4 +5,4 @@ import java.time.LocalDate;
 public record OpphorRessursCommand(
         String fid,
         LocalDate sluttdato
-) implements RessursCommand { }
+) implements RessursCommand {}

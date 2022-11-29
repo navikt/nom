@@ -47,9 +47,12 @@ public interface OrgenhetHendelseRepository extends HendelseRepository {
     List<GenericStorageElement> findByAgressoIdIn(Set<String> agressoId);
 
 
-    @Query(value = """
-            SELECT * FROM T_GENERIC_STORAGE
-            WHERE DOCUMENT ->> 'fid' in (:fidSet)
-            """, nativeQuery = true)
+    @Query(
+            value = """
+                    SELECT * FROM T_GENERIC_STORAGE
+                    WHERE DOCUMENT ->> 'fid' in (:fidSet)
+                    """,
+            nativeQuery = true
+    )
     List<GenericStorageElement> findByFidIn(Set<String> fidSet);
 }

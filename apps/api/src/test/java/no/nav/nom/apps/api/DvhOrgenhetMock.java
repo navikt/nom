@@ -32,7 +32,7 @@ public class DvhOrgenhetMock {
     @JsonProperty("LASTET_DATO")
     private LocalDate LASTET_DATO;
 
-    public static DvhOrgenhetMockBuilder getBuilderWithDefault(){
+    public static DvhOrgenhetMockBuilder getBuilderWithDefault() {
         return DvhOrgenhetMock.builder()
                 .ORGENHET_KODE("testKode")
                 .ORGENHET_NAVN("testNavn")

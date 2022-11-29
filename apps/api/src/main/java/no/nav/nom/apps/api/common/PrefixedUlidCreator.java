@@ -8,19 +8,19 @@ public class PrefixedUlidCreator {
     private static final String ORGENHET_ULID_PREFIX = "orgEnhet-";
     private static final String EVENT_ULID_PREFIX = "event-";
 
-    private static String createPrefixedUlid(String prefix){
-        return prefix+UlidCreator.getUlid().toString();
+    private static String createPrefixedUlid(String prefix) {
+        return prefix + UlidCreator.getUlid().toString();
     }
 
-    public static String createRessursUlid(){
+    public static String createRessursUlid() {
         return createPrefixedUlid(RESSURS_ULID_PREFIX);
     }
 
-    public static String createOrgEnhetUlid(){
+    public static String createOrgEnhetUlid() {
         return createPrefixedUlid(ORGENHET_ULID_PREFIX);
     }
 
-    public static String createEventUlid(){
+    public static String createEventUlid() {
         return createPrefixedUlid(EVENT_ULID_PREFIX);
     }
 }

@@ -37,7 +37,7 @@ public class GraphQLFieldConsumptionCounter {
 
         registerValues(queryRoot, queryRoot, consumer, operationName); // register query root
         env.getSelectionSet().getFields().forEach(field -> {
-            final var currentPath = String.format("%s.%s",queryRoot, field.getQualifiedName().replace("/", "."));
+            final var currentPath = String.format("%s.%s", queryRoot, field.getQualifiedName().replace("/", "."));
             registerValues(field.getName(), currentPath, consumer, operationName); // register fields beneath query root
         });
     }
@@ -57,7 +57,7 @@ public class GraphQLFieldConsumptionCounter {
         var counterId = counterName + tagsAndValues.toString();
         counterByNameAndTagValues.putIfAbsent(counterId, buildCounter(counterName, tagsAndValues));
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug("Incrementing counter for " + tagsAndValues);
         }
 

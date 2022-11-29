@@ -7,7 +7,7 @@ import static java.util.Collections.singletonList;
 
 public class MappingUtils {
 
-    public static Ressurs toRessurs(RessursState ressursState){
+    public static Ressurs toRessurs(RessursState ressursState) {
         final var sektor = singletonList(ressursState.sektor());
 
         return Ressurs.builder()
@@ -18,7 +18,10 @@ public class MappingUtils {
                 .ressurstype(sektor)
                 .sektor(sektor)
                 .sluttdato(ressursState.sluttdato().orElse(null))
-                .fornavn(ressursState.visningsnavn().mellomnavn().map(m -> ressursState.visningsnavn().fornavn()+" "+m).orElse(ressursState.visningsnavn().fornavn()))
+                .fornavn(ressursState.visningsnavn()
+                                 .mellomnavn()
+                                 .map(m -> ressursState.visningsnavn().fornavn() + " " + m)
+                                 .orElse(ressursState.visningsnavn().fornavn()))
                 .etternavn(ressursState.visningsnavn().etternavn())
                 .build();
     }

@@ -34,7 +34,12 @@ public class PersonTest extends RestTestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
 
-        val response = testRestTemplate.exchange("/api/v1/person/getPerson", HttpMethod.POST, new HttpEntity<>(new PdlPersonRequest(personident), headers), PdlPersonDTO.class);
+        val response = testRestTemplate.exchange(
+                "/api/v1/person/getPerson",
+                HttpMethod.POST,
+                new HttpEntity<>(new PdlPersonRequest(personident), headers),
+                PdlPersonDTO.class
+        );
         Assertions.assertNotNull(response.getBody());
 
         Assertions.assertEquals(expectedNavn.getFornavn(), response.getBody().getNavn().getFornavn());
@@ -53,7 +58,12 @@ public class PersonTest extends RestTestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim().claim("azp", "invalid")));
 
-        val response = testRestTemplate.exchange("/api/v1/person/getPerson", HttpMethod.POST, new HttpEntity<>(new PdlPersonRequest(personident), headers), String.class);
+        val response = testRestTemplate.exchange(
+                "/api/v1/person/getPerson",
+                HttpMethod.POST,
+                new HttpEntity<>(new PdlPersonRequest(personident), headers),
+                String.class
+        );
         Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         Assertions.assertNull(response.getBody());
     }

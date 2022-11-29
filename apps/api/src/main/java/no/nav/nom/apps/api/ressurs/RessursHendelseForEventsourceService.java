@@ -33,95 +33,67 @@ public class RessursHendelseForEventsourceService {
 
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
-        log.info("Ressurser to process "+dvhRessurs.size());
+        log.info("Ressurser to process " + dvhRessurs.size());
         log.info("Sender meldinger ut på kafka");
-        log.info("State repository size "+ressursStateService.getAll().size());
+        log.info("State repository size " + ressursStateService.getAll().size());
         Map<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
 
         dvhRessurs.forEach(ressurs -> {
             val ressursByPersonident = ressursStateService.findByPersonident(ressurs.getPersonIdent());
 
-            ressursByPersonident.ifPresentOrElse(
-                    (r) -> createEndreHendelse(r, ressurs),
-                    () -> {
-                        final var taskEvent = opprettRessurs(ressurs);
-                        opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
-                    }
-            );
+            ressursByPersonident.ifPresentOrElse((r) -> createEndreHendelse(r, ressurs), () -> {
+                final var taskEvent = opprettRessurs(ressurs);
+                opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
+            });
         });
 
 
-        opprettetRessuser.entrySet().stream()
-                .filter(entry -> entry.getKey().getSluttdato() != null)
-                .map(entry -> {
+        opprettetRessuser.entrySet().stream().filter(entry -> entry.getKey().getSluttdato() != null).map(entry -> {
                     try {
-                        final var event = entry.getValue().get(5, TimeUnit.SECONDS)
-                                .getProducerRecord()
-                                .value();
+                        final var event = entry.getValue().get(5, TimeUnit.SECONDS).getProducerRecord().value();
 
                         return Map.entry(entry.getKey(), event);
-                    } catch (Exception e){
+                    } catch (Exception e) {
                         log.error("Failed to send Opprett and sluttet event, will retry on next scheduled run", e);
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .forEach(entry -> {
-                    ressursSluttet(entry.getValue().getFid(), entry.getKey());
-                });
+                .forEach(entry -> ressursSluttet(entry.getValue().getFid(), entry.getKey()));
     }
 
-    public Map.Entry<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs){
-        return Map.entry(
-                ressurs,
-                ressursCommadService.createRessursEvent(
-                        new OpprettRessursCommand(
-                                ressurs.getPersonIdent(),
-                                ressurs.getNavIdent(),
-                                Optional.empty(),
-                                DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
-                                new Visningsnavn(
-                                        ressurs.getFornavn(),
-                                        null,
-                                        ressurs.getEtternavn()
-                                ),
-                                createInputMetadata(ressurs.getRawData())
-                        )
-                )
-        );
+    public Map.Entry<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
+        return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
+                ressurs.getPersonIdent(),
+                ressurs.getNavIdent(),
+                Optional.empty(),
+                DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
+                new Visningsnavn(
+                        ressurs.getFornavn(),
+                        null,
+                        ressurs.getEtternavn()
+                ),
+                createInputMetadata(ressurs.getRawData())
+        )));
     }
 
     public void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
-        ressursState.sluttdato().ifPresentOrElse(
-                (s) -> {
-                    if (!s.equals(dvhRessurs.getSluttdato())){
-                        ressursSluttet(ressursState.fid(), dvhRessurs);
-                    }
-                },
-                () -> {
-                    if (dvhRessurs.getSluttdato() != null){
-                        ressursSluttet(ressursState.fid(), dvhRessurs);
-                    }
-                }
-        );
+        ressursState.sluttdato().ifPresentOrElse((s) -> {
+            if (!s.equals(dvhRessurs.getSluttdato())) {
+                ressursSluttet(ressursState.fid(), dvhRessurs);
+            }
+        }, () -> {
+            if (dvhRessurs.getSluttdato() != null) {
+                ressursSluttet(ressursState.fid(), dvhRessurs);
+            }
+        });
     }
 
-    public void ressursSluttet(String fid, DvhRessurs dvhRessurs){
-        ressursCommadService.avsluttRessursEvent(
-                new OpphorRessursCommand(
-                        fid,
-                        dvhRessurs.getSluttdato()
-                ),
-                createInputMetadata(dvhRessurs.getRawData())
-        );
+    public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
-    public InputMetadata createInputMetadata(Object rawData){
-        return new InputMetadata(
-                "nom-api BatchJob",
-                "Datavarehus",
-                rawData,
-                new Origination("nom-api", "nom-api")
-        );
+    public InputMetadata createInputMetadata(Object rawData) {
+        return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
     }
 }

@@ -5,6 +5,8 @@ import org.springframework.data.web.ProjectedPayload;
 @ProjectedPayload
 public interface OrgEnhetSearch {
     String getAgressoId();
+
     String getOrgNiv();
+
     String getNavn();
 }

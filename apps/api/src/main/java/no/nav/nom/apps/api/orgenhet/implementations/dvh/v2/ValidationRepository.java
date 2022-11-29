@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface ValidationRepository extends GenericStorage {
 
-    @Query(value =  "SELECT * FROM T_GENERIC_STORAGE a " +
-            "WHERE a.document ->> 'validationCode' IN :validationCodes",
-            nativeQuery = true)
+    @Query(value = "SELECT * FROM T_GENERIC_STORAGE a  WHERE a.document ->> 'validationCode' IN :validationCodes", nativeQuery = true)
     List<GenericStorageElement> findAllInValidationCode(List<String> validationCodes);
 }

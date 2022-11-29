@@ -14,7 +14,6 @@ import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.ad.AdRessurs.AdStatus;
 import no.nav.nom.contract.ad.AdRessurser;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import org.dataloader.BatchLoaderEnvironment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,12 +45,7 @@ public class ActiveDirectoryRessursBatchLoader {
     public <T> Map<Ressurs, DataFetcherResult<T>> load(Collection<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
         final var adRessurser = getAdRessurser(ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver);
         return ressurser.stream()
-                .collect(
-                        toMap(
-                                Function.identity(),
-                                ressurs -> adRessurser.getOrDefault(ressurs.getNavIdent(), DataFetcherResult.<T>newResult().build())
-                        )
-                );
+                .collect(toMap(Function.identity(), ressurs -> adRessurser.getOrDefault(ressurs.getNavIdent(), DataFetcherResult.<T>newResult().build())));
     }
 
     @SneakyThrows
@@ -69,42 +63,26 @@ public class ActiveDirectoryRessursBatchLoader {
             );
 
             if (result.getStatusCode().is2xxSuccessful() && result.getBody() != null) {
-                return result.getBody().getRessurser().stream()
-                        .collect(
-                                toMap(
-                                        AdRessurs::getNavIdent,
-                                        o -> convert(o, propertyResolver)
-                                )
-                        );
+                return result.getBody().getRessurser().stream().collect(toMap(AdRessurs::getNavIdent, o -> convert(o, propertyResolver)));
             }
             throw new ADResponseException("Error in proxy query to AD code=" + result.getStatusCode(), result, ErrorCode.SERVER_ERROR);
 
         } catch (Exception exception) {
             log.error("Feil i oppslag mot AD i proxy", exception);
-            return navIdenter.stream()
-                    .collect(
-                            toMap(
-                                    Function.identity(),
-                                    p -> convertToError(ErrorCode.SERVER_ERROR, "Oppslag mot AD feilet")
-                            )
-                    );
+            return navIdenter.stream().collect(toMap(Function.identity(), p -> convertToError(ErrorCode.SERVER_ERROR, "Oppslag mot AD feilet")));
         }
     }
 
     private <T> DataFetcherResult<T> convert(AdRessurs ressurs, Function<AdRessurs, T> propertyResolver) {
         if (ressurs.getStatus() == AdStatus.OK) {
-            return DataFetcherResult.<T>newResult()
-                    .data(propertyResolver.apply(ressurs))
-                    .build();
+            return DataFetcherResult.<T>newResult().data(propertyResolver.apply(ressurs)).build();
         }
         log.warn("Manglende data fra AD", new GraphQLException("Manglende data fra AD for ident=" + ressurs.getNavIdent()));
         return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på denne navIdent");
     }
 
     private <T> DataFetcherResult<T> convertToError(ErrorCode errorCode, String message) {
-        return DataFetcherResult.<T>newResult()
-                .error(errorCode.construct(message))
-                .build();
+        return DataFetcherResult.<T>newResult().error(errorCode.construct(message)).build();
     }
 
     public static GraphQLError handleADResponseException(Throwable throwable, DataFetchingEnvironment environment) {

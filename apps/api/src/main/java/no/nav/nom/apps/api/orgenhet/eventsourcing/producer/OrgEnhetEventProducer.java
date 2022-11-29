@@ -17,7 +17,11 @@ public class OrgEnhetEventProducer {
     private final OrgEnhetEventSourceRepository orgEnhetEventSourceRepository;
     private final ObjectMapper objectMapper;
 
-    public OrgEnhetEventProducer(KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate, OrgEnhetEventSourceRepository orgEnhetEventSourceRepository, ObjectMapper objectMapper){
+    public OrgEnhetEventProducer(
+            KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate,
+            OrgEnhetEventSourceRepository orgEnhetEventSourceRepository,
+            ObjectMapper objectMapper
+    ) {
         this.orgEnhetEventProducerTemplate = orgEnhetEventProducerTemplate;
         this.orgEnhetEventSourceRepository = orgEnhetEventSourceRepository;
         this.objectMapper = objectMapper;
@@ -30,11 +34,6 @@ public class OrgEnhetEventProducer {
     }
 
     private void saveToDB(OrgEnhetEvent event, String eventKey) {
-        orgEnhetEventSourceRepository.save(
-                OrgEnhetEventSource.builder()
-                        .eventKey(eventKey)
-                        .payload(objectMapper.valueToTree(event))
-                .build()
-        );
+        orgEnhetEventSourceRepository.save(OrgEnhetEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
     }
 }

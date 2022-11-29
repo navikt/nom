@@ -28,16 +28,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class TokenRepository {
 
+    private static final String AAD_GRANT_TYPE_OBO = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+    private static final String AAD_GRANT_TYPE = "client_credentials";
+    private static final String AAD_TOKEN_USE = "on_behalf_of";
+    private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private final AuthenticationProperties.Aad aadAuthenticationProperties;
     private final RestTemplate restTemplate;
     private final JWSSigner jwsSigner;
     private final Map<String, SignedJWT> cachedAadTokensByScope = new ConcurrentHashMap<>(2);
     private final Map<String, SignedJWT> cachedAadTokensByUserAndScope = new ConcurrentHashMap<>(2);
-
-    private static final String AAD_GRANT_TYPE_OBO = "urn:ietf:params:oauth:grant-type:jwt-bearer";
-    private static final String AAD_GRANT_TYPE = "client_credentials";
-    private static final String AAD_TOKEN_USE = "on_behalf_of";
-    private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
     public TokenRepository(AuthenticationProperties authenticationProperties, RestTemplate restTemplate) throws Exception {
         this.aadAuthenticationProperties = authenticationProperties.aad();
@@ -45,7 +44,7 @@ public class TokenRepository {
         this.jwsSigner = new DefaultJWSSignerFactory().createJWSSigner(aadAuthenticationProperties.jwk());
     }
 
-    public SignedJWT getAadToken(String scope, boolean OBO){
+    public SignedJWT getAadToken(String scope, boolean OBO) {
         return OBO ? getOnbehalfofTokenFor(scope) : getSystemAadToken(scope);
     }
 
@@ -58,7 +57,7 @@ public class TokenRepository {
     @SneakyThrows
     public SignedJWT getOnbehalfofTokenFor(String scope) {
         String assertion = ((JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication()).getToken().getTokenValue();
-        val signedJwt = cachedAadTokensByUserAndScope.get(assertion+scope);
+        val signedJwt = cachedAadTokensByUserAndScope.get(assertion + scope);
         return isValidToken(signedJwt) ? signedJwt : refreshOnbehalfofTokenFor(assertion, scope);
     }
 
@@ -75,7 +74,12 @@ public class TokenRepository {
             aadBodyMap.add("client_assertion", generateClientAssertionToken());
             aadBodyMap.add("grant_type", AAD_GRANT_TYPE);
 
-            val result = restTemplate.exchange(aadAuthenticationProperties.issuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+            val result = restTemplate.exchange(
+                    aadAuthenticationProperties.issuerBaseUrl() + "/oauth2/v2.0/token",
+                    HttpMethod.POST,
+                    new HttpEntity<>(aadBodyMap, aadHeaders),
+                    JsonNode.class
+            ).getBody();
             val token = SignedJWT.parse(result.get("access_token").asText());
             cachedAadTokensByScope.put(scope, token);
             return token;
@@ -99,7 +103,12 @@ public class TokenRepository {
             aadBodyMap.add("grant_type", AAD_GRANT_TYPE_OBO);
             aadBodyMap.add("requested_token_use", AAD_TOKEN_USE);
 
-            val result = restTemplate.exchange(aadAuthenticationProperties.issuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+            val result = restTemplate.exchange(
+                    aadAuthenticationProperties.issuerBaseUrl() + "/oauth2/v2.0/token",
+                    HttpMethod.POST,
+                    new HttpEntity<>(aadBodyMap, aadHeaders),
+                    JsonNode.class
+            ).getBody();
             val token = SignedJWT.parse(result.get("access_token").asText());
             cachedAadTokensByUserAndScope.put(cacheKey, token);
             return token;
@@ -109,8 +118,7 @@ public class TokenRepository {
 
     @SneakyThrows
     private String generateClientAssertionToken() {
-        final var claimSet = new JWTClaimsSet.Builder()
-                .audience(aadAuthenticationProperties.issuerBaseUrl() + "/v2.0")
+        final var claimSet = new JWTClaimsSet.Builder().audience(aadAuthenticationProperties.issuerBaseUrl() + "/v2.0")
                 .expirationTime(Date.from(Instant.now().plusSeconds(60 * 5)))
                 .issuer(aadAuthenticationProperties.clientId())
                 .jwtID(UUID.randomUUID().toString())

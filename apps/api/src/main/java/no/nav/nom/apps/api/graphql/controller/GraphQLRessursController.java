@@ -67,10 +67,11 @@ public class GraphQLRessursController {
         this.personResolver = personResolver;
     }
 
-    @PreAuthorize("""
-                @securityUtil.checkAuth(authentication) &&
-                @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
-                """
+    @PreAuthorize(
+            """
+            @securityUtil.checkAuth(authentication) &&
+            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
+            """
     )
     @QueryMapping("ressurs")
     public Optional<Ressurs> ressurs(@Argument("where") RessursSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
@@ -79,10 +80,11 @@ public class GraphQLRessursController {
         return ressursResolver.ressurs(search);
     }
 
-    @PreAuthorize("""
-                @securityUtil.checkAuth(authentication) &&
-                @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
-                """
+    @PreAuthorize(
+            """
+            @securityUtil.checkAuth(authentication) &&
+            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
+            """
     )
     @QueryMapping("ressurser")
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
@@ -90,13 +92,16 @@ public class GraphQLRessursController {
         return ressursResolver.ressurser(search);
     }
 
-    @PreAuthorize("""
-                @securityUtil.checkAuth(authentication) &&
-                hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)
-                """
+    @PreAuthorize(
+            """
+            @securityUtil.checkAuth(authentication) &&
+            hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)
+            """
     )
     @MutationMapping("opprettRessurs")
-    public DataFetcherResult<OpprettRessursResponse> opprettRessurs(@Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token) {
+    public DataFetcherResult<OpprettRessursResponse> opprettRessurs(
+            @Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token
+    ) {
         return ressursResolver.opprettRessurs(request, environment, token);
     }
 

@@ -19,11 +19,7 @@ public class EventAggregateListenerConfig {
     ConsumerFactory<String, RessursState> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
 
-        jsonDeserializer.configure(
-                Map.of(
-                        JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"
-                ), true
-        );
+        jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"), true);
 
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
     }

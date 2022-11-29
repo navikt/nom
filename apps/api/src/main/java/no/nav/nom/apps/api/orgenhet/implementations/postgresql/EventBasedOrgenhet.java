@@ -43,10 +43,7 @@ public class EventBasedOrgenhet implements IOrgenhet {
     }
 
     public UUID getFid() {
-        return hendelser.stream()
-                .findFirst()
-                .map(IHendelse::getFid)
-                .orElseThrow();
+        return hendelser.stream().findFirst().map(IHendelse::getFid).orElseThrow();
     }
 
     @Override
@@ -84,7 +81,7 @@ public class EventBasedOrgenhet implements IOrgenhet {
 
     @Override
     public String getUniqueAgressoId() {
-        return getAgressoId()+"-"+getNavn()+"-"+getOrgNiv();
+        return getAgressoId() + "-" + getNavn() + "-" + getOrgNiv();
     }
 
     private Optional<String> getLast(String property) {
@@ -95,16 +92,16 @@ public class EventBasedOrgenhet implements IOrgenhet {
                 .map(e -> !e.isNull() ? e.asText() : null);
     }
 
-    public void addHendelse(IHendelse hendelse){
+    public void addHendelse(IHendelse hendelse) {
         hendelser.add(hendelse);
     }
 
-    public List<IHendelse> getHendelser(){
+    public List<IHendelse> getHendelser() {
         return Collections.unmodifiableList(hendelser);
     }
 
     private class StaticOrgenhetkategoriMapping {
-        static OrgEnhetsKategori resolveFor(String agressoId, String orgniv){
+        static OrgEnhetsKategori resolveFor(String agressoId, String orgniv) {
             return switch (orgniv) {
                 case "ORGNIV1" -> {
                     if ("1".equals(agressoId) || "4".equals(agressoId)) {

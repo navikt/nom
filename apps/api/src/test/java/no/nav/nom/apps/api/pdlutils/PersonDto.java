@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.pdlutils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import no.nav.nom.apps.api.pdl.Kjonn;
 
 import java.util.List;
 

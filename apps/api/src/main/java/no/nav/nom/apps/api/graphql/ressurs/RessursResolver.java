@@ -139,7 +139,7 @@ public class RessursResolver {
     }
 
 
-    private RessursState createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
+    private RessursState createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token) {
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 navident,

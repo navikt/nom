@@ -6,12 +6,20 @@ import java.util.UUID;
 
 public interface IOrgenhet {
     UUID getFid();
+
     String getAgressoId();
+
     String getAgressoOrgenhetType();
+
     String getNavn();
+
     String getOrgNiv();
+
     LocalDate getGyldigFom();
+
     Optional<LocalDate> getGyldigTom();
+
     Optional<OrgEnhetsKategori> getOrgEnhetsKategori();
+
     String getUniqueAgressoId();
 }

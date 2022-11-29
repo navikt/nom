@@ -19,7 +19,8 @@ public class OrganiseringResolver {
     }
 
     public List<Organisering> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
-        return  dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn()).stream()
+        return dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
+                .stream()
                 .map(organisering -> convert(organisering, orgEnhet))
                 .filter(organisering -> retning == null || organisering.getRetning() == retning)
                 .toList();
@@ -28,7 +29,8 @@ public class OrganiseringResolver {
     private Organisering convert(DvhOrganisering organisering, OrgEnhet orgEnhet) {
         var retning = OrganiseringRetning.over;
 
-        if(organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) && organisering.getOrgNivOver().equals(orgEnhet.getOrgNiv()) && organisering.getNavnOver().equals(orgEnhet.getNavn())) {
+        if (organisering.getAgressoIdOver().equals(orgEnhet.getAgressoId()) && organisering.getOrgNivOver()
+                .equals(orgEnhet.getOrgNiv()) && organisering.getNavnOver().equals(orgEnhet.getNavn())) {
             retning = OrganiseringRetning.under;
         }
 

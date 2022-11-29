@@ -50,17 +50,16 @@ public class DvhRestConsumer {
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
 
-    public boolean initloadComplete(){
+    public boolean initloadComplete() {
         return initialLoadComplete.get();
     }
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void scheduledLoadlFromDvh(){
-        while (!eventAggregateListener.initloadComplete()){
+    public void scheduledLoadlFromDvh() {
+        while (!eventAggregateListener.initloadComplete()) {
             try {
-                Thread.sleep(5*1000);
-            } catch (Exception e){
-                // no-op
+                Thread.sleep(5_000);
+            } catch (Exception ignored) {
             }
 
         }
@@ -86,7 +85,7 @@ public class DvhRestConsumer {
                 initialLoadComplete.set(true);
                 log.info("Dvh load complete");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
     }
@@ -99,21 +98,23 @@ public class DvhRestConsumer {
                 .map(DvhRessurs::new)
                 .distinct()
                 .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
-                .values().stream()
+                .values()
+                .stream()
                 .peek(l -> {
-                    if(l.size() > 1){
+                    if (l.size() > 1) {
                         l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
-                        if(l.size() > 1){
+                        if (l.size() > 1) {
                             val personIdent = l.get(0).getPersonIdent();
                             val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
-                            log.warn("Forkastet lesing av ansatt med personident "+personIdent+" har flere aktive navidenter: "+navIdenter);
+                            log.warn("Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
                             l.clear();
                         }
                     }
                 })
                 .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
-                .values().stream()
+                .values()
+                .stream()
                 .filter(l -> l.size() == 1)
                 .flatMap(Collection::stream)
                 .toList();
@@ -136,7 +137,7 @@ public class DvhRestConsumer {
 
     private void loadTlfFromDvh() {
         val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
-        val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(),false)
+        val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
                 .filter(this::validateTlf)
                 .map(DvhTelefon::new)
                 .collect(Collectors.toList());
@@ -148,10 +149,7 @@ public class DvhRestConsumer {
         val isSecretNumber = !jsonNode.hasNonNull("issecretnumber") || (jsonNode.hasNonNull("issecretnumber") && !jsonNode.get("issecretnumber").asBoolean());
         val userRef1 = jsonNode.get("userreference1");
 
-        return isSecretNumber
-                && (userRef1.asText().startsWith("PT-")
-                || userRef1.asText().startsWith("PK-")
-        );
+        return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
     }
 
     private void loadLedereAndOrganiseringerFromDvh() {
@@ -196,46 +194,41 @@ public class DvhRestConsumer {
     }
 
     private boolean validateEnhet(JsonNode e) {
-        val validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN") && e.hasNonNull("ORGNODE_NIVA");
-        if (validate) {
-            return true;
-        } else {
-            log.info("Ugyldig enhet fra dvh, ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE") + ", ORGNODE_NAVN: " + getAsText(e, "ORGNODE_NAVN"));
-            return false;
+        final var validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN") && e.hasNonNull("ORGNODE_NIVA");
+        if (!validate) {
+            log.info("Ugyldig enhet fra dvh, ORGNODE_KODE: {}, ORGNODE_NAVN: {}", getAsText(e, "ORGNODE_KODE"), getAsText(e, "ORGNODE_NAVN"));
         }
+        return validate;
     }
 
     private boolean validateOrganisering(JsonNode e) {
-        val validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE") &&
-                e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
-        if (validate) {
-            return true;
-        } else {
-            log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: " + getAsText(e, "ORGNODE_KODE_OVER") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
-            return false;
+        final var validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE")
+                && e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
+        if (!validate) {
+            log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: {}, ORGNODE_KODE: {}", getAsText(e, "ORGNODE_KODE_OVER"), getAsText(e, "ORGNODE_KODE"));
         }
+        return validate;
     }
 
     private boolean validateLeder(JsonNode e) {
-        val validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NIVA");
-        if (validate) {
-            return true;
-        } else {
-            log.info("Ugyldig leder fra dvh, LEDER_NAVIDENT: " + getAsText(e, "LEDER_NAVIDENT") + ", ORGNODE_KODE: " + getAsText(e, "ORGNODE_KODE"));
-            return false;
+        final var validate = e.hasNonNull("LEDER_NAVIDENT") && e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NIVA");
+        if (!validate) {
+            log.info("Ugyldig leder fra dvh, LEDER_NAVIDENT: {}, ORGNODE_KODE: {}", getAsText(e, "LEDER_NAVIDENT"), getAsText(e, "ORGNODE_KODE"));
         }
+        return validate;
     }
 
     private boolean validateKobling(JsonNode e) {
-        val validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO")
-                && e.hasNonNull("ORGENHET");
-        if (validate) {
-            return true;
-        } else {
-            log.info("Ugyldig kobling fra dvh, NAV_ID: " + getAsText(e, "NAV_ID") + ", ORGENHET: " + getAsText(e, "ORGENHET")
-                    + ", FRA_DATO: " + getAsText(e, "FRA_DATO"));
-            return false;
+        final var validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO") && e.hasNonNull("ORGENHET");
+        if (!validate) {
+            log.info(
+                    "Ugyldig kobling fra dvh, NAV_ID: {}, ORGENHET: {}, FRA_DATO: {}",
+                    getAsText(e, "NAV_ID"),
+                    getAsText(e, "ORGENHET"),
+                    getAsText(e, "FRA_DATO")
+            );
         }
+        return validate;
     }
 
     private String getAsText(JsonNode e, String field) {

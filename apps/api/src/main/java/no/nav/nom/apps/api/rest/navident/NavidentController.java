@@ -139,7 +139,7 @@ public class NavidentController {
     }
 
 
-    private RessursState opprettRessursHendelse(NavidentRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token){
+    private RessursState opprettRessursHendelse(NavidentRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token) {
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
                 navident,

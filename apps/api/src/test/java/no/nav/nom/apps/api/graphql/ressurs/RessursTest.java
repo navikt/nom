@@ -258,7 +258,10 @@ class RessursTest extends RessursTestBase {
         assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 1");
         assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
         assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 2");
-        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().fornavn() + ressurs3.visningsnavn().mellomnavn().map(n -> " " + n).orElse("") + " " + ressurs3.visningsnavn().etternavn());
+        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().fornavn() + ressurs3.visningsnavn()
+                .mellomnavn()
+                .map(n -> " " + n)
+                .orElse("") + " " + ressurs3.visningsnavn().etternavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         response.errors().satisfy(errors -> assertEquals(1, errors.size()));
@@ -341,6 +344,6 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadFromDvh();
         final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql");
-//        assertThat(res.isOk());
+        //        assertThat(res.isOk());
     }
 }

@@ -16,7 +16,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 
 @DisplayName("GraphQL.Search")
 public class SearchTest extends GraphQLTestBase {
@@ -103,7 +107,7 @@ public class SearchTest extends GraphQLTestBase {
 
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
-    public void scenario51(){
+    public void scenario51() {
         luceneEnabled(true);
         final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
@@ -124,7 +128,7 @@ public class SearchTest extends GraphQLTestBase {
 
     @Test
     @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
-    public void scenario61(){
+    public void scenario61() {
         luceneEnabled(true);
 
         final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();

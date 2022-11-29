@@ -120,6 +120,7 @@ public abstract class TestBase {
 
     /**
      * Loads a given resource from the test classpath using ResourceLoader
+     *
      * @param location path to the resource
      * @return The string content of the resource
      * @throws IOException
@@ -138,13 +139,13 @@ public abstract class TestBase {
     protected RessursState createRessursHendelseEventSource(String suffix) {
         final var ressursState = new RessursState(
                 PrefixedUlidCreator.createRessursUlid(),
-                "testPersonIdent"+suffix,
-                "testNavIdent"+suffix,
+                "testPersonIdent" + suffix,
+                "testNavIdent" + suffix,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(
-                        "fornavn"+suffix,
-                        Optional.of("mellomnavn"+suffix),
-                        "etternavn"+suffix
+                        "fornavn" + suffix,
+                        Optional.of("mellomnavn" + suffix),
+                        "etternavn" + suffix
                 ),
                 null
         );
@@ -158,7 +159,7 @@ public abstract class TestBase {
         kafkaUtils.send(ressursState.fid(), ressursState);
     }
 
-    protected void luceneEnabled(boolean toggle){
+    protected void luceneEnabled(boolean toggle) {
         Mockito.when(unleash.isEnabled(SearchResolver.UNLEASH_LUCENE_TOGGLE)).thenReturn(toggle);
     }
 }

@@ -2,9 +2,9 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.contract.nom.TelefonType;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
-import no.nav.nom.contract.nom.TelefonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,10 +35,7 @@ public class TelefonResolver {
     public List<Telefon> telefon(Ressurs ressurs) {
         List<DvhTelefon> tlfList = dvhRepository.getTelefonNrListByNavIdent(ressurs.getNavIdent());
 
-        return tlfList.stream()
-                .map(tlf -> telefonFromDvhTelefon(tlf, ressurs))
-                .filter(Objects::nonNull)
-                .toList();
+        return tlfList.stream().map(tlf -> telefonFromDvhTelefon(tlf, ressurs)).filter(Objects::nonNull).toList();
     }
 
     private Telefon telefonFromDvhTelefon(DvhTelefon it, Ressurs ressurs) {

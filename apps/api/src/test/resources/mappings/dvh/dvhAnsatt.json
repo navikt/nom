@@ -5,7 +5,9 @@
   },
   "response": {
     "status": 200,
-    "transformers": ["response-template"],
+    "transformers": [
+      "response-template"
+    ],
     "jsonBody": {
       "NOM_ANSATTE_BUCKETS_v1Result": [
         {

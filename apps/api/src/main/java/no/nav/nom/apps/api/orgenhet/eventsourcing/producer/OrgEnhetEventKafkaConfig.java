@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
-import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -24,7 +23,9 @@ public class OrgEnhetEventKafkaConfig {
     }
 
     @Bean
-    KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate(ProducerFactory<String, OrgEnhetEvent> orgEnhetEventProducerFactory, @Value("${app.kafka.orgEnhet.eventsourceTopic}") String eventsourceTopic) {
+    KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate(
+            ProducerFactory<String, OrgEnhetEvent> orgEnhetEventProducerFactory, @Value("${app.kafka.orgEnhet.eventsourceTopic}") String eventsourceTopic
+    ) {
         final var eventsourceTemplate = new KafkaTemplate<>(orgEnhetEventProducerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);
 

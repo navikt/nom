@@ -20,7 +20,7 @@ public class DvhRessursInterface {
         this.dvhRepository = dvhRepository;
     }
 
-    public Optional<DvhRessurs> getRessurs(String navIdent){
+    public Optional<DvhRessurs> getRessurs(String navIdent) {
         return Optional.ofNullable(dvhRepository.getRessursByNavIdent().get(navIdent));
     }
 
@@ -31,13 +31,10 @@ public class DvhRessursInterface {
                     case KOMMUNAL -> Sektor.NAV_KOMMUNAL;
                     case EKSTERN, ANNEN_STATLIG -> Sektor.EKSTERN;
                     default -> null;
-                })
-                .map(Sektor::name);
+                }).map(Sektor::name);
     }
 
     public LocalDate getSluttdatoForPersonident(String personIdent) {
-        return Optional.ofNullable(dvhRepository.getRessursByPersonident().get(personIdent))
-                .map(DvhRessurs::getSluttdato)
-                .orElse(null);
+        return Optional.ofNullable(dvhRepository.getRessursByPersonident().get(personIdent)).map(DvhRessurs::getSluttdato).orElse(null);
     }
 }

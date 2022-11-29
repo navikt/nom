@@ -41,26 +41,19 @@ public class PdlUtils {
     }
 
     private void mockPdlResponse(String response) {
-        stubFor(post("/graphql")
-                .withHeader("Tema", equalTo(appProperties.pdl().tema()))
-                .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody(response)));
+        stubFor(post("/graphql").withHeader("Tema", equalTo(appProperties.pdl().tema()))
+                        .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
     }
 
     public void addPersonToPdlResponse(boolean mellomnavn, String... personIdenter) {
         List.of(personIdenter).forEach(p -> {
             val navn = NavnDto.builder()
-                    .fornavn("fornavn"+pdlEntryByIdent.size())
-                    .mellomnavn(mellomnavn ? "mellomnavn"+pdlEntryByIdent.size() : null)
-                    .etternavn("etternavn"+pdlEntryByIdent.size())
+                    .fornavn("fornavn" + pdlEntryByIdent.size())
+                    .mellomnavn(mellomnavn ? "mellomnavn" + pdlEntryByIdent.size() : null)
+                    .etternavn("etternavn" + pdlEntryByIdent.size())
                     .build();
             val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
-            val entry = HentPersonBulkEntry.builder()
-                    .ident(p)
-                    .person(new PersonDto(List.of(navn), List.of(kjoenn)))
-                    .code("ok")
-                    .build();
+            val entry = HentPersonBulkEntry.builder().ident(p).person(new PersonDto(List.of(navn), List.of(kjoenn))).code("ok").build();
             pdlEntryByIdent.put(p, entry);
         });
 
@@ -68,14 +61,10 @@ public class PdlUtils {
     }
 
     @SneakyThrows
-    public NavnDto mockSinglePersonResponse(String personIdent){
+    public NavnDto mockSinglePersonResponse(String personIdent) {
         val resultBuilder = new StringBuilder();
 
-        val navn = NavnDto.builder()
-                .fornavn("fornavn")
-                .mellomnavn("mellomnavn")
-                .etternavn("etternavn")
-                .build();
+        val navn = NavnDto.builder().fornavn("fornavn").mellomnavn("mellomnavn").etternavn("etternavn").build();
 
         val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
 
@@ -90,11 +79,7 @@ public class PdlUtils {
     }
 
     public void addErrorToPdlResponse(String personIdent, String code) {
-        val entry = HentPersonBulkEntry.builder()
-                .ident(personIdent)
-                .person(null)
-                .code(code)
-                .build();
+        val entry = HentPersonBulkEntry.builder().ident(personIdent).person(null).code(code).build();
         pdlEntryByIdent.put(personIdent, entry);
 
         mockPdlResponse(buildResponse());

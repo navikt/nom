@@ -58,16 +58,16 @@ public class GenericStorageElement {
 
         String dataType;
 
-        DataType(String dataType){
+        DataType(String dataType) {
             this.dataType = dataType;
         }
 
         @JsonValue
-        public String getDataType(){
+        public String getDataType() {
             return dataType;
         }
 
-        public static DataType fromString(String value){
+        public static DataType fromString(String value) {
             return Arrays.stream(DataType.values())
                     .filter(v -> v.getDataType().equals(value))
                     .findAny()
@@ -76,8 +76,7 @@ public class GenericStorageElement {
     }
 
     @Converter
-    static class DataTypeConverter implements
-            AttributeConverter<DataType, String> {
+    static class DataTypeConverter implements AttributeConverter<DataType, String> {
 
         @Override
         public String convertToDatabaseColumn(DataType dataType) {

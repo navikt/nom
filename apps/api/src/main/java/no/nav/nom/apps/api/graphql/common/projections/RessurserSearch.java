@@ -15,12 +15,15 @@ import static java.util.Collections.emptySet;
 @ProjectedPayload
 public interface RessurserSearch {
     RessurserSearch EMPTY_SEARCH = emptyRessurserSearch();
+
     @Deprecated(forRemoval = true)
     Set<String> getPersonIdenter();
+
     Set<String> getPersonidenter();
 
     @Deprecated(forRemoval = true)
     Set<String> getNavIdenter();
+
     Set<String> getNavidenter();
 
     default Set<String> resolvePersonidenter() {

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import graphql.GraphQLException;
 import graphql.execution.DataFetcherResult;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
@@ -27,9 +26,7 @@ public class RessursPropertyResolver {
     private final boolean sendDummydata;
 
     public RessursPropertyResolver(
-            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader,
-            Environment env,
-            RessursStateService ressursStateService
+            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env, RessursStateService ressursStateService
     ) {
         this.adRessursBatchLoader = activeDirectoryRessursBatchLoader;
         this.ressursStateService = ressursStateService;
@@ -39,14 +36,11 @@ public class RessursPropertyResolver {
     }
 
     private Map<Ressurs, DataFetcherResult<String>> createDummyResponse(String fieldSpec, List<Ressurs> source) {
-        return source.stream()
-                .collect(toMap(Function.identity(), ressurs -> respondWithDummydata(fieldSpec + ressurs.getNavIdent())));
+        return source.stream().collect(toMap(Function.identity(), ressurs -> respondWithDummydata(fieldSpec + ressurs.getNavIdent())));
     }
 
     private DataFetcherResult<String> respondWithDummydata(String data) {
-        return DataFetcherResult.<String>newResult()
-                .data(data)
-                .build();
+        return DataFetcherResult.<String>newResult().data(data).build();
     }
 
     public Map<Ressurs, DataFetcherResult<String>> epost(List<Ressurs> ressurser) {
@@ -57,11 +51,7 @@ public class RessursPropertyResolver {
     }
 
     public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser) {
-        return adRessursBatchLoaderWithFallback(
-                ressurser,
-                AdRessurs::getDisplayName,
-                r -> r.visningsnavn().toString()
-        );
+        return adRessursBatchLoaderWithFallback(ressurser, AdRessurs::getDisplayName, r -> r.visningsnavn().toString());
     }
 
     public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser) {
@@ -79,9 +69,7 @@ public class RessursPropertyResolver {
     }
 
     private Map<Ressurs, DataFetcherResult<String>> adRessursBatchLoaderWithFallback(
-            List<Ressurs> ressurser,
-            Function<AdRessurs, String> fieldGetter,
-            Function<RessursState, String> fallbackFieldGetter
+            List<Ressurs> ressurser, Function<AdRessurs, String> fieldGetter, Function<RessursState, String> fallbackFieldGetter
     ) {
         var out = adRessursBatchLoader.load(ressurser, fieldGetter);
         var gotAdError = false;
@@ -91,14 +79,12 @@ public class RessursPropertyResolver {
                 var optionalRessursState = ressursStateService.findByNavident(entry.getKey().getNavIdent());
                 if (optionalRessursState.isPresent()) {
                     var fieldByFallback = fallbackFieldGetter.apply(optionalRessursState.get());
-                    var replacement = DataFetcherResult.<String>newResult()
-                            .data(fieldByFallback)
-                            .build();
+                    var replacement = DataFetcherResult.<String>newResult().data(fieldByFallback).build();
                     out.put(entry.getKey(), replacement);
                 }
             }
         }
-        if(gotAdError){
+        if (gotAdError) {
             log.warn("Fallback to DVH data due to AD error.");
         }
         return out;

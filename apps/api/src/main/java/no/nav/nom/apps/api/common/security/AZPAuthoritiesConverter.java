@@ -23,14 +23,11 @@ import static java.util.Collections.emptySet;
 @Component
 public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
-    private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);
-
-    private final static Set<String> AZP_CLAIM_NAMES = Set.of("azp", "azp_name");
-    private final static String GROUPS_CLAIM_NAME = "groups";
-
     public static final String AUTH_QUERY_PERSON = "QUERY_PERSON";
     public static final String AUTH_MUTATE_RESSURS = "MUTATE_RESSURS";
-
+    private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);
+    private final static Set<String> AZP_CLAIM_NAMES = Set.of("azp", "azp_name");
+    private final static String GROUPS_CLAIM_NAME = "groups";
     private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();
     private final GraphQLSecurityProperties securityProperties;
     private final Map<String, Set<GrantedAuthority>> authoritiesMap = new HashMap<>();
@@ -53,7 +50,12 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
             });
         });
 
-        log.info("Adding authorities {} from configuration \"{}\" with identifier(s) = {}", mappableAccessScopes.authorities(), configuration, mappableAccessScopes.identifiers());
+        log.info(
+                "Adding authorities {} from configuration \"{}\" with identifier(s) = {}",
+                mappableAccessScopes.authorities(),
+                configuration,
+                mappableAccessScopes.identifiers()
+        );
     }
 
     @Override

@@ -13,6 +13,7 @@ public interface PersonSearch {
 
     @Deprecated(forRemoval = true)
     String getPersonIdent();
+
     String getPersonident();
 
     default boolean isPersonidentPresent() {

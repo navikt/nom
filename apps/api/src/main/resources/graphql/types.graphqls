@@ -1,4 +1,3 @@
-
 type OrgEnhet {
     id: ID!
     agressoId: ID!

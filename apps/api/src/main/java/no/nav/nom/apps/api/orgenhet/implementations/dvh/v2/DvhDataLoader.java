@@ -50,24 +50,22 @@ public class DvhDataLoader {
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
 
 
-
     /*
     1. Enhter blir avsluttet hos oss ved at maxstillingsdato settes. sluttdato settes ikke.
     2. ØT puncher feil og oppretter ny stilling på enheten etter den er avsluttet.
     3. Man kan gjenoppstarte enheten HVIS det opprettes ny rad i agresso innenfor 1mnd av den gamle
      */
-    public void load(){
+    public void load() {
         log.info("Laster orgenhet v2 fra dvh");
         val response = nomProxyRestClient.getEnheterResponse();
 
-        val validations = Arrays.stream(ValidationType.values())
-                        .collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
+        val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
 
         val parsedEnheter = StreamSupport.stream(response.spliterator(), false) // 8496 enheter
                 .map(DvhOrgenhetV2::new)
                 // Validation: Orgenhetstatus should only be P and N
                 .filter(e -> {
-                    if(!e.getOrgenhetStatus().equals("P") && !e.getOrgenhetStatus().equals("N")){
+                    if (!e.getOrgenhetStatus().equals("P") && !e.getOrgenhetStatus().equals("N")) {
                         validations.get(ValidationType.ORGENHET_STATUS).add(e);
                         return false;
                     }
@@ -75,8 +73,8 @@ public class DvhDataLoader {
                 })
                 // Validation: Enhet is invalid if its parked and never had stillinger.
                 .filter(e -> {
-                    if(e.getOrgNiv().equals("ORGENHET")){
-                        if(e.getOrgenhetStatus().equals("P")) {
+                    if (e.getOrgNiv().equals("ORGENHET")) {
+                        if (e.getOrgenhetStatus().equals("P")) {
                             if (e.getStillingMaksDato() == null) {
                                 validations.get(ValidationType.PARKED_WITHOUT_STILLINGER).add(e);
                                 return false;
@@ -84,10 +82,9 @@ public class DvhDataLoader {
                         }
                     }
                     return true;
-                })
-                .filter(e -> {
-                    if(e.getOrgNiv().equals("ORGENHET")){
-                        if(e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX))){
+                }).filter(e -> {
+                    if (e.getOrgNiv().equals("ORGENHET")) {
+                        if (e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX))) {
                             validations.get(ValidationType.PARKED_INVALID_PERIOD).add(e);
                             return false;
                         }
@@ -99,114 +96,102 @@ public class DvhDataLoader {
                 // Slår sammen enheter der gyldighetsperiodene er skilt med 1 mnd eller mindre
                 .peek(entry -> {
                     val list = entry.getValue();
-                    if(list.size() > 1){
-                        for(int i = list.size() - 1; i >= 0; i--){
+                    if (list.size() > 1) {
+                        for (int i = list.size() - 1; i >= 0; i--) {
                             val enhetLast = list.get(i);
-                            for (int j = 0; j < i; j++){
+                            for (int j = 0; j < i; j++) {
                                 val enhetCompare = list.get(j);
                                 boolean shouldMerge = withinOneMonth(enhetLast, enhetCompare) || isOverlapping(enhetLast, enhetCompare);
-                                if(shouldMerge){
+                                if (shouldMerge) {
                                     enhetCompare.merge(enhetLast, objectMapper);
                                     list.remove(enhetLast);
                                 }
                             }
                         }
                     }
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        val persistedEnheter = orgenhetService.getAllEnheter().stream()
-                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+        val persistedEnheter = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
 
         val hendelserToSave = new LinkedList<IHendelse>();
 
 
         parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed()).forEach(parsedEnhet -> {
             val x = persistedEnheter.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
-            val matchingEnheter = x.stream()
-                    .filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p))
-                    .toList();
+            val matchingEnheter = x.stream().filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p)).toList();
 
-            if(matchingEnheter.size() < 2){
-                matchingEnheter.stream().findAny()
-                        .ifPresentOrElse(
-                                (p) -> {
-                                    val endreHendelse = createEndreHendelse(parsedEnhet, p, getOpprettetAv());
-                                    if(endreHendelse != null){
-                                        hendelserToSave.add(endreHendelse);
-                                        ((EventBasedOrgenhet) p).addHendelse(endreHendelse);
-                                    }
-                                },
-                                () -> {
-                                    hendelserToSave.add(createOpprettHendelse(parsedEnhet, getOpprettetAv()));
-                                }
-                        );
+            if (matchingEnheter.size() < 2) {
+                matchingEnheter.stream().findAny().ifPresentOrElse((p) -> {
+                    val endreHendelse = createEndreHendelse(parsedEnhet, p, getOpprettetAv());
+                    if (endreHendelse != null) {
+                        hendelserToSave.add(endreHendelse);
+                        ((EventBasedOrgenhet) p).addHendelse(endreHendelse);
+                    }
+                }, () -> {
+                    hendelserToSave.add(createOpprettHendelse(parsedEnhet, getOpprettetAv()));
+                });
+            } else {
+                log.error("Manual correction needed, enhet merge error with fids " + matchingEnheter.stream().map(IOrgenhet::getFid).toList());
             }
-            else {
-                log.error("Manual correction needed, enhet merge error with fids "+matchingEnheter.stream().map(IOrgenhet::getFid).toList());
-            }
-                }
-        ));
+        }));
 
 
         orgenhetHendelseRepository.saveAll(
-            hendelserToSave.stream()
-                    .filter(Objects::nonNull)
-                    .map(e -> GenericStorageElement.builder()
-                            .id(e.getId())
-                            .document(objectMapper.convertValue(e, JsonNode.class))
-                            .storedDate(LocalDateTime.now())
-                            .dataType(GenericStorageElement.DataType.HENDELSE_V1)
-                            .build()
-                    )
-                    .toList()
+                hendelserToSave.stream()
+                        .filter(Objects::nonNull)
+                        .map(e -> GenericStorageElement.builder()
+                                .id(e.getId())
+                                .document(objectMapper.convertValue(e, JsonNode.class))
+                                .storedDate(LocalDateTime.now())
+                                .dataType(GenericStorageElement.DataType.HENDELSE_V1)
+                                .build())
+                        .toList()
         );
 
 
         validationService.saveValidations(
-            validations.entrySet().stream()
-                    .map(s ->
-                            s.getValue().stream()
-                                            .map(v -> Validation.builder()
-                                                    .validationCode(s.getKey().name())
-                                                    .validationDescription(s.getKey().beskrivelse)
-                                                    .rawInputData(v.getRawData())
-                                                    .build()
-                                            )
-                                                    .toList()
-                    )
-                    .flatMap(List::stream)
-                    .toList()
+                validations.entrySet()
+                        .stream()
+                        .map(s -> s.getValue()
+                                .stream()
+                                .map(v -> Validation.builder()
+                                        .validationCode(s.getKey().name())
+                                        .validationDescription(s.getKey().beskrivelse)
+                                        .rawInputData(v.getRawData())
+                                        .build())
+                                .toList())
+                        .flatMap(List::stream)
+                        .toList()
         );
     }
 
-    private boolean isNewEnhet(IOrgenhet persistedEnhet, IOrgenhet newEnhet){
+    private boolean isNewEnhet(IOrgenhet persistedEnhet, IOrgenhet newEnhet) {
         return persistedEnhet == null || !isOverlapping(persistedEnhet, newEnhet) || !withinOneMonth(persistedEnhet, newEnhet);
     }
 
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {
-        return orgenhetV2One.getGyldigFom().isBefore(orgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX))
-                && orgenhetV2Two.getGyldigFom().isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
+        return orgenhetV2One.getGyldigFom().isBefore(orgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX)) && orgenhetV2Two.getGyldigFom()
+                .isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
     }
 
-    public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two){
-        return dvhOrgenhetV2One != dvhOrgenhetV2Two
-                &&
-                (Math.abs(ChronoUnit.MONTHS.between(
+    public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two) {
+        return dvhOrgenhetV2One != dvhOrgenhetV2Two && (Math.abs(ChronoUnit.MONTHS.between(
                 dvhOrgenhetV2One.getGyldigFom().withDayOfMonth(1),
-                dvhOrgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1))) <= 1
-                ||
-                        Math.abs(ChronoUnit.MONTHS.between(
+                dvhOrgenhetV2Two.getGyldigTom()
+                        .orElse(LocalDate.MAX)
+                        .withDayOfMonth(1)
+        )) <= 1 || Math.abs(ChronoUnit.MONTHS.between(
                 dvhOrgenhetV2Two.getGyldigFom().withDayOfMonth(1),
-                dvhOrgenhetV2One.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1))) <= 1);
+                dvhOrgenhetV2One.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+        )) <= 1);
     }
 
     @SneakyThrows
-    private IHendelse createOpprettHendelse(DvhOrgenhetV2 dvhOrgenhetV2, HendelseMetadata.OpprettetAv opprettetAv){
+    private IHendelse createOpprettHendelse(DvhOrgenhetV2 dvhOrgenhetV2, HendelseMetadata.OpprettetAv opprettetAv) {
         val hendelse = objectMapper.createObjectNode();
         hendelse.put(EventBasedOrgenhet.NAVN_FIELD, dvhOrgenhetV2.getNavn());
         hendelse.put(EventBasedOrgenhet.GYLDIG_FOM_FIELD, dvhOrgenhetV2.getGyldigFom().toString());
-        if(dvhOrgenhetV2.getGyldigTom().isPresent()){
+        if (dvhOrgenhetV2.getGyldigTom().isPresent()) {
             hendelse.put(EventBasedOrgenhet.GYLDIG_TOM_FIELD, dvhOrgenhetV2.getGyldigTom().get().toString());
         } else {
             hendelse.putNull(EventBasedOrgenhet.GYLDIG_TOM_FIELD);
@@ -216,32 +201,41 @@ public class DvhDataLoader {
         hendelse.put(EventBasedOrgenhet.AGRESSO_ORGENHET_TYPE_FIELD, dvhOrgenhetV2.getAgressoOrgenhetType());
 
 
-        return hendelseService.createOpprettHendelse(hendelse, HendelseMetadataSerialize.builder()
-                .opprettetAv(opprettetAv)
-                .opprettetTidspunkt(LocalDateTime.now())
-                .rawInputData(dvhOrgenhetV2.getRawData())
-                .build(), HendelseDataType.ORGENHET_V1);
+        return hendelseService.createOpprettHendelse(
+                hendelse,
+                HendelseMetadataSerialize.builder()
+                        .opprettetAv(opprettetAv)
+                        .opprettetTidspunkt(LocalDateTime.now())
+                        .rawInputData(dvhOrgenhetV2.getRawData())
+                        .build(),
+                HendelseDataType.ORGENHET_V1
+        );
     }
 
     @SneakyThrows
-    private IHendelse createEndreHendelse(DvhOrgenhetV2 dvhOrgenhetV2, IOrgenhet eventBasedOrgenhet, HendelseMetadata.OpprettetAv opprettetAv){
+    private IHendelse createEndreHendelse(DvhOrgenhetV2 dvhOrgenhetV2, IOrgenhet eventBasedOrgenhet, HendelseMetadata.OpprettetAv opprettetAv) {
         val hendelse = objectMapper.createObjectNode();
-        if(!dvhOrgenhetV2.getGyldigFom().equals(eventBasedOrgenhet.getGyldigFom())){
+        if (!dvhOrgenhetV2.getGyldigFom().equals(eventBasedOrgenhet.getGyldigFom())) {
             hendelse.put(EventBasedOrgenhet.GYLDIG_FOM_FIELD, dvhOrgenhetV2.getGyldigFom().toString());
         }
-        if (!Objects.equals(dvhOrgenhetV2.getGyldigTom().orElse(null), eventBasedOrgenhet.getGyldigTom().orElse(null))){
+        if (!Objects.equals(dvhOrgenhetV2.getGyldigTom().orElse(null), eventBasedOrgenhet.getGyldigTom().orElse(null))) {
             hendelse.put(EventBasedOrgenhet.GYLDIG_TOM_FIELD, dvhOrgenhetV2.getGyldigTom().isPresent() ? dvhOrgenhetV2.getGyldigTom().get().toString() : null);
         }
-        if(!Objects.equals(dvhOrgenhetV2.getAgressoOrgenhetType(), eventBasedOrgenhet.getAgressoOrgenhetType())){
+        if (!Objects.equals(dvhOrgenhetV2.getAgressoOrgenhetType(), eventBasedOrgenhet.getAgressoOrgenhetType())) {
             hendelse.put(EventBasedOrgenhet.AGRESSO_ORGENHET_TYPE_FIELD, dvhOrgenhetV2.getAgressoOrgenhetType());
         }
 
-        if (!hendelse.isEmpty()){
-            return hendelseService.createEndreHendelse(eventBasedOrgenhet.getFid(), hendelse, HendelseMetadataSerialize.builder()
-                    .opprettetAv(opprettetAv)
-                    .opprettetTidspunkt(LocalDateTime.now())
-                    .rawInputData(dvhOrgenhetV2.getRawData())
-                    .build(), HendelseDataType.ORGENHET_V1);
+        if (!hendelse.isEmpty()) {
+            return hendelseService.createEndreHendelse(
+                    eventBasedOrgenhet.getFid(),
+                    hendelse,
+                    HendelseMetadataSerialize.builder()
+                            .opprettetAv(opprettetAv)
+                            .opprettetTidspunkt(LocalDateTime.now())
+                            .rawInputData(dvhOrgenhetV2.getRawData())
+                            .build(),
+                    HendelseDataType.ORGENHET_V1
+            );
         }
 
         return null;
@@ -255,7 +249,7 @@ public class DvhDataLoader {
 
         String beskrivelse;
 
-        ValidationType(String beskrivelse){
+        ValidationType(String beskrivelse) {
             this.beskrivelse = beskrivelse;
         }
     }

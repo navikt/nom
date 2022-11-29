@@ -24,17 +24,15 @@ public class OrgEnhetCommandService {
     }
 
     private ListenableFuture<SendResult<String, OrgEnhetEvent>> createOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
-        return eventProducer.sendMessage(
-                new OrgEnhetOpprettetEventV1(
-                        fid,
-                        new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData(
-                                opprettOrgEnhet.id(),
-                                opprettOrgEnhet.navn(),
-                                opprettOrgEnhet.parentOrgEnhetFid(),
-                                opprettOrgEnhet.lederRessursFid()
-                        ),
-                        opprettOrgEnhet.inputMetadata()
-                )
-        );
+        return eventProducer.sendMessage(new OrgEnhetOpprettetEventV1(
+                fid,
+                new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData(
+                        opprettOrgEnhet.id(),
+                        opprettOrgEnhet.navn(),
+                        opprettOrgEnhet.parentOrgEnhetFid(),
+                        opprettOrgEnhet.lederRessursFid()
+                ),
+                opprettOrgEnhet.inputMetadata()
+        ));
     }
 }

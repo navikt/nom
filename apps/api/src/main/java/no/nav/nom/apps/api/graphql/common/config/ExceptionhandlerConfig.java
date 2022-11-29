@@ -47,6 +47,7 @@ public class ExceptionhandlerConfig {
      * an exception to a list of GraphQL errors. Effectively, a shortcut
      * for creating {@link DataFetcherExceptionResolverAdapter} and overriding
      * its {@code resolveToMultipleErrors} method.
+     *
      * @param resolver the resolver function to use
      * @return the created instance
      */

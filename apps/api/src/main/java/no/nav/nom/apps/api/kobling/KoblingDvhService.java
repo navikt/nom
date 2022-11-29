@@ -31,21 +31,14 @@ public class KoblingDvhService implements KoblingService {
 
     @Override
     public List<Kobling> getKoblingerByNavIdent(String navIdent) {
-        return getAllKoblinger().stream()
-                .filter(s -> s.getNavIdent().equals(navIdent))
-                .toList();
+        return getAllKoblinger().stream().filter(s -> s.getNavIdent().equals(navIdent)).toList();
     }
 
     @Override
     public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Kobling, T> transformer) {
         return getAllKoblinger().stream()
                 .filter(kobling -> navidenter.contains(kobling.getNavIdent()))
-                .collect(
-                        groupingBy(
-                                Kobling::getNavIdent,
-                                mapping(transformer, toList())
-                        )
-                );
+                .collect(groupingBy(Kobling::getNavIdent, mapping(transformer, toList())));
     }
 
 }

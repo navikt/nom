@@ -42,16 +42,15 @@ public class OrgenhetService implements IOrgenhetService {
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
-            return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name).stream())
-                    .max(comparing(IOrgenhet::getGyldigFom));
+            return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name)
+                                             .stream()).max(comparing(IOrgenhet::getGyldigFom));
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNiva(agressoId, orgNiv).stream())
-                .max(comparing(IOrgenhet::getGyldigFom));
+        return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNiva(agressoId, orgNiv).stream()).max(comparing(IOrgenhet::getGyldigFom));
     }
 
     @Override
@@ -66,29 +65,39 @@ public class OrgenhetService implements IOrgenhetService {
 
     @Override
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(EventBasedOrgenhet.AGRESSO_ID_FIELD, agressoId, HendelseDataType.ORGENHET_V1.getDataType()).stream()).toList();
+        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(
+                EventBasedOrgenhet.AGRESSO_ID_FIELD,
+                agressoId,
+                HendelseDataType.ORGENHET_V1.getDataType()
+        ).stream()).toList();
     }
 
     @Override
     public List<IOrgenhet> matchByNavn(String navn) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(EventBasedOrgenhet.NAVN_FIELD, navn, HendelseDataType.ORGENHET_V1.getDataType()).stream()).toList();
+        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(
+                EventBasedOrgenhet.NAVN_FIELD,
+                navn,
+                HendelseDataType.ORGENHET_V1.getDataType()
+        ).stream()).toList();
     }
 
     @Override
     public Map<String, IOrgenhet> getByFidBulk(List<String> fidList) {
         var tmp = orgenhetHendelseRepository.findByFidIn(new HashSet<>(fidList));
 
-        var out = new HashMap<String,IOrgenhet>(tmp.size());
+        var out = new HashMap<String, IOrgenhet>(tmp.size());
         var orgenhetStream = toIOrgEnhetStream(tmp.stream());
         orgenhetStream.forEach(oe -> {
-            out.put(oe.getFid().toString(),oe);
+            out.put(oe.getFid().toString(), oe);
         });
         return out;
     }
 
     private Stream<IOrgenhet> toIOrgEnhetStream(Stream<GenericStorageElement> elementStream) {
         return elementStream.map(hendelseService::convert)
-                .collect(Collectors.groupingBy(IHendelse::getFid)).values().stream()
+                .collect(Collectors.groupingBy(IHendelse::getFid))
+                .values()
+                .stream()
                 .map(this::convert)
                 .filter(Optional::isPresent)
                 .map(Optional::get);

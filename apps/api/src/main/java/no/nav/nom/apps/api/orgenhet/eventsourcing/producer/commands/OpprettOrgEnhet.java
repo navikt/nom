@@ -5,9 +5,9 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import java.util.Optional;
 
 public record OpprettOrgEnhet(
-    String id,
-    String navn,
-    Optional<String> parentOrgEnhetFid,
-    Optional<String> lederRessursFid,
-    InputMetadata inputMetadata
-){}
+        String id,
+        String navn,
+        Optional<String> parentOrgEnhetFid,
+        Optional<String> lederRessursFid,
+        InputMetadata inputMetadata
+) {}

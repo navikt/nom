@@ -24,8 +24,6 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch.EMPTY_SEARCH;
-
 @Controller
 @PreAuthorize("@securityUtil.checkAuth(authentication)")
 public class GraphQLOrgEnhetController {
@@ -93,6 +91,7 @@ public class GraphQLOrgEnhetController {
     public OrgEnhet organisasjonsenhet(Organisering organisering) {
         return orgEnhet(organisering);
     }
+
     @SchemaMapping(typeName = "Organisering", field = "orgEnhet")
     public OrgEnhet orgEnhet(Organisering organisering) {
         return orgEnhetResolver.orgEnhet(organisering);

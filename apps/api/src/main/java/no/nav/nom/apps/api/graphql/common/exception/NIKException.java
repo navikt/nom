@@ -8,6 +8,7 @@ public class NIKException extends RuntimeException {
 
     private final ResponseEntity<OpprettNavidentResponse> response;
     private final ErrorCode errorCode;
+
     public NIKException(String message, ResponseEntity<OpprettNavidentResponse> response, ErrorCode errorCode) {
         super(message);
         this.response = response;

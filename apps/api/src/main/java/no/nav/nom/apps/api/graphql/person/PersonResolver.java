@@ -20,17 +20,12 @@ public class PersonResolver {
         if (personident == null) {
             return Optional.empty();
         }
-        return ressursService.findByPersonident(personident)
-                .map(PersonResolver::fromRessurs)
-                .or(() -> Optional.of(baseRessurs(personident)));
+        return ressursService.findByPersonident(personident).map(PersonResolver::fromRessurs).or(() -> Optional.of(baseRessurs(personident)));
 
     }
 
     private static PersonResult baseRessurs(String personIdent) {
-        return PersonResult.builder()
-                .personIdent(personIdent)
-                .personident(personIdent)
-                .build();
+        return PersonResult.builder().personIdent(personIdent).personident(personIdent).build();
     }
 
     public static PersonResult fromRessurs(RessursState ressurs) {

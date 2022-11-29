@@ -24,7 +24,8 @@ public class OrgEnhetKoblingResolver {
     }
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
-        return dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv()).stream()
+        return dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
+                .stream()
                 .map(kobling -> ressursService.findByNavident(kobling.getNavIdent(), ressurs -> tilOrgEnhetsKobling(ressurs, kobling)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

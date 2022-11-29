@@ -163,13 +163,16 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
     }
 
-    private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock){
+    private void assertOpprettetEventFromDvhRessurs(RessursOpprettetEventV1 ressursSluttetEvent, DvhRessursUtils.RessursMock ressursMock) {
 
         Assertions.assertNotNull(ressursSluttetEvent.getFid());
 
         RessursOpprettetEventV1.RessursOpprettetEventData eventData = (RessursOpprettetEventV1.RessursOpprettetEventData) ressursSluttetEvent.getData();
 
-        Assertions.assertEquals(ressursMock.NAV_IDENT(), ((RessursOpprettetEventV1.RessursOpprettetAdditionalData)ressursSluttetEvent.getAdditionalData()).navident().get());
+        Assertions.assertEquals(
+                ressursMock.NAV_IDENT(),
+                ((RessursOpprettetEventV1.RessursOpprettetAdditionalData) ressursSluttetEvent.getAdditionalData()).navident().get()
+        );
         Assertions.assertEquals(ressursMock.FNR(), eventData.personident());
         Assertions.assertEquals(DvhRessurs.toSektor(ressursMock.ANSATT_TYPE()), eventData.sektor());
         Assertions.assertEquals(ressursMock.FORNAVN(), eventData.visningsnavn().fornavn());

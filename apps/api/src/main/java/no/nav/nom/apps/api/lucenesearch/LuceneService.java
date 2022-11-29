@@ -7,8 +7,8 @@ import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
-import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
+import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -45,11 +45,11 @@ public class LuceneService {
     }
 
     @Scheduled(initialDelayString = "PT10S", fixedRateString = "PT30S")
-    public void addInvalidatedEntitiesToIndex(){
+    public void addInvalidatedEntitiesToIndex() {
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
         var orgenheterCountToIndex = 0;
         var sumCount = ressurserCountToIndex + orgenheterCountToIndex;
-        if(sumCount == 0) {
+        if (sumCount == 0) {
             return;
         }
         log.info("Lucene indexing started. Number of entities:" + sumCount);
@@ -59,14 +59,15 @@ public class LuceneService {
             var invalidatedNavIdentList = grabAndResetNavidentInvalidationList();
 
             var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
-            var luceneRessursStream = resMap.values().stream().map(it -> {
-                        var visningsNavn = it.visningsnavn().fornavn()
-                                + it.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
-                                + (" " + it.visningsnavn().etternavn());
-                        var activeRessurs = it.sluttdato().isEmpty() || it.sluttdato().get().isAfter(LocalDate.now());
-                        return new LuceneRessurs(it.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs);
-                    }
-            );
+            var luceneRessursStream = resMap.values().stream()
+                    .map(it -> {
+                             var visningsNavn = it.visningsnavn().fornavn()
+                                     + it.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
+                                     + (" " + it.visningsnavn().etternavn());
+                             var activeRessurs = it.sluttdato().isEmpty() || it.sluttdato().get().isAfter(LocalDate.now());
+                             return new LuceneRessurs(it.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs);
+                         }
+                    );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
 
@@ -75,15 +76,14 @@ public class LuceneService {
 
         // orgenheter
         {
-//            var invalidatedOrgEnhetList = grabAndResetOrgenhetInvalidationList();
-//            var oeMap = orgenhetService.findByIdBulk(invalidatedOrgEnhetList);
-//            var luceneOeStream = oeMap.values().stream().map(oe -> new LuceneOrgEnhet(oe.getId(), oe.getNavn().get(), oe.getEnhetsType()));
-//
-//            searchRepo.upsertEntities(luceneOeStream, LuceneOrgEnhet.class);
-//
-//            invalidatedOrgEnhetList.clear();
+            //            var invalidatedOrgEnhetList = grabAndResetOrgenhetInvalidationList();
+            //            var oeMap = orgenhetService.findByIdBulk(invalidatedOrgEnhetList);
+            //            var luceneOeStream = oeMap.values().stream().map(oe -> new LuceneOrgEnhet(oe.getId(), oe.getNavn().get(), oe.getEnhetsType()));
+            //
+            //            searchRepo.upsertEntities(luceneOeStream, LuceneOrgEnhet.class);
+            //
+            //            invalidatedOrgEnhetList.clear();
         }
-
 
 
         log.info("Lucene indexing completed.");
@@ -93,44 +93,46 @@ public class LuceneService {
     @Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
-        wrappedLucene.upsertEntities(orgenhetService.getAllEnheter().stream()
-                .map(it -> new LuceneOrgEnhet(
-                        it.getFid().toString(),
-                        it.getNavn(),
-                        it.getOrgEnhetsKategori().toString())
-                ), LuceneOrgEnhet.class);
+        wrappedLucene.upsertEntities(
+                orgenhetService.getAllEnheter().stream()
+                        .map(it -> new LuceneOrgEnhet(
+                                     it.getFid().toString(),
+                                     it.getNavn(),
+                                     it.getOrgEnhetsKategori().toString()
+                             )
+                        ), LuceneOrgEnhet.class);
         log.info("Lucene indexing for orgenhet completed.");
 
     }
 
-    public synchronized void invalidateRessurs(String navident){
+    public synchronized void invalidateRessurs(String navident) {
         this.invalidatedNavidentList.add(navident);
     }
 
-    public synchronized void invalidateOrgenhet(String orgenhetId){
+    public synchronized void invalidateOrgenhet(String orgenhetId) {
         throw new NotImplementedException();
     }
 
-    private synchronized List<String> grabAndResetNavidentInvalidationList(){
+    private synchronized List<String> grabAndResetNavidentInvalidationList() {
         var out = this.invalidatedNavidentList;
         this.invalidatedNavidentList = new ArrayList<>();
         return out;
     }
 
-    private synchronized List<String> grabAndResetOrgenhetInvalidationList(){
+    private synchronized List<String> grabAndResetOrgenhetInvalidationList() {
         throw new NotImplementedException();
     }
 
 
-    public List<SearchResult> search(String term){
+    public List<SearchResult> search(String term) {
         return this.wrappedLucene.search(term);
     }
 
-    public boolean filterOrgenhetResult(SearchResult searchResult){
+    public boolean filterOrgenhetResult(SearchResult searchResult) {
         return searchResult.entType().equals(this.entTypeOrgenhet);
     }
 
-    public boolean filterRessursResult(SearchResult searchResult){
+    public boolean filterRessursResult(SearchResult searchResult) {
         return searchResult.entType().equals(this.entTypeRessurs);
     }
 

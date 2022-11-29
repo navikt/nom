@@ -17,7 +17,11 @@ public class RessursEventProducer {
     private final RessursEventSourceRepository ressursEventSourceRepository;
     private final ObjectMapper objectMapper;
 
-    public RessursEventProducer(KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate, RessursEventSourceRepository ressursEventSourceRepository, ObjectMapper objectMapper){
+    public RessursEventProducer(
+            KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
+            RessursEventSourceRepository ressursEventSourceRepository,
+            ObjectMapper objectMapper
+    ) {
         this.ressursEventProducerTemplate = ressursEventProducerTemplate;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
         this.objectMapper = objectMapper;
@@ -30,11 +34,6 @@ public class RessursEventProducer {
     }
 
     private void saveToDB(RessursEvent event, String eventKey) {
-        ressursEventSourceRepository.save(
-                RessursEventSource.builder()
-                        .eventKey(eventKey)
-                        .payload(objectMapper.valueToTree(event))
-                .build()
-        );
+        ressursEventSourceRepository.save(RessursEventSource.builder().eventKey(eventKey).payload(objectMapper.valueToTree(event)).build());
     }
 }

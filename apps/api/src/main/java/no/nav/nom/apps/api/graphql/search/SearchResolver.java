@@ -41,7 +41,7 @@ public class SearchResolver {
         Stream<OrgEnhet> orgenheter;
         Stream<Object> ressurser;
 
-        if(unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)){
+        if (unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)) {
             // termer ser ut til å fungere bedre når de er inneklemt med single-quotes
             // men dette skjer kun i API/miljø. Rart at lokalt GUI skal oppføre seg annerledes.
             var matchedNavidentsSorted = luceneService.search(term_inp).stream()
@@ -55,7 +55,7 @@ public class SearchResolver {
                     .map(SearchResult::id).toList();
             Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
             orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-        }else{
+        } else {
             var matchedOrgenhetIds = Stream.concat(
                             orgenhetService.matchByAgressoId(term_inp).stream(),
                             orgenhetService.matchByNavn(term_inp).stream()

@@ -6,10 +6,11 @@ import org.springframework.graphql.client.ClientGraphQlResponse;
 
 import java.util.List;
 
-public class PDLBolkException extends RuntimeException{
+public class PDLBolkException extends RuntimeException {
 
     private final ClientGraphQlResponse graphQlResponse;
     private final ErrorCode errorCode;
+
     public PDLBolkException(String message, ClientGraphQlResponse graphQlResponse, ErrorCode errorCode) {
         super(message);
         this.graphQlResponse = graphQlResponse;
@@ -19,6 +20,7 @@ public class PDLBolkException extends RuntimeException{
     public ClientGraphQlResponse getSource() {
         return graphQlResponse;
     }
+
     public List<ResponseError> getErrors() {
         return graphQlResponse.getErrors();
     }

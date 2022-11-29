@@ -10,6 +10,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.EKSTERN;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.KOMMUNAL;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.STATLIG;
+
 @Value
 @Builder
 @RequiredArgsConstructor
@@ -57,26 +62,25 @@ public class DvhRessurs {
         }
     }
 
-    public LocalDate getSluttdato(){
-        if(!hasPermisjon()) {
-            if ("E".equals(ansattRessursKode) ||
-                    Arrays.asList(RemedyRessursType.EKSTERN.beskrivelse, RemedyRessursType.ANNEN_STATLIG.beskrivelse, RemedyRessursType.KOMMUNAL.beskrivelse).contains(remedyAnsattType)) {
+    public LocalDate getSluttdato() {
+        if (!hasPermisjon()) {
+            if ("E".equals(ansattRessursKode) || Arrays.asList(EKSTERN.beskrivelse, ANNEN_STATLIG.beskrivelse, KOMMUNAL.beskrivelse)
+                    .contains(remedyAnsattType)) {
                 return getDateOrNull(remedySluttdato);
             }
 
-            return agressoSluttdato != null && !D2099.equals(agressoSluttdato)
-                    ? agressoSluttdato : getDateOrNull(remedySluttdato);
+            return agressoSluttdato != null && !D2099.equals(agressoSluttdato) ? agressoSluttdato : getDateOrNull(remedySluttdato);
         }
         return null;
     }
 
-    public boolean hasPermisjon(){
-        if(remedyPermisjon && remedyAktiv){
-            if(List.of(RemedyRessursType.KOMMUNAL.beskrivelse, RemedyRessursType.STATLIG.beskrivelse).contains(remedyAnsattType)){
-                if (RemedyRessursType.KOMMUNAL.beskrivelse.equals(remedyAnsattType)) {
+    public boolean hasPermisjon() {
+        if (remedyPermisjon && remedyAktiv) {
+            if (List.of(KOMMUNAL.beskrivelse, STATLIG.beskrivelse).contains(remedyAnsattType)) {
+                if (KOMMUNAL.beskrivelse.equals(remedyAnsattType)) {
                     return true;
                 }
-                if(agressoSluttdato == null || LocalDate.of(2099, 12, 31).equals(agressoSluttdato)){
+                if (agressoSluttdato == null || LocalDate.of(2099, 12, 31).equals(agressoSluttdato)) {
                     return true;
                 }
             }
@@ -88,10 +92,10 @@ public class DvhRessurs {
         return !D2099.equals(dato) ? dato : null;
     }
 
-    public static Sektor toSektor(String remedyAnsattType){
-        if (remedyAnsattType.equals("NAV Statlig")){
+    public static Sektor toSektor(String remedyAnsattType) {
+        if (remedyAnsattType.equals("NAV Statlig")) {
             return Sektor.NAV_STATLIG;
-        } else if (remedyAnsattType.equals("NAV Kommunalt")){
+        } else if (remedyAnsattType.equals("NAV Kommunalt")) {
             return Sektor.NAV_KOMMUNAL;
         } else {
             return Sektor.EKSTERN;

@@ -21,30 +21,26 @@ import java.util.Optional;
 public class PdlConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(PdlConsumer.class);
-
-    private final HttpGraphQlClient graphQlClient;
-
     private final static String PDL_HENT_PERSON_QUERY = // language=graphql
             """
-                query($ident: ID!) {
-                       hentPerson(ident: $ident) {
-                            navn {
-                                fornavn
-                                mellomnavn
-                                etternavn
-                            }
-                            kjoenn {
-                                kjoenn
-                            }
-                       }
-                }
-                """;
+            query($ident: ID!) {
+                hentPerson(ident: $ident) {
+                    navn {
+                        fornavn
+                        mellomnavn
+                        etternavn
+                    }
+                    kjoenn {
+                        kjoenn
+                    }
+               }
+            }
+            """;
+    private final HttpGraphQlClient graphQlClient;
 
     @Autowired
     public PdlConsumer(
-            AppProperties appProperties,
-            TokenRepository tokenRepository,
-            WebClient.Builder webClientBuilder
+            AppProperties appProperties, TokenRepository tokenRepository, WebClient.Builder webClientBuilder
     ) {
         final var pdlProperties = appProperties.pdl();
         this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
@@ -58,9 +54,9 @@ public class PdlConsumer {
     }
 
     public Optional<Person> hentPerson(String personIdent) {
-        return executePDLRequest(personIdent)
-                .filter(GraphQlResponse::isValid)
-                .map(res -> res.field("hentPerson").toEntity(JsonNode.class))
+        return executePDLRequest(personIdent).filter(GraphQlResponse::isValid)
+                .map(res -> res.field("hentPerson")
+                        .toEntity(JsonNode.class))
                 .onErrorResume(throwable -> {
                     logger.warn("Error in lookup from PDL", throwable);
                     return Mono.empty();
@@ -70,21 +66,26 @@ public class PdlConsumer {
     }
 
     private Mono<ClientGraphQlResponse> executePDLRequest(String personident) {
-        return graphQlClient
-                .document(PDL_HENT_PERSON_QUERY)
+        return graphQlClient.document(PDL_HENT_PERSON_QUERY)
                 .variable("ident", personident)
                 .execute();
     }
 
     private Person convertToApiPerson(JsonNode person) {
-        final var navn = person.get("navn").get(0);
+        final var navn = person.get("navn")
+                .get(0);
         final var mellomnavn = navn.get("mellomnavn");
-        final var kjonn = person.get("kjoenn").get(0).get("kjoenn").asText();
+        final var kjonn = person.get("kjoenn")
+                .get(0)
+                .get("kjoenn")
+                .asText();
 
         return Person.builder()
-                .fornavn(navn.get("fornavn").asText())
+                .fornavn(navn.get("fornavn")
+                                 .asText())
                 .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
-                .etternavn(navn.get("etternavn").asText())
+                .etternavn(navn.get("etternavn")
+                                   .asText())
                 .kjonn(Kjonn.valueOf(kjonn))
                 .build();
     }

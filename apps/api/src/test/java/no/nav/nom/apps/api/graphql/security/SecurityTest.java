@@ -8,7 +8,6 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,6 @@ import java.time.Instant;
 import java.util.Date;
 
 import static java.util.Objects.requireNonNullElse;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @DisplayName("GraphQL.Sikkerhet")
 class SecurityTest extends SecurityTestBase {
@@ -38,10 +36,7 @@ class SecurityTest extends SecurityTestBase {
     @SneakyThrows
     @DisplayName("Gitt feil signert token, får man Unauthenticated error i responsen")
     public void scenario12() {
-        val rsaKey = new RSAKeyGenerator(2048)
-                .keyUse(KeyUse.SIGNATURE)
-                .keyID("annenKey")
-                .generate();
+        val rsaKey = new RSAKeyGenerator(2048).keyUse(KeyUse.SIGNATURE).keyID("annenKey").generate();
         val claims = validJwtWithAzpClaim();
         val signer = new RSASSASigner(rsaKey);
         val signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("annenKey").build(), claims.build());

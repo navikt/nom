@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.kobling;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
-import lombok.Value;
 import lombok.val;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 
@@ -28,11 +27,11 @@ public class DvhKobling implements Kobling {
     }
 
     @Override
-    public Optional<LocalDate> getGyldigTom(){
+    public Optional<LocalDate> getGyldigTom() {
         return Optional.ofNullable(gyldigTom);
     }
 
-    public void setOrgenhetNavn(String orgenhetNavn){
+    public void setOrgenhetNavn(String orgenhetNavn) {
         this.orgenhetNavn = orgenhetNavn;
     }
 }

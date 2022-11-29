@@ -29,7 +29,7 @@ public record AppProperties(
     ) {}
 
     public record Nik(
-        String baseUrl,
-        String aadClientId
+            String baseUrl,
+            String aadClientId
     ) {}
 }

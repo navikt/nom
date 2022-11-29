@@ -7,13 +7,13 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 @ConstructorBinding
 @ConfigurationProperties("authentication")
-public record AuthenticationProperties (
-    Aad aad
+public record AuthenticationProperties(
+        Aad aad
 ) {
 
-    public record Aad (
-        String issuerBaseUrl,
-        String clientId,
-        JWK jwk
+    public record Aad(
+            String issuerBaseUrl,
+            String clientId,
+            JWK jwk
     ) {}
 }

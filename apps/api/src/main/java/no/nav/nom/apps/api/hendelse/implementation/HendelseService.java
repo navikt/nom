@@ -28,14 +28,14 @@ public class HendelseService implements IHendelseService {
 
     @Override
     public IHendelse createOpprettHendelse(JsonNode data, HendelseMetadata hendelseMetadata, HendelseDataType hendelseDataType) {
-         return HendelseV1.builder()
+        return HendelseV1.builder()
                 .id(UUID.randomUUID())
                 .fid(UUID.randomUUID())
                 .tidligereId(null)
                 .hendelseType(HendelseType.OPPRETTET)
                 .hendelseDataType(hendelseDataType)
                 .hendelseData(data)
-                 .hendelseMetadata(hendelseMetadata)
+                .hendelseMetadata(hendelseMetadata)
                 .build();
     }
 
@@ -46,7 +46,7 @@ public class HendelseService implements IHendelseService {
 
     @Override
     public IHendelse createEndreHendelse(UUID fid, JsonNode data, HendelseMetadata hendelseMetadata, HendelseDataType hendelseDataType) {
-        return  HendelseV1.builder()
+        return HendelseV1.builder()
                 .id(UUID.randomUUID())
                 .fid(fid)
                 .tidligereId(null)
@@ -63,7 +63,7 @@ public class HendelseService implements IHendelseService {
     }
 
     @Override
-    public GenericStorageElement convert(IHendelse hendelse){
+    public GenericStorageElement convert(IHendelse hendelse) {
         return GenericStorageElement.builder()
                 .id(hendelse.getId())
                 .dataType(GenericStorageElement.DataType.HENDELSE_V1)

@@ -45,7 +45,7 @@ public class EventAggregateListener {
             LuceneService luceneService,
             KafkaAdmin admin,
             KafkaProperties kafkaProperties
-    ){
+    ) {
         this.stateTopic = stateTopic;
         this.ressursStateService = ressursStateService;
         this.kafkaProperties = kafkaProperties;
@@ -54,46 +54,45 @@ public class EventAggregateListener {
     }
 
     @KafkaListener(
-            topicPartitions = @TopicPartition(topic = "${app.kafka.ressurs.stateTopic}",
-            partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0"))
+            topicPartitions = @TopicPartition(
+                    topic = "${app.kafka.ressurs.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+            )
     )
-    public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer){
-        StreamSupport.stream(records.spliterator(), false)
-                .forEach(it -> {
-                    var ressurs = it.value();
-                    ressursStateService.putEventAggregate(ressurs);
-                    this.luceneService.invalidateRessurs(ressurs.navident());
-                    if(waitingMapByFid.containsKey(it.key())) {
-                        waitingMapByFid.remove(it.key()).thenReturn(ressurs);
-                    }
-                });
+    public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer) {
+        StreamSupport.stream(records.spliterator(), false).forEach(it -> {
+            var ressurs = it.value();
+            ressursStateService.putEventAggregate(ressurs);
+            this.luceneService.invalidateRessurs(ressurs.navident());
+            if (waitingMapByFid.containsKey(it.key())) {
+                waitingMapByFid.remove(it.key()).thenReturn(ressurs);
+            }
+        });
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka state listener initial load finished"));
     }
 
-    public boolean initloadComplete(){
-        if(!initialLoadComplete.get()){
+    public boolean initloadComplete() {
+        if (!initialLoadComplete.get()) {
             try {
-                if(!consumerGroupRegistedForTopic(stateTopic)){
+                if (!consumerGroupRegistedForTopic(stateTopic)) {
                     initialLoadComplete.set(true);
                 }
-            } catch (Exception exception){
+            } catch (Exception exception) {
                 log.error("Exception when trying to fetch consumer group from topic", exception);
             }
         }
         return initialLoadComplete.get();
     }
 
-    public Mono<RessursState> waitForAggregate(String fid){
+    public Mono<RessursState> waitForAggregate(String fid) {
         return waitingMapByFid.put(fid, Mono.empty());
     }
 
     public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {
-        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer()
-                .getGroupId())
-                .partitionsToOffsetAndMetadata().get(10, TimeUnit.SECONDS);
-        
-        return topicPartitions.entrySet().stream()
-                .anyMatch(entry -> entry.getKey().topic().equals(topic));
+        final var topicPartitions = adminClient.listConsumerGroupOffsets(kafkaProperties.getConsumer().getGroupId())
+                .partitionsToOffsetAndMetadata()
+                .get(10, TimeUnit.SECONDS);
+
+        return topicPartitions.entrySet().stream().anyMatch(entry -> entry.getKey().topic().equals(topic));
     }
 }

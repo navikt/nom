@@ -13,6 +13,7 @@ public interface RessursSearch extends PersonSearch {
 
     @Deprecated(forRemoval = true)
     String getNavIdent();
+
     String getNavident();
 
 

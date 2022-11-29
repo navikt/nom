@@ -17,7 +17,7 @@ public class NomProxyRestClient {
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
 
-    public JsonNode getEnheterResponse(){
+    public JsonNode getEnheterResponse() {
         return dvhExchange(appProperties.proxy().enhetPath()).get("NOM_HRORG_ORGENHETResponse").get("NOM_HRORG_ORGENHETResult");
     }
 

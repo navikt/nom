@@ -30,8 +30,8 @@ public class AppConfig {
     ) throws SSLException {
         SslContext insecureContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         HttpClient httpClient = HttpClient.create()
-                        .secure(spec -> spec.sslContext(insecureContext))
-                        .proxy(proxy -> proxy.type(ProxyProvider.Proxy.HTTP).host(proxyHost).port(proxyPort));
+                .secure(spec -> spec.sslContext(insecureContext))
+                .proxy(proxy -> proxy.type(ProxyProvider.Proxy.HTTP).host(proxyHost).port(proxyPort));
 
         return webClientBuilder -> webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient));
     }

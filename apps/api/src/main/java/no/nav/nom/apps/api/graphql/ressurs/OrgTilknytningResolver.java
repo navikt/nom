@@ -31,18 +31,9 @@ public class OrgTilknytningResolver {
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
-        final var tilknytninger = koblingService.getKoblingerByNavidenter(
-                ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()),
-                this::fromDvhKobling
-        );
+        final var tilknytninger = koblingService.getKoblingerByNavidenter(ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()), this::fromDvhKobling);
 
-        return ressurser.stream()
-                .collect(
-                        toMap(
-                                Function.identity(),
-                                ressurs -> tilknytninger.getOrDefault(ressurs.getNavIdent(), emptyList())
-                        )
-                );
+        return ressurser.stream().collect(toMap(Function.identity(), ressurs -> tilknytninger.getOrDefault(ressurs.getNavIdent(), emptyList())));
     }
 
     private RessursOrgTilknytning fromDvhKobling(Kobling kobling) {

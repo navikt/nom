@@ -9,12 +9,12 @@ public enum HendelseDataType {
 
     String dataType;
 
-    HendelseDataType(String dataType){
+    HendelseDataType(String dataType) {
         this.dataType = dataType;
     }
 
     @JsonValue
-    public String getDataType(){
+    public String getDataType() {
         return dataType;
     }
 }

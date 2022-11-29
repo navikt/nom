@@ -60,14 +60,14 @@ public class RessursStateService implements IRessursService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void putEventAggregate(RessursState ressursEventData){
+    public void putEventAggregate(RessursState ressursEventData) {
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
         ressursByNavident.put(ressursEventData.navident(), ressursEventData);
     }
 
     @Override
-    public void clear(){
+    public void clear() {
         ressursByFid.clear();
         ressursByPersonident.clear();
         ressursByNavident.clear();

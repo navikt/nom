@@ -16,6 +16,7 @@ public class GraphQLSearchController {
 
     private final SearchResolver searchResolver;
     private final GraphQLFieldConsumptionCounter counter;
+
     public GraphQLSearchController(SearchResolver searchResolver, GraphQLFieldConsumptionCounter counter) {
         this.searchResolver = searchResolver;
         this.counter = counter;

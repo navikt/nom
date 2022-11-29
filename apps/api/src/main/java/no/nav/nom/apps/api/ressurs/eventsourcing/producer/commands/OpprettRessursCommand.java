@@ -14,4 +14,4 @@ public record OpprettRessursCommand(
         Sektor sektor,
         Visningsnavn visningsnavn,
         InputMetadata inputMetadata
-) implements RessursCommand { }
+) implements RessursCommand {}

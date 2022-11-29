@@ -13,29 +13,29 @@ public class DvhTelefon {
     DvhTelefonType type;
     String beskrivelse;
 
-    public enum DvhTelefonType {
-        TJENESTETELEFON,
-        KONTORTELEFON
-    }
-
-    public DvhTelefon(JsonNode node){
+    public DvhTelefon(JsonNode node) {
         this.navIdent = node.get("navident").asText();
         this.nummer = node.get("msisdn").asText();
 
         val userref1 = node.get("userreference1").asText();
 
-        if(userref1.startsWith("PK-")){
+        if (userref1.startsWith("PK-")) {
             this.type = DvhTelefonType.KONTORTELEFON;
-        }else if(userref1.startsWith("PT-")){
+        } else if (userref1.startsWith("PT-")) {
             this.type = DvhTelefonType.TJENESTETELEFON;
-        }else{
+        } else {
             // TODO, håndtere bedre?
-            log.error("DvhTelefon.type satt til null! " + node.get("userreference1").asText() );
+            log.error("DvhTelefon.type satt til null! " + node.get("userreference1").asText());
             this.type = null;
         }
 
         this.beskrivelse = node.get("typename").asText();
 
 
+    }
+
+    public enum DvhTelefonType {
+        TJENESTETELEFON,
+        KONTORTELEFON
     }
 }

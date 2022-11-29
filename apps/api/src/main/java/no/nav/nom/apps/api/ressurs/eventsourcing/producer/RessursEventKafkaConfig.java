@@ -21,8 +21,12 @@ public class RessursEventKafkaConfig {
 
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
+
     @Bean
-    KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate(ProducerFactory<String, RessursEvent> ressursEventProducerFactory, @Value("${app.kafka.ressurs.eventsourceTopic}") String eventsourceTopic) {
+    KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate(
+            ProducerFactory<String, RessursEvent> ressursEventProducerFactory,
+            @Value("${app.kafka.ressurs.eventsourceTopic}") String eventsourceTopic
+    ) {
         final var eventsourceTemplate = new KafkaTemplate<>(ressursEventProducerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);
 

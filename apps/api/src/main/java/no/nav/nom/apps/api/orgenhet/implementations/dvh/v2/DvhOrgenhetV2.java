@@ -37,13 +37,14 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         val tempGyldigTom = node.get("ORGENHET_TIL_PERIODE").asText();
         this.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;
         this.orgenhetStatus = node.get("ORGENHET_STATUS").asText().toUpperCase();
-        this.stillingMaksDato = node.hasNonNull("STILLING_MAKS_GYLDIG_TIL_DATO") ? LocalDate.parse(node.get("STILLING_MAKS_GYLDIG_TIL_DATO").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        this.stillingMaksDato = node.hasNonNull("STILLING_MAKS_GYLDIG_TIL_DATO") ?
+                LocalDate.parse(node.get("STILLING_MAKS_GYLDIG_TIL_DATO").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
         this.dvhLastetDato = LocalDate.parse(node.get("LASTET_DATO").asText());
         this.lederRessursNr = node.hasNonNull("LEDER_RESSURSNR") ? node.get("LEDER_RESSURSNR").asText() : null;
 
         // Hvis stillingMaksDato er før Agresso sin gyldigFom dato, er den nok knyttet
         // til en tidligere enhet med samme agressoId.
-        if(stillingMaksDato != null && getGyldigFom().isAfter(stillingMaksDato)){
+        if (stillingMaksDato != null && getGyldigFom().isAfter(stillingMaksDato)) {
             stillingMaksDato = null;
         }
     }
@@ -59,13 +60,10 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     @Override
-    public Optional<LocalDate> getGyldigTom(){
+    public Optional<LocalDate> getGyldigTom() {
         val dateToUse = !orgNiv.equals("ORGENHET") || agressoGyldigFom.equals("0") || agressoGyldigTom.equals("209999") ? null : agressoGyldigTom;
-        return Optional.ofNullable(
-                getDate(getLastDay(dateToUse)).orElseGet(() ->
-                        orgenhetStatus.equals("P") && orgNiv.equals("ORGENHET") ? getDate(stillingMaksDato).orElse(null) : null
-                )
-        );
+        return Optional.ofNullable(getDate(getLastDay(dateToUse)).orElseGet(() -> orgenhetStatus.equals("P") && orgNiv.equals("ORGENHET") ?
+                getDate(stillingMaksDato).orElse(null) : null));
     }
 
     @Override
@@ -75,40 +73,40 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public String getUniqueAgressoId() {
-        return getAgressoId()+"-"+getNavn()+"-"+getOrgNiv();
+        return getAgressoId() + "-" + getNavn() + "-" + getOrgNiv();
     }
 
-    private LocalDate getLastDay(String yyyyMM){
-        if(yyyyMM != null) {
+    private LocalDate getLastDay(String yyyyMM) {
+        if (yyyyMM != null) {
             LocalDate convertedDate = getFirstDay(yyyyMM);
             return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
         }
         return null;
     }
 
-    private LocalDate getFirstDay(String yyyyMM){
-        return LocalDate.parse(yyyyMM+"01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+    private LocalDate getFirstDay(String yyyyMM) {
+        return LocalDate.parse(yyyyMM + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
     }
 
-    private Optional<LocalDate> getDate(LocalDate date){
-        if(date != null && !date.isEqual(LocalDate.parse("2099-12-31"))){
+    private Optional<LocalDate> getDate(LocalDate date) {
+        if (date != null && !date.isEqual(LocalDate.parse("2099-12-31"))) {
             return Optional.of(date);
         }
         return Optional.empty();
     }
 
-    public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper){
-        if(getGyldigFom().isAfter(dvhOrgenhetV2.getGyldigFom())){
+    public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper) {
+        if (getGyldigFom().isAfter(dvhOrgenhetV2.getGyldigFom())) {
             this.agressoGyldigFom = dvhOrgenhetV2.getAgressoGyldigFom();
         }
-        if(getGyldigTom().orElse(LocalDate.MAX).isBefore(dvhOrgenhetV2.getGyldigTom().orElse(LocalDate.MAX))){
+        if (getGyldigTom().orElse(LocalDate.MAX).isBefore(dvhOrgenhetV2.getGyldigTom().orElse(LocalDate.MAX))) {
             this.agressoGyldigTom = dvhOrgenhetV2.getAgressoGyldigTom();
         }
-        if(dvhOrgenhetV2.orgenhetStatus.equals("N")){
+        if (dvhOrgenhetV2.orgenhetStatus.equals("N")) {
             this.orgenhetStatus = dvhOrgenhetV2.orgenhetStatus;
         }
 
-        if(!this.getRawData().isArray()){
+        if (!this.getRawData().isArray()) {
             this.setRawData(objectMapper.createArrayNode().add(this.getRawData()));
         }
         ((ArrayNode) this.getRawData()).add(dvhOrgenhetV2.getRawData());

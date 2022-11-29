@@ -9,6 +9,7 @@ public enum GraphQLAccessScope {
     MUTATE_RESSURS(AZPAuthoritiesConverter.AUTH_MUTATE_RESSURS);
 
     private final String scope;
+
     GraphQLAccessScope(String scope) {
         this.scope = scope;
     }

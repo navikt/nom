@@ -34,46 +34,30 @@ import static java.util.stream.Collectors.toMap;
 @Component
 public class PersonBatchLoader {
 
-    private final HttpGraphQlClient graphQlClient;
-
     private final static String PDL_BOLK_HENT_PERSON_QUERY = // language=graphql
             """
-                query($identer: [ID!]!) {
-                    hentPersonBolk(identer: $identer) {
-                        ident
-                        person {
-                            navn(historikk: false) {
-                                fornavn
-                                etternavn
-                                mellomnavn
-                            }
+            query($identer: [ID!]!) {
+                hentPersonBolk(identer: $identer) {
+                    ident
+                    person {
+                        navn(historikk: false) {
+                            fornavn
+                            etternavn
+                            mellomnavn
                         }
-                        code
                     }
+                    code
                 }
-                """;
+            }
+            """;
+    private final HttpGraphQlClient graphQlClient;
 
     public PersonBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, WebClient.Builder webClientBuilder) {
         var pdlProperties = appProperties.pdl();
-        this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder)
-                .url(pdlProperties.baseUrl() + "/graphql")
-                .headers(headers -> {
-                    headers.setContentType(MediaType.APPLICATION_JSON);
-                    headers.add("Tema", pdlProperties.tema());
-                })
-                .webClient(builder -> builder.filter(setBearerAuthWith(tokenRepository, pdlProperties.aadClientId())))
-                .build();
-    }
-
-    public static ExchangeFilterFunction setBearerAuthWith(TokenRepository tokenRepository, String clientId) {
-        // Utility outbound exchange filter on webclient to set the authorization header
-        return ExchangeFilterFunction.ofRequestProcessor(
-                request -> Mono.just(
-                        ClientRequest.from(request)
-                                .headers(headers -> headers.setBearerAuth(tokenRepository.getSystemAadToken(clientId).serialize()))
-                                .build()
-                )
-        );
+        this.graphQlClient = HttpGraphQlClient.builder(webClientBuilder).url(pdlProperties.baseUrl() + "/graphql").headers(headers -> {
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Tema", pdlProperties.tema());
+        }).webClient(builder -> builder.filter(setBearerAuthWith(tokenRepository, pdlProperties.aadClientId()))).build();
     }
 
     public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> loadMany(Collection<T> ressurser, Function<T, String> identResolver) {
@@ -86,16 +70,13 @@ public class PersonBatchLoader {
     }
 
     public <T> Mono<Map<T, DataFetcherResult<FolkeregisterPerson>>> getPDLBatch(Map<String, T> ressurser) {
-        return executePDLRequest(ressurser.keySet())
-                .map(response -> {
+        return executePDLRequest(ressurser.keySet()).map(response -> {
                     if (response != null && !response.isValid()) {
                         log.error("Feil i oppslag mot PDL: {}", response.getErrors());
                         throw new PDLBolkException("Oppslag mot PDL feilet", response, ErrorCode.SERVER_ERROR);
                     }
 
-                    return requireNonNull(response)
-                            .field("hentPersonBolk")
-                            .toEntity(JsonNode.class);
+                    return requireNonNull(response).field("hentPersonBolk").toEntity(JsonNode.class);
                 })
                 .flatMapIterable(Function.identity())
                 .map(person -> Map.entry(person.get("ident").asText(), convert(person)))
@@ -106,10 +87,7 @@ public class PersonBatchLoader {
     }
 
     private Mono<ClientGraphQlResponse> executePDLRequest(Collection<String> personidenter) {
-        return graphQlClient
-                .document(PDL_BOLK_HENT_PERSON_QUERY)
-                .variable("identer", personidenter)
-                .execute();
+        return graphQlClient.document(PDL_BOLK_HENT_PERSON_QUERY).variable("identer", personidenter).execute();
     }
 
     private DataFetcherResult<FolkeregisterPerson> convert(JsonNode personResult) {
@@ -120,15 +98,12 @@ public class PersonBatchLoader {
 
             return DataFetcherResult.<FolkeregisterPerson>newResult()
                     .data(FolkeregisterPerson.builder()
-                            .navn(
-                                    RessursNavn.builder()
-                                            .fornavn(navn.get("fornavn").asText())
-                                            .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
-                                            .etternavn(navn.get("etternavn").asText())
-                                            .build()
-                            )
-                            .build()
-                    )
+                                  .navn(RessursNavn.builder()
+                                                .fornavn(navn.get("fornavn").asText())
+                                                .mellomnavn(mellomnavn.isTextual() ? mellomnavn.asText() : null)
+                                                .etternavn(navn.get("etternavn").asText())
+                                                .build())
+                                  .build())
                     .build();
         }
         log.warn("Manglende data fra PDL", new GraphQLException("Manglende data fra PDL med kode: " + code));
@@ -136,16 +111,20 @@ public class PersonBatchLoader {
     }
 
     private DataFetcherResult<FolkeregisterPerson> convertToError(String code, String message) {
-        return DataFetcherResult.<FolkeregisterPerson>newResult()
-                .error(ErrorCode.valueOf(code.toUpperCase()).construct(message))
-                .build();
+        return DataFetcherResult.<FolkeregisterPerson>newResult().error(ErrorCode.valueOf(code.toUpperCase()).construct(message)).build();
+    }
+
+    public static ExchangeFilterFunction setBearerAuthWith(TokenRepository tokenRepository, String clientId) {
+        // Utility outbound exchange filter on webclient to set the authorization header
+        return ExchangeFilterFunction.ofRequestProcessor(request -> Mono.just(ClientRequest.from(request)
+                                                                                      .headers(headers -> headers.setBearerAuth(tokenRepository.getSystemAadToken(
+                                                                                              clientId).serialize()))
+                                                                                      .build()));
     }
 
     public static List<GraphQLError> handlePDLBolkException(Throwable throwable, DataFetchingEnvironment environment) {
         if (throwable instanceof PDLBolkException exception) {
-            return exception.getErrors().stream()
-                    .map(error -> exception.getErrorCode().construct(environment, exception.getMessage()))
-                    .toList();
+            return exception.getErrors().stream().map(error -> exception.getErrorCode().construct(environment, exception.getMessage())).toList();
         }
         return null;
     }

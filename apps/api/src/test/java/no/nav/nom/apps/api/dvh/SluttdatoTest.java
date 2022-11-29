@@ -15,7 +15,7 @@ public class SluttdatoTest extends DvhTestBase {
     @Test
     @SneakyThrows
     @DisplayName("Tester regler for statlige ansatte")
-    void scenario11(){
+    void scenario11() {
         // Fast statlig ansatt med sluttdato i agresso
         val test1Sluttdato = LocalDate.now().minusDays(10);
         val test1 = DvhRessurs.builder()
@@ -67,20 +67,21 @@ public class SluttdatoTest extends DvhTestBase {
                 .build();
         Assertions.assertEquals(test4Sluttdato, test4.getSluttdato());
     }
+
     @Test
     @SneakyThrows
     @DisplayName("Tester regler for kommunalt, eksternt og annen_statlig ansatte")
-    void scenario21(){
+    void scenario21() {
         scenario21Helper("NAV Kommunalt", "1");
         scenario21Helper("Annen Statlig", "2");
         scenario21Helper("Eksternt", "3");
     }
 
-    private void scenario21Helper(String remedyRessursType, String suffix){
+    private void scenario21Helper(String remedyRessursType, String suffix) {
         val test1Sluttdato = LocalDate.now().minusDays(10);
         val test1 = DvhRessurs.builder()
-                .personIdent("test1"+suffix)
-                .navIdent("test1"+suffix)
+                .personIdent("test1" + suffix)
+                .navIdent("test1" + suffix)
                 .ansattRessursKode(null)
                 .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(test1Sluttdato)
@@ -91,8 +92,8 @@ public class SluttdatoTest extends DvhTestBase {
 
 
         val test2 = DvhRessurs.builder()
-                .personIdent("test2"+suffix)
-                .navIdent("test2"+suffix)
+                .personIdent("test2" + suffix)
+                .navIdent("test2" + suffix)
                 .ansattRessursKode(null)
                 .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(LocalDate.parse("2099-12-31"))
@@ -105,16 +106,16 @@ public class SluttdatoTest extends DvhTestBase {
     @Test
     @SneakyThrows
     @DisplayName("Sluttdato edgecase - ekstern, kommunal eller annenstat har tidligere vært statlig ansatt")
-    void scenario22(){
+    void scenario22() {
         scenario22Helper("NAV Kommunalt", "10");
         scenario22Helper("Annen Statlig", "20");
         scenario22Helper("Eksternt", "30");
     }
 
-    void scenario22Helper(String remedyRessursType, String suffix){
+    void scenario22Helper(String remedyRessursType, String suffix) {
         val test = DvhRessurs.builder()
-                .personIdent("test"+suffix)
-                .navIdent("test"+suffix)
+                .personIdent("test" + suffix)
+                .navIdent("test" + suffix)
                 .ansattRessursKode("F")
                 .remedyAnsattType(remedyRessursType)
                 .remedySluttdato(LocalDate.parse("2099-12-31"))
@@ -133,7 +134,7 @@ public class SluttdatoTest extends DvhTestBase {
 
     OBSERVASJON: Det tas hensyn til permisjon for alle som er registret i agresso med unntak av de med kode "E"
      */
-    void scenario31(){
+    void scenario31() {
         // Fast statlig ansatt i permisjon:
         val test1 = DvhRessurs.builder()
                 .personIdent("test1")

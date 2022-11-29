@@ -5,14 +5,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TlfFraDvhTest extends DvhTestBase {
 
     @Test
     @DisplayName("hent telefonnr")
-    public void test1(){
+    public void test1() {
         stubTlfFromString(tlfDvhPayload);
         stubResourcesFromString(resourceInitDvhPayload);
 
@@ -33,7 +35,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
     @Test
     @DisplayName("hent telefonnr, sjekk flere")
-    public void test21(){
+    public void test21() {
         stubTlfFromString(tlfDvhPayload);
         stubResourcesFromString(resourceInitDvhPayload);
 
@@ -41,7 +43,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
 
         val resourceList = this.ressursService.getAll();
-        for(val r : resourceList){
+        for (val r : resourceList) {
             assertThat(this.dvhRepository.getTelefonNrListByNavIdent(r.navident())).hasSize(1);
         }
 
@@ -49,19 +51,27 @@ public class TlfFraDvhTest extends DvhTestBase {
 
 
     private void stubTlfFromString(String payload) {
-        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1").willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json;charset=UTF-8")
-                .withBody(payload)
-        ));
+        stubFor(
+                get("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1")
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=UTF-8")
+                                        .withBody(payload)
+                        )
+        );
     }
 
     private void stubResourcesFromString(String payload) {
-        stubFor(get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "application/json;charset=UTF-8")
-                .withBody(payload)
-        ));
+        stubFor(
+                get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").
+                        willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=UTF-8")
+                                        .withBody(payload)
+                        )
+        );
     }
 
 

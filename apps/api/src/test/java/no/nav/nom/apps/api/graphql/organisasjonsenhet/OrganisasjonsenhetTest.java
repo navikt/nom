@@ -173,7 +173,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
                 .collect(toMap(
                         o -> o.get("retning").asText(),
-                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)));
+                        o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                ));
 
         assertThat(organiserteEnheter).hasSize(1);
         assertEquals(mockEnhet2.getORGENHET_KODE(), organiserteEnheter.get("over").getAgressoId());
@@ -209,8 +210,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
 //        final var ledere = response.path("organisasjonsenhet.leder").entity(new ParameterizedTypeReference<OrgEnhetsLeder>() {}).get();
-        final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {
-        });
+        final var outputLedere = objectMapper.convertValue(outputEnhetJson.get("leder"), new TypeReference<List<OrgEnhetsLeder>>() {});
 
         assertEquals(0, outputLedere.size());
     }
@@ -249,8 +249,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
 
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {
-        });
+        final var outputKoblinger = objectMapper.convertValue(outputEnhetJson.get("koblinger"), new TypeReference<List<OrgEnhetsKobling>>() {});
 
         assertEquals(1, outputKoblinger.size());
 

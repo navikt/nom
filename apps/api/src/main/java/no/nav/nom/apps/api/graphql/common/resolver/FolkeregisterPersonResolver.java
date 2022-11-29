@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.graphql.common.resolver;
 import graphql.execution.DataFetcherResult;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
-import org.dataloader.BatchLoaderEnvironment;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
