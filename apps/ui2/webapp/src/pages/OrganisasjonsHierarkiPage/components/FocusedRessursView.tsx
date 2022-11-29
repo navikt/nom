@@ -80,7 +80,8 @@ export const FocusedRessursView = ({
               focusedRessurs.koblinger,
               (kobling) => kobling.organisasjonsenhet.agressoId
             ).map((orgTilknytning) => {
-              const { agressoId, navn, orgNiv } = orgTilknytning.orgEnhet;
+              const { agressoId, navn, orgNiv } =
+                orgTilknytning.organisasjonsenhet;
               return (
                 <span
                   className={css`
