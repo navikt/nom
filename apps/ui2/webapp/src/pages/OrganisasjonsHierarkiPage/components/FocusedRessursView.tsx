@@ -77,8 +77,8 @@ export const FocusedRessursView = ({
             </span>
 
             {uniqBy(
-              focusedRessurs.orgTilknytning,
-              (orgTilknytning) => orgTilknytning.orgEnhet.agressoId
+              focusedRessurs.koblinger,
+              (kobling) => kobling.organisasjonsenhet.agressoId
             ).map((orgTilknytning) => {
               const { agressoId, navn, orgNiv } = orgTilknytning.orgEnhet;
               return (
