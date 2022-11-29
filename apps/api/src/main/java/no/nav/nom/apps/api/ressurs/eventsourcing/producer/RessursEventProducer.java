@@ -25,7 +25,7 @@ public class RessursEventProducer {
 
     public ListenableFuture<SendResult<String, RessursEvent>> sendMessage(RessursEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
-        //saveToDB(event, eventKey);
+        saveToDB(event, eventKey);
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
     }
 
