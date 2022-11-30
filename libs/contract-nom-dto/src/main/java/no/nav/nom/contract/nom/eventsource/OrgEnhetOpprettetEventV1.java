@@ -2,6 +2,7 @@ package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
@@ -18,6 +19,7 @@ public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
     public record OrgEnhetOpprettetEventData(
             String id,
             String navn,
+            LocalDate gyldigFom,
             Optional<String> overordnetOrgEnhetFid,
             Optional<String> lederRessursFid
     ) implements Data{ }

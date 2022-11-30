@@ -1,7 +1,9 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import org.springframework.kafka.support.SendResult;
@@ -29,10 +31,23 @@ public class OrgEnhetCommandService {
                 new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData(
                         opprettOrgEnhet.id(),
                         opprettOrgEnhet.navn(),
+                        opprettOrgEnhet.gyldigFom(),
                         opprettOrgEnhet.parentOrgEnhetFid(),
                         opprettOrgEnhet.lederRessursFid()
                 ),
                 opprettOrgEnhet.inputMetadata()
         ));
     }
+
+    public ListenableFuture<SendResult<String, OrgEnhetEvent>> terminateOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
+        return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
+                fid,
+                new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
+                        avvikleOrgEnhet.fid(),
+                        avvikleOrgEnhet.gyldigTom()
+                ),
+                avvikleOrgEnhet.inputMetadata()
+        ));
+    }
+
 }

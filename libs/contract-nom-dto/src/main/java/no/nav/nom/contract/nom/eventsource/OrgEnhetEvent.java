@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 )
 @JsonSubTypes({
         @Type(value = OrgEnhetOpprettetEventV1.class),
+        @Type(value = OrgEnhetAvvikletEventV1.class),
 })
 public abstract class OrgEnhetEvent extends Event {
 

@@ -39,11 +39,11 @@ public class RessursCommadService {
         return response.block();
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opprettRessursCommand, InputMetadata inputMetadata) {
+    public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opphorRessursCommand, InputMetadata inputMetadata) {
         // TODO validate command
         return eventProducer.sendMessage(new RessursSluttetEventV1(
-                opprettRessursCommand.fid(),
-                new RessursSluttetEventV1.RessursSluttetEventData(opprettRessursCommand.sluttdato()),
+                opphorRessursCommand.fid(),
+                new RessursSluttetEventV1.RessursSluttetEventData(opphorRessursCommand.sluttdato()),
                 inputMetadata
         ));
     }
