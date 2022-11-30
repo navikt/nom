@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -38,6 +40,7 @@ public class DvhRepository {
     private List<DvhTelefon> navidentTelefonNrMap;
     private Map<String, DvhRessurs> ressursByNavIdent = Collections.emptyMap();
     private Map<String, DvhRessurs> ressursByPersonident = Collections.emptyMap();
+    private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 
     public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv, String navn) {
         return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
@@ -61,6 +64,7 @@ public class DvhRepository {
 
     public void saveLedere(List<DvhLeder> ledere) {
         this.ledere = ledere;
+        this.updateListeners();
     }
 
     public void saveOrganiseringer(List<DvhOrganisering> organiseringer) {
@@ -91,14 +95,18 @@ public class DvhRepository {
                     return false;
                 })
                 .collect(toList());
+        this.updateListeners();
     }
 
     public void saveKoblinger(List<Kobling> koblinger) {
         this.koblinger = koblinger;
+        this.updateListeners();
     }
+
 
     public void saveTlf(List<DvhTelefon> tlfList) {
         this.navidentTelefonNrMap = tlfList;
+        this.updateListeners();
     }
 
     public void clearRepository() {
@@ -106,6 +114,7 @@ public class DvhRepository {
             organiseringer.clear();
         }
         koblinger = Collections.emptyList();
+        this.updateListeners();
     }
 
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
@@ -117,5 +126,15 @@ public class DvhRepository {
         this.ressursByNavIdent = dvhRessurs.stream().collect(toMap(DvhRessurs::getNavIdent, Function.identity()));
 
         this.ressursByPersonident = dvhRessurs.stream().collect(toMap(DvhRessurs::getPersonIdent, Function.identity()));
+    }
+
+    public void addUpdateListener(Supplier<Boolean> callback) {
+        this.listeners.add(callback);
+    }
+
+    private void updateListeners() {
+        for(var listener: this.listeners){
+            listener.get();
+        }
     }
 }
