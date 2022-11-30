@@ -159,7 +159,7 @@ public class Unit4RessursDto {
                         .build(),
                 RelatedValue.builder()
                         .relationId("23")
-                        .relatedValue("0000")
+                        .relatedValue("L03034")
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
                         .build(),
