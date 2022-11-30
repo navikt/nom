@@ -116,7 +116,7 @@ public class Unit4RessursDto {
         birthDate = birthDateTemp;
 
         additionalInformation = AdditionalInformation.builder()
-                .relatedPersonId(eventData.personident())
+                .relatedPersonId(ressursNr)
                 .build();
         
         name = firstName + " " + surName;
