@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
@@ -17,8 +18,9 @@ import java.util.function.Function;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-
+@Slf4j
 @Component
+
 public class OrgTilknytningResolver {
 
     private final KoblingService koblingService;
@@ -31,8 +33,10 @@ public class OrgTilknytningResolver {
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
+        var reftime = System.currentTimeMillis();
         final var tilknytninger = koblingService.getKoblingerByNavidenter(ressurser.stream().map(Ressurs::getNavIdent).collect(toSet()), this::fromDvhKobling);
 
+        log.info("Timing of getKoblingerByNavidenter, list size: " + ressurser.size() + ", time: " + (System.currentTimeMillis()-reftime));
         return ressurser.stream().collect(toMap(Function.identity(), ressurs -> tilknytninger.getOrDefault(ressurs.getNavIdent(), emptyList())));
     }
 
