@@ -16,6 +16,8 @@ import org.apache.lucene.store.ByteBuffersDirectory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,7 +27,7 @@ import java.util.stream.Stream;
 public class WrappedLucene {
 
     private final ByteBuffersDirectory bbdir = new ByteBuffersDirectory();
-    private final Map<Class<?>,IEntityIndexer<?>> indexers;
+    private final Map<Class<?>, IEntityIndexer<?>> indexers;
 
     public WrappedLucene(List<IEntityIndexer<?>> indexers) {
         this.indexers = indexers.stream().collect(Collectors.toMap(IEntityIndexer::clazz, Function.identity()));
@@ -40,15 +42,15 @@ public class WrappedLucene {
         if (indexer == null) {
             throw new IllegalStateException("No indexer registered for type " + ent.getClass().getName());
         }
-        this.upsertEntity(ent,(IEntityIndexer<T>) indexer);
+        this.upsertEntity(ent, (IEntityIndexer<T>) indexer);
     }
 
-    public <T> void upsertEntities(Stream<T> entStream, Class<T> clazz){
+    public <T> void upsertEntities(Stream<T> entStream, Class<T> clazz) {
         var indexer = this.indexers.get(clazz);
         if (indexer == null) {
             throw new IllegalStateException("No indexer registered for type " + clazz.getName());
         }
-        this.upsertEntities(entStream,(IEntityIndexer<T>) indexer);
+        this.upsertEntities(entStream, (IEntityIndexer<T>) indexer);
     }
 
     public <T> void upsertEntities(Stream<T> entStream, IEntityIndexer<T> entityIndexer) {
@@ -81,23 +83,27 @@ public class WrappedLucene {
         }
     }
 
+
     public List<SearchResult> search(String searchterms) {
+        return search(searchterms, Collections.emptyList());
+    }
+
+    public List<SearchResult> search(String searchterms, List<Class<?>> classFilter) {
         var sz = 30;
         var out = new ArrayList<SearchResult>(sz);
         try {
             IndexReader ir = DirectoryReader.open(bbdir);
             IndexSearcher is = new IndexSearcher(ir);
 
+            var currentIndexers = indexersForDomainClasses(classFilter);
+
             var bqb = new BooleanQuery.Builder();
-            for (var indexer : this.indexers.values()) {
+            for (var indexer : currentIndexers) {
                 var typeRestrictQry = new TermQuery(new Term(IEntityIndexer.FIELD_TYPE, indexer.typeStr()));
                 var actualQry = indexer.toQuery(searchterms);
-                var combinedQry =
-                        new BooleanQuery.Builder()
-                                .add(new BooleanClause(actualQry, BooleanClause.Occur.MUST))
-                                .add(new BooleanClause(new BoostQuery(typeRestrictQry,0.0f), BooleanClause.Occur.MUST))
-                                .build();
-
+                var combinedQry = new BooleanQuery.Builder().add(new BooleanClause(actualQry, BooleanClause.Occur.MUST))
+                        .add(new BooleanClause(new BoostQuery(typeRestrictQry, 0.0f), BooleanClause.Occur.MUST))
+                        .build();
                 bqb.add(new BooleanClause(combinedQry, BooleanClause.Occur.SHOULD));
             }
             var bq = bqb.build();
@@ -115,6 +121,14 @@ public class WrappedLucene {
         }
     }
 
+    private Collection<IEntityIndexer<?>> indexersForDomainClasses(List<Class<?>> filter) {
+        if (filter.isEmpty()) {
+            return this.indexers.values();
+        } else {
+            return this.indexers.values().stream().filter(it -> filter.contains(it.clazz())).toList();
+        }
+    }
+
     private SearchResult getSearchResult(IndexReader ir, ScoreDoc d) throws IOException {
         var doc = ir.document(d.doc);
         var entType = doc.getField(IEntityIndexer.FIELD_TYPE).stringValue();
@@ -127,5 +141,4 @@ public class WrappedLucene {
         }
         throw new IllegalStateException("Encountered invalid type: " + entType);
     }
-
 }
