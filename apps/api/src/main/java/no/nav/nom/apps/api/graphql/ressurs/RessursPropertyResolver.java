@@ -51,7 +51,7 @@ public class RessursPropertyResolver {
     }
 
     public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser) {
-        return adRessursBatchLoaderWithFallback(ressurser, AdRessurs::getDisplayName, r -> r.visningsnavn().toString());
+        return adRessursBatchLoaderWithFallback(ressurser, adRessurs -> flipAdDisplayName(adRessurs.getDisplayName()), r -> r.visningsnavn().toString());
     }
 
     public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser) {
@@ -88,5 +88,18 @@ public class RessursPropertyResolver {
             log.warn("Fallback to DVH data due to AD error.");
         }
         return out;
+    }
+
+    // "Peterson, Alfred" -> "Alfred Peterson"
+    private String flipAdDisplayName(String adDisplayName) {
+        var commaPos = adDisplayName.indexOf(",");
+        var commaNotFound = commaPos == -1;
+        var multipleCommas = !commaNotFound && adDisplayName.substring(commaPos + 1).contains(",");
+        if (commaNotFound || multipleCommas) {
+            return adDisplayName;
+        }
+        var lastname = adDisplayName.substring(0, commaPos);
+        var firstAndMiddlename = adDisplayName.substring(commaPos + 1);
+        return (firstAndMiddlename + " " + lastname).trim();
     }
 }
