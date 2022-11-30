@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.navident;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -50,19 +49,16 @@ public class NavidentController {
     private final IRessursService ressursService;
     private final NIKConsumer nikConsumer;
     private final PdlConsumer pdlConsumer;
-    private final ObjectMapper mapper;
 
     public NavidentController(
             RessursCommadService ressursCommadService,
             IRessursService ressursService,
             NIKConsumer nikConsumer,
-            PdlConsumer pdlConsumer,
-            ObjectMapper mapper
+            PdlConsumer pdlConsumer
     ) {
         this.ressursCommadService = ressursCommadService;
         this.ressursService = ressursService;
         this.nikConsumer = nikConsumer;
-        this.mapper = mapper;
         this.pdlConsumer = pdlConsumer;
     }
 
@@ -84,17 +80,11 @@ public class NavidentController {
             description = "Henter en eksisterende eller oppretter en ny navident",
             security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses(
-            value = @ApiResponse(
-                    responseCode = "200",
-                    description = "Success"
-            )
-    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success")
+    })
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
-    public ResponseEntity<NavidentResponse> opprettNavident(
-            @RequestBody NavidentRequest request,
-            @NonNull JwtAuthenticationToken token
-    ) {
+    public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request, @NonNull JwtAuthenticationToken token) {
         final var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
@@ -120,9 +110,7 @@ public class NavidentController {
 
         } catch (Exception exception) {
             log.warn("Unhandled exception during call to nav-ident: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(
-                    NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff")
-            );
+            return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
         }
 
         Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
@@ -132,9 +120,7 @@ public class NavidentController {
             return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
         } catch (Exception exception) {
             log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(
-                    NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff")
-            );
+            return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
         }
     }
 
@@ -145,19 +131,12 @@ public class NavidentController {
                 navident,
                 pdlPerson,
                 Sektor.valueOf(request.getSektor()),
-                new Visningsnavn(
-                        request.getFornavn(),
-                        Optional.ofNullable(request.getMellomnavn()),
-                        request.getEtternavn()
-                ),
+                new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
                 new InputMetadata(
                         "REST",
                         "/api/v1/navident",
                         request,
-                        new Origination(
-                                SecurityUtil.getUserFromToken(token).orElseThrow(),
-                                SecurityUtil.getSystemFromToken(token).orElseThrow()
-                        )
+                        new Origination(SecurityUtil.getUserFromToken(token).orElseThrow(), SecurityUtil.getSystemFromToken(token).orElseThrow())
                 )
         );
         return ressursCommadService.createRessursSync(opprettRessursCommand);
