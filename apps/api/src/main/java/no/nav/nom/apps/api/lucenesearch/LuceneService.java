@@ -128,6 +128,11 @@ public class LuceneService {
         return this.wrappedLucene.search(term);
     }
 
+
+    public List<SearchResult> searchRessurs(String term) {
+        return this.wrappedLucene.search(term, List.of(LuceneRessurs.class));
+    }
+
     public boolean filterOrgenhetResult(SearchResult searchResult) {
         return searchResult.entType().equals(this.entTypeOrgenhet);
     }

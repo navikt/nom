@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.graphql.controller;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,9 +31,9 @@ public class GraphQLSearchController {
     }
 
     @QueryMapping("searchRessurs")
-    public List<Object> searchRessurs(@Argument("term") String term, DataFetchingEnvironment environment) {
+    public List<Ressurs> searchRessurs(@Argument("term") String term, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return Collections.emptyList();
+        return searchResolver.searchRessurs(term);
     }
 
 }

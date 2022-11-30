@@ -8,6 +8,8 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
@@ -71,4 +73,17 @@ public class SearchResolver {
         return Stream.concat(orgenheter, ressurser).toList();
 
     }
+
+
+    public List<Ressurs> searchRessurs(String term) {
+        var matchedNavidentsSorted = luceneService.searchRessurs(term).stream();
+        var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.map(SearchResult::id).toList());
+
+        return matchedNavidentsSorted
+                .map(it -> MappingUtils.toRessurs(matchedNavidentsMap.get(it.id())))
+                .toList();
+    }
+
+
+
 }
