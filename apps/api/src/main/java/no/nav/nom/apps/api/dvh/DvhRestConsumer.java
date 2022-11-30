@@ -77,14 +77,15 @@ public class DvhRestConsumer {
             log.info("Laster koblinger fra dvh");
             loadKoblingerFromDvh();
             loadLedereAndOrganiseringerFromDvh();
-            log.info("Laster tlf fra dvh");
-            loadTlfFromDvh();
-
 
             if (!initialLoadComplete.get()) {
                 initialLoadComplete.set(true);
                 log.info("Dvh load complete");
             }
+
+            // manglende tlf er ikke kritisk nok til å stoppe applikasjonen fra å være "ready"
+            log.info("Laster tlf fra dvh");
+            loadTlfFromDvh();
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
