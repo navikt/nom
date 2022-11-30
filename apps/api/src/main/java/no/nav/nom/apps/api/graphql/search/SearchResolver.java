@@ -44,8 +44,6 @@ public class SearchResolver {
         Stream<Object> ressurser;
 
         if (unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)) {
-            // termer ser ut til å fungere bedre når de er inneklemt med single-quotes
-            // men dette skjer kun i API/miljø. Rart at lokalt GUI skal oppføre seg annerledes.
             var matchedNavidentsSorted = luceneService.search(term_inp).stream()
                     .filter(luceneService::filterRessursResult)
                     .map(SearchResult::id).toList();
@@ -76,10 +74,10 @@ public class SearchResolver {
 
 
     public List<Ressurs> searchRessurs(String term) {
-        var matchedNavidentsSorted = luceneService.searchRessurs(term).stream();
-        var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.map(SearchResult::id).toList());
+        var matchedNavidentsSorted = luceneService.searchRessurs(term);
+        var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.stream().map(SearchResult::id).toList());
 
-        return matchedNavidentsSorted
+        return matchedNavidentsSorted.stream()
                 .map(it -> MappingUtils.toRessurs(matchedNavidentsMap.get(it.id())))
                 .toList();
     }

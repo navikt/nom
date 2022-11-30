@@ -9,6 +9,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class GraphQLSearchController {
     public List<Ressurs> searchRessurs(@Argument("term") String term, DataFetchingEnvironment environment) {
         counter.count(environment);
         return searchResolver.searchRessurs(term);
+
     }
 
 }

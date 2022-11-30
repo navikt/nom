@@ -17,6 +17,7 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -148,6 +149,29 @@ public class SearchTest extends GraphQLTestBase {
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
         assertThat(searchResults.toString(), containsString("NAV"));
+    }
+
+    @Test
+    @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
+    public void scenario52() {
+        luceneEnabled(true);
+        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        luceneService.addInvalidatedEntitiesToIndex();
+        luceneService.refreshOrgenhet();
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+        dvhRestConsumer.loadFromDvh();
+
+        final var response = postForResource("search/scenario5_1.graphql");
+        final var searchResults = response.path("searchRessurs").entity(JsonNode.class).get();
+
+        assertThat(searchResults.toString(), containsString("test"));
+        assertThat(searchResults.size(),equalTo(2));
     }
 }
 

@@ -1,0 +1,16 @@
+query {
+    searchRessurs(term: "fornavn") {
+        __typename
+        ... on Ressurs {
+            navIdent
+            personIdent
+            person {
+                navn {
+                    fornavn
+                    mellomnavn
+                    etternavn
+                }
+            }
+        }
+    }
+}
