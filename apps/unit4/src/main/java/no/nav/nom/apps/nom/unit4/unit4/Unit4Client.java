@@ -9,7 +9,6 @@ import lombok.val;
 import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.apps.nom.unit4.TokenRepository;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +37,6 @@ public class Unit4Client {
 
 
     public void createRessursByProxy(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
-        val requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        requestHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
-
         val body = objectMapper.writeValueAsString(unit4RessursDto);
 
         try {
@@ -49,6 +45,7 @@ public class Unit4Client {
                     .headers(httpHeaders -> {
                         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                         httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+                        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                     })
                     .bodyValue(body)
                     .retrieve()
