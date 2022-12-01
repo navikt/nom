@@ -74,17 +74,21 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
+        final var enhetAndRessursMissing = new LinkedList<DvhLeder>();
+        final var enhetMissing = new LinkedList<DvhLeder>();
+        final var ressursMissing = new LinkedList<DvhLeder>();
+
         dvhRepository.saveLedere(
                 ledere.stream()
                         .filter(l -> {
                             val enhet = cachedEnheter.get(l.getOrgEnhetNr() + "-" + l.getOrgenhetNavn() + "-" + l.getOrgNiv());
                             val ressurs = ressursService.findByNavident(l.getNavIdent());
                             if (enhet == null && ressurs.isEmpty()) {
-                                log.info("Leder relasjon mislyktes, enhet: " + l.getOrgEnhetNr() + ", navIdent: " + l.getNavIdent() + ", " + "Enhet og ressurs mangler");
+                                enhetAndRessursMissing.add(l);
                             } else if (enhet == null) {
-                                log.info("Leder relasjon mislyktes, enhet: " + l.getOrgEnhetNr() + ", navIdent: " + l.getNavIdent() + ", " + "Enhet mangler");
+                                enhetMissing.add(l);
                             } else if (ressurs.isEmpty()) {
-                                log.info("Leder relasjon mislyktes, enhet: " + l.getOrgEnhetNr() + ", navIdent: " + l.getNavIdent() + ", " + "Ressurs mangler");
+                                ressursMissing.add(l);
                             }
                             if (enhet != null && ressurs.isPresent()) {
                                 return true;
@@ -93,5 +97,9 @@ public class DvhService {
                         })
                         .toList()
         );
+
+        log.warn(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
+        log.warn(enhetMissing.size() + " leder koblinger hvor enhet mangler");
+        log.warn(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
     }
 }
