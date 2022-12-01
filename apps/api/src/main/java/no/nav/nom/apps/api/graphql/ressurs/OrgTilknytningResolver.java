@@ -34,14 +34,12 @@ public class OrgTilknytningResolver {
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
-        var reftime = System.currentTimeMillis();
-
         var navidenter = ressurser.stream().map(Ressurs::getNavIdent).collect(toSet());
         var koblingerContext = koblingService.getKoblingerByNavidenter(navidenter, it -> it).values().stream().flatMap(Collection::stream).collect(toSet());
         var agressoIdSet = koblingerContext.stream().map(kob -> new IOrgenhet.AgressoIdCombo(kob.getAgressoId(), kob.getOrgNiv())).collect(toSet());
         var orgEnheterContext = orgenhetService.findEnheterByAgressoIdConcatOrgnivIn(agressoIdSet);
 
-        var out = ressurser.stream()
+        return ressurser.stream()
                 .collect(toMap(
                         Function.identity(),
                         ressurs -> koblingService.getKoblingerByNavIdent(ressurs.getNavIdent())
@@ -49,8 +47,6 @@ public class OrgTilknytningResolver {
                                 .map(kobling -> this.fromDvhKobling(kobling, orgEnheterContext))
                                 .toList()
                 ));
-        log.info("Timing of getKoblingerByNavidenter, list size: " + ressurser.size() + ", time: " + (System.currentTimeMillis() - reftime));
-        return out;
     }
 
     private RessursOrgTilknytning fromDvhKobling(Kobling kobling, List<IOrgenhet> orgenhetContext) {
