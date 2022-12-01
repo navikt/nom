@@ -26,6 +26,14 @@ type SearchResultRaw =
       __typename: "Ressurs";
       navident: string;
       visningsnavn: string;
+      orgTilknytning: {
+        orgEnhet: {
+          agressoOrgenhetType: string;
+          agressoId: string;
+          orgNiv: string;
+          navn: string;
+        };
+      }[];
     };
 
 const Option = (properties: OptionProps<SearchOption>) => {
@@ -104,20 +112,23 @@ async function searchRessurs(inputValue: string) {
 async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
   const fetchresult = await fetch("/nom-api/graphql", {
     body: JSON.stringify({
-      operationName: "search",
-      query: `query search {
-              search(term:"${searchString ?? ""}"){
+      operationName: "searchRessurs",
+      query: `query searchRessurs {
+              searchRessurs(term:"${searchString ?? ""}"){
                 __typename
                 ... on Ressurs {
                   navident
                   visningsnavn
+                      orgTilknytning {
+                          orgEnhet {
+                            agressoOrgenhetType
+                            agressoId
+                            orgNiv
+                            navn
+                          }
+                     }
+                  }
                 }
-                ... on OrgEnhet {
-                  agressoId
-                  navn
-                  orgNiv
-                }
-              }
             }`,
       variables: {},
     }),
@@ -127,7 +138,7 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
     },
   });
   const json = await fetchresult.json();
-  return json.data.search;
+  return json.data.searchRessurs;
 }
 
 const searchResultClassname1 = css`
@@ -148,9 +159,13 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
   return results.map((r) => {
     switch (r.__typename) {
       case "Ressurs": {
+        const oe = r.orgTilknytning[0]?.orgEnhet;
+        const url = oe
+          ? "/org/" + oe.agressoId + "/" + oe.orgNiv + "/" + r.navident
+          : "/ressurs/" + r.navident;
         return {
           tag: "Ressurs",
-          url: "/ressurs/" + r.navident,
+          url: url,
           label: r.visningsnavn,
           className: searchResultClassname1,
           value: r.navident,
