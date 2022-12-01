@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.kobling;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,47 +21,69 @@ public class KoblingDvhService implements KoblingService {
 
     private final DvhRepository dvhRepository;
 
-    private final Map<String, List<Kobling>> koblingMap;
+    private final Map<String, List<Kobling>> navidentKoblingMap;
+
+    private final Map<IOrgenhet.AgressoIdCombo,List<Kobling>> agressoIdComboKoblingMap;
 
     public KoblingDvhService(DvhRepository dvhRepository) {
         this.dvhRepository = dvhRepository;
         dvhRepository.addUpdateListener(this::updateSelf);
-        this.koblingMap = new HashMap<>();
+        this.navidentKoblingMap = new HashMap<>();
+        this.agressoIdComboKoblingMap = new HashMap<>();
     }
 
     @Override
     public Collection<Kobling> getAllKoblinger() {
-        return this.koblingMap.values().stream().flatMap(Collection::stream).toList();
+        return this.navidentKoblingMap.values().stream().flatMap(Collection::stream).toList();
     }
 
     @Override
     public List<Kobling> getKoblingerByNavIdent(String navIdent) {
-        var hit = this.koblingMap.get(navIdent);
+        var hit = this.navidentKoblingMap.get(navIdent);
         return hit == null ? Collections.emptyList() : hit;
     }
 
     @Override
     public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Kobling, T> transformer) {
         return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
-            var value = this.koblingMap.get(navident);
+            var value = this.navidentKoblingMap.get(navident);
             return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
         }));
     }
 
     private boolean updateSelf() {
-        this.koblingMap.clear();
+        this.navidentKoblingMap.clear();
+
         for (var kobling : dvhRepository.getKoblinger()) {
-            var key = kobling.getNavIdent();
-            var coll = this.koblingMap.get(key);
-            if (coll != null) {
-                coll.add(kobling);
-            } else {
-                var lstnew = new ArrayList<Kobling>();
-                lstnew.add(kobling);
-                this.koblingMap.put(key, lstnew);
-            }
+            addKoblingToNavidentMap(kobling);
+            addKoblingToAgressoIdComboMap(kobling);
         }
         return true;
     }
+
+    private void addKoblingToNavidentMap(Kobling kobling) {
+        var key = kobling.getNavIdent();
+        var coll = this.navidentKoblingMap.get(key);
+        if (coll != null) {
+            coll.add(kobling);
+        } else {
+            var lstnew = new ArrayList<Kobling>();
+            lstnew.add(kobling);
+            this.navidentKoblingMap.put(key, lstnew);
+        }
+    }
+
+    private void addKoblingToAgressoIdComboMap(Kobling kobling) {
+        var key = new IOrgenhet.AgressoIdCombo(kobling.getAgressoId(), kobling.getOrgNiv());
+        var coll = this.agressoIdComboKoblingMap.get(key);
+        if (coll != null) {
+            coll.add(kobling);
+        } else {
+            var newList = new ArrayList<Kobling>();
+            newList.add(kobling);
+            this.agressoIdComboKoblingMap.put(key, newList);
+        }
+    }
+
 
 }

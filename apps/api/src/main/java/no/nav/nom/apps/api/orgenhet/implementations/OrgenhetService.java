@@ -59,6 +59,13 @@ public class OrgenhetService implements IOrgenhetService {
     }
 
     @Override
+    public List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet) {
+        return toIOrgEnhetStream(orgenhetHendelseRepository.findByAgressoIdConcatOrgnivIn(agressoIdConcatOrgnivSet.stream()
+                .map(it -> it.orgNiv() + "--" + it.agressoId())
+                .collect(Collectors.toSet())).stream()).toList();
+    }
+
+    @Override
     public Collection<IOrgenhet> getAllEnheter() {
         return toIOrgEnhetStream(orgenhetHendelseRepository.findAllByDataType(HendelseDataType.ORGENHET_V1.getDataType()).stream()).toList();
     }

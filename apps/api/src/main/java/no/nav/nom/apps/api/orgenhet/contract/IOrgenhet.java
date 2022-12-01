@@ -22,4 +22,14 @@ public interface IOrgenhet {
     Optional<OrgEnhetsKategori> getOrgEnhetsKategori();
 
     String getUniqueAgressoId();
+
+    record AgressoIdCombo(
+            String agressoId,
+            String orgNiv
+    ){
+        @Override
+        public String toString() {
+            return orgNiv + "--" + agressoId;
+        }
+    }
 }

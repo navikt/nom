@@ -49,6 +49,19 @@ public interface OrgenhetHendelseRepository extends HendelseRepository {
 
     @Query(
             value = """
+                    with tmp as (select document -> 'hendelseDataType' as htype, document -> 'hendelseData' as hdata, document ->> 'fid' as fid from t_generic_storage)
+                       , orgenhetHendelser as (select * from tmp where htype = '"no.nav.nom.hendelser:Organisasjonsenhet:v1"')
+                       , orgeenhetHendelserMedIdCombo as (select fid, (orgenhetHendelser.hdata ->> 'agressoOrgNiv') || '--' || (orgenhetHendelser.hdata ->> 'agressoId') as agressoIdCombo from orgenhetHendelser)
+                       , fidUtvalg as (select fid from orgeenhetHendelserMedIdCombo where agressoIdCombo in :agressoOrgIdComboSet)
+                    select * from t_generic_storage where document ->> 'fid' in (select fid from fidUtvalg)
+                                """,
+            nativeQuery = true
+    )
+    List<GenericStorageElement> findByAgressoIdConcatOrgnivIn(Set<String> agressoOrgIdComboSet);
+
+
+    @Query(
+            value = """
                     SELECT * FROM T_GENERIC_STORAGE
                     WHERE DOCUMENT ->> 'fid' in (:fidSet)
                     """,
