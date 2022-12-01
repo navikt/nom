@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -31,6 +32,8 @@ public class LuceneService {
 
     private final String entTypeOrgenhet;
     private final String entTypeRessurs;
+
+    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
     public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService) {
         this.orgenhetService = orgenhetService;
@@ -85,8 +88,8 @@ public class LuceneService {
             //            invalidatedOrgEnhetList.clear();
         }
 
-
         log.info("Lucene indexing completed.");
+        this.initialLoadComplete.set(true);
 
     }
 
@@ -141,4 +144,7 @@ public class LuceneService {
         return searchResult.entType().equals(this.entTypeRessurs);
     }
 
+    public synchronized boolean initLoadComplete() {
+        return initialLoadComplete.get();
+    }
 }
