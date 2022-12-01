@@ -85,7 +85,9 @@ public class EventAggregateListener {
     }
 
     public Mono<RessursState> waitForAggregate(String fid) {
-        return waitingMapByFid.put(fid, Mono.empty());
+        final Mono<RessursState> mono = Mono.empty();
+        waitingMapByFid.put(fid, mono);
+        return mono;
     }
 
     public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {
