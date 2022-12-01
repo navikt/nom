@@ -51,6 +51,14 @@ function sortUnderenheterForHierarchyFrontPage(
 }
 
 function getOverEnheterBackToRootRecursively(orgEnhet: OrgEnhet): OrgEnhet[] {
+  if (!orgEnhet) {
+    return [];
+  }
+
+  if (!orgEnhet.organiseringer || !orgEnhet.organiseringer[0]) {
+    return [];
+  }
+
   const firstOrganisering = orgEnhet.organiseringer[0]?.organisasjonsenhet;
 
   return firstOrganisering
