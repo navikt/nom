@@ -129,7 +129,7 @@ public class NavidentController {
                             "REST",
                             "/api/v1/navident",
                             request,
-                            new Origination(SecurityUtil.getUserFromToken(token).orElse(callingSystem), SecurityUtil.getSystemFromToken(token).orElseThrow())
+                            new Origination(SecurityUtil.getUserFromToken(token).orElse(callingSystem), callingSystem)
                     )
             );
 
