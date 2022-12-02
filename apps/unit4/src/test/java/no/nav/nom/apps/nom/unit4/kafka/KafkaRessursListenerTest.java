@@ -6,7 +6,12 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.*;
+import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +22,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -24,7 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ActiveProfiles({"test", "log-console"})
 @SpringBootTest
@@ -107,7 +116,8 @@ class KafkaRessursListenerTest {
                                 "Fornavn",
                                 null,
                                 "Etternavn"
-                        ))
+                        )),
+                        Optional.of(LocalDate.now())
                 )
         );
     }

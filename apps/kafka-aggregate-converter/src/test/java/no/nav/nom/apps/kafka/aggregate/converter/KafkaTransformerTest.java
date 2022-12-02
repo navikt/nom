@@ -47,6 +47,7 @@ public class KafkaTransformerTest {
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
                 Optional.of("navident"),
                 null,
+                null,
                 null
         );
 
@@ -96,6 +97,7 @@ public class KafkaTransformerTest {
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
                 Optional.of("navident"),
+                null,
                 null,
                 null
         );
