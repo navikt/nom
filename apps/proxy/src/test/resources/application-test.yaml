@@ -1,4 +1,5 @@
 DVH_BASE_URL: http://localhost:${wiremock.server.port}
+UNIT4_BASE_URL: http://localhost:${wiremock.server.port}
 
 app:
   pdl:

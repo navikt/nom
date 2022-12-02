@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,13 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestController
-@RequestMapping("/proxy/unit4")
+@RequestMapping(value = "/proxy/unit4", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class Unit4Controller {
     public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
@@ -27,7 +29,7 @@ public class Unit4Controller {
     private final AppProperties appProperties;
 
     @PostMapping("/ressurs")
-    public String postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
+    public ResponseEntity<String> postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
         log.info("Mottatt /proxy/unit4/ressurs POST request");
 
         var request = RequestEntity
@@ -38,8 +40,14 @@ public class Unit4Controller {
                         }
                 )
                 .body(body);
-
-        return restTemplate.exchange(request, String.class).getBody(); // nullptr ?
+        ResponseEntity<String> response;
+        try{
+            response = restTemplate.exchange(request, String.class);
+        } catch (RestClientResponseException restClientResponseException){
+            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
+                    .body(restClientResponseException.getMessage());
+        }
+        return response;
     }
 
     @GetMapping("/**")
