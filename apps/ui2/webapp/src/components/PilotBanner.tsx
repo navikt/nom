@@ -47,10 +47,7 @@ const PilotBanner = () => {
 
   return (
     <div className={outerDivStyles}>
-      <div
-        className={bannerStyles}
-        onClick={() => (!isOpen ? setIsOpen(true) : setIsOpen(false))}
-      >
+      <div className={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
         <img alt="Pilot info" className={iconStyles} src={InfoIcon} />
         <Heading size="small">Løsningen er i pilot</Heading>
         <div className={buttonDivStyles}>
