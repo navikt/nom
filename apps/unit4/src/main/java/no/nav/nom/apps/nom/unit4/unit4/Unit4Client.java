@@ -12,7 +12,6 @@ import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -26,7 +25,6 @@ import java.util.List;
 public class Unit4Client {
 
     private final WebClient webClient = WebClient.create();
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     private final TokenRepository tokenRepository;

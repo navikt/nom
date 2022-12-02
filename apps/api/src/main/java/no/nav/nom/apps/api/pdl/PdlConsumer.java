@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -32,6 +33,10 @@ public class PdlConsumer {
                     }
                     kjoenn {
                         kjoenn
+                    }
+                    foedsel {
+                       foedselsdato
+                       foedselsaar
                     }
                }
             }
@@ -80,6 +85,14 @@ public class PdlConsumer {
                 .get("kjoenn")
                 .asText();
 
+        final var jsonFoedsel = person.get("foedsel").get(0);
+
+        // foedselsdato might be missing, foedselsaar is always present.
+        LocalDate foedselsdato = jsonFoedsel.hasNonNull("foedselsdato") ? LocalDate.parse(jsonFoedsel.get("foedselsdato").asText()) :
+                LocalDate.of(jsonFoedsel.get("foedselsaar").asInt(), 1, 1);
+
+
+
         return Person.builder()
                 .fornavn(navn.get("fornavn")
                                  .asText())
@@ -87,6 +100,7 @@ public class PdlConsumer {
                 .etternavn(navn.get("etternavn")
                                    .asText())
                 .kjonn(Kjonn.valueOf(kjonn))
+                .foedselsdato(foedselsdato)
                 .build();
     }
 }

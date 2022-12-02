@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
@@ -77,7 +78,8 @@ public class RessursCommadService {
                                         pdlPerson.getFornavn(),
                                         pdlPerson.getMellomnavn(),
                                         pdlPerson.getEtternavn()
-                                ))
+                                )),
+                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato)
                 )
         ));
     }

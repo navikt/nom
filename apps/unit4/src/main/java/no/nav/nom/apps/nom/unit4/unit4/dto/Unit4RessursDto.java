@@ -106,14 +106,8 @@ public class Unit4RessursDto {
                 }
         ).orElseThrow(() -> new NoSuchElementException("Folkeregistrert kjoenn is missing from event"));
 
-        LocalDateTime birthDateTemp;
-        try {
-            val parsedBirthDate = LocalDate.parse(eventData.personident().substring(0, 6), DateTimeFormatter.ofPattern("ddMMyy"));
-            birthDateTemp = (parsedBirthDate.isAfter(LocalDate.now()) ? parsedBirthDate.minusYears(100) : parsedBirthDate).atStartOfDay();
-        } catch (Exception ex){
-            birthDateTemp = LocalDate.parse("1995-04-12").atStartOfDay();
-        }
-        birthDate = birthDateTemp;
+        birthDate = ((RessursOpprettetAdditionalData) record.getAdditionalData()).foedselsdato().map(LocalDate::atStartOfDay)
+                .orElseThrow(() -> new NoSuchElementException("Foedseldato is missing from event"));
 
         additionalInformation = AdditionalInformation.builder()
                 .relatedPersonId(ressursNr)
