@@ -9,15 +9,21 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Service
 public class RessursCommadService {
 
+    private final Logger log = LoggerFactory.getLogger(RessursCommadService.class);
     private final RessursEventProducer eventProducer;
     private final EventAggregateListener eventAggregateListener;
 
@@ -31,12 +37,18 @@ public class RessursCommadService {
         return createRessurs(PrefixedUlidCreator.createRessursUlid(), opprettRessursCommand);
     }
 
-    public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) {
+    public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) throws ExecutionException, InterruptedException, TimeoutException {
         final var fid = PrefixedUlidCreator.createRessursUlid();
         final var response = eventAggregateListener.waitForAggregate(fid);
         createRessurs(fid, opprettRessursCommand);
 
-        return response.block();
+        try{
+            return response.get(10, TimeUnit.SECONDS);
+        } catch (Exception e){
+            eventAggregateListener.removeWait(fid);
+            log.error("Error waiting for ressurs to be created ", e);
+            throw e;
+        }
     }
 
     public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opphorRessursCommand, InputMetadata inputMetadata) {

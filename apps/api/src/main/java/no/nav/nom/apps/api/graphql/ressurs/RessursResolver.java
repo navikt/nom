@@ -13,7 +13,6 @@ import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
-import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -34,6 +33,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 @Component
@@ -106,7 +107,7 @@ public class RessursResolver {
         }
     }
 
-    private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {
+    private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) throws ExecutionException, InterruptedException, TimeoutException {
         final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1), "STANDARD", true);
 
         if (!nikResponse.getStatusCode().is2xxSuccessful()) {
@@ -135,14 +136,10 @@ public class RessursResolver {
 
         log.debug("createRessurs for {} - {}", nikResponse.getBody().getNavident(), request.getVisningsetternavn());
 
-        return createRessursEvent(request, nikResponse.getBody().getNavident(), pdlPerson, token);
-    }
 
-
-    private RessursState createRessursEvent(OpprettRessursRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token) {
         final var opprettRessursCommand = new OpprettRessursCommand(
                 request.getPersonident(),
-                navident,
+                nikResponse.getBody().getNavident(),
                 pdlPerson,
                 request.getSektor(),
                 new Visningsnavn(

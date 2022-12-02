@@ -15,11 +15,11 @@ import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -33,7 +33,7 @@ public class EventAggregateListener {
     private final String stateTopic;
     private final RessursStateService ressursStateService;
 
-    private final Map<String, Mono<RessursState>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, CompletableFuture<RessursState>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
 
     private final AdminClient adminClient;
     private final KafkaProperties kafkaProperties;
@@ -64,7 +64,8 @@ public class EventAggregateListener {
             ressursStateService.putEventAggregate(ressurs);
             this.luceneService.invalidateRessurs(ressurs.navident());
             if (waitingMapByFid.containsKey(it.key())) {
-                waitingMapByFid.remove(it.key()).thenReturn(ressurs);
+                waitingMapByFid.remove(it.key()).complete(ressurs);
+
             }
         });
 
@@ -84,10 +85,14 @@ public class EventAggregateListener {
         return initialLoadComplete.get();
     }
 
-    public Mono<RessursState> waitForAggregate(String fid) {
-        final Mono<RessursState> mono = Mono.empty();
-        waitingMapByFid.put(fid, mono);
-        return mono;
+    public CompletableFuture<RessursState> waitForAggregate(String fid) {
+        final CompletableFuture<RessursState> completableFuture = new CompletableFuture<>();
+        waitingMapByFid.put(fid, completableFuture);
+        return completableFuture;
+    }
+
+    public void removeWait(String fid){
+        waitingMapByFid.remove(fid);
     }
 
     public boolean consumerGroupRegistedForTopic(String topic) throws ExecutionException, InterruptedException, TimeoutException {

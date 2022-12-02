@@ -116,32 +116,27 @@ public class NavidentController {
         Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
         try {
-            final var opprettetRessurs = opprettRessursHendelse(request, opprettetNavident, pdlPerson, token);
-            return ResponseEntity.ok(toNavidentResponse(opprettetRessurs));
+
+            final var opprettRessursCommand = new OpprettRessursCommand(
+                    request.getPersonident(),
+                    opprettetNavident,
+                    pdlPerson,
+                    Sektor.valueOf(request.getSektor()),
+                    new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
+                    new InputMetadata(
+                            "REST",
+                            "/api/v1/navident",
+                            request,
+                            new Origination(SecurityUtil.getUserFromToken(token).orElseThrow(), SecurityUtil.getSystemFromToken(token).orElseThrow())
+                    )
+            );
+
+            return ResponseEntity.ok(toNavidentResponse(ressursCommadService.createRessursSync(opprettRessursCommand)));
         } catch (Exception exception) {
             log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
             return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
         }
     }
-
-
-    private RessursState opprettRessursHendelse(NavidentRequest request, String navident, Optional<Person> pdlPerson, JwtAuthenticationToken token) {
-        final var opprettRessursCommand = new OpprettRessursCommand(
-                request.getPersonident(),
-                navident,
-                pdlPerson,
-                Sektor.valueOf(request.getSektor()),
-                new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
-                new InputMetadata(
-                        "REST",
-                        "/api/v1/navident",
-                        request,
-                        new Origination(SecurityUtil.getUserFromToken(token).orElseThrow(), SecurityUtil.getSystemFromToken(token).orElseThrow())
-                )
-        );
-        return ressursCommadService.createRessursSync(opprettRessursCommand);
-    }
-
 
     private NavidentResponse toNavidentResponse(RessursState ressurs) {
         return NavidentResponse.builder()
