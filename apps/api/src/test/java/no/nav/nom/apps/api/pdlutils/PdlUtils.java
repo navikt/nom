@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.pdl.Kjonn;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +69,19 @@ public class PdlUtils {
 
         val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
 
-        resultBuilder.append("{\"data\": {\"hentPerson\": { \"navn\": [")
-                .append(objectMapper.writeValueAsString(navn))
-                .append("]")
-                .append(",\"kjoenn\": [")
-                .append(objectMapper.writeValueAsString(kjoenn));
-        mockPdlResponse(resultBuilder.append("]}}}").toString());
+        val foedselsdato = objectMapper.createObjectNode()
+                .put("foedselsdato", LocalDate.now().toString())
+                .put("foedselsaar", 2000);
+
+        var personDataJson = objectMapper.createObjectNode();
+        personDataJson.set("navn", objectMapper.createArrayNode().add(objectMapper.valueToTree(navn)));
+        personDataJson.set("kjoenn", objectMapper.createArrayNode().add(objectMapper.valueToTree(kjoenn)));
+        personDataJson.set("foedsel", objectMapper.createArrayNode().add(foedselsdato));
+
+        var result = objectMapper.createObjectNode();
+        result.set("data", objectMapper.createObjectNode().set("hentPerson", personDataJson));
+
+        mockPdlResponse(objectMapper.writeValueAsString(result));
 
         return navn;
     }
