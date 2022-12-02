@@ -117,6 +117,8 @@ public class NavidentController {
 
         try {
 
+            final var callingSystem = SecurityUtil.getSystemFromToken(token).orElseThrow();
+
             final var opprettRessursCommand = new OpprettRessursCommand(
                     request.getPersonident(),
                     opprettetNavident,
@@ -127,7 +129,7 @@ public class NavidentController {
                             "REST",
                             "/api/v1/navident",
                             request,
-                            new Origination(SecurityUtil.getUserFromToken(token).orElseThrow(), SecurityUtil.getSystemFromToken(token).orElseThrow())
+                            new Origination(SecurityUtil.getUserFromToken(token).orElse(callingSystem), SecurityUtil.getSystemFromToken(token).orElseThrow())
                     )
             );
 
