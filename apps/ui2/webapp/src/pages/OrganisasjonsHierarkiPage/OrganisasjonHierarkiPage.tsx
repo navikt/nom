@@ -51,11 +51,7 @@ function sortUnderenheterForHierarchyFrontPage(
 }
 
 function getOverEnheterBackToRootRecursively(orgEnhet: OrgEnhet): OrgEnhet[] {
-  if (!orgEnhet) {
-    return [];
-  }
-
-  if (!orgEnhet.organiseringer || !orgEnhet.organiseringer[0]) {
+  if (!orgEnhet || !orgEnhet.organiseringer) {
     return [];
   }
 
