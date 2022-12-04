@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const graphiqlSrc = {
     reactdev: "https://unpkg.com/react@16/umd/react.development.js",
     reactdomdev: "https://unpkg.com/react-dom@16/umd/react-dom.development.js",
@@ -15,13 +13,13 @@ async function initVendorStorage() {
     try {
         const fetches = {};
         for (const s of Object.keys(graphiqlSrc)) {
-            fetches[s] = axios.get(graphiqlSrc[s]);
+            fetches[s] = fetch(graphiqlSrc[s]);
         }
         await Promise.allSettled(Object.values(fetches));
 
         const bodies = {};
         for (const s of Object.keys(fetches)) {
-            bodies[s] = (await fetches[s]).data;
+            bodies[s] = (await fetches[s]).text();
         }
         await Promise.allSettled(Object.values(bodies));
 
