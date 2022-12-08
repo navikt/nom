@@ -24,12 +24,9 @@ import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhe
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.context.annotation.Import;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -221,7 +218,8 @@ public class DvhDataLoader {
                 dvhOrgenhetV2.getGyldigFom(),
                 Optional.empty(),
                 Optional.empty(),
-                new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
+                StaticOrgenhetkategoriMapping.resolveFor(dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv()),
+            new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
         return orgEnhetCommandService.createOrgEnhet(opprettOrgEnhet);
     }

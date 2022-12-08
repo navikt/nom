@@ -32,8 +32,9 @@ public class OrgEnhetCommandService {
                         opprettOrgEnhet.id(),
                         opprettOrgEnhet.navn(),
                         opprettOrgEnhet.gyldigFom(),
-                        opprettOrgEnhet.parentOrgEnhetFid(),
-                        opprettOrgEnhet.lederRessursFid()
+                        opprettOrgEnhet.overordnetOrgEnhetFid(),
+                        opprettOrgEnhet.lederRessursFid(),
+                        opprettOrgEnhet.orgEnhetsKategori()
                 ),
                 opprettOrgEnhet.inputMetadata()
         ));

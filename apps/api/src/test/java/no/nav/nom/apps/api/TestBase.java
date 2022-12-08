@@ -26,6 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
@@ -51,6 +52,7 @@ import java.util.Optional;
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class TestBase {
 
     // Singleton pattern with static start and custom spring initializer

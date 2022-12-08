@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.rocksdb</groupId>
             <artifactId>rocksdbjni</artifactId>
-            <version>7.6.0</version>
         </dependency>
     </dependencies>
 
