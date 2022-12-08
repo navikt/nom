@@ -116,9 +116,6 @@ public class NavidentController {
         Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
 
         try {
-
-            final var callingSystem = SecurityUtil.getSystemFromToken(token).orElseThrow();
-
             final var opprettRessursCommand = new OpprettRessursCommand(
                     request.getPersonident(),
                     opprettetNavident,
@@ -129,7 +126,7 @@ public class NavidentController {
                             "REST",
                             "/api/v1/navident",
                             request,
-                            new Origination(SecurityUtil.getUserFromToken(token).orElse(callingSystem), callingSystem)
+                            new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
                     )
             );
 

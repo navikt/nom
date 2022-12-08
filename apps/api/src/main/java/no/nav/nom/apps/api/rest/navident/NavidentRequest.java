@@ -12,4 +12,5 @@ public class NavidentRequest {
     private String forbokstav;
     private String identType;
     private String sektor;
+    private String submitter;
 }
