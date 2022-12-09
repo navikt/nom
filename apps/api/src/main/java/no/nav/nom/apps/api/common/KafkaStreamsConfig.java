@@ -23,7 +23,7 @@ import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG;
 import static org.apache.kafka.streams.StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG;
 
-@Configuration
+//@Configuration
 //@EnableKafkaStreams - This creates a single StreamsBuilderBeanFactory, and do not support multiple streams on same topic. E.g. different Application.id's
 public class KafkaStreamsConfig {
 
@@ -38,7 +38,7 @@ public class KafkaStreamsConfig {
         return objectSerde;
     }
 
-    @Bean(name = ORGENHET_STATE_STREAMS_BUILDER_BEAN_NAME)
+//    @Bean(name = ORGENHET_STATE_STREAMS_BUILDER_BEAN_NAME)
     public FactoryBean<StreamsBuilder> orgEnhetStateStreamsBuilder(ObjectProvider<StreamsBuilderFactoryBeanCustomizer> customizers) {
         var props = commonStreamsConfigProperties();
         props.put(APPLICATION_ID_CONFIG, "orgEnhet_Eventsource2State");

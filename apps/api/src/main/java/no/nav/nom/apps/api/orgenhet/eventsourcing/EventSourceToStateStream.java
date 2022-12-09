@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@Component
+//@Component
 public class EventSourceToStateStream {
     private final static Logger log = LoggerFactory.getLogger(EventSourceToStateStream.class);
 
