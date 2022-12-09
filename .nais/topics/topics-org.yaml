@@ -63,6 +63,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: orgenhet-eventsource
   namespace: org
   labels:
@@ -88,7 +90,58 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  name: nom.orgenhet-eventsource
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: orgenhet-state-v1
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.orgenhet-state-v1
   namespace: org
   labels:
     team: org
