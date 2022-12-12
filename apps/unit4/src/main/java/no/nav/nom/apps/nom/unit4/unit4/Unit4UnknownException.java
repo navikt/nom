@@ -4,4 +4,8 @@ public class Unit4UnknownException extends Unit4Exception {
     public Unit4UnknownException(String message) {
         super(message);
     }
+
+    public Unit4UnknownException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

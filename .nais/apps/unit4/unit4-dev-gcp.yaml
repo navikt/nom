@@ -4,8 +4,8 @@ kafka-pool: nav-dev
 env:
   - name: UNIT4_BASEURL
     value: https://agresso.test.local
-  - name: SPRING_PROFILES_ACTIVE
-    value: log-logstash
+  - name: LOGGING_CONFIG
+    value: 'classpath:logback-nais.xml'
   - name: NOM_PROXY_BASEURL
     value: https://nom-proxy.dev-fss-pub.nais.io
   - name: NOM_PROXY_CLIENT_ID

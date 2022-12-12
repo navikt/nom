@@ -1,35 +1,32 @@
 app:
+  name: ${NAIS_APP_NAME:nom-unit4}
   kafka:
     listener:
-      blockSecondsOnBail: 20
-
-  name: ${NAIS_APP_NAME}
-  ressurs.topic: org.ressurs-eventsource
+      block-seconds-on-bail: PT20S
+  ressurs:
+    topic: org.ressurs-eventsource
   unit4:
-    baseUrl: ${UNIT4_BASEURL}
-    employeesPath: /agrt01-web-api/v1/employees
-    apiUsername: ${NOM_UNIT4_API_USERNAME}
-    apiPassword: ${NOM_UNIT4_API_PASSWORD}
+    base-url: ${UNIT4_BASEURL}
+    employees-path: /agrt01-web-api/v1/employees
+    api-username: ${NOM_UNIT4_API_USERNAME}
+    api-password: ${NOM_UNIT4_API_PASSWORD}
   proxy:
-    baseUrl: ${NOM_PROXY_BASEURL}
-    aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
+    base-url: ${NOM_PROXY_BASEURL}
+    aad-client-id: api://${NOM_PROXY_CLIENT_ID}/.default
 
 authentication:
   aad:
-    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
-    clientId: ${AZURE_APP_CLIENT_ID}
+    issuer-base-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    client-id: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
-nom:
-  libs:
-    utils:
-      common:
-        kafka:
-          load-properties: false
-        app:
-          load-properties: true
-
 spring:
+  application:
+    name: ${app.name}
+  main:
+    cloud-platform: kubernetes
+    banner-mode: off
+
   kafka:
     client-id: ${app.name}
     bootstrap-servers: ${KAFKA_BROKERS}
@@ -55,10 +52,31 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+
+server:
+  shutdown: graceful
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus,health,heapdump,scheduledtasks,threaddump
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api

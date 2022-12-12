@@ -19,6 +19,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -39,10 +41,10 @@ public class Unit4Client {
 
         try {
             webClient.post()
-                    .uri(appProperties.getProxy().getBaseUrl() + RESSURS_POST_ENDPOINT)
+                    .uri(appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT)
                     .headers(httpHeaders -> {
                         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.getProxy().getAadClientId()).serialize());
+                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
                         httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                     })
                     .bodyValue(body)
@@ -52,7 +54,7 @@ public class Unit4Client {
 
         } catch (WebClientResponseException wce) {
             HttpStatus httpStatus = wce.getStatusCode();
-            log.error("error", wce);
+            log.error(SECURE_LOGS, "Error posting to Unit4[{}], dumping dto({}): {} ", appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
@@ -67,6 +69,7 @@ public class Unit4Client {
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 createRessurs request error", wce);
+            log.warn(SECURE_LOGS, "Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}", appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
             throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }
@@ -94,7 +97,7 @@ public class Unit4Client {
                 }
             });
         } else if (node.isArray()) {
-            node.forEach(innerNode -> logIfNotificationMessagesInJson(innerNode));
+            node.forEach(this::logIfNotificationMessagesInJson);
         }
     }
 }

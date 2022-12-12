@@ -61,4 +61,14 @@ public abstract class Event {
             @Type(value = OrgEnhetEvent.Data.class)
     })
     public interface Data{ }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "fid='" + fid + '\'' +
+                ", data=" + data +
+                ", metadata=" + metadata +
+                ", additionalData=" + additionalData +
+                '}';
+    }
 }

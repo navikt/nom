@@ -16,13 +16,12 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles({"test", "log-console"})
+@ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
 @ExtendWith(OutputCaptureExtension.class)
 class Unit4ClientTest {
-
 
     @Autowired
     Unit4Client unit4Client;
@@ -47,7 +46,7 @@ class Unit4ClientTest {
     void createRessursByProxy_422_BadRequest_Logging(CapturedOutput output) {
         try {
             unit4Client.createRessursByProxy(dummyRessurs("010199000003"));
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
         assertTrue(output.getOut().contains("Leverandør-ID og ressurs-ID må være identiske, i henhold til systemparameteren HS_EQUAL_ID."));
     }
 
@@ -61,7 +60,7 @@ class Unit4ClientTest {
     void createRessursByProxy_422_BadRequest2_Logging(CapturedOutput output) {
         try  {
             unit4Client.createRessursByProxy(dummyRessurs("010199000004"));
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
         assertTrue(output.getOut().contains("Obligatorisk relasjon for begrepet FELLES."));
     }
 

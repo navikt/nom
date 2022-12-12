@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory;
-import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
@@ -65,12 +64,12 @@ public class TokenRepository {
 
             val aadBodyMap = new LinkedMultiValueMap<String, String>();
             aadBodyMap.add("scope", scope);
-            aadBodyMap.add("client_id", authenticationProperties.getAad().getClientId());
+            aadBodyMap.add("client_id", authenticationProperties.aad().clientId());
             aadBodyMap.add("client_assertion_type", AAD_CLIENT_ASSERTION_TYPE);
             aadBodyMap.add("client_assertion", generateClientAssertionToken());
             aadBodyMap.add("grant_type", AAD_GRANT_TYPE);
 
-            val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+            val result = restTemplate.exchange(authenticationProperties.aad().issuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
             val token = SignedJWT.parse(result.get("access_token").asText());
             cachedAadTokensByScope.put(scope, token);
             return token;
@@ -87,14 +86,14 @@ public class TokenRepository {
 
             val aadBodyMap = new LinkedMultiValueMap<String, String>();
             aadBodyMap.add("scope", scope);
-            aadBodyMap.add("client_id", authenticationProperties.getAad().getClientId());
+            aadBodyMap.add("client_id", authenticationProperties.aad().clientId());
             aadBodyMap.add("client_assertion_type", AAD_CLIENT_ASSERTION_TYPE);
             aadBodyMap.add("client_assertion", generateClientAssertionToken());
             aadBodyMap.add("assertion", assertion);
             aadBodyMap.add("grant_type", AAD_GRANT_TYPE_OBO);
             aadBodyMap.add("requested_token_use", AAD_TOKEN_USE);
 
-            val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+            val result = restTemplate.exchange(authenticationProperties.aad().issuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
             val token = SignedJWT.parse(result.get("access_token").asText());
             cachedAadTokensByUserAndScope.put(cacheKey, token);
             return token;
@@ -105,15 +104,15 @@ public class TokenRepository {
     @SneakyThrows
     private String generateClientAssertionToken() {
         val claimSet = new JWTClaimsSet.Builder()
-                .audience(authenticationProperties.getAad().getIssuerBaseUrl() + "/v2.0")
+                .audience(authenticationProperties.aad().issuerBaseUrl() + "/v2.0")
                 .expirationTime(Date.from(Instant.now().plusSeconds(60 * 5)))
-                .issuer(authenticationProperties.getAad().getClientId())
+                .issuer(authenticationProperties.aad().clientId())
                 .jwtID(UUID.randomUUID().toString())
                 .notBeforeTime(Date.from(Instant.now()))
-                .subject(authenticationProperties.getAad().getClientId())
+                .subject(authenticationProperties.aad().clientId())
                 .build();
 
-        val parsedJwk = JWK.parse(authenticationProperties.getAad().getJwk());
+        val parsedJwk = authenticationProperties.aad().jwk();
         val signer = new DefaultJWSSignerFactory().createJWSSigner(parsedJwk);
         val signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(parsedJwk.getKeyID()).build(), claimSet);
         signedJWT.sign(signer);

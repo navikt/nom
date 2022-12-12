@@ -44,6 +44,8 @@ spec:
       - name: {{this.name}}
         value: {{this.value}}
   {{/each}}
+  secureLogs:
+    enabled: true
   accessPolicy:
     inbound:
       rules:

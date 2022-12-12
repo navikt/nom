@@ -6,4 +6,8 @@ public class Unit4RequestException extends Unit4Exception {
     public Unit4RequestException(String message) {
         super(message);
     }
+
+    public Unit4RequestException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

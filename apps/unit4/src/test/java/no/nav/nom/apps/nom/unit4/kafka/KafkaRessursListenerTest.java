@@ -35,7 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-@ActiveProfiles({"test", "log-console"})
+@ActiveProfiles("test")
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
 @ExtendWith(OutputCaptureExtension.class)
@@ -86,9 +86,7 @@ class KafkaRessursListenerTest {
                 .when(unit4Client)
                 .createRessursByProxy(any());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2"));
-        });
+        Exception exception = assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2")));
         assertTrue(output.getOut().contains("Bailer ut"));
     }
 

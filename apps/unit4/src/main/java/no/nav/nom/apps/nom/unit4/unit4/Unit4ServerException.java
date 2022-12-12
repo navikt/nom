@@ -4,4 +4,8 @@ public class Unit4ServerException extends Unit4Exception {
     public Unit4ServerException(String message) {
         super(message);
     }
+
+    public Unit4ServerException(String message, Throwable throwable) {
+        super(message, throwable);
+    }
 }

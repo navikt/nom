@@ -1,31 +1,41 @@
 package no.nav.nom.apps.nom.unit4;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Getter
+import java.time.Duration;
+
 @ConstructorBinding
-@AllArgsConstructor
 @ConfigurationProperties("app")
-public class AppProperties {
+public record AppProperties(
+        Unit4 unit4,
+        Proxy proxy,
+        Kafka kafka,
+        Ressurs ressurs,
+        String name
+) {
 
-    private final Unit4 unit4;
-    private final Proxy proxy;
+    public record Unit4(
+            String baseUrl,
+            String employeesPath,
+            String apiUsername,
+            String apiPassword
+    ) {}
 
-    @Value
-    public static class Unit4 {
-        String baseUrl;
-        String employeesPath;
-        String apiUsername;
-        String apiPassword;
+    public record Proxy(
+            String baseUrl,
+            String aadClientId
+    ) {}
+
+    public record Kafka(
+            Listener listener
+    ) {
+        public record Listener(
+                Duration blockSecondsOnBail
+        ) {}
     }
 
-    @Value
-    public static class Proxy {
-        String baseUrl;
-        String aadClientId;
-    }
+    public record Ressurs(
+            String topic
+    ) {}
 }
