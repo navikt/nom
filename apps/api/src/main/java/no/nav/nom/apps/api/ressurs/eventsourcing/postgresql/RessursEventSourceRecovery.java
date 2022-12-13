@@ -54,12 +54,16 @@ public class RessursEventSourceRecovery {
                 log.error("Failed to convert DB backed-up Ressurs EventSource with key - %s".formatted(eventKey), e);
             }
             count.getAndIncrement();
+            if (count.get() % 5000==0) {
+                log.info("Processing recovery of eventsource from DB. Recovered {} events", count);
+            }
         });
-        log.info("Done recovery of eventsource from DB. Recoverd {} events", count);
+        log.info("Done recovery of eventsource from DB. Recoverd {} events", count.get());
     }
 
-    @Scheduled(initialDelay = 180000, fixedDelayString = "PT02H") // Wait 3 min, then delay 2 hours before trying again
+    @Scheduled(initialDelay = 300000, fixedDelay = 7200000) // Wait 5 min, then delay 2 hours before trying again
     public void triggerRecover() {
+        log.info("Scheduled trigger for recovery of eventsource with leader={} and recoverRessursEventSource={}", leaderElection.isLeader(), doRecover);
         if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
