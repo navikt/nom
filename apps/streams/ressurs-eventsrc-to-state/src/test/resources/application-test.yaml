@@ -1,5 +1,5 @@
-KAFKA_BROKERS: localhost:39092
-KAFKA_STREAMS_APPLICATION_ID: ressurs-state-converter
+KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
+KAFKA_STREAMS_APPLICATION_ID: ressurs-eventsrc-to-state
 spring:
   kafka:
     security:

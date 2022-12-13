@@ -1,7 +1,7 @@
 app:
   kafka:
-    eventsourceTopic: org.ressurs-eventsource
-    stateTopic: org.ressurs-state-v1
+    eventsourceTopic: org.nom.ressurs-eventsource
+    stateTopic: org.nom.ressurs-state-v1
 
 spring:
   kafka:

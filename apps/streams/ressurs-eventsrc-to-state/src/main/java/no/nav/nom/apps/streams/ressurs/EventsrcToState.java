@@ -1,4 +1,4 @@
-package no.nav.nom.apps.kafka.aggregate.converter;
+package no.nav.nom.apps.streams.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,11 +24,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Component
-class KafkaTransformer {
+class EventsrcToState {
 
-    private final static Logger log = LoggerFactory.getLogger(KafkaTransformer.class);
+    private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
 
-    public KafkaTransformer(
+    public EventsrcToState(
             @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
             @Value("${app.kafka.stateTopic}") String stateTopic,
             ObjectMapper objectMapper,

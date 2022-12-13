@@ -1,4 +1,4 @@
-package no.nav.nom.apps.kafka.aggregate.converter;
+package no.nav.nom.apps.streams.ressurs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;

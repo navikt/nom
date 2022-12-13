@@ -1,4 +1,4 @@
-package no.nav.nom.apps.kafka.aggregate.converter;
+package no.nav.nom.apps.streams.ressurs;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
