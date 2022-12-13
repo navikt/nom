@@ -1,4 +1,4 @@
-name: Build, Deploy Kafka-aggregate-converter
+name: Build, Deploy nom-ressurs-eventsrc-to-state
 
 on:
   push:
