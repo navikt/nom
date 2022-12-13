@@ -55,7 +55,7 @@
         <scala-library.version>2.13.10</scala-library.version>
         <snappy-java.test.version>1.1.8.4</snappy-java.test.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <rocksdbjni.version>7.6.0</rocksdbjni.version>
+        <rocksdbjni.version>7.7.3</rocksdbjni.version>
         <lucene-wrapper-core.version>1.1.0</lucene-wrapper-core.version>
 
         <!-- SNYK Security warnings -->
