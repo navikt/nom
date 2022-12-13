@@ -50,7 +50,7 @@ spec:
       application: nom-api
       access: readwrite
     - team: org
-      application: kafka-aggregate-converter
+      application: nom-ressurs-eventsrc-to-state
       access: read
     - team: org
       application: org-kafka-manager
@@ -110,7 +110,7 @@ spec:
       application: nom-api
       access: read
     - team: org
-      application: kafka-aggregate-converter
+      application: nom-ressurs-eventsrc-to-state
       access: readwrite
     - team: org
       application: org-kafka-manager
