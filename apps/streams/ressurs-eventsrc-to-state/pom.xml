@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ressurs-evtsrc-to-state</artifactId>
-    <name>NOM :: Apps :: Ressurs-evtsrc-to-state</name>
+    <artifactId>ressurs-eventsrc-to-state</artifactId>
+    <name>NOM :: Apps :: Streams :: Ressurs-eventsrc-to-state</name>
 
     <dependencies>
         <dependency>

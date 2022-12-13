@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: kafka-aggregate-converter
+  name: nom-ressurs-eventsrc-to-state
   namespace: org
   labels:
     team: org
@@ -12,7 +12,7 @@ spec:
       value: log-logstash
   port: 8080
   ingresses:
-    - https://kafka-aggregate-converter.dev.intern.nav.no
+    - https://nom-ressurs-eventsrc-to-state.dev.intern.nav.no
   replicas:
     min: 1
     max: 1
