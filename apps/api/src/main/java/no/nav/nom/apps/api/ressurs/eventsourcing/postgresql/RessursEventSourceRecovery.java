@@ -11,6 +11,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -57,19 +58,8 @@ public class RessursEventSourceRecovery {
         log.info("Done recovery of eventsource from DB. Recoverd {} events", count);
     }
 
-    @EventListener
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        // Triggers on context refresh  - e.g. application startup
-        // in order to recover eventSource from DB, deploy with parameter
-        //          app.kafka.ressurs.recoverRessursEventSource: true
-
-        // Is leader provisioned at once? Dunno - lets wait a bit
-        try {
-            TimeUnit.MINUTES.sleep(3);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
-        
+    @Scheduled(initialDelay = 180000, fixedDelayString = "PT02H") // Wait 3 min, then delay 2 hours before trying again
+    public void triggerRecover() {
         if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
