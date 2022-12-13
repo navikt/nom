@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 @Service
 @Slf4j
 public class RessursEventSourceRecovery {
-
+    @Value("${app.kafka.ressurs.recoverRessursEventSource:false}") private boolean doRecover;
     private final KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
     private final RessursEventSourceRepository ressursEventSourceRepository;
     private final ObjectMapper objectMapper;
@@ -32,7 +35,7 @@ public class RessursEventSourceRecovery {
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
     }
 
-    public void recoverFromDB() {
+    private void recoverFromDB() {
         ressursEventSourceRepository.findAll().forEach( es -> {
             String eventKey = es.getEventKey();
             try {
@@ -42,5 +45,13 @@ public class RessursEventSourceRecovery {
                 log.error("Failed to convert DB backed-up Ressurs EventSource with key - %s".formatted(eventKey), e);
             }
         });
+    }
+
+    @EventListener
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        // Triggers on context refresh  - e.g. application startup
+        // in order to recover eventSource from DB, deploy with parameter
+        //          app.kafka.ressurs.recoverRessursEventSource: true
+        if (doRecover) recoverFromDB();
     }
 }

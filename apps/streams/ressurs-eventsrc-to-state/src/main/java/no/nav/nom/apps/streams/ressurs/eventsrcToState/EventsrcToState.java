@@ -1,4 +1,4 @@
-package no.nav.nom.apps.streams.ressurs;
+package no.nav.nom.apps.streams.ressurs.eventsrcToState;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
