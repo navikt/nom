@@ -14,6 +14,9 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Service
 @Slf4j
 public class RessursEventSourceRecovery {
@@ -23,12 +26,12 @@ public class RessursEventSourceRecovery {
     private final ObjectMapper objectMapper;
     private final LeaderElection leaderElection;
     public RessursEventSourceRecovery(
-            @Qualifier("new_RessursEventSourceTopic") KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate_newTopic,
+            @Qualifier("new_RessursEventSourceTopic") KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
             RessursEventSourceRepository ressursEventSourceRepository,
             ObjectMapper objectMapper,
             LeaderElection leaderElection
     ) {
-        this.ressursEventProducerTemplate = ressursEventProducerTemplate_newTopic;
+        this.ressursEventProducerTemplate = ressursEventProducerTemplate;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
         this.objectMapper = objectMapper;
         this.leaderElection = leaderElection;
@@ -39,6 +42,8 @@ public class RessursEventSourceRecovery {
     }
 
     private void recoverFromDB() {
+        log.info("Starting recovery of eventsource from DB to topic {}", ressursEventProducerTemplate.getDefaultTopic());
+        AtomicInteger count = new AtomicInteger();
         ressursEventSourceRepository.findAll().forEach( es -> {
             String eventKey = es.getEventKey();
             try {
@@ -47,7 +52,9 @@ public class RessursEventSourceRecovery {
             } catch (JsonProcessingException e) {
                 log.error("Failed to convert DB backed-up Ressurs EventSource with key - %s".formatted(eventKey), e);
             }
+            count.getAndIncrement();
         });
+        log.info("Done recovery of eventsource from DB. Recoverd {} events", count);
     }
 
     @EventListener
@@ -55,6 +62,14 @@ public class RessursEventSourceRecovery {
         // Triggers on context refresh  - e.g. application startup
         // in order to recover eventSource from DB, deploy with parameter
         //          app.kafka.ressurs.recoverRessursEventSource: true
+
+        // Is leader provisioned at once? Dunno - lets wait a bit
+        try {
+            TimeUnit.MINUTES.sleep(3);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+        
         if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
