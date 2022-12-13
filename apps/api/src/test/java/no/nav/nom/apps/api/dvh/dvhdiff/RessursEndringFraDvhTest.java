@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class RessursEndringFraDvhTest extends DvhTestBase {
 
     @SpyBean
-    private KafkaTemplate<String, RessursEvent> eventProducerTemplate;
+    private KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
 
     @Test
     @DisplayName("Ressurser fra datavarehus trigger opprett event")
@@ -56,7 +56,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         ArgumentCaptor<RessursOpprettetEventV1> eventArgumentCaptor = ArgumentCaptor.forClass(RessursOpprettetEventV1.class);
 
         loadFromDvh();
-        Mockito.verify(eventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(response.size())).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
         final var eventsByPersonident = eventArgumentCaptor.getAllValues()
                 .stream()
                 .collect(Collectors.toMap(e -> ((RessursOpprettetEventV1.RessursOpprettetEventData) e.getData()).personident(), Function.identity()));
@@ -80,7 +80,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 )
         );
         loadFromDvh();
-        Mockito.verifyNoInteractions(eventProducerTemplate);
+        Mockito.verifyNoInteractions(ressursEventProducerTemplate);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
 
         loadFromDvh();
-        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
@@ -157,7 +157,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         dvhRessursUtils.addToResponse(response2);
         loadFromDvh();
 
-        Mockito.verify(eventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
