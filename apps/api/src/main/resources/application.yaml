@@ -5,7 +5,7 @@ app:
       eventsourceTopic: org.ressurs-eventsource
       newStateTopic: org.nom.ressurs-state-v1
       newEventsourceTopic: org.nom.ressurs-eventsource
-      recoverRessursEventSource: false
+      recoverRessursEventSource: true
     orgEnhet:
       stateTopic: org.orgenhet-state-v1
       eventsourceTopic: org.orgenhet-eventsource
