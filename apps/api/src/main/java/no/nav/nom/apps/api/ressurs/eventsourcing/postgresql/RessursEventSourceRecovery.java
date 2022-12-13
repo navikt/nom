@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -20,15 +21,17 @@ public class RessursEventSourceRecovery {
     private final KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate;
     private final RessursEventSourceRepository ressursEventSourceRepository;
     private final ObjectMapper objectMapper;
-
+    private final LeaderElection leaderElection;
     public RessursEventSourceRecovery(
             @Qualifier("new_RessursEventSourceTopic") KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate_newTopic,
             RessursEventSourceRepository ressursEventSourceRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            LeaderElection leaderElection
     ) {
         this.ressursEventProducerTemplate = ressursEventProducerTemplate_newTopic;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
         this.objectMapper = objectMapper;
+        this.leaderElection = leaderElection;
     }
 
     private ListenableFuture<SendResult<String, RessursEvent>> sendMessage(String eventKey, RessursEvent event) {
@@ -52,6 +55,6 @@ public class RessursEventSourceRecovery {
         // Triggers on context refresh  - e.g. application startup
         // in order to recover eventSource from DB, deploy with parameter
         //          app.kafka.ressurs.recoverRessursEventSource: true
-        if (doRecover) recoverFromDB();
+        if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
