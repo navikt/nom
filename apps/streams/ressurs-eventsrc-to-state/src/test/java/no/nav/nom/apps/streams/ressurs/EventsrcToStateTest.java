@@ -1,4 +1,4 @@
-package no.nav.nom.apps.kafka.aggregate.converter;
+package no.nav.nom.apps.streams.ressurs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 
-public class KafkaTransformerTest {
+public class EventsrcToStateTest {
     private ObjectMapper objectMapper = configureObjectMapper();
     private TestInputTopic<String, RessursEvent> inputTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
@@ -162,7 +162,7 @@ public class KafkaTransformerTest {
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
 
 
-        new KafkaTransformer(
+        new EventsrcToState(
                 "inputTopic",
                 "outputTopic",
                 objectMapper,
