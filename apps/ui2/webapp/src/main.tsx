@@ -1,6 +1,6 @@
 import "@navikt/ds-css";
 import "@navikt/ds-css-internal";
-import "./resources/designSystemColorsOverrides.css";
+import "./designSystemOverrides.css";
 
 import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/css";

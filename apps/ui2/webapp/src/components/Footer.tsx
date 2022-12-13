@@ -1,5 +1,6 @@
 import { css } from "@emotion/css";
 import { EmailFilled } from "@navikt/ds-icons";
+import { Link } from "@navikt/ds-react";
 
 import { slackNom } from "./Images";
 
@@ -18,13 +19,30 @@ export function Footer() {
         gap: 60px;
       `}
     >
-      <a
-        href="https://nav-it.slack.com/archives/C0362LA7ZLN"
-        rel="noopener noreferrer"
-        target="_blank"
+      <div
+        className={css`
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        `}
       >
-        <img alt="nom slack" src={slackNom}></img>
-      </a>
+        <img
+          alt="slack"
+          className={css`
+            width: 32px;
+            height: 32px;
+          `}
+          src={slackNom}
+        />
+        <a
+          className={css`
+            color: white;
+          `}
+          href={"https://nav-it.slack.com/archives/C0362LA7ZLN"}
+        >
+          #nom
+        </a>
+      </div>
       <div
         className={css`
           display: flex;

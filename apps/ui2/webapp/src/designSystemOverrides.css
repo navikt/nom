@@ -16,3 +16,18 @@
     --navds-text-field-color-border-hover: var(--nom-primary);
     --navds-semantic-color-link: var(--nom-primary);
 }
+
+
+
+a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.navds-button {
+    border-radius: 8px;
+}

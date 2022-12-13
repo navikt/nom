@@ -61,7 +61,9 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             padding: 1rem 0;
           `}
         >
-          <Heading size="medium">{orgEnhet.navn}</Heading>
+          <Heading level={"2"} size="medium">
+            {orgEnhet.navn}
+          </Heading>
           Leder:{" "}
           <span>
             {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
@@ -84,6 +86,7 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
           className={css`
             padding: 1rem 0;
           `}
+          level={"2"}
           size="medium"
         >
           {ressurs.visningsnavn ?? "Uten navn"}

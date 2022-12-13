@@ -56,8 +56,8 @@ const NavHeader = () => {
   return (
     <div className={outerDiv}>
       <div className={innerDiv}>
-        <Link className={verticallyCenter} to="/">
-          <img alt="logo" src={nomLogoCircle} />
+        <Link className={verticallyCenter} title={"Hjem"} to="/">
+          <img alt="Forside NOM" src={nomLogoCircle} />
         </Link>
 
         {/*<Search*/}

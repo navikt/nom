@@ -62,7 +62,7 @@ export function SearchBar() {
       cacheOptions
       className={css`
         cursor: text;
-        width: 500px;
+        min-width: 200px;
         border-radius: var(--navds-border-radius-medium);
         border: 1px solid var(--navds-select-color-border);
 
@@ -94,10 +94,15 @@ export function SearchBar() {
           boxShadow: "none",
           border: 0,
           cursor: "text",
+          div: { div: { color: `var(--navds-dropdown-menu-color)` } },
         }),
         // Make border and size of input box to be identical with those from DesignSystem
         valueContainer: (base) => ({ ...base, padding: "8px", color: "black" }),
+        indicatorSeparator: (base) => ({ ...base, display: "none" }),
+        dropdownIndicator: (base) => ({ ...base, display: "none" }),
+
       }}
+
     />
   );
 }

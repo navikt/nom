@@ -66,7 +66,7 @@ export const ValgtEnhet = ({
       `}
     >
       <div>
-        <Heading size="large">
+        <Heading level={"2"} size="large">
           <Building
             className={css`
               color: var(--navds-global-color-lightblue-800);

@@ -15,4 +15,4 @@ export { default as person } from "../resources/person.svg";
 export { default as questionMarkIcon } from "../resources/questionmark.svg";
 export { default as ressursLogo } from "../resources/ressursLogo.svg";
 export { default as searchIcon } from "../resources/searchIcon.svg";
-export { default as slackNom } from "../resources/slackNom.svg";
+export { default as slackNom } from "../resources/slackWhite.svg";

@@ -41,6 +41,7 @@ export const FocusedRessursView = ({
             className={css`
               margin-bottom: var(--navds-spacing-3);
             `}
+            level={"2"}
             size="large"
           >
             {focusedRessurs.visningsnavn ?? "Uten navn"}
