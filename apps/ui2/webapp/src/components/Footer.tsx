@@ -1,6 +1,5 @@
 import { css } from "@emotion/css";
 import { EmailFilled } from "@navikt/ds-icons";
-import { Link } from "@navikt/ds-react";
 
 import { slackNom } from "./Images";
 

@@ -100,9 +100,7 @@ export function SearchBar() {
         valueContainer: (base) => ({ ...base, padding: "8px", color: "black" }),
         indicatorSeparator: (base) => ({ ...base, display: "none" }),
         dropdownIndicator: (base) => ({ ...base, display: "none" }),
-
       }}
-
     />
   );
 }
