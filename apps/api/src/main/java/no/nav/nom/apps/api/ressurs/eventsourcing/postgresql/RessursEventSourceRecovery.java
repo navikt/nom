@@ -13,10 +13,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -42,26 +44,30 @@ public class RessursEventSourceRecovery {
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
     }
 
-    private void recoverFromDB() {
+    @Transactional(readOnly = true)
+    public void recoverFromDB() {
         log.info("Starting recovery of eventsource from DB to topic {}", ressursEventProducerTemplate.getDefaultTopic());
         AtomicInteger count = new AtomicInteger();
-        ressursEventSourceRepository.findAll().forEach( es -> {
-            String eventKey = es.getEventKey();
-            try {
-                RessursEvent event = objectMapper.treeToValue(es.getPayload(), RessursEvent.class);
-                sendMessage(eventKey, event);
-            } catch (JsonProcessingException e) {
-                log.error("Failed to convert DB backed-up Ressurs EventSource with key - %s".formatted(eventKey), e);
-            }
-            count.getAndIncrement();
-            if (count.get() % 5000==0) {
-                log.info("Processing recovery of eventsource from DB. Recovered {} events", count);
-            }
-        });
+        try (Stream<RessursEventSource> eventSource = ressursEventSourceRepository.findAllBy()) {
+            eventSource.forEach( es -> {
+                String eventKey = es.getEventKey();
+                try {
+                    RessursEvent event = objectMapper.treeToValue(es.getPayload(), RessursEvent.class);
+                    sendMessage(eventKey, event);
+                } catch (JsonProcessingException e) {
+                    log.error("Failed to convert DB backed-up Ressurs EventSource with key - %s".formatted(eventKey), e);
+                }
+                count.getAndIncrement();
+                if (count.get() % 5000 == 0) {
+                    log.info("Processing recovery of eventsource from DB. Recovered {} events", count);
+                }
+            });
+        }
         log.info("Done recovery of eventsource from DB. Recoverd {} events", count.get());
     }
 
     @Scheduled(initialDelay = 300000, fixedDelay = 7200000) // Wait 5 min, then delay 2 hours before trying again
+    @Transactional
     public void triggerRecover() {
         log.info("Scheduled trigger for recovery of eventsource with leader={} and recoverRessursEventSource={}", leaderElection.isLeader(), doRecover);
         if (leaderElection.isLeader() && doRecover) recoverFromDB();
