@@ -73,7 +73,7 @@ public class RessursEventSourceRecovery {
         if (doRecover) {
             // wait a bit for new leader election after redeploy
             ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.schedule(this::triggerRecover, 1, TimeUnit.MINUTES);
+            executorService.schedule(this::triggerRecover, 5, TimeUnit.MINUTES);
         }
     }
 
