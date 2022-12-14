@@ -7,15 +7,16 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -46,7 +47,7 @@ public class RessursEventSourceRecovery {
 
     @Transactional(readOnly = true)
     public void recoverFromDB() {
-        log.info("Starting recovery of eventsource from DB to topic {}", ressursEventProducerTemplate.getDefaultTopic());
+        log.info("Starting ressurs recovery of eventsource from DB to topic {}", ressursEventProducerTemplate.getDefaultTopic());
         AtomicInteger count = new AtomicInteger();
         try (Stream<RessursEventSource> eventSource = ressursEventSourceRepository.findAllBy()) {
             eventSource.forEach( es -> {
@@ -59,17 +60,26 @@ public class RessursEventSourceRecovery {
                 }
                 count.getAndIncrement();
                 if (count.get() % 5000 == 0) {
-                    log.info("Processing recovery of eventsource from DB. Recovered {} events", count);
+                    log.info("Processing ressurs recovery of eventsource from DB. Recovered {} events", count);
                 }
             });
         }
-        log.info("Done recovery of eventsource from DB. Recoverd {} events", count.get());
+        log.info("Done ressurs recovery of eventsource from DB. Recoverd {} events", count.get());
     }
 
-    @Scheduled(initialDelay = 300000, fixedDelay = 7200000) // Wait 5 min, then delay 2 hours before trying again
+    @EventListener
+    public void triggerRecoverAfterStartup(ApplicationReadyEvent event) {
+        log.info("Application startup event in ressurs recovery of eventsource with recoverRessursEventSource={}", doRecover);
+        if (doRecover) {
+            // wait a bit for new leader election after redeploy
+            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+            executorService.schedule(this::triggerRecover, 1, TimeUnit.MINUTES);
+        }
+    }
+
     @Transactional
     public void triggerRecover() {
-        log.info("Scheduled trigger for recovery of eventsource with leader={} and recoverRessursEventSource={}", leaderElection.isLeader(), doRecover);
+        log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
         if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }

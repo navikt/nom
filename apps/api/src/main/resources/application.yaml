@@ -118,7 +118,7 @@ management:
       exposure:
         include: prometheus,health,mappings,flyway,info,loggers,metrics
 
-app.kafka.ressurs.recoverRessursEventSource: false
+app.kafka.ressurs.recoverRessursEventSource: true
 
 app:
   graphql:
