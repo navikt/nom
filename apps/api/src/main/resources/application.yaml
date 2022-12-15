@@ -1,10 +1,8 @@
 app:
   kafka:
     ressurs:
-      stateTopic: org.ressurs-state-v1
-      eventsourceTopic: org.ressurs-eventsource
-      newStateTopic: org.nom.ressurs-state-v1
-      newEventsourceTopic: org.nom.ressurs-eventsource
+      stateTopic: org.nom.ressurs-state-v1
+      eventsourceTopic: org.nom.ressurs-eventsource
     orgEnhet:
       stateTopic: org.orgenhet-state-v1
       eventsourceTopic: org.orgenhet-eventsource
@@ -119,10 +117,6 @@ management:
         include: prometheus,health,mappings,flyway,info,loggers,metrics
 
 app:
-  kafka:
-    ressurs:
-      stateTopic: org.nom.ressurs-state-v1
-      eventsourceTopic: org.nom.ressurs-eventsource
   graphql:
     auth:
       clients:
@@ -165,8 +159,6 @@ spring:
   graphql:
     graphiql:
       enabled: false # Disable graphiql in production
-
-app.kafka.ressurs.recoverRessursEventSource: true
 
 app:
   graphql:
