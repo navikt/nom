@@ -166,7 +166,7 @@ spring:
     graphiql:
       enabled: false # Disable graphiql in production
 
-app.kafka.ressurs.recoverRessursEventSource: false
+app.kafka.ressurs.recoverRessursEventSource: true
 
 app:
   graphql:
