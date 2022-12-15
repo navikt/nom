@@ -3,6 +3,7 @@ app:
     ressurs:
       stateTopic: org.nom.ressurs-state-v1
       eventsourceTopic: org.nom.ressurs-eventsource
+      newEventsourceTopic: org.nom.ressurs-eventsource
     orgEnhet:
       stateTopic: org.orgenhet-state-v1
       eventsourceTopic: org.orgenhet-eventsource
@@ -165,7 +166,6 @@ app:
     ressurs:
       stateTopic: org.nom.ressurs-state-v1
       eventsourceTopic: org.ressurs-eventsource
-      newEventsourceTopic: org.nom.ressurs-eventsource
       recoverRessursEventSource: true
   graphql:
     auth:
