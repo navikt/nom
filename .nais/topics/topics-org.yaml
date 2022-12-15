@@ -33,6 +33,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.ressurs-eventsource
   namespace: org
   labels:
@@ -94,6 +96,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: nom.ressurs-state-v1
   namespace: org
   labels:
@@ -117,33 +121,6 @@ spec:
       access: read
     - team: team-nof
       application: fullmakt-state-converter
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-  name: orgenhet-eventsource
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    retentionBytes: -1
-    retentionHours: -1
-  acl:
-    - team: nom
-      application: nom-api
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
       access: read
 
 ---
