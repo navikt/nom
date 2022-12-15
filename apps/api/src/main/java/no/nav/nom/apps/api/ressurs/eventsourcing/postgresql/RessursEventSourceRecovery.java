@@ -102,6 +102,6 @@ public class RessursEventSourceRecovery {
     @Transactional
     public void triggerRecoveryIfLeader() {
         log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
-        if (leaderElection.isLeader() && doRecover) recoverFromDB();
+        if (leaderElection.isLeader()) recoverFromDB();
     }
 }
