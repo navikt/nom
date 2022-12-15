@@ -118,9 +118,11 @@ management:
       exposure:
         include: prometheus,health,mappings,flyway,info,loggers,metrics
 
-app.kafka.ressurs.recoverRessursEventSource: true
-
 app:
+  kafka:
+    ressurs:
+      stateTopic: org.nom.ressurs-state-v1
+      eventsourceTopic: org.nom.ressurs-eventsource
   graphql:
     auth:
       clients:
@@ -163,6 +165,8 @@ spring:
   graphql:
     graphiql:
       enabled: false # Disable graphiql in production
+
+app.kafka.ressurs.recoverRessursEventSource: false
 
 app:
   graphql:
