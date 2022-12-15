@@ -39,7 +39,7 @@ public class RessursEventSourceRecovery {
     private TransactionTemplate transactionTemplate;
     private final TaskExecutor taskExecutor;
     public RessursEventSourceRecovery(
-            @Qualifier("new_RessursEventSourceTopic") KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
+            KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
             RessursEventSourceRepository ressursEventSourceRepository,
             ObjectMapper objectMapper,
             LeaderElection leaderElection,
