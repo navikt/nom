@@ -9,17 +9,21 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+
+import static org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED;
 
 @Service
 @Slf4j
@@ -29,16 +33,24 @@ public class RessursEventSourceRecovery {
     private final RessursEventSourceRepository ressursEventSourceRepository;
     private final ObjectMapper objectMapper;
     private final LeaderElection leaderElection;
+
+    private final PlatformTransactionManager transactionManager;
+
+    private TransactionTemplate transactionTemplate;
+    private final TaskExecutor taskExecutor;
     public RessursEventSourceRecovery(
             @Qualifier("new_RessursEventSourceTopic") KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
             RessursEventSourceRepository ressursEventSourceRepository,
             ObjectMapper objectMapper,
-            LeaderElection leaderElection
+            LeaderElection leaderElection,
+            PlatformTransactionManager transactionManager, TaskExecutor taskExecutor
     ) {
         this.ressursEventProducerTemplate = ressursEventProducerTemplate;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
         this.objectMapper = objectMapper;
         this.leaderElection = leaderElection;
+        this.transactionManager = transactionManager;
+        this.taskExecutor = taskExecutor;
     }
 
     private ListenableFuture<SendResult<String, RessursEvent>> sendMessage(String eventKey, RessursEvent event) {
@@ -67,18 +79,29 @@ public class RessursEventSourceRecovery {
         log.info("Done ressurs recovery of eventsource from DB. Recoverd {} events", count.get());
     }
 
-    @Transactional(readOnly = true)
     @EventListener
     public void triggerRecoverAfterStartup(ApplicationReadyEvent event) {
         log.info("Application startup event in ressurs recovery of eventsource with recoverRessursEventSource={}", doRecover);
         if (doRecover) {
-            // wait a bit for new leader election after redeploy
-            try {
-                TimeUnit.MINUTES.sleep(5);
-            } catch (Exception ignored) {
-            }
-            log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
-            if (leaderElection.isLeader() && doRecover) recoverFromDB();
+            taskExecutor.execute(() -> {
+                // wait a bit for new leader election after redeploy
+                try {
+                    TimeUnit.MINUTES.sleep(5);
+                } catch (Exception ignored) {
+                }
+                transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.setIsolationLevel(ISOLATION_READ_COMMITTED);
+                transactionTemplate.execute( status -> {
+                    triggerRecoveryIfLeader();
+                    return "done";
+                });
+            });
         }
+    }
+
+    @Transactional
+    public void triggerRecoveryIfLeader() {
+        log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
+        if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
