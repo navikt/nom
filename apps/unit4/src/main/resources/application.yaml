@@ -4,7 +4,7 @@ app:
     listener:
       block-seconds-on-bail: PT20S
   ressurs:
-    topic: org.ressurs-eventsource
+    topic: org.nom.ressurs-eventsource
   unit4:
     base-url: ${UNIT4_BASEURL}
     employees-path: /agrt01-web-api/v1/employees
