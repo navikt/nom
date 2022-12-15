@@ -67,19 +67,18 @@ public class RessursEventSourceRecovery {
         log.info("Done ressurs recovery of eventsource from DB. Recoverd {} events", count.get());
     }
 
+    @Transactional(readOnly = true)
     @EventListener
     public void triggerRecoverAfterStartup(ApplicationReadyEvent event) {
         log.info("Application startup event in ressurs recovery of eventsource with recoverRessursEventSource={}", doRecover);
         if (doRecover) {
             // wait a bit for new leader election after redeploy
-            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-            executorService.schedule(this::triggerRecover, 5, TimeUnit.MINUTES);
+            try {
+                TimeUnit.MINUTES.sleep(5);
+            } catch (Exception ignored) {
+            }
+            log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
+            if (leaderElection.isLeader() && doRecover) recoverFromDB();
         }
-    }
-
-    @Transactional
-    public void triggerRecover() {
-        log.info("Trigger for ressurs recovery of eventsource with leader={}", leaderElection.isLeader());
-        if (leaderElection.isLeader() && doRecover) recoverFromDB();
     }
 }
