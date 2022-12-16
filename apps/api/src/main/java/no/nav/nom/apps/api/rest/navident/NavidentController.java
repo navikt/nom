@@ -141,7 +141,8 @@ public class NavidentController {
                             "/api/v1/navident",
                             request,
                             new Origination(initiatedBy, SecurityUtil.getSystemFromToken(token).orElseThrow())
-                    )
+                    ),
+                    null
             );
 
             return ResponseEntity.ok(toNavidentResponse(ressursCommadService.createRessursSync(opprettRessursCommand)));

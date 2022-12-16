@@ -79,7 +79,8 @@ public class RessursCommadService {
                                         pdlPerson.getMellomnavn(),
                                         pdlPerson.getEtternavn()
                                 )),
-                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato)
+                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
+                        Optional.ofNullable(opprettRessursCommand.startdato())
                 )
         ));
     }

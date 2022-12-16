@@ -50,7 +50,8 @@ public class EventsrcToStateTest {
                 Optional.of("navident"),
                 null,
                 null,
-                null
+                null,
+                Optional.of(LocalDate.now())
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(
@@ -101,7 +102,8 @@ public class EventsrcToStateTest {
                 Optional.of("navident"),
                 null,
                 null,
-                null
+                null,
+                Optional.of(LocalDate.now())
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(

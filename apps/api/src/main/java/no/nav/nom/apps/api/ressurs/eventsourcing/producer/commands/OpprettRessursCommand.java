@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public record OpprettRessursCommand(
@@ -13,5 +14,6 @@ public record OpprettRessursCommand(
         Optional<Person> pdlPerson,
         Sektor sektor,
         Visningsnavn visningsnavn,
-        InputMetadata inputMetadata
+        InputMetadata inputMetadata,
+        LocalDate startdato
 ) implements RessursCommand {}
