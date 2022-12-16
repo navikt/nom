@@ -24,21 +24,9 @@ public class RessursEventKafkaConfig {
     }
 
     @Bean
-    @Primary
     KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate(
             ProducerFactory<String, RessursEvent> ressursEventProducerFactory,
             @Value("${app.kafka.ressurs.eventsourceTopic}") String eventsourceTopic
-    ) {
-        final var eventsourceTemplate = new KafkaTemplate<>(ressursEventProducerFactory);
-        eventsourceTemplate.setDefaultTopic(eventsourceTopic);
-
-        return eventsourceTemplate;
-    }
-
-    @Bean(name="new_RessursEventSourceTopic")
-    KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate_newTopic(
-            ProducerFactory<String, RessursEvent> ressursEventProducerFactory,
-            @Value("${app.kafka.ressurs.newEventsourceTopic}") String eventsourceTopic
     ) {
         final var eventsourceTemplate = new KafkaTemplate<>(ressursEventProducerFactory);
         eventsourceTemplate.setDefaultTopic(eventsourceTopic);

@@ -9,6 +9,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash-mdc, prod
+    - name: JAVA_OPTS
+      value: "-Xms512m -Xmx1024m"
   envFrom:
     - secret: nom-sluttdato-override-json
   image: {{image}}

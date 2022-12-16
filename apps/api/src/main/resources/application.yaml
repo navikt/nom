@@ -1,11 +1,8 @@
 app:
   kafka:
     ressurs:
-      stateTopic: org.ressurs-state-v1
-      eventsourceTopic: org.ressurs-eventsource
-      newStateTopic: org.nom.ressurs-state-v1
-      newEventsourceTopic: org.nom.ressurs-eventsource
-      recoverRessursEventSource: false
+      stateTopic: org.nom.ressurs-state-v1
+      eventsourceTopic: org.nom.ressurs-eventsource
     orgEnhet:
       stateTopic: org.orgenhet-state-v1
       eventsourceTopic: org.orgenhet-eventsource
@@ -118,6 +115,7 @@ management:
     web:
       exposure:
         include: prometheus,health,mappings,flyway,info,loggers,metrics
+
 app:
   graphql:
     auth:

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.common.Utils;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
@@ -94,19 +93,6 @@ public class NavidentController {
                     .get();
         }
 
-        final var initiatedBy = request.getSubmitter().toUpperCase();
-
-        try{
-            Utils.validateNavident(initiatedBy);
-        } catch (IllegalArgumentException illegalArgumentException){
-            return ResponseEntity.ok(
-                    NavidentResponse.medFeilmelding(
-                            HttpStatus.BAD_REQUEST,
-                            illegalArgumentException.getMessage()
-                    )
-            );
-        }
-
         String opprettetNavident;
         try {
             final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
@@ -140,7 +126,7 @@ public class NavidentController {
                             "REST",
                             "/api/v1/navident",
                             request,
-                            new Origination(initiatedBy, SecurityUtil.getSystemFromToken(token).orElseThrow())
+                            new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
                     ),
                     null
             );
