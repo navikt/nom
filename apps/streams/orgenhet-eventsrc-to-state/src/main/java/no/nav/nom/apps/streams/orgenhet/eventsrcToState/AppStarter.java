@@ -1,4 +1,4 @@
-package no.nav.nom.apps.streams.orgenhet.eventsrcToState.eventsrcToState;
+package no.nav.nom.apps.streams.orgenhet.eventsrcToState;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

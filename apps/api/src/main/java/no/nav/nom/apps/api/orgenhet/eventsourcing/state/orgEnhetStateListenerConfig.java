@@ -1,7 +1,7 @@
-package no.nav.nom.apps.api.ressurs.eventsourcing.state;
+package no.nav.nom.apps.api.orgenhet.eventsourcing.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -14,10 +14,10 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.Map;
 
 @Configuration
-public class EventAggregateListenerConfig {
+public class orgEnhetStateListenerConfig {
     @Bean
-    ConsumerFactory<String, RessursState> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
-        final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
+    ConsumerFactory<String, OrgEnhetState> orgEnhetStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        final var jsonDeserializer = new JsonDeserializer<>(OrgEnhetState.class, objectMapper);
 
         jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"), true);
 
@@ -25,8 +25,8 @@ public class EventAggregateListenerConfig {
     }
 
     @Bean
-    ConcurrentKafkaListenerContainerFactory<String, RessursState> kafkaListenerContainerFactory(ConsumerFactory<String, RessursState> consumerFactory) {
-        final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
+    ConcurrentKafkaListenerContainerFactory<String, OrgEnhetState> orgEnhetStateKafkaListenerContainerFactory(ConsumerFactory<String, OrgEnhetState> consumerFactory) {
+        final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         return factory;

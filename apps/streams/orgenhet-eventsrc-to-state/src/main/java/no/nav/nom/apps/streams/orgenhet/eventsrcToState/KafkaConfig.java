@@ -1,4 +1,4 @@
-package no.nav.nom.apps.streams.orgenhet.eventsrcToState.eventsrcToState;
+package no.nav.nom.apps.streams.orgenhet.eventsrcToState;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.Event;

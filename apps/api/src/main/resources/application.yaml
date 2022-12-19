@@ -4,8 +4,8 @@ app:
       stateTopic: org.nom.ressurs-state-v1
       eventsourceTopic: org.nom.ressurs-eventsource
     orgEnhet:
-      stateTopic: org.orgenhet-state-v1
-      eventsourceTopic: org.orgenhet-eventsource
+      stateTopic: org.nom.orgenhet-state-v1
+      eventsourceTopic: org.nom.orgenhet-eventsource
   name: ${NAIS_APP_NAME:nom-api}
   proxy:
     baseUrl: ${NOM_PROXY_BASEURL}

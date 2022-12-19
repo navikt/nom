@@ -13,7 +13,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.http.HttpEntity;
@@ -45,7 +45,7 @@ public class DvhRestConsumer {
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final EventAggregateListener eventAggregateListener;
+    private final RessursStateListener ressursStateListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
@@ -56,7 +56,7 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void scheduledLoadlFromDvh() {
-        while (!eventAggregateListener.initloadComplete()) {
+        while (!ressursStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {

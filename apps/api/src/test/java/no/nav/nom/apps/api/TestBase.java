@@ -51,7 +51,7 @@ import java.util.Optional;
         initializers = TestBase.Initializer.class
 )
 @Testcontainers
-@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class TestBase {
 
