@@ -15,6 +15,7 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
@@ -25,6 +26,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseR
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +61,7 @@ public class DvhDataLoader {
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetStateService orgEnhetStateService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
 
@@ -124,13 +127,15 @@ public class DvhDataLoader {
                     }
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        val persistedEnheter = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+        val persistedEnheterOld = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+
+        val persistedEnheterNewStream = orgEnhetStateService.getAll().stream().collect(Collectors.groupingBy(OrgEnhetState::uniqueAgressoId));
 
         val hendelserToSave = new LinkedList<IHendelse>();
 
 
         parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed()).forEach(parsedEnhet -> {
-            val x = persistedEnheter.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+            val x = persistedEnheterOld.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
             val matchingEnheter = x.stream().filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p)).toList();
 
             if (matchingEnheter.size() < 2) {
