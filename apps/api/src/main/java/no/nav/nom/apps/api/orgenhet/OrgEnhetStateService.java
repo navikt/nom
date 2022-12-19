@@ -23,7 +23,7 @@ public class OrgEnhetStateService {
         return Optional.ofNullable(orgEnhetByFid.get(id));
     }
 
-    public Optional<OrgEnhetState> findByuniqueAgressoId(String id) {
+    public Optional<OrgEnhetState> findByUniqueAgressoId(String id) {
         return Optional.ofNullable(orgEnhetByUniqueAgressoId.get(id));
     }
 
