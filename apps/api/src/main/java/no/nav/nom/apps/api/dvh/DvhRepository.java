@@ -38,8 +38,7 @@ public class DvhRepository {
     private List<DvhOrganisering> organiseringer;
     private List<Kobling> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
-    private Map<String, DvhRessurs> ressursByNavIdent = Collections.emptyMap();
-    private Map<String, DvhRessurs> ressursByPersonident = Collections.emptyMap();
+
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 
     public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv, String navn) {
@@ -120,12 +119,6 @@ public class DvhRepository {
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
         val lst = this.navidentTelefonNrMap.stream().filter(it -> it.getNavIdent().equals(navIdent));
         return lst.toList();
-    }
-
-    public void setRessurs(List<DvhRessurs> dvhRessurs) {
-        this.ressursByNavIdent = dvhRessurs.stream().collect(toMap(DvhRessurs::getNavIdent, Function.identity()));
-
-        this.ressursByPersonident = dvhRessurs.stream().collect(toMap(DvhRessurs::getPersonIdent, Function.identity()));
     }
 
     public void addUpdateListener(Supplier<Boolean> callback) {

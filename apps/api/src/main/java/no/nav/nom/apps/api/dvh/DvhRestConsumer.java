@@ -55,7 +55,7 @@ public class DvhRestConsumer {
     }
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void scheduledLoadlFromDvh() {
+    public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
         while (!ressursStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
@@ -63,17 +63,34 @@ public class DvhRestConsumer {
             }
 
         }
-        loadFromDvh();
+        loadKoblingerLedereOgTlfFromDvh();
     }
 
-    public void loadFromDvh() {
-        try {
+    @Scheduled(cron = "0 0 6 * * *") // Kl 06:00 every day
+    public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
+        while (!ressursStateListener.initloadComplete()) {
+            try {
+                Thread.sleep(5_000);
+            } catch (Exception ignored) {
+            }
+
+        }
+        loadRessurserOgOrgEnheter();
+    }
+
+    public void loadRessurserOgOrgEnheter() {
+        if (leaderElection.isLeader()) {
             log.info("Laster ressurser fra dvh");
             loadRessurserFromDvh();
-            if (leaderElection.isLeader()) {
-                log.info("Laster orgenheter fra dvh");
-                dvhDataLoader.load();
-            }
+
+            log.info("Laster orgenheter fra dvh");
+            dvhDataLoader.load();
+        }
+    }
+
+
+    public void loadKoblingerLedereOgTlfFromDvh() {
+        try {
             log.info("Laster koblinger fra dvh");
             loadKoblingerFromDvh();
             loadLedereAndOrganiseringerFromDvh();
@@ -120,10 +137,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-        dvhRepository.setRessurs(dvhRessurs);
-        if (leaderElection.isLeader()) {
-            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
-        }
+        ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
     }
 
     private void loadKoblingerFromDvh() {

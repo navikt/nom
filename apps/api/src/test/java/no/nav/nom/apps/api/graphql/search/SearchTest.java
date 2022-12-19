@@ -73,7 +73,7 @@ public class SearchTest extends GraphQLTestBase {
         final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario3.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
@@ -92,7 +92,7 @@ public class SearchTest extends GraphQLTestBase {
         createRessursHendelseEventSource("2");
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario4.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -119,7 +119,7 @@ public class SearchTest extends GraphQLTestBase {
         luceneService.addInvalidatedEntitiesToIndex();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario5.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -143,7 +143,7 @@ public class SearchTest extends GraphQLTestBase {
         luceneService.refreshOrgenhet();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario6.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -165,7 +165,7 @@ public class SearchTest extends GraphQLTestBase {
         luceneService.refreshOrgenhet();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario5_1.graphql");
         final var searchResults = response.path("searchRessurs").entity(JsonNode.class).get();

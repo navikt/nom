@@ -115,7 +115,8 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("2");
         final var enhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
         dvhOrgenhetMockUtils.addToResponse(enhet);
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario42.graphql");
 
@@ -278,7 +279,8 @@ class RessursTest extends RessursTestBase {
                         .ORGENHET_NAVN("testNavn")
                         .build()
         );
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario6.graphql");
 
@@ -298,7 +300,8 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario7.graphql");
 
@@ -320,7 +323,8 @@ class RessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario71.graphql");
 
@@ -342,7 +346,9 @@ class RessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+
         final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql");
         //        assertThat(res.isOk());
     }

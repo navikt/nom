@@ -22,6 +22,7 @@ public abstract class DvhTestBase extends TestBase {
     }
 
     protected void loadFromDvh() {
-        dvhRestConsumer.loadFromDvh();
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
     }
 }
