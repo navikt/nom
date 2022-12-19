@@ -12,6 +12,7 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -23,6 +24,7 @@ import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
 
 @Component
 @Slf4j
+@Profile("!prod")
 public class KafkaRessursListener {
 
     private final Unit4Client unit4Client;

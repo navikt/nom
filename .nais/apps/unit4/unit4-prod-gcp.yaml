@@ -1,0 +1,15 @@
+ingresses:
+  - https://nom-unit4.intern.nav.no
+kafka-pool: nav-prod
+env:
+  - name: UNIT4_BASEURL
+    value: https://agresso.adeo.no
+  - name: UNIT4_EMPLOYEES_PATH
+    value: '/agressowebapi/v1/employees'
+  - name: LOGGING_CONFIG
+    value: 'classpath:logback-nais.xml'
+  - name: NOM_PROXY_BASEURL
+    value: https://nom-proxy.prod-fss-pub.nais.io
+  - name: NOM_PROXY_CLIENT_ID
+    value: prod-fss.nom.nom-proxy
+inboundrules: []

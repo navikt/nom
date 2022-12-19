@@ -25,6 +25,8 @@ spec:
       value: DC=preprod,DC=local
     - name: UNIT4_BASE_URL
       value: https://agresso.test.local
+    - name: UNIT4_EMPLOYEES_PATH
+      value: '/agrt01-web-api/v1/employees'
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser

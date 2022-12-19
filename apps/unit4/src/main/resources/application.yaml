@@ -7,7 +7,7 @@ app:
     topic: org.nom.ressurs-eventsource
   unit4:
     base-url: ${UNIT4_BASEURL}
-    employees-path: /agrt01-web-api/v1/employees
+    employees-path: ${UNIT4_EMPLOYEES_PATH}
     api-username: ${NOM_UNIT4_API_USERNAME}
     api-password: ${NOM_UNIT4_API_PASSWORD}
   proxy:
@@ -23,6 +23,8 @@ authentication:
 spring:
   application:
     name: ${app.name}
+  profiles:
+    active: ${ENV}
   main:
     cloud-platform: kubernetes
     banner-mode: off

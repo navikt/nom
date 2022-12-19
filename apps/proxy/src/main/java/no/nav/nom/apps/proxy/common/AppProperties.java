@@ -42,6 +42,7 @@ public class AppProperties {
         String unit4Username;
         String unit4Password;
         String baseUrl;
+        String employeesPath;
     }
 
     @Value

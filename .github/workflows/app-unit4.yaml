@@ -67,18 +67,17 @@ jobs:
           RESOURCE: .nais/apps/unit4/unit4.yaml
           VARS: .nais/apps/unit4/unit4-dev-gcp.yaml
 
-
-#  deploy-prod:
-#    name: Deploy to NAIS prod-fss
-#    needs: build-jar-docker
-#    if: github.ref == 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: prod-gcp
-#          RESOURCE: .nais/apps/unit4/unit4.yaml
-#          VARS: .nais/apps/unit4/unit4-prod-gcp.yaml
+  deploy-prod:
+    name: Deploy to NAIS prod-gcp
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/apps/unit4/unit4.yaml
+          VARS: .nais/apps/unit4/unit4-prod-gcp.yaml
 
