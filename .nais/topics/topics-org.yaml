@@ -1,6 +1,8 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: ressurs-eventsource
   namespace: org
   labels:
@@ -64,6 +66,8 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
   name: ressurs-state-v1
   namespace: org
   labels:

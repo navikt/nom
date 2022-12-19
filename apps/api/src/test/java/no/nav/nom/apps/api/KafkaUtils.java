@@ -1,9 +1,10 @@
 package no.nav.nom.apps.api;
 
 import lombok.val;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.clients.admin.RecordsToDelete;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -31,17 +32,17 @@ public class KafkaUtils {
     private final String ressursStateTopic;
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
     @SpyBean
-    private final EventAggregateListener eventAggregateListener;
+    private final RessursStateListener ressursStateListener;
     private KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
 
     @Autowired
     public KafkaUtils(
             EmbeddedKafkaBroker embeddedKafkaBroker,
-            EventAggregateListener eventAggregateListener,
+            RessursStateListener ressursStateListener,
             @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
-        this.eventAggregateListener = eventAggregateListener;
+        this.ressursStateListener = ressursStateListener;
         this.ressursStateTopic = ressursStateTopic;
         ressursStateKafkaTemplate = ressursStateKafkaTemplate();
     }
@@ -53,7 +54,7 @@ public class KafkaUtils {
             invocation.callRealMethod();
             latch.countDown();
             return null;
-        }).when(eventAggregateListener).onMessage(Mockito.any(), Mockito.any());
+        }).when(ressursStateListener).onMessage(Mockito.any(), Mockito.any());
 
 
         ressursStateKafkaTemplate.sendDefault(key, ressursState);

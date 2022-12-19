@@ -1,7 +1,7 @@
 app:
   kafka:
-    stateTopic: org.orgenhet-state-v1
-    eventsourceTopic: org.orgenhet-eventsource
+    stateTopic: org.nom.orgenhet-state-v1
+    eventsourceTopic: org.nom.orgenhet-eventsource
 
 spring:
   kafka:

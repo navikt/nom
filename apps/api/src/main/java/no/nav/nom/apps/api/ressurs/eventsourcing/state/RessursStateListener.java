@@ -28,7 +28,7 @@ import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
-public class EventAggregateListener {
+public class RessursStateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
     private final RessursStateService ressursStateService;
@@ -39,7 +39,7 @@ public class EventAggregateListener {
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
 
-    public EventAggregateListener(
+    public RessursStateListener(
             @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
             RessursStateService ressursStateService,
             LuceneService luceneService,
@@ -54,22 +54,26 @@ public class EventAggregateListener {
     }
 
     @KafkaListener(
+            containerFactory = "ressursStateKafkaListenerContainerFactory",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.ressurs.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )
     )
     public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false).forEach(it -> {
-            var ressurs = it.value();
-            ressursStateService.putEventAggregate(ressurs);
-            this.luceneService.invalidateRessurs(ressurs.navident());
-            if (waitingMapByFid.containsKey(it.key())) {
-                waitingMapByFid.remove(it.key()).complete(ressurs);
-
-            }
+            processMessage(it.key(), it.value());
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka state listener initial load finished"));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished"));
+    }
+
+    private void processMessage(String key, RessursState ressursState) {
+        ressursStateService.putEventAggregate(ressursState);
+        this.luceneService.invalidateRessurs(ressursState.navident());
+        if (waitingMapByFid.containsKey(key)) {
+            waitingMapByFid.remove(key).complete(ressursState);
+
+        }
     }
 
     public boolean initloadComplete() {

@@ -9,12 +9,12 @@ import java.util.Optional;
 public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
 
     @JsonCreator
-    public OrgEnhetOpprettetEventV1(String fid, OrgEnhetOpprettetEventData data, Metadata metadata){
-        super(fid, data, metadata, null);
+    public OrgEnhetOpprettetEventV1(String fid, OrgEnhetOpprettetEventData data, Metadata metadata, OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData additionalData){
+        super(fid, data, metadata, additionalData);
     }
 
-    public OrgEnhetOpprettetEventV1(String fid, OrgEnhetOpprettetEventData data, InputMetadata inputMetadata) {
-        this(fid, data, Metadata.from(inputMetadata));
+    public OrgEnhetOpprettetEventV1(String fid, OrgEnhetOpprettetEventData data, InputMetadata inputMetadata, OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData additionalData) {
+        this(fid, data, Metadata.from(inputMetadata), additionalData);
     }
 
     public record OrgEnhetOpprettetEventData(
@@ -25,4 +25,13 @@ public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
             Optional<String> lederRessursFid,
             OrgEnhetsKategori orgEnhetsKategori
     ) implements Data{ }
+
+    public record OrgEnhetOpprettetAdditionalData(
+            String agressoId,
+            String agressoNavn,
+            String AgressoOrgNivaa,
+            String AgressoOrgenhetType,
+            String uniqueAgressoId
+    ) implements OrgEnhetEvent.Data {
+    }
 }
