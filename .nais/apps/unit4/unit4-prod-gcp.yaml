@@ -12,4 +12,7 @@ env:
     value: https://nom-proxy.prod-fss-pub.nais.io
   - name: NOM_PROXY_CLIENT_ID
     value: prod-fss.nom.nom-proxy
-inboundrules: []
+inboundrules:
+  - application: nom-unit4  # midlertidig
+    namespace: org
+    cluster: prod-gcp
