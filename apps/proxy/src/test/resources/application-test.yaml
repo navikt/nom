@@ -1,5 +1,6 @@
 DVH_BASE_URL: http://localhost:${wiremock.server.port}
 UNIT4_BASE_URL: http://localhost:${wiremock.server.port}
+UNIT4_EMPLOYEES_PATH: '/agrt01-web-api/v1/employees'
 
 app:
   pdl:
