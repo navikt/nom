@@ -66,19 +66,6 @@ public class RessursStateListener {
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished"));
     }
 
-//    @KafkaListener(
-//            topicPartitions = @TopicPartition(
-//                    topic = "${app.kafka.ressurs.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
-//            )
-//    )
-//    public void onMessage(ConsumerRecords<String, RessursState> records, Consumer<String, String> consumer) {
-//        StreamSupport.stream(records.spliterator(), false).forEach(it -> {
-//            processMessage(it.key(), it.value());
-//        });
-//
-//        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished"));
-//    }
-
     private void processMessage(String key, RessursState ressursState) {
         ressursStateService.putEventAggregate(ressursState);
         this.luceneService.invalidateRessurs(ressursState.navident());
