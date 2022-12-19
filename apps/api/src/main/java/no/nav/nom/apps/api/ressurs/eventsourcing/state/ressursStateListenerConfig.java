@@ -11,6 +11,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Configuration
@@ -19,7 +20,7 @@ public class ressursStateListenerConfig {
     ConsumerFactory<String, RessursState> ressursStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
 
-        jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.event"), true);
+//        jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.state"), true);
 
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
     }
@@ -29,6 +30,12 @@ public class ressursStateListenerConfig {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, RessursState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
+
+        // If authentication towards kafka broker topic fails, retry every 10s
+        factory.setContainerCustomizer(container ->
+                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10))
+        );
+
         return factory;
     }
 }

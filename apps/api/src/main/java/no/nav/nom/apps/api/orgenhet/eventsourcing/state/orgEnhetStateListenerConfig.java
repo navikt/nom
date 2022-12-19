@@ -11,6 +11,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Configuration
@@ -29,6 +30,12 @@ public class orgEnhetStateListenerConfig {
         final var factory = new ConcurrentKafkaListenerContainerFactory<String, OrgEnhetState>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
+
+        // If authentication towards kafka broker topic fails, retry every 10s
+        factory.setContainerCustomizer(container ->
+                container.getContainerProperties().setAuthExceptionRetryInterval(Duration.ofSeconds(10))
+        );
+
         return factory;
     }
 }

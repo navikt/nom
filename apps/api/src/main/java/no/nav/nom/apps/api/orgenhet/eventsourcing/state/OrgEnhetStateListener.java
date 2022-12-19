@@ -53,6 +53,7 @@ public class OrgEnhetStateListener {
     }
 
     @KafkaListener(
+            containerFactory = "orgEnhetStateKafkaListenerContainerFactory",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.orgEnhet.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )

@@ -54,6 +54,7 @@ public class RessursStateListener {
     }
 
     @KafkaListener(
+            containerFactory = "ressursStateKafkaListenerContainerFactory",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.ressurs.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )
