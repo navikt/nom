@@ -1,11 +1,12 @@
-package no.nav.nom.apps.api.orgenhet.eventsourcing;
+package no.nav.nom.apps.streams.orgenhet.eventsrcToState;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import no.nav.nom.apps.api.common.KafkaStreamsConfig;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -15,7 +16,6 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
@@ -23,16 +23,16 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Optional;
 
-//@Component
-public class EventSourceToStateStream {
-    private final static Logger log = LoggerFactory.getLogger(EventSourceToStateStream.class);
+@Component
+class EventsrcToState {
+    private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
 
-    public EventSourceToStateStream(
-            @Value("${app.kafka.orgEnhet.eventsourceTopic}") String eventsourceTopic,
-            @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
+    public EventsrcToState(
+            @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
+            @Value("${app.kafka.stateTopic}") String stateTopic,
             ObjectMapper objectMapper,
             JsonSerde<Object> objectSerde,
-            @Qualifier(KafkaStreamsConfig.ORGENHET_STATE_STREAMS_BUILDER_BEAN_NAME) StreamsBuilder streamsBuilder
+            StreamsBuilder streamsBuilder
     ){
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(OrgEnhetEvent.class);
@@ -42,6 +42,9 @@ public class EventSourceToStateStream {
                 .aggregate(
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
+                            if(event.getAdditionalData() instanceof OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData data){
+                                state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
+                            }
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;
                         },
@@ -53,8 +56,10 @@ public class EventSourceToStateStream {
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
         Optional<String> overordnetOrgEnhetFid = Optional.ofNullable(eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null);
-        Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederFid") ? eventStateAggregate.get("lederFid").asText() : null);
+        Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null);
         Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsKategori") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("orgEnhetsKategori").asText()) : null);
+        var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
+        Optional<String> uniqueAgressoId = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asText() : null);
         try {
             return new OrgEnhetState(
                     fid,
@@ -64,7 +69,8 @@ public class EventSourceToStateStream {
                     Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
                     overordnetOrgEnhetFid,
                     lederFid,
-                    orgEnhetsKategori
+                    orgEnhetsKategori,
+                    uniqueAgressoId
             );
         } catch (Exception e){
             log.error("Error mapping to OrgEnhetState", e);

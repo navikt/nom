@@ -9,6 +9,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: log-logstash-mdc, dev
+    - name: JAVA_OPTS
+      value: "-Xms512m -Xmx1024m"
   image: {{image}}
   port: 8080
   ingresses:

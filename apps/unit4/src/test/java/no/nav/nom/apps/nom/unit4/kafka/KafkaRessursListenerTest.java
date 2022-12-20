@@ -22,6 +22,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -115,6 +116,7 @@ class KafkaRessursListenerTest {
                                 null,
                                 "Etternavn"
                         )),
+                        Optional.of(LocalDate.now()),
                         Optional.of(LocalDate.now())
                 )
         );

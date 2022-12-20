@@ -4,7 +4,7 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -26,11 +26,11 @@ public class RessursCommadService {
 
     private final Logger log = LoggerFactory.getLogger(RessursCommadService.class);
     private final RessursEventProducer eventProducer;
-    private final EventAggregateListener eventAggregateListener;
+    private final RessursStateListener ressursStateListener;
 
-    public RessursCommadService(RessursEventProducer eventProducer, EventAggregateListener eventAggregateListener) {
+    public RessursCommadService(RessursEventProducer eventProducer, RessursStateListener ressursStateListener) {
         this.eventProducer = eventProducer;
-        this.eventAggregateListener = eventAggregateListener;
+        this.ressursStateListener = ressursStateListener;
     }
 
     public ListenableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
@@ -40,13 +40,13 @@ public class RessursCommadService {
 
     public RessursState createRessursSync(OpprettRessursCommand opprettRessursCommand) throws ExecutionException, InterruptedException, TimeoutException {
         final var fid = PrefixedUlidCreator.createRessursUlid();
-        final var response = eventAggregateListener.waitForAggregate(fid);
+        final var response = ressursStateListener.waitForAggregate(fid);
         createRessurs(fid, opprettRessursCommand);
 
         try{
             return response.get(10, TimeUnit.SECONDS);
         } catch (Exception e){
-            eventAggregateListener.removeWait(fid);
+            ressursStateListener.removeWait(fid);
             log.error("Error waiting for ressurs to be created ", e);
             throw e;
         }
@@ -79,7 +79,8 @@ public class RessursCommadService {
                                         pdlPerson.getMellomnavn(),
                                         pdlPerson.getEtternavn()
                                 )),
-                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato)
+                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
+                        Optional.ofNullable(opprettRessursCommand.startdato())
                 )
         ));
     }

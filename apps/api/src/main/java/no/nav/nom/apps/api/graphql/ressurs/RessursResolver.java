@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -155,7 +156,8 @@ public class RessursResolver {
                                 SecurityUtil.getUserFromToken(token).orElseThrow(),
                                 SecurityUtil.getSystemFromToken(token).orElseThrow()
                         )
-                )
+                ),
+                request.getStartDato()
         );
 
         return ressursCommadService.createRessursSync(opprettRessursCommand);

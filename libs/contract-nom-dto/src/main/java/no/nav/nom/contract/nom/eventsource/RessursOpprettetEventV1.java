@@ -27,7 +27,8 @@ public class RessursOpprettetEventV1 extends RessursEvent {
             Optional<String> navident,
             Optional<String> kjoenn,
             Optional<FolkeregistrertNavn> folkeregistrertNavn,
-            Optional<LocalDate> foedselsdato
+            Optional<LocalDate> foedselsdato,
+            Optional<LocalDate> startdato
     ) implements Data {
         public record FolkeregistrertNavn(
                 String fornavn,

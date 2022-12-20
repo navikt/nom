@@ -15,8 +15,10 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
@@ -25,6 +27,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseR
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +62,10 @@ public class DvhDataLoader {
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetStateService orgEnhetStateService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
+    private final OrgEnhetIdGenerator orgEnhetIdGenerator;
 
 
     /*
@@ -124,42 +129,58 @@ public class DvhDataLoader {
                     }
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        val persistedEnheter = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+        val persistedEnheterOld = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+
+        val persistedEnheterNewStream = orgEnhetStateService.getAll().stream().collect(Collectors.groupingBy(OrgEnhetState::uniqueAgressoId));
 
         val hendelserToSave = new LinkedList<IHendelse>();
 
-
         parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed()).forEach(parsedEnhet -> {
-            val x = persistedEnheter.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+
+            // Eventsourcing block
+            if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+                val stateEnheterPerUniqueAgressoId = persistedEnheterNewStream.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+                val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
+                        .filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p))
+                        .toList();
+
+                if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
+                    stateEnheterMatchingDvhParsedEnhet.stream().findFirst().ifPresentOrElse( orgEnhetState -> {
+                        // Parsed DVH enhet found in state
+                        // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
+                        if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(orgEnhetState.gyldigTom())) {
+                            avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
+                        }
+                    }, () -> {
+                        // Parsed DVH enhet NOT found in state
+                        String fid = opprettOrgEnhet(parsedEnhet);
+                        if (parsedEnhet.getGyldigTom().isPresent()) {
+                            avvikleOrgEnhet(fid, parsedEnhet);
+                        }
+                    });
+                } else {
+                    log.error("Manual correction needed, enhet merge error with fids {} for parsed DVH enhet [{}]",
+                            stateEnheterMatchingDvhParsedEnhet.stream().map(OrgEnhetState::fid).toList(), parsedEnhet.getUniqueAgressoId());
+                }
+            }
+
+            val x = persistedEnheterOld.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
             val matchingEnheter = x.stream().filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p)).toList();
 
             if (matchingEnheter.size() < 2) {
                 matchingEnheter.stream().findAny().ifPresentOrElse((p) -> {
-                    if (unleash.isEnabled(UNLEASH_TOGGLE)) {// Eventsourcing block
-                        // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
-                        if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(p.getGyldigTom())) {
-                            avvikleOrgEnhet(p.getFid().toString(), parsedEnhet); // TODO:!! Use FID, not UUID.STRING When state is from eventSource
-                        }
-                    }
                     val endreHendelse = createEndreHendelse(parsedEnhet, p, getOpprettetAv());
                     if (endreHendelse != null) {
                         hendelserToSave.add(endreHendelse);
                         ((EventBasedOrgenhet) p).addHendelse(endreHendelse);
                     }
                 }, () -> {
-                    if (unleash.isEnabled(UNLEASH_TOGGLE)) { // Eventsourcing block
-                        String fid = opprettOrgEnhet(parsedEnhet);
-                        if (parsedEnhet.getGyldigTom().isPresent()) {
-                            avvikleOrgEnhet(fid, parsedEnhet);
-                        }
-                    }
                     hendelserToSave.add(createOpprettHendelse(parsedEnhet, getOpprettetAv()));
                 });
             } else {
                 log.error("Manual correction needed, enhet merge error with fids " + matchingEnheter.stream().map(IOrgenhet::getFid).toList());
             }
         }));
-
 
         orgenhetHendelseRepository.saveAll(
                 hendelserToSave.stream()
@@ -190,13 +211,14 @@ public class DvhDataLoader {
         );
     }
 
-    private boolean isNewEnhet(IOrgenhet persistedEnhet, IOrgenhet newEnhet) {
-        return persistedEnhet == null || !isOverlapping(persistedEnhet, newEnhet) || !withinOneMonth(persistedEnhet, newEnhet);
-    }
-
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {
         return orgenhetV2One.getGyldigFom().isBefore(orgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX)) && orgenhetV2Two.getGyldigFom()
                 .isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
+    }
+
+    public boolean isOverlapping(DvhOrgenhetV2 dvhOrgenhet, OrgEnhetState orgEnhetState) {
+        return dvhOrgenhet.getGyldigFom().isBefore(orgEnhetState.gyldigTom().orElse(LocalDate.MAX)) && orgEnhetState.gyldigFom()
+                .isBefore(dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX));
     }
 
     public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two) {
@@ -211,9 +233,23 @@ public class DvhDataLoader {
         )) <= 1);
     }
 
+    public boolean withinOneMonth(DvhOrgenhetV2 dvhOrgenhet,OrgEnhetState orgEnhetState) {
+        return (
+            Math.abs(ChronoUnit.MONTHS.between(
+                    dvhOrgenhet.getGyldigFom().withDayOfMonth(1),
+                    orgEnhetState.gyldigTom()
+                            .orElse(LocalDate.MAX)
+                            .withDayOfMonth(1)
+                )) <= 1
+            || Math.abs(ChronoUnit.MONTHS.between(
+                    orgEnhetState.gyldigFom().withDayOfMonth(1),
+                    dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+                )) <= 1);
+    }
+
     private String opprettOrgEnhet(DvhOrgenhetV2 dvhOrgenhetV2) {
         final var opprettOrgEnhet = new OpprettOrgEnhet(
-                "Intern_id_" + dvhOrgenhetV2.getAgressoId(), // TODO:!! Create NOM id - ikke bruk agressoId
+                orgEnhetIdGenerator.newId(),
                 dvhOrgenhetV2.getNavn(),
                 dvhOrgenhetV2.getGyldigFom(),
                 Optional.empty(),

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = "/proxy/unit4", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class Unit4Controller {
-    public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
+    //public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
     private final RestTemplate restTemplate;
 
     private final AppProperties appProperties;
@@ -33,7 +33,7 @@ public class Unit4Controller {
         log.info("Mottatt /proxy/unit4/ressurs POST request");
 
         var request = RequestEntity
-                .post(appProperties.getUnit4().getBaseUrl() + API_EMPLOYEES_PATH)
+                .post(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath())
                 .headers(h -> {
                             h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
                             h.setContentType(MediaType.APPLICATION_JSON);

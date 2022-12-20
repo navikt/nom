@@ -13,7 +13,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.DvhKobling;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.EventAggregateListener;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.http.HttpEntity;
@@ -45,7 +45,7 @@ public class DvhRestConsumer {
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
-    private final EventAggregateListener eventAggregateListener;
+    private final RessursStateListener ressursStateListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
@@ -55,25 +55,42 @@ public class DvhRestConsumer {
     }
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void scheduledLoadlFromDvh() {
-        while (!eventAggregateListener.initloadComplete()) {
+    public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
+        while (!ressursStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
             }
 
         }
-        loadFromDvh();
+        loadKoblingerLedereOgTlfFromDvh();
     }
 
-    public void loadFromDvh() {
-        try {
+    @Scheduled(cron = "0 0 6 * * *") // Kl 06:00 every day
+    public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
+        while (!ressursStateListener.initloadComplete()) {
+            try {
+                Thread.sleep(5_000);
+            } catch (Exception ignored) {
+            }
+
+        }
+        loadRessurserOgOrgEnheter();
+    }
+
+    public void loadRessurserOgOrgEnheter() {
+        if (leaderElection.isLeader()) {
             log.info("Laster ressurser fra dvh");
             loadRessurserFromDvh();
-            if (leaderElection.isLeader()) {
-                log.info("Laster orgenheter fra dvh");
-                dvhDataLoader.load();
-            }
+
+            log.info("Laster orgenheter fra dvh");
+            dvhDataLoader.load();
+        }
+    }
+
+
+    public void loadKoblingerLedereOgTlfFromDvh() {
+        try {
             log.info("Laster koblinger fra dvh");
             loadKoblingerFromDvh();
             loadLedereAndOrganiseringerFromDvh();
@@ -120,10 +137,7 @@ public class DvhRestConsumer {
                 .flatMap(Collection::stream)
                 .toList();
 
-        dvhRepository.setRessurs(dvhRessurs);
-        if (leaderElection.isLeader()) {
-            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
-        }
+        ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
     }
 
     private void loadKoblingerFromDvh() {

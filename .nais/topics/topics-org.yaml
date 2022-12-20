@@ -1,38 +1,6 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: ressurs-eventsource
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    retentionBytes: -1
-    retentionHours: -1
-  acl:
-    - team: nom
-      application: nom-api
-      access: readwrite
-    - team: org
-      application: kafka-aggregate-converter
-      access: read
-    - team: org
-      application: org-kafka-manager
-      access: read
-    - team: org
-      application: nom-unit4
-      access: read
-
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
   name: nom.ressurs-eventsource
   namespace: org
   labels:
@@ -50,43 +18,13 @@ spec:
       application: nom-api
       access: readwrite
     - team: org
-      application: kafka-aggregate-converter
+      application: nom-ressurs-eventsrc-to-state
       access: read
     - team: org
       application: org-kafka-manager
       access: read
     - team: org
       application: nom-unit4
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  name: ressurs-state-v1
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    cleanupPolicy: compact
-  acl:
-    - team: nom
-      application: nom-api
-      access: read
-    - team: org
-      application: kafka-aggregate-converter
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
-      access: read
-    - team: team-nof
-      application: fullmakt-state-converter
       access: read
 
 ---
@@ -110,40 +48,13 @@ spec:
       application: nom-api
       access: read
     - team: org
-      application: kafka-aggregate-converter
+      application: nom-ressurs-eventsrc-to-state
       access: readwrite
     - team: org
       application: org-kafka-manager
       access: read
     - team: team-nof
       application: fullmakt-state-converter
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-  name: orgenhet-eventsource
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    retentionBytes: -1
-    retentionHours: -1
-  acl:
-    - team: nom
-      application: nom-api
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
       access: read
 
 ---
@@ -163,32 +74,6 @@ spec:
     replication: 3
     retentionBytes: -1
     retentionHours: -1
-  acl:
-    - team: nom
-      application: nom-api
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-  name: orgenhet-state-v1
-  namespace: org
-  labels:
-    team: org
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    cleanupPolicy: compact
   acl:
     - team: nom
       application: nom-api

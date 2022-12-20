@@ -13,5 +13,6 @@ public record OrgEnhetState (
     Optional<LocalDate> gyldigTom,
     Optional<String> overordnetOrgEnhetFid,
     Optional<String> lederFid,
-    Optional<OrgEnhetsKategori> orgEnhetsKategori
+    Optional<OrgEnhetsKategori> orgEnhetsKategori,
+    Optional<String> uniqueAgressoId
 ) {}

@@ -21,6 +21,10 @@ spec:
       value: ldaps://ldapgw.adeo.no:636
     - name: LDAP_BASE
       value: DC=adeo,DC=no
+    - name: UNIT4_BASE_URL
+      value: https://agresso.adeo.no
+    - name: UNIT4_RESSURS_PATH
+      value: '/agressowebapi/v1/employees'
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser

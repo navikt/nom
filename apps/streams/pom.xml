@@ -15,5 +15,6 @@
 
     <modules>
         <module>ressurs-eventsrc-to-state</module>
+        <module>orgenhet-eventsrc-to-state</module>
     </modules>
 </project>

@@ -1,10 +1,12 @@
-package no.nav.nom.apps.streams.ressurs;
+package no.nav.nom.apps.streams.ressurs.eventsrcToState;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import no.nav.nom.apps.streams.ressurs.eventsrcToState.EventsrcToState;
+import no.nav.nom.apps.streams.ressurs.eventsrcToState.KafkaConfig;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.*;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -48,7 +50,8 @@ public class EventsrcToStateTest {
                 Optional.of("navident"),
                 null,
                 null,
-                null
+                null,
+                Optional.of(LocalDate.now())
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(
@@ -99,7 +102,8 @@ public class EventsrcToStateTest {
                 Optional.of("navident"),
                 null,
                 null,
-                null
+                null,
+                Optional.of(LocalDate.now())
         );
 
         final RessursEvent event = new RessursOpprettetEventV1(

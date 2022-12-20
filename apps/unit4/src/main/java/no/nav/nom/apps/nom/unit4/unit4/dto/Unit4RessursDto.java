@@ -35,7 +35,7 @@ public class Unit4RessursDto {
     AdditionalInformation additionalInformation;
     LocalDateTime birthDate;
     String companyId = "HR";
-    LocalDateTime dateFrom = AGRESSO_STARTTIME;
+    LocalDateTime dateFrom;
     LocalDateTime dateTo = AGRESSO_TIMESTAMP_VOIDVALUE;
     String languageCode = "NO";
     String name;
@@ -68,7 +68,7 @@ public class Unit4RessursDto {
             birthDateTemp = LocalDate.parse("1995-04-12").atStartOfDay();
         }
         birthDate = birthDateTemp;
-
+        dateFrom = AGRESSO_STARTTIME;
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
                 .aliasName(nomRessursDTO.getNavident())
@@ -105,7 +105,7 @@ public class Unit4RessursDto {
                     default -> null;
                 }
         ).orElseThrow(() -> new NoSuchElementException("Folkeregistrert kjoenn is missing from event"));
-
+        dateFrom =  additionalData.startdato().map(LocalDate::atStartOfDay).orElse(AGRESSO_STARTTIME);
         birthDate = ((RessursOpprettetAdditionalData) record.getAdditionalData()).foedselsdato().map(LocalDate::atStartOfDay)
                 .orElseThrow(() -> new NoSuchElementException("Foedseldato is missing from event"));
 

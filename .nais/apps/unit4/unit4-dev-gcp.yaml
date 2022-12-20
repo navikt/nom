@@ -4,6 +4,8 @@ kafka-pool: nav-dev
 env:
   - name: UNIT4_BASEURL
     value: https://agresso.test.local
+  - name: UNIT4_EMPLOYEES_PATH
+    value: '/agrt01-web-api/v1/employees'
   - name: LOGGING_CONFIG
     value: 'classpath:logback-nais.xml'
   - name: NOM_PROXY_BASEURL

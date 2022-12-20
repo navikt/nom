@@ -83,18 +83,18 @@ public class ApiTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
 
-        stubFor(post(Unit4Controller.API_EMPLOYEES_PATH).willReturn(aResponse().withStatus(HttpStatus.CREATED.value()).withHeader("Content-Type", "application/json").withBody("response")));
+        stubFor(post(appProperties.getUnit4().getEmployeesPath()).willReturn(aResponse().withStatus(HttpStatus.CREATED.value()).withHeader("Content-Type", "application/json").withBody("response")));
 
         val result = restTemplate.exchange(URI.create("/proxy/unit4/ressurs"), HttpMethod.POST, new HttpEntity<>("Boddyyy", headers), String.class);
         assertThat(result.getStatusCode(), is(HttpStatus.CREATED));
 
 
-        stubFor(post(Unit4Controller.API_EMPLOYEES_PATH).willReturn(aResponse().withStatus(HttpStatus.CONFLICT.value()).withHeader("Content-Type", "application/json").withBody("response")));
+        stubFor(post(appProperties.getUnit4().getEmployeesPath()).willReturn(aResponse().withStatus(HttpStatus.CONFLICT.value()).withHeader("Content-Type", "application/json").withBody("response")));
 
         val result2 = restTemplate.exchange(URI.create("/proxy/unit4/ressurs"), HttpMethod.POST, new HttpEntity<>("Boddyyy", headers), String.class);
         assertThat(result2.getStatusCode(), is(HttpStatus.CONFLICT));
 
-        stubFor(post(Unit4Controller.API_EMPLOYEES_PATH).willReturn(aResponse().withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value()).withHeader("Content-Type", "application/json").withBody("response")));
+        stubFor(post(appProperties.getUnit4().getEmployeesPath()).willReturn(aResponse().withStatus(HttpStatus.UNPROCESSABLE_ENTITY.value()).withHeader("Content-Type", "application/json").withBody("response")));
 
         val result3 = restTemplate.exchange(URI.create("/proxy/unit4/ressurs"), HttpMethod.POST, new HttpEntity<>("Boddyyy", headers), String.class);
         assertThat(result3.getStatusCode(), is(HttpStatus.UNPROCESSABLE_ENTITY));
