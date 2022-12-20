@@ -138,6 +138,8 @@ public class DvhDataLoader {
             val x = persistedEnheterOld.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
             val matchingEnheter = x.stream().filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p)).toList();
 
+            val stateEnheterForAgressoId = persistedEnheterNewStream.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+
             if (matchingEnheter.size() < 2) {
                 matchingEnheter.stream().findAny().ifPresentOrElse((p) -> {
                     if (unleash.isEnabled(UNLEASH_TOGGLE)) {// Eventsourcing block
@@ -164,7 +166,6 @@ public class DvhDataLoader {
                 log.error("Manual correction needed, enhet merge error with fids " + matchingEnheter.stream().map(IOrgenhet::getFid).toList());
             }
         }));
-
 
         orgenhetHendelseRepository.saveAll(
                 hendelserToSave.stream()
@@ -204,6 +205,11 @@ public class DvhDataLoader {
                 .isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
     }
 
+    public boolean isOverlapping(OrgEnhetState orgenhetOne, OrgEnhetState orgenhetTwo) {
+        return orgenhetOne.gyldigFom().isBefore(orgenhetTwo.gyldigTom().orElse(LocalDate.MAX)) && orgenhetTwo.gyldigFom()
+                .isBefore(orgenhetOne.gyldigTom().orElse(LocalDate.MAX));
+    }
+
     public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two) {
         return dvhOrgenhetV2One != dvhOrgenhetV2Two && (Math.abs(ChronoUnit.MONTHS.between(
                 dvhOrgenhetV2One.getGyldigFom().withDayOfMonth(1),
@@ -214,6 +220,20 @@ public class DvhDataLoader {
                 dvhOrgenhetV2Two.getGyldigFom().withDayOfMonth(1),
                 dvhOrgenhetV2One.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
         )) <= 1);
+    }
+
+    public boolean withinOneMonth(OrgEnhetState orgenhetOne,OrgEnhetState orgenhetTwo) {
+        return orgenhetOne != orgenhetTwo && (
+            Math.abs(ChronoUnit.MONTHS.between(
+                    orgenhetOne.gyldigFom().withDayOfMonth(1),
+                    orgenhetTwo.gyldigTom()
+                            .orElse(LocalDate.MAX)
+                            .withDayOfMonth(1)
+                )) <= 1
+            || Math.abs(ChronoUnit.MONTHS.between(
+                    orgenhetTwo.gyldigFom().withDayOfMonth(1),
+                    orgenhetOne.gyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+                )) <= 1);
     }
 
     private String opprettOrgEnhet(DvhOrgenhetV2 dvhOrgenhetV2) {
