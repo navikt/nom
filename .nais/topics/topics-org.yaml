@@ -54,7 +54,7 @@ spec:
       application: org-kafka-manager
       access: read
     - team: team-nof
-      application: fullmakt-state-converter
+      application: fullmaktsregister-state-converter
       access: read
 
 ---
