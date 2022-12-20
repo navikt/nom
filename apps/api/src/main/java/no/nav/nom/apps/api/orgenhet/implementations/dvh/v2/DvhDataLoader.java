@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
@@ -64,6 +65,7 @@ public class DvhDataLoader {
     private final OrgEnhetStateService orgEnhetStateService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
+    private final OrgEnhetIdGenerator orgEnhetIdGenerator;
 
 
     /*
@@ -247,7 +249,7 @@ public class DvhDataLoader {
 
     private String opprettOrgEnhet(DvhOrgenhetV2 dvhOrgenhetV2) {
         final var opprettOrgEnhet = new OpprettOrgEnhet(
-                "Intern_id_" + dvhOrgenhetV2.getAgressoId(), // TODO:!! Create NOM id - ikke bruk agressoId
+                orgEnhetIdGenerator.newId(),
                 dvhOrgenhetV2.getNavn(),
                 dvhOrgenhetV2.getGyldigFom(),
                 Optional.empty(),
