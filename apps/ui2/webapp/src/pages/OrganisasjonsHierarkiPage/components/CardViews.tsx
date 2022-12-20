@@ -1,5 +1,5 @@
 import { css } from "@emotion/css";
-import { Next, PeopleFilled } from "@navikt/ds-icons";
+import { Next } from "@navikt/ds-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
@@ -8,8 +8,8 @@ import type {
   OrgEnhet,
   Ressurs,
 } from "../../../api/generated/graphql_generated";
+import { building, peopleFilledIcon } from "../../../components/Images";
 import UserImage from "../../../components/UserImage";
-import { Building } from "../../../resources/CustomIcons/Building";
 
 export function DynamicColumnContainer({
   children,
@@ -54,7 +54,8 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     >
       <UnitContainerLink>
         <VerticalEdge>
-          <Building color="white" />
+          {/*<Building />*/}
+          <img alt={"Enhet"} src={building} />
         </VerticalEdge>
         <div
           className={css`
@@ -80,7 +81,8 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
     <Link className={hideLinkCss} key={ressurs.navident} to={ressurs.navident}>
       <UnitContainerLink>
         <VerticalEdge>
-          <PeopleFilled color="white" />
+          {/*<PeopleFilled color="white" />*/}
+          <img alt={"Person"} src={peopleFilledIcon} />
         </VerticalEdge>
         <Heading
           className={css`

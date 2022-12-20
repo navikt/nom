@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import type { OrgEnhet } from "../../../api/generated/graphql_generated";
+import { building2 } from "../../../components/Images";
 import UserImage from "../../../components/UserImage";
-import { Building } from "../../../resources/CustomIcons/Building";
 import { HorizontalEdge } from "./CardViews";
 
 const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
@@ -67,11 +67,12 @@ export const ValgtEnhet = ({
     >
       <div>
         <Heading level={"2"} size="large">
-          <Building
+          <img
+            alt={"Enhet"}
             className={css`
-              color: var(--navds-global-color-lightblue-800);
               margin-right: 1rem;
             `}
+            src={building2}
           />
           {valgtEnhet.navn}
         </Heading>
