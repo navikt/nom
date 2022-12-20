@@ -133,33 +133,46 @@ public class DvhDataLoader {
 
         val hendelserToSave = new LinkedList<IHendelse>();
 
-
         parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed()).forEach(parsedEnhet -> {
+
+            // Eventsourcing block
+            if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+                val stateEnheterPerUniqueAgressoId = persistedEnheterNewStream.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+                val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
+                        .filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p))
+                        .toList();
+
+                if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
+                    stateEnheterMatchingDvhParsedEnhet.stream().findFirst().ifPresentOrElse( orgEnhetState -> {
+                        // Parsed DVH enhet found in state
+                        // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
+                        if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(orgEnhetState.gyldigTom())) {
+                            avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
+                        }
+                    }, () -> {
+                        // Parsed DVH enhet NOT found in state
+                        String fid = opprettOrgEnhet(parsedEnhet);
+                        if (parsedEnhet.getGyldigTom().isPresent()) {
+                            avvikleOrgEnhet(fid, parsedEnhet);
+                        }
+                    });
+                } else {
+                    log.error("Manual correction needed, enhet merge error with fids {} for parsed DVH enhet [{}]",
+                            stateEnheterMatchingDvhParsedEnhet.stream().map(OrgEnhetState::fid).toList(), parsedEnhet.getUniqueAgressoId());
+                }
+            }
+
             val x = persistedEnheterOld.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
             val matchingEnheter = x.stream().filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p)).toList();
 
-            val stateEnheterForAgressoId = persistedEnheterNewStream.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
-
             if (matchingEnheter.size() < 2) {
                 matchingEnheter.stream().findAny().ifPresentOrElse((p) -> {
-                    if (unleash.isEnabled(UNLEASH_TOGGLE)) {// Eventsourcing block
-                        // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
-                        if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(p.getGyldigTom())) {
-                            avvikleOrgEnhet(p.getFid().toString(), parsedEnhet); // TODO:!! Use FID, not UUID.STRING When state is from eventSource
-                        }
-                    }
                     val endreHendelse = createEndreHendelse(parsedEnhet, p, getOpprettetAv());
                     if (endreHendelse != null) {
                         hendelserToSave.add(endreHendelse);
                         ((EventBasedOrgenhet) p).addHendelse(endreHendelse);
                     }
                 }, () -> {
-                    if (unleash.isEnabled(UNLEASH_TOGGLE)) { // Eventsourcing block
-                        String fid = opprettOrgEnhet(parsedEnhet);
-                        if (parsedEnhet.getGyldigTom().isPresent()) {
-                            avvikleOrgEnhet(fid, parsedEnhet);
-                        }
-                    }
                     hendelserToSave.add(createOpprettHendelse(parsedEnhet, getOpprettetAv()));
                 });
             } else {
@@ -196,18 +209,14 @@ public class DvhDataLoader {
         );
     }
 
-    private boolean isNewEnhet(IOrgenhet persistedEnhet, IOrgenhet newEnhet) {
-        return persistedEnhet == null || !isOverlapping(persistedEnhet, newEnhet) || !withinOneMonth(persistedEnhet, newEnhet);
-    }
-
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {
         return orgenhetV2One.getGyldigFom().isBefore(orgenhetV2Two.getGyldigTom().orElse(LocalDate.MAX)) && orgenhetV2Two.getGyldigFom()
                 .isBefore(orgenhetV2One.getGyldigTom().orElse(LocalDate.MAX));
     }
 
-    public boolean isOverlapping(OrgEnhetState orgenhetOne, OrgEnhetState orgenhetTwo) {
-        return orgenhetOne.gyldigFom().isBefore(orgenhetTwo.gyldigTom().orElse(LocalDate.MAX)) && orgenhetTwo.gyldigFom()
-                .isBefore(orgenhetOne.gyldigTom().orElse(LocalDate.MAX));
+    public boolean isOverlapping(DvhOrgenhetV2 dvhOrgenhet, OrgEnhetState orgEnhetState) {
+        return dvhOrgenhet.getGyldigFom().isBefore(orgEnhetState.gyldigTom().orElse(LocalDate.MAX)) && orgEnhetState.gyldigFom()
+                .isBefore(dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX));
     }
 
     public boolean withinOneMonth(IOrgenhet dvhOrgenhetV2One, IOrgenhet dvhOrgenhetV2Two) {
@@ -222,17 +231,17 @@ public class DvhDataLoader {
         )) <= 1);
     }
 
-    public boolean withinOneMonth(OrgEnhetState orgenhetOne,OrgEnhetState orgenhetTwo) {
-        return orgenhetOne != orgenhetTwo && (
+    public boolean withinOneMonth(DvhOrgenhetV2 dvhOrgenhet,OrgEnhetState orgEnhetState) {
+        return (
             Math.abs(ChronoUnit.MONTHS.between(
-                    orgenhetOne.gyldigFom().withDayOfMonth(1),
-                    orgenhetTwo.gyldigTom()
+                    dvhOrgenhet.getGyldigFom().withDayOfMonth(1),
+                    orgEnhetState.gyldigTom()
                             .orElse(LocalDate.MAX)
                             .withDayOfMonth(1)
                 )) <= 1
             || Math.abs(ChronoUnit.MONTHS.between(
-                    orgenhetTwo.gyldigFom().withDayOfMonth(1),
-                    orgenhetOne.gyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
+                    orgEnhetState.gyldigFom().withDayOfMonth(1),
+                    dvhOrgenhet.getGyldigTom().orElse(LocalDate.MAX).withDayOfMonth(1)
                 )) <= 1);
     }
 
