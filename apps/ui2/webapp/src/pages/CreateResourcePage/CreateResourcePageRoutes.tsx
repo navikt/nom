@@ -5,12 +5,17 @@ import { Outlet, Route, Routes, useMatch } from "react-router";
 
 import ContentWrapper from "../../components/ContentWrapper";
 import { PageBanner } from "../../components/PageBanner";
+import { UserRole, useSessionContext } from "../../main";
+import { NotAuthorizedPage } from "../NotAuthorizedPage";
 import CreateResourceForm from "./components/CreateResourceForm";
 import { SearchForPerson } from "./components/SearchForPerson";
 import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
 
 export function CreateResourcePageRoutes() {
-  return (
+  const ses = useSessionContext();
+  const hasWrite = ses.roles.includes(UserRole.ROLE_WRITE);
+
+  return hasWrite ? (
     <Routes>
       <Route element={<Wrapper />} path="/">
         <Route element={<SearchForPerson />} path="/">
@@ -21,6 +26,10 @@ export function CreateResourcePageRoutes() {
           path=":navident/receipt"
         />
       </Route>
+    </Routes>
+  ) : (
+    <Routes>
+      <Route element={<NotAuthorizedPage />} path="*" />
     </Routes>
   );
 }
