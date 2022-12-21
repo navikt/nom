@@ -25,7 +25,7 @@ public class OrgEnhetIdGeneratorTest {
 
     @Test
     public void test20Randoms() {
-        for (int i=0;i<2000;i++) {
+        for (int i=0;i<20;i++) {
             String id = orgEnhetIdGenerator.newId();
             assertTrue(id.matches(idRegex), "No match: %s".formatted(id));
             assertFalse(orgEnhetStateService.findByFid(id).isPresent());

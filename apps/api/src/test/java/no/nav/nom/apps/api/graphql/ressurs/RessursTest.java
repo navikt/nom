@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
@@ -113,7 +113,7 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
         createRessursHendelseEventSource("2");
-        final var enhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
+        final var enhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
@@ -273,7 +273,7 @@ class RessursTest extends RessursTestBase {
     void scenario35() {
         createRessursHendelseEventSource("");
         dvhOrgenhetMockUtils.addToResponse(
-                DvhOrgenhetMock.getBuilderWithDefault()
+                DvhOrgEnhetMock.getBuilderWithDefault()
                         .ORGENHET_KODE("testId1")
                         .ORGNODE_NIV("ORGENHET")
                         .ORGENHET_NAVN("testNavn")
@@ -292,7 +292,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente leder for ressurs")
     void scenario36() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2")
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2")
                 .ORGENHET_NAVN("testNavn")
                 .ORGNODE_NIV("ORGENHET")
                 .build();
@@ -316,9 +316,9 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
         createRessursHendelseEventSource("4");
-        final var ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+        final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+        final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
@@ -339,9 +339,9 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
         createRessursHendelseEventSource("4");
-        final var ressursLederForDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+        final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var lederenErPaDenneEnheten = DvhOrgenhetMock.getBuilderWithDefault()
+        final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);

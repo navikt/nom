@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-public class DvhOrgenhetMock {
+public class DvhOrgEnhetMock {
     @JsonProperty("ORGENHET_KODE")
     private String ORGENHET_KODE;
     @JsonProperty("ORGENHET_NAVN")
@@ -32,8 +32,8 @@ public class DvhOrgenhetMock {
     @JsonProperty("LASTET_DATO")
     private LocalDate LASTET_DATO;
 
-    public static DvhOrgenhetMockBuilder getBuilderWithDefault() {
-        return DvhOrgenhetMock.builder()
+    public static DvhOrgEnhetMockBuilder getBuilderWithDefault() {
+        return DvhOrgEnhetMock.builder()
                 .ORGENHET_KODE("testKode")
                 .ORGENHET_NAVN("testNavn")
                 .ORGNODE_NIV("ORGENHET")

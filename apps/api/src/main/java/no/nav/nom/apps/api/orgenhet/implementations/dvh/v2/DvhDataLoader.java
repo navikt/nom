@@ -139,15 +139,17 @@ public class DvhDataLoader {
 
             // Eventsourcing block
             if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-                val stateEnheterPerUniqueAgressoId = persistedEnheterNewStream.getOrDefault(parsedEnhet.getUniqueAgressoId(), Collections.emptyList());
+                val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
                 val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
                         .filter(p -> isOverlapping(parsedEnhet, p) || withinOneMonth(parsedEnhet, p))
                         .toList();
 
                 if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
-                    stateEnheterMatchingDvhParsedEnhet.stream().findFirst().ifPresentOrElse( orgEnhetState -> {
+                    stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
                         // Parsed DVH enhet found in state
                         // TODO: Håndter Korrigeringer, EndreLeder og EndrePlassering
+
+                        // Ved overlapp skal orgEnhetState korrigeres med fra-til dato settes likt DvhEnhet fra-til - Hvis disse er forskjellig
                         if (parsedEnhet.getGyldigTom().isPresent() && !parsedEnhet.getGyldigTom().equals(orgEnhetState.gyldigTom())) {
                             avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
                         }

@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
@@ -38,7 +38,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
                 .ENHETTYPE_NAVN("TYPEEE").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
@@ -56,7 +56,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter bulk")
     void scenario112() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
@@ -77,7 +77,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå")
     void scenario113() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
@@ -94,7 +94,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql bulk filtrert på nivå og agressoId")
     void scenario114() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
@@ -121,11 +121,11 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql uten id parameter")
     void scenario12() {
         dvhOrgenhetMockUtils.addToResponse(
-                DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("test1").ORGENHET_KODE("test1").ORGNODE_NIV("ORGENHET").build(),
-                DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("test2").ORGENHET_KODE("test2").ORGNODE_NIV("ORGENHET").build(),
-                DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("test3").ORGENHET_KODE("test3").ORGNODE_NIV("ORGENHET").build(),
-                DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("test4").ORGENHET_KODE("test4").ORGNODE_NIV("ORGENHET").build(),
-                DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("test5").ORGENHET_KODE("test5").ORGNODE_NIV("ORGENHET").build()
+                DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test1").ORGENHET_KODE("test1").ORGNODE_NIV("ORGENHET").build(),
+                DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test2").ORGENHET_KODE("test2").ORGNODE_NIV("ORGENHET").build(),
+                DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test3").ORGENHET_KODE("test3").ORGNODE_NIV("ORGENHET").build(),
+                DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test4").ORGENHET_KODE("test4").ORGNODE_NIV("ORGENHET").build(),
+                DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("test5").ORGENHET_KODE("test5").ORGNODE_NIV("ORGENHET").build()
         );
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -137,9 +137,9 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21() {
-        final var mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
-        final var mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
-        final var mockEnhet3 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
+        final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
+        final var mockEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
+        final var mockEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2, mockEnhet3);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
@@ -162,8 +162,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33() {
-        final var mockEnhet1 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
-        final var mockEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
 
         dvhOrgenhetMockUtils.addToResponse(mockEnhet1, mockEnhet2);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -185,7 +185,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Tester at graphQL spørring på leder hvor enhet har ledig gir leder")
     void scenario31() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         RessursState ressurs = createRessursHendelseEventSource("");
@@ -204,7 +204,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Tester at graphQL spørring på leder for enhet, hvor enhet ikke har leder")
     void scenario32() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
@@ -221,7 +221,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Henter ut person navn i kontekst av enhet leder spørring")
     void scenario34() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         RessursState ressurs = createRessursHendelseEventSource("");
 
@@ -244,7 +244,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Leser kobling fra DVH og leser fra graphQl")
     void scenario41() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         RessursState ressurs = createRessursHendelseEventSource("");
@@ -270,7 +270,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Kobling er en tom liste om ingen kobling som refererer til organisasjonsenheten eksisterer.")
     void scenario42() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId10").ORGENHET_NAVN("testNavn10").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -285,7 +285,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Henter ut person navn i kontekst av enhet kobling spørring")
     void scenario43() {
-        final var mockEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
 
         RessursState ressurs = createRessursHendelseEventSource("");

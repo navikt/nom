@@ -75,7 +75,7 @@ public abstract class TestBase {
     private GenericStorage genericStorage;
 
     @Autowired
-    public DvhOrgenhetMockUtils dvhOrgenhetMockUtils;
+    public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
     public DvhRessursUtils dvhRessursUtils;

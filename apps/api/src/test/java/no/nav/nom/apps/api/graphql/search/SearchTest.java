@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import no.nav.nom.apps.api.DvhOrgenhetMock;
+import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
@@ -52,10 +52,11 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
-        final var mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
+        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
 
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario2.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
@@ -70,9 +71,8 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario3.graphql");
@@ -85,7 +85,7 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         createRessursHendelseEventSource("1");
@@ -110,7 +110,7 @@ public class SearchTest extends GraphQLTestBase {
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario51() {
         luceneEnabled(true);
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         createRessursHendelseEventSource("1");
@@ -132,9 +132,10 @@ public class SearchTest extends GraphQLTestBase {
     public void scenario61() {
         luceneEnabled(true);
 
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();
-        final var mockedEnhet2 = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("Not-to-find").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();
+        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("Not-to-find").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
@@ -143,7 +144,6 @@ public class SearchTest extends GraphQLTestBase {
         luceneService.refreshOrgenhet();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario6.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -155,7 +155,7 @@ public class SearchTest extends GraphQLTestBase {
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario52() {
         luceneEnabled(true);
-        final var mockedEnhet = DvhOrgenhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
+        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         createRessursHendelseEventSource("1");

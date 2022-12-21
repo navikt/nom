@@ -18,20 +18,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 
 @Service
 @RequiredArgsConstructor
-public class DvhOrgenhetMockUtils {
+public class DvhOrgEnhetMockUtils {
 
-    private final List<DvhOrgenhetMock> response = new LinkedList<>();
+    private final List<DvhOrgEnhetMock> response = new LinkedList<>();
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
     private final DvhDataLoader dvhDataLoader;
 
-    private void mockDvhOrgenhetResponse(String response) {
+    private void mockDvhOrgEnhetResponse(String response) {
         stubFor(get(appProperties.proxy().enhetPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
-        dvhDataLoader.load();
     }
 
     @SneakyThrows
-    public void addToResponse(DvhOrgenhetMock... enheter) {
+    public void addToResponse(DvhOrgEnhetMock... enheter) {
         response.addAll(List.of(enheter));
         createResponse(response);
     }
@@ -46,12 +45,12 @@ public class DvhOrgenhetMockUtils {
     }
 
     @SneakyThrows
-    private void createResponse(List<DvhOrgenhetMock> orgenhetMocks) {
+    private void createResponse(List<DvhOrgEnhetMock> orgenhetMocks) {
         val response = objectMapper.createObjectNode();
         response.set(
                 "NOM_HRORG_ORGENHETResponse",
                 objectMapper.createObjectNode().set("NOM_HRORG_ORGENHETResult", objectMapper.convertValue(orgenhetMocks, JsonNode.class))
         );
-        mockDvhOrgenhetResponse(objectMapper.writeValueAsString(response));
+        mockDvhOrgEnhetResponse(objectMapper.writeValueAsString(response));
     }
 }

@@ -70,4 +70,15 @@ public class OrgEnhetCommandService {
         ));
     }
 
+    // TODO: Complete this for corrections
+//    public ListenableFuture<SendResult<String, OrgEnhetEvent>> correctingOrgEnhet(String fid, KorrigertOrgEnhet korrigertOrgEnhet) {
+//        return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
+//                fid,
+//                new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
+//                        avvikleOrgEnhet.gyldigTom()
+//                ),
+//                avvikleOrgEnhet.inputMetadata()
+//        ));
+//    }
+
 }
