@@ -72,7 +72,7 @@ public class OrgEnhetCommandService {
         ));
     }
 
-    // Alleveriderr i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
+    // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
     public ListenableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
         OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
