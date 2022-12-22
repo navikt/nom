@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @Type(value = OrgEnhetOpprettetEventV1.class),
         @Type(value = OrgEnhetAvvikletEventV1.class),
+        @Type(value = OrgEnhetKorrigertEventV1.class),
 })
 public abstract class OrgEnhetEvent extends Event {
 
@@ -23,7 +24,10 @@ public abstract class OrgEnhetEvent extends Event {
             property = "type")
     @JsonSubTypes({
             @Type(value = OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData.class),
-            @Type(value = OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData.class),
+            @Type(value = OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData.class),
+            @Type(value = OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData.class),
+            @Type(value = OrgEnhetKorrigertEventV1.OrgEnhetKorrigertEventData.class),
+            @Type(value = OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData.class),
     })
     public interface Data extends Event.Data { }
 }

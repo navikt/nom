@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class OrgEnhetTest extends TestBase {
 
@@ -71,7 +72,7 @@ public class OrgEnhetTest extends TestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
+            verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
         }
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
@@ -122,7 +123,7 @@ public class OrgEnhetTest extends TestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
+            verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
         }
 
 
@@ -174,7 +175,7 @@ public class OrgEnhetTest extends TestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
+            verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
         }
 
         assertEquals(3, orgenhetService.getAllEnheter().size());
@@ -244,7 +245,7 @@ public class OrgEnhetTest extends TestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(1)).createOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
         }
 
 
@@ -296,8 +297,8 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(3)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(2)).terminateOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(2)).avikleOrgEnhet(any(), any());
         }
 
 
@@ -375,8 +376,8 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(0)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
         }
 
         assertEquals(1, orgenhetService.getAllEnheter().size());
@@ -421,6 +422,9 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+            verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
                             "orgenhet_FID_1",
@@ -487,12 +491,10 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(2)).terminateOrgEnhet(any(), any());
-        }
+            verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
-
-        if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
                             "orgenhet_FID_1",
@@ -567,12 +569,12 @@ public class OrgEnhetTest extends TestBase {
 
             // Mock1+2 er slått sammen i parsing.
             // Lager 'FID_1' [2020.08 - ]
-            verify(orgEnhetCommandService, times(1)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(0)).terminateOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(0)).avikleOrgEnhet(any(), any());
 
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
-                            "orgenhet_FID_1",
+                            "FID_1",
                             "testId",
                             "testNavn",
                             LocalDate.of(2020, 8, 1),
@@ -606,6 +608,10 @@ public class OrgEnhetTest extends TestBase {
         mockedEnhet1.setORGENHET_TIL_PERIODE(202011);
         dvhOrgenhetMockUtils.createEmptyResponse();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
+        if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+            when(orgEnhetCommandService.opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))))).thenReturn("FID_2");
+        }
+
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
@@ -614,31 +620,23 @@ public class OrgEnhetTest extends TestBase {
 
 
             // Før ny innlesning - En enhet i state : [2020.08 - ]
-            // Prossesering av dvhEnheter er seneste start dato først (start dato decend)
-
-            // Parsing slaår ikke sammen
-            // mockEnhet2 er [2021.01 - ] -> Finner overlapp på 'FID_1' og gjør ingenting
-                // -> TODO: Her skal det lages korrigering siden fra dato er endret
-            // mockEnhet1 er [2020.08 - 2020.11] -> Finner ikke overlapp - lager 'FID_2' og terminerer denne
-                // -> TODO: Nå finner den overlapp og gjør kun terminering av eksisterende.
+            // Prossesering av dvhEnheter er seneste start dato først (start dato decend). Altså mock 2 først
+            // Parsing slår ikke sammen
+            // leser mockEnhet2 [2021.01 - ] -> Finner overlapp på 'FID_1' og korrigerer startdato
+                // State på FID_1 er fortsatt [2020.08 - ] -> Eventually [2021.01 - ]
+            // mockEnhet1 er [2020.08 - 2020.11] -> Finner overlapp på 'FID_1' -> terminerer denne !!
+                    // mockEnhet1 er [2020.08 - 2020.11] -> Finner overlapp på eventually fra dato - lager 'FID_2' og terminerer denne
             // Etter innlesning -
-            // Nå feilaktig:
-            //      FID_1: [2020.08 - 2020.11]
-            // Korrekt skal være:
             //      FID_1: [2021.01 - ]
             //      FID_2: [2020.08 - 2020.11]
 
-            // Nå gjør den feilaktig dette
-            verify(orgEnhetCommandService, times(1)).createOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))));
-            verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(argThat(fidArg -> fidArg.equals(firstEnhetFID)), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
-            // Og ikke dette: TODO: supporter dette Se over
-//            verify(orgEnhetCommandService, times(1 + 1)).createOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))));
-//            verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(argThat(fidArg -> !fidArg.equals(firstEnhetFID)), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
-//            verify(orgEnhetCommandService, times(1 + 1)).correctingOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(1 + 1)).opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))));
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(argThat(arg -> !arg.equals(firstEnhetFID)), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
+            verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
-                            "orgenhet_FID_1",
+                            "FID_1",
                             "testId",
                             "testNavn",
                             LocalDate.of(2021, 1, 1),
@@ -650,7 +648,7 @@ public class OrgEnhetTest extends TestBase {
                     ));
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
-                            "orgenhet_FID_2",
+                            "FID_2",
                             "testId",
                             "testNavn",
                             LocalDate.of(2020, 8, 1),
@@ -709,8 +707,8 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
 
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
@@ -748,8 +746,8 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(2)).createOrgEnhet(any());
-            verify(orgEnhetCommandService, times(1)).terminateOrgEnhet(any(), any());
+            verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
         }
 
         allEnheter = orgenhetService.getAllEnheter();

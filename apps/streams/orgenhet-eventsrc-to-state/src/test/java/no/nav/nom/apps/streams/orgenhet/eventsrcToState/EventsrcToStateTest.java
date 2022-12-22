@@ -51,7 +51,7 @@ public class EventsrcToStateTest {
         );
 
 
-        final OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData additionalData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalData(
+        final OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData additionalData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
