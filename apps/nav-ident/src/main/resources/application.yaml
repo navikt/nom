@@ -1,8 +1,11 @@
 app:
   name: ${NAIS_APP_NAME:nav-ident}
   kafka:
-    topic.eventsource.name: org.nav-ident
-    topic.rnr.name: org.nav-ident-rnr
+    topic:
+      eventsource:
+        name: org.nav-ident
+      rnr:
+        name: org.nav-ident-rnr
     identServiceListenerName: IdentService_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (For asynk koble rnr need.respons til selve requesten)
     eventSourceListenerName: EventSourceListener_${HOSTNAME}  # Ønsker unik consumer group per pod for å lese alle meldinger (Domain model er in memory, å skal være komplett i hver pod), også fra start av stream
     eventSourceIdleTimeout: 10000 # Millis før idle event - brukes for å trigge når lesing av eventsource køen er ferdig.
@@ -14,30 +17,18 @@ app:
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
 
-logging:
-  level:
-    no.nav.nom: DEBUG
-
-nom:
-  libs:
-    utils:
-      common:
-        kafka:
-          load-properties: false
-        app:
-          load-properties: true
-
 authentication:
   aad:
     issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
     clientId: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
-management.endpoints.web.exposure.include: prometheus,health,mappings,flyway,info,loggers,metrics
-
 spring:
+  application:
+    name: ${app.name}
   main:
     banner-mode: "log"
+    cloud-platform: kubernetes
 
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DATABASE}
@@ -75,7 +66,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
-      properties.spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
+      properties:
+        spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
 
   redis:
     host: ${REDIS_HOST}
@@ -87,3 +79,49 @@ spring:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+
+management:
+  metrics:
+    tags:
+      app: ${app.name}
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,mappings,flyway,info,loggers,metrics
+      base-path: /internal
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+server:
+  shutdown: graceful
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev & !prod
+  flyway:
+    locations: classpath:/db/migration,classpath:/db/migration/dev
+
+PDL_CLIENT_ID: dev-fss.pdl.pdl-api
+PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
+REDIS_HOST: nav-ident-redis.org.svc.cluster.local
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod & !dev
+  flyway:
+    locations: classpath:/db/migration,classpath:/db/migration/prod
+
+PDL_CLIENT_ID: prod-fss.pdl.pdl-api
+PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
+REDIS_HOST: nav-ident-redis.org.svc.cluster.local

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.security.AADTokenRepository;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -50,11 +51,13 @@ public class PdlServiceImpl implements PdlService {
         try {
             pdlResponse = postToPdl(qryBody, token);
         } catch (RuntimeException e) {
+            log.error(LogConfig.SECURE_LOGS, "PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}. Exception message: {}", pdlHentIdentQry, id, e.getMessage());
             log.error("PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}***. Exception message: {}", pdlHentIdentQry, id.substring(0,5), e.getMessage());
             return Collections.emptyList();
         }
 
         if (pdlResponse == null) {
+            log.error(LogConfig.SECURE_LOGS, "PDL GraphQL returned empty response for qry:\n{}\nwith ident = {}", pdlHentIdentQry, id);
             log.error(String.format("PDL GraphQL returned empty response for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
             return Collections.emptyList();
         }
@@ -63,6 +66,7 @@ public class PdlServiceImpl implements PdlService {
         try {
             response = mapper.readTree(pdlResponse);
         } catch (JsonProcessingException e) {
+            log.error(LogConfig.SECURE_LOGS, "PDL GraphQL returned unparsable json response for qry:\n{}\nwith ident = {}", pdlHentIdentQry, id);
             log.error(String.format("PDL GraphQL returned unparsable json response for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
             return Collections.emptyList();
         }
@@ -75,11 +79,13 @@ public class PdlServiceImpl implements PdlService {
                         .sorted( Comparator.comparing(PdlIdent::erGjeldende, Comparator.reverseOrder()) )   // Sorter slik at gjeldende folkeregistrert id for personen ligger først
                         .map( i -> i.ident ).collect(Collectors.toList());
             } catch (JsonProcessingException e) {
+                log.error(LogConfig.SECURE_LOGS, "Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n{}\nwith ident = {}", pdlHentIdentQry, id);
                 log.error(String.format("Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n%s\nwith ident = %s***", pdlHentIdentQry, id.substring(0,5)));
                 return Collections.emptyList();
             }
         } else {
             String errorMessage = response.withArray("errors").get(0).path("message").textValue();
+            log.error(LogConfig.SECURE_LOGS, "PDL GraphQL returned error in response: {}\nfor qry:\n{}\nwith ident = {}", errorMessage, pdlHentIdentQry, id);
             log.error(String.format("PDL GraphQL returned error in response: %s\nfor qry:\n%s\nwith ident = %s***", errorMessage, pdlHentIdentQry, id.substring(0,5)));
             return Collections.emptyList();
         }

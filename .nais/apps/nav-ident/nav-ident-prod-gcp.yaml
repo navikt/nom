@@ -8,13 +8,11 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash,prod
-    - name: PDL_CLIENT_ID
-      value: prod-fss.pdl.pdl-api
-    - name: PDL_BASE_URL
-      value: https://pdl-api.prod-fss-pub.nais.io
-    - name: REDIS_HOST
-      value: nav-ident-redis.org.svc.cluster.local
+      value: prod
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+  secureLogs:
+    enabled: true
   image: {{image}}
   port: 8080
   ingresses:

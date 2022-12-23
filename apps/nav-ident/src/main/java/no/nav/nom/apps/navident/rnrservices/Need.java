@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.IdentType;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 @Data
@@ -50,7 +49,7 @@ public class Need implements Cloneable {
     public String maskedToString() {
         Need masked = this.clone();
         masked.personid = mask(this.personid);
-        masked.pdlPersonider = this.pdlPersonider != null ? this.pdlPersonider.stream().map( p -> mask(p)).collect(Collectors.toList()) : null;
+        masked.pdlPersonider = this.pdlPersonider != null ? this.pdlPersonider.stream().map(this::mask).toList() : null;
         masked.pdlGjeldendePersonid =  mask(this.pdlGjeldendePersonid);
         return masked.toString();
     }

@@ -1,13 +1,12 @@
 package no.nav.nom.apps.navident.rnrservices;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
+import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.domain.IdentType;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -27,16 +25,22 @@ import java.util.stream.Collectors;
 @Slf4j
 public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
     // Map contents need to be consistent between thread running bestillIdent(...) and thread listening for the RnR Response
-    private Map<String, CountDownLatch> requests = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, Respons> responses = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, CountDownLatch> requests = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, Respons> responses = Collections.synchronizedMap(new HashMap<>());
 
-    @Autowired RnRMdcCache rnRMdcCache;
-    @Autowired NeedProducer needProducer;
+    private final RnRMdcCache rnRMdcCache;
+    private final NeedProducer needProducer;
+
+    public IdentServiceImpl(RnRMdcCache rnRMdcCache, NeedProducer needProducer) {
+        this.rnRMdcCache = rnRMdcCache;
+        this.needProducer = needProducer;
+    }
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
+        log.debug(LogConfig.SECURE_LOGS, "bestillIdent(personId = {}, type = {}, idPrefix = '{}') invokert", personid, type, idPrefix);
         log.debug("bestillIdent(personId = %s, type = %s, idPrefix = '%s') invokert".formatted(mask(personid), type, idPrefix));
         CountDownLatch latch = new CountDownLatch(1);
-        /**
+        /*
          * Thread safe consideration.
          * This block needs to complete before any Response listener tries to fetch the latch from map
          */
@@ -51,9 +55,11 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
                     responses.remove(uuid);
+                    log.debug(LogConfig.SECURE_LOGS, "Returnerer respons for personid {} : {}", personid, respons);
                     log.debug("Returnerer respons for personid %s : %s".formatted(mask(personid), respons));
                     return respons;
                 } else {
+                    log.error(LogConfig.SECURE_LOGS, "Forventet respons data for bestilling av personid {}, men ingen var tilgjengelig", personid);
                     log.error("Forventet respons data for bestilling av personid %s, men ingen var tilgjengelig".formatted(mask(personid)));
                     return Respons.builder()
                             .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -63,6 +69,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                             .build();
                 }
             } else { // TimeOut
+                log.error(LogConfig.SECURE_LOGS, "Tjenesten for bestilling av personid timet ut i bestilling av {}", personid);
                 log.error("Tjenesten for bestilling av personid timet ut i bestilling av %s".formatted(mask(personid)));
                 return Respons.builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,6 +79,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                         .build();
             }
         } catch (InterruptedException e) {
+            log.error(LogConfig.SECURE_LOGS, "Ident bestilling for ident {} ble avbrutt", personid, e);
             log.error("Ident bestilling for ident %s ble avbrutt".formatted(mask(personid)), e);
             return Respons.builder()
                     .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -95,7 +103,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
         Respons respons = need.getRespons();
         responses.put(need.getUuid(), respons);
 
-        /**
+        /*
          * Thread safe consideration
          * Do not try to find a latch unless bestillIdent threads has fully completed both to produceNeed and put latch onto the map
          */
@@ -114,7 +122,7 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
-        final List<String> topics = assignments.keySet().stream().map( p -> p.topic() ).collect(Collectors.toList());
+        final List<String> topics = assignments.keySet().stream().map(TopicPartition::topic).collect(Collectors.toList());
         log.info("Kafka partions on topics %s assigned to listener %s. Seek to end in order to only process new messages".formatted(topics, listenerName));
         callback.seekToEnd(assignments.keySet());
     }

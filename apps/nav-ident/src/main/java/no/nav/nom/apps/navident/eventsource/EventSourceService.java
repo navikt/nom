@@ -26,7 +26,8 @@ public class EventSourceService {
 
     @KafkaListener(
             id = "${app.kafka.eventSourceListenerName}",
-            topics = "${app.kafka.topic.eventsource.name}")
+            topics = "${app.kafka.topic.eventsource.name}"
+    )
     public void listen(SourceEvent event, @Header(KafkaHeaders.OFFSET) long currentOffset) {
         log.debug("Got SourceEvent on offset %d: %s".formatted(currentOffset, event.maskedToString()));
 
@@ -38,8 +39,7 @@ public class EventSourceService {
                 default -> log.error("Unknown event type %s".formatted(event.event));
             }
         } catch (IllegalSourceEventException e) {
-            String error = String.format("Could not handle SourceEvent. Reason: %s", e.getMessage());
-            log.error(error);
+            log.error("Could not handle SourceEvent. Reason: {}", e.getMessage());
             log.debug("Callstack:", e);
         }
     }
@@ -52,19 +52,19 @@ public class EventSourceService {
         String navid =  event.payload.navident;
         String personid = event.payload.personid;
         if ( navidenter.values().stream().anyMatch( id -> id.is(personid) && navid != id.getNavident() ) ) {
-            throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes ifra før en på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
+            throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes allerede på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
         }
 
         Navident ident = null;
         if (navidenter.containsKey(navid)) {
-            log.info("Navident %s finnes ifra før. Denne eventen erstatter tidligere info", navid);
+            log.info("Navident {} finnes ifra før. Denne eventen erstatter tidligere info", navid);
 
             ident = navidenter.get(navid).clone();
             ident.setGjeldendePersonid(personid);  // ASSUMPTION!! Siste personid i eventsource benyttes som gjeldende
             if (!ident.getAllePersonider().contains(personid)) {
                 ident.addPersonid(personid);
             } else {
-                log.info("Personid finnes ifra før på denne navidenten %s. Denne eventen endrer kanskje kun på gjeldendeIdent info", navid);
+                log.info("Personid finnes ifra før på denne navidenten {}. Denne eventen endrer kanskje kun på gjeldendeIdent info", navid);
             }
         } else {
             ident = Navident
@@ -86,14 +86,14 @@ public class EventSourceService {
             throw new IllegalSourceEventException("Finner ingen NavIdent %s. Kan ikke behandle DELETE SourceEvent", navident);
         }
         navidenter.remove(navident);
-        log.debug("Fjernet navident %s fra domain".formatted(navident));
+        log.debug("Fjernet navident {} fra domain", navident);
     }
 
     @EventListener
     public void eventHandler(ListenerContainerIdleEvent event) {
         if (hasReadToEndOnStartup) return;
 
-        log.debug("Idle event received for listener %s. Waiting for listener %s".formatted(event.getListenerId(), listenerId));
+        log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
             log.info("All SourceEvents has now been read on startup");
             hasReadToEndOnStartup = true;

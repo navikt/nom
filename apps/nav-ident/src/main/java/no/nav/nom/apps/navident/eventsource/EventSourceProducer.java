@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
@@ -35,6 +36,7 @@ public class EventSourceProducer {
         mdcCache.loadMdc(need.getUuid());
 
         if (need.isResponsProdusentVisited() && need.getRespons() != null && List.of(HttpStatus.OK, HttpStatus.CREATED).contains(need.getRespons().getHttpStatus())) {
+            log.debug(LogConfig.SECURE_LOGS,"Producing and persisting SourceEvent for need: {}", need);
             log.debug("Producing and persisting SourceEvent for need: %s".formatted(need.maskedToString()));
             val responseBody = need.getRespons().getBody();
             val sourceEvent = SourceEvent.builder()

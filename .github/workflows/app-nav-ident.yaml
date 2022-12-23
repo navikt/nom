@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'dev/*'
     paths:
       - 'apps/nav-ident/**'
       - 'libs/utils-common/**'
@@ -20,6 +21,7 @@ jobs:
   build-jar-docker:
     name: build-jar-docker
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,7 +58,6 @@ jobs:
   deploy-dev:
     name: Deploy to NAIS dev-gcp
     needs: build-jar-docker
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
