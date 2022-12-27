@@ -1,5 +1,7 @@
 package no.nav.nom.apps.navident.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.val;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
 public class NavidentController {
