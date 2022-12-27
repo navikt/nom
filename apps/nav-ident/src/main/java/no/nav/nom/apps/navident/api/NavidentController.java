@@ -3,6 +3,8 @@ package no.nav.nom.apps.navident.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -52,7 +54,14 @@ public class NavidentController {
             {
                     @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
                     @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized, bearer token not supplied")
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized, bearer token not supplied or invalid",
+                            content = @Content, // Empty response
+                            headers = {
+                                    @Header(name = "www-authenticate", description = "Error message from bearer/jwt authentication process")
+                            }
+                    )
             }
     )
     @PostMapping
