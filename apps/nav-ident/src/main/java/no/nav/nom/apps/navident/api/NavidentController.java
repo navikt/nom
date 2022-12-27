@@ -51,7 +51,7 @@ public class NavidentController {
     @ApiResponses(
             {
                     @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
-                    @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter.", useReturnTypeSchema = true)
+                    @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter")
             }
     )
     @PostMapping

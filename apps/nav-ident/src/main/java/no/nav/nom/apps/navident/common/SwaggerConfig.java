@@ -27,7 +27,7 @@ public class SwaggerConfig {
     public static final String SECURITY_SCHEME_CONFIGURATION_NAME = "BearerAuth";
 
     @Bean
-    public OpenAPI customOpenAPI(@Value("${spring.application.name}") String appname, @Value("${random.uuid") String uuid) {
+    public OpenAPI customOpenAPI(@Value("${spring.application.name}") String appname, @Value("${random.uuid}") String uuid) {
         return new OpenAPI()
                 .info(
                         new Info()
