@@ -1,10 +1,21 @@
 package no.nav.nom.apps.navident.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.val;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
 import no.nav.nom.apps.navident.api.dto.NavidentResponseDTO;
 import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.common.SwaggerConfig;
+import no.nav.nom.libs.utils.common.mdc.MdcConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Tag(name = "Navident")
 @RestController
 @RequestMapping(NavidentController.BASE_URL)
 public class NavidentController {
@@ -27,6 +39,31 @@ public class NavidentController {
         this.identService = identService;
     }
 
+    @Operation(
+            description = "Bestill en nav-ident",
+            security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
+    )
+    @Parameters(
+            {
+                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CALL_ID_KEY),
+                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_X_REQUEST_ID_KEY),
+                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CONSUMER_ID_KEY)
+            }
+    )
+    @ApiResponses(
+            {
+                    @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
+                    @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter"),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized, bearer token not supplied or invalid",
+                            content = @Content, // Empty response
+                            headers = {
+                                    @Header(name = "www-authenticate", description = "Error message from bearer/jwt authentication process")
+                            }
+                    )
+            }
+    )
     @PostMapping
     public ResponseEntity<NavidentResponseDTO> createNavident(@RequestBody NavidentRequestDTO request) {
         logger.info(LogConfig.SECURE_LOGS, "Navident bestilt for: {}", request);

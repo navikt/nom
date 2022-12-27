@@ -1,5 +1,6 @@
 package no.nav.nom.apps.navident.common.security;
 
+import no.nav.nom.apps.navident.common.SwaggerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -21,13 +22,17 @@ public class SpringSecurityConfiguration {
         Begrunnelse for å bruke dette i stede for å ta http.mvcMatchers("/internal/**").permitAll()
         er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
          */
-        return (web) -> web.ignoring().mvcMatchers("/internal/**");
+        return (web) -> {
+            web.ignoring().mvcMatchers("/internal/**");
+            web.ignoring().mvcMatchers(SwaggerConfig.SWAGGER_API_URLS);
+        };
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
+            .authorizeRequests(requests -> requests.mvcMatchers(SwaggerConfig.SWAGGER_API_URLS).permitAll())
             .authorizeRequests(requests -> requests.anyRequest().authenticated())
             .exceptionHandling(handler -> handler.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
