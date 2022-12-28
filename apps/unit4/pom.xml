@@ -19,6 +19,7 @@
     <properties>
         <java.version>17</java.version>
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependecies version -->
+        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
     </properties>
 
@@ -54,6 +55,12 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
         </dependency>
 
         <dependency>
