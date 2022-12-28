@@ -15,10 +15,10 @@ public class SecurityConfig {
     @Profile("!test")
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorize -> authorize
-                        .mvcMatchers("/internal/health/**")
-                        .permitAll()
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests(requests -> {
+                            requests.mvcMatchers("/internal/health/**").permitAll();
+                            requests.anyRequest().authenticated();
+                        }
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         return http.build();
