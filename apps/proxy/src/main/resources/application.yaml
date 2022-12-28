@@ -35,6 +35,11 @@ authentication:
     scope: openid
 
 spring:
+  application:
+    name: ${NAIS_APP_NAME:nom-proxy}
+  main:
+    banner-mode: off
+    cloud-platform: kubernetes
   security:
     oauth2:
       resourceserver:
@@ -49,9 +54,24 @@ spring:
     template:
       ignore-partial-result-exception: true
 
-nom:
-  libs:
-    utils:
-      common:
-        app:
-          load-properties: true
+server:
+  shutdown: graceful
+
+management:
+  metrics:
+    tags:
+      app: ${spring.application.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus,health,heapdump,scheduledtasks,threaddump
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api
