@@ -1,5 +1,6 @@
 package no.nav.nom.apps.navident.common.security;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.libs.test.SecurityTestUtils;
@@ -15,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({SecurityTestUtils.class})
 class AADTokenRepositoryTest extends SpringBootTestBase {
 
-    @Autowired private AADTokenRepository aadTokenRepository;
+    @Autowired
+    private AADTokenRepository aadTokenRepository;
 
     @Autowired
     protected SecurityTestUtils securityTestUtils;
@@ -59,6 +61,7 @@ class AADTokenRepositoryTest extends SpringBootTestBase {
         verify(1, postRequestedFor(urlEqualTo("/oauth2/v2.0/token"))); // Make sure cache is hit on second invocation
     }
 
+    @SneakyThrows
     private String getValidToken() {
         val jwtClaimsBuilder = securityTestUtils.validJwtClaims();
         return securityTestUtils.createToken(jwtClaimsBuilder);

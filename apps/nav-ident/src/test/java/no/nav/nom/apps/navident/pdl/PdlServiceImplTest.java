@@ -1,5 +1,6 @@
 package no.nav.nom.apps.navident.pdl;
 
+import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.navident.SpringBootTestBase;
 import no.nav.nom.libs.test.SecurityTestUtils;
@@ -74,6 +75,7 @@ class PdlServiceImplTest extends SpringBootTestBase {
     }
 
 
+    @SneakyThrows
     public void setSecurityContextAuthentication() {
         val builder = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(builder);

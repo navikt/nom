@@ -78,6 +78,7 @@ public abstract class GraphQLTestBase extends TestBase {
         this.responseTimeout.set(duration);
     }
 
+    @SneakyThrows
     private String createJwtForTest(boolean includeValidAzp) {
         final var claims = includeValidAzp ? validJwtWithAzpClaim() : securityTestUtils.validJwtClaims();
         claims.claim("azp_name", "test");

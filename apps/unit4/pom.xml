@@ -20,7 +20,6 @@
         <java.version>17</java.version>
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependecies version -->
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
     </properties>
 
     <dependencies>
@@ -90,12 +89,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.thomaskasene.wiremock</groupId>
-            <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-test</artifactId>
