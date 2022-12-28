@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.*;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -64,10 +64,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Depends on external resources. Run explicitly")
 public class E2ENavIdent {
 
-    @MockBean RnRTestNeedProducer rnRTestNeedProducer;
-    @MockBean RnRTestListener rnRTestListener;
+    @MockBean
+    RnRTestNeedProducer rnRTestNeedProducer;
+    @MockBean
+    RnRTestListener rnRTestListener;
 
-    @LocalServerPort String port;
+    @LocalServerPort
+    String port;
 
     @Autowired
     protected Map<String, Navident> navidenter;
