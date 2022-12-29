@@ -3,13 +3,17 @@ package no.nav.nom.apps.api.lucenesearch;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneRessursFilter;
 import no.nav.nom.libs.lucenewrapper.domain.OrgEnhetIndexer;
 import no.nav.nom.libs.lucenewrapper.domain.RessursIndexer;
+import no.nav.nom.libs.lucenewrapper.search.QueryFilter;
+import no.nav.nom.libs.lucenewrapper.search.QueryFilterContext;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +34,8 @@ public class LuceneService {
 
     private final OrgenhetService orgenhetService;
 
-    private final String entTypeOrgenhet;
-    private final String entTypeRessurs;
+    private final String orgenhetEntityType;
+    private final String ressursEntityType;
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
@@ -41,8 +45,8 @@ public class LuceneService {
         var indexRessurs = new RessursIndexer();
         this.wrappedLucene = new WrappedLucene(List.of(indexOrgEnhet, indexRessurs));
 
-        this.entTypeOrgenhet = indexOrgEnhet.typeStr();
-        this.entTypeRessurs = indexRessurs.typeStr();
+        this.orgenhetEntityType = indexOrgEnhet.typeString();
+        this.ressursEntityType = indexRessurs.typeString();
 
         this.ressursService = ressursService;
     }
@@ -63,14 +67,12 @@ public class LuceneService {
 
             var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
             var luceneRessursStream = resMap.values().stream()
-                    .map(it -> {
-                             var visningsNavn = it.visningsnavn().fornavn()
-                                     + it.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
-                                     + (" " + it.visningsnavn().etternavn());
-                             var activeRessurs = it.sluttdato().isEmpty() || it.sluttdato().get().isAfter(LocalDate.now());
-                             return new LuceneRessurs(it.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs);
-                         }
-                    );
+                .map(ressurs -> {
+                        var visningsNavn = getVisningsNavn(ressurs);
+                        var activeRessurs = ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true);
+                        return new LuceneRessurs(ressurs.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs, ressurs.sektor().toString());
+                    }
+                );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
 
@@ -93,17 +95,25 @@ public class LuceneService {
 
     }
 
+    private String getVisningsNavn(RessursState ressurs) {
+        return ressurs.visningsnavn().fornavn()
+            + ressurs.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
+            + (" " + ressurs.visningsnavn().etternavn());
+    }
+
     @Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
         wrappedLucene.upsertEntities(
-                orgenhetService.getAllEnheter().stream()
-                        .map(it -> new LuceneOrgEnhet(
-                                     it.getFid().toString(),
-                                     it.getNavn(),
-                                     it.getOrgEnhetsKategori().toString()
-                             )
-                        ), LuceneOrgEnhet.class);
+            orgenhetService.getAllEnheter().stream()
+                .map(orgenhet -> new LuceneOrgEnhet(
+                        orgenhet.getFid().toString(),
+                        orgenhet.getNavn(),
+                        orgenhet.getOrgEnhetsKategori().toString(),
+                        orgenhet.getOrgNiv(),
+                        orgenhet.getGyldigTom()
+                    )
+                ), LuceneOrgEnhet.class);
         log.info("Lucene indexing for orgenhet completed.");
 
     }
@@ -113,7 +123,7 @@ public class LuceneService {
     }
 
     public synchronized void invalidateOrgenhet(String orgenhetId) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     private synchronized List<String> grabAndResetNavidentInvalidationList() {
@@ -123,28 +133,50 @@ public class LuceneService {
     }
 
     private synchronized List<String> grabAndResetOrgenhetInvalidationList() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
-
 
     public List<SearchResult> search(String term) {
-        return this.wrappedLucene.search(term);
+        return wrappedLucene.search(term);
     }
 
-
     public List<SearchResult> searchRessurs(String term) {
-        return this.wrappedLucene.search(term, List.of(LuceneRessurs.class));
+        return searchRessurs(term, LuceneRessursFilter.alle());
+    }
+
+    public List<SearchResult> searchRessurs(String term, LuceneRessursFilter filter) {
+        return search(term, filter, false);
+    }
+
+    public List<SearchResult> searchOrgenhet(String term) {
+        return searchOrgenhet(term, LuceneOrgenhetFilter.alle());
+    }
+
+    public List<SearchResult> searchOrgenhet(String term, LuceneOrgenhetFilter filter) {
+        return search(term, filter, false);
+    }
+
+    private <T> List<SearchResult> search(String term, QueryFilter<T> filter, boolean includeDefault) {
+        var filterContext = new QueryFilterContext(filter);
+        filterContext.setDefaultInclude(includeDefault);
+
+        return wrappedLucene.search(term, filterContext);
     }
 
     public boolean filterOrgenhetResult(SearchResult searchResult) {
-        return searchResult.entType().equals(this.entTypeOrgenhet);
+        return searchResult.entityType().equals(this.orgenhetEntityType);
     }
 
     public boolean filterRessursResult(SearchResult searchResult) {
-        return searchResult.entType().equals(this.entTypeRessurs);
+        return searchResult.entityType().equals(this.ressursEntityType);
     }
 
     public synchronized boolean initLoadComplete() {
         return initialLoadComplete.get();
+    }
+
+
+    public void clear() {
+        this.wrappedLucene.dropPersistedIndex();
     }
 }

@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.function.Predicate.not;
+
 @Data
 public class DvhOrgenhetV2 implements IOrgenhet {
     private String agressoId;
@@ -27,6 +29,10 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     private String lederRessursNr;
     private JsonNode rawData;
 
+    private final static LocalDate AGRESSO_MAX_DATE = LocalDate.parse("2099-12-31");
+    private final static DateTimeFormatter yyyyMMdd_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private final static DateTimeFormatter YYYY_MM_DD_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     public DvhOrgenhetV2(JsonNode node) {
         this.rawData = node;
         this.agressoId = node.get("ORGENHET_KODE").asText();
@@ -38,7 +44,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         this.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;
         this.orgenhetStatus = node.get("ORGENHET_STATUS").asText().toUpperCase();
         this.stillingMaksDato = node.hasNonNull("STILLING_MAKS_GYLDIG_TIL_DATO") ?
-                LocalDate.parse(node.get("STILLING_MAKS_GYLDIG_TIL_DATO").asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+            LocalDate.parse(node.get("STILLING_MAKS_GYLDIG_TIL_DATO").asText(), YYYY_MM_DD_FORMATTER) : null;
         this.dvhLastetDato = LocalDate.parse(node.get("LASTET_DATO").asText());
         this.lederRessursNr = node.hasNonNull("LEDER_RESSURSNR") ? node.get("LEDER_RESSURSNR").asText() : null;
 
@@ -61,9 +67,18 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public Optional<LocalDate> getGyldigTom() {
-        val dateToUse = !orgNiv.equals("ORGENHET") || agressoGyldigFom.equals("0") || agressoGyldigTom.equals("209999") ? null : agressoGyldigTom;
-        return Optional.ofNullable(getDate(getLastDay(dateToUse)).orElseGet(() -> orgenhetStatus.equals("P") && orgNiv.equals("ORGENHET") ?
-                getDate(stillingMaksDato).orElse(null) : null));
+        final var ignoreDate = !"ORGENHET".equals(orgNiv) || "0".equals(agressoGyldigFom) || "209999".equals(agressoGyldigTom);
+        if (ignoreDate) {
+            return Optional.empty();
+        }
+
+        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom));
+        if (agressoGyldigTomDato.isPresent()) {
+            return agressoGyldigTomDato;
+        }
+
+        final var useMaxStillingDate = "P".equals(orgenhetStatus) && "ORGENHET".equals(orgNiv);
+        return useMaxStillingDate ? getDate(stillingMaksDato) : Optional.empty();
     }
 
     @Override
@@ -77,22 +92,19 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     private LocalDate getLastDay(String yyyyMM) {
-        if (yyyyMM != null) {
-            LocalDate convertedDate = getFirstDay(yyyyMM);
-            return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
+        if (yyyyMM == null) {
+            return null;
         }
-        return null;
+        LocalDate convertedDate = getFirstDay(yyyyMM);
+        return convertedDate.withDayOfMonth(convertedDate.getMonth().length(convertedDate.isLeapYear()));
     }
 
     private LocalDate getFirstDay(String yyyyMM) {
-        return LocalDate.parse(yyyyMM + "01", DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return LocalDate.parse(yyyyMM + "01", yyyyMMdd_FORMATTER);
     }
 
     private Optional<LocalDate> getDate(LocalDate date) {
-        if (date != null && !date.isEqual(LocalDate.parse("2099-12-31"))) {
-            return Optional.of(date);
-        }
-        return Optional.empty();
+        return Optional.ofNullable(date).filter(not(AGRESSO_MAX_DATE::isEqual));
     }
 
     public DvhOrgenhetV2 merge(DvhOrgenhetV2 dvhOrgenhetV2, ObjectMapper objectMapper) {

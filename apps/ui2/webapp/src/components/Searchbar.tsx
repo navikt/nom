@@ -117,7 +117,9 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
     body: JSON.stringify({
       operationName: "searchRessurs",
       query: `query searchRessurs {
-              searchRessurs(term:"${searchString ?? ""}"){
+              searchRessurs(term:"${
+                searchString ?? ""
+              }", filter: {sektorSelection: ALLE, statusSelection: ALLE}){
                 __typename
                 ... on Ressurs {
                   navident

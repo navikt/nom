@@ -101,6 +101,7 @@ public abstract class TestBase {
         ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
         luceneEnabled(false);
+
         enableOrgEnhetEventSource(true);
     }
 

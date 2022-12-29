@@ -22,7 +22,9 @@ import static java.util.Collections.emptyMap;
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class GraphQLTestBase extends TestBase {
 
-    private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> Duration.of(5, SECONDS));
+    private final static Duration TIMEOUT_DURATION = Duration.of(5, SECONDS);
+
+    private final ThreadLocal<Duration> responseTimeout = ThreadLocal.withInitial(() -> TIMEOUT_DURATION);
 
     @Autowired
     HttpGraphQlTester graphQlTester;
@@ -71,7 +73,7 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @BeforeEach
     protected void resetClientResponseTimeout() {
-        this.responseTimeout.set(Duration.of(5, SECONDS));
+        this.responseTimeout.set(TIMEOUT_DURATION);
     }
 
     protected void setClientResponseTimeout(Duration duration) {

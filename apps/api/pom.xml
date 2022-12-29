@@ -162,6 +162,12 @@
         </dependency>
 
         <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>lucene-wrapper-nomdomain</artifactId>
+            <version>${lucene-wrapper-nomdomain.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.rocksdb</groupId>
             <artifactId>rocksdbjni</artifactId>
         </dependency>

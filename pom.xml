@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
+        <version>2.7.6</version>
         <relativePath/>
     </parent>
 
@@ -35,7 +35,6 @@
         <jna.version>5.12.1</jna.version>
         <guava.version>31.1-jre</guava.version>
         <org.jetbrains.annotations.version>23.1.0</org.jetbrains.annotations.version>
-        <graphql.java-version>19.2</graphql.java-version>
         <nimbus.jose.jwt-version>9.25.6</nimbus.jose.jwt-version>
         <springdoc-openapi.version>1.6.13</springdoc-openapi.version>
 
@@ -52,6 +51,7 @@
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <rocksdbjni.version>7.7.3</rocksdbjni.version>
         <lucene-wrapper-core.version>1.1.0</lucene-wrapper-core.version>
+        <lucene-wrapper-nomdomain.version>1.1.0</lucene-wrapper-nomdomain.version>
 
         <!-- SNYK Security warnings -->
         <postgresql.version>42.5.1</postgresql.version> <!-- Override spring-boot-dependecies version -->
