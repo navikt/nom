@@ -5,7 +5,8 @@ app:
 
 spring:
   kafka:
-    security.protocol: SSL
+    security:
+      protocol: SSL
     ssl:
       key-store-type: PKCS12
       key-store-location: file:${KAFKA_KEYSTORE_PATH}

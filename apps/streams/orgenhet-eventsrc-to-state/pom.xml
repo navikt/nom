@@ -24,7 +24,6 @@
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <unleash.version>6.1.0</unleash.version>
     </properties>
 
     <dependencies>
