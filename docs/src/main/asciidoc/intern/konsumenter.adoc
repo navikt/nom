@@ -1,0 +1,33 @@
+= Konsumenter
+
+== Konsumenter av NOM
+
+.Konsumenter av NOM 
+[%autowidth]
+[%header,cols="20%s,8%,8%,44%,20%"]
+|===
+|Konsument            |Oppetids-krav    |Volum/responstid?    |Beskrivelse av data og bruken                |Konsekvens av nedetid, evt. andre kommentarer
+|Teamkatalogen        |Ikke kritisk     |Ikke kritisk         |Konsumerer orgEnhetsdata over graphQL        |Ikke kritisk konsument, tåler nedetid på timer. Påvirker ikke innbygger.
+|Fullmaktsregister    |24/7?            |?                    |TODO                                         |Understøtter denne en tjeneste på nav.no??
+|Remedy Identrutina   |Arbeidstid       |Ikke kritisk         |Oppretter NAV-identer i NIK over Rest        |
+|NØF - NAV Økonomiske fullmakter  |Arbeidstid     |Ikke kritisk  |TODO                                      |TODO
+|Avvikssystemet       |Arbeidstid       |Ikke kritisk         |Henter leder og orgHierarki via graphQL      |
+|Oppgavestatistikk?   |Arbeidstid       |?                    |Henter alle ressurser en leder er leder for  |-
+|Oppgave/Modia?       |Arbeidstid       |Ikke kritisk         |Henter navn på ressurser                     |-
+|===
+
+
+ 
+
+== NOM konsumerer følgende løsninger
+I listen under har vi ikke listet opp rent tekniske avhengigheter til f.eks. sikkerhetsløsninger. Kun funksjonelle avhengigheter knyttet til dataflyt er listet opp.
+.NOM konsumerer følgende
+[%autowidth]
+[%header,cols="20%s,30,30%,20%"]
+|===
+|Produsent        |Konsumerer hva                     |Konsekvens av nedetid                                      |Evt. kommentar
+|DVH              |all data om ressurs og orgEnhet    |Data i NOM utdatert på 24t                                 |
+|Unit4            |sender ressursinfo ifm. endringer  |Stopp i opprett/endre-ressurs prosess. Lagres lokalt i NOM, men får ikke fullført mot Unit4. Mer manuelt arbeid.    |TODO                                
+|AD               |Profilbilder                       |Får ikke vist profilbilder. NOM UI fungerer ellers.        |
+|Telenor          |Telefonnr for interne              |TODO. Har vi lokal kopi?                                   |TODO                                   
+|===
