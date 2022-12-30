@@ -20,17 +20,16 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -38,24 +37,28 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-@ActiveProfiles({
-        "test",
-        "log-console-error"
-})
+@ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
 @SpringBootTest(
         classes = TestConfig.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(
-        initializers = TestBase.Initializer.class
-)
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
+@DirtiesContext // Added due to switching to @DynamicPropertySource usage with @Container.
 public abstract class TestBase {
 
-    // Singleton pattern with static start and custom spring initializer
-    public static PostgreSQLContainer<?> postgreSQLContainer = CustomPostgreSQLContainer.getInstance();
+    @Container
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12");
+
+    @DynamicPropertySource
+    static void postgresDbProperties(DynamicPropertyRegistry registry) {
+        // DynamicPropertySource is a spring context customizer enabling us to utilise the testcontainers-junit extension fully.
+        // https://www.baeldung.com/spring-dynamicpropertysource#thedynamicpropertysource
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+    }
 
     static {
         postgreSQLContainer.start();
@@ -103,17 +106,6 @@ public abstract class TestBase {
         luceneEnabled(false);
 
         enableOrgEnhetEventSource(true);
-    }
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-                    "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-                    "spring.datasource.password=" + postgreSQLContainer.getPassword()
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
     }
 
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
