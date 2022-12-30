@@ -22,20 +22,11 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
-        <asciidoc.version>2.2.2</asciidoc.version>
-        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
-        <nimbus.jose.jwt-version>9.25.6</nimbus.jose.jwt-version>
-
-        <unleash.version>6.1.0</unleash.version>
-
         <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
 
         <snappy-java.test.version>1.1.8.4</snappy-java.test.version>
-        <lucene-wrapper-core.version>1.1.0</lucene-wrapper-core.version>
-        <lucene-wrapper-nomdomain.version>1.1.0</lucene-wrapper-nomdomain.version>
 
         <!-- SNYK Security warnings -->
         <snakeyaml.version>1.33</snakeyaml.version>
@@ -48,40 +39,8 @@
         <module>docs</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional> <!-- Ikke være med i jars -->
-        </dependency>
-    </dependencies>
-
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>${spring-kafka.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>${logstash-logback-encoder.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.getunleash</groupId>
-                <artifactId>unleash-client-java</artifactId>
-                <version>${unleash.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>${nimbus.jose.jwt-version}</version>
-            </dependency>
-
             <!-- Test dependencies -->
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
@@ -96,17 +55,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>com.thomaskasene.wiremock</groupId>
-                <artifactId>wiremock-junit-extension</artifactId>
-                <version>${wiremock-extension.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.nom</groupId>
-                <artifactId>lucene-wrapper-core</artifactId>
-                <version>${lucene-wrapper-core.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

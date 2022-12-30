@@ -10,10 +10,15 @@
         <version>1.1.0</version>
     </parent>
 
-    <artifactId>contract-nom-dto</artifactId>
     <name>NOM :: Libs :: Contract NOM Dto</name>
+    <artifactId>contract-nom-dto</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional> <!-- Ikke være med i jars -->
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
