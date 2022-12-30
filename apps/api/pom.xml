@@ -5,13 +5,35 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>no.nav.nom</groupId>
-        <artifactId>apps</artifactId>
-        <version>1.1.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.7</version>
+        <relativePath />
     </parent>
 
-    <artifactId>api</artifactId>
     <name>NOM :: Apps :: Api</name>
+    <groupId>no.nav.nom</groupId>
+    <artifactId>api</artifactId>
+    <version>1.1.0</version>
+
+    <properties>
+        <java.version>17</java.version>
+
+        <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
+
+        <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
+        <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
+        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
+        <hibernate-types-55.version>2.20.0</hibernate-types-55.version>
+        <graphql-java.version>19.3</graphql-java.version>
+        <graphql-extended-scalars.version>19.1</graphql-extended-scalars.version>
+        <unleash.version>6.1.0</unleash.version>
+
+        <org.testcontainers-version>1.17.6</org.testcontainers-version>
+    </properties>
+
 
     <dependencies>
         <dependency>
@@ -19,89 +41,102 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- Snyk security warning -->
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional> <!-- Ikke være med i jars -->
         </dependency>
 
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-graphql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-security</artifactId>
+            <version>${springdoc-openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-55</artifactId>
+            <version>${hibernate-types-55.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
             <artifactId>ulid-creator</artifactId>
             <version>5.1.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java-extended-scalars</artifactId>
+            <version>${graphql-extended-scalars.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.getunleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>${unleash.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>lucene-wrapper-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-security</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-55</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-graphql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.graphql</groupId>
-            <artifactId>spring-graphql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-extended-scalars</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>lucene-wrapper-nomdomain</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -109,69 +144,38 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.graphql</groupId>
             <artifactId>spring-graphql-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-streams</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.rocksdb</groupId>
-                    <artifactId>rocksdbjni</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${org.testcontainers-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${org.testcontainers-version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>lucene-wrapper-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>lucene-wrapper-nomdomain</artifactId>
-            <version>${lucene-wrapper-nomdomain.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.rocksdb</groupId>
-            <artifactId>rocksdbjni</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
