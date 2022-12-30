@@ -29,7 +29,7 @@
         <hibernate-types-55.version>2.20.0</hibernate-types-55.version>
         <graphql-java.version>19.3</graphql-java.version>
         <graphql-extended-scalars.version>19.1</graphql-extended-scalars.version>
-        <unleash.version>6.1.0</unleash.version>
+        <unleash.version>7.0.0</unleash.version>
 
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
