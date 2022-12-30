@@ -44,6 +44,7 @@
         <lucene-wrapper-nomdomain.version>1.1.0</lucene-wrapper-nomdomain.version>
 
         <!-- SNYK Security warnings -->
+        <snakeyaml.version>1.33</snakeyaml.version>
         <netty-codec.version>4.1.86.Final</netty-codec.version>
     </properties>
 
