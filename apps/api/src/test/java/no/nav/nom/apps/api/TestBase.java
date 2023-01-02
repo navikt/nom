@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.test.PostgresSQLReadyStrategy;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +47,19 @@ import java.util.Optional;
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
-@ExtendWith(PostgreSQLExtension.class)
+@DirtiesContext
 public abstract class TestBase {
+    @Container
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12").waitingFor(new PostgresSQLReadyStrategy());
+
+    @DynamicPropertySource
+    static void postgresDbProperties(DynamicPropertyRegistry registry) {
+        // DynamicPropertySource is a spring context customizer enabling us to utilise the testcontainers-junit extension fully.
+        // https://www.baeldung.com/spring-dynamicpropertysource#thedynamicpropertysource
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+    }
 
     @Autowired
     private SecurityTestUtils securityTestUtils;
