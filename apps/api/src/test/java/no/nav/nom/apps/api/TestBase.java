@@ -47,7 +47,6 @@ import java.util.Optional;
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
 @ExtendWith(PostgreSQLExtension.class)
-@DirtiesContext // Added due to switching to @DynamicPropertySource usage with @Container.
 public abstract class TestBase {
 
     @Autowired
