@@ -26,7 +26,7 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <hibernate-types-55.version>2.20.0</hibernate-types-55.version>
+        <hypersistence-utils-hibernate-55.version>3.0.1</hypersistence-utils-hibernate-55.version>
         <graphql-java.version>19.3</graphql-java.version>
         <graphql-extended-scalars.version>19.1</graphql-extended-scalars.version>
         <unleash.version>7.0.0</unleash.version>
@@ -98,9 +98,12 @@
             <artifactId>postgresql</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-55</artifactId>
-            <version>${hibernate-types-55.version}</version>
+            <!-- previously named com.vladmihalcea:hibernate-types-55 -->
+            <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
+            <!-- TODO: Migrate to hypersistence-utils-hibernate-60 when upgrading to spring boot 3.0 -->
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <version>${hypersistence-utils-hibernate-55.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
