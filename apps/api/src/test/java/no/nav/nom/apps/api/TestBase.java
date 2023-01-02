@@ -13,11 +13,9 @@ import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.PostgresSQLReadyStrategy;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,13 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.StreamUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -47,20 +40,7 @@ import java.util.Optional;
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
-@DirtiesContext
 public abstract class TestBase {
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12").waitingFor(new PostgresSQLReadyStrategy());
-
-    @DynamicPropertySource
-    static void postgresDbProperties(DynamicPropertyRegistry registry) {
-        // DynamicPropertySource is a spring context customizer enabling us to utilise the testcontainers-junit extension fully.
-        // https://www.baeldung.com/spring-dynamicpropertysource#thedynamicpropertysource
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-    }
-
     @Autowired
     private SecurityTestUtils securityTestUtils;
 
