@@ -1,0 +1,80 @@
+name: Build, Deploy nom-orgenhet-eventsrc-to-state
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/streams/orgenhet-eventsrc-to-state/**'
+      - '.nais/apps/streams/orgenhet-eventsrc-to-state.yaml'
+      - '.github/*/streams-orgenhet-eventsrc-to-state.yaml'
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/streams-orgenhet-eventsrc-to-state:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-orgenhet-eventsrc-to-state:latest
+
+jobs:
+  build-jar-docker:
+    name: build-jar-docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+      - name: Cache Dependencies
+        uses: actions/cache@v3.0.11
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - name: Build
+        env:
+          GITHUB_USERNAME: x-access-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+        run: mvn clean package --projects :orgenhet-eventsrc-to-state --also-make --batch-mode
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker container
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
+          build-args: JAR_PATH=apps/streams/orgenhet-eventsrc-to-state/target/app.jar
+
+  deploy-dev:
+    name: Deploy to NAIS dev-gcp
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: dev-gcp
+          VAR: kafka-pool=nav-dev
+          RESOURCE: .nais/streams/orgenhet-eventsrc-to-state.yaml
+
+  deploy-prod:
+    name: Deploy to NAIS dev-prod
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: prod-gcp
+          VAR: kafka-pool=nav-prod
+          RESOURCE: .nais/streams/orgenhet-eventsrc-to-state.yaml

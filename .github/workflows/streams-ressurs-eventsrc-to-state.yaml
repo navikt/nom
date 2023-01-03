@@ -11,8 +11,8 @@ on:
       - '.github/*/streams-ressurs-eventsrc-to-state.yaml'
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/kafka-aggregate-converter:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/kafka-aggregate-converter:latest
+  IMAGE: ghcr.io/${{ github.repository }}/streams-ressurs-eventsrc-to-state:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-ressurs-eventsrc-to-state:latest
 
 jobs:
   build-jar-docker:
