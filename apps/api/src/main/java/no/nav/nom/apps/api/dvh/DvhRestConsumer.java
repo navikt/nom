@@ -69,14 +69,13 @@ public class DvhRestConsumer {
         loadKoblingerLedereOgTlfFromDvh();
     }
 
-    @Scheduled(cron = "0 0 6 * * *") // Kl 06:00 every day
+    @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
     public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
         while (!ressursStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
             }
-
         }
         loadRessurserOgOrgEnheter();
     }
