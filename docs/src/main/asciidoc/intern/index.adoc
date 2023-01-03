@@ -86,7 +86,6 @@ Agresso --> DVH --> TDV --> NOM
 
 Remedy  --> DVH --> TDV --> NOM
 
-== Konsumenter
 include::konsumenter.adoc[leveloffset=1]
 
 include::tips-n-tricks.adoc[leveloffset=1]
