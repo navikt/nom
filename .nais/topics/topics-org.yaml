@@ -81,6 +81,9 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+    - team: org
+      application: nom-orgenhet-eventsrc-to-state
+      access: read
 
 ---
 
@@ -105,3 +108,6 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+    - team: org
+      application: nom-orgenhet-eventsrc-to-state
+      access: readwrite
