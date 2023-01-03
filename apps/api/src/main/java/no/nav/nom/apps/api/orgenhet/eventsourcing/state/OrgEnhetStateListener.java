@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +17,6 @@ import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.core.KafkaAdmin;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -34,26 +29,27 @@ public class OrgEnhetStateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
     private final OrgEnhetStateService orgEnhetStateService;
-    private final AdminClient adminClient;
+    private final Admin adminClient;
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
 
     public OrgEnhetStateListener(
-            @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
-            OrgEnhetStateService ressursStateService,
-            LuceneService luceneService,
-            KafkaAdmin admin,
-            KafkaProperties kafkaProperties
+        @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
+        OrgEnhetStateService ressursStateService,
+        Admin adminClient, LuceneService luceneService,
+        KafkaAdmin admin,
+        KafkaProperties kafkaProperties
     ) {
         this.stateTopic = stateTopic;
         this.orgEnhetStateService = ressursStateService;
+        this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
-        adminClient = AdminClient.create(admin.getConfigurationProperties());
         this.luceneService = luceneService;
     }
 
     @KafkaListener(
             containerFactory = "orgEnhetStateKafkaListenerContainerFactory",
+            clientIdPrefix = "orgEnhetStateListener",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.orgEnhet.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )
@@ -65,7 +61,7 @@ public class OrgEnhetStateListener {
             this.luceneService.invalidateOrgenhet(orgEnhetState.id());
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgEnhetState listener initial load finished"));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgEnhetState listener initial load finished - {} OrgEnheter", orgEnhetStateService.count()));
     }
 
     public boolean initloadComplete() {

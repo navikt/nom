@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
-import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,26 +35,27 @@ public class RessursStateListener {
 
     private final Map<String, CompletableFuture<RessursState>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
 
-    private final AdminClient adminClient;
+    private final Admin adminClient;
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
 
     public RessursStateListener(
-            @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
-            RessursStateService ressursStateService,
-            LuceneService luceneService,
-            KafkaAdmin admin,
-            KafkaProperties kafkaProperties
+        @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
+        RessursStateService ressursStateService,
+        Admin adminClient, LuceneService luceneService,
+        KafkaAdmin admin,
+        KafkaProperties kafkaProperties
     ) {
         this.stateTopic = stateTopic;
         this.ressursStateService = ressursStateService;
+        this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
-        adminClient = AdminClient.create(admin.getConfigurationProperties());
         this.luceneService = luceneService;
     }
 
     @KafkaListener(
             containerFactory = "ressursStateKafkaListenerContainerFactory",
+            clientIdPrefix = "ressursStateListener",
             topicPartitions = @TopicPartition(
                     topic = "${app.kafka.ressurs.stateTopic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
             )
@@ -64,7 +65,7 @@ public class RessursStateListener {
             processMessage(it.key(), it.value());
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished"));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished. {} ressurser", ressursStateService.count()));
     }
 
     private void processMessage(String key, RessursState ressursState) {

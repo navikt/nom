@@ -44,6 +44,10 @@ public class OrgEnhetStateService {
         return orgEnhetByFid.values();
     }
 
+    public int count() {
+        return orgEnhetByFid.size();
+    }
+
     public void putEventAggregate(OrgEnhetState newOrgEnhetState) {
         orgEnhetByFid.put(newOrgEnhetState.fid(), newOrgEnhetState);
         orgEnhetById.put(newOrgEnhetState.id(), newOrgEnhetState);

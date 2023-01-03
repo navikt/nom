@@ -31,6 +31,7 @@ public class LuceneService {
     private final IRessursService ressursService;
 
     private List<String> invalidatedNavidentList = new ArrayList<>();
+    private List<String> invalidatedOrgEnhetList = new ArrayList<>();
 
     private final OrgenhetService orgenhetService;
 
@@ -79,8 +80,7 @@ public class LuceneService {
             invalidatedNavidentList.clear(); // or just leave for GC?
         }
 
-        // orgenheter
-        {
+        // orgenheter TODO: Set this active
             //            var invalidatedOrgEnhetList = grabAndResetOrgenhetInvalidationList();
             //            var oeMap = orgenhetService.findByIdBulk(invalidatedOrgEnhetList);
             //            var luceneOeStream = oeMap.values().stream().map(oe -> new LuceneOrgEnhet(oe.getId(), oe.getNavn().get(), oe.getEnhetsType()));
@@ -88,7 +88,7 @@ public class LuceneService {
             //            searchRepo.upsertEntities(luceneOeStream, LuceneOrgEnhet.class);
             //
             //            invalidatedOrgEnhetList.clear();
-        }
+//        }
 
         log.info("Lucene indexing completed.");
         this.initialLoadComplete.set(true);
@@ -122,9 +122,7 @@ public class LuceneService {
         this.invalidatedNavidentList.add(navident);
     }
 
-    public synchronized void invalidateOrgenhet(String orgenhetId) {
-        throw new UnsupportedOperationException();
-    }
+    public synchronized void invalidateOrgenhet(String orgenhetId) { invalidatedOrgEnhetList.add(orgenhetId); }
 
     private synchronized List<String> grabAndResetNavidentInvalidationList() {
         var out = this.invalidatedNavidentList;
@@ -133,7 +131,9 @@ public class LuceneService {
     }
 
     private synchronized List<String> grabAndResetOrgenhetInvalidationList() {
-        throw new UnsupportedOperationException();
+        var out = this.invalidatedOrgEnhetList;
+        this.invalidatedOrgEnhetList = new ArrayList<>();
+        return out;
     }
 
     public List<SearchResult> search(String term) {
