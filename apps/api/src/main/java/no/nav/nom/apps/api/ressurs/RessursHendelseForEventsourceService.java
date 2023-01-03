@@ -74,6 +74,7 @@ public class RessursHendelseForEventsourceService {
                         ressurs.getEtternavn()
                 ),
                 createInputMetadata(ressurs.getRawData()),
+                null,
                 null
         )));
     }

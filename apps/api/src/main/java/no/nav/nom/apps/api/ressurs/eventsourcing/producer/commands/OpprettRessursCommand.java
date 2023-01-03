@@ -15,5 +15,6 @@ public record OpprettRessursCommand(
         Sektor sektor,
         Visningsnavn visningsnavn,
         InputMetadata inputMetadata,
-        LocalDate startdato
-) implements RessursCommand {}
+        LocalDate startdato,
+        String orgEnhet
+        ) implements RessursCommand {}

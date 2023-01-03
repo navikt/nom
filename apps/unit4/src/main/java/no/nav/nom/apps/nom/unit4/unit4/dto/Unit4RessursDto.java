@@ -15,9 +15,12 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOppret
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Value
 @Builder
@@ -83,6 +86,14 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(nomRessursDTO.getPersonident())
                 .build();
         personId = ressursNr;
+        relatedValues.add(
+                RelatedValue.builder()
+                .relationId("M0")
+                .relatedValue("5224300")
+                .dateFrom(AGRESSO_STARTTIME)
+                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                .build()
+        );
     }
 
     public Unit4RessursDto(RessursOpprettetEventV1 record) throws IllegalArgumentException {
@@ -127,6 +138,20 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(eventData.personident())
                 .build();
         personId = ressursNr;
+        relatedValues.add(
+                additionalData.orgEnhet()
+                        .map((orgenhet) -> RelatedValue.builder()
+                                .relationId("M0")
+                                .relatedValue(additionalData.orgEnhet().get())
+                                .dateFrom(AGRESSO_STARTTIME)
+                                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                                .build()
+                        ).orElse(RelatedValue.builder()
+                                .relationId("M0")
+                                .relatedValue("5224300")
+                                .dateFrom(AGRESSO_STARTTIME)
+                                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                                .build()));
     }
 
     private List<ContactPoint> getContactPointsDefault(){
@@ -138,13 +163,7 @@ public class Unit4RessursDto {
     }
 
     private List<RelatedValue> getRelatedValuesDefault(){
-        return List.of(
-                RelatedValue.builder()
-                        .relationId("M0")
-                        .relatedValue("5224300")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
+        return Stream.of(
                 RelatedValue.builder()
                         .relationId("C1")
                         .relatedValue("522400")
@@ -199,6 +218,6 @@ public class Unit4RessursDto {
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
                         .build()
-        );
+        ).collect(Collectors.toList());
     }
 }

@@ -117,7 +117,8 @@ class KafkaRessursListenerTest {
                                 "Etternavn"
                         )),
                         Optional.of(LocalDate.now()),
-                        Optional.of(LocalDate.now())
+                        Optional.of(LocalDate.now()),
+                        Optional.empty()
                 )
         );
     }
