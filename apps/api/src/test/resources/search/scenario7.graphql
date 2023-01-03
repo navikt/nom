@@ -1,0 +1,10 @@
+query searchForOrgenhet($term: String!, $filter: OrgEnhetSearchFilter){
+    searchOrgEnhet(term: $term, filter: $filter) {
+        __typename
+        agressoId
+        navn
+        id
+        orgNiv
+        gyldigTom
+    }
+}

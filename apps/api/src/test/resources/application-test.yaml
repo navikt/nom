@@ -34,3 +34,8 @@ spring:
         jwt:
           issuer-uri: http://localhost:${wiremock.server.port}/aad
           audiences: test
+
+# Testcontainers automagikk. Med jdbc:tc: driver kjøres basen automatisk opp i en test container
+# https://www.testcontainers.org/modules/databases/jdbc/
+  datasource:
+    url: jdbc:tc:postgresql:12:///postgres-api

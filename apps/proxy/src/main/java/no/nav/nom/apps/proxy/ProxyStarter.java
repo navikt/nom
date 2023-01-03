@@ -12,7 +12,6 @@ import java.util.Map;
 public class ProxyStarter {
 
     public static void main(String[] args) {
-        PropertyUtils.initDefaultProperties("nom-proxy");
         PropertyUtils.readVaultSrvProps(Map.of("srvnomad", "app.ldap"));
         SpringApplication.run(ProxyStarter.class, args);
 

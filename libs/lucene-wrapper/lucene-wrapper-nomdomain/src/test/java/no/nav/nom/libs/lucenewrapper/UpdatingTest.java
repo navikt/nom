@@ -27,7 +27,7 @@ public class UpdatingTest {
     void updateWorksForRessurs(){
         var repo = Helpers.initScenario(List.of(r1,r2,oe1,oe2,oe3));
         var resList = repo.search(r1.navn());
-        Helpers.assertBestMatch(Helpers.fromRessurs(r1, indexRessurs.typeStr()),resList);
+        Helpers.assertBestMatch(Helpers.fromRessurs(r1, indexRessurs.typeString()), resList);
         repo.upsertEntity(r1_2);
         var resList2 = repo.search(r1.navn());
         Assertions.assertFalse(resList2.stream().anyMatch(it -> it.id().equals(r1.navident())));
@@ -42,7 +42,7 @@ public class UpdatingTest {
     void updatedWorksForEnhet(){
         var repo = Helpers.initScenario(List.of(r1,r2,oe1,oe2,oe3));
         var resList = repo.search(oe1.navn());
-        Helpers.assertBestMatch(Helpers.fromOrgenhet(oe1, indexOrgEnhet.typeStr()),resList);
+        Helpers.assertBestMatch(Helpers.fromOrgenhet(oe1, indexOrgEnhet.typeString()), resList);
         repo.upsertEntity(oe1_2);
         var resList2 = repo.search(oe1.navn());
         Assertions.assertTrue(resList2.size() == 0 || !resList2.get(0).id().equals(oe1.id()));

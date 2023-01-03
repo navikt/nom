@@ -12,7 +12,7 @@
 
     <artifactId>lucene-wrapper-demoui</artifactId>
     <name>NOM :: Libs :: Lucene Wrapper Demo UI</name>
-    <version>${project.parent.version}</version>
+    <version>1.1.0</version>
 
     <dependencies>
         <dependency>
@@ -20,6 +20,16 @@
             <artifactId>lucene-wrapper-core</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>lucene-wrapper-nomdomain</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
     </dependencies>
 

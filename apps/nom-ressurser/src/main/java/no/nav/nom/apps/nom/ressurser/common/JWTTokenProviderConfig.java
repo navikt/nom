@@ -1,12 +1,10 @@
 package no.nav.nom.apps.nom.ressurser.common;
 
-import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration;
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 @Profile({"local", "test"})
 @Configuration
-@Import(TokenGeneratorConfiguration.class)
-public class JWTTokenProviderConfig {
-}
+@EnableMockOAuth2Server
+public class JWTTokenProviderConfig {}

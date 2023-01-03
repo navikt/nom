@@ -2,6 +2,8 @@ package no.nav.nom.apps.api.graphql.search;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
+import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
@@ -9,13 +11,14 @@ import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneRessursFilter;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -73,8 +76,8 @@ public class SearchResolver {
     }
 
 
-    public List<Ressurs> searchRessurs(String term) {
-        var matchedNavidentsSorted = luceneService.searchRessurs(term);
+    public List<Ressurs> searchRessurs(String term, RessursSearchFilter filter) {
+        var matchedNavidentsSorted = luceneService.searchRessurs(term, filter.toLuceneFilter());
         var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.stream().map(SearchResult::id).toList());
 
         return matchedNavidentsSorted.stream()
@@ -83,5 +86,15 @@ public class SearchResolver {
     }
 
 
-
+    public List<OrgEnhet> searchOrgenhet(String term, OrgEnhetSearchFilter filter) {
+        try {
+            var matchedFidsSorted = luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
+                .map(SearchResult::id).toList();
+            Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+            var orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
+            return orgenheter.toList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

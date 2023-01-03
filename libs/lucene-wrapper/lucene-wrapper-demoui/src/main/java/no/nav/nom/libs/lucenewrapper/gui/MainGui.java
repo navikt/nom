@@ -60,7 +60,7 @@ public class MainGui implements Runnable {
                 var sb = new StringBuilder();
                 sb.append("Hits: ").append(res.size()).append("\n");
                 for (var x : res) {
-                    var fieldsToDisplay = java.util.List.of(x.id(), x.name(), x.entType(), String.valueOf(x.score()));
+                    var fieldsToDisplay = java.util.List.of(x.id(), x.name(), x.entityType(), String.valueOf(x.score()));
                     var strToDisplay = fieldsToDisplay.stream().map(it -> "[ " + it + " ]").collect(Collectors.joining(",   "));
                     sb.append(strToDisplay).append("\n");
                 }

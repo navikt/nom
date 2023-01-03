@@ -15,7 +15,7 @@ import java.util.Map;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.await;
 
 class EventSourceServiceTest extends EmbeddedKafkaTestBase {
     @Autowired private KafkaTemplate<String, SourceEvent> kafkaTemplate;

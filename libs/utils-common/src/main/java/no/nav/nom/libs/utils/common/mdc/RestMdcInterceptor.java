@@ -8,7 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_X_REQUEST_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_X_REQUEST_ID_KEY;
 
 @Component
 public class RestMdcInterceptor implements HandlerInterceptor {

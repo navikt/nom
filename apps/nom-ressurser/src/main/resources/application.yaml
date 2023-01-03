@@ -2,20 +2,12 @@ app:
   kafka:
     username: ${app.username}
     password: ${app.password}
-    topic.ressurs.name: aapen-nom-ressurs-v1
+    topic:
+      ressurs:
+        name: aapen-nom-ressurs-v1
   scheduledTasks:
     dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 59 * ? * *  # Every hour
-
-spring:
-  profiles:
-    active: ${ENV}
-  jpa:
-    hibernate:
-      ddl-auto: none
-  flyway:
-    schemas: public
-    table: schema_version
 
 server:
   error:
@@ -38,41 +30,44 @@ management:
     prometheus:
       enabled: true
 
-spring.kafka:
-  client-id: ${app.kafka.username}
-  properties:
-    security.protocol: SASL_SSL
-    sasl:
-      mechanism: PLAIN
-      jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
-    ssl:
-      truststore.location: ${javax.net.ssl.trustStore:}
-      truststore.password: ${javax.net.ssl.trustStorePassword:}
-  producer:
-    key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    transaction-id-prefix: ${kafka-transaction-uuid}-
-    acks: all
-    retries: 30
+spring:
+  profiles:
+    active: ${ENV}
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    schemas: public
+    table: schema_version
+
+  kafka:
+    client-id: ${app.kafka.username}
     properties:
-      max.block.ms: 15000
-      enable.idempotence: true
-      max.in.flight.requests.per.connection: 1
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
+      ssl.truststore.location: ${javax.net.ssl.trustStore:}
+      ssl.truststore.password: ${javax.net.ssl.trustStorePassword:}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      transaction-id-prefix: ${kafka-transaction-uuid}-
+      acks: all
+      retries: 30
+      properties:
+        max.block.ms: 15000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
 
-no.nav:
-  security:
-    jwt:
-      issuer:
-        aad:
-          discoveryurl: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
-          accepted_audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
-          proxyurl:
-
-nom:
-  libs:
-    utils:
-      common:
-        app:
-          load-properties: false
-        kafka:
-          load-properties: false
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+#            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
+            discovery-url: http://localhost:${mock-oauth2-server.port}/aad/.well-known/openid-configuration
+#            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
+            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
+            cookie-name: localhost-idtoken
+            proxy-url:

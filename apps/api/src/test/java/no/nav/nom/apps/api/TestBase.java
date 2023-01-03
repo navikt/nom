@@ -20,17 +20,11 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
@@ -38,29 +32,15 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-@ActiveProfiles({
-        "test",
-        "log-console-error"
-})
+@ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
 @SpringBootTest(
         classes = TestConfig.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(
-        initializers = TestBase.Initializer.class
-)
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
 public abstract class TestBase {
-
-    // Singleton pattern with static start and custom spring initializer
-    public static PostgreSQLContainer<?> postgreSQLContainer = CustomPostgreSQLContainer.getInstance();
-
-    static {
-        postgreSQLContainer.start();
-    }
-
     @Autowired
     private SecurityTestUtils securityTestUtils;
 
@@ -101,18 +81,8 @@ public abstract class TestBase {
         ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
         luceneEnabled(false);
+
         enableOrgEnhetEventSource(true);
-    }
-
-    public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    "spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
-                    "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-                    "spring.datasource.password=" + postgreSQLContainer.getPassword()
-            ).applyTo(configurableApplicationContext.getEnvironment());
-        }
     }
 
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {

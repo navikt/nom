@@ -40,6 +40,10 @@ public class RessursStateService implements IRessursService {
         return ressursByFid.values();
     }
 
+    public int count() {
+        return ressursByFid.size();
+    }
+
     public List<RessursState> matchByNavident(String navident) {
         return getAll().stream()
                 .filter(r -> r.navident().contains(navident))

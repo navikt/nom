@@ -4,7 +4,6 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.redis.TestRedisConfiguration;
 import no.nav.nom.libs.test.RsaStub;
-import no.nav.nom.libs.utils.common.mdc.RestMdcInterceptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
 
-@ActiveProfiles({"test", "log-console-mdc"})
+@ActiveProfiles({"test"})
 @WireMockStubs(RsaStub.class)
 @Slf4j
 @SpringBootTest

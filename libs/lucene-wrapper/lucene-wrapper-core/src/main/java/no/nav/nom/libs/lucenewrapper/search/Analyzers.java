@@ -4,12 +4,13 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.ngram.EdgeNGramTokenFilter;
 import org.apache.lucene.analysis.phonetic.DoubleMetaphoneFilter;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 
 import java.util.HashMap;
@@ -17,44 +18,60 @@ import java.util.HashMap;
 public interface Analyzers {
 
 
-    public static Analyzer createNGramAnalyzer(){
+    static Analyzer createNGramAnalyzer(int mingram) {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName) {
                 Tokenizer source = new StandardTokenizer();
-                TokenStream result = new LowerCaseFilter(source);
-                result = new EdgeNGramTokenFilter(result ,3,40,false);
+                TokenStream result = new EdgeNGramTokenFilter(new LowerCaseFilter(source), mingram, 40, false);
                 return new TokenStreamComponents(source, result);
             }
         };
     }
 
-    public static Analyzer createMetaphoneAnalyzer(){
+    static Analyzer createNGramAnalyzer() {
+        return createNGramAnalyzer(3);
+    }
+
+    static Analyzer createMetaphoneAnalyzer() {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName) {
                 Tokenizer source = new StandardTokenizer();
-                TokenStream result = new LowerCaseFilter(source);
-                result = new DoubleMetaphoneFilter(result ,10,false);
+                TokenStream result = new DoubleMetaphoneFilter(new LowerCaseFilter(source), 10, false);
                 return new TokenStreamComponents(source, result);
             }
         };
     }
 
 
-    public static Analyzer createPerFieldAnalyzer(HashMap<String,Analyzer> fieldToAnalyzer) {
+    static Analyzer createPerFieldAnalyzer(HashMap<String, Analyzer> fieldToAnalyzer) {
         return new PerFieldAnalyzerWrapper(createSimpleIgnoreCaseAnalyzer(), fieldToAnalyzer);
     }
 
-    public static Analyzer createSimpleIgnoreCaseAnalyzer(){
+    static Analyzer createSimpleIgnoreCaseAnalyzer() {
         return new Analyzer() {
             @Override
             protected TokenStreamComponents createComponents(String fieldName) {
                 Tokenizer source = new WhitespaceTokenizer();
-                TokenStream result = new LowerCaseFilter(source);
-                result = new ASCIIFoldingFilter(result);
+                TokenStream result = new ASCIIFoldingFilter(new LowerCaseFilter(source));
                 return new TokenStreamComponents(source, result);
             }
         };
+    }
+
+    static Analyzer createTrimAnalyzer() {
+        return new Analyzer() {
+            @Override
+            protected TokenStreamComponents createComponents(String fieldName){
+                Tokenizer source = new WhitespaceTokenizer();
+                TokenStream result = new TrimFilter(source);
+                return new Analyzer.TokenStreamComponents(source,result);
+            }
+        };
+    }
+
+    static Analyzer createKeywordAnalyzer() {
+        return new KeywordAnalyzer();
     }
 }

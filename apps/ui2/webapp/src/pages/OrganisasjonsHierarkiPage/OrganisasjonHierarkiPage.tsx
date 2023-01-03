@@ -206,7 +206,13 @@ function OrganisasjonsHierarkiPageOuter() {
           `}
         >
           {hentHierarkiQuery.loading && !hentHierarkiQuery.data ? (
-            <Loader />
+            <div
+              className={css`
+                justify-self: center;
+              `}
+            >
+              <Loader size="3xlarge" variant="neutral" />
+            </div>
           ) : undefined}
           {hentHierarkiQuery.error && (
             <Alert variant="error">

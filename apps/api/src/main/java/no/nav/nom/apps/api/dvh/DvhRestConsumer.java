@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,6 +24,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +51,7 @@ public class DvhRestConsumer {
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
+    private final Environment environment;
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -66,16 +69,30 @@ public class DvhRestConsumer {
         loadKoblingerLedereOgTlfFromDvh();
     }
 
-    @Scheduled(cron = "0 0 6 * * *") // Kl 06:00 every day
+    @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
     public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
         while (!ressursStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
             }
-
         }
         loadRessurserOgOrgEnheter();
+    }
+
+    @Scheduled(fixedDelay = 60*1000)
+    public void loadFromDvhLocal() {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
+            while (!ressursStateListener.initloadComplete()) {
+                try {
+                    Thread.sleep(5_000);
+                } catch (Exception ignored) {
+                }
+
+            }
+            loadRessurserOgOrgEnheter();
+            loadKoblingerLedereOgTlfFromDvh();
+        }
     }
 
     public void loadRessurserOgOrgEnheter() {

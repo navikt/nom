@@ -5,7 +5,8 @@ app:
 
 spring:
   kafka:
-    security.protocol: SSL
+    security:
+      protocol: SSL
     ssl:
       key-store-type: PKCS12
       key-store-location: file:${KAFKA_KEYSTORE_PATH}
@@ -32,9 +33,9 @@ management:
         enabled: true
   endpoints:
     web:
+      base-path: /internal
       exposure:
         include: prometheus, info, health, metrics
-      base-path: /internal
   metrics:
     web:
       server:

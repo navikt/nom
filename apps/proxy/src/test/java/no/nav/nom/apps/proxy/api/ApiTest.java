@@ -22,7 +22,7 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("Tester dvh kall")
-    public void scenario21(){
+    public void scenario21() throws Exception {
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
@@ -36,7 +36,7 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("Tester tel kall")
-    public void scenario31(){
+    public void scenario31() throws Exception {
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
@@ -49,7 +49,7 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("Tester generelt proxy kall")
-    public void scenario32(){
+    public void scenario32() throws Exception{
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
@@ -62,7 +62,7 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("Tester generelt proxy kall med query parametre")
-    public void scenario33(){
+    public void scenario33() throws Exception{
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
@@ -75,7 +75,7 @@ public class ApiTest extends ApiTestBase {
 
     @Test
     @DisplayName("Tester at response koder og melding blir videreført")
-    public void scenario41(){
+    public void scenario41() throws Exception {
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 

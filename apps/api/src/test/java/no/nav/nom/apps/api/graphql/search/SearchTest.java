@@ -7,10 +7,13 @@ import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -31,6 +34,11 @@ public class SearchTest extends GraphQLTestBase {
 
     @Autowired
     private LuceneService luceneService;
+
+    @BeforeEach
+    void clearLucene() {
+        luceneService.clear();
+    }
 
     @Test
     @DisplayName("Søk på navident")
@@ -98,9 +106,9 @@ public class SearchTest extends GraphQLTestBase {
         final var searchResults = response.path("search").entity(JsonNode.class).get();
 
         final var resultTypes = StreamSupport
-                .stream(searchResults.spliterator(), false)
-                .map(result -> result.get("__typename").asText())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            .stream(searchResults.spliterator(), false)
+            .map(result -> result.get("__typename").asText())
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         assertThat(resultTypes.getOrDefault("Ressurs", 0L), greaterThan(0L));
         assertThat(resultTypes.getOrDefault("OrgEnhet", 0L), greaterThan(0L));
@@ -116,10 +124,9 @@ public class SearchTest extends GraphQLTestBase {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
-        luceneService.addInvalidatedEntitiesToIndex();
-
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
         dvhRestConsumer.loadRessurserOgOrgEnheter();
+        luceneService.addInvalidatedEntitiesToIndex();
 
         final var response = postForResource("search/scenario5.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -156,22 +163,98 @@ public class SearchTest extends GraphQLTestBase {
     public void scenario52() {
         luceneEnabled(true);
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
         luceneService.refreshOrgenhet();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         final var response = postForResource("search/scenario5_1.graphql");
         final var searchResults = response.path("searchRessurs").entity(JsonNode.class).get();
 
         assertThat(searchResults.toString(), containsString("test"));
-        assertThat(searchResults.size(),equalTo(2));
+        assertThat(searchResults.size(), equalTo(2));
     }
-}
 
+    @Test
+    @DisplayName("Søk etter orgenhet")
+    public void scenario71() {
+        luceneEnabled(true);
+        var passedDate = LocalDate.now().minusMonths(1L);
+        final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
+        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn").build();
+        final var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavnet")
+            .STILLING_MAKS_GYLDIG_TIL_DATO(passedDate)
+            .ORGENHET_TIL_PERIODE(Integer.parseInt(passedDate.getYear() + "" + passedDate.getMonthValue())).build();
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet3, mockedEnhet1, mockedEnhet2);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        luceneService.addInvalidatedEntitiesToIndex();
+        luceneService.refreshOrgenhet();
+
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+
+        final var allResponse = postForResource(
+            "search/scenario7.graphql",
+            Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "ALLE"),
+                "term", "forn"
+            )
+        );
+        final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
+
+        assertThat(all.toString(), containsString("test"));
+        assertThat(all.size(), equalTo(2));
+
+        final var onlyActiveResponse = postForResource(
+            "search/scenario7.graphql",
+            Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "IKKE_PASSERT"),
+                "term", "forn"
+            )
+        );
+        final var onlyActive = onlyActiveResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
+        assertThat(onlyActive.size(), equalTo(1));
+    }
+
+    @Test
+    @DisplayName("Søk etter orgenhet orgniv filter")
+    public void scenario71_orgniv() {
+        luceneEnabled(true);
+        final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
+        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavnet").build();
+        final var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn")
+            .ORGNODE_NIV("ORGNIV2").build();
+
+        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("2");
+
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet3, mockedEnhet1, mockedEnhet2);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        luceneService.addInvalidatedEntitiesToIndex();
+        luceneService.refreshOrgenhet();
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
+
+
+        final var allResponse = postForResource(
+            "search/scenario7.graphql",
+            Map.of("filter", Map.of("orgnivSelection", "ORGNIV_ORGENHET", "gyldigTomSelection", "ALLE"),
+                "term", "forn"
+            )
+        );
+        final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
+
+        assertThat(all.toString(), containsString("test"));
+        assertThat(all.size(), equalTo(2));
+
+
+
+    }
+
+}

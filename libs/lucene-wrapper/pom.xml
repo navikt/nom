@@ -18,6 +18,7 @@
     <modules>
         <module>lucene-wrapper-core</module>
         <module>lucene-wrapper-demoui</module>
+        <module>lucene-wrapper-nomdomain</module>
     </modules>
 
 </project>

@@ -1,4 +1,5 @@
 import { css } from "@emotion/css";
+import { Switch } from "@navikt/ds-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -49,30 +50,8 @@ function transform(inp: SearchRowRaw): SearchResultRow {
   }
 }
 
-function SearchdemoPage() {
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  const [txt, setTxt] = React.useState<any>([]);
-
-  const [searchString, setSearchString] = React.useState("");
-  const [dirtyString, setDirtyString] = React.useState("");
-  const inputReference = React.useRef<HTMLInputElement>(null);
-  const [timeoutId, setTimeoutId] = React.useState<NodeJS.Timeout>();
-
-  // to restrict amount of network calls made
-  React.useEffect(() => {
-    clearTimeout(timeoutId);
-    const timeoutIdTemporary = setTimeout(() => {
-      setSearchString(dirtyString);
-    }, 600);
-    setTimeoutId(timeoutIdTemporary);
-  }, [dirtyString]);
-
-  React.useEffect(() => {
-    if (inputReference.current && inputReference.current.value) {
-      fetch("/nom-api/graphql", {
-        body: JSON.stringify({
-          operationName: "U",
-          query: `query U {
+function getBothQuery(searchString: string) {
+  return `query searchDemoPage {
               search(term:"${searchString ?? ""}"){
                 __typename
                 ... on Ressurs {
@@ -85,16 +64,72 @@ function SearchdemoPage() {
                   orgNiv
                 }
               }
-            }`,
+            }`;
+}
+
+function getOrgenhetQuery(searchString: string) {
+  return `query searchDemoPage {
+    searchOrgEnhet(
+      term: "${searchString ?? ""}"
+    filter: {orgnivSelection: ORGNIV_ORGENHET, gyldigTomSelection: IKKE_PASSERT}
+  ) {
+      __typename
+      agressoId
+      orgNiv
+      navn
+      gyldigTom
+    }
+  }`;
+}
+
+function SearchdemoPage() {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  const [txt, setTxt] = React.useState<any>([]);
+
+  const [searchString, setSearchString] = React.useState("");
+  const [dirtyString, setDirtyString] = React.useState("");
+  const inputReference = React.useRef<HTMLInputElement>(null);
+  const [timeoutId, setTimeoutId] = React.useState<NodeJS.Timeout>();
+  const [orgenhetOnly, setOrgenhetOnly] = React.useState(false);
+  const [searchState, setSearchState] = React.useState("waiting");
+
+  // to restrict amount of network calls made
+  React.useEffect(() => {
+    clearTimeout(timeoutId);
+    setTxt([]);
+    setSearchState("Venter..");
+    const timeoutIdTemporary = setTimeout(() => {
+      setSearchString(dirtyString);
+    }, 600);
+    setTimeoutId(timeoutIdTemporary);
+  }, [dirtyString]);
+
+  React.useEffect(() => {
+    setSearchState("Søker...");
+    if (inputReference.current && inputReference.current.value) {
+      fetch("/nom-api/graphql", {
+        body: JSON.stringify({
+          operationName: "searchDemoPage",
+          query: orgenhetOnly
+            ? getOrgenhetQuery(searchString)
+            : getBothQuery(searchString),
           variables: {},
         }),
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
-      }).then((it) => it.json().then((tx) => setTxt(tx.data.search)));
+      }).then((it) =>
+        it.json().then((tx) => {
+          const searchHits = orgenhetOnly
+            ? tx.data.searchOrgEnhet
+            : tx.data.search;
+          setSearchState("Antall treff: " + searchHits.length);
+          setTxt(searchHits);
+        })
+      );
     }
-  }, [searchString]);
+  }, [searchString, orgenhetOnly]);
 
   const rows = txt.map((it: SearchRowRaw) => transform(it as SearchRowRaw));
 
@@ -110,8 +145,11 @@ function SearchdemoPage() {
           onChange={(changeevent) => setDirtyString(changeevent.target.value)}
           ref={inputReference}
         ></input>
+        <Switch onChange={(event) => setOrgenhetOnly(event.target.checked)}>
+          Bare orgenhet (orgniv orgenhet, status aktiv)
+        </Switch>
       </span>
-
+      <span>{searchState}</span>
       <div
         className={css`
           display: grid;

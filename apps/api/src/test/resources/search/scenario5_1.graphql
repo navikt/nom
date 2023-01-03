@@ -1,5 +1,5 @@
 query {
-    searchRessurs(term: "fornavn") {
+    searchRessurs(term: "fornavn",filter: {sektorSelection: ALLE, statusSelection: ALLE}) {
         __typename
         ... on Ressurs {
             navIdent

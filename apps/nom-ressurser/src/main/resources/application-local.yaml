@@ -1,8 +1,10 @@
-app.kafka:
-  username: NO_VALUE
-  password: NO_VALUE
+app:
+  kafka:
+    username: NO_VALUE
+    password: NO_VALUE
 
-dvh.endpoint: dummyUrl
+dvh:
+  endpoint: dummyUrl
 
 spring:
   datasource:
@@ -15,16 +17,28 @@ spring:
     client-id: srvnav-ressurs
     properties:
       security.protocol: PLAINTEXT
-      sasl:
-        mechanism:
-        jaas.config:
-      ssl:
-        truststore.location: NO_VALUE
-        truststore.password: NO_VALUE
+      sasl.mechanism:
+      sasl.jaas.config:
+      ssl.truststore.location: NO_VALUE
+      ssl.truststore.password: NO_VALUE
 
 management:
   endpoints:
     enabled-by-default: true
     web:
       base-path: /internal
-      exposure.include: prometheus
+      exposure:
+        include: prometheus
+
+
+no:
+  nav:
+    security:
+      jwt:
+        issuer:
+          aad:
+#            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
+            discovery-url: http://localhost:${mock-oauth2-server.port}/aad/.well-known/openid-configuration
+            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
+            cookie-name: localhost-idtoken
+            proxy-url:

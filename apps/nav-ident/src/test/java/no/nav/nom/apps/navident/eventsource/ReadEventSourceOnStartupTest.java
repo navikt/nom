@@ -15,8 +15,8 @@ import java.util.Map;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @Slf4j
 class ReadEventSourceOnStartupTest extends EmbeddedKafkaTestBase {

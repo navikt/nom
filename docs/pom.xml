@@ -12,6 +12,10 @@
     <artifactId>docs</artifactId>
     <name>NOM :: Docs</name>
 
+    <properties>
+        <asciidoc.version>2.2.2</asciidoc.version>
+    </properties>
+
     <profiles>
         <profile>
             <id>build-docs</id>

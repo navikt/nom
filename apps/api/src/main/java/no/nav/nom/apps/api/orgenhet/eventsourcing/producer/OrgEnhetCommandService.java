@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
@@ -14,6 +15,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
+@Slf4j
 @Service
 public class OrgEnhetCommandService {
 
@@ -38,14 +40,19 @@ public class OrgEnhetCommandService {
         OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData additionalAgressoData = null;
         if (opprettOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = objectMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
-            var dvhOrgenhet2 = new DvhOrgenhetV2(input);
-            additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
+            try {
+                var dvhOrgenhet2 = new DvhOrgenhetV2(input);
+                additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
                     dvhOrgenhet2.getOrgNiv(),
                     dvhOrgenhet2.getAgressoOrgenhetType(),
                     dvhOrgenhet2.getUniqueAgressoId()
-            );
+                );
+            } catch (Exception e) {
+                log.error("Problem converting orgEnhet info from dvh", e);
+                log.info("dvh data: {}", input.toPrettyString());
+            }
         }
         return new OrgEnhetOpprettetEventV1(
                 fid,
@@ -72,7 +79,7 @@ public class OrgEnhetCommandService {
         ));
     }
 
-    // Alleveriderr i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
+    // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
     public ListenableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
         OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {

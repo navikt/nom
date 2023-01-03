@@ -12,15 +12,12 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.time.Duration;
-import java.util.Map;
 
 @Configuration
 public class ressursStateListenerConfig {
     @Bean
     ConsumerFactory<String, RessursState> ressursStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(RessursState.class, objectMapper);
-
-//        jsonDeserializer.configure(Map.of(JsonDeserializer.TRUSTED_PACKAGES, "no.nav.nom.contract.nom.state"), true);
 
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
     }

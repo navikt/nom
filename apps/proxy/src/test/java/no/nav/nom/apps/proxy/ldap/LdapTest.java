@@ -25,7 +25,7 @@ public class LdapTest extends ApiTestBase {
     OnpremAdConsumer consumer;
 
     @Test
-    void getAdRessurs() {
+    void getAdRessurs() throws Exception {
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
 
