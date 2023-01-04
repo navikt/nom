@@ -29,7 +29,6 @@ import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -51,7 +50,6 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Import(no.nav.nom.libs.utils.common.unleash.Config.class)
 public class DvhDataLoader {
 
     public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing";
