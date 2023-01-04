@@ -84,6 +84,9 @@ spec:
     - team: org
       application: nom-orgenhet-eventsrc-to-state
       access: read
+    - team: org
+      application: kafka-cli
+      access: readwrite
 
 ---
 
@@ -110,4 +113,7 @@ spec:
       access: read
     - team: org
       application: nom-orgenhet-eventsrc-to-state
+      access: readwrite
+    - team: org
+      application: kafka-cli
       access: readwrite
