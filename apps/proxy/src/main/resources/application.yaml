@@ -75,3 +75,32 @@ management:
 unleash:
   endpoint:
     url: https://unleash.nais.io/api
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev & !prod
+
+DVH_BASE_URL: https://tdv-u.adeo.no
+APP_TEL_BASE_URL: http://jiraint-q1.adeo.no/si/telenor/
+STS_BASEURL: https://security-token-service.dev.adeo.no
+LDAP_URL: ldaps://ldapgw.preprod.local:636
+LDAP_BASE: DC=preprod,DC=local
+UNIT4_BASE_URL: https://agresso.test.local
+UNIT4_EMPLOYEES_PATH: '/agrt01-web-api/v1/employees'
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod & !dev
+
+
+DVH_BASE_URL: https://tdv-p.adeo.no
+APP_TEL_BASE_URL: "" # why empty?
+STS_BASEURL: https://security-token-service.nais.adeo.no
+LDAP_URL: ldaps://ldapgw.adeo.no:636
+LDAP_BASE: DC=adeo,DC=no
+UNIT4_BASE_URL: https://agresso.adeo.no
+UNIT4_EMPLOYEES_PATH: '/agressowebapi/v1/employees'

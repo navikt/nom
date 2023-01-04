@@ -10,21 +10,9 @@ spec:
     - name: STACK
       value: prod
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash,k8s,kafka
-    - name: DVH_BASE_URL
-      value: https://tdv-p.adeo.no
-    - name: STS_BASEURL
-      value: https://security-token-service.nais.adeo.no
-    - name: PDL_BASEURL
-      value: https://pdl-api.intern.nav.no
-    - name: LDAP_URL
-      value: ldaps://ldapgw.adeo.no:636
-    - name: LDAP_BASE
-      value: DC=adeo,DC=no
-    - name: UNIT4_BASE_URL
-      value: https://agresso.adeo.no
-    - name: UNIT4_RESSURS_PATH
-      value: '/agressowebapi/v1/employees'
+      value: log-logstash,prod
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser

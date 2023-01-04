@@ -10,23 +10,9 @@ spec:
     - name: STACK
       value: preprod
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash,k8s,kafka
-    - name: DVH_BASE_URL
-      value: https://tdv-u.adeo.no
-    - name: APP_TEL_URL
-      value: http://jiraint-q1.adeo.no/si/telenor/
-    - name: STS_BASEURL
-      value: https://security-token-service.dev.adeo.no
-    - name: PDL_BASEURL
-      value: https://pdl-api.dev.intern.nav.no
-    - name: LDAP_URL
-      value: ldaps://ldapgw.preprod.local:636
-    - name: LDAP_BASE
-      value: DC=preprod,DC=local
-    - name: UNIT4_BASE_URL
-      value: https://agresso.test.local
-    - name: UNIT4_EMPLOYEES_PATH
-      value: '/agrt01-web-api/v1/employees'
+      value: dev
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser
