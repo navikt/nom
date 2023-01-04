@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "unleash.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable/disable unleash autoconfiguration.",
+      "defaultValue": true
+    }
+  ]
+}
