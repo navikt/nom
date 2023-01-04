@@ -8,8 +8,8 @@ metadata:
 spec:
   image: {{image}}
   env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   port: 8080
   ingresses:
     - https://nom-ressurs-eventsrc-to-state.dev.intern.nav.no
