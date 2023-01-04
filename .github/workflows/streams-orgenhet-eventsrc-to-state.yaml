@@ -7,7 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/streams/orgenhet-eventsrc-to-state/**'
-      - '.nais/apps/streams/orgenhet-eventsrc-to-state.yaml'
+      - '.nais/streams/orgenhet-eventsrc-to-state.yaml'
       - '.github/*/streams-orgenhet-eventsrc-to-state.yaml'
 
 env:

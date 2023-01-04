@@ -7,7 +7,7 @@ on:
       - 'dev/*'
     paths:
       - 'apps/streams/ressurs-eventsrc-to-state/**'
-      - '.nais/apps/streams/ressurs-eventsrc-to-state.yaml'
+      - '.nais/streams/ressurs-eventsrc-to-state.yaml'
       - '.github/*/streams-ressurs-eventsrc-to-state.yaml'
 
 env:
