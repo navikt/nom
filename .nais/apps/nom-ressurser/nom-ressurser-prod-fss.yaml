@@ -7,24 +7,12 @@ metadata:
     team: nom
 spec:
   env:
-    - name: ENV
-      value: prod
-    - name: DB_HOST
-      value: A01DBVL009.adeo.no
-    - name: DB_NAME
-      value: nom-ressurser-prod
-    - name: DB_ENV
-      value: prod-fss
-    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-      value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
-    - name: SPRING_KAFKA_TOPIC_RESSURS_NAME
-      value: aapen-nom-ressurs-v1
     - name: STACK
       value: prod
-    - name: DVH_ENDPOINT
-      value: https://tdv-p.adeo.no:9402/json/Hr/Nom/Nom_Ansatte
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
+      value: prod
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   image: {{image}}
   port: 8080
   ingresses:

@@ -7,24 +7,12 @@ metadata:
     team: nom
 spec:
   env:
-    - name: ENV
-      value: dev
-    - name: DB_HOST
-      value: b27dbvl009.preprod.local
-    - name: DB_NAME
-      value: nom-ressurser-dev
-    - name: DB_ENV
-      value: preprod-fss
-    - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
-      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-    - name: SPRING_KAFKA_TOPIC_RESSURS_NAME
-      value: aapen-nom-ressurs-v1
-    - name: STACK
+    - name: STACK # What does this do?
       value: preprod
-    - name: DVH_ENDPOINT
-      value: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash
+      value: dev
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
   image: {{image}}
   port: 8080
   ingresses:

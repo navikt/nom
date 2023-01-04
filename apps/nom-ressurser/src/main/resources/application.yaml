@@ -9,6 +9,9 @@ app:
     dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 59 * ? * *  # Every hour
 
+dvh:
+  endpoint: ${DVH_ENDPOINT}
+
 server:
   error:
     include-message: always
@@ -25,14 +28,13 @@ management:
     enabled-by-default: false
     web:
       base-path: /internal
-      exposure.include: prometheus
+      exposure:
+        include: prometheus
   endpoint:
     prometheus:
       enabled: true
 
 spring:
-  profiles:
-    active: ${ENV}
   jpa:
     hibernate:
       ddl-auto: none
@@ -42,6 +44,7 @@ spring:
 
   kafka:
     client-id: ${app.kafka.username}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     properties:
       security.protocol: SASL_SSL
       sasl.mechanism: PLAIN
@@ -65,9 +68,30 @@ no:
       jwt:
         issuer:
           aad:
-#            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
-            discovery-url: http://localhost:${mock-oauth2-server.port}/aad/.well-known/openid-configuration
-#            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
+            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
             accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
-            cookie-name: localhost-idtoken
             proxy-url:
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev & !prod
+
+DB_HOST: b27dbvl009.preprod.local
+DB_NAME: nom-ressurser-dev
+DB_ENV: preprod-fss
+KAFKA_BOOTSTRAP_SERVERS: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+DVH_ENDPOINT: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod & !dev
+
+DB_HOST: A01DBVL009.adeo.no
+DB_NAME: nom-ressurser-prod
+DB_ENV: prod-fss
+KAFKA_BOOTSTRAP_SERVERS: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
+DVH_ENDPOINT: https://tdv-p.adeo.no:9402/json/Hr/Nom/Nom_Ansatte
