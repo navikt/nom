@@ -8,7 +8,9 @@ metadata:
 spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: log-logstash-mdc, dev
+      value: dev
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
     - name: JAVA_OPTS
       value: "-Xms512m -Xmx1024m"
   image: {{image}}

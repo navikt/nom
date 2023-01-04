@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
+            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+<!-- NOM loggers -->
+<!--    <logger name="no.nav.nom" level="debug" />-->
+<!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
+<!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
+
+<!-- Spring Security logger -->
+<!--    <logger name="org.springframework.security" level="trace"/>-->
+
+<!-- GraphQL loggers -->
+<!--    <logger name="graphql" level="trace"/>-->
+<!--    <logger name="org.dataloader" level="trace"/>-->
+<!--    <logger name="org.springframework.graphql" level="trace"/>-->
+<!--    <logger name="org.springframework.boot.autoconfigure.graphql" level="trace"/>-->
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT_JSON"/>
+    </root>
+</configuration>
