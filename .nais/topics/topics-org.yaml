@@ -80,13 +80,10 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: read
+      access: readwrite
     - team: org
       application: nom-orgenhet-eventsrc-to-state
       access: read
-    - team: org
-      application: kafka-cli
-      access: readwrite
 
 ---
 
@@ -110,10 +107,7 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: read
-    - team: org
-      application: nom-orgenhet-eventsrc-to-state
       access: readwrite
     - team: org
-      application: kafka-cli
+      application: nom-orgenhet-eventsrc-to-state
       access: readwrite
