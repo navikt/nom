@@ -80,21 +80,6 @@ public class DvhRestConsumer {
         loadRessurserOgOrgEnheter();
     }
 
-    @Scheduled(fixedDelay = 60*1000)
-    public void loadFromDvhLocal() {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
-            while (!ressursStateListener.initloadComplete()) {
-                try {
-                    Thread.sleep(5_000);
-                } catch (Exception ignored) {
-                }
-
-            }
-            loadRessurserOgOrgEnheter();
-            loadKoblingerLedereOgTlfFromDvh();
-        }
-    }
-
     public void loadRessurserOgOrgEnheter() {
         if (leaderElection.isLeader()) {
             log.info("Laster ressurser fra dvh");

@@ -18,7 +18,7 @@ public class OrgEnhetEventKafkaConfig {
     @Bean
     ProducerFactory<String, OrgEnhetEvent> orgEnhetEventProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonSerializer = new JsonSerializer<OrgEnhetEvent>(objectMapper);
-
+        properties.setClientId("orgEnhetEventProducer");
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
 

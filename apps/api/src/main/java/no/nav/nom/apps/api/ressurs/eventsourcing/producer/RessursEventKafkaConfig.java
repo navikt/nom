@@ -19,7 +19,7 @@ public class RessursEventKafkaConfig {
     @Bean
     ProducerFactory<String, RessursEvent> ressursEventProducerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonSerializer = new JsonSerializer<RessursEvent>(objectMapper);
-
+        properties.setClientId("ressursEventProducer");
         return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties(), new StringSerializer(), jsonSerializer);
     }
 

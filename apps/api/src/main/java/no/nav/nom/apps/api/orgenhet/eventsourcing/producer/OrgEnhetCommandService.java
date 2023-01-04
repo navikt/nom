@@ -41,7 +41,7 @@ public class OrgEnhetCommandService {
         if (opprettOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = objectMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
             try {
-                var dvhOrgenhet2 = new DvhOrgenhetV2(input);
+                var dvhOrgenhet2 = new DvhOrgenhetV2(input.isArray() ? input.get(0): input);
                 additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
@@ -84,7 +84,7 @@ public class OrgEnhetCommandService {
         OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = objectMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
-            var dvhOrgenhet2 = new DvhOrgenhetV2(input);
+            var dvhOrgenhet2 = new DvhOrgenhetV2(input.isArray() ? input.get(0): input);
             additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
