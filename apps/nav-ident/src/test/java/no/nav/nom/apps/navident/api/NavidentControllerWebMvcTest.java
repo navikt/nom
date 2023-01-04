@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-@ActiveProfiles({"test", "log-console-mdc"})
+@ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
 @WebMvcTest(NavidentController.class)
 @ContextConfiguration(classes = {NavidentController.class, RestMdcInterceptor.class})

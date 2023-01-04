@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * AAD - Test AAD
  * PDL - Test PDL
  */
-@ActiveProfiles({"e2e-local", "log-console-mdc"})
+@ActiveProfiles("e2e-local")
 @Slf4j
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)

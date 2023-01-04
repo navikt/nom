@@ -61,7 +61,7 @@ Man må være tilkoblet naisdevice for å kunne kjøre lokalutvikling mot miljø
 * NOM-UI frackend må startes først:
 ** Kopier teksten i filen `apps/ui/src/main/resources/application-local-template.yaml` til en ny fil `application-local.yaml` i samme mappe
 ** Sett inn oppdaterte AAD credentials i `application-local.yaml`. Hentes i clusteret, gjerne med et script.
-** Start ui lokalt, med profiles `log-console,local,dev`
+** Start ui lokalt, med profiles `local,dev`
 ** Hvis UI f.eks kjører på port 8080, gå til https://localhost:8080/login og logg inn med trygdeetaten bruker, enten din egen eller bruker generert i https://ida.intern.nav.no
 ** UI Frackend vil nå gjøre API kall direkte mot miljø via naisdevice.
 * Deretter kan react-dev server kjøres opp
