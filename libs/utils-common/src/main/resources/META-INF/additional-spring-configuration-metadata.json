@@ -17,6 +17,12 @@
       "type": "java.lang.Boolean",
       "description": "Enable/disable leader election autoconfiguration.",
       "defaultValue": true
+    },
+    {
+      "name": "nom.libs.utils.common.rest-mdc-interceptor.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable/disable the RestMdcIntercpetor autoconfiguration.",
+      "defaultValue": true
     }
   ]
 }

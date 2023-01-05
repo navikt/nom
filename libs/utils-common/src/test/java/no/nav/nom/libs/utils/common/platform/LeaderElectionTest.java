@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "ELECTOR_PATH=localhost:${wiremock.server.port}/elect"
     }
 )
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class LeaderElectionTest {
 
     @SpringBootApplication

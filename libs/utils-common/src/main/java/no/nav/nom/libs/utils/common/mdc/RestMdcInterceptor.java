@@ -1,7 +1,6 @@
 package no.nav.nom.libs.utils.common.mdc;
 
 import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_X_REQUEST_ID_KEY;
 
-@Component
 public class RestMdcInterceptor implements HandlerInterceptor {
 
     @Override
