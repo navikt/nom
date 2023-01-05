@@ -5,6 +5,12 @@
       "type": "java.lang.Boolean",
       "description": "Enable/disable unleash autoconfiguration.",
       "defaultValue": true
+    },
+    {
+      "name": "nom.libs.utils.common.metrics.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable/disable metrics aspects autoconfiguration.",
+      "defaultValue": true
     }
   ]
 }
