@@ -11,6 +11,12 @@
       "type": "java.lang.Boolean",
       "description": "Enable/disable metrics aspects autoconfiguration.",
       "defaultValue": true
+    },
+    {
+      "name": "nom.libs.utils.common.leader-election.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable/disable leader election autoconfiguration.",
+      "defaultValue": true
     }
   ]
 }

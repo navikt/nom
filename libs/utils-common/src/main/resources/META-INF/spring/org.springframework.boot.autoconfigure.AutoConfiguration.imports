@@ -1,2 +1,3 @@
 no.nav.nom.libs.utils.common.unleash.UnleashAutoconfiguration
 no.nav.nom.libs.utils.common.metrics.MetricsAspectsAutoConfiguration
+no.nav.nom.libs.utils.common.platform.LeaderElectionAutoconfiguration

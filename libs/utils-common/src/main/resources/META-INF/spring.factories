@@ -1,4 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   no.nav.nom.libs.utils.common.properties.PropertiesAutoConfig,\
-  no.nav.nom.libs.utils.common.platform.LeaderElection,\
   no.nav.nom.libs.utils.common.mdc.RestMdcInterceptor
