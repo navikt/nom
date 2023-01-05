@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhet;
+package no.nav.nom.apps.api.orgenhet.eventsourcing.state;
 
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Comparator.comparing;
 
 @Service
-public class OrgEnhetStateService {
+public class OrgEnhetStateRepository {
     private final Map<String, OrgEnhetState> orgEnhetByFid = new ConcurrentHashMap<>();
     private final Map<String, OrgEnhetState> orgEnhetById = new ConcurrentHashMap<>();
 

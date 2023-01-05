@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.state;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
 import org.apache.kafka.clients.admin.Admin;
@@ -28,14 +27,14 @@ import java.util.stream.StreamSupport;
 public class OrgEnhetStateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
-    private final OrgEnhetStateService orgEnhetStateService;
+    private final OrgEnhetStateRepository orgEnhetStateService;
     private final Admin adminClient;
     private final KafkaProperties kafkaProperties;
     private final LuceneService luceneService;
 
     public OrgEnhetStateListener(
         @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
-        OrgEnhetStateService ressursStateService,
+        OrgEnhetStateRepository ressursStateService,
         Admin adminClient, LuceneService luceneService,
         KafkaAdmin admin,
         KafkaProperties kafkaProperties

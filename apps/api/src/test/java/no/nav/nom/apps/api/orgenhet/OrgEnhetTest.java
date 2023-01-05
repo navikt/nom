@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ public class OrgEnhetTest extends TestBase {
     private IOrgenhetService orgenhetService;
 
     @Autowired
-    private OrgEnhetStateService orgEnhetStateService;
+    private OrgEnhetStateRepository orgEnhetStateService;
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;
