@@ -38,7 +38,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
         this.agressoId = node.get("ORGENHET_KODE").asText();
         this.orgNiv = node.get("ORGNODE_NIV").asText();
         this.navn = node.get("ORGENHET_NAVN").asText();
-        this.agressoOrgenhetType = node.get("ENHETTYPE_NAVN").asText();
+        this.agressoOrgenhetType = node.get("ENHETTYPE_NAVN").asText(null);
         this.agressoGyldigFom = node.get("ORGENHET_FRA_PERIODE").asText();
         val tempGyldigTom = node.get("ORGENHET_TIL_PERIODE").asText();
         this.agressoGyldigTom = tempGyldigTom.equals("209999") ? "209912" : tempGyldigTom;

@@ -57,19 +57,28 @@ class EventsrcToState {
         Optional<String> overordnetOrgEnhetFid = Optional.ofNullable(eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null);
         Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null);
         Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsKategori") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("orgEnhetsKategori").asText()) : null);
+
+        // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
         Optional<String> uniqueAgressoId = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("uniqueAgressoId") ? additionalData.get().get("uniqueAgressoId").asText() : null);
+        Optional<String> agressoId = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoId") ? additionalData.get().get("agressoId").asText() : null);
+        Optional<String> agressoOrgNivaa = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgNivaa") ? additionalData.get().get("agressoOrgNivaa").asText() : null);
+        Optional<String> agressoOrgenhetType = Optional.ofNullable(additionalData.isPresent() && additionalData.get().hasNonNull("agressoOrgenhetType") ? additionalData.get().get("agressoOrgenhetType").asText() : null);
+
         try {
             return new OrgEnhetState(
-                    fid,
-                    eventStateAggregate.get("id").asText(),
-                    eventStateAggregate.get("navn").asText(),
-                    LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                    Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                    overordnetOrgEnhetFid,
-                    lederFid,
-                    orgEnhetsKategori,
-                    uniqueAgressoId
+                fid,
+                eventStateAggregate.get("id").asText(),
+                eventStateAggregate.get("navn").asText(),
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
+                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
+                overordnetOrgEnhetFid,
+                lederFid,
+                orgEnhetsKategori,
+                uniqueAgressoId,
+                agressoId,
+                agressoOrgNivaa,
+                agressoOrgenhetType
             );
         } catch (Exception e){
             log.error("Error mapping to OrgEnhetState", e);

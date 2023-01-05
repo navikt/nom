@@ -14,5 +14,8 @@ public record OrgEnhetState (
     Optional<String> overordnetOrgEnhetFid,
     Optional<String> lederFid,
     Optional<OrgEnhetsKategori> orgEnhetsKategori,
-    Optional<String> uniqueAgressoId
+    Optional<String> uniqueAgressoId,
+    Optional<String> agressoId,
+    Optional<String> agressoOrgNivaa,
+    Optional<String> agressoOrgenhetType
 ) {}

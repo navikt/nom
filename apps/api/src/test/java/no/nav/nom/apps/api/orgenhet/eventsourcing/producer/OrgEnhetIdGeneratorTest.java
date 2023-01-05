@@ -34,7 +34,7 @@ public class OrgEnhetIdGeneratorTest {
     }
 
     private OrgEnhetState newOrgEnhet(String id) {
-        return new OrgEnhetState("fid", id, "navn", LocalDate.now(), Optional.empty(),Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty() );
+        return new OrgEnhetState("fid", id, "navn", LocalDate.now(), Optional.empty(),Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty() );
     }
 
 }
