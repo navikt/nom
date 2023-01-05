@@ -3,7 +3,7 @@ scalar DateTime
 scalar JSON
 
 type Query {
-    search(term: String!): [SearchResult!]!
+    search(term: String!, ressursFilter: RessursSearchFilter, orgEnhetFilter: OrgEnhetSearchFilter): [SearchResult!]!
     searchRessurs(term: String!, filter: RessursSearchFilter): [Ressurs!]!
     searchOrgEnhet(term: String!, filter: OrgEnhetSearchFilter): [OrgEnhet!]!
     organisasjonsenhet(where: OrgEnhetSearch!): OrgEnhet @deprecated(reason: "Bruk orgEnhet query med samme parametre")

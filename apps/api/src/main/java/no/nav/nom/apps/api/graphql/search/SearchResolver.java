@@ -8,17 +8,20 @@ import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetServiceNewFromEvtsrc;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toSet;
 
 @Component
 public class SearchResolver {
@@ -31,15 +34,34 @@ public class SearchResolver {
 
     private final Unleash unleash;
 
-    public SearchResolver(IRessursService ressursService, IOrgenhetService orgenhetService, LuceneService luceneService, Unleash unleash) {
+    public SearchResolver(IRessursService ressursService, OrgenhetServiceNewFromEvtsrc orgenhetService, LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.luceneService = luceneService;
         this.unleash = unleash;
     }
 
-    public List<Object> search(String term_inp) {
-        Stream<OrgEnhet> orgenheter;
+    public List<Object> search(String term_inp, RessursSearchFilter ressursSearchFilter, OrgEnhetSearchFilter orgEnhetSearchFilter) {
+        return Stream.concat(
+            luceneService.searchRessurs(term_inp, ressursSearchFilter.toLuceneFilter()).stream(),
+                luceneService.searchOrgenhet(term_inp, orgEnhetSearchFilter.toLuceneFilter()).stream()
+            )
+            .sorted(Comparator.comparing(SearchResult::score).reversed())
+            .map(result -> {
+                if(result.entityClass().equals(LuceneOrgEnhet.class)){
+                    return  OrgEnhetResolver.convertToOrgEnhet(orgenhetService.getByFid(UUID.fromString(result.id())).orElseThrow());
+                } else if(result.entityClass().equals(LuceneRessurs.class)){
+                    return MappingUtils.toRessurs(ressursService.findByNavident(result.id()).orElseThrow());
+                } else {
+                    throw new RuntimeException("Unknown entity class: " + result.entityClass());
+                }
+            })
+            .toList();
+
+
+
+
+        /*Stream<OrgEnhet> orgenheter;
         Stream<Object> ressurser;
 
         if (unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)) {
@@ -67,7 +89,7 @@ public class SearchResolver {
             ressurser = ressursService.matchByNavident(term_inp).stream().map(MappingUtils::toRessurs);
         }
 
-        return Stream.concat(orgenheter, ressurser).toList();
+        return Stream.concat(orgenheter, ressurser).toList();*/
 
     }
 
