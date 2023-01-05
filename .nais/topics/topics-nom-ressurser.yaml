@@ -1,0 +1,31 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom-ressurser
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: nom
+      application: nom-ressurser
+      access: readwrite
+    - team: nom
+      application: team-catalog-backend
+      access: read
+    - team: org
+      application: skjermede-personer
+      access: read
+    - team: oppgavehandtering
+      application: oppgave-navressurs-lytter
+      access: read
+    - team: org
+      application: aivia
+      access: read
