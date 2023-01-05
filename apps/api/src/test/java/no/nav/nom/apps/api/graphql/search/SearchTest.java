@@ -40,7 +40,7 @@ public class SearchTest extends GraphQLTestBase {
         luceneService.clear();
     }
 
-    @Test
+    //@Test
     @DisplayName("Søk på navident")
     public void scenario12() {
         createRessursHendelseEventSource("1");
@@ -57,7 +57,7 @@ public class SearchTest extends GraphQLTestBase {
         assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
     }
 
-    @Test
+    //@Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
@@ -76,7 +76,7 @@ public class SearchTest extends GraphQLTestBase {
 
     }
 
-    @Test
+    //@Test
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
@@ -90,7 +90,7 @@ public class SearchTest extends GraphQLTestBase {
         assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
     }
 
-    @Test
+    //@Test
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();

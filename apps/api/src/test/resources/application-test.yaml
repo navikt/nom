@@ -16,6 +16,7 @@ app:
             - MUTATE_RESSURS
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
+ELECTOR_PATH: localhost:8080
 
 authentication:
   aad:
