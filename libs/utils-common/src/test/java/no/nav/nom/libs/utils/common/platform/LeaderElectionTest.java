@@ -2,7 +2,6 @@ package no.nav.nom.libs.utils.common.platform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
