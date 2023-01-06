@@ -1,3 +1,4 @@
+import type { ApolloError } from "@apollo/client";
 import { css } from "@emotion/css";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
 import partition from "lodash/partition";
@@ -61,6 +62,16 @@ function getOverEnheterBackToRootRecursively(orgEnhet: OrgEnhet): OrgEnhet[] {
     ? [...getOverEnheterBackToRootRecursively(firstOrganisering), orgEnhet]
     : [orgEnhet];
 }
+
+const graphqlErrorWrapper = (errors: ApolloError, keyPrefix: string) => {
+  return (
+    <ul>
+      {errors.graphQLErrors.map((error, index) => (
+        <li key={`${keyPrefix}-error-${index}`}>error.message</li>
+      ))}
+    </ul>
+  );
+};
 
 const OrganisasjonHierarkiPageInner = (properties: {
   data: HentHierarkiQueryHookResult["data"];
@@ -126,7 +137,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
           <Heading level="3" size="small">
             Kunne ikke hente ressurs
           </Heading>
-          {ressursQuery.error.message}
+          {graphqlErrorWrapper(ressursQuery.error, "ressursQuery")}
         </Alert>
       )}
 
