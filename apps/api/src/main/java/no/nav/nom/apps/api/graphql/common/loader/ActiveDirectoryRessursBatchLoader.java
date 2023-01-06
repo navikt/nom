@@ -78,7 +78,7 @@ public class ActiveDirectoryRessursBatchLoader {
             return DataFetcherResult.<T>newResult().data(propertyResolver.apply(ressurs)).build();
         }
         log.warn("Manglende data fra AD", new GraphQLException("Manglende data fra AD for ident=" + ressurs.getNavIdent()));
-        return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på denne navIdent");
+        return convertToError(ErrorCode.NOT_FOUND, "AD har ingen data på nav-ident: " + ressurs.getNavIdent());
     }
 
     private <T> DataFetcherResult<T> convertToError(ErrorCode errorCode, String message) {
