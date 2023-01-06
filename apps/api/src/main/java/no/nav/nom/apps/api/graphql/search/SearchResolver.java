@@ -4,11 +4,8 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetServiceNewFromEvtsrc;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -19,24 +16,23 @@ import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Component
 public class SearchResolver {
 
     private final IRessursService ressursService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final LuceneService luceneService;
 
     public static final String UNLEASH_LUCENE_TOGGLE = "nom.ressurs.lucene_search_toggle";
 
     private final Unleash unleash;
 
-    public SearchResolver(IRessursService ressursService, OrgenhetServiceNewFromEvtsrc orgenhetService, LuceneService luceneService, Unleash unleash) {
+    public SearchResolver(IRessursService ressursService, OrgEnhetStateRepository orgEnhetStateRepository, LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
-        this.orgenhetService = orgenhetService;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.luceneService = luceneService;
         this.unleash = unleash;
     }
@@ -49,7 +45,7 @@ public class SearchResolver {
             .sorted(Comparator.comparing(SearchResult::score).reversed())
             .map(result -> {
                 if(result.entityClass().equals(LuceneOrgEnhet.class)){
-                    return  OrgEnhetResolver.convertToOrgEnhet(orgenhetService.getByFid(UUID.fromString(result.id())).orElseThrow());
+                    return MappingUtils.toOrgEnhet(orgEnhetStateRepository.findById(result.id()).orElseThrow());
                 } else if(result.entityClass().equals(LuceneRessurs.class)){
                     return MappingUtils.toRessurs(ressursService.findByNavident(result.id()).orElseThrow());
                 } else {
@@ -106,11 +102,16 @@ public class SearchResolver {
 
     public List<OrgEnhet> searchOrgenhet(String term, OrgEnhetSearchFilter filter) {
         try {
-            var matchedFidsSorted = luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
-                .map(SearchResult::id).toList();
-            Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+            return luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
+                    .map(result -> orgEnhetStateRepository.findById(result.id()))
+                    .map(Optional::get)
+                    .map(MappingUtils::toOrgEnhet)
+                    .toList();
+            /*Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+
+            MappingUtils.toOrgEnhet(orgEnhetStateRepository.findById(result.id()).orElseThrow());
             var orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-            return orgenheter.toList();
+            return orgenheter.toList();*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

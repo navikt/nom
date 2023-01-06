@@ -24,7 +24,7 @@ public class OrgEnhetStateRepository {
     }
 
     public Optional<OrgEnhetState> findById(String id) {
-        return Optional.ofNullable(orgEnhetByFid.get(id));
+        return Optional.ofNullable(orgEnhetById.get(id));
     }
 
     public List<OrgEnhetState> findAllByUniqueAgressoId(String id) {
