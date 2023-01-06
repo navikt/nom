@@ -6,7 +6,6 @@ import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoad
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -48,58 +47,5 @@ public class RessursPropertyResolver {
             return createDummyResponse("dummy-epost@i-dev.", ressurser);
         }
         return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail);
-    }
-
-    public Map<Ressurs, DataFetcherResult<String>> visningsnavn(List<Ressurs> ressurser) {
-        return adRessursBatchLoaderWithFallback(ressurser, adRessurs -> flipAdDisplayName(adRessurs.getDisplayName()), r -> r.visningsnavn().toString());
-    }
-
-    public Map<Ressurs, DataFetcherResult<String>> fornavn(List<Ressurs> ressurser) {
-        if (sendDummydata) {
-            return createDummyResponse("dummy-fornavn-i-dev-", ressurser);
-        }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getGivenName);
-    }
-
-    public Map<Ressurs, DataFetcherResult<String>> etternavn(List<Ressurs> ressurser) {
-        if (sendDummydata) {
-            return createDummyResponse("dummy-etternnavn-i-dev-", ressurser);
-        }
-        return adRessursBatchLoader.load(ressurser, AdRessurs::getSurname);
-    }
-
-    private Map<Ressurs, DataFetcherResult<String>> adRessursBatchLoaderWithFallback(
-            List<Ressurs> ressurser, Function<AdRessurs, String> fieldGetter, Function<RessursState, String> fallbackFieldGetter
-    ) {
-        var out = adRessursBatchLoader.load(ressurser, fieldGetter);
-        var gotAdError = false;
-        for (var entry : out.entrySet()) {
-            if (entry.getValue().hasErrors()) {
-                gotAdError = true;
-                var optionalRessursState = ressursStateService.findByNavident(entry.getKey().getNavIdent());
-                if (optionalRessursState.isPresent()) {
-                    var fieldByFallback = fallbackFieldGetter.apply(optionalRessursState.get());
-                    var replacement = DataFetcherResult.<String>newResult().data(fieldByFallback).build();
-                    out.put(entry.getKey(), replacement);
-                }
-            }
-        }
-        if (gotAdError) {
-            log.warn("Fallback to DVH data due to AD error.");
-        }
-        return out;
-    }
-
-    // "Peterson, Alfred" -> "Alfred Peterson"
-    private String flipAdDisplayName(String adDisplayName) {
-        var commaPos = adDisplayName.indexOf(",");
-        var commaNotFound = commaPos == -1;
-        var multipleCommas = !commaNotFound && adDisplayName.substring(commaPos + 1).contains(",");
-        if (commaNotFound || multipleCommas) {
-            return adDisplayName;
-        }
-        var lastname = adDisplayName.substring(0, commaPos);
-        var firstAndMiddlename = adDisplayName.substring(commaPos + 1);
-        return (firstAndMiddlename + " " + lastname).trim();
     }
 }

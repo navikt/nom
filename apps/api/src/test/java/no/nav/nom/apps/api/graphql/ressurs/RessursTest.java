@@ -239,10 +239,10 @@ class RessursTest extends RessursTestBase {
     }
 
     @Test
-    @DisplayName("Kan hente email og visningsnavn fra AD")
+    @DisplayName("Kan hente email fra AD og visningsnavn")
     void scenario745() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        final var ressurs1 = createRessursHendelseEventSource("1");
+        final var ressurs2 = createRessursHendelseEventSource("2");
         final var ressurs3 = createRessursHendelseEventSource("3");
 
         final var response = postForResource("ressurs/scenario8.graphql");
@@ -256,13 +256,10 @@ class RessursTest extends RessursTestBase {
         ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
         assertThat(ressurser.get(0).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent1@domain.no");
-        assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 1");
+        assertThat(ressurser.get(0).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs1.visningsnavn().getFormattedVisningsnavn());
         assertThat(ressurser.get(1).get("ressurs").get("epost").asText()).isEqualTo("testNavIdent2@domain.no");
-        assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo("Visning 2");
-        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().fornavn() + ressurs3.visningsnavn()
-                .mellomnavn()
-                .map(n -> " " + n)
-                .orElse("") + " " + ressurs3.visningsnavn().etternavn());
+        assertThat(ressurser.get(1).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs2.visningsnavn().getFormattedVisningsnavn());
+        assertThat(ressurser.get(2).get("ressurs").get("visningsNavn").asText()).isEqualTo(ressurs3.visningsnavn().getFormattedVisningsnavn());
         assertTrue(ressurser.get(2).get("ressurs").get("epost").isNull());
 
         response.errors().satisfy(errors -> assertEquals(1, errors.size()));

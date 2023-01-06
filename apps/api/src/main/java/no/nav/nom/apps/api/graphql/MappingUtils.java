@@ -18,11 +18,10 @@ public class MappingUtils {
                 .ressurstype(sektor)
                 .sektor(sektor)
                 .sluttdato(ressursState.sluttdato().orElse(null))
-                .fornavn(ressursState.visningsnavn()
-                                 .mellomnavn()
-                                 .map(m -> ressursState.visningsnavn().fornavn() + " " + m)
-                                 .orElse(ressursState.visningsnavn().fornavn()))
+                .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
                 .etternavn(ressursState.visningsnavn().etternavn())
+                .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
+                .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
                 .build();
     }
 
