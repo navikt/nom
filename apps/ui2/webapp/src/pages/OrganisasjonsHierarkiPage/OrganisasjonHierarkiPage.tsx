@@ -67,7 +67,7 @@ const graphqlErrorWrapper = (errors: ApolloError, keyPrefix: string) => {
   return (
     <ul>
       {errors.graphQLErrors.map((error, index) => (
-        <li key={`${keyPrefix}-error-${index}`}>error.message</li>
+        <li key={`${keyPrefix}-error-${index}`}>${error.message}</li>
       ))}
     </ul>
   );
