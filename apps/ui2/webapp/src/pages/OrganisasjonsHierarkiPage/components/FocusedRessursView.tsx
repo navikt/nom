@@ -66,7 +66,7 @@ export const FocusedRessursView = ({
             `}
           >
             <span>
-              E-post: <strong>{focusedRessurs.epost}</strong>
+              E-post: <strong>{focusedRessurs.epost || "Mangler epost"}</strong>
             </span>
             <span>
               Tlf:{" "}

@@ -96,6 +96,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
       navident: resourceId,
     },
     skip: !resourceId,
+    errorPolicy: "all",
   });
 
   const firstOverEnhet = (
