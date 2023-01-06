@@ -79,7 +79,7 @@ const graphqlErrorWrapper = (errors: ApolloError, keyPrefix: string) => {
       {[...deduplicateGraphqlErrors(errors.graphQLErrors)].map(
         (error, index) => (
           <li key={`${keyPrefix}-error-${index}`}>
-            ${error[0]} (${error[1]})
+            {error[0]} ({error[1]})
           </li>
         )
       )}
