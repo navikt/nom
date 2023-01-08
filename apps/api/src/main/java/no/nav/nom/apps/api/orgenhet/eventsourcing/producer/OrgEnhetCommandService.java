@@ -15,6 +15,8 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 public class OrgEnhetCommandService {
@@ -46,7 +48,7 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
                     dvhOrgenhet2.getOrgNiv(),
-                    dvhOrgenhet2.getAgressoOrgenhetType(),
+                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
                     dvhOrgenhet2.getUniqueAgressoId()
                 );
             } catch (Exception e) {
@@ -89,7 +91,7 @@ public class OrgEnhetCommandService {
                     dvhOrgenhet2.getAgressoId(),
                     dvhOrgenhet2.getNavn(),
                     dvhOrgenhet2.getOrgNiv(),
-                    dvhOrgenhet2.getAgressoOrgenhetType(),
+                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
                     dvhOrgenhet2.getUniqueAgressoId()
             );
         }

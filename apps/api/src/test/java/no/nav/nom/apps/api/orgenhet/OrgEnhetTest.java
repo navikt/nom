@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ public class OrgEnhetTest extends TestBase {
     private IOrgenhetService orgenhetService;
 
     @Autowired
-    private OrgEnhetStateService orgEnhetStateService;
+    private OrgEnhetStateRepository orgEnhetStateService;
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;
@@ -341,7 +342,10 @@ public class OrgEnhetTest extends TestBase {
                     Optional.empty(),
                     Optional.empty(),
                     Optional.empty(),
-                    Optional.of("testId-testNavn-ORGENHET")
+                    Optional.of("testId-testNavn-ORGENHET"),
+                    Optional.of("testId"),
+                    Optional.of("ORGNIV"),
+                    Optional.of("ORGENHET")
             ));
         }
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1);
@@ -435,7 +439,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
@@ -447,7 +454,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
 
 
@@ -505,7 +515,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
 
 
@@ -582,7 +595,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
 
             var allEnheter = orgEnhetStateService.getAll();
@@ -644,7 +660,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
@@ -656,7 +675,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
 
             var allStateEnheter = orgEnhetStateService.getAll();
@@ -720,7 +742,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
             orgEnhetStateService.putEventAggregate(
                     new OrgEnhetState(
@@ -732,7 +757,10 @@ public class OrgEnhetTest extends TestBase {
                             Optional.empty(),
                             Optional.empty(),
                             Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET")
+                            Optional.of("testId-testNavn-ORGENHET"),
+                            Optional.of("testId"),
+                            Optional.of("ORGNIV"),
+                            Optional.of("ORGENHET")
                     ));
         }
 

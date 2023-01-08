@@ -4,42 +4,60 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
+import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toSet;
 
 @Component
 public class SearchResolver {
 
     private final IRessursService ressursService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final LuceneService luceneService;
 
     public static final String UNLEASH_LUCENE_TOGGLE = "nom.ressurs.lucene_search_toggle";
 
     private final Unleash unleash;
 
-    public SearchResolver(IRessursService ressursService, IOrgenhetService orgenhetService, LuceneService luceneService, Unleash unleash) {
+    public SearchResolver(IRessursService ressursService, OrgEnhetStateRepository orgEnhetStateRepository, LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
-        this.orgenhetService = orgenhetService;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.luceneService = luceneService;
         this.unleash = unleash;
     }
 
-    public List<Object> search(String term_inp) {
-        Stream<OrgEnhet> orgenheter;
+    public List<Object> search(String term_inp, RessursSearchFilter ressursSearchFilter, OrgEnhetSearchFilter orgEnhetSearchFilter) {
+        return Stream.concat(
+            luceneService.searchRessurs(term_inp, ressursSearchFilter.toLuceneFilter()).stream(),
+                luceneService.searchOrgenhet(term_inp, orgEnhetSearchFilter.toLuceneFilter()).stream()
+            )
+            .sorted(Comparator.comparing(SearchResult::score).reversed())
+            .map(result -> {
+                if(result.entityClass().equals(LuceneOrgEnhet.class)){
+                    return MappingUtils.toOrgEnhet(orgEnhetStateRepository.findById(result.id()).orElseThrow());
+                } else if(result.entityClass().equals(LuceneRessurs.class)){
+                    return MappingUtils.toRessurs(ressursService.findByNavident(result.id()).orElseThrow());
+                } else {
+                    throw new RuntimeException("Unknown entity class: " + result.entityClass());
+                }
+            })
+            .toList();
+
+
+
+
+        /*Stream<OrgEnhet> orgenheter;
         Stream<Object> ressurser;
 
         if (unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)) {
@@ -67,7 +85,7 @@ public class SearchResolver {
             ressurser = ressursService.matchByNavident(term_inp).stream().map(MappingUtils::toRessurs);
         }
 
-        return Stream.concat(orgenheter, ressurser).toList();
+        return Stream.concat(orgenheter, ressurser).toList();*/
 
     }
 
@@ -84,11 +102,16 @@ public class SearchResolver {
 
     public List<OrgEnhet> searchOrgenhet(String term, OrgEnhetSearchFilter filter) {
         try {
-            var matchedFidsSorted = luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
-                .map(SearchResult::id).toList();
-            Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+            return luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
+                    .map(result -> orgEnhetStateRepository.findById(result.id()))
+                    .map(Optional::get)
+                    .map(MappingUtils::toOrgEnhet)
+                    .toList();
+            /*Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
+
+            MappingUtils.toOrgEnhet(orgEnhetStateRepository.findById(result.id()).orElseThrow());
             var orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-            return orgenheter.toList();
+            return orgenheter.toList();*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

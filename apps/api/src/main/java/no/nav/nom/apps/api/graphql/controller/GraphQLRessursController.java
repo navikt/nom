@@ -142,27 +142,6 @@ public class GraphQLRessursController {
         return Mono.fromSupplier(() -> propertyResolver.epost(ressurser));
     }
 
-    @Deprecated(forRemoval = true)
-    @BatchMapping(typeName = "Ressurs", field = "visningsNavn")
-    public Mono<Map<Ressurs, DataFetcherResult<String>>> visningsNavn(List<Ressurs> ressurser) {
-        return visningsnavn(ressurser);
-    }
-
-    @BatchMapping(typeName = "Ressurs", field = "visningsnavn")
-    public Mono<Map<Ressurs, DataFetcherResult<String>>> visningsnavn(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> propertyResolver.visningsnavn(ressurser));
-    }
-
-    @BatchMapping(typeName = "Ressurs", field = "fornavn")
-    public Mono<Map<Ressurs, DataFetcherResult<String>>> fornavn(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> propertyResolver.fornavn(ressurser));
-    }
-
-    @BatchMapping(typeName = "Ressurs", field = "etternavn")
-    public Mono<Map<Ressurs, DataFetcherResult<String>>> etternavn(List<Ressurs> ressurser) {
-        return Mono.fromSupplier(() -> propertyResolver.etternavn(ressurser));
-    }
-
     @BatchMapping(typeName = "Ressurs", field = "telefon")
     public Mono<Map<Ressurs, List<Telefon>>> telefon(List<Ressurs> ressurser) {
         return Mono.fromSupplier(() -> telefonResolver.load(ressurser));

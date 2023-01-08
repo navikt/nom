@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
-import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,9 +12,9 @@ import static java.util.function.Predicate.not;
 @Component
 public class OrgEnhetIdGenerator {
     private final Random random = new Random();
-    private final OrgEnhetStateService orgEnhetStateService;
+    private final OrgEnhetStateRepository orgEnhetStateService;
 
-    public OrgEnhetIdGenerator(OrgEnhetStateService orgEnhetStateService) {
+    public OrgEnhetIdGenerator(OrgEnhetStateRepository orgEnhetStateService) {
         this.orgEnhetStateService = orgEnhetStateService;
     }
 

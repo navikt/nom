@@ -21,4 +21,6 @@ public class Ressurs {
     LocalDate sluttdato;
     String fornavn;
     String etternavn;
+    String visningsNavn;
+    String visningsnavn;
 }

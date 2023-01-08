@@ -55,7 +55,7 @@ public class EventsrcToStateTest {
                 "AgressoId_123",
                 "AgressoNavn",
                 "AgressoOrgNivaa_1",
-                "AgressoOrgEnhetType",
+                Optional.of("AgressoOrgEnhetType"),
                 "AgressoId_123-AgressoNavn-AgressoOrgNivaa_1"
         );
 
@@ -75,7 +75,10 @@ public class EventsrcToStateTest {
                 eventData.overordnetOrgEnhetFid(),
                 eventData.lederRessursFid(),
                 Optional.ofNullable(eventData.orgEnhetsKategori()),
-                Optional.ofNullable(additionalData.uniqueAgressoId())
+                Optional.ofNullable(additionalData.uniqueAgressoId()),
+                Optional.ofNullable(additionalData.agressoId()),
+                Optional.ofNullable(additionalData.agressoOrgNivaa()),
+                additionalData.agressoOrgenhetType()
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);

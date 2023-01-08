@@ -28,7 +28,6 @@ type SearchResultRaw =
       visningsnavn: string;
       orgTilknytning: {
         orgEnhet: {
-          agressoOrgenhetType: string;
           agressoId: string;
           orgNiv: string;
           navn: string;
@@ -86,7 +85,7 @@ export function SearchBar() {
       onChange={(selectedOption) =>
         selectedOption && navigate([selectedOption].flat()[0].url)
       }
-      placeholder="Søk etter ressurser"
+      placeholder="Søk etter ressurser eller organisasjonsenheter"
       styles={{
         // Removes default focus-border so it can be replaced with focus from DesignSystem
         control: (base) => ({
@@ -109,33 +108,52 @@ async function searchRessurs(inputValue: string) {
   if (inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT) {
     return [];
   }
+
   return await createOptions(inputValue);
 }
 
 async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
+  const searchQuery = `query search($searchString: String!, $orgEnhetFilter: OrgEnhetSearchFilter!, $ressursFilter: RessursSearchFilter) {
+        search(term: $searchString, orgEnhetFilter: $orgEnhetFilter, ressursFilter: $ressursFilter) {
+        __typename
+        ... on Ressurs {
+          navident
+          visningsnavn
+          orgTilknytning {
+            orgEnhet {
+              agressoId
+              orgNiv
+              navn
+            }
+          }
+        }
+        ... on OrgEnhet {
+          agressoId
+          navn
+          orgNiv
+        }
+      }
+    }`;
+
+  const orgEnhetFilter = {
+    orgnivSelection: "ORGNIV_ORGENHET",
+    gyldigTomSelection: "IKKE_PASSERT",
+  };
+
+  const ressursFilter = {
+    sektorSelection: "ALLE",
+    statusSelection: "ALLE",
+  };
+
   const fetchresult = await fetch("/nom-api/graphql", {
     body: JSON.stringify({
-      operationName: "searchRessurs",
-      query: `query searchRessurs {
-              searchRessurs(term:"${
-                searchString ?? ""
-              }", filter: {sektorSelection: ALLE, statusSelection: ALLE}){
-                __typename
-                ... on Ressurs {
-                  navident
-                  visningsnavn
-                      orgTilknytning {
-                          orgEnhet {
-                            agressoOrgenhetType
-                            agressoId
-                            orgNiv
-                            navn
-                          }
-                     }
-                  }
-                }
-            }`,
-      variables: {},
+      operationName: "search",
+      query: searchQuery,
+      variables: {
+        searchString: searchString,
+        orgEnhetFilter: orgEnhetFilter,
+        ressursFilter: ressursFilter,
+      },
     }),
     method: "POST",
     headers: {
@@ -143,7 +161,7 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
     },
   });
   const json = await fetchresult.json();
-  return json.data.searchRessurs;
+  return json.data.search;
 }
 
 const searchResultClassname1 = css`

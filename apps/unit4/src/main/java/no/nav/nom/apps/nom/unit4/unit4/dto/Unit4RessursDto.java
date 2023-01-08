@@ -15,7 +15,6 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOppret
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 public class Unit4RessursDto {
 
     @JsonIgnore
-    private final static LocalDateTime AGRESSO_TIMESTAMP_VOIDVALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
+    private final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
     @JsonIgnore
     private final static LocalDateTime AGRESSO_STARTTIME = LocalDate.now().atStartOfDay();
     @JsonIgnore
@@ -39,7 +38,7 @@ public class Unit4RessursDto {
     LocalDateTime birthDate;
     String companyId = "HR";
     LocalDateTime dateFrom;
-    LocalDateTime dateTo = AGRESSO_TIMESTAMP_VOIDVALUE;
+    LocalDateTime dateTo = AGRESSO_TIMESTAMP_NULL_VALUE;
     String languageCode = "NO";
     String name;
     NameInformation nameInformation;
@@ -91,7 +90,7 @@ public class Unit4RessursDto {
                 .relationId("M0")
                 .relatedValue("5224300")
                 .dateFrom(AGRESSO_STARTTIME)
-                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                 .build()
         );
     }
@@ -144,13 +143,13 @@ public class Unit4RessursDto {
                                 .relationId("M0")
                                 .relatedValue(additionalData.orgEnhet().get())
                                 .dateFrom(AGRESSO_STARTTIME)
-                                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                                 .build()
                         ).orElse(RelatedValue.builder()
                                 .relationId("M0")
                                 .relatedValue("5224300")
                                 .dateFrom(AGRESSO_STARTTIME)
-                                .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
+                                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                                 .build()));
     }
 
@@ -164,60 +163,90 @@ public class Unit4RessursDto {
 
     private List<RelatedValue> getRelatedValuesDefault(){
         return Stream.of(
+                // Default verdi. Endres i unit4 etter opprettelse ved behov.
+                RelatedValue.builder()
+                        .relationId("23")
+                        .relatedValue("000000")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Uspesifisert verdi som gjelder det fleste. Verdien Skal settes til dette for default, dermed endres det etter behov.
+                // Eksterne skal muligens ha annen default verdi når det blir aktuelt.
+                RelatedValue.builder()
+                        .relationId("20")
+                        .relatedValue("000000")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
+                RelatedValue.builder()
+                        .relationId("C8")
+                        .relatedValue("FLON")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Default verdi, 2 typer eksterne som kanskje skal ha annen default verdi.
+                RelatedValue.builder()
+                        .relationId("B1")
+                        .relatedValue("000000")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Default verdi for alle
+                RelatedValue.builder()
+                        .relationId("MQ")
+                        .relatedValue("BB")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Default verdi for alle faste og midlertidige og timelønnet.
+                // Kommunale Eksterne står det Nei på.
+                RelatedValue.builder()
+                        .relationId("Y7")
+                        .relatedValue("SPK")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build(),
+
+                // Flagg for å indikere at ressursen er opprettet av NOM
+                RelatedValue.builder()
+                        .relationId("NOM")
+                        .relatedValue("1")
+                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                        .build()
+
+            /*
+                SLETTET
                 RelatedValue.builder()
                         .relationId("C1")
                         .relatedValue("522400")
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("23")
-                        .relatedValue("L03034")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("20")
-                        .relatedValue("000000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("C8")
-                        .relatedValue("TLON")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
+                        .build(),*/
+
+            // SLETTET
+                /*RelatedValue.builder()
                         .relationId("AL")
                         .relatedValue("060501110000")
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
+                        .build(),*/
+
+            // SLETTET
+                /*RelatedValue.builder()
                         .relationId("ZA")
                         .relatedValue("060501180000")
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("B1")
-                        .relatedValue("000000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("MQ")
-                        .relatedValue("BB")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),
-                RelatedValue.builder()
-                        .relationId("Y7")
-                        .relatedValue("SPK_A")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build()
+                        .build(),*/
+
+
         ).collect(Collectors.toList());
     }
 }

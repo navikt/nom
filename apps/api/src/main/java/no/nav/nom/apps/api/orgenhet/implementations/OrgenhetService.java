@@ -1,12 +1,11 @@
 package no.nav.nom.apps.api.orgenhet.implementations;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.hendelse.contract.HendelseDataType;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
-import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
-import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import org.springframework.stereotype.Service;
 
@@ -25,99 +24,78 @@ import static java.util.Comparator.comparing;
 
 @Service
 public class OrgenhetService implements IOrgenhetService {
-    private final OrgenhetHendelseRepository orgenhetHendelseRepository;
-    private final IHendelseService hendelseService;
+    private final OrgenhetServiceOld orgenhetServiceOld;
+    private final OrgenhetServiceNewFromEvtsrc orgenhetServiceNewFromEvtsrc;
 
-    public OrgenhetService(OrgenhetHendelseRepository orgenhetHendelseRepository, IHendelseService hendelseService) {
-        this.orgenhetHendelseRepository = orgenhetHendelseRepository;
-        this.hendelseService = hendelseService;
+    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing";
+    private final Unleash unleash;
+
+    public OrgenhetService(OrgenhetServiceOld orgenhetServiceOld, OrgenhetServiceNewFromEvtsrc orgenhetServiceNewFromEvtsrc, Unleash unleash) {
+        this.orgenhetServiceOld = orgenhetServiceOld;
+        this.orgenhetServiceNewFromEvtsrc = orgenhetServiceNewFromEvtsrc;
+        this.unleash = unleash;
     }
-
 
     @Override
     public Optional<IOrgenhet> getByFid(UUID fid) {
-        return convert(orgenhetHendelseRepository.findAllByFunksjonellId(fid).stream().map(hendelseService::convert).toList());
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getByFid(fid) :
+            orgenhetServiceOld.getByFid(fid);
     }
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
-        if (name != null) {
-            return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name)
-                                             .stream()).max(comparing(IOrgenhet::getGyldigFom));
-        }
-        return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name) :
+            orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(agressoId, orgNiv, name);
     }
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findEnhetByAgressoIdNiva(agressoId, orgNiv).stream()).max(comparing(IOrgenhet::getGyldigFom));
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv) :
+            orgenhetServiceOld.getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
     @Override
     public List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findByAgressoIdIn(agressoIds).stream()).toList();
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.findEnheterByAgressoIdIn(agressoIds) :
+            orgenhetServiceOld.findEnheterByAgressoIdIn(agressoIds);
     }
 
     @Override
     public List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet) {
-        return toIOrgEnhetStream(
-            orgenhetHendelseRepository.findByAgressoIdConcatOrgnivIn(agressoIdConcatOrgnivSet.stream()
-                .map(it -> it.orgNiv() + "--" + it.agressoId())
-                .collect(Collectors.toSet())
-            )
-        ).toList();
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.findEnheterByAgressoIdConcatOrgnivIn(agressoIdConcatOrgnivSet) :
+            orgenhetServiceOld.findEnheterByAgressoIdConcatOrgnivIn(agressoIdConcatOrgnivSet);
     }
 
     @Override
     public Collection<IOrgenhet> getAllEnheter() {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findAllByDataType(HendelseDataType.ORGENHET_V1.getDataType()).stream()).toList();
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getAllEnheter() :
+            orgenhetServiceOld.getAllEnheter();
     }
 
     @Override
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(
-                EventBasedOrgenhet.AGRESSO_ID_FIELD,
-                agressoId,
-                HendelseDataType.ORGENHET_V1.getDataType()
-        ).stream()).toList();
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.matchByAgressoId(agressoId) :
+            orgenhetServiceOld.matchByAgressoId(agressoId);
     }
 
     @Override
     public List<IOrgenhet> matchByNavn(String navn) {
-        return toIOrgEnhetStream(orgenhetHendelseRepository.findHendelserByJsonMatch(
-                EventBasedOrgenhet.NAVN_FIELD,
-                navn,
-                HendelseDataType.ORGENHET_V1.getDataType()
-        ).stream()).toList();
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.matchByNavn(navn) :
+            orgenhetServiceOld.matchByNavn(navn);
     }
 
     @Override
     public Map<String, IOrgenhet> getByFidBulk(List<String> fidList) {
-        var tmp = orgenhetHendelseRepository.findByFidIn(new HashSet<>(fidList));
-
-        var out = new HashMap<String, IOrgenhet>(tmp.size());
-        var orgenhetStream = toIOrgEnhetStream(tmp.stream());
-        orgenhetStream.forEach(oe -> {
-            out.put(oe.getFid().toString(), oe);
-        });
-        return out;
-    }
-
-    private Stream<IOrgenhet> toIOrgEnhetStream(Collection<GenericStorageElement> storageElements) {
-        return toIOrgEnhetStream(storageElements.stream());
-    }
-
-    private Stream<IOrgenhet> toIOrgEnhetStream(Stream<GenericStorageElement> elementStream) {
-        return elementStream.map(hendelseService::convert)
-                .collect(Collectors.groupingBy(IHendelse::getFid))
-                .values()
-                .stream()
-                .map(this::convert)
-                .filter(Optional::isPresent)
-                .map(Optional::get);
-    }
-
-    private Optional<IOrgenhet> convert(List<IHendelse> hendelser) {
-        return Optional.ofNullable(hendelser).map(EventBasedOrgenhet::new);
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getByFidBulk(fidList) :
+            orgenhetServiceOld.getByFidBulk(fidList);
     }
 }

@@ -30,8 +30,8 @@ public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
     public record OrgEnhetKorrigertAdditionalAgressoData(
             String agressoId,
             String agressoNavn,
-            String AgressoOrgNivaa,
-            String AgressoOrgenhetType,
+            String agressoOrgNivaa,
+            Optional<String> agressoOrgenhetType,
             String uniqueAgressoId
     ) implements OrgEnhetEvent.Data {
     }

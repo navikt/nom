@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
-import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class OrgEnhetIdGeneratorTest {
     private OrgEnhetIdGenerator orgEnhetIdGenerator;
 
     @MockBean
-    OrgEnhetStateService orgEnhetStateService;
+    OrgEnhetStateRepository orgEnhetStateService;
 
     String idRegex = "^(?:(?![oil])[a-z]){2}\\d{3}[a-z^oil]$"; // 2 lowercase letters except 'iol' + 4 digits + 1 lowercase letters except 'iol'
 
@@ -34,7 +34,7 @@ public class OrgEnhetIdGeneratorTest {
     }
 
     private OrgEnhetState newOrgEnhet(String id) {
-        return new OrgEnhetState("fid", id, "navn", LocalDate.now(), Optional.empty(),Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty() );
+        return new OrgEnhetState("fid", id, "navn", LocalDate.now(), Optional.empty(),Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty() );
     }
 
 }

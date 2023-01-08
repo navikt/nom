@@ -15,7 +15,7 @@ import no.nav.nom.apps.api.hendelse.contract.HendelseMetadata;
 import no.nav.nom.apps.api.hendelse.contract.HendelseMetadataSerialize;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetStateService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -62,7 +62,7 @@ public class DvhDataLoader {
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
-    private final OrgEnhetStateService orgEnhetStateService;
+    private final OrgEnhetStateRepository orgEnhetStateService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;

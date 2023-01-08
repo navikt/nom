@@ -1,9 +1,10 @@
 package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -29,6 +31,8 @@ public class LuceneService {
     private final WrappedLucene wrappedLucene;
 
     private final IRessursService ressursService;
+
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
 
     private List<String> invalidatedNavidentList = new ArrayList<>();
     private List<String> invalidatedOrgEnhetList = new ArrayList<>();
@@ -40,7 +44,8 @@ public class LuceneService {
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
-    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService) {
+    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService, OrgEnhetStateRepository orgEnhetStateRepository) {
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -55,7 +60,7 @@ public class LuceneService {
     @Scheduled(initialDelayString = "PT10S", fixedRateString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
-        var orgenheterCountToIndex = 0;
+        var orgenheterCountToIndex = this.invalidatedOrgEnhetList.size();
         var sumCount = ressurserCountToIndex + orgenheterCountToIndex;
         if (sumCount == 0) {
             return;
@@ -64,21 +69,45 @@ public class LuceneService {
 
         // ressurser
         {
-            var invalidatedNavIdentList = grabAndResetNavidentInvalidationList();
-
-            var resMap = ressursService.findByNavidentBulk(invalidatedNavIdentList);
-            var luceneRessursStream = resMap.values().stream()
-                .map(ressurs -> {
-                        var visningsNavn = getVisningsNavn(ressurs);
-                        var activeRessurs = ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true);
-                        return new LuceneRessurs(ressurs.navident(), visningsNavn, "tlf-nr", "epost", activeRessurs, ressurs.sektor().toString());
-                    }
-                );
+            final var luceneRessursStream = grabAndResetNavidentInvalidationList().stream()
+                    //.map(UUID::fromString)
+                    .map(ressursService::findByNavident)
+                    .map(Optional::get)
+                    .map(ressurs -> new LuceneRessurs(ressurs.navident(),
+                            ressurs.visningsnavn().getFormattedVisningsnavn(),
+                            "tlf-nr",
+                            "epost",
+                            ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
+                            ressurs.sektor().toString()
+                            )
+                    );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
 
             invalidatedNavidentList.clear(); // or just leave for GC?
         }
+
+        {
+
+            final var luceneOrgEnhetStream = grabAndResetOrgenhetInvalidationList().stream()
+                    .map(orgEnhetStateRepository::findById)
+                    .map(Optional::get)
+                    .map(orgenhet -> new LuceneOrgEnhet(
+                            orgenhet.id(),
+                            orgenhet.navn(),
+                            orgenhet.orgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(null),
+                            orgenhet.agressoOrgNivaa().orElse(null),
+                            orgenhet.gyldigTom()
+                    ));
+
+
+
+            wrappedLucene.upsertEntities(luceneOrgEnhetStream, LuceneOrgEnhet.class);
+
+            invalidatedOrgEnhetList.clear(); // or just leave for GC?
+        }
+
+
 
         // orgenheter TODO: Set this active
             //            var invalidatedOrgEnhetList = grabAndResetOrgenhetInvalidationList();
@@ -95,13 +124,7 @@ public class LuceneService {
 
     }
 
-    private String getVisningsNavn(RessursState ressurs) {
-        return ressurs.visningsnavn().fornavn()
-            + ressurs.visningsnavn().mellomnavn().map(mellomnavn -> " " + mellomnavn).orElse("")
-            + (" " + ressurs.visningsnavn().etternavn());
-    }
-
-    @Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
+    //@Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
     public void refreshOrgenhet() {
         log.info("Lucene indexing started for orgenhet");
         wrappedLucene.upsertEntities(
@@ -122,7 +145,9 @@ public class LuceneService {
         this.invalidatedNavidentList.add(navident);
     }
 
-    public synchronized void invalidateOrgenhet(String orgenhetId) { invalidatedOrgEnhetList.add(orgenhetId); }
+    public synchronized void invalidateOrgenhet(String orgenhetId) {
+        invalidatedOrgEnhetList.add(orgenhetId);
+    }
 
     private synchronized List<String> grabAndResetNavidentInvalidationList() {
         var out = this.invalidatedNavidentList;

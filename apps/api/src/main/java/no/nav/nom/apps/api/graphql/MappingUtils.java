@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.graphql;
 
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 
 import static java.util.Collections.singletonList;
@@ -18,11 +20,23 @@ public class MappingUtils {
                 .ressurstype(sektor)
                 .sektor(sektor)
                 .sluttdato(ressursState.sluttdato().orElse(null))
-                .fornavn(ressursState.visningsnavn()
-                                 .mellomnavn()
-                                 .map(m -> ressursState.visningsnavn().fornavn() + " " + m)
-                                 .orElse(ressursState.visningsnavn().fornavn()))
+                .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
                 .etternavn(ressursState.visningsnavn().etternavn())
+                .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())
+                .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())
+                .build();
+    }
+
+    public static OrgEnhet toOrgEnhet(OrgEnhetState orgEnhetState){
+        return OrgEnhet.builder()
+                .id(orgEnhetState.id())
+                .agressoId(orgEnhetState.agressoId().orElse(null))
+                .orgNiv(orgEnhetState.agressoOrgNivaa().orElse(null))
+                .navn(orgEnhetState.navn())
+                .agressoOrgenhetType(orgEnhetState.agressoOrgenhetType().orElse(null))
+                .gyldigFom(orgEnhetState.gyldigFom())
+                .gyldigTom(orgEnhetState.gyldigTom().orElse(null))
+                .orgEnhetsKategori(orgEnhetState.orgEnhetsKategori().orElse(null))
                 .build();
     }
 

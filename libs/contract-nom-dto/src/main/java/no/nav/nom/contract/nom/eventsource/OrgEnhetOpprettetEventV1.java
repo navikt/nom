@@ -29,8 +29,8 @@ public class OrgEnhetOpprettetEventV1 extends OrgEnhetEvent {
     public record OrgEnhetOpprettetAdditionalAgressoData(
             String agressoId,
             String agressoNavn,
-            String AgressoOrgNivaa,
-            String AgressoOrgenhetType,
+            String agressoOrgNivaa,
+            Optional<String> agressoOrgenhetType,
             String uniqueAgressoId
     ) implements OrgEnhetEvent.Data {
     }
