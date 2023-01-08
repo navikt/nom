@@ -23,9 +23,10 @@ spec:
     - team: org
       application: skjermede-personer
       access: read
-    - team: oppgavehandtering
-      application: oppgave-navressurs-lytter
+    - team: org
+      application: aivia-org
       access: read
     - team: org
-      application: aivia
+      application: org-kafka-manager
       access: read
+
