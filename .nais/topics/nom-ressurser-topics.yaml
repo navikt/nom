@@ -24,7 +24,7 @@ spec:
       application: skjermede-personer
       access: read
     - team: org
-      application: aivia-org
+      application: org-aivia
       access: read
     - team: org
       application: org-kafka-manager
