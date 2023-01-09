@@ -25,7 +25,7 @@ spec:
       access: read
     - team: org
       application: org-aivia-1
-      access: read
+      access: readwrite
     - team: org
       application: org-kafka-manager
       access: read
