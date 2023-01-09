@@ -164,15 +164,19 @@ public class Unit4RessursDto {
     private List<RelatedValue> getRelatedValuesDefault(){
         return Stream.of(
                 // Default verdi. Endres i unit4 etter opprettelse ved behov.
+                // BEGREP - FELLES
+                // Beskrivelse - Felles
                 RelatedValue.builder()
                         .relationId("23")
-                        .relatedValue("000000")
+                        .relatedValue("L03034") // Skal være 000000, men denne verdien finnes ikke enda.
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Uspesifisert verdi som gjelder det fleste. Verdien Skal settes til dette for default, dermed endres det etter behov.
                 // Eksterne skal muligens ha annen default verdi når det blir aktuelt.
+                // BEGREP - PRODUKT
+                // Beskrivelse - Produkt
                 RelatedValue.builder()
                         .relationId("20")
                         .relatedValue("000000")
@@ -181,6 +185,8 @@ public class Unit4RessursDto {
                         .build(),
 
                 // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
+                // BEGREP - GRUPPE
+                // Beskrivelse - Gruppe
                 RelatedValue.builder()
                         .relationId("C8")
                         .relatedValue("FLON")
@@ -189,6 +195,8 @@ public class Unit4RessursDto {
                         .build(),
 
                 // Default verdi, 2 typer eksterne som kanskje skal ha annen default verdi.
+                // BEGREP - OPPGAVE
+                // Beskrivelse - Oppgave
                 RelatedValue.builder()
                         .relationId("B1")
                         .relatedValue("000000")
@@ -197,6 +205,8 @@ public class Unit4RessursDto {
                         .build(),
 
                 // Default verdi for alle
+                // BEGREP - AGASTAT
+                // Beskrivelse - Arbeidsgiveravgift
                 RelatedValue.builder()
                         .relationId("MQ")
                         .relatedValue("BB")
@@ -206,6 +216,8 @@ public class Unit4RessursDto {
 
                 // Default verdi for alle faste og midlertidige og timelønnet.
                 // Kommunale Eksterne står det Nei på.
+                // BEGREP - PENSJON
+                // Beskrivelse - Pensjonsplan - nivå
                 RelatedValue.builder()
                         .relationId("Y7")
                         .relatedValue("SPK")
@@ -214,6 +226,8 @@ public class Unit4RessursDto {
                         .build(),
 
                 // Flagg for å indikere at ressursen er opprettet av NOM
+                // BEGREP - AUTO_GEN_NOM
+                // Beskrivelse - Generart av NOM
                 RelatedValue.builder()
                         .relationId("NOM")
                         .relatedValue("1")
