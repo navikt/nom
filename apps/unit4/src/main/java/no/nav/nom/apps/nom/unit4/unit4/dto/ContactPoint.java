@@ -8,14 +8,5 @@ import lombok.Value;
 @Builder
 @RequiredArgsConstructor
 public class ContactPoint{
-    Address address;
     String contactPointType;
-
-    @Value
-    @Builder
-    @RequiredArgsConstructor
-    public static class Address{
-        String place = "MÅ ENDRES";
-        String postcode = "00000";
-    }
 }

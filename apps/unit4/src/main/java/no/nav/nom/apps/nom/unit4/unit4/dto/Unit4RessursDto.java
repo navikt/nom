@@ -155,7 +155,6 @@ public class Unit4RessursDto {
 
     private List<ContactPoint> getContactPointsDefault(){
         val contactPontOne = ContactPoint.builder()
-                .address(new ContactPoint.Address())
                 .contactPointType("1")
                 .build();
         return List.of(contactPontOne);
@@ -164,102 +163,62 @@ public class Unit4RessursDto {
     private List<RelatedValue> getRelatedValuesDefault(){
         return Stream.of(
                 // Default verdi. Endres i unit4 etter opprettelse ved behov.
-                // BEGREP - FELLES
-                // Beskrivelse - Felles
                 RelatedValue.builder()
-                        .relationId("23")
-                        .relatedValue("L03034") // Skal være 000000, men denne verdien finnes ikke enda.
+                        .relationId("23")   // 23: Begrep=FELLES, Beskrivelse=Felles
+                        .relatedValue("L03034") // Skal være 000000 USPESIFISERT, men denne verdien finnes ikke enda.L03034 står for "Oslo, Fyrstikkalléen 1"
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Uspesifisert verdi som gjelder det fleste. Verdien Skal settes til dette for default, dermed endres det etter behov.
                 // Eksterne skal muligens ha annen default verdi når det blir aktuelt.
-                // BEGREP - PRODUKT
-                // Beskrivelse - Produkt
                 RelatedValue.builder()
-                        .relationId("20")
-                        .relatedValue("000000")
+                        .relationId("20")   // 20: Begrep=PRODUKT, Beskrivelse=Produkt
+                        .relatedValue("000000") // 000000: Uspesifisert
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
-                // BEGREP - GRUPPE
-                // Beskrivelse - Gruppe
                 RelatedValue.builder()
-                        .relationId("C8")
-                        .relatedValue("FLON")
+                        .relationId("C8")   // C8: Begrep=GRUPPE, Beskrivelse=Gruppe
+                        .relatedValue("FLON") // FLON: 5000 - Oppg. Faste stillinger, ordinær
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Default verdi, 2 typer eksterne som kanskje skal ha annen default verdi.
-                // BEGREP - OPPGAVE
-                // Beskrivelse - Oppgave
                 RelatedValue.builder()
-                        .relationId("B1")
-                        .relatedValue("000000")
+                        .relationId("B1")   // B1: Begrep=OPPGAVE, Beskrivelse=Oppgave
+                        .relatedValue("000000") // 000000: Uspesifisert
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Default verdi for alle
-                // BEGREP - AGASTAT
-                // Beskrivelse - Arbeidsgiveravgift
                 RelatedValue.builder()
-                        .relationId("MQ")
-                        .relatedValue("BB")
+                        .relationId("MQ")   // MQ: Begrep=AGASTAT, Beskrivelse=Arbeidsgiveravgift
+                        .relatedValue("BB") // BB: Statsforvaltning og helseforetak
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Default verdi for alle faste og midlertidige og timelønnet.
                 // Kommunale Eksterne står det Nei på.
-                // BEGREP - PENSJON
-                // Beskrivelse - Pensjonsplan - nivå
                 RelatedValue.builder()
-                        .relationId("Y7")
-                        .relatedValue("SPK")
+                        .relationId("Y7") // Y7: Begrep=PENSJON, Beskrivelse=Pensjonsplan - nivå
+                        .relatedValue("SPK") // SPK: Pensjonstrekk SPK 2%
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
                 // Flagg for å indikere at ressursen er opprettet av NOM
-                // BEGREP - AUTO_GEN_NOM
-                // Beskrivelse - Generart av NOM
                 RelatedValue.builder()
-                        .relationId("NOM")
-                        .relatedValue("1")
+                        .relationId("NOM")  // NOM: Begrep=AUTO_GEN_NOM, Beskrivelse=Generert av NOM
+                        .relatedValue("1")  // 1: Generert av NOM
                         .dateFrom(AGRESSO_STARTTIME)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
-
-            /*
-                SLETTET
-                RelatedValue.builder()
-                        .relationId("C1")
-                        .relatedValue("522400")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
-            // SLETTET
-                /*RelatedValue.builder()
-                        .relationId("AL")
-                        .relatedValue("060501110000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
-            // SLETTET
-                /*RelatedValue.builder()
-                        .relationId("ZA")
-                        .relatedValue("060501180000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
 
         ).collect(Collectors.toList());
     }
