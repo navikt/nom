@@ -155,7 +155,6 @@ public class Unit4RessursDto {
 
     private List<ContactPoint> getContactPointsDefault(){
         val contactPontOne = ContactPoint.builder()
-                .address(new ContactPoint.Address())
                 .contactPointType("1")
                 .build();
         return List.of(contactPontOne);
