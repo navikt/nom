@@ -1,11 +1,13 @@
 package no.nav.nom.apps.api.orgenhet.contract;
 
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
+
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface IOrgenhet {
-    UUID getFid();
+    String getFid();
 
     String getAgressoId();
 

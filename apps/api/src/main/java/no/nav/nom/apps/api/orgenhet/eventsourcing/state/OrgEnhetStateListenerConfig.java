@@ -15,7 +15,7 @@ import java.time.Duration;
 import java.util.Map;
 
 @Configuration
-public class orgEnhetStateListenerConfig {
+public class OrgEnhetStateListenerConfig {
     @Bean
     ConsumerFactory<String, OrgEnhetState> orgEnhetStateConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         final var jsonDeserializer = new JsonDeserializer<>(OrgEnhetState.class, objectMapper);

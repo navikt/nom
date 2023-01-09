@@ -47,7 +47,6 @@ public class OrgEnhetResolver {
         final var orgenhetkategori = search.resolveOrgEnhetsKategori()
                 .stream()
                 .map(OrgEnhetsKategori::valueOf)
-                .map(OrgEnhetResolver::from)
                 .collect(Collectors.toSet());
         final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
                 .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getOrgEnhetsKategori().orElse(null)))
@@ -76,23 +75,8 @@ public class OrgEnhetResolver {
                 .agressoOrgenhetType(orgenhet.getAgressoOrgenhetType())
                 .gyldigFom(orgenhet.getGyldigFom())
                 .gyldigTom(orgenhet.getGyldigTom().orElse(null))
-                .orgEnhetsKategori(orgenhet.getOrgEnhetsKategori().map(OrgEnhetResolver::from).orElse(null))
+                .orgEnhetsKategori(orgenhet.getOrgEnhetsKategori().orElse(null))
                 .build();
     }
 
-    private static OrgEnhetsKategori from(no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori orgEnhetsKategori) {
-        return switch (orgEnhetsKategori) {
-            case ARBEIDSOMRAADE -> OrgEnhetsKategori.ARBEIDSOMRAADE;
-            case DRIFTSENHET -> OrgEnhetsKategori.DRIFTSENHET;
-            case LINJEENHET -> OrgEnhetsKategori.LINJEENHET;
-        };
-    }
-
-    private static no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori from(OrgEnhetsKategori orgEnhetsKategori) {
-        return switch (orgEnhetsKategori) {
-            case ARBEIDSOMRAADE -> no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori.ARBEIDSOMRAADE;
-            case DRIFTSENHET -> no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori.DRIFTSENHET;
-            case LINJEENHET -> no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori.LINJEENHET;
-        };
-    }
 }

@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
-import java.util.UUID;
 
 import static java.util.function.Predicate.not;
 
@@ -56,7 +55,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     @Override
-    public UUID getFid() {
+    public String getFid() {
         return null;
     }
 
