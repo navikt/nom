@@ -220,32 +220,6 @@ public class Unit4RessursDto {
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
 
-            /*
-                SLETTET
-                RelatedValue.builder()
-                        .relationId("C1")
-                        .relatedValue("522400")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
-            // SLETTET
-                /*RelatedValue.builder()
-                        .relationId("AL")
-                        .relatedValue("060501110000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
-            // SLETTET
-                /*RelatedValue.builder()
-                        .relationId("ZA")
-                        .relatedValue("060501180000")
-                        .dateFrom(AGRESSO_STARTTIME)
-                        .dateTo(AGRESSO_TIMESTAMP_VOIDVALUE)
-                        .build(),*/
-
-
         ).collect(Collectors.toList());
     }
 }
