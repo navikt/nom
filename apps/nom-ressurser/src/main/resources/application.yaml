@@ -4,7 +4,7 @@ app:
     password: ${app.password}
     topic:
       ressurs:
-        name: aapen-nom-ressurs-v1
+        name: org.nom-ressurser
   scheduledTasks:
     dvhConsumer: 0 0 5 ? * *  # Every day 5AM
     repositoryMetrics: 0 59 * ? * *  # Every hour

@@ -14,7 +14,7 @@ public class KafkaScheduler {
     private final KafkaProducer kafkaProducer;
     private final LeaderElection leaderElection;
 
-    //@Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000)
     public void produce(){
         if(leaderElection.isLeader()) {
             kafkaProducer.send(ressursRepository.findAllByProduced(false));
