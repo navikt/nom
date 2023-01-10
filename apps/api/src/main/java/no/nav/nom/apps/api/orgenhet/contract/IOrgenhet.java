@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface IOrgenhet {
     String getFid();
 
+    String getId();
+
     String getAgressoId();
 
     String getAgressoOrgenhetType();

@@ -143,7 +143,8 @@ app:
           scopes: ["MUTATE_RESSURS"]
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i dev)
-#  dvh-load:
+  dvh-load:
+    cron-ressurs-og-orgenhet: "0 0 * * * *"
 #    cron-ressurs-og-orgenhet: "0 */5 * * * *"
 
 NIK_BASEURL: "https://nav-ident.dev.intern.nav.no"

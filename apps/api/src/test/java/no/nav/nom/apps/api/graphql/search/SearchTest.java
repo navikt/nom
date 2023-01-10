@@ -50,6 +50,8 @@ public class SearchTest extends GraphQLTestBase {
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
+        luceneService.addInvalidatedEntitiesToIndex();
+
         final var response = postForResource("search/scenario1.graphql");
         final var searchResults = response.path("search").entityList(Ressurs.class).get();
 

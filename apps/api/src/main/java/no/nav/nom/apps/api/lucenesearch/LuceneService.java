@@ -32,8 +32,6 @@ public class LuceneService {
 
     private final IRessursService ressursService;
 
-    private final OrgEnhetStateRepository orgEnhetStateRepository;
-
     private List<String> invalidatedNavidentList = new ArrayList<>();
     private List<String> invalidatedOrgEnhetList = new ArrayList<>();
 
@@ -44,8 +42,7 @@ public class LuceneService {
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
-    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService, OrgEnhetStateRepository orgEnhetStateRepository) {
-        this.orgEnhetStateRepository = orgEnhetStateRepository;
+    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService) {
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -70,7 +67,6 @@ public class LuceneService {
         // ressurser
         {
             final var luceneRessursStream = grabAndResetNavidentInvalidationList().stream()
-                    //.map(UUID::fromString)
                     .map(ressursService::findByNavident)
                     .map(Optional::get)
                     .map(ressurs -> new LuceneRessurs(ressurs.navident(),
@@ -83,41 +79,24 @@ public class LuceneService {
                     );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
-
-            invalidatedNavidentList.clear(); // or just leave for GC?
         }
 
         {
-
             final var luceneOrgEnhetStream = grabAndResetOrgenhetInvalidationList().stream()
-                    .map(orgEnhetStateRepository::findById)
+                    .map(orgenhetService::getById)
                     .map(Optional::get)
                     .map(orgenhet -> new LuceneOrgEnhet(
-                            orgenhet.id(),
-                            orgenhet.navn(),
-                            orgenhet.orgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(null),
-                            orgenhet.agressoOrgNivaa().orElse(null),
-                            orgenhet.gyldigTom()
+                            orgenhet.getId(),
+                            orgenhet.getNavn(),
+                            orgenhet.getOrgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(null),
+                            orgenhet.getOrgNiv(),
+                            orgenhet.getGyldigTom()
                     ));
 
 
 
             wrappedLucene.upsertEntities(luceneOrgEnhetStream, LuceneOrgEnhet.class);
-
-            invalidatedOrgEnhetList.clear(); // or just leave for GC?
         }
-
-
-
-        // orgenheter TODO: Set this active
-            //            var invalidatedOrgEnhetList = grabAndResetOrgenhetInvalidationList();
-            //            var oeMap = orgenhetService.findByIdBulk(invalidatedOrgEnhetList);
-            //            var luceneOeStream = oeMap.values().stream().map(oe -> new LuceneOrgEnhet(oe.getId(), oe.getNavn().get(), oe.getEnhetsType()));
-            //
-            //            searchRepo.upsertEntities(luceneOeStream, LuceneOrgEnhet.class);
-            //
-            //            invalidatedOrgEnhetList.clear();
-//        }
 
         log.info("Lucene indexing completed.");
         this.initialLoadComplete.set(true);

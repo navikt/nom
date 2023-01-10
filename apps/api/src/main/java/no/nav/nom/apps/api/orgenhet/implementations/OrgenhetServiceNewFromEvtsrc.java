@@ -47,7 +47,7 @@ public class OrgenhetServiceNewFromEvtsrc implements IOrgenhetService {
 
     @Override
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return map(orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "--" + orgNiv)
+        return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
             .stream()
             .max(comparing(OrgEnhetState::gyldigFom))
         );
@@ -61,7 +61,7 @@ public class OrgenhetServiceNewFromEvtsrc implements IOrgenhetService {
     @Override
     public List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet) {
         var agressoIdAndNivs =  agressoIdConcatOrgnivSet.stream()
-            .map(it -> it.orgNiv() + "--" + it.agressoId())
+            .map(it -> it.agressoId() + "--" + it.orgNiv())
             .collect(Collectors.toSet());
         return orgEnhetStateRepository.findByAgressoIdAndNivIn(agressoIdAndNivs).stream().map(this::map).toList();
     }

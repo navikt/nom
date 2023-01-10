@@ -81,9 +81,9 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
 
             assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -175,9 +175,9 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
 
             assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -269,9 +269,9 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
 
             assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -382,7 +382,7 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
 
             assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -455,9 +455,9 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202112")));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 2, "202202", Optional.of("202204")));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 3, "202206", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202112")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202202", Optional.of("202204")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 3, "202206", Optional.empty()));
 
             assertEquals(3, orgenhetService.getAllEnheter().size());
 
@@ -511,7 +511,7 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
 
             assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -566,7 +566,7 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202201")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202201")));
 
             assertEquals(1, orgenhetService.getAllEnheter().size());
 
@@ -633,8 +633,8 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202012")));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 2, "202106", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202012")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202106", Optional.empty()));
 
             var allEnheter = orgenhetService.getAllEnheter();
             assertEquals(2, allEnheter.size());
@@ -696,7 +696,7 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202102")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202102")));
 
             allEnheter = orgenhetService.getAllEnheter();
             assertEquals(2, allEnheter.size());
@@ -768,7 +768,7 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
 
             var allEnheter = orgenhetService.getAllEnheter();
             assertEquals(1, allEnheter.size());
@@ -840,8 +840,8 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202101", Optional.empty()));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet2, 2, "202008", Optional.of("202011")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202101", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202008", Optional.of("202011")));
 
             allEnheter = orgenhetService.getAllEnheter();
             assertEquals(2, allEnheter.size());
@@ -914,8 +914,8 @@ public class OrgEnhetTest extends TestBase {
             // Since stream infrastructure is not up, the streams pipeline has not created state.
             // Lets do it manually, to test getmethods below.
             // This testing should be split up
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202011")));
-            orgEnhetStateRepository.putEventAggregate(dvhMockToState(mockedEnhet1, 2, "202101", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202011")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202101", Optional.empty()));
 
 
             var allEnheter = orgenhetService.getAllEnheter();
@@ -984,15 +984,5 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
     }
 
-    private OrgEnhetState dvhMockToState(DvhOrgEnhetMock dvhMock, int nr,String from, Optional<String> to) {
-        LocalDate fromDate = LocalDate.of(Integer.parseInt(from.substring(0,4)), Integer.parseInt(from.substring(4,6)), 01);
-        Optional<LocalDate> toDate = Optional.empty();
-        if (to.isPresent() ) toDate = Optional.of(LocalDate.of(Integer.parseInt(to.get().substring(0,4)), Integer.parseInt(to.get().substring(4,6)), 01).plusMonths(1).minusDays(1));
-        String agressoId = dvhMock.getORGENHET_KODE();
-        String agressoNavn = dvhMock.getORGENHET_NAVN();
-        String agressoNiv = dvhMock.getORGNODE_NIV();
-        String agressoType = dvhMock.getENHETTYPE_NAVN();
-        String uniqueAgressoId = agressoId + "-" + agressoNavn + "-" + agressoNiv;
-        return new OrgEnhetState("FID_" + nr, "ID_" + nr, agressoNavn, fromDate, toDate, Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(uniqueAgressoId), Optional.of(agressoId), Optional.of(agressoNiv), Optional.of(agressoType));
-    }
+
 }

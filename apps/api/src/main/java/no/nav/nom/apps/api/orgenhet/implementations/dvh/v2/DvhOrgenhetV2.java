@@ -58,6 +58,10 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     public String getFid() {
         return null;
     }
+    @Override
+    public String getId() {
+        return null;
+    }
 
     @Override
     public LocalDate getGyldigFom() {

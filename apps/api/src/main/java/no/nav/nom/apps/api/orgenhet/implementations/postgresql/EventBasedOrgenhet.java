@@ -47,6 +47,11 @@ public class EventBasedOrgenhet implements IOrgenhet {
     }
 
     @Override
+    public String getId() {
+        return getFid();
+    }
+
+    @Override
     public String getAgressoId() {
         return getLast(AGRESSO_ID_FIELD).orElseThrow();
     }

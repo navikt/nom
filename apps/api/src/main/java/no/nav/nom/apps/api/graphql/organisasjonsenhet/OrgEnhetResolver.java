@@ -68,7 +68,7 @@ public class OrgEnhetResolver {
 
     public static OrgEnhet convertToOrgEnhet(IOrgenhet orgenhet) {
         return OrgEnhet.builder()
-                .id(orgenhet.getFid().toString())
+                .id(orgenhet.getId())
                 .agressoId(orgenhet.getAgressoId())
                 .orgNiv(orgenhet.getOrgNiv())
                 .navn(orgenhet.getNavn())

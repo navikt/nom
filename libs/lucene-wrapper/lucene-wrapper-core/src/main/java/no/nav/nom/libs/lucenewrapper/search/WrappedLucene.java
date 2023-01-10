@@ -137,9 +137,9 @@ public class WrappedLucene {
             }
 
         } catch (IOException ignored) {
+            logger.warn("Possible no indexes initiated yet", ignored);
             return List.of();
         } catch (ParseException e) {
-//            throw new RuntimeException(e);
             logger.warn(e.getMessage());
             return out;
         }

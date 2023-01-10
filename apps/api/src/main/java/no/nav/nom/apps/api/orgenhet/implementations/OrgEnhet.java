@@ -21,6 +21,9 @@ public class OrgEnhet implements IOrgenhet {
     }
 
     @Override
+    public String getId() { return orgEnhetState.id(); }
+
+    @Override
     public String getAgressoId() { return orgEnhetState.agressoId().orElse(null); }
 
     @Override
