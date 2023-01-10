@@ -5,7 +5,6 @@ import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -110,11 +109,6 @@ public class SearchResolver {
                     .map(Optional::get)
                     .map(MappingUtils::toOrgEnhet)
                     .toList();
-            /*Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
-
-            MappingUtils.toOrgEnhet(orgEnhetStateRepository.findById(result.id()).orElseThrow());
-            var orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-            return orgenheter.toList();*/
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
