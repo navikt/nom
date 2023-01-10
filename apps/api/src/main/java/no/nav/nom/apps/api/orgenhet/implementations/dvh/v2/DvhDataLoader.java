@@ -54,7 +54,7 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhDataLoader {
 
-    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing";
+    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing.load";
     private final Unleash unleash;
 
     private final TokenRepository tokenRepository;
