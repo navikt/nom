@@ -43,18 +43,20 @@ spring:
     table: schema_version
 
   kafka:
-    client-id: ${app.kafka.username}
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    bootstrap-servers: ${KAFKA_BROKERS}
     properties:
-      security.protocol: SASL_SSL
-      sasl.mechanism: PLAIN
-      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="${app.kafka.username}" password="${app.kafka.password}";
-      ssl.truststore.location: ${javax.net.ssl.trustStore:}
-      ssl.truststore.password: ${javax.net.ssl.trustStorePassword:}
+      security.protocol: SSL
+      ssl:
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      transaction-id-prefix: ${kafka-transaction-uuid}-
       acks: all
       retries: 30
       properties:

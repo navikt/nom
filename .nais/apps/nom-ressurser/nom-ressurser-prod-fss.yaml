@@ -20,6 +20,8 @@ spec:
   azure:
     application:
       enabled: true
+  kafka:
+    pool: nav-prod
   replicas:
     min: 1
     max: 1

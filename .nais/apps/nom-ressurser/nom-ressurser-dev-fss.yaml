@@ -22,6 +22,8 @@ spec:
     application:
       enabled: true
       tennant: trygdeetaten.no
+  kafka:
+    pool: nav-dev
   webproxy: true
   leaderElection: true
   replicas:
