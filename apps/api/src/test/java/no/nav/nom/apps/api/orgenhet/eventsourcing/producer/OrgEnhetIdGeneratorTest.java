@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+@Slf4j
 @SpringJUnitConfig(classes = OrgEnhetIdGenerator.class)
 public class OrgEnhetIdGeneratorTest {
     @Autowired
@@ -21,12 +22,13 @@ public class OrgEnhetIdGeneratorTest {
     @MockBean
     OrgEnhetStateRepository orgEnhetStateService;
 
-    String idRegex = "^(?:(?![oil])[a-z]){2}\\d{3}[a-z^oil]$"; // 2 lowercase letters except 'iol' + 4 digits + 1 lowercase letters except 'iol'
+    String idRegex = "^[bdfghjkmnprstv][aeuy]\\d{3}[abcdefghjkmnprstuvwxyz]$"; // 2 lowercase letters (consonant + vovel) + 3 digits + 1 lowercase letter
 
     @Test
     public void test20Randoms() {
         for (int i=0;i<20;i++) {
             String id = orgEnhetIdGenerator.newId();
+//            log.info("Generert id: {}", id);
             assertTrue(id.matches(idRegex), "No match: %s".formatted(id));
             assertFalse(orgEnhetStateService.findByFid(id).isPresent());
             orgEnhetStateService.putEventAggregate(newOrgEnhet(id));
