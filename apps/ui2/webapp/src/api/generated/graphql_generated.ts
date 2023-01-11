@@ -25,6 +25,12 @@ export type FolkeregisterPerson = {
   navn: Navn;
 };
 
+export enum GyldigTomSelection {
+  Alle = 'ALLE',
+  IkkePassert = 'IKKE_PASSERT',
+  Passert = 'PASSERT'
+}
+
 export type Kode = {
   __typename?: 'Kode';
   gyldigFom?: Maybe<Scalars['Date']>;
@@ -117,6 +123,12 @@ export type OrgEnhetSearch = {
   orgNiv?: InputMaybe<Scalars['String']>;
 };
 
+export type OrgEnhetSearchFilter = {
+  gyldigTomSelection?: GyldigTomSelection;
+  limit?: ResultLimit;
+  orgnivSelection?: OrgnivSelection;
+};
+
 export type OrgEnheterSearch = {
   agressoIder?: InputMaybe<Array<Scalars['String']>>;
   orgEnhetsKategori?: InputMaybe<Array<OrgEnhetsKategori>>;
@@ -151,6 +163,12 @@ export type Organisering = {
   retning: Retning;
 };
 
+export enum OrgnivSelection {
+  Alle = 'ALLE',
+  IkkeOrgnivOrgenhet = 'IKKE_ORGNIV_ORGENHET',
+  OrgnivOrgenhet = 'ORGNIV_ORGENHET'
+}
+
 export type PersonResult = {
   __typename?: 'PersonResult';
   folkeregisterPerson?: Maybe<FolkeregisterPerson>;
@@ -180,6 +198,8 @@ export type Query = {
   ressurs?: Maybe<Ressurs>;
   ressurser: Array<RessursResult>;
   search: Array<SearchResult>;
+  searchOrgEnhet: Array<OrgEnhet>;
+  searchRessurs: Array<Ressurs>;
 };
 
 
@@ -219,6 +239,20 @@ export type QueryRessurserArgs = {
 
 
 export type QuerySearchArgs = {
+  orgEnhetFilter?: InputMaybe<OrgEnhetSearchFilter>;
+  ressursFilter?: InputMaybe<RessursSearchFilter>;
+  term: Scalars['String'];
+};
+
+
+export type QuerySearchOrgEnhetArgs = {
+  filter?: InputMaybe<OrgEnhetSearchFilter>;
+  term: Scalars['String'];
+};
+
+
+export type QuerySearchRessursArgs = {
+  filter?: InputMaybe<RessursSearchFilter>;
   term: Scalars['String'];
 };
 
@@ -280,6 +314,12 @@ export type RessursSearch = {
   personident?: InputMaybe<Scalars['String']>;
 };
 
+export type RessursSearchFilter = {
+  limit?: ResultLimit;
+  sektorSelection?: SektorSelection;
+  statusSelection?: StatusSelection;
+};
+
 export type RessurserSearch = {
   navidenter?: InputMaybe<Array<Scalars['String']>>;
   personidenter?: InputMaybe<Array<Scalars['String']>>;
@@ -289,6 +329,16 @@ export enum ResultCode {
   Error = 'ERROR',
   NotFound = 'NOT_FOUND',
   Ok = 'OK'
+}
+
+export enum ResultLimit {
+  Limit_10 = 'LIMIT_10',
+  Limit_20 = 'LIMIT_20',
+  Limit_30 = 'LIMIT_30',
+  Limit_50 = 'LIMIT_50',
+  Limit_100 = 'LIMIT_100',
+  Limit_200 = 'LIMIT_200',
+  Unlimited = 'UNLIMITED'
 }
 
 export enum Retning {
@@ -302,6 +352,20 @@ export enum Sektor {
   Ekstern = 'EKSTERN',
   NavKommunal = 'NAV_KOMMUNAL',
   NavStatlig = 'NAV_STATLIG'
+}
+
+export enum SektorSelection {
+  Alle = 'ALLE',
+  Ekstern = 'EKSTERN',
+  IkkeEkstern = 'IKKE_EKSTERN',
+  Kommunal = 'KOMMUNAL',
+  Statlig = 'STATLIG'
+}
+
+export enum StatusSelection {
+  Aktiv = 'AKTIV',
+  Alle = 'ALLE',
+  Inaktiv = 'INAKTIV'
 }
 
 export type Telefon = {
@@ -429,6 +493,14 @@ export type HentRessursQueryVariables = Exact<{
 
 export type HentRessursQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', sektor: Array<Sektor>, navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string, id: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', agressoId: string, orgNiv: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } | null };
 
+export type SearchOrgenheterQueryVariables = Exact<{
+  term: Scalars['String'];
+  filter?: InputMaybe<OrgEnhetSearchFilter>;
+}>;
+
+
+export type SearchOrgenheterQuery = { __typename?: 'Query', searchOrgEnhet: Array<{ __typename?: 'OrgEnhet', id: string, agressoId: string, navn: string }> };
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -502,6 +574,7 @@ export type ResolversTypes = {
   Date: ResolverTypeWrapper<Scalars['Date']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   FolkeregisterPerson: ResolverTypeWrapper<FolkeregisterPerson>;
+  GyldigTomSelection: GyldigTomSelection;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']>;
   Kode: ResolverTypeWrapper<Kode>;
@@ -513,11 +586,13 @@ export type ResolversTypes = {
   OrgEnhet: ResolverTypeWrapper<OrgEnhet>;
   OrgEnhetResult: ResolverTypeWrapper<OrgEnhetResult>;
   OrgEnhetSearch: OrgEnhetSearch;
+  OrgEnhetSearchFilter: OrgEnhetSearchFilter;
   OrgEnheterSearch: OrgEnheterSearch;
   OrgEnhetsKategori: OrgEnhetsKategori;
   OrgEnhetsKobling: ResolverTypeWrapper<OrgEnhetsKobling>;
   OrgEnhetsLeder: ResolverTypeWrapper<OrgEnhetsLeder>;
   Organisering: ResolverTypeWrapper<Organisering>;
+  OrgnivSelection: OrgnivSelection;
   PersonResult: ResolverTypeWrapper<PersonResult>;
   PersonSearch: PersonSearch;
   Query: ResolverTypeWrapper<{}>;
@@ -526,11 +601,15 @@ export type ResolversTypes = {
   RessursOrgTilknytning: ResolverTypeWrapper<RessursOrgTilknytning>;
   RessursResult: ResolverTypeWrapper<RessursResult>;
   RessursSearch: RessursSearch;
+  RessursSearchFilter: RessursSearchFilter;
   RessurserSearch: RessurserSearch;
   ResultCode: ResultCode;
+  ResultLimit: ResultLimit;
   Retning: Retning;
   SearchResult: ResolversTypes['OrgEnhet'] | ResolversTypes['Ressurs'];
   Sektor: Sektor;
+  SektorSelection: SektorSelection;
+  StatusSelection: StatusSelection;
   String: ResolverTypeWrapper<Scalars['String']>;
   Telefon: ResolverTypeWrapper<Telefon>;
   TelefonType: TelefonType;
@@ -553,6 +632,7 @@ export type ResolversParentTypes = {
   OrgEnhet: OrgEnhet;
   OrgEnhetResult: OrgEnhetResult;
   OrgEnhetSearch: OrgEnhetSearch;
+  OrgEnhetSearchFilter: OrgEnhetSearchFilter;
   OrgEnheterSearch: OrgEnheterSearch;
   OrgEnhetsKobling: OrgEnhetsKobling;
   OrgEnhetsLeder: OrgEnhetsLeder;
@@ -565,6 +645,7 @@ export type ResolversParentTypes = {
   RessursOrgTilknytning: RessursOrgTilknytning;
   RessursResult: RessursResult;
   RessursSearch: RessursSearch;
+  RessursSearchFilter: RessursSearchFilter;
   RessurserSearch: RessurserSearch;
   SearchResult: ResolversParentTypes['OrgEnhet'] | ResolversParentTypes['Ressurs'];
   String: Scalars['String'];
@@ -689,6 +770,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   ressurs?: Resolver<Maybe<ResolversTypes['Ressurs']>, ParentType, ContextType, RequireFields<QueryRessursArgs, 'where'>>;
   ressurser?: Resolver<Array<ResolversTypes['RessursResult']>, ParentType, ContextType, Partial<QueryRessurserArgs>>;
   search?: Resolver<Array<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'term'>>;
+  searchOrgEnhet?: Resolver<Array<ResolversTypes['OrgEnhet']>, ParentType, ContextType, RequireFields<QuerySearchOrgEnhetArgs, 'term'>>;
+  searchRessurs?: Resolver<Array<ResolversTypes['Ressurs']>, ParentType, ContextType, RequireFields<QuerySearchRessursArgs, 'term'>>;
 };
 
 export type RessursResolvers<ContextType = any, ParentType extends ResolversParentTypes['Ressurs'] = ResolversParentTypes['Ressurs']> = {
@@ -1796,3 +1879,41 @@ export function useHentRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type HentRessursQueryHookResult = ReturnType<typeof useHentRessursQuery>;
 export type HentRessursLazyQueryHookResult = ReturnType<typeof useHentRessursLazyQuery>;
 export type HentRessursQueryResult = Apollo.QueryResult<HentRessursQuery, HentRessursQueryVariables>;
+export const SearchOrgenheterDocument = gql`
+    query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
+  searchOrgEnhet(term: $term, filter: $filter) {
+    id
+    agressoId
+    navn
+  }
+}
+    `;
+
+/**
+ * __useSearchOrgenheterQuery__
+ *
+ * To run a query within a React component, call `useSearchOrgenheterQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchOrgenheterQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchOrgenheterQuery({
+ *   variables: {
+ *      term: // value for 'term'
+ *      filter: // value for 'filter'
+ *   },
+ * });
+ */
+export function useSearchOrgenheterQuery(baseOptions: Apollo.QueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
+      }
+export function useSearchOrgenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
+        }
+export type SearchOrgenheterQueryHookResult = ReturnType<typeof useSearchOrgenheterQuery>;
+export type SearchOrgenheterLazyQueryHookResult = ReturnType<typeof useSearchOrgenheterLazyQuery>;
+export type SearchOrgenheterQueryResult = Apollo.QueryResult<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>;

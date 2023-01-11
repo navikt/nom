@@ -81,7 +81,7 @@ public class RessursCommadService {
                                 )),
                         opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
                         Optional.ofNullable(opprettRessursCommand.startdato()),
-                        Optional.ofNullable(opprettRessursCommand.orgEnhet())
+                        Optional.ofNullable(opprettRessursCommand.orgEnhetId())
                 )
         ));
     }

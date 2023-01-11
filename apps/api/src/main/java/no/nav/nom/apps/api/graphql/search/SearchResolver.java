@@ -41,8 +41,8 @@ public class SearchResolver {
 
     public List<Object> search(String term_inp, RessursSearchFilter ressursSearchFilter, OrgEnhetSearchFilter orgEnhetSearchFilter) {
         return Stream.concat(
-                luceneService.searchRessurs(term_inp, ressursSearchFilter.toLuceneFilter()).stream(),
-                luceneService.searchOrgenhet(term_inp, orgEnhetSearchFilter.toLuceneFilter()).stream()
+                luceneService.searchRessurs(term_inp, ressursSearchFilter.toLuceneFilter(), ressursSearchFilter.getLimit().getValue()).stream(),
+                luceneService.searchOrgenhet(term_inp, orgEnhetSearchFilter.toLuceneFilter(), orgEnhetSearchFilter.getLimit().getValue()).stream()
             )
             .sorted(Comparator.comparing(SearchResult::score).reversed())
             .map(result -> {
@@ -93,18 +93,18 @@ public class SearchResolver {
 
 
     public List<Ressurs> searchRessurs(String term, RessursSearchFilter filter) {
-        var matchedNavidentsSorted = luceneService.searchRessurs(term, filter.toLuceneFilter());
+        var matchedNavidentsSorted = luceneService.searchRessurs(term, filter.toLuceneFilter(), filter.getLimit().getValue());
         var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.stream().map(SearchResult::id).toList());
 
         return matchedNavidentsSorted.stream()
-                .map(it -> MappingUtils.toRessurs(matchedNavidentsMap.get(it.id())))
-                .toList();
+            .map(it -> MappingUtils.toRessurs(matchedNavidentsMap.get(it.id())))
+            .toList();
     }
 
 
     public List<OrgEnhet> searchOrgenhet(String term, OrgEnhetSearchFilter filter) {
         try {
-            return luceneService.searchOrgenhet(term,filter.toLuceneFilter()).stream()
+            return luceneService.searchOrgenhet(term, filter.toLuceneFilter(), filter.getLimit().getValue()).stream()
                     .map(result -> orgenhetService.getById(result.id()))
                     .map(Optional::get)
                     .map(MappingUtils::toOrgEnhet)

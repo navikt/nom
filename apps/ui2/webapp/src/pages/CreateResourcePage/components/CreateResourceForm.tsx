@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Heading,
+  Label,
   Loader,
   Radio,
   RadioGroup,
@@ -13,14 +14,25 @@ import {
 import { decode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
+import Select, { createFilter } from "react-select";
+import type { FilterOptionOption } from "react-select/dist/declarations/src/filters";
+import { v4 as uuidv4 } from "uuid";
 
-import type { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
+import type {
+  FolkeregisterPerson,
+  OrgEnhet,
+} from "~/api/generated/graphql_generated";
 import {
+  GyldigTomSelection,
+  OrgnivSelection,
+  ResultLimit,
   Sektor,
   useHentPersonQuery,
   useOpprettRessursMutation,
-} from "../../../api/generated/graphql_generated";
-import { capitalizeName } from "../../../resources/utils/utils";
+  useSearchOrgenheterQuery,
+} from "~/api/generated/graphql_generated";
+import { capitalizeName } from "~/resources/utils/utils";
+
 import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";
 import { ResourceMetadata } from "./ResourceMetadata";
 
@@ -43,7 +55,19 @@ export default function CreateResourceForm() {
     errorPolicy: "all",
   });
 
-  if (hentPersonQuery.loading) {
+  const searchOrgenheterQuery = useSearchOrgenheterQuery({
+    variables: {
+      term: "*:*",
+      filter: {
+        gyldigTomSelection: GyldigTomSelection.IkkePassert,
+        orgnivSelection: OrgnivSelection.OrgnivOrgenhet,
+        limit: ResultLimit.Unlimited,
+      },
+    },
+    errorPolicy: "all",
+  });
+
+  if (hentPersonQuery.loading || searchOrgenheterQuery.loading) {
     return (
       <Loader
         className={css`
@@ -58,8 +82,12 @@ export default function CreateResourceForm() {
   if (hentPersonQuery.error) {
     return <Alert variant="error">{hentPersonQuery.error.message}</Alert>;
   }
+  if (searchOrgenheterQuery.error) {
+    return <Alert variant="error">{searchOrgenheterQuery.error.message}</Alert>;
+  }
 
   const personResult = hentPersonQuery.data?.person;
+  const enheter = searchOrgenheterQuery.data?.searchOrgEnhet || [];
 
   if (personResult?.navident) {
     return (
@@ -76,6 +104,7 @@ export default function CreateResourceForm() {
       <>
         <ResourceMetadata person={personResult.person} />
         <CreateResourceFormInner
+          orgEnheter={enheter as OrgEnhet[]}
           personResult={personResult.person}
           personident={personResult.personident}
         />
@@ -95,10 +124,13 @@ export const SektorNameMapping = {
 function CreateResourceFormInner({
   personResult,
   personident,
+  orgEnheter,
 }: {
   personResult: FolkeregisterPerson;
   personident: string;
+  orgEnheter: OrgEnhet[];
 }) {
+  const MIN_INPUT_LENGTH = 3;
   const navigate = useNavigate();
   const {
     register,
@@ -113,6 +145,7 @@ function CreateResourceFormInner({
       visningsmellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
       visningsetternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
       sektor: Sektor.NavStatlig,
+      orgEnhetId: undefined,
       startDato: new Date(),
     },
   });
@@ -189,6 +222,97 @@ function CreateResourceFormInner({
             {SektorNameMapping[Sektor.Ekstern]}
           </Radio>
         </RadioGroup>
+
+        <Controller
+          control={control}
+          name="orgEnhetId"
+          render={({
+            field: { onChange, value, name },
+            fieldState: { error },
+          }) => {
+            const fieldId = `${name}_${uuidv4()}`;
+            return (
+              <>
+                <Label htmlFor={fieldId} size="medium">
+                  Org.enhet
+                </Label>
+                {error && (
+                  <Alert size="small" variant="error">
+                    {error.message}
+                  </Alert>
+                )}
+                <Select
+                  backspaceRemovesValue
+                  className={css`
+                    cursor: text;
+                    min-width: 200px;
+                    border-radius: var(--navds-border-radius-medium);
+                    border: 1px solid var(--navds-select-color-border);
+                    z-index: 2; // 10.01.2023: Hack to get around the datepicker button having a z-index of 1 and overlaying on the dropdown.
+
+                    &:focus-within {
+                      outline: none;
+                      box-shadow: var(--navds-shadow-focus);
+                    }
+                  `}
+                  components={{
+                    // eslint-disable-next-line unicorn/no-null
+                    DropdownIndicator: () => null, // Remove dropdown icon
+                    // eslint-disable-next-line unicorn/no-null
+                    IndicatorSeparator: () => null, // Remove separator
+                  }}
+                  defaultMenuIsOpen={false}
+                  escapeClearsValue={true}
+                  filterOption={
+                    (candidate: FilterOptionOption<OrgEnhet>, input: string) =>
+                      input.length >= MIN_INPUT_LENGTH &&
+                      createFilter({})(candidate, input) // Use Select's default filtering for string matching by creating filter
+                  }
+                  getOptionLabel={(orgenhet) =>
+                    `${orgenhet.navn} (${orgenhet.id})`
+                  }
+                  getOptionValue={(orgenhet: OrgEnhet) => orgenhet.id}
+                  inputId={fieldId}
+                  isClearable
+                  isMulti={false}
+                  noOptionsMessage={(input) => {
+                    if (input.inputValue.length < MIN_INPUT_LENGTH) {
+                      return "Du må skrive minst 3 tegn for å søke";
+                    }
+                    return "Ingen valg tilgjengelig";
+                  }}
+                  onChange={(orgEnhet: OrgEnhet | null) =>
+                    onChange(orgEnhet?.id)
+                  }
+                  openMenuOnClick={false}
+                  openMenuOnFocus={false}
+                  options={orgEnheter}
+                  placeholder="Søk etter organisasjonsenhet..."
+                  styles={{
+                    // Removes default focus-border, so that it can be replaced with focus from DesignSystem
+                    control: (base) => ({
+                      ...base,
+                      boxShadow: "none",
+                      border: 0,
+                      cursor: "text",
+                      div: {
+                        div: { color: `var(--navds-dropdown-menu-color)` },
+                      },
+                    }),
+                    // Make border and size of input box to be identical with those from DesignSystem
+                    valueContainer: (base) => ({
+                      ...base,
+                      padding: "8px",
+                      color: "black",
+                    }),
+                  }}
+                  value={orgEnheter.find((enhet) => enhet.id === value)}
+                />
+              </>
+            );
+          }}
+          rules={{ required: "Må angis" }}
+        />
 
         <Controller
           control={control}

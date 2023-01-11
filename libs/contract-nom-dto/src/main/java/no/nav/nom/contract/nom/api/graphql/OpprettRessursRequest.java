@@ -15,7 +15,7 @@ public class OpprettRessursRequest {
     private String visningsmellomnavn;
     private String visningsetternavn;
     private Sektor sektor;
-    private OrgEnhet orgEnhet;
+    private String orgEnhetId;
     private LocalDate startDato;
     
 }

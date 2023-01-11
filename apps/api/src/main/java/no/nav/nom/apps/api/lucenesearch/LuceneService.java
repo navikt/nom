@@ -149,22 +149,30 @@ public class LuceneService {
     }
 
     public List<SearchResult> searchRessurs(String term, LuceneRessursFilter filter) {
-        return search(term, filter, false);
+        return search(term, filter, WrappedLucene.DEFAULT_RESULT_SIZE, false);
+    }
+
+    public List<SearchResult> searchRessurs(String term, LuceneRessursFilter filter, Integer resultLimit) {
+        return search(term, filter, resultLimit, false);
     }
 
     public List<SearchResult> searchOrgenhet(String term) {
         return searchOrgenhet(term, LuceneOrgenhetFilter.alle());
     }
 
+
     public List<SearchResult> searchOrgenhet(String term, LuceneOrgenhetFilter filter) {
-        return search(term, filter, false);
+        return search(term, filter, WrappedLucene.DEFAULT_RESULT_SIZE, false);
+    }
+    public List<SearchResult> searchOrgenhet(String term, LuceneOrgenhetFilter filter, Integer resultLimit) {
+        return search(term, filter, resultLimit, false);
     }
 
-    private <T> List<SearchResult> search(String term, QueryFilter<T> filter, boolean includeDefault) {
+    private <T> List<SearchResult> search(String term, QueryFilter<T> filter, Integer resultLimit, boolean includeDefault) {
         var filterContext = new QueryFilterContext(filter);
         filterContext.setDefaultInclude(includeDefault);
 
-        return wrappedLucene.search(term, filterContext);
+        return wrappedLucene.search(term, filterContext, resultLimit);
     }
 
     public boolean filterOrgenhetResult(SearchResult searchResult) {

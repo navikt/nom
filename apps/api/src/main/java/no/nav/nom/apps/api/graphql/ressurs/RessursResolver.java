@@ -12,6 +12,8 @@ import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
@@ -45,17 +47,20 @@ public class RessursResolver {
     private final PdlConsumer pdlConsumer;
     private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
+    private final OrgenhetService orgenhetService;
 
     RessursResolver(
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
             IRessursService ressursService,
-            RessursCommadService ressursCommadService
+            RessursCommadService ressursCommadService,
+            OrgenhetService orgenhetService
     ) {
         this.nikConsumer = nikConsumer;
         this.pdlConsumer = pdlConsumer;
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
+        this.orgenhetService = orgenhetService;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
@@ -157,7 +162,10 @@ public class RessursResolver {
                         )
                 ),
                 request.getStartDato(),
-                request.getOrgEnhet() != null ? request.getOrgEnhet().getAgressoId() : null
+                Optional.ofNullable(request.getOrgEnhetId())
+                    .flatMap(orgenhetService::getById)
+                    .map(IOrgenhet::getAgressoId)
+                    .orElse(null) // TODO: Validate not null in RessursCommandService
         );
 
         return ressursCommadService.createRessursSync(opprettRessursCommand);

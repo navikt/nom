@@ -18,13 +18,15 @@ type Query {
 union SearchResult = Ressurs | OrgEnhet
 
 input RessursSearchFilter {
-    sektorSelection: SektorSelection!
-    statusSelection: StatusSelection!
+    sektorSelection: SektorSelection! = ALLE
+    statusSelection: StatusSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
 }
 
 input OrgEnhetSearchFilter {
-    orgnivSelection: OrgnivSelection!
-    gyldigTomSelection: GyldigTomSelection!
+    orgnivSelection: OrgnivSelection! = ALLE
+    gyldigTomSelection: GyldigTomSelection! = ALLE
+    limit: ResultLimit! = LIMIT_30
 }
 
 input OrgEnhetSearch {
@@ -111,4 +113,14 @@ enum OrgnivSelection {
     ORGNIV_ORGENHET,
     IKKE_ORGNIV_ORGENHET,
     ALLE
+}
+
+enum ResultLimit {
+    LIMIT_10,
+    LIMIT_20,
+    LIMIT_30,
+    LIMIT_50,
+    LIMIT_100,
+    LIMIT_200,
+    UNLIMITED,
 }
