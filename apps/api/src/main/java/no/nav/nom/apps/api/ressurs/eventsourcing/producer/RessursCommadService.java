@@ -2,10 +2,12 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
@@ -57,6 +59,17 @@ public class RessursCommadService {
         return eventProducer.sendMessage(new RessursSluttetEventV1(
                 opphorRessursCommand.fid(),
                 new RessursSluttetEventV1.RessursSluttetEventData(opphorRessursCommand.sluttdato()),
+                inputMetadata
+        ));
+    }
+
+    public ListenableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(OppdaterPersonaliaCommand oppdaterPersonaliaCommand, InputMetadata inputMetadata) {
+        // TODO validate command
+        return eventProducer.sendMessage(new RessursPersonaliaOppdatertV1(
+                oppdaterPersonaliaCommand.fid(),
+                new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                        oppdaterPersonaliaCommand.visningsnavn()
+                ),
                 inputMetadata
         ));
     }

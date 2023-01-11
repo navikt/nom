@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
@@ -68,11 +69,7 @@ public class RessursHendelseForEventsourceService {
                 ressurs.getNavIdent(),
                 Optional.empty(),
                 DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
-                new Visningsnavn(
-                        ressurs.getFornavn(),
-                        null,
-                        ressurs.getEtternavn()
-                ),
+                toVisningsnavn(ressurs),
                 createInputMetadata(ressurs.getRawData()),
                 null,
                 null
@@ -89,13 +86,27 @@ public class RessursHendelseForEventsourceService {
                 ressursSluttet(ressursState.fid(), dvhRessurs);
             }
         });
+
+        final var currentVisningsnavn = toVisningsnavn(dvhRessurs);
+
+        if(!Objects.equals(ressursState.visningsnavn().getFormattedVisningsnavn(), currentVisningsnavn.getFormattedVisningsnavn())) {
+            ressursEndretPersonalia(ressursState.fid(), dvhRessurs);
+        }
     }
 
     public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
+    public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.oppdaterPersonaliaEvent(new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)), createInputMetadata(dvhRessurs.getRawData()));
+    }
+
     public InputMetadata createInputMetadata(Object rawData) {
         return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
+    }
+
+    private Visningsnavn toVisningsnavn(DvhRessurs dvhRessurs) {
+        return new Visningsnavn(dvhRessurs.getFornavn(), Optional.empty(), dvhRessurs.getEtternavn());
     }
 }
