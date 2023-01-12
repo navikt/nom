@@ -1,0 +1,7 @@
+[
+  {
+    "op": "Replace",
+    "path": "personnelType",
+    "value": "E"
+  }
+]

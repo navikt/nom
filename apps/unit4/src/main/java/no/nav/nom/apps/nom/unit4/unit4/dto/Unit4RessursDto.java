@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 public class Unit4RessursDto {
 
     @JsonIgnore
-    private final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
+    public final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
     @JsonIgnore
-    private final static LocalDateTime AGRESSO_STARTTIME = LocalDate.now().atStartOfDay();
+    public final LocalDateTime AGRESSO_STARTTIME = LocalDate.now().atStartOfDay();
     @JsonIgnore
     LocalDateTime createdTime = LocalDate.now().atStartOfDay();
 
@@ -45,7 +45,7 @@ public class Unit4RessursDto {
     PaymentInformation paymentInformation;
     PersonalInformation personalInformation;
     String personId;
-    String personnelType = "F";
+    Unit4RessursType personnelType = Unit4RessursType.FAST_ANSATTE;
     String status = "N";
     List<ContactPoint> contactPoints = getContactPointsDefault();
     List<RelatedValue> relatedValues = getRelatedValuesDefault();
@@ -54,8 +54,8 @@ public class Unit4RessursDto {
 
     public Unit4RessursDto(NomRessursDTO nomRessursDTO) {
         String ressursNr = nomRessursDTO.getNavident().substring(1);
-        String firstName = Utils.convertName(nomRessursDTO.getFornavn()) + (nomRessursDTO.getMellomnavn() != null ? " "+Utils.convertName(nomRessursDTO.getMellomnavn()) : "");
-        String surName = Utils.convertName(nomRessursDTO.getEtternavn());
+        String firstName = Utils.formatName(nomRessursDTO.getFornavn()) + (nomRessursDTO.getMellomnavn() != null ? " "+Utils.formatName(nomRessursDTO.getMellomnavn()) : "");
+        String surName = Utils.formatName(nomRessursDTO.getEtternavn());
 
         additionalInformation = AdditionalInformation.builder()
                 .relatedPersonId(ressursNr)
