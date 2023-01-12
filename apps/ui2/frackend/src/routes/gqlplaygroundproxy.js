@@ -3,6 +3,7 @@ const graphiqlSrc = {
     reactdomdev: "https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js",
     graphiqlcss: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
     graphiqljs: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js",
+    graphiqljsMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js.map",
 };
 
 const extractPath = (url) => url.substring("https://unpkg.com".length);
@@ -111,6 +112,8 @@ export function setupGqlPlaygroundProxy(app) {
         app.get("/vendor" + path, (req, res) => {
             const mimeType = path.endsWith(".css")
                 ? "text/css"
+                : path.endsWith(".map")
+                ? "appllication/json"
                 : "application/javascript";
             res.type(mimeType).send(vendorStorage[s]);
         });
