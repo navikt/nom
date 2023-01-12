@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @RequiredArgsConstructor
 public class RelatedValue{
-    String status = "N";
+    Unit4Status status = Unit4Status.AKTIV;
     String relationId;
     String relatedValue;
     Integer percentage = 100;

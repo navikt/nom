@@ -126,7 +126,7 @@ public record Unit4PatchRequest(
     public static List<Unit4PatchRequest> createEndreSluttDatoPatchRequest(LocalDate sluttDato) {
         return List.of(
                 new Unit4PatchRequest(Operation.REPLACE, "dateTo", sluttDato.atStartOfDay())
-                //new Unit4PatchRequest(Operation.REPLACE, "status", "-")
+                //new Unit4PatchRequest(Operation.REPLACE, "status", Unit4Status.PARKERT)
         );
     }
 

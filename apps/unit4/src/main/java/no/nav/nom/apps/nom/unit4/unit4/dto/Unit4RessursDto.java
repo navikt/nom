@@ -42,7 +42,7 @@ public class Unit4RessursDto {
     PersonalInformation personalInformation;
     String personId;
     Unit4RessursType personnelType = Unit4RessursType.FAST_ANSATTE;
-    String status = "N";
+    Unit4Status status = Unit4Status.AKTIV;
     List<ContactPoint> contactPoints = getContactPointsDefault();
     List<RelatedValue> relatedValues = getRelatedValuesDefault();
 
