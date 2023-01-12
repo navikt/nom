@@ -1,7 +1,8 @@
 const graphiqlSrc = {
-    reactdev: "https://unpkg.com/react@16.14.0/umd/react.development.js",
-    reactdomdev: "https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js",
+    reactdev: "https://unpkg.com/react@18.2.0/umd/react.development.js",
+    reactdomdev: "https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js",
     graphiqlcss: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
+    graphiqlcssMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
     graphiqljs: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js",
     graphiqljsMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js.map",
 };
