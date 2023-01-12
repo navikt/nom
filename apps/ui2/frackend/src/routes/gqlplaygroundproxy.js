@@ -82,7 +82,7 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
         subscriptionUrl,
     });
 
-    ReactDOM.render(
+    ReactDOM.createRoot(
         React.createElement(GraphiQL, {
             fetcher: gqlFetcher,
             defaultVariableEditorOpen: true,
