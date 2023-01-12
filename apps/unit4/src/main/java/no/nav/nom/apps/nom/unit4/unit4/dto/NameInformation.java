@@ -8,7 +8,7 @@ import lombok.Value;
 @Builder
 @RequiredArgsConstructor
 public class NameInformation{
-    String aliasName;
+    String aliasName; // navident
     String firstName;
     String surname;
 }

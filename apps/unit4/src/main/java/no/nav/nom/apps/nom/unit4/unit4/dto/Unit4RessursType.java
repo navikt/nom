@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum Unit4RessursType {
     FAST_ANSATTE("F"),
     KOMMUNALT_ANSATT("N"),
-    EKSTERN("E"),
+    EKSTERN("E");
+    /*
+    BRUKES IKKE:
+
     MIDLERTIDIG_ANSATTE("M"),
     LEDER("B"),
     IKKJE_RELEVANT("I"),
@@ -18,6 +21,7 @@ public enum Unit4RessursType {
     TOLK("T"),
     VENTELOENN("V"),
     TIMELOENNA("Y");
+    */
 
     private final String value;
 

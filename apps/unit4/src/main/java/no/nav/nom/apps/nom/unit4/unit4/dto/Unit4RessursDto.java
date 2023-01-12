@@ -40,7 +40,7 @@ public class Unit4RessursDto {
     NameInformation nameInformation;
     PaymentInformation paymentInformation;
     PersonalInformation personalInformation;
-    String personId;
+    String personId; // Siste 6 siffer av navident
     Unit4RessursType personnelType = Unit4RessursType.FAST_ANSATTE;
     Unit4Status status = Unit4Status.AKTIV;
     List<ContactPoint> contactPoints = getContactPointsDefault();
