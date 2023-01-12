@@ -44,7 +44,7 @@ public class Unit4RessursDto {
     Unit4RessursType personnelType = Unit4RessursType.FAST_ANSATTE;
     Unit4Status status = Unit4Status.AKTIV;
     List<ContactPoint> contactPoints = getContactPointsDefault();
-    List<RelatedValue> relatedValues = getRelatedValuesDefault();
+    List<RelatedValue> relatedValues;
 
 
 
@@ -81,6 +81,7 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(nomRessursDTO.getPersonident())
                 .build();
         personId = ressursNr;
+        relatedValues = getRelatedValuesDefault();
         relatedValues.add(
                 RelatedValue.builder()
                 .relationId("M0")
@@ -135,6 +136,7 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(eventData.personident())
                 .build();
         personId = ressursNr;
+        relatedValues = getRelatedValuesDefault();
         relatedValues.add(
                 additionalData.orgEnhet()
                         .map((orgenhet) -> RelatedValue.builder()
