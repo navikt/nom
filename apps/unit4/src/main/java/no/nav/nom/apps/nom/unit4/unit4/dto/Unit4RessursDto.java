@@ -28,10 +28,6 @@ public class Unit4RessursDto {
 
     @JsonIgnore
     public final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
-    @JsonIgnore
-    public final LocalDateTime AGRESSO_STARTTIME = LocalDate.now().atStartOfDay();
-    @JsonIgnore
-    LocalDateTime createdTime = LocalDate.now().atStartOfDay();
 
 
     AdditionalInformation additionalInformation;
@@ -70,7 +66,7 @@ public class Unit4RessursDto {
             birthDateTemp = LocalDate.parse("1995-04-12").atStartOfDay();
         }
         birthDate = birthDateTemp;
-        dateFrom = AGRESSO_STARTTIME;
+        dateFrom = LocalDate.now().atStartOfDay();;
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
                 .aliasName(nomRessursDTO.getNavident())
@@ -81,7 +77,7 @@ public class Unit4RessursDto {
                 .supplierId(ressursNr)
                 .build();
         personalInformation = PersonalInformation.builder()
-                .gender("F")
+                .gender(Unit4RessursGender.FEMALE)
                 .nationalIdentityNo(nomRessursDTO.getPersonident())
                 .build();
         personId = ressursNr;
@@ -89,7 +85,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                 .relationId("M0")
                 .relatedValue("5224300")
-                .dateFrom(AGRESSO_STARTTIME)
+                .dateFrom(dateFrom)
                 .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                 .build()
         );
@@ -108,14 +104,16 @@ public class Unit4RessursDto {
         String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)
                 .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
 
-        String kjoenn = additionalData.kjoenn().map(k ->
+        Unit4RessursGender kjoenn = additionalData.kjoenn().map(k ->
                 switch (k){
-                    case "MANN" -> "M";
-                    case "KVINNE" -> "F";
+                    case "MANN" -> Unit4RessursGender.MALE;
+                    case "KVINNE" -> Unit4RessursGender.FEMALE;
                     default -> null;
                 }
         ).orElseThrow(() -> new NoSuchElementException("Folkeregistrert kjoenn is missing from event"));
-        dateFrom =  additionalData.startdato().map(LocalDate::atStartOfDay).orElse(AGRESSO_STARTTIME);
+        dateFrom =  additionalData.startdato()
+                .map(LocalDate::atStartOfDay)
+                .orElseThrow(() -> new NoSuchElementException("Startdato is missing from event"));
         birthDate = ((RessursOpprettetAdditionalData) record.getAdditionalData()).foedselsdato().map(LocalDate::atStartOfDay)
                 .orElseThrow(() -> new NoSuchElementException("Foedseldato is missing from event"));
 
@@ -142,15 +140,12 @@ public class Unit4RessursDto {
                         .map((orgenhet) -> RelatedValue.builder()
                                 .relationId("M0")
                                 .relatedValue(additionalData.orgEnhet().get())
-                                .dateFrom(AGRESSO_STARTTIME)
+                                .dateFrom(dateFrom)
                                 .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                                 .build()
-                        ).orElse(RelatedValue.builder()
-                                .relationId("M0")
-                                .relatedValue("5224300")
-                                .dateFrom(AGRESSO_STARTTIME)
-                                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
-                                .build()));
+                        )
+                        .orElseThrow(() -> new NoSuchElementException("Agresso unit id is missing from event"))
+        );
     }
 
     private List<ContactPoint> getContactPointsDefault(){
@@ -166,7 +161,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("23")   // 23: Begrep=FELLES, Beskrivelse=Felles
                         .relatedValue("L03034") // Skal være 000000 USPESIFISERT, men denne verdien finnes ikke enda.L03034 står for "Oslo, Fyrstikkalléen 1"
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -175,7 +170,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("20")   // 20: Begrep=PRODUKT, Beskrivelse=Produkt
                         .relatedValue("000000") // 000000: Uspesifisert
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -183,7 +178,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("C8")   // C8: Begrep=GRUPPE, Beskrivelse=Gruppe
                         .relatedValue("FLON") // FLON: 5000 - Oppg. Faste stillinger, ordinær
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -191,7 +186,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("B1")   // B1: Begrep=OPPGAVE, Beskrivelse=Oppgave
                         .relatedValue("000000") // 000000: Uspesifisert
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -199,7 +194,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("MQ")   // MQ: Begrep=AGASTAT, Beskrivelse=Arbeidsgiveravgift
                         .relatedValue("BB") // BB: Statsforvaltning og helseforetak
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -208,7 +203,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("Y7") // Y7: Begrep=PENSJON, Beskrivelse=Pensjonsplan - nivå
                         .relatedValue("SPK") // SPK: Pensjonstrekk SPK 2%
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 
@@ -216,7 +211,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("NOM")  // NOM: Begrep=AUTO_GEN_NOM, Beskrivelse=Generert av NOM
                         .relatedValue("1")  // 1: Generert av NOM
-                        .dateFrom(AGRESSO_STARTTIME)
+                        .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
 

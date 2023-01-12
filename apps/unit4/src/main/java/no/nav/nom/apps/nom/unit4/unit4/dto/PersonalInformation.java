@@ -8,6 +8,6 @@ import lombok.Value;
 @Builder
 @RequiredArgsConstructor
 public class PersonalInformation{
-    String gender; // M/F
+    Unit4RessursGender gender; // M/F
     String nationalIdentityNo; // FNR
 }
