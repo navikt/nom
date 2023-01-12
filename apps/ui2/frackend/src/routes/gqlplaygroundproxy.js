@@ -28,7 +28,7 @@ async function initVendorStorage() {
         }
     } catch (e) {
         vendorStorage = {};
-        console.error("Could not vendor graphql js and css from unpkg.com");
+        console.error("Could not vendor graphql js and css from unpkg.com", e);
     }
 }
 
