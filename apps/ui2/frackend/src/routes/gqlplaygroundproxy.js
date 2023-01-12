@@ -1,8 +1,8 @@
 const graphiqlSrc = {
-    reactdev: "https://unpkg.com/react@16/umd/react.development.js",
-    reactdomdev: "https://unpkg.com/react-dom@16/umd/react-dom.development.js",
-    graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
-    graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
+    reactdev: "https://unpkg.com/react@16.14.0/umd/react.development.js",
+    reactdomdev: "https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js",
+    graphiqlcss: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
+    graphiqljs: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js",
 };
 
 const extractPath = (url) => url.substring("https://unpkg.com".length);
