@@ -15,6 +15,22 @@ public record Unit4PatchRequest(
 
     // Husk at Unit4 ønsker folkeregistrert navn formatert med apps/unit4/src/main/java/no/nav/nom/apps/nom/unit4/unit4/Utils.java
     // sin formatName metode
+
+    /*
+    EKSEMPEL BODY:
+    [
+      {
+        "op": "Replace",
+        "path": "nameInformation.firstName",
+        "value": "NYTT FORNAVN"
+      },
+      {
+        "op": "Replace",
+        "path": "nameInformation.surname",
+        "value": "NYTT ETTERNAVN"
+      }
+    ]
+    */
     public static List<Unit4PatchRequest> createEndreNavnPatchRequest(String fornavn, String etternavn) {
         return List.of(
                 new Unit4PatchRequest(Operation.REPLACE, "nameInformation.firstName", Utils.formatName(fornavn)),
@@ -24,6 +40,20 @@ public record Unit4PatchRequest(
 
     // Må avklares!!
     // Skal orgtilknytning på employment (stilling) relatedValues endres?
+    /*
+    [
+        {
+            "op": "AddOrReplaceById",
+            "path": "relatedValues",
+            "value": {
+                "relationId": "M0",
+                "relatedValue": "0101001",
+                "dateFrom": "2023-01-11T00:00:00.000",
+                "dateTo": "2099-12-31T00:00:00.000"
+            }
+        }
+    ]
+     */
     public static List<Unit4PatchRequest> createEndreOrgtilknytningPatchRequest(String agressoId) {
         return List.of(
                 new Unit4PatchRequest(Operation.ADD_OR_REPLACE_BY_ID,
@@ -40,6 +70,16 @@ public record Unit4PatchRequest(
 
     // Må avklares!!
     // Skal ressurstype på employment (stilling) endres?
+    /*
+    EKSEMPEL BODY:
+    [
+      {
+        "op": "Replace",
+        "path": "personnelType",
+        "value": "E"
+      }
+    ]
+    */
     public static List<Unit4PatchRequest> createEndreRessurstypePatchRequest(Unit4RessursType ressursType) {
         return List.of(
                 new Unit4PatchRequest(Operation.REPLACE, "personnelType", ressursType)
@@ -52,6 +92,16 @@ public record Unit4PatchRequest(
     // status og dateTo på relatedValues?
     // status og dateTo på employment og dens relatedValues?
     // andre ting som må endres i unit4 når en ressurs endrer startdato?
+    /*
+    EKSEMPEL BODY:
+    [
+        {
+            "op": "Replace",
+            "path": "dateFrom",
+            "value": "2023-01-14T00:00:00.000"
+        }
+    ]
+     */
     public static List<Unit4PatchRequest> createEndreStartDatoPatchRequest(LocalDate startDato) {
         return List.of(
                 new Unit4PatchRequest(Operation.REPLACE, "dateFrom", startDato.atStartOfDay())
@@ -63,6 +113,16 @@ public record Unit4PatchRequest(
     // status og dateTo på relatedValues?
     // status og dateTo på employment og dens relatedValues?
     // andre ting som må endres i unit4 når en ressurs slutter?
+    /*
+    EKSEMPEL BODY:
+    [
+        {
+            "op": "Replace",
+            "path": "dateTo",
+            "value": "2023-01-14T00:00:00.000"
+        }
+    ]
+     */
     public static List<Unit4PatchRequest> createEndreSluttDatoPatchRequest(LocalDate sluttDato) {
         return List.of(
                 new Unit4PatchRequest(Operation.REPLACE, "dateTo", sluttDato.atStartOfDay())
