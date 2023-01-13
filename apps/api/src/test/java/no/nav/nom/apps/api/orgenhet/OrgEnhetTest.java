@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetServiceOld;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,17 +35,19 @@ public class OrgEnhetTest extends TestBase {
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
+    private OrgEnhetStateRepository orgEnhetStateRepository;
+    @Autowired
     private IOrgenhetService orgenhetService;
 
     @Autowired
-    private OrgEnhetStateRepository orgEnhetStateService;
+    private OrgenhetServiceOld orgenhetServiceOld;
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;
 
     @BeforeEach
     void resetOrgEnhetState() {
-        orgEnhetStateService.clear();
+        orgEnhetStateRepository.clear();
     }
 
     @Test
@@ -70,18 +73,61 @@ public class OrgEnhetTest extends TestBase {
                 .ENHETTYPE_NAVN("TYPEEE")
                 .build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2, mockedEnhet3);
-
         dvhRestConsumer.loadRessurserOgOrgEnheter();
+
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
-        }
 
-        assertEquals(3, orgenhetService.getAllEnheter().size());
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
 
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+            assertEquals(3, orgenhetService.getAllEnheter().size());
+
+            var outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+
+            var outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet2.getORGENHET_KODE(),
+                mockedEnhet2.getORGNODE_NIV(),
+                mockedEnhet2.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet2.isPresent());
+
+            assertEquals(mockedEnhet2.getORGENHET_KODE(), outputEnhet2.get().getAgressoId());
+            assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
+
+            var outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet3.getORGENHET_KODE(),
+                mockedEnhet3.getORGNODE_NIV(),
+                mockedEnhet3.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet3.isPresent());
+
+            assertEquals(mockedEnhet3.getORGENHET_KODE(), outputEnhet3.get().getAgressoId());
+            assertEquals(mockedEnhet3.getENHETTYPE_NAVN(), outputEnhet3.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet3.getORGNODE_NIV(), outputEnhet3.get().getOrgNiv());
+        }
+
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(3, orgenhetServiceOld.getAllEnheter().size());
+
+        var outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
+            mockedEnhet1.getORGENHET_KODE(),
+            mockedEnhet1.getORGNODE_NIV(),
+            mockedEnhet1.getORGENHET_NAVN()
         );
         assertTrue(outputEnhet.isPresent());
 
@@ -89,10 +135,10 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
 
-        val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
-                mockedEnhet2.getORGENHET_KODE(),
-                mockedEnhet2.getORGNODE_NIV(),
-                mockedEnhet2.getORGENHET_NAVN()
+        var outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
+            mockedEnhet2.getORGENHET_KODE(),
+            mockedEnhet2.getORGNODE_NIV(),
+            mockedEnhet2.getORGENHET_NAVN()
         );
         assertTrue(outputEnhet2.isPresent());
 
@@ -100,10 +146,10 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
 
-        val outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
-                mockedEnhet3.getORGENHET_KODE(),
-                mockedEnhet3.getORGNODE_NIV(),
-                mockedEnhet3.getORGENHET_NAVN()
+        var outputEnhet3 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
+            mockedEnhet3.getORGENHET_KODE(),
+            mockedEnhet3.getORGNODE_NIV(),
+            mockedEnhet3.getORGENHET_NAVN()
         );
         assertTrue(outputEnhet3.isPresent());
 
@@ -125,12 +171,54 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
+
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+
+            assertEquals(3, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+
+            val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet2.getORGENHET_KODE(),
+                mockedEnhet2.getORGNODE_NIV(),
+                mockedEnhet2.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet2.isPresent());
+
+            assertEquals(mockedEnhet2.getORGENHET_KODE(), outputEnhet2.get().getAgressoId());
+            assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
+
+            val outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet3.getORGENHET_KODE(),
+                mockedEnhet3.getORGNODE_NIV(),
+                mockedEnhet3.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet3.isPresent());
+
+            assertEquals(mockedEnhet3.getORGENHET_KODE(), outputEnhet3.get().getAgressoId());
+            assertEquals(mockedEnhet3.getENHETTYPE_NAVN(), outputEnhet3.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet3.getORGNODE_NIV(), outputEnhet3.get().getOrgNiv());
         }
 
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(3, orgenhetServiceOld.getAllEnheter().size());
 
-        assertEquals(3, orgenhetService.getAllEnheter().size());
-
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -141,7 +229,7 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
 
-        val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet2.getORGENHET_KODE(),
                 mockedEnhet2.getORGNODE_NIV(),
                 mockedEnhet2.getORGENHET_NAVN()
@@ -152,7 +240,7 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
 
-        val outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet3 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet3.getORGENHET_KODE(),
                 mockedEnhet3.getORGNODE_NIV(),
                 mockedEnhet3.getORGENHET_NAVN()
@@ -177,11 +265,54 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
+
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+
+            assertEquals(3, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+
+            val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet2.getORGENHET_KODE(),
+                mockedEnhet2.getORGNODE_NIV(),
+                mockedEnhet2.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet2.isPresent());
+
+            assertEquals(mockedEnhet2.getORGENHET_KODE(), outputEnhet2.get().getAgressoId());
+            assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
+
+            val outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet3.getORGENHET_KODE(),
+                mockedEnhet3.getORGNODE_NIV(),
+                mockedEnhet3.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet3.isPresent());
+
+            assertEquals(mockedEnhet3.getORGENHET_KODE(), outputEnhet3.get().getAgressoId());
+            assertEquals(mockedEnhet3.getENHETTYPE_NAVN(), outputEnhet3.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet3.getORGNODE_NIV(), outputEnhet3.get().getOrgNiv());
         }
 
-        assertEquals(3, orgenhetService.getAllEnheter().size());
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(3, orgenhetServiceOld.getAllEnheter().size());
 
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -192,7 +323,7 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
 
-        val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet2.getORGENHET_KODE(),
                 mockedEnhet2.getORGNODE_NIV(),
                 mockedEnhet2.getORGENHET_NAVN()
@@ -203,7 +334,7 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(mockedEnhet2.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
         assertEquals(mockedEnhet2.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
 
-        val outputEnhet3 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet3 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet3.getORGENHET_KODE(),
                 mockedEnhet3.getORGNODE_NIV(),
                 mockedEnhet3.getORGENHET_NAVN()
@@ -247,12 +378,32 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
+
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
+
+            assertEquals(1, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2021-08-01"), outputEnhet.get().getGyldigFom());
+            assertFalse(outputEnhet.get().getGyldigTom().isPresent());
         }
 
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(1, orgenhetServiceOld.getAllEnheter().size());
 
-        assertEquals(1, orgenhetService.getAllEnheter().size());
-
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -300,12 +451,34 @@ public class OrgEnhetTest extends TestBase {
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(3)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(2)).avikleOrgEnhet(any(), any());
+
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202112")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202202", Optional.of("202204")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 3, "202206", Optional.empty()));
+
+            assertEquals(3, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet3.getORGENHET_KODE(),
+                mockedEnhet3.getORGNODE_NIV(),
+                mockedEnhet3.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2022-06-01"), outputEnhet.get().getGyldigFom());
+            assertFalse(outputEnhet.get().getGyldigTom().isPresent());
         }
 
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(3, orgenhetServiceOld.getAllEnheter().size());
 
-        assertEquals(3, orgenhetService.getAllEnheter().size());
-
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet3.getORGENHET_KODE(),
                 mockedEnhet3.getORGNODE_NIV(),
                 mockedEnhet3.getORGENHET_NAVN()
@@ -331,29 +504,36 @@ public class OrgEnhetTest extends TestBase {
                 .ORGENHET_FRA_PERIODE(202108)
                 .build();
 
-        if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            orgEnhetStateService.putEventAggregate(
-                new OrgEnhetState(
-                    "orgenhet_FID_1",
-                    "testId",
-                    "testNavn",
-                    LocalDate.of(2021, 8, 1),
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.empty(),
-                    Optional.of("testId-testNavn-ORGENHET"),
-                    Optional.of("testId"),
-                    Optional.of("ORGNIV"),
-                    Optional.of("ORGENHET")
-            ));
-        }
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        assertEquals(1, orgenhetService.getAllEnheter().size());
+        if (unleash.isEnabled(UNLEASH_TOGGLE)) {
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.empty()));
 
-        val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+            assertEquals(1, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2021-08-01"), outputEnhet.get().getGyldigFom());
+            assertFalse(outputEnhet.get().getGyldigTom().isPresent());
+
+        }
+
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(1, orgenhetServiceOld.getAllEnheter().size());
+
+        val outputEnhet = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -380,13 +560,34 @@ public class OrgEnhetTest extends TestBase {
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+            verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
+
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202108", Optional.of("202201")));
+
+            assertEquals(1, orgenhetService.getAllEnheter().size());
+
+            val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet2.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet2.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet2.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet2.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2021-08-01"), outputEnhet2.get().getGyldigFom());
+            assertTrue(outputEnhet2.get().getGyldigTom().isPresent());
+            assertEquals(LocalDate.parse("2022-01-31"), outputEnhet2.get().getGyldigTom().get());
         }
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        assertEquals(1, orgenhetServiceOld.getAllEnheter().size());
 
-        assertEquals(1, orgenhetService.getAllEnheter().size());
-
-        val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -429,53 +630,40 @@ public class OrgEnhetTest extends TestBase {
             verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
 
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "orgenhet_FID_1",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2021, 6, 1),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "orgenhet_FID_2",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2020, 8, 1),
-                            Optional.of(LocalDate.of(2020, 12, 31)),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202012")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202106", Optional.empty()));
 
-
-            val allEnheter = orgEnhetStateService.getAll();
+            var allEnheter = orgenhetService.getAllEnheter();
             assertEquals(2, allEnheter.size());
-            val outputEnhet = orgEnhetStateService.findNewestUniqueAgressoId("testId-testNavn-ORGENHET");
-            assertTrue(outputEnhet.isPresent());
-            assertEquals(LocalDate.parse("2021-06-01"), outputEnhet.get().gyldigFom());
-            assertFalse(outputEnhet.get().gyldigTom().isPresent());
 
-            var historicOutputEnhet = orgEnhetStateService.findByFid("orgenhet_FID_2");
+            var outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet1.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet1.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2021-06-01"), outputEnhet1.get().getGyldigFom());
+            assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
+
+            val historicFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findFirst().get().getFid();
+
+            var historicOutputEnhet = orgenhetService.getByFid(historicFid);
             assertTrue(historicOutputEnhet.isPresent());
-            assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().gyldigTom().get());
+            assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom().get());
         }
-        var allEnheter = orgenhetService.getAllEnheter();
+
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        var allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
-        var outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        var outputEnhet1 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -490,7 +678,7 @@ public class OrgEnhetTest extends TestBase {
 
         val historicFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findFirst().get().getFid();
 
-        var historicOutputEnhet = orgenhetService.getByFid(historicFid);
+        var historicOutputEnhet = orgenhetServiceOld.getByFid(historicFid);
         assertTrue(historicOutputEnhet.isPresent());
         assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom().get());
 
@@ -505,35 +693,32 @@ public class OrgEnhetTest extends TestBase {
             verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
             verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "orgenhet_FID_1",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2020, 8, 1),
-                            Optional.of(LocalDate.of(2021, 2, 28)),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202102")));
 
+            allEnheter = orgenhetService.getAllEnheter();
+            assertEquals(2, allEnheter.size());
 
-            val allStateEnheter = orgEnhetStateService.getAll();
-            assertEquals(2, allStateEnheter.size());
-            assertEquals(2, orgEnhetStateService.findAllByUniqueAgressoId("testId-testNavn-ORGENHET").size());
+            var outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
 
-            var historicOutputStateEnhet = orgEnhetStateService.findByFid("orgenhet_FID_1");
-            assertTrue(historicOutputStateEnhet.isPresent());
-            assertEquals(LocalDate.parse("2021-02-28"), historicOutputStateEnhet.get().gyldigTom().get());
+            var historicStateFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet2.get().getFid())).findFirst().get().getFid();
+
+            historicOutputEnhet = orgenhetService.getByFid(historicStateFid);
+            assertTrue(historicOutputEnhet.isPresent());
+            assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom().get());
         }
-        allEnheter = orgenhetService.getAllEnheter();
+
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
-        var outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        var outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -541,7 +726,7 @@ public class OrgEnhetTest extends TestBase {
 
         var historicStateFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet2.get().getFid())).findFirst().get().getFid();
 
-        historicOutputEnhet = orgenhetService.getByFid(historicStateFid);
+        historicOutputEnhet = orgenhetServiceOld.getByFid(historicStateFid);
         assertTrue(historicOutputEnhet.isPresent());
         assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom().get());
     }
@@ -570,12 +755,6 @@ public class OrgEnhetTest extends TestBase {
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        val outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
-                mockedEnhet1.getORGENHET_KODE(),
-                mockedEnhet1.getORGNODE_NIV(),
-                mockedEnhet1.getORGENHET_NAVN()
-        );
-
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             // DvhEnheter er slått samme der det er overlapp
             // Prossesering av dvhEnheter er seneste start dato først (start dato decend)
@@ -585,33 +764,38 @@ public class OrgEnhetTest extends TestBase {
             verify(orgEnhetCommandService, times(1)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(0)).avikleOrgEnhet(any(), any());
 
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "FID_1",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2020, 8, 1),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
 
-            var allEnheter = orgEnhetStateService.getAll();
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
+
+            var allEnheter = orgenhetService.getAllEnheter();
             assertEquals(1, allEnheter.size());
 
-            var stateEnehet1 = orgEnhetStateService.findNewestUniqueAgressoId("testId-testNavn-ORGENHET");
+            val outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+
             assertTrue(outputEnhet1.isPresent());
-            assertEquals(LocalDate.parse("2020-08-01"), stateEnehet1.get().gyldigFom());
-            assertFalse(stateEnehet1.get().gyldigTom().isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet1.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2020-08-01"), outputEnhet1.get().getGyldigFom());
+            assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
         }
-        // Uten Toggle
-        var allEnheter = orgenhetService.getAllEnheter();
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        var allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(1, allEnheter.size());
+
+        val outputEnhet1 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
+            mockedEnhet1.getORGENHET_KODE(),
+            mockedEnhet1.getORGNODE_NIV(),
+            mockedEnhet1.getORGENHET_NAVN()
+        );
 
         assertTrue(outputEnhet1.isPresent());
 
@@ -624,16 +808,19 @@ public class OrgEnhetTest extends TestBase {
         mockedEnhet1.setORGENHET_TIL_PERIODE(202011);
         dvhOrgenhetMockUtils.createEmptyResponse();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
+
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            when(orgEnhetCommandService.opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))))).thenReturn("FID_2");
+            when(orgEnhetCommandService.opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))))).thenReturn("FID_1");
         }
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
-            var stateEnehet1 = orgEnhetStateService.findNewestUniqueAgressoId("testId-testNavn-ORGENHET");
-            final String firstEnhetFID = stateEnehet1.get().fid();
-
+            val outputEnhet1Before = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
 
             // Før ny innlesning - En enhet i state : [2020.08 - ]
             // Prossesering av dvhEnheter er seneste start dato først (start dato decend). Altså mock 2 først
@@ -647,47 +834,39 @@ public class OrgEnhetTest extends TestBase {
             //      FID_2: [2020.08 - 2020.11]
 
             verify(orgEnhetCommandService, times(1 + 1)).opprettOrgEnhet(argThat(arg -> arg.gyldigFom().equals(LocalDate.of(2020,8,1))));
-            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(argThat(arg -> !arg.equals(firstEnhetFID)), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
+            verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(argThat(arg -> arg.equals("FID_1")), argThat(arg -> arg.gyldigTom().equals(LocalDate.of(2020,11,30))));
             verify(orgEnhetCommandService, times(1)).korrigerOrgEnhet(any(), any());
 
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "FID_1",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2021, 1, 1),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "FID_2",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2020, 8, 1),
-                            Optional.of(LocalDate.of(2020, 11, 30)),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202101", Optional.empty()));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202008", Optional.of("202011")));
 
-            var allStateEnheter = orgEnhetStateService.getAll();
-            assertEquals(2, allStateEnheter.size());
+            allEnheter = orgenhetService.getAllEnheter();
+            assertEquals(2, allEnheter.size());
+
+            val outputEnhet1After = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet1After.isPresent());
+
+            assertEquals(outputEnhet1Before.get().getFid(), outputEnhet1After.get().getFid());
+            assertEquals(LocalDate.parse("2021-01-01"), outputEnhet1After.get().getGyldigFom());
+            assertFalse(outputEnhet1After.get().getGyldigTom().isPresent());
+
+            val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1After.get().getFid())).findAny();
+            assertTrue(outputEnhet3.isPresent());
+            assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
+            assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
         }
-        allEnheter = orgenhetService.getAllEnheter();
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
-        val outputEnhet2 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet2 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -732,40 +911,19 @@ public class OrgEnhetTest extends TestBase {
             verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
 
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "orgenhet_FID_1",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2021, 1, 1),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
-            orgEnhetStateService.putEventAggregate(
-                    new OrgEnhetState(
-                            "orgenhet_FID_2",
-                            "testId",
-                            "testNavn",
-                            LocalDate.of(2020, 8, 1),
-                            Optional.of(LocalDate.of(2020, 11, 30)),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.empty(),
-                            Optional.of("testId-testNavn-ORGENHET"),
-                            Optional.of("testId"),
-                            Optional.of("ORGNIV"),
-                            Optional.of("ORGENHET")
-                    ));
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.of("202011")));
+            orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 2, "202101", Optional.empty()));
+
+
+            var allEnheter = orgenhetService.getAllEnheter();
+            assertEquals(2, allEnheter.size());
         }
 
-
-        var allEnheter = orgenhetService.getAllEnheter();
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        var allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
         mockedEnhet1.setORGENHET_TIL_PERIODE(202012);
@@ -776,12 +934,38 @@ public class OrgEnhetTest extends TestBase {
         if (unleash.isEnabled(UNLEASH_TOGGLE)) {
             verify(orgEnhetCommandService, times(2)).opprettOrgEnhet(any());
             verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), any());
-        }
 
-        allEnheter = orgenhetService.getAllEnheter();
+            // Since stream infrastructure is not up, the streams pipeline has not created state.
+            // Lets do it manually, to test getmethods below.
+            // This testing should be split up
+            // No changes!
+
+            allEnheter = orgenhetService.getAllEnheter();
+            assertEquals(2, allEnheter.size());
+
+            val outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+                mockedEnhet1.getORGENHET_KODE(),
+                mockedEnhet1.getORGNODE_NIV(),
+                mockedEnhet1.getORGENHET_NAVN()
+            );
+            assertTrue(outputEnhet1.isPresent());
+
+            assertEquals(mockedEnhet1.getORGENHET_KODE(), outputEnhet1.get().getAgressoId());
+            assertEquals(mockedEnhet1.getENHETTYPE_NAVN(), outputEnhet1.get().getAgressoOrgenhetType());
+            assertEquals(mockedEnhet1.getORGNODE_NIV(), outputEnhet1.get().getOrgNiv());
+            assertEquals(LocalDate.parse("2021-01-01"), outputEnhet1.get().getGyldigFom());
+            assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
+
+            val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findAny();
+            assertTrue(outputEnhet3.isPresent());
+            assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
+            assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
+        }
+        /// !! NB Duplicate code to test old service. Remove when removing old code
+        allEnheter = orgenhetServiceOld.getAllEnheter();
         assertEquals(2, allEnheter.size());
 
-        val outputEnhet1 = orgenhetService.getEnhetByAgressoIdNivaAndName(
+        val outputEnhet1 = orgenhetServiceOld.getEnhetByAgressoIdNivaAndName(
                 mockedEnhet1.getORGENHET_KODE(),
                 mockedEnhet1.getORGNODE_NIV(),
                 mockedEnhet1.getORGENHET_NAVN()
@@ -799,4 +983,6 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
         assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
     }
+
+
 }

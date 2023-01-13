@@ -10,7 +10,14 @@ import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseR
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,10 +33,14 @@ public class OrgenhetServiceOld implements IOrgenhetService {
         this.hendelseService = hendelseService;
     }
 
+    @Override
+    public Optional<IOrgenhet> getById(String id) {
+        return getByFid(id);
+    }
 
     @Override
-    public Optional<IOrgenhet> getByFid(UUID fid) {
-        return convert(orgenhetHendelseRepository.findAllByFunksjonellId(fid).stream().map(hendelseService::convert).toList());
+    public Optional<IOrgenhet> getByFid(String fid) {
+        return convert(orgenhetHendelseRepository.findAllByFunksjonellId(UUID.fromString(fid)).stream().map(hendelseService::convert).toList());
     }
 
     @Override
@@ -82,6 +93,11 @@ public class OrgenhetServiceOld implements IOrgenhetService {
                 navn,
                 HendelseDataType.ORGENHET_V1.getDataType()
         ).stream()).toList();
+    }
+
+    @Override
+    public Map<String, IOrgenhet> getByIdBulk(List<String> idList) {
+        return getByIdBulk(idList);
     }
 
     @Override

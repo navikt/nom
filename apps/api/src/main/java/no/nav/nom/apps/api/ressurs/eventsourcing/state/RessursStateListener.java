@@ -73,7 +73,6 @@ public class RessursStateListener {
         this.luceneService.invalidateRessurs(ressursState.navident());
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);
-
         }
     }
 

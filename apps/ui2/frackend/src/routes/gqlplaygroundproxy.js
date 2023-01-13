@@ -1,8 +1,10 @@
 const graphiqlSrc = {
-    reactdev: "https://unpkg.com/react@16/umd/react.development.js",
-    reactdomdev: "https://unpkg.com/react-dom@16/umd/react-dom.development.js",
-    graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
-    graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
+    reactdev: "https://unpkg.com/react@18.2.0/umd/react.development.js",
+    reactdomdev: "https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js",
+    graphiqlcss: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
+    graphiqlcssMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css.map",
+    graphiqljs: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js",
+    graphiqljsMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js.map",
 };
 
 const extractPath = (url) => url.substring("https://unpkg.com".length);
@@ -28,7 +30,7 @@ async function initVendorStorage() {
         }
     } catch (e) {
         vendorStorage = {};
-        console.error("Could not vendor graphql js and css from unpkg.com");
+        console.error("Could not vendor graphql js and css from unpkg.com", e);
     }
 }
 
@@ -80,15 +82,15 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
         subscriptionUrl,
     });
 
-    ReactDOM.render(
-        React.createElement(GraphiQL, {
+    const root = ReactDOM.createRoot(document.getElementById('graphiql'));
+    root.render(
+      React.createElement(GraphiQL, {
             fetcher: gqlFetcher,
             defaultVariableEditorOpen: true,
             headerEditorEnabled: true,
             shouldPersistHeaders: true
-        }),
-        document.getElementById('graphiql'),
-    );
+        })
+    )
 </script>
 </body>
 </html>
@@ -111,6 +113,8 @@ export function setupGqlPlaygroundProxy(app) {
         app.get("/vendor" + path, (req, res) => {
             const mimeType = path.endsWith(".css")
                 ? "text/css"
+                : path.endsWith(".map")
+                ? "appllication/json"
                 : "application/javascript";
             res.type(mimeType).send(vendorStorage[s]);
         });

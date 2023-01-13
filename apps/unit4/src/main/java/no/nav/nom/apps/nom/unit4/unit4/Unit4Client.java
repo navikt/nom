@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.apps.nom.unit4.TokenRepository;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4PatchRequest;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -70,6 +71,47 @@ public class Unit4Client {
         } catch (WebClientException wce) {
             log.warn("Unit4 createRessurs request error", wce);
             log.warn(SECURE_LOGS, "Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}", appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
+            throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
+        }
+    }
+
+    public void patchEmployee(String personId, List<Unit4PatchRequest> unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
+        val body = objectMapper.writeValueAsString(unit4PatchRequest);
+        val url = appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT+ "/" + personId;
+
+        try {
+            webClient.patch()
+                    .uri(url)
+                    .headers(httpHeaders -> {
+                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                        httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
+                        httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                    })
+                    .bodyValue(body)
+                    .retrieve()
+                    .toEntity(JsonNode.class)
+                    .block();
+
+        } catch (WebClientResponseException wce) {
+            HttpStatus httpStatus = wce.getStatusCode();
+            log.error(SECURE_LOGS, "Error patching to Unit4[{}], dumping dto({}): {} ", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
+
+            logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
+
+            if (httpStatus == HttpStatus.CONFLICT) {
+                throw new Unit4ConflictException("Ressurs finnes i Unit4. (HttpStatus.CONFLICT)");
+            } else if (httpStatus == HttpStatus.NOT_FOUND){
+                throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4. HttpsStatus: $s".formatted(httpStatus.toString()));
+            } else if (httpStatus.is4xxClientError()) {
+                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            } else if (httpStatus.is5xxServerError()) {
+                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            } else {
+                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
+            }
+        } catch (WebClientException wce) {
+            log.warn("Unit4 createRessurs request error", wce);
+            log.warn(SECURE_LOGS, "Unit4 createRessurs request error for Unit4[{}], dumping dto({}): {}", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
             throw new Unit4UnknownException("Annen ukjent feil ved request til Unit4");
         }
     }

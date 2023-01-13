@@ -8,7 +8,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface IOrgenhetService {
-    Optional<IOrgenhet> getByFid(UUID fid);
+    Optional<IOrgenhet> getById(String id);
+
+    Optional<IOrgenhet> getByFid(String fid);
 
     Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name);
 
@@ -23,6 +25,8 @@ public interface IOrgenhetService {
     List<IOrgenhet> matchByAgressoId(String agressoId);
 
     List<IOrgenhet> matchByNavn(String navn);
+
+    Map<String, IOrgenhet> getByIdBulk(List<String> idList);
 
     Map<String, IOrgenhet> getByFidBulk(List<String> fidList);
 }

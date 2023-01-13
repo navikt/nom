@@ -1,0 +1,31 @@
+[
+  {
+    "FJERN DENNE!!!": "Content-type i request må være application/json-patch+json",
+    "op": "AddOrReplaceById",
+    "path": "employments",
+    "value": {
+      "positionId": "265",
+      "startDate": "2020-09-01T00:00:00.000",
+      "endDate": "2099-12-31T00:00:00.000",
+      "status": "N",
+      "RelatedValues": [
+        {
+          "positionId": "265",
+          "relationGroup": "",
+          "status": "N",
+          "isDefaulted": false,
+          "useInFixedPd": false,
+          "useInAccountingCategories": false,
+          "useInRateCalculation": false,
+          "useInReport": false,
+          "relationId": "M0",
+          "relationName": "ORGENHET",
+          "relatedValue": "0101001",
+          "percentage": 100.0,
+          "dateFrom": "2022-05-01T00:00:00.000",
+          "dateTo": "2099-12-31T00:00:00.000"
+        }
+      ]
+    }
+  }
+]

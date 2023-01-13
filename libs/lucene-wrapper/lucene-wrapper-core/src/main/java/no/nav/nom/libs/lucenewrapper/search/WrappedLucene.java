@@ -35,7 +35,7 @@ public class WrappedLucene {
     private final Map<Class<?>, IEntityIndexer<?, ?>> indexers;
 
     private final Map<String,Class<?>> mapTypestrToEntclass = new HashMap<>();
-    private static final int RESULT_SIZE = 30;
+    public static final int DEFAULT_RESULT_SIZE = 30;
 
     public WrappedLucene(List<IEntityIndexer<?, ?>> indexers) {
         this.bbdir = new ByteBuffersDirectory();
@@ -104,17 +104,23 @@ public class WrappedLucene {
 
     }
 
-
     public List<SearchResult> search(String searchterms) {
         return search(searchterms, new QueryFilterContext());
     }
 
     public List<SearchResult> search(String searchterms, QueryFilterContext qryFilterCtx) {
+        return search(searchterms, qryFilterCtx, DEFAULT_RESULT_SIZE);
+    }
+
+    public List<SearchResult> search(String searchterms, QueryFilterContext qryFilterCtx, Integer resultLimit) {
         verifyFilterCompatability(qryFilterCtx);
-        var out = new ArrayList<SearchResult>(RESULT_SIZE);
+        var out = new ArrayList<SearchResult>();
         try {
             IndexReader ir = DirectoryReader.open(bbdir);
             IndexSearcher is = new IndexSearcher(ir);
+            var docLimit = resultLimit != null ? resultLimit : ir.maxDoc();
+
+            out = new ArrayList<>(docLimit);
 
             var bqb = new BooleanQuery.Builder();
 
@@ -130,16 +136,16 @@ public class WrappedLucene {
 
             var bq = bqb.build();
 
-            var res = is.search(bq, RESULT_SIZE);
+            var res = is.search(bq, docLimit);
             for (var d : res.scoreDocs) {
                 SearchResult searchRes = getSearchResult(ir, d);
                 out.add(searchRes);
             }
 
         } catch (IOException ignored) {
+            logger.warn("Possible no indexes initiated yet", ignored);
             return List.of();
         } catch (ParseException e) {
-//            throw new RuntimeException(e);
             logger.warn(e.getMessage());
             return out;
         }

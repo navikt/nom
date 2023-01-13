@@ -4,7 +4,7 @@ import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import org.springframework.data.web.ProjectedPayload;
 
 @ProjectedPayload
-public interface OrgEnhetSearchFilter {
+public interface OrgEnhetSearchFilter extends ResultLimit {
     GyldigTomSelection getGyldigTomSelection();
 
     OrgnivSelection getOrgnivSelection();
@@ -47,6 +47,11 @@ public interface OrgEnhetSearchFilter {
             @Override
             public OrgnivSelection getOrgnivSelection() {
                 return OrgnivSelection.ALLE;
+            }
+
+            @Override
+            public Limit getLimit() {
+                return Limit.LIMIT_30;
             }
         };
     }

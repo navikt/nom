@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql;
 
+import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -27,16 +28,16 @@ public class MappingUtils {
                 .build();
     }
 
-    public static OrgEnhet toOrgEnhet(OrgEnhetState orgEnhetState){
+    public static OrgEnhet toOrgEnhet(IOrgenhet orgEnhet){
         return OrgEnhet.builder()
-                .id(orgEnhetState.id())
-                .agressoId(orgEnhetState.agressoId().orElse(null))
-                .orgNiv(orgEnhetState.agressoOrgNivaa().orElse(null))
-                .navn(orgEnhetState.navn())
-                .agressoOrgenhetType(orgEnhetState.agressoOrgenhetType().orElse(null))
-                .gyldigFom(orgEnhetState.gyldigFom())
-                .gyldigTom(orgEnhetState.gyldigTom().orElse(null))
-                .orgEnhetsKategori(orgEnhetState.orgEnhetsKategori().orElse(null))
+                .id(orgEnhet.getId())
+                .agressoId(orgEnhet.getAgressoId())
+                .orgNiv(orgEnhet.getOrgNiv())
+                .navn(orgEnhet.getNavn())
+                .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())
+                .gyldigFom(orgEnhet.getGyldigFom())
+                .gyldigTom(orgEnhet.getGyldigTom().orElse(null))
+                .orgEnhetsKategori(orgEnhet.getOrgEnhetsKategori().orElse(null))
                 .build();
     }
 

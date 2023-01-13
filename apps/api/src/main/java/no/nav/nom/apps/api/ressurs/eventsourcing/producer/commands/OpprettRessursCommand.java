@@ -9,12 +9,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public record OpprettRessursCommand(
-        String personident,
-        String navident,
-        Optional<Person> pdlPerson,
-        Sektor sektor,
-        Visningsnavn visningsnavn,
-        InputMetadata inputMetadata,
-        LocalDate startdato,
-        String orgEnhet
-        ) implements RessursCommand {}
+    String personident,
+    String navident,
+    Optional<Person> pdlPerson,
+    Sektor sektor,
+    Visningsnavn visningsnavn,
+    InputMetadata inputMetadata,
+    LocalDate startdato,
+    String orgEnhetId
+) implements RessursCommand {}

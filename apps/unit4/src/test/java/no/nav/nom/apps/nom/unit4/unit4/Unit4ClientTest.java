@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.unit4.unit4;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
@@ -25,6 +26,9 @@ class Unit4ClientTest {
 
     @Autowired
     Unit4Client unit4Client;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     @SneakyThrows

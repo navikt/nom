@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgenhet.implementations.postgresql;
 import lombok.Value;
 import no.nav.nom.apps.api.hendelse.contract.IHendelse;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -42,8 +42,13 @@ public class EventBasedOrgenhet implements IOrgenhet {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public UUID getFid() {
-        return hendelser.stream().findFirst().map(IHendelse::getFid).orElseThrow();
+    public String getFid() {
+        return hendelser.stream().findFirst().map(IHendelse::getFid).orElseThrow().toString();
+    }
+
+    @Override
+    public String getId() {
+        return getFid();
     }
 
     @Override

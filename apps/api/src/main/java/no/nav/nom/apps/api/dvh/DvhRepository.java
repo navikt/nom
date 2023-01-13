@@ -10,14 +10,12 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;

@@ -37,7 +37,14 @@ public class OrgenhetService implements IOrgenhetService {
     }
 
     @Override
-    public Optional<IOrgenhet> getByFid(UUID fid) {
+    public Optional<IOrgenhet> getById(String id) {
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getById(id) :
+            orgenhetServiceOld.getById(id);
+    }
+
+    @Override
+    public Optional<IOrgenhet> getByFid(String fid) {
         return unleash.isEnabled(UNLEASH_TOGGLE) ?
             orgenhetServiceNewFromEvtsrc.getByFid(fid) :
             orgenhetServiceOld.getByFid(fid);
@@ -90,6 +97,13 @@ public class OrgenhetService implements IOrgenhetService {
         return unleash.isEnabled(UNLEASH_TOGGLE) ?
             orgenhetServiceNewFromEvtsrc.matchByNavn(navn) :
             orgenhetServiceOld.matchByNavn(navn);
+    }
+
+    @Override
+    public Map<String, IOrgenhet> getByIdBulk(List<String> idList) {
+        return unleash.isEnabled(UNLEASH_TOGGLE) ?
+            orgenhetServiceNewFromEvtsrc.getByIdBulk(idList) :
+            orgenhetServiceOld.getByIdBulk(idList);
     }
 
     @Override

@@ -23,6 +23,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEn
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetServiceOld;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.EventBasedOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.postgresql.OrgenhetHendelseRepository;
 import no.nav.nom.apps.api.postgresql.GenericStorageElement;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -52,7 +54,7 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhDataLoader {
 
-    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing";
+    public static final String UNLEASH_TOGGLE = "nom.orgenhet.eventsourcing.load";
     private final Unleash unleash;
 
     private final TokenRepository tokenRepository;
@@ -62,6 +64,7 @@ public class DvhDataLoader {
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
     private final OrgenhetService orgenhetService;
+    private final OrgenhetServiceOld orgenhetServiceOld;
     private final OrgEnhetStateRepository orgEnhetStateService;
     private final OrgenhetHendelseRepository orgenhetHendelseRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
@@ -129,7 +132,7 @@ public class DvhDataLoader {
                     }
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        val persistedEnheterOld = orgenhetService.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
+        val persistedEnheterOld = orgenhetServiceOld.getAllEnheter().stream().collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId));
 
         val hendelserToSave = new LinkedList<IHendelse>();
         val fidMarkedForEndDate = new HashMap<String, LocalDate>();
@@ -350,7 +353,7 @@ public class DvhDataLoader {
 
         if (!hendelse.isEmpty()) {
             return hendelseService.createEndreHendelse(
-                    eventBasedOrgenhet.getFid(),
+                    UUID.fromString(eventBasedOrgenhet.getFid()),
                     hendelse,
                     HendelseMetadataSerialize.builder()
                             .opprettetAv(opprettetAv)

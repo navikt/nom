@@ -600,3 +600,11 @@ query HentRessurs($navident: String) {
     }
   }
 }
+
+query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
+    searchOrgEnhet(term: $term, filter: $filter) {
+        id,
+        agressoId,
+        navn
+    }
+}

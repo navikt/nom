@@ -36,13 +36,13 @@ public class GraphQLSearchController {
     @QueryMapping("searchRessurs")
     public List<Ressurs> searchRessurs(@Argument("term") String term, @Argument("filter") Optional<RessursSearchFilter> filter, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return searchResolver.searchRessurs(term,filter.orElseGet(RessursSearchFilter::alle));
+        return searchResolver.searchRessurs(term, filter.orElseGet(RessursSearchFilter::alle));
     }
 
     @QueryMapping("searchOrgEnhet")
     public List<OrgEnhet> searchOrgEnhet(@Argument("term") String term, @Argument("filter") Optional<OrgEnhetSearchFilter> filter, DataFetchingEnvironment environment) {
         counter.count(environment);
-        return searchResolver.searchOrgenhet(term,filter.orElseGet(OrgEnhetSearchFilter::alle));
+        return searchResolver.searchOrgenhet(term, filter.orElseGet(OrgEnhetSearchFilter::alle));
     }
 
 }
