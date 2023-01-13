@@ -18,6 +18,9 @@ spec:
       application: nom-ressurser
       access: readwrite
     - team: nom
+      application: team-catalog-backend
+      access: read
+    - team: nom
       application: skjermede-personer
       access: read
     - team: org
