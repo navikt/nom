@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;

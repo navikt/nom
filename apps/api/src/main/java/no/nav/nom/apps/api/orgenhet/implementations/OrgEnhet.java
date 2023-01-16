@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgenhet.implementations;
 
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 

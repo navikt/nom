@@ -1,7 +1,5 @@
 package no.nav.nom.apps.api.kobling.contract;
 
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.common.NomProxyRestClient;
 import no.nav.nom.apps.api.common.security.AuthenticationProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;

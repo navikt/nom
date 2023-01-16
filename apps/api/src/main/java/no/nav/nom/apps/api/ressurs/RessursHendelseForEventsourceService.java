@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -29,18 +29,17 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class RessursHendelseForEventsourceService {
-    private final RessursStateService ressursStateService;
+    private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
-
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
         log.info("Ressurser to process " + dvhRessurs.size());
         log.info("Sender meldinger ut på kafka");
-        log.info("State repository size " + ressursStateService.getAll().size());
+        log.info("State repository size " + ressursStateRepository.getAll().size());
         Map<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
 
         dvhRessurs.forEach(ressurs -> {
-            val ressursByPersonident = ressursStateService.findByPersonident(ressurs.getPersonIdent());
+            val ressursByPersonident = ressursStateRepository.findByPersonident(ressurs.getPersonIdent());
 
             ressursByPersonident.ifPresentOrElse((r) -> createEndreHendelse(r, ressurs), () -> {
                 final var taskEvent = opprettRessurs(ressurs);

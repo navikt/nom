@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhet.contract;
+package no.nav.nom.apps.api.orgenhet;
 
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 

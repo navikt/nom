@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
 public class RessursStateListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String stateTopic;
-    private final RessursStateService ressursStateService;
+    private final RessursStateRepository ressursStateRepository;
 
     private final Map<String, CompletableFuture<RessursState>> waitingMapByFid = Collections.synchronizedMap(new HashMap<>());
 
@@ -41,13 +41,13 @@ public class RessursStateListener {
 
     public RessursStateListener(
         @Value("${app.kafka.ressurs.stateTopic}") String stateTopic,
-        RessursStateService ressursStateService,
+        RessursStateRepository ressursStateRepository,
         Admin adminClient, LuceneService luceneService,
         KafkaAdmin admin,
         KafkaProperties kafkaProperties
     ) {
         this.stateTopic = stateTopic;
-        this.ressursStateService = ressursStateService;
+        this.ressursStateRepository = ressursStateRepository;
         this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
         this.luceneService = luceneService;
@@ -65,11 +65,11 @@ public class RessursStateListener {
             processMessage(it.key(), it.value());
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished. {} ressurser", ressursStateService.count()));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka RessursState listener initial load finished. {} ressurser", ressursStateRepository.count()));
     }
 
     private void processMessage(String key, RessursState ressursState) {
-        ressursStateService.putEventAggregate(ressursState);
+        ressursStateRepository.putEventAggregate(ressursState);
         this.luceneService.invalidateRessurs(ressursState.navident());
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);

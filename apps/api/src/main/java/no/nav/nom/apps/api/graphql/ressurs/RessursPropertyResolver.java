@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.execution.DataFetcherResult;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.core.env.Environment;
@@ -21,14 +21,14 @@ public class RessursPropertyResolver {
 
     private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
 
-    private final RessursStateService ressursStateService;
+    private final RessursStateRepository ressursStateRepository;
     private final boolean sendDummydata;
 
     public RessursPropertyResolver(
-            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env, RessursStateService ressursStateService
+            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env, RessursStateRepository ressursStateRepository
     ) {
         this.adRessursBatchLoader = activeDirectoryRessursBatchLoader;
-        this.ressursStateService = ressursStateService;
+        this.ressursStateRepository = ressursStateRepository;
         var naisClientId = env.getProperty("NAIS_CLUSTER_NAME");
         // Sliter med at AD fungerer dårlig i dev-miljø.
         sendDummydata = naisClientId != null && naisClientId.startsWith("dev");

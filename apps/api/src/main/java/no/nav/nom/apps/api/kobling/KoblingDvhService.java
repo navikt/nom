@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.kobling;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.kobling.contract.Kobling;
 import no.nav.nom.apps.api.kobling.contract.KoblingService;
-import no.nav.nom.apps.api.orgenhet.contract.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
