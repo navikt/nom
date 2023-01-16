@@ -55,40 +55,6 @@ public class SearchResolver {
                 }
             })
             .toList();
-
-
-
-
-        /*Stream<OrgEnhet> orgenheter;
-        Stream<Object> ressurser;
-
-        if (unleash.isEnabled(UNLEASH_LUCENE_TOGGLE)) {
-            var matchedNavidentsSorted = luceneService.search(term_inp).stream()
-                    .filter(luceneService::filterRessursResult)
-                    .map(SearchResult::id).toList();
-            var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted);
-            ressurser = matchedNavidentsSorted.stream().map(r -> MappingUtils.toRessurs(matchedNavidentsMap.get(r)));
-
-            var matchedFidsSorted = luceneService.search(term_inp).stream()
-                    .filter(luceneService::filterOrgenhetResult)
-                    .map(SearchResult::id).toList();
-            Map<String, IOrgenhet> matchedFidsMap = orgenhetService.getByFidBulk(matchedFidsSorted);
-            orgenheter = matchedFidsSorted.stream().map(ioe -> OrgEnhetResolver.convertToOrgEnhet(matchedFidsMap.get(ioe)));
-        } else {
-            var matchedOrgenhetIds = Stream.concat(
-                            orgenhetService.matchByAgressoId(term_inp).stream(),
-                            orgenhetService.matchByNavn(term_inp).stream()
-                    )
-                    .map(IOrgenhet::getAgressoId)
-                    .collect(toSet());
-
-            orgenheter = orgenhetService.findEnheterByAgressoIdIn(matchedOrgenhetIds).stream().map(OrgEnhetResolver::convertToOrgEnhet);
-
-            ressurser = ressursService.matchByNavident(term_inp).stream().map(MappingUtils::toRessurs);
-        }
-
-        return Stream.concat(orgenheter, ressurser).toList();*/
-
     }
 
 

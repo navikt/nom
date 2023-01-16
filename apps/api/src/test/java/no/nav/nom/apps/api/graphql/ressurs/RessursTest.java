@@ -121,31 +121,17 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        // Gammel Search - FeatureToggle of
-        enableOrgEnhetEventSource(false);
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var responseOld = postForResource("ressurs/scenario42.graphql");
-
-        final var ressursOld = responseOld.path("ressurs").entity(JsonNode.class).get();
-        final var actualOrganisasjonsEnhetIdOld = ressursOld.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
-        assertEquals("testId2", actualOrganisasjonsEnhetIdOld);
-
-        // Ny Search - FeatureToggle on
-        enableOrgEnhetEventSource(true);
-
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
-        final var responseNew = postForResource("ressurs/scenario42.graphql");
+        final var response = postForResource("ressurs/scenario42.graphql");
 
-        final var ressursNew = responseNew.path("ressurs").entity(JsonNode.class).get();
-        final var actualOrganisasjonsEnhetIdNew = ressursNew.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
-        assertEquals("testId2", actualOrganisasjonsEnhetIdNew);
+        final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
+        final var actualOrganisasjonsEnhetId = ressurs.get("koblinger").get(0).get("organisasjonsenhet").get("agressoId").asText();
+        assertEquals("testId2", actualOrganisasjonsEnhetId);
     }
 
     @Test
@@ -300,31 +286,17 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        // Gammel Search - FeatureToggle of
-        enableOrgEnhetEventSource(false);
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var responseOld = postForResource("ressurs/scenario6.graphql");
-
-        final var lederForOld = responseOld.path("ressurs.lederFor").entity(JsonNode.class).get();
-        assertThat(lederForOld.size()).isEqualTo(1);
-        assertThat(lederForOld.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
-
-        // Ny Search - FeatureToggle on
-        enableOrgEnhetEventSource(true);
-
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
-        final var responseNew = postForResource("ressurs/scenario6.graphql");
+        final var response = postForResource("ressurs/scenario6.graphql");
 
-        final var lederForNew = responseNew.path("ressurs.lederFor").entity(JsonNode.class).get();
-        assertThat(lederForNew.size()).isEqualTo(1);
-        assertThat(lederForNew.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
+        final var lederFor = response.path("ressurs.lederFor").entity(JsonNode.class).get();
+        assertThat(lederFor.size()).isEqualTo(1);
+        assertThat(lederFor.get(0).get("organisasjonsenhet").get("agressoId").textValue()).isEqualTo("testId1");
     }
 
     @Test
@@ -340,31 +312,17 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        // Gammel Search - FeatureToggle of
-        enableOrgEnhetEventSource(false);
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var responseOld = postForResource("ressurs/scenario7.graphql");
-
-        final var ledereOld = responseOld.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledereOld.size()).isEqualTo(1);
-        assertThat(ledereOld.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
-
-        // Ny Search - FeatureToggle on
-        enableOrgEnhetEventSource(true);
-
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
-        final var responseNew = postForResource("ressurs/scenario7.graphql");
+        final var response = postForResource("ressurs/scenario7.graphql");
 
-        final var ledereNew = responseNew.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledereNew.size()).isEqualTo(1);
-        assertThat(ledereNew.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+        final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
+        assertThat(ledere.size()).isEqualTo(1);
+        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
     }
 
     @Test
@@ -382,20 +340,6 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
-        // Gammel Search - FeatureToggle of
-        enableOrgEnhetEventSource(false);
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
-
-        final var responseOld = postForResource("ressurs/scenario71.graphql");
-
-        final var ledereOld = responseOld.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledereOld.size()).isEqualTo(1);
-        assertThat(ledereOld.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
-
-        // Ny Search - FeatureToggle on
-        enableOrgEnhetEventSource(true);
-
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
@@ -403,11 +347,11 @@ class RessursTest extends RessursTestBase {
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
-        final var responseNew = postForResource("ressurs/scenario71.graphql");
+        final var response = postForResource("ressurs/scenario71.graphql");
 
-        final var ledereNew = responseNew.path("ressurs.ledere").entity(JsonNode.class).get();
-        assertThat(ledereNew.size()).isEqualTo(1);
-        assertThat(ledereNew.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
+        final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
+        assertThat(ledere.size()).isEqualTo(1);
+        assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
     }
 
     @Test

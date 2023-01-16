@@ -6,7 +6,6 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.search.SearchResolver;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -81,8 +80,6 @@ public abstract class TestBase {
         ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
         luceneEnabled(false);
-
-        enableOrgEnhetEventSource(true);
     }
 
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
@@ -135,9 +132,4 @@ public abstract class TestBase {
     protected void luceneEnabled(boolean toggle) {
         Mockito.when(unleash.isEnabled(SearchResolver.UNLEASH_LUCENE_TOGGLE)).thenReturn(toggle);
     }
-
-    protected void enableOrgEnhetEventSource(boolean toggle) {
-        Mockito.when(unleash.isEnabled(DvhDataLoader.UNLEASH_TOGGLE)).thenReturn(toggle);
-    }
-
 }
