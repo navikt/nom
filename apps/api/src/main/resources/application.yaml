@@ -125,6 +125,9 @@ app:
         nom-ui2:
           client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
           scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+        nom-ui2-srvuser:
+          client-id: "9735c586-f3eb-4630-9b80-4088c21a8959"
+          scopes: ["QUERY_PERSON"]
         ida:
           client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
           scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
