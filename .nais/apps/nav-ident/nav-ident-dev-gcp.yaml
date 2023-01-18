@@ -58,8 +58,7 @@ spec:
           - name: nav-ident-db
             envVarPrefix: DATABASE
     buckets:
-      - name: filestorage
-        cascadingDelete: true
+      - name: nav-ident-storage-bucket
         lifecycleCondition:
           age: 14
   azure:
