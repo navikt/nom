@@ -78,6 +78,9 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: prod-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident-redis
