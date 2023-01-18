@@ -57,7 +57,10 @@ spec:
         databases:
           - name: nav-ident-db
             envVarPrefix: DATABASE
-
+    buckets:
+      - name: filestorage
+        lifecycleCondition:
+          age: 14
   azure:
     application:
       enabled: true
