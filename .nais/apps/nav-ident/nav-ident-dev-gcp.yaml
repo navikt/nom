@@ -59,6 +59,7 @@ spec:
             envVarPrefix: DATABASE
     buckets:
       - name: filestorage
+        cascadingDelete: true
         lifecycleCondition:
           age: 14
   azure:
