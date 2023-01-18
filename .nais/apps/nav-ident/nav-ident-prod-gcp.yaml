@@ -11,6 +11,8 @@ spec:
       value: prod
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
+    - name: GROUP_ID_NOM_WRITE
+      value: '1334a91a-c4e0-409e-a497-3c4453869874'
   secureLogs:
     enabled: true
   image: {{image}}
@@ -62,9 +64,11 @@ spec:
   azure:
     application:
       enabled: true
-#      claims:
-#        extra:
-#          - "idtyp"
+      allowAllUsers: true
+      claims:
+        groups:
+          # AD gruppe NOM-WRITE
+          - id: "1334a91a-c4e0-409e-a497-3c4453869874"
 
   kafka:
     pool: nav-prod
