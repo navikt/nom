@@ -1,6 +1,7 @@
 package no.nav.nom.apps.navident.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -25,7 +28,7 @@ public class AdminController {
     private final static Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @Operation(
-            description = "Test",
+            description = "Importer NavIdenter. One-off job for å importere navidenter og personidenter fra Remedy",
             security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
     )
     @ApiResponses(
@@ -41,10 +44,10 @@ public class AdminController {
                     )
             }
     )
-    @GetMapping
+    @GetMapping("/importerNavIdenter")
     @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
-    public String test() {
-        logger.info("Test admin url invoked");
-        return "Autorisert";
+    public String importerNavIdenter(@RequestParam(required = false) boolean kunLes) {
+        logger.info("Starter NavIdent innlesning. kunLes={}", kunLes);
+        return "Autorisert + kunLes=%s".formatted(kunLes);
     }
 }
