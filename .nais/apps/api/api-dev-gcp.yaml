@@ -134,6 +134,9 @@ spec:
         - application: fullmaktsregister-api
           namespace: team-nof
           cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
