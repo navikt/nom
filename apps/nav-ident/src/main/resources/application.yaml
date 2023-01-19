@@ -16,6 +16,7 @@ app:
     timeoutInMillis: 2500
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
+  gs-bucket-name: nav-ident-storage-bucket
 
 authentication:
   aad:
