@@ -69,6 +69,8 @@ public class LuceneService {
             final var luceneRessursStream = grabAndResetNavidentInvalidationList().stream()
                     .map(ressursService::findByNavident)
                     .map(Optional::get)
+                    // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
+                    .filter( ressurs -> ressurs.personident().length() == 11 )
                     .map(ressurs -> new LuceneRessurs(ressurs.navident(),
                             ressurs.visningsnavn().getFormattedVisningsnavn(),
                             "tlf-nr",
