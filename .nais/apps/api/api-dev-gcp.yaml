@@ -137,6 +137,9 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: dev-gcp
+        - application: oh-ressurs-behandler
+          namespace: oppgavehandtering
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
