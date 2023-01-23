@@ -15,11 +15,13 @@ import no.nav.nom.libs.lucenewrapper.search.QueryFilter;
 import no.nav.nom.libs.lucenewrapper.search.QueryFilterContext;
 import no.nav.nom.libs.lucenewrapper.search.SearchResult;
 import no.nav.nom.libs.lucenewrapper.search.WrappedLucene;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,7 +44,9 @@ public class LuceneService {
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
 
-    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService) {
+    private final boolean isLocal;
+
+    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService, Environment environment) {
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -52,6 +56,8 @@ public class LuceneService {
         this.ressursEntityType = indexRessurs.typeString();
 
         this.ressursService = ressursService;
+        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
+        isLocal = profiles.contains("local") || profiles.contains("test");
     }
 
     @Scheduled(initialDelayString = "PT10S", fixedRateString = "PT30S")
@@ -66,11 +72,12 @@ public class LuceneService {
 
         // ressurser
         {
-            final var luceneRessursStream = grabAndResetNavidentInvalidationList().stream()
+            final var navidentsToIndex =  grabAndResetNavidentInvalidationList();
+            final var luceneRessursStream = navidentsToIndex.stream()
                     .map(ressursService::findByNavident)
                     .map(Optional::get)
                     // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
-                    .filter( ressurs -> ressurs.personident().length() == 11 )
+                    .filter( ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run
                     .map(ressurs -> new LuceneRessurs(ressurs.navident(),
                             ressurs.visningsnavn().getFormattedVisningsnavn(),
                             "tlf-nr",
