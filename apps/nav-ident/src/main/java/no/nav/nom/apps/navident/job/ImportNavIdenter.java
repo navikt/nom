@@ -34,4 +34,9 @@ public class ImportNavIdenter {
             return "Unable to read. " + e.getMessage();
         }
     }
+
+    public void importTestNavIdent(String importLine) {
+
+    }
+
 }
