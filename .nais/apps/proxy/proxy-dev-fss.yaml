@@ -22,6 +22,7 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: true
       tenant: trygdeetaten.no
   accessPolicy:
     inbound:

@@ -38,7 +38,7 @@
         </encoder>
     </appender>
 
-    <logger name="no.nav.nom" level="DEBUG" />
+    <logger name="no.nav.nom" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
