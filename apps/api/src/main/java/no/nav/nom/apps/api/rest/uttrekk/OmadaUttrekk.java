@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.kobling.KoblingDvhService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
@@ -129,7 +130,7 @@ public class OmadaUttrekk {
         }
     }
 
-    @GetMapping(value = "/orgenheter", produces = "text/csv")
+    @GetMapping(value = "/orgenhet", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
@@ -151,7 +152,7 @@ public class OmadaUttrekk {
                                     .findAny()
                                     .map(DvhLeder::getNavIdent)
                                     .orElse(""),
-                        orgenhet.getOrgEnhetsKategori(),
+                        orgenhet.getOrgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(""),
                         dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
                             .filter(organisering ->
                                     organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
