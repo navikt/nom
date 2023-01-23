@@ -23,6 +23,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("GraphQL.HentEnhet")
@@ -320,7 +321,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         final var outputKobling = outputKoblinger.get(0);
         assertEquals("2021-01-01", outputKobling.getGyldigFom().toString());
-        assertEquals("2099-12-31", outputKobling.getGyldigTom().toString());
+        assertNull(outputKobling.getGyldigTom());
 
         final var outputRessurs = outputKoblinger.get(0).getRessurs();
         assertEquals(ressurs.navident(), outputRessurs.getNavIdent());

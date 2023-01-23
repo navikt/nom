@@ -16,19 +16,18 @@ public class DvhKobling implements Kobling {
     String orgNiv = "ORGENHET";
     String orgenhetNavn = null;
     LocalDate gyldigFom;
-    LocalDate gyldigTom;
+    Optional<LocalDate> gyldigTom;
 
     public DvhKobling(JsonNode node) {
         navIdent = node.get("NAV_ID").asText();
         agressoId = node.get("ORGENHET").asText();
         gyldigFom = LocalDate.parse(node.get("FRA_DATO").asText());
         val gyldigTomText = node.get("TIL_DATO").asText();
-        gyldigTom = gyldigTomText != null ? LocalDate.parse(gyldigTomText) : null;
-    }
+        gyldigTom = Optional.ofNullable(
+            gyldigTomText != null ?
+                (LocalDate.parse(gyldigTomText).equals(LocalDate.parse("2099-12-31")) ? null : LocalDate.parse(gyldigTomText))
+                : null);
 
-    @Override
-    public Optional<LocalDate> getGyldigTom() {
-        return Optional.ofNullable(gyldigTom);
     }
 
     public void setOrgenhetNavn(String orgenhetNavn) {
