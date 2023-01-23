@@ -19,9 +19,10 @@ import java.nio.channels.Channels;
 public class ImportNavIdenter {
 
     @Value("${app.gs-bucket-name}") private String bucketName;
-    @Value("${nais.cluster.name}") private String gsProjectId;
+    @Value("${nais.cluster.name:local}") private String gsProjectId;
 
     public String fromBucketObject(String objectName) {
+        log.info("ImportNavIdenter: {} - {}/{}", gsProjectId, bucketName, objectName);
         Storage storage = StorageOptions.newBuilder().setProjectId(gsProjectId).build().getService();
 
         Page<Blob> blobs = storage.list(bucketName);
