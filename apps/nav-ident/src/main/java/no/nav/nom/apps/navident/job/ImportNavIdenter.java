@@ -18,8 +18,8 @@ import java.nio.channels.Channels;
 @Slf4j
 public class ImportNavIdenter {
 
-    @Value("app.gs-bucket-name") private String bucketName;
-    @Value("nais.cluster.name") private String gsProjectId;
+    @Value("${app.gs-bucket-name}") private String bucketName;
+    @Value("${nais.cluster.name}") private String gsProjectId;
 
     public String fromBucketObject(String objectName) {
         Storage storage = StorageOptions.newBuilder().setProjectId(gsProjectId).build().getService();
