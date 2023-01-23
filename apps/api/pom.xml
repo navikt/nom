@@ -30,6 +30,7 @@
         <graphql-java.version>19.3</graphql-java.version>
         <graphql-extended-scalars.version>19.1</graphql-extended-scalars.version>
         <unleash.version>7.0.0</unleash.version>
+        <apache.common.csv.version>1.9.0</apache.common.csv.version>
 
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
@@ -148,6 +149,11 @@
             <groupId>no.nav.nom</groupId>
             <artifactId>lucene-wrapper-nomdomain</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${apache.common.csv.version}</version>
         </dependency>
 
         <dependency>
