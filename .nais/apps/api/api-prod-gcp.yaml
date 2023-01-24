@@ -103,6 +103,9 @@ spec:
         - application: fullmaktsregister-api
           namespace: team-nof
           cluster: prod-gcp
+        - application: fullmaktsregister-web
+          namespace: team-nof
+          cluster: prod-gcp
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
