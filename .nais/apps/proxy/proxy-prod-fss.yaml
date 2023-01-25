@@ -31,6 +31,9 @@ spec:
         - application: nom-api-qa
           namespace: nom
           cluster: prod-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: prod-gcp
   webproxy: true
   ingresses:
     - https://nom-proxy.intern.nav.no
