@@ -99,4 +99,8 @@ public class EventSourceService {
             hasReadToEndOnStartup = true;
         }
     }
+
+    public boolean finnesNavIdent(String navIdent) {
+        return navidenter.containsKey(navIdent);
+    }
 }
