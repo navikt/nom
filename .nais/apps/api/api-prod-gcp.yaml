@@ -109,6 +109,9 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
+        - application: oh-ressurs-behandler
+          namespace: oppgavehandtering
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
