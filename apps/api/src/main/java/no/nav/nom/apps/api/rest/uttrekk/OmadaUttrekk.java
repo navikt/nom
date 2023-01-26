@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 
 @Tag(name = "Omada uttrekk")
 @RestController
-@RequestMapping("/api/uttrekk/omada")
+@RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
 
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
