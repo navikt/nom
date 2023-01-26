@@ -1,5 +1,11 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.kobling.KoblingDvhService;
@@ -23,6 +29,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 
+@Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/uttrekk/omada")
 public class OmadaUttrekk {
@@ -45,6 +52,13 @@ public class OmadaUttrekk {
         this.dvhRepository = dvhRepository;
     }
 
+    @Operation(
+        description = "Returnerer csv med alle ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
     @GetMapping(value = "/ressurs", produces = "text/csv")
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
@@ -75,6 +89,13 @@ public class OmadaUttrekk {
         }
     }
 
+    @Operation(
+        description = "Returnerer csv med alle orgtilknytninger for ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
     @GetMapping(value = "/orgtilknytning", produces = "text/csv")
     public @ResponseBody byte[] exportOrgtilknytning() throws IOException {
         StringWriter writer = new StringWriter();
@@ -103,6 +124,13 @@ public class OmadaUttrekk {
         }
     }
 
+    @Operation(
+        description = "Returnerer csv med alle telefonnumre for ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
     @GetMapping(value = "/telefon", produces = "text/csv")
     public @ResponseBody byte[] exportTelefon() throws IOException {
         StringWriter writer = new StringWriter();
@@ -130,6 +158,13 @@ public class OmadaUttrekk {
         }
     }
 
+    @Operation(
+        description = "Returnerer csv med alle orgenheter, og deres leder og organisering",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
     @GetMapping(value = "/orgenhet", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();

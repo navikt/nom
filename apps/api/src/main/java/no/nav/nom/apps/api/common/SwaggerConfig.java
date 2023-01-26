@@ -16,7 +16,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        return new OpenAPI().info(new Info().title("Axsys API").description("REST API for oppslag og forvaltning av dokumenttilganger ved enheter"))
+        return new OpenAPI().info(new Info().title("NOM API").description("REST API for NOM"))
                 .components(new Components().addSecuritySchemes(
                         BEARER_TOKEN,
                         new SecurityScheme().type(SecurityScheme.Type.HTTP)
