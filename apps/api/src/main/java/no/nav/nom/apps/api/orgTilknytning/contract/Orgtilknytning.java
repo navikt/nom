@@ -1,9 +1,9 @@
-package no.nav.nom.apps.api.kobling.contract;
+package no.nav.nom.apps.api.orgTilknytning.contract;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
-public interface Kobling {
+public interface Orgtilknytning {
     String getAgressoId();
 
     String getOrgNiv();

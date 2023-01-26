@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.kobling.contract.Kobling;
+import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -32,11 +32,11 @@ public class OrgEnhetKoblingResolver {
                 .toList();
     }
 
-    private OrgEnhetsKobling tilOrgEnhetsKobling(RessursState ressurs, Kobling kobling) {
+    private OrgEnhetsKobling tilOrgEnhetsKobling(RessursState ressurs, Orgtilknytning orgtilknytning) {
         return OrgEnhetsKobling.builder()
                 .ressurs(MappingUtils.toRessurs(ressurs))
-                .gyldigFom(kobling.getGyldigFom())
-                .gyldigTom(kobling.getGyldigTom().orElse(null))
+                .gyldigFom(orgtilknytning.getGyldigFom())
+                .gyldigTom(orgtilknytning.getGyldigTom().orElse(null))
                 .build();
     }
 }

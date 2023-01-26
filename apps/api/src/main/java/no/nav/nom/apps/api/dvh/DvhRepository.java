@@ -7,7 +7,7 @@ import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.kobling.contract.Kobling;
+import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ public class DvhRepository {
     private final IOrgenhetService orgenhetService;
     private List<DvhLeder> ledere;
     private List<DvhOrganisering> organiseringer;
-    private List<Kobling> koblinger;
+    private List<Orgtilknytning> koblinger;
     private List<DvhTelefon> navidentTelefonNrMap;
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
@@ -43,7 +43,7 @@ public class DvhRepository {
         return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
     }
 
-    public List<Kobling> getKoblingerByAgressoId(String agressoId, String orgNiv) {
+    public List<Orgtilknytning> getKoblingerByAgressoId(String agressoId, String orgNiv) {
         return koblinger.stream().filter(x -> x.getAgressoId().equals(agressoId) && x.getOrgNiv().equals(orgNiv)).toList();
     }
 
@@ -95,7 +95,7 @@ public class DvhRepository {
         this.updateListeners();
     }
 
-    public void saveKoblinger(List<Kobling> koblinger) {
+    public void saveKoblinger(List<Orgtilknytning> koblinger) {
         this.koblinger = koblinger;
         this.updateListeners();
     }

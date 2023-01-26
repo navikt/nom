@@ -4,7 +4,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
-import no.nav.nom.apps.api.kobling.contract.KoblingService;
+import no.nav.nom.apps.api.orgTilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -30,13 +30,13 @@ public class LederResolver {
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
-    private final KoblingService koblingService;
+    private final OrgtilknytningService orgtilknytningService;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService, KoblingService koblingService) {
+    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
-        this.koblingService = koblingService;
+        this.orgtilknytningService = orgtilknytningService;
     }
 
     public <T> Map<Ressurs, List<T>> load(Collection<Ressurs> ressurser, Function<Ressurs, List<T>> loader) {
@@ -57,7 +57,7 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        return koblingService.getKoblingerByNavIdent(navIdent)
+        return orgtilknytningService.getKoblingerByNavIdent(navIdent)
                 .stream()
                 .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom().orElse(null)))
                 .filter(distinctByKey(k -> k.getAgressoId() + k.getOrgNiv()))

@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.kobling.DvhKobling;
+import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
@@ -143,9 +143,9 @@ public class DvhRestConsumer {
 
     private void loadKoblingerFromDvh() {
         val jsonStillinger = dvhExchange("/proxy/dvh/json/Hr/NOM2/stilling2nom");
-        List<DvhKobling> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
+        List<DvhOrgtilknytning> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
-                .map(DvhKobling::new)
+                .map(DvhOrgtilknytning::new)
                 .collect(Collectors.toList());
 
         dvhService.saveKoblinger(koblinger);

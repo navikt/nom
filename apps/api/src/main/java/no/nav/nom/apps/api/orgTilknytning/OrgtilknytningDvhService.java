@@ -1,8 +1,8 @@
-package no.nav.nom.apps.api.kobling;
+package no.nav.nom.apps.api.orgTilknytning;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.kobling.contract.Kobling;
-import no.nav.nom.apps.api.kobling.contract.KoblingService;
+import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgTilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +17,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class KoblingDvhService implements KoblingService {
+public class OrgtilknytningDvhService implements OrgtilknytningService {
 
     private final DvhRepository dvhRepository;
 
-    private final Map<String, List<Kobling>> navidentKoblingMap;
+    private final Map<String, List<Orgtilknytning>> navidentKoblingMap;
 
-    private final Map<IOrgenhet.AgressoIdCombo,List<Kobling>> agressoIdComboKoblingMap;
+    private final Map<IOrgenhet.AgressoIdCombo,List<Orgtilknytning>> agressoIdComboKoblingMap;
 
-    public KoblingDvhService(DvhRepository dvhRepository) {
+    public OrgtilknytningDvhService(DvhRepository dvhRepository) {
         this.dvhRepository = dvhRepository;
         dvhRepository.addUpdateListener(this::updateSelf);
         this.navidentKoblingMap = new HashMap<>();
@@ -33,18 +33,18 @@ public class KoblingDvhService implements KoblingService {
     }
 
     @Override
-    public Collection<Kobling> getAllKoblinger() {
+    public Collection<Orgtilknytning> getAllKoblinger() {
         return this.navidentKoblingMap.values().stream().flatMap(Collection::stream).toList();
     }
 
     @Override
-    public List<Kobling> getKoblingerByNavIdent(String navIdent) {
+    public List<Orgtilknytning> getKoblingerByNavIdent(String navIdent) {
         var hit = this.navidentKoblingMap.get(navIdent);
         return hit == null ? Collections.emptyList() : hit;
     }
 
     @Override
-    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Kobling, T> transformer) {
+    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Orgtilknytning, T> transformer) {
         return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
             var value = this.navidentKoblingMap.get(navident);
             return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
@@ -61,26 +61,26 @@ public class KoblingDvhService implements KoblingService {
         return true;
     }
 
-    private void addKoblingToNavidentMap(Kobling kobling) {
-        var key = kobling.getNavIdent();
+    private void addKoblingToNavidentMap(Orgtilknytning orgtilknytning) {
+        var key = orgtilknytning.getNavIdent();
         var coll = this.navidentKoblingMap.get(key);
         if (coll != null) {
-            coll.add(kobling);
+            coll.add(orgtilknytning);
         } else {
-            var lstnew = new ArrayList<Kobling>();
-            lstnew.add(kobling);
+            var lstnew = new ArrayList<Orgtilknytning>();
+            lstnew.add(orgtilknytning);
             this.navidentKoblingMap.put(key, lstnew);
         }
     }
 
-    private void addKoblingToAgressoIdComboMap(Kobling kobling) {
-        var key = new IOrgenhet.AgressoIdCombo(kobling.getAgressoId(), kobling.getOrgNiv());
+    private void addKoblingToAgressoIdComboMap(Orgtilknytning orgtilknytning) {
+        var key = new IOrgenhet.AgressoIdCombo(orgtilknytning.getAgressoId(), orgtilknytning.getOrgNiv());
         var coll = this.agressoIdComboKoblingMap.get(key);
         if (coll != null) {
-            coll.add(kobling);
+            coll.add(orgtilknytning);
         } else {
-            var newList = new ArrayList<Kobling>();
-            newList.add(kobling);
+            var newList = new ArrayList<Orgtilknytning>();
+            newList.add(orgtilknytning);
             this.agressoIdComboKoblingMap.put(key, newList);
         }
     }

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.kobling.DvhKobling;
-import no.nav.nom.apps.api.kobling.contract.Kobling;
+import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -29,7 +29,7 @@ public class DvhService {
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
 
-    public void saveKoblinger(List<DvhKobling> koblinger) {
+    public void saveKoblinger(List<DvhOrgtilknytning> koblinger) {
         val cachedEnheter = orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv())).values().stream()
                 .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
@@ -37,9 +37,9 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(e -> e.getAgressoId() + "" + e.getOrgNiv(), Function.identity()));
 
-        final var orgenhetAndRessursMissing = new LinkedList<Kobling>();
-        final var orgenhetMissing = new LinkedList<Kobling>();
-        final var ressursMissing = new LinkedList<Kobling>();
+        final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
+        final var orgenhetMissing = new LinkedList<Orgtilknytning>();
+        final var ressursMissing = new LinkedList<Orgtilknytning>();
 
         dvhRepository.saveKoblinger(
                 koblinger.stream()

@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.kobling.KoblingDvhService;
+import no.nav.nom.apps.api.orgTilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -38,17 +38,17 @@ public class OmadaUttrekk {
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
 
-    private final KoblingDvhService koblingDvhService;
+    private final OrgtilknytningDvhService orgtilknytningDvhService;
 
     private final DvhRepository dvhRepository;
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
 
-    public OmadaUttrekk(IRessursService ressursService, IOrgenhetService orgenhetService, KoblingDvhService koblingDvhService, DvhRepository dvhRepository) {
+    public OmadaUttrekk(IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService, DvhRepository dvhRepository) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
-        this.koblingDvhService = koblingDvhService;
+        this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.dvhRepository = dvhRepository;
     }
 
@@ -104,7 +104,7 @@ public class OmadaUttrekk {
 
         try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
 
-            koblingDvhService.getAllKoblinger().forEach(kobling -> {
+            orgtilknytningDvhService.getAllKoblinger().forEach(kobling -> {
                 try {
                     printer.printRecord(
                         kobling.getNavIdent(),
