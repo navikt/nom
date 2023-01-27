@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgTilknytning;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.val;
 import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
 
@@ -9,12 +10,15 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Getter
+@Setter
 public class DvhOrgtilknytning implements Orgtilknytning {
 
     String navIdent;
     String agressoId;
     String orgNiv = "ORGENHET";
     String orgenhetNavn = null;
+
+    String orgEnhetId = null;
     LocalDate gyldigFom;
     Optional<LocalDate> gyldigTom;
 
@@ -30,7 +34,11 @@ public class DvhOrgtilknytning implements Orgtilknytning {
 
     }
 
-    public void setOrgenhetNavn(String orgenhetNavn) {
+    /*public void setOrgenhetNavn(String orgenhetNavn) {
         this.orgenhetNavn = orgenhetNavn;
     }
+
+    public void setOrgEnhetId(String orgEnhetId) {
+        this.orgEnhetId = orgEnhetId;
+    }*/
 }

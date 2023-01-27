@@ -142,13 +142,13 @@ public class DvhRestConsumer {
     }
 
     private void loadKoblingerFromDvh() {
-        val jsonStillinger = dvhExchange("/proxy/dvh/json/Hr/NOM2/stilling2nom");
+        val jsonStillinger = dvhExchange(appProperties.proxy().orgtilknytningPath());
         List<DvhOrgtilknytning> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
                 .map(DvhOrgtilknytning::new)
                 .collect(Collectors.toList());
 
-        dvhService.saveKoblinger(koblinger);
+        dvhService.saveOrgtilknytning(koblinger);
     }
 
     private void loadTlfFromDvh() {

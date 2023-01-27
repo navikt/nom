@@ -19,6 +19,7 @@ public record AppProperties(
     public record Proxy(
             String baseUrl,
             String enhetPath,
+            String orgtilknytningPath,
             String aadClientId
     ) {}
 

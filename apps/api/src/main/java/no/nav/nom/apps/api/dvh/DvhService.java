@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.dvh;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
@@ -29,7 +30,7 @@ public class DvhService {
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
 
-    public void saveKoblinger(List<DvhOrgtilknytning> koblinger) {
+    public void saveOrgtilknytning(List<DvhOrgtilknytning> koblinger) {
         val cachedEnheter = orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv())).values().stream()
                 .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
@@ -42,23 +43,46 @@ public class DvhService {
         final var ressursMissing = new LinkedList<Orgtilknytning>();
 
         dvhRepository.saveKoblinger(
-                koblinger.stream()
-                        .filter(k -> {
-                            val organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + "" + k.getOrgNiv());
-                            val ressurs = ressursService.findByNavident(k.getNavIdent());
-                            if (organisasjonsenhet == null && ressurs.isEmpty()) {
-                                orgenhetAndRessursMissing.add(k);
-                            } else if (organisasjonsenhet == null) {
-                                orgenhetMissing.add(k);
-                            } else if (ressurs.isEmpty()) {
-                                ressursMissing.add(k);
-                            } else {
-                                k.setOrgenhetNavn(organisasjonsenhet.getNavn());
-                                return true;
+            koblinger.stream()
+                .filter(k -> {
+                    final var organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + "" + k.getOrgNiv());
+                    final var ressurs = ressursService.findByNavident(k.getNavIdent());
+                    if (organisasjonsenhet == null && ressurs.isEmpty()) {
+                        orgenhetAndRessursMissing.add(k);
+                    } else if (organisasjonsenhet == null) {
+                        orgenhetMissing.add(k);
+                    } else if (ressurs.isEmpty()) {
+                        ressursMissing.add(k);
+                    } else {
+                        k.setOrgenhetNavn(organisasjonsenhet.getNavn());
+                        k.setOrgEnhetId(organisasjonsenhet.getId());
+                        return true;
+                    }
+                    return false;
+                })
+                .collect(Collectors.groupingBy(orgTilknytning -> orgTilknytning.getNavIdent() + orgTilknytning.getOrgEnhetId()))
+                .values().stream()
+                .peek(orgTilknytninger -> {
+                    for (int i = orgTilknytninger.size() - 1; i >= 0; i--) {
+                        final var lastOrgtilknytning = orgTilknytninger.get(i);
+                        for (int j = 0; j < i; j++) {
+                            final var orgtilknytningCompare = orgTilknytninger.get(j);
+                            boolean shouldMerge = DateUtils.isPeriodsOverlapping(
+                                orgtilknytningCompare.getGyldigFom(),
+                                orgtilknytningCompare.getGyldigTom(),
+                                lastOrgtilknytning.getGyldigFom(),
+                                lastOrgtilknytning.getGyldigTom()
+                            );
+                            if (shouldMerge) {
+                                if(orgtilknytningCompare.getGyldigFom().isAfter(lastOrgtilknytning.getGyldigFom()))
+                                    orgtilknytningCompare.setGyldigFom(lastOrgtilknytning.getGyldigFom());
+                                orgTilknytninger.remove(lastOrgtilknytning);
                             }
-                            return false;
-                        })
-                        .collect(toUnmodifiableList())
+                        }
+                    }
+                })
+                .flatMap(List::stream)
+                .collect(toUnmodifiableList())
         );
 
         log.warn(orgenhetAndRessursMissing.size() + " koblinger hvor orgEnhet og ressurs mangler");

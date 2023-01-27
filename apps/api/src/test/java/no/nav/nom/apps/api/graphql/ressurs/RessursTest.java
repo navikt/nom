@@ -5,6 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMock;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.Sektor;
@@ -116,7 +117,7 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kan hente ut kobling for ressurs")
     void scenario21() {
-        createRessursHendelseEventSource("2");
+        final var ressursState = createRessursHendelseEventSource("2");
         final var enhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").build();
         dvhOrgenhetMockUtils.addToResponse(enhet);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -124,7 +125,14 @@ class RessursTest extends RessursTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
-
+        dvhOrgtilknytningMockUtils.addToResponse(
+            new DvhOrgtilknytningMock(
+                ressursState.navident(),
+                enhet.getORGENHET_KODE(),
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2099-12-31")
+            )
+        );
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario42.graphql");
@@ -307,14 +315,23 @@ class RessursTest extends RessursTestBase {
                 .ORGNODE_NIV("ORGENHET")
                 .build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        final var ressursState1 = createRessursHendelseEventSource("1");
+        final var ressursState2 =createRessursHendelseEventSource("2");
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+
+        dvhOrgtilknytningMockUtils.addToResponse(
+            new DvhOrgtilknytningMock(
+                ressursState2.navident(),
+                mockedEnhet.getORGENHET_KODE(),
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2099-12-31")
+            )
+        );
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
@@ -330,7 +347,7 @@ class RessursTest extends RessursTestBase {
     void scenario37() {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
-        createRessursHendelseEventSource("4");
+        final var ressursState4 = createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
                 .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
@@ -344,6 +361,15 @@ class RessursTest extends RessursTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(lederenErPaDenneEnheten, 2, String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))));
+
+        dvhOrgtilknytningMockUtils.addToResponse(
+            new DvhOrgtilknytningMock(
+                ressursState4.navident(),
+                ressursLederForDenneEnheten.getORGENHET_KODE(),
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2099-12-31")
+            )
+        );
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 

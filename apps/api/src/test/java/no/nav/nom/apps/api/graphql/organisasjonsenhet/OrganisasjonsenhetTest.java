@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMock;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -37,8 +38,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
-    @Autowired
-    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
@@ -310,6 +309,15 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
+        dvhOrgtilknytningMockUtils.addToResponse(
+            new DvhOrgtilknytningMock(
+                ressurs.navident(),
+                mockEnhet.getORGENHET_KODE(),
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2099-12-31")
+            )
+        );
+
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
@@ -320,7 +328,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         assertEquals(1, outputKoblinger.size());
 
         final var outputKobling = outputKoblinger.get(0);
-        assertEquals("2021-01-01", outputKobling.getGyldigFom().toString());
+        assertEquals("2020-01-01", outputKobling.getGyldigFom().toString());
         assertNull(outputKobling.getGyldigTom());
 
         final var outputRessurs = outputKoblinger.get(0).getRessurs();
@@ -361,6 +369,15 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+
+        dvhOrgtilknytningMockUtils.addToResponse(
+            new DvhOrgtilknytningMock(
+                ressurs.navident(),
+                mockEnhet.getORGENHET_KODE(),
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2099-12-31")
+            )
+        );
 
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
