@@ -4,6 +4,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.redis.TestRedisConfiguration;
 import no.nav.nom.libs.test.RsaStub;
+import no.nav.nom.libs.utils.common.mdc.RestMdcAutoconfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -23,7 +24,7 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
 @WireMockStubs(RsaStub.class)
 @Slf4j
 @SpringBootTest
-@Import(TestRedisConfiguration.class)
+@Import({TestRedisConfiguration.class, RestMdcAutoconfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class SpringBootTestBase {
     @MockBean DataSource dataSource;
