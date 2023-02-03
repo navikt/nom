@@ -1,6 +1,6 @@
 = Visjon
 
-NAV Organisasjonsmaster (NOM) skal være masterkilde for _ressurser_, _organisasjonsenheter_ inkl. organisasjonshierarkiet, samt orgtilknytning mellom mennesker og organisasjonsenheter, som så kan forsyne andre applikasjoner med data. NOM skal være en smal applikasjon som holder på sentral informasjon som mange konsumenter kan være interessert i, og så legges det heller opp til at andre konsumenter kan berike med mer info om elementer som finnes i NOM. Et eksempel på det er at NOM er master for ressurser med navn, NAV-ident mm., mens lønnsinfo vil lønnssystemet berike med, eller at Teamkatalogen vil berike med teamtilknytning.
+NAV Organisasjonsmaster (NOM) skal være masterkilde for _ressurser_, _organisasjonsenheter_ inkl. organisasjonshierarkiet, samt orgtilknytning mellom ressurser og organisasjonsenheter. Som masterkilde skal NOM forsyne andre applikasjoner med data. NOM skal være en smal applikasjon som holder på sentral informasjon om ressurser og orgenheter som mange konsumenter kan være interessert i, og så legges det heller opp til at andre konsumenter kan berike med mer info om elementer som finnes i NOM. Et eksempel på det er at NOM er master for ressurser med navn, NAV-ident mm., mens lønnsinfo vil lønnssystemet berike med, eller at Teamkatalogen vil berike med teamtilknytning.
 
 *Visjon: NOM skal inneholde og dele autoritativ informasjon om hvordan NAV er organisert og hvem som jobber for NAV.*
 
