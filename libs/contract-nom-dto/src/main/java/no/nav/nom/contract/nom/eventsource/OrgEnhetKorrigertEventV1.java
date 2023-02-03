@@ -33,6 +33,5 @@ public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
             String agressoOrgNivaa,
             Optional<String> agressoOrgenhetType,
             String uniqueAgressoId
-    ) implements OrgEnhetEvent.Data {
-    }
+    ) implements Data { }
 }
