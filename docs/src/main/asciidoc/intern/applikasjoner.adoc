@@ -17,7 +17,7 @@ image::images/NOM Teknisk status.png[]
 
 == NOM-Api
 
-Integrasjonspunkt for konsumenter utenfor NOM, og NOM-Ui.
+Integrasjonspunkt for konsumenter utenfor NOM, og NOM-Ui. +
 Eksponerer GraphQL for å hente informasjon fra NOM.
 
 == NOM-PROXY
