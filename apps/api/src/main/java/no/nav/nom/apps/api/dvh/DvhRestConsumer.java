@@ -110,7 +110,7 @@ public class DvhRestConsumer {
     }
 
     @SneakyThrows
-    private void loadRessurserFromDvh() {
+    public void loadRessurserFromDvh() {
         var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1");
 
         val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)

@@ -6,10 +6,14 @@ import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -37,6 +41,9 @@ public class OrgEnhetTest extends TestBase {
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;
+
+    @Captor
+    ArgumentCaptor<AvvikleOrgEnhet> avvikleOrgEnhetCaptor;
 
     @BeforeEach
     void resetOrgEnhetState() {
@@ -675,5 +682,71 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
     }
 
+    @Test
+    @SneakyThrows
+    @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato")
+    void scenario35() {
+        LocalDate stillingMaxTil = LocalDate.of(2022,07,26);
+        val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("testId")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .ENHETTYPE_NAVN("TYPEEE")
+            .ORGENHET_STATUS("P")
+            .ORGENHET_FRA_PERIODE(202008)
+            .ORGENHET_TIL_PERIODE(209912)
+            .STILLING_MAKS_GYLDIG_TIL_DATO(stillingMaxTil)
+            .build();
 
+        orgEnhetStateRepository.putEventAggregate(
+            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202008", Optional.empty()));
+
+
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet1);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
+
+        assertEquals(stillingMaxTil, avvikleOrgEnhetCaptor.getValue().gyldigTom());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato. Dvh har dette som to splittede enheter")
+    void scenario36() {
+        LocalDate stillingMaxTil = LocalDate.of(2022,07,26);
+        val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("testId")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .ENHETTYPE_NAVN("TYPEEE")
+            .ORGENHET_STATUS("P")
+            .ORGENHET_FRA_PERIODE(200701)
+            .ORGENHET_TIL_PERIODE(201805)
+            .STILLING_MAKS_GYLDIG_TIL_DATO(stillingMaxTil)
+            .build();
+        val mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("testId")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .ENHETTYPE_NAVN("TYPEEE")
+            .ORGENHET_STATUS("P")
+            .ORGENHET_FRA_PERIODE(201806)
+            .ORGENHET_TIL_PERIODE(209912)
+            .STILLING_MAKS_GYLDIG_TIL_DATO(stillingMaxTil)
+            .build();
+
+        orgEnhetStateRepository.putEventAggregate(
+            dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 1, "201806", Optional.empty()));
+
+
+        dvhOrgenhetMockUtils.addToResponse(mockedEnhet1, mockedEnhet2);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        verify(orgEnhetCommandService, times(0)).opprettOrgEnhet(any());
+        verify(orgEnhetCommandService, times(1)).avikleOrgEnhet(any(), avvikleOrgEnhetCaptor.capture());
+
+        assertEquals(stillingMaxTil, avvikleOrgEnhetCaptor.getValue().gyldigTom());
+    }
 }
