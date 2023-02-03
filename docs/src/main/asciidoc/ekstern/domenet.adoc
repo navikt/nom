@@ -1,24 +1,24 @@
 = Domenet
 
-Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager]
+Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager] (TODO, ny URL eller fjern)
 
 
 == Organisering
 [cols="3"]
 |===
-| https://data.adeo.no/begrep/?????[Datakatalogen (TODO)] | Oppslag: Kommer | Hendelser: Kommer
+| Begrepsdefinisjon (TODO) | Oppslag: Kommer | Hendelser: Kommer
 |===
 
 *Beskrivelse:* +
 Organisering er den hierarkiske koblingen mellom orgEnheter som danner et hierarki.
 En organisering omfatter 2 orgEnheter og typen organisering mellom dem.
-En orgEnhet kan være overenhet for flere enheter, men en orgEnhet kan bare ha én overenhet.
+En orgEnhet kan ha flere underenheter, men en orgEnhet kan bare ha én overenhet. Slik NAV er organisert i dag, vil alle aktive enheter være knyttet til orghierarkiet i NOM. 
 
 [%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
 |id             |Ja         |Generert UUID som representerer organiseringen                       |7457a63b-c130-46a3-8278-deb23e2a526f   |NOM
-|retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over:"/"under:"                       |Unit4 via DVH
+|retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over"/"under"                         |Unit4 via DVH
 |orgEnhet       |Ja         |OrgEnhet over eller under avhengig av retning                        |Se OrgEnhet                            |Unit4 via DVH
 |gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
 |gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med                            |2020-02-14, NULL hvis ikke satt.       |Unit4 via DVH
@@ -46,15 +46,17 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 [%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
-|id             |Ja         |Generert UUID som tilegnes orgEnhet. (fremtidig felt)                       |123e4567-e89b-12d3-a456-426614174000          |TOBE
+|id             |Ja         |NOMs unike ID for en orgEnhet. Formatet er <XX999X>. Id-en er en syntetisk nøkkel, og altså ikke meningsbærende.                      |pa649a          |NOM
 |navn           |Ja         |Navnet på en orgEnheten                                     |NAV Halden Stab          | Unit4 via DVH
-|gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | tobe
-|gyldigTom      |Nei        |Siste dag orgEnheten var virksom.                         |2020-02-14, NULL hvis ikke satt.         | tobe
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso         | ORGNIV2          | Unit4 via DVH
+|gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag orgEnheten var (eller skal være) virksom. Kan være frem i tid.           |2020-02-14, NULL hvis ikke satt.         | Unit4 via DVH
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
 |agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
+|agressoOrgenhetType | Ja   |Enhetstype slik det er definert i Unit4. Alle enheter i direktoratet er f.eks. DIR, et NAV-kontor er LOKAL | LOKAL/DIR... | Unit4 via DVH
+|orgEnhetskategori  |Nei    |Enkelte orgenheter kan klassifiseres som et ARBEIDSOMRÅDE (også kalt ENHET), DRIFTSENHET eller LINJEENHET. Dette feltet er satt for de orgEnhetene som kan klassifiseres som et av disse tre verdiene. Per januar 2023 er ikke feltet populert.    |DRIFTSENHET    |NOM
 |organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter.        |Se Organiseringer-objektet         | Unit4 via DVH
-|leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se Ressurs-objektet         | Unit4 via DVH
-|type           |Nei        |Typen orgEnhet. Kun satt på nederste nivå av orgEnheter.                    |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
+|leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se OrgEnhetsleder-objektet         | Unit4 via DVH
+|type           |Nei        |Typen orgEnhet. Per januar 2023 er ikke feltet populert.                  |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
 |koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. |Se OrgEnhetskobling | Unit4 via DVH
 |===
 
