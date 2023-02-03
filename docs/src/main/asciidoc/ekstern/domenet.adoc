@@ -1,7 +1,8 @@
 = Domenet
 
 Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager] (TODO, ny URL eller fjern)
-
+TODO: gå igjennom gyldigFom/gyldigTom og si noe om kvalitet
+TODO: burde Orgenhet.koblinger omdøpes til Orgenhet.orgtilknytninger?
 
 == Organisering
 [cols="3"]
@@ -17,7 +18,6 @@ En orgEnhet kan ha flere underenheter, men en orgEnhet kan bare ha én overenhet
 [%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
-|id             |Ja         |Generert UUID som representerer organiseringen                       |7457a63b-c130-46a3-8278-deb23e2a526f   |NOM
 |retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over"/"under"                         |Unit4 via DVH
 |orgEnhet       |Ja         |OrgEnhet over eller under avhengig av retning                        |Se OrgEnhet                            |Unit4 via DVH
 |gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
@@ -62,6 +62,7 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 
 
 
+
 == OrgEnhetskobling
 [cols="3"]
 |===
@@ -77,8 +78,8 @@ OrgEnhet _NAV Halden_ har en orgEnhetskobling til ansatt Ola i perioden 01.01.20
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
 |ressurs        |Ja         |Ressursen orgEnheten er koblet til                         |Se Ressurs-objekt                    |Unit4 via DVH
-|gyldigFom      |Ja         |Datoen koblingen er gyldig fra og med                      |2009-01-22                           |Unit4 via DVH
-|gyldigTom      |Nei        |Siste dag koblingen er gyldig.                             |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
+|gyldigFom      |Ja         |Datoen koblingen er gyldig fra og med. Per jan 2023 viser denne oftest en nyere dato enn da ressursen ble koblet til den gitte orgEnheten. Dette skyldes at Unit4, og dernest DVH, stykker opp periodene vesentlig mer enn det NOM vil presentere.                      |2009-01-22                           |Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag koblingen er gyldig.  NULL hvis ikke satt.       |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
 |===
 
 
@@ -122,13 +123,12 @@ Omfatter:
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                                            |Eksempel |Kilde
-|nomId          |Ja         |Generert UUID som representerer ressursen                                              |  |NOM     
 |navIdent       |Ja         |Intern identifikator som tildeles alle ressurser i NAV                                 |Z123456  |Remedy via DVH
-|personIdent    |Ja         |11-sifret fødselsnummer eller DNR for personen.                                        |1234567890 |Remedy via DVH
-|ressurstype    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |Remedy via DVH
-|folkeregisterPerson         |Nei        |Inneholder folkeregisterrert navn for ressursen                                        | |Folkereg. via PDL
+|personIdent    |Ja         |11-sifret fødselsnummer eller DNR for ressurser med innslag i Folkeregisteret. For ressurser uten fnr/dnr vil det her finnes id-er på ulike format - dette gjelder f.eks. for utenlandske konsulenter på korttidsoppdrag, roboter mv.                     |1234567890 |Remedy via DVH
+|sektor    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |Remedy via DVH
+|folkeregisterPerson |Nei        |Inneholder folkeregisterrert navn for ressursen                                        | |Folkereg. via PDL
 |epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via AD
-|visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
+|visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Formatert <Fornavn Etternavn> Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
 |fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
 |sluttDato      |Ja         |Ressursens sluttdato.
@@ -146,21 +146,21 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 |telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
 |ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. | |Unit4 via DVH
 |lederFor       |Ja         |Liste over orgEnheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
-|koblinger      |Ja         |Ressursens orgtilknytning til orgEnheter. Alle aktive ressurser må ha en knytning til en orgEnhet. Hvis en ressurs er ansatt i en orgEnhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. OrgEnheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt |Unit4 via DVH
+|orgTilknytning      |Ja         |Ressursens orgtilknytning til orgEnheter. Alle aktive ressurser må ha en knytning til en orgEnhet, med unntak av eksterne som per i dag ikke har denne knytningen. Hvis en ressurs er ansatt i en orgEnhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. OrgEnheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt RessursOrgTilknytning |Unit4 via DVH
 |===
 
 
 
-== Ressurskobling
+== RessursOrgTilknytning
 [cols="3"]
 |===
 |===
 
 *Beskrivelse:* +
-Ressurskobling er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursKoblinger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursKobling til en gitt orgEnhet på et gitt tidspunkt.
+RessursOrgTilknytning er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursOrgTilknytninger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursOrgTilknytning til en gitt orgEnhet på et gitt tidspunkt.
 
 *Eksempler:* +
-Ansatt Ola har en ressursKobling til orgEnhet NAV Halden i perioden 01.01.2020 - 31.03.2022
+Ansatt Ola har en ressursOrgTilknytning til orgEnhet NAV Halden i perioden 01.01.2020 - 31.03.2022
 
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
