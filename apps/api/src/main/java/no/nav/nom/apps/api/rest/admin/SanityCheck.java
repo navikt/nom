@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.List;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -55,12 +57,11 @@ public class SanityCheck {
     private String sjekkOrgEnhetStartSluttDato() {
         StringBuffer result = new StringBuffer();
 
-        var orgEnheter = orgenhetService.getAllEnheter();
-        var oeStream = orgEnheter.stream();
+        List<IOrgenhet> orgEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
 
-        result.append("Totalt antall orgEnheter: %s".formatted(oeStream.count()));
-        result.append("   Med startdato: %s".formatted(oeStream.filter( oe -> oe.getGyldigFom() != null).count()));
-        result.append("   Med sluttdato: %s".formatted(oeStream.filter( oe -> oe.getGyldigTom() != null).count()));
+        result.append("Totalt antall orgEnheter: %s".formatted(orgEnheter.size()));
+        result.append("   Med startdato: %s".formatted(orgEnheter.stream().filter( oe -> oe.getGyldigTom() != null).count()));
+        result.append("   Med sluttdato: %s".formatted(orgEnheter.stream().filter( oe -> oe.getGyldigTom() != null).count()));
         return result.toString();
     }
 }
