@@ -1,0 +1,46 @@
+{
+  "type": "OrgEnhetKorrigertEventV1",
+  "fid": "orgEnhet-01GPJGSKXV06QSV4AF9N7TFRCB",
+  "data": {
+    "type": "OrgEnhetKorrigertEventV1$OrgEnhetKorrigertEventData",
+    "id": "ve762b",
+    "navn": "Væres Arbeid- og veiledning",
+    "gyldigFom": "2022-12-01",
+    "gyldigTom": "2022-12-31",
+    "overordnetOrgEnhetFid": null,
+    "lederRessursFid": null,
+    "orgEnhetsKategori": null
+  },
+  "metadata": {
+    "inputMetadata": {
+      "inputInterfaceName": "nom-api BatchJob",
+      "inputInterfaceMethodName": "Datavarehus",
+      "inputInterfaceMethodArguments": {
+        "ORGENHET_KODE": "1783001",
+        "ORGENHET_NAVN": "Væres Arbeid- og veiledning",
+        "ORGNODE_NIV": "ORGENHET",
+        "ENHETTYPE_KODE": "31",
+        "ENHETTYPE_NAVN": "Lokal",
+        "ORGENHET_STATUS": "P",
+        "ORGENHET_FRA_PERIODE": 202212,
+        "ORGENHET_TIL_PERIODE": 202212,
+        "LASTET_DATO": "2023-01-03",
+        "STILLING_MAKS_GYLDIG_TIL_DATO": "2099-12-31",
+        "LEDER_RESSURSNR": "129318"
+      },
+      "origination": {
+        "initiatedBy": "nom-api",
+        "initiatedFrom": "nom-api"
+      }
+    },
+    "createdTimestamp": "2023-01-19T06:00:50.511508786"
+  },
+  "additionalData": {
+    "type": "OrgEnhetKorrigertEventV1$OrgEnhetKorrigertAdditionalAgressoData",
+    "agressoId": "1783001",
+    "agressoNavn": "Væres Arbeid- og veiledning",
+    "agressoOrgNivaa": "ORGENHET",
+    "agressoOrgenhetType": "Lokal",
+    "uniqueAgressoId": "1783001-Væres Arbeid- og veiledning-ORGENHET"
+  }
+}

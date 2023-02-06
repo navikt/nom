@@ -1,11 +1,18 @@
 package no.nav.nom.contract.nom.eventsource;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         property = "type"
 )
+@JsonSubTypes({
+    @Type(value = OrgEnhetOpprettetEventV1.class),
+    @Type(value = OrgEnhetAvvikletEventV1.class),
+    @Type(value = OrgEnhetKorrigertEventV1.class),
+})
 public abstract class OrgEnhetEvent extends Event {
 
     public OrgEnhetEvent(String fid, Data data, Metadata metadata, OrgEnhetEvent.Data additionalData) {
