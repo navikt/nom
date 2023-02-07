@@ -56,4 +56,12 @@ public class DvhOrganisering {
         return (Objects.equals(agressoId, agressoIdOver) && Objects.equals(orgNiv, orgNivOver) && Objects.equals(navn, navnOver))
                 || (Objects.equals(agressoId, agressoIdUnder) && Objects.equals(orgNiv, orgNivUnder) && Objects.equals(navn, navnUnder));
     }
+
+    public String uniqueAgressoIdUnder() {
+        return agressoIdUnder + "-" + navnUnder + "-" + orgNivUnder;
+    }
+    public String uniqueAgressoIdOver() {
+        return agressoIdOver + "-" + navnOver + "-" + orgNivOver;
+    }
+
 }
