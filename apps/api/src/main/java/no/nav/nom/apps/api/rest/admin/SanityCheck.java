@@ -60,14 +60,14 @@ public class SanityCheck {
         List<IOrgenhet> orgEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
 
         result.append("Totalt antall orgEnheter: %s\n".formatted(orgEnheter.size()));
-        result.append("   Med startdato: %s\n".formatted(orgEnheter.size() - enheterUtenStartdato(orgEnheter).size()));
+        result.append("   Med startdato: %s\n".formatted(enheterMedStartdato(orgEnheter).size()));
         result.append("   Med sluttdato: %s\n".formatted(enheterMedSluttdato(orgEnheter).size()));
         result.append("   Med sluttdato før startdato: %s\n".formatted(enheterMedSluttdatoFørStartdato(enheterMedSluttdato(orgEnheter)).size()));
 
         return result.toString();
     }
 
-    private List<IOrgenhet> enheterUtenStartdato(List<IOrgenhet> enheter) {
+    private List<IOrgenhet> enheterMedStartdato(List<IOrgenhet> enheter) {
         return enheter.stream().filter( oe -> oe.getGyldigFom() != null).toList();
     }
 
