@@ -68,6 +68,7 @@ public class SanityCheck {
         result.append("   Med startdato: %s\n".formatted(enheterMedStartdato(alleEnheter).size()));
         result.append("   Med sluttdato: %s\n".formatted(enheterMedSluttdato(alleEnheter).size()));
         result.append("   Med sluttdato før startdato: %s\n\n".formatted(enheterMedSluttdatoFørStartdato(enheterMedSluttdato(alleEnheter)).size()));
+        log.info("Resultat so far:\n{}", result);
 
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
         List<IOrgenhet> inaktiveEnheter = getInaktiveEnheter(alleEnheter, aktiveEnheter);
@@ -80,6 +81,7 @@ public class SanityCheck {
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
         result.append("Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
         result.append("Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
+        log.info("Resultat so far:\n{}", result);
 
         List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
         List<Orgtilknytning> alleTilknytninger = dvhRepository.getKoblinger();
@@ -94,7 +96,8 @@ public class SanityCheck {
         result.append("   Aktive uten orgtilknytning: %s\n".formatted(aktiveRessurserUtenTilkoblinger.size()));
         result.append("   Aktive med orgtilknytning til inaktiv enhet: %s\n".formatted(aktiveRessurserMedKoblingTilIkkeAktivEnhet.size()));
         result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
-        
+
+        log.info("Total resultat:\n{}", result);
         return result.toString();
     }
 
