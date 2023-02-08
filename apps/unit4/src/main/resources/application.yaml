@@ -92,9 +92,10 @@ spring:
 
 app:
   unit4:
-    felles-kobling-value:
+    felles-kobling-value: L03034
+
 --- # PROD
 spring:
   config:
     activate:
-      on-profile: !dev && prod
+      on-profile: prod && !dev
