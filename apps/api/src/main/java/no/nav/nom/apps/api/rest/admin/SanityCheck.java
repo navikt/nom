@@ -8,9 +8,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -60,23 +64,42 @@ public class SanityCheck {
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
-        result.append("Totalt antall alleEnheter: %s\n".formatted(alleEnheter.size()));
+        result.append("Totalt antall enheter: %s\n".formatted(alleEnheter.size()));
         result.append("   Med startdato: %s\n".formatted(enheterMedStartdato(alleEnheter).size()));
         result.append("   Med sluttdato: %s\n".formatted(enheterMedSluttdato(alleEnheter).size()));
         result.append("   Med sluttdato før startdato: %s\n\n".formatted(enheterMedSluttdatoFørStartdato(enheterMedSluttdato(alleEnheter)).size()));
 
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<IOrgenhet> inaktiveEnheter = getInaktiveEnheter(alleEnheter, aktiveEnheter);
         List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
         List<String> aktiveOverEnheterUniqueAgressoId = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
         List<String> aktiveUnderEnheterUniqueAgressoId = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterUtenEnhetOver(aktiveEnheter, aktiveOverEnheterUniqueAgressoId);
-        List<IOrgenhet> aktiveEnheterUtenAktivUnderEnhet = enheterUtenEnhetOver(aktiveEnheter, aktiveUnderEnheterUniqueAgressoId);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheter, aktiveOverEnheterUniqueAgressoId);
+        List<IOrgenhet> aktiveEnheterUtenAktivUnderEnhet = enheterForAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoId);
 
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
         result.append("Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
         result.append("Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
 
+        List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
+        List<Orgtilknytning> alleTilknytninger = dvhRepository.getKoblinger();
+        List<Orgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<RessursState> aktiveRessurser = ressurserForKoblinger(alleRessurser, aktiveTilknytninger);
+        List<RessursState> aktiveRessurserUtenTilkoblinger = ressurserUtenKoblinger(aktiveRessurser, aktiveTilknytninger);
+        List<RessursState> aktiveRessurserMedKoblingTilIkkeAktivEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, inaktiveEnheter);
+        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
+
+        result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
+        result.append("   Aktive: %s\n".formatted(aktiveRessurser.size()));
+        result.append("   Aktive uten orgtilknytning: %s\n".formatted(aktiveRessurserUtenTilkoblinger.size()));
+        result.append("   Aktive med orgtilknytning til inaktiv enhet: %s\n".formatted(aktiveRessurserMedKoblingTilIkkeAktivEnhet.size()));
+        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
+        
         return result.toString();
+    }
+
+    private static List<IOrgenhet> getInaktiveEnheter(List<IOrgenhet> alleEnheter, List<IOrgenhet> aktiveEnheter) {
+        return alleEnheter.stream().filter(e -> !aktiveEnheter.stream().anyMatch(ae -> ae.getId() == e.getId())).toList();
     }
 
     private List<IOrgenhet> enheterMedStartdato(List<IOrgenhet> enheter) {
@@ -103,15 +126,15 @@ public class SanityCheck {
         // FOM er fremtidig, samt at TOM er null eller etter FOM
         return organiseringer.stream().filter( o ->
                 o.getGyldigFom().isAfter(LocalDate.now()) &&
-                (o.getGyldigTom() != null || o.getGyldigTom().isAfter(o.getGyldigFom()))
+                (o.getGyldigTom() == null || o.getGyldigTom().isAfter(o.getGyldigFom()))
         ).toList();
     }
 
     private List<DvhOrganisering> aktiveOrganiseringer(List<DvhOrganisering> organiseringer) {
-        // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
+        // FOM er før eller lik dagens dato, samt at TOM er null eller fremtidig
         return organiseringer.stream().filter( o ->
                 o.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (o.getGyldigTom() != null || o.getGyldigTom().isAfter(LocalDate.now()))
+                (o.getGyldigTom() == null || o.getGyldigTom().isAfter(LocalDate.now()))
         ).toList();
     }
 
@@ -123,10 +146,37 @@ public class SanityCheck {
         return organiseringer.stream().map(o -> o.uniqueAgressoIdUnder()).toList();
     }
 
-    private List<IOrgenhet> enheterUtenEnhetOver(List<IOrgenhet> enheter, List<String> underEnheterUniqueAgessoId) {
+    private List<IOrgenhet> enheterForAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
         // Enheter som ikke er under enhet i organiseringer
-        return enheter.stream().filter( oe -> !underEnheterUniqueAgessoId.contains(oe.getUniqueAgressoId())).toList();
+        return enheter.stream().filter( oe -> !uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
+
+    private List<Orgtilknytning> aktiveOrgtilknytninger(List<Orgtilknytning> orgtilknytninger) {
+        // FOM er før eller lik dagens dato, samt at TOM er null eller fremtidig
+        return orgtilknytninger.stream().filter( ot ->
+            ot.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
+                (!ot.getGyldigTom().isPresent() || ot.getGyldigTom().get().isAfter(LocalDate.now()))
+        ).toList();
+    }
+
+    private List<RessursState> ressurserForKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
+        return ressurser.stream().filter( r -> orgtilknytninger.stream().anyMatch(ot -> r.navident().equals(ot.getNavIdent()))).toList();
+    }
+
+    private List<RessursState> ressursKoblingForEnheter(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger, List<IOrgenhet> enheter) {
+        List<DvhOrgtilknytning> orgtilknytningerTilAngitteEnheter =
+            orgtilknytninger.stream()
+                .map(DvhOrgtilknytning.class::cast)
+                .filter( ot -> enheter.stream().anyMatch( ie -> ie.getUniqueAgressoId().equals(ot.getUniqueAgressoId())))
+                .toList();
+
+        return ressurser.stream().filter( r -> orgtilknytningerTilAngitteEnheter.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
+    }
+
+    private List<RessursState> ressurserUtenKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
+        return ressurser.stream().filter( r -> !orgtilknytninger.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
+    }
+
 
 }
 

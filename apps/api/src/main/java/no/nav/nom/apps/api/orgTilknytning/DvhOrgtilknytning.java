@@ -34,11 +34,7 @@ public class DvhOrgtilknytning implements Orgtilknytning {
 
     }
 
-    /*public void setOrgenhetNavn(String orgenhetNavn) {
-        this.orgenhetNavn = orgenhetNavn;
+    public String getUniqueAgressoId() {
+        return agressoId + "-" + orgenhetNavn + "-" + orgNiv;
     }
-
-    public void setOrgEnhetId(String orgEnhetId) {
-        this.orgEnhetId = orgEnhetId;
-    }*/
 }
