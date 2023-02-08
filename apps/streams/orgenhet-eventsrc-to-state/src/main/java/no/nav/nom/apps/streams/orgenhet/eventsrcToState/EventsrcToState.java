@@ -42,17 +42,10 @@ class EventsrcToState {
                 .aggregate(
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
-                            if (event instanceof OrgEnhetAvvikletEventV1) {
-                                log.info("Avviklet event: {}", event);
-                                log.info("State før; {}", state.toPrettyString());
-                            }
                             if(event.getAdditionalData() instanceof OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData data){
                                 state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
                             }
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                            if (event instanceof OrgEnhetAvvikletEventV1) {
-                                log.info("State etter; {}", state.toPrettyString());
-                            }
                             return state;
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
