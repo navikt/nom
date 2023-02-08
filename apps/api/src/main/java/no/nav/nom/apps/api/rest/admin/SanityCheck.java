@@ -49,11 +49,47 @@ public class SanityCheck {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/data")
-    public String dataSanityCheck() {
+    @GetMapping(value = "/enheter")
+    public String dataSanityCheckEnheter() {
         StringBuffer result = new StringBuffer();
 
         result.append(sjekkOrgEnhetStartSluttDato());
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "Kjør Sanity Check på data",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/enheterOgOrganisering")
+    public String dataSanityCheckEnheterOgOrganisering() {
+        StringBuffer result = new StringBuffer();
+
+        result.append(sjekkAktiveEnheterOgOrganisering());
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "Kjør Sanity Check på data",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/ressurser")
+    public String dataSanityCheckRessurser() {
+        StringBuffer result = new StringBuffer();
+
+        result.append(aktiveRessurser());
 
         return result.toString();
     }
@@ -62,40 +98,59 @@ public class SanityCheck {
         StringBuffer result = new StringBuffer();
 
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
-        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
         result.append("Totalt antall enheter: %s\n".formatted(alleEnheter.size()));
         result.append("   Med startdato: %s\n".formatted(enheterMedStartdato(alleEnheter).size()));
         result.append("   Med sluttdato: %s\n".formatted(enheterMedSluttdato(alleEnheter).size()));
         result.append("   Med sluttdato før startdato: %s\n\n".formatted(enheterMedSluttdatoFørStartdato(enheterMedSluttdato(alleEnheter)).size()));
         log.info("Resultat so far:\n{}", result);
+        return result.toString();
+    }
+
+    private String sjekkAktiveEnheterOgOrganisering() {
+        StringBuffer result = new StringBuffer();
+
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
-        List<IOrgenhet> inaktiveEnheter = getInaktiveEnheter(alleEnheter, aktiveEnheter);
         List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
+
         List<String> aktiveOverEnheterUniqueAgressoId = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
         List<String> aktiveUnderEnheterUniqueAgressoId = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
         List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheter, aktiveOverEnheterUniqueAgressoId);
         List<IOrgenhet> aktiveEnheterUtenAktivUnderEnhet = enheterForAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoId);
 
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
-        result.append("Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
-        result.append("Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
+        result.append("     Aktive organiseringer: %s\n".formatted(aktiveOrganiseringer.size()));
+        result.append("     Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
+        result.append("     Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
         log.info("Resultat so far:\n{}", result);
 
+        return result.toString();
+    }
+
+    private String aktiveRessurser() {
+        StringBuffer result = new StringBuffer();
         List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
         List<Orgtilknytning> alleTilknytninger = dvhRepository.getKoblinger();
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+
         List<Orgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<IOrgenhet> inaktiveEnheter = getInaktiveEnheter(alleEnheter, aktiveEnheter);
+
         List<RessursState> aktiveRessurser = ressurserForKoblinger(alleRessurser, aktiveTilknytninger);
         List<RessursState> aktiveRessurserUtenTilkoblinger = ressurserUtenKoblinger(aktiveRessurser, aktiveTilknytninger);
         List<RessursState> aktiveRessurserMedKoblingTilIkkeAktivEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, inaktiveEnheter);
-        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
+//        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
 
         result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
         result.append("   Aktive: %s\n".formatted(aktiveRessurser.size()));
+        result.append("   Akrive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
         result.append("   Aktive uten orgtilknytning: %s\n".formatted(aktiveRessurserUtenTilkoblinger.size()));
         result.append("   Aktive med orgtilknytning til inaktiv enhet: %s\n".formatted(aktiveRessurserMedKoblingTilIkkeAktivEnhet.size()));
-        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
+//        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
 
         log.info("Total resultat:\n{}", result);
         return result.toString();
