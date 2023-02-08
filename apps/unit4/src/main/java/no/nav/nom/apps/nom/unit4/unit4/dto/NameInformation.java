@@ -8,7 +8,7 @@ import lombok.Value;
 @Builder
 @RequiredArgsConstructor
 public class NameInformation{
-    String aliasName; // navident
+    String aliasName; // XXYY, XX er første to bokstaver i fornavn, og YY skal være første to i etternavn
     String firstName;
     String surname;
 }

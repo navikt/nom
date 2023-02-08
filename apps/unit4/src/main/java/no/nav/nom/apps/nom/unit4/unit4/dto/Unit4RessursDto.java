@@ -29,7 +29,6 @@ public class Unit4RessursDto {
     @JsonIgnore
     public final static LocalDateTime AGRESSO_TIMESTAMP_NULL_VALUE = LocalDateTime.parse("2099-12-31T00:00:00.000");
 
-
     AdditionalInformation additionalInformation;
     LocalDateTime birthDate;
     String companyId = "HR";
@@ -48,10 +47,11 @@ public class Unit4RessursDto {
 
 
 
-    public Unit4RessursDto(NomRessursDTO nomRessursDTO) {
+    public Unit4RessursDto(NomRessursDTO nomRessursDTO, String fellesKoblingValue) {
         String ressursNr = nomRessursDTO.getNavident().substring(1);
         String firstName = Utils.formatName(nomRessursDTO.getFornavn()) + (nomRessursDTO.getMellomnavn() != null ? " "+Utils.formatName(nomRessursDTO.getMellomnavn()) : "");
         String surName = Utils.formatName(nomRessursDTO.getEtternavn());
+        String aliasName = (firstName.substring(0,2) + surName.substring(0,2)).toUpperCase();
 
         additionalInformation = AdditionalInformation.builder()
                 .relatedPersonId(ressursNr)
@@ -69,7 +69,7 @@ public class Unit4RessursDto {
         dateFrom = LocalDate.now().atStartOfDay();;
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
-                .aliasName(nomRessursDTO.getNavident())
+                .aliasName(aliasName)
                 .firstName(firstName)
                 .surname(surName)
                 .build();
@@ -81,7 +81,7 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(nomRessursDTO.getPersonident())
                 .build();
         personId = ressursNr;
-        relatedValues = getRelatedValuesDefault();
+        relatedValues = getRelatedValuesDefault(fellesKoblingValue);
         relatedValues.add(
                 RelatedValue.builder()
                 .relationId("M0")
@@ -92,7 +92,7 @@ public class Unit4RessursDto {
         );
     }
 
-    public Unit4RessursDto(RessursOpprettetEventV1 record) throws IllegalArgumentException {
+    public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue) throws IllegalArgumentException {
         RessursOpprettetEventData eventData = (RessursOpprettetEventData) record.getData();
         RessursOpprettetAdditionalData additionalData = (RessursOpprettetAdditionalData) record.getAdditionalData();
 
@@ -104,6 +104,8 @@ public class Unit4RessursDto {
 
         String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)
                 .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
+
+        String aliasName = (firstName.substring(0,2) + surName.substring(0,2)).toUpperCase();
 
         Unit4RessursGender kjoenn = additionalData.kjoenn().map(k ->
                 switch (k){
@@ -124,7 +126,7 @@ public class Unit4RessursDto {
         
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
-                .aliasName(navident)
+                .aliasName(aliasName)
                 .firstName(firstName)
                 .surname(surName)
                 .build();
@@ -136,7 +138,7 @@ public class Unit4RessursDto {
                 .nationalIdentityNo(eventData.personident())
                 .build();
         personId = ressursNr;
-        relatedValues = getRelatedValuesDefault();
+        relatedValues = getRelatedValuesDefault(fellesKoblingValue);
         relatedValues.add(
                 additionalData.orgEnhet()
                         .map((orgenhet) -> RelatedValue.builder()
@@ -157,12 +159,12 @@ public class Unit4RessursDto {
         return List.of(contactPontOne);
     }
 
-    private List<RelatedValue> getRelatedValuesDefault(){
+    private List<RelatedValue> getRelatedValuesDefault(String fellesKoblingValue){
         return Stream.of(
                 // Default verdi. Endres i unit4 etter opprettelse ved behov.
                 RelatedValue.builder()
                         .relationId("23")   // 23: Begrep=FELLES, Beskrivelse=Felles
-                        .relatedValue("L03034") // Skal være 000000 USPESIFISERT, men denne verdien finnes ikke enda.L03034 står for "Oslo, Fyrstikkalléen 1"
+                        .relatedValue(fellesKoblingValue) // Skal være 000000 USPESIFISERT, men denne verdien finnes ikke enda.L03034 står for "Oslo, Fyrstikkalléen 1"
                         .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
@@ -205,7 +207,7 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("Y7") // Y7: Begrep=PENSJON, Beskrivelse=Pensjonsplan - nivå
                         .relatedValue("SPK") // SPK: Pensjonstrekk SPK 2%
-                        .dateFrom(dateFrom)
+                        .dateFrom(dateFrom.withDayOfMonth(1)) // Alltid første dag i startmåned
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),
 

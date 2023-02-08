@@ -12,6 +12,7 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -30,6 +31,9 @@ public class KafkaRessursListener {
     private final Unit4Client unit4Client;
     private final Duration blockSeconds;
 
+    @Value("${app.unit4.fells-kobling-value:000000}")
+    private String fellesKoblingValue;
+
     public KafkaRessursListener(Unit4Client unit4Client, AppProperties appProperties) {
         this.unit4Client = unit4Client;
         this.blockSeconds = appProperties.kafka().listener().blockSecondsOnBail();
@@ -42,7 +46,7 @@ public class KafkaRessursListener {
             if(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedFrom().contains("nom-ui")) {
                 Unit4RessursDto unit4RessursDto;
                 try {
-                    unit4RessursDto = new Unit4RessursDto(ressursOpprettetEventV1);
+                    unit4RessursDto = new Unit4RessursDto(ressursOpprettetEventV1, fellesKoblingValue);
                 } catch (Exception e) {
                     log.error("Feil ved konvertering til Unit4 objekt på meldings-key: {}", uuid);
                     log.error(SECURE_LOGS, "Feil ved konvertering til Unit4 objekt på meldings-key: {}, event: {}", uuid, ressursOpprettetEventV1, e); // Send more detailed information to secure-logs logger.

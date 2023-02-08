@@ -82,3 +82,19 @@ management:
 unleash:
   endpoint:
     url: https://unleash.nais.io/api
+
+
+--- # DEV
+spring:
+  config:
+    activate:
+      on-profile: dev && !prod
+
+app:
+  unit4:
+    felles-kobling-value:
+--- # PROD
+spring:
+  config:
+    activate:
+      on-profile: !dev && prod

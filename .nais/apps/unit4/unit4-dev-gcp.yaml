@@ -2,6 +2,8 @@ ingresses:
   - https://nom-unit4.dev.intern.nav.no
 kafka-pool: nav-dev
 env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: dev
   - name: UNIT4_BASEURL
     value: https://agresso.test.local
   - name: UNIT4_EMPLOYEES_PATH
