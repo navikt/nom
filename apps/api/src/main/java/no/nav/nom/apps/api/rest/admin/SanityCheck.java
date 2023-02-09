@@ -156,6 +156,51 @@ public class SanityCheck {
         return result.toString();
     }
 
+    @Operation(
+        description = "List ressurser med aktive orgtilknytninger for enhet om er inaktiv eller uten organisering",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listRessurserTilIkkeAktivEnhet")
+    public String listRessurserTilIkkeAktivEnhet() {
+        StringBuffer result = new StringBuffer();
+
+        List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
+        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
+
+        List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
+        List<String> aktiveOverEnheterUniqueAgressoIder = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
+
+        List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
+        aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
+
+        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
+
+        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
+        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
+        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
+        List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
+
+        List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
+        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
+
+
+        ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( r ->
+            result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + "\n")
+        );
+
+        return result.toString();
+    }
+
     private String sjekkOrgEnhetStartSluttDato() {
         StringBuffer result = new StringBuffer();
 
@@ -229,19 +274,19 @@ public class SanityCheck {
 //        Map<String, IOrgenhet> uniqueAgressoIderMapAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
         List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
 
-        List<IOrgenhet> ikkeAktiveEnheterMedOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
-        List<String> uniqueAgressoIderIkkeAktiveEnheterMedOrganisering = ikkeAktiveEnheterMedOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
+        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
+        List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
         List<RessursState> ressurserUtenAktiveTilknytninger = ressurserIkkeBlandtNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
-        List<RessursState> ressurserMedAktiveTilknytningerTilIkkeAktiveEnheterMedOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderIkkeAktiveEnheterMedOrganisering);
+        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
 //        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
 
         result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
         result.append("   Aktive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
         result.append("   Ressurser med aktive orgtilknytninger: %s\n".formatted(ressurserMedAktiveTilknytninger.size()));
         result.append("   Ressurser uten aktive orgtilknytninger: %s\n".formatted(ressurserUtenAktiveTilknytninger.size()));
-        result.append("   Ressurser med aktive orgtilknytninger med orgtilknytning til inaktiv enhet: %s\n".formatted(ressurserMedAktiveTilknytningerTilIkkeAktiveEnheterMedOrganisering.size()));
+        result.append("   Ressurser med aktive orgtilknytninger for enhet om er inaktiv eller uten organisering: %s\n".formatted(ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.size()));
 //        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
 
         log.info("Total resultat:\n{}", result);
