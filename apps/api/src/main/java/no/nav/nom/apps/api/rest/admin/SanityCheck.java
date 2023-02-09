@@ -211,6 +211,9 @@ public class SanityCheck {
             }
         );
 
+        result.append("\n");
+        uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( s -> result.append(s + "\n"));
+
         return result.toString();
     }
 
