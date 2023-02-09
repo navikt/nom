@@ -95,6 +95,34 @@ public class SanityCheck {
         return result.toString();
     }
 
+    @Operation(
+        description = "Kjør Sanity Check på data",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listEnheterUtenOverEnheter")
+    public String listEnheterUtenOverEnheter() {
+        StringBuffer result = new StringBuffer();
+
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
+
+        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
+
+        aktiveEnheterUtenAktivOverEnhet.stream().forEach( oe ->
+            result.append(oe.getUniqueAgressoId() + " [" + oe.getGyldigFom() + " - " + oe.getGyldigTom() + "]\n")
+        );
+
+        return result.toString();
+    }
+
     private String sjekkOrgEnhetStartSluttDato() {
         StringBuffer result = new StringBuffer();
 
