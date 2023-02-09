@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -204,31 +208,44 @@ public class SanityCheck {
     private String aktiveRessurser() {
         StringBuffer result = new StringBuffer();
         List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
-        List<Orgtilknytning> alleTilknytninger = dvhRepository.getKoblinger();
+        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
-        List<Orgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
+        List<String> aktiveOverEnheterUniqueAgressoIder = uniqueAgressoIdForOverEnhet(aktiveOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
+
+        List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
+        aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
+
+        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
+        List<String> uniqueAgresssoIderAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getUniqueAgressoId).toList();
+
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
-        List<IOrgenhet> inaktiveEnheter = getInaktiveEnheter(alleEnheter, aktiveEnheter);
+        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
 
-        List<RessursState> aktiveRessurser = ressurserForKoblinger(alleRessurser, aktiveTilknytninger);
-        List<RessursState> aktiveRessurserUtenTilkoblinger = ressurserUtenKoblinger(aktiveRessurser, aktiveTilknytninger);
-        List<RessursState> aktiveRessurserMedKoblingTilIkkeAktivEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, inaktiveEnheter);
+//        Map<String, IOrgenhet> uniqueAgressoIderMapAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
+
+        List<IOrgenhet> ikkeAktiveEnheterMedOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
+        List<String> uniqueAgressoIderIkkeAktiveEnheterMedOrganisering = ikkeAktiveEnheterMedOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
+
+        List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
+        List<RessursState> ressurserUtenAktiveTilknytninger = ressurserIkkeBlandtNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
+        List<RessursState> ressurserMedAktiveTilknytningerTilIkkeAktiveEnheterMedOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderIkkeAktiveEnheterMedOrganisering);
 //        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
 
         result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
-        result.append("   Aktive: %s\n".formatted(aktiveRessurser.size()));
-        result.append("   Akrive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
-        result.append("   Aktive uten orgtilknytning: %s\n".formatted(aktiveRessurserUtenTilkoblinger.size()));
-        result.append("   Aktive med orgtilknytning til inaktiv enhet: %s\n".formatted(aktiveRessurserMedKoblingTilIkkeAktivEnhet.size()));
+        result.append("   Aktive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
+        result.append("   Ressurser med aktive orgtilknytninger: %s\n".formatted(ressurserMedAktiveTilknytninger.size()));
+        result.append("   Ressurser uten aktive orgtilknytninger: %s\n".formatted(ressurserUtenAktiveTilknytninger.size()));
+        result.append("   Ressurser med aktive orgtilknytninger med orgtilknytning til inaktiv enhet: %s\n".formatted(ressurserMedAktiveTilknytningerTilIkkeAktiveEnheterMedOrganisering.size()));
 //        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
 
         log.info("Total resultat:\n{}", result);
         return result.toString();
-    }
-
-    private static List<IOrgenhet> getInaktiveEnheter(List<IOrgenhet> alleEnheter, List<IOrgenhet> aktiveEnheter) {
-        return alleEnheter.stream().filter(e -> !aktiveEnheter.stream().anyMatch(ae -> ae.getId() == e.getId())).toList();
     }
 
     private List<IOrgenhet> enheterMedStartdato(List<IOrgenhet> enheter) {
@@ -275,6 +292,14 @@ public class SanityCheck {
         return organiseringer.stream().map(o -> o.uniqueAgressoIdUnder()).distinct().toList();
     }
 
+    private static List<IOrgenhet> enheterForEnhetIder(List<IOrgenhet> enheter, List<String> enehtIder) {
+        return enheter.stream().filter(e -> enehtIder.contains(e.getId())).toList();
+    }
+
+    private static List<IOrgenhet> enheterIkkeBlandtEnhetIder(List<IOrgenhet> enheter, List<String> enehtIder) {
+        return enheter.stream().filter(e -> !enehtIder.contains(e.getId())).toList();
+    }
+
     private List<IOrgenhet> enheterForAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
         return enheter.stream().filter( oe -> uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
@@ -285,7 +310,7 @@ public class SanityCheck {
     }
 
 
-    private List<Orgtilknytning> aktiveOrgtilknytninger(List<Orgtilknytning> orgtilknytninger) {
+    private List<DvhOrgtilknytning> aktiveOrgtilknytninger(List<DvhOrgtilknytning> orgtilknytninger) {
         // FOM er før eller lik dagens dato, samt at TOM er null eller fremtidig
         return orgtilknytninger.stream().filter( ot ->
             ot.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
@@ -297,20 +322,24 @@ public class SanityCheck {
         return ressurser.stream().filter( r -> orgtilknytninger.stream().anyMatch(ot -> r.navident().equals(ot.getNavIdent()))).toList();
     }
 
-    private List<RessursState> ressursKoblingForEnheter(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger, List<IOrgenhet> enheter) {
-        List<DvhOrgtilknytning> orgtilknytningerTilAngitteEnheter =
-            orgtilknytninger.stream()
-                .map(DvhOrgtilknytning.class::cast)
-                .filter( ot -> enheter.stream().anyMatch( ie -> ie.getUniqueAgressoId().equals(ot.getUniqueAgressoId())))
-                .toList();
+    private List<RessursState> ressursKoblingForUniqueAgressoIder(List<RessursState> ressurser,List<DvhOrgtilknytning> orgtilknytninger, List<String> uniqueAgressoIder) {
+        List<DvhOrgtilknytning> orgtilknytningerForAngitteUniqueAgressoIder =
+            orgtilknytninger.stream().filter( e -> uniqueAgressoIder.contains(e.getUniqueAgressoId())).toList();
 
-        return ressurser.stream().filter( r -> orgtilknytningerTilAngitteEnheter.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
+        return ressurser.stream().filter( r -> orgtilknytningerForAngitteUniqueAgressoIder.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
     }
 
     private List<RessursState> ressurserUtenKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
         return ressurser.stream().filter( r -> !orgtilknytninger.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
     }
 
+    private List<RessursState> ressurserForNavIdenter(List<RessursState> ressurser, List<String> navIdenter) {
+        return ressurser.stream().filter( r -> navIdenter.contains(r.navident())).toList();
+    }
+
+    private List<RessursState> ressurserIkkeBlandtNavIdenter(List<RessursState> ressurser, List<String> navIdenter) {
+        return ressurser.stream().filter( r -> !navIdenter.contains(r.navident())).toList();
+    }
 }
 
 

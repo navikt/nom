@@ -37,17 +37,11 @@ public class RessursStateRepository implements IRessursService {
     }
 
     public Collection<RessursState> getAll() {
-        return ressursByFid.values();
+        return ressursByNavident.values();
     }
 
     public int count() {
         return ressursByFid.size();
-    }
-
-    public List<RessursState> matchByNavident(String navident) {
-        return getAll().stream()
-                .filter(r -> r.navident().contains(navident))
-                .collect(Collectors.toList());
     }
 
     @Override
