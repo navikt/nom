@@ -183,12 +183,8 @@ public class SanityCheck {
 
         List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
         List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
-        List<String> uniqueAgresssoIderAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getUniqueAgressoId).toList();
 
-        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
-        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, uniqueAgresssoIderAktiveTilknytninger);
-        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
-        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
+        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
@@ -283,18 +279,17 @@ public class SanityCheck {
 
         List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
         List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
-        List<String> uniqueAgresssoIderAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getUniqueAgressoId).toList();
+//        List<String> uniqueAgresssoIderAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getUniqueAgressoId).toList();
 
-        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
-        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, uniqueAgresssoIderAktiveTilknytninger);
+//        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+//        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, uniqueAgresssoIderAktiveTilknytninger);
 
 //        Map<String, IOrgenhet> uniqueAgressoIderMapAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
-        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
+//        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
+        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
 
-        List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtEnhetIder(alleEnheter, enhetIderAktiveEnheterMedOrganisering);
-
-        // Denne listen kan ha uniqueAgressoId hvor samme match finnes også på en aktiv enhet
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
+
 
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
         List<RessursState> ressurserUtenAktiveTilknytninger = ressurserIkkeBlandtNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
