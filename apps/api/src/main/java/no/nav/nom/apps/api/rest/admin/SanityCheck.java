@@ -195,7 +195,20 @@ public class SanityCheck {
 
 
         ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( r ->
-            result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + "\n")
+            {
+                result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + " => ");
+                StringBuffer enheter = new StringBuffer();
+                aktiveTilknytninger.stream()
+                    .filter( ot -> ot.getNavIdent().equals(r.navident()))
+                    .forEach( ot ->
+                        enheter.append(ot.getUniqueAgressoId() + ", ")
+                    );
+                if (enheter.length() == 0) {
+                    result.append(" What? - ingen orgenhet i tilknytninger?\n");
+                } else {
+                    result.append(enheter.substring(0, enheter.length() - 2) + "\n");
+                }
+            }
         );
 
         return result.toString();
