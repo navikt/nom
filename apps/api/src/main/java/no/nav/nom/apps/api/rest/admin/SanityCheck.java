@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -42,7 +41,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Kjør Sanity Check på data",
+        description = "Sjekk enheter antall og dato",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -60,7 +59,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Kjør Sanity Check på data",
+        description = "Sjekk aktive enheter og organiseringer",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -78,7 +77,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Kjør Sanity Check på data",
+        description = "Sjekk aktive enheter og organiseringer",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -96,7 +95,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Kjør Sanity Check på data",
+        description = "List aktive enheter Uten over-enhet",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -114,9 +113,39 @@ public class SanityCheck {
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
         List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
         List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
-        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
 
         aktiveEnheterUtenAktivOverEnhet.stream().forEach( oe ->
+            result.append(oe.getUniqueAgressoId() + " [" + oe.getGyldigFom() + " - " + oe.getGyldigTom() + "]\n")
+        );
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "List aktive enheter Uten over-enhet men med under-enheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listEnheterUtenOverEnheterMedUnderEnheter")
+    public String listEnheterUtenOverEnheterMedUnderEnheter() {
+        StringBuffer result = new StringBuffer();
+
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
+
+        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        List<DvhOrganisering> aktiveOrganiseringer = aktiveOrganiseringer(alleOrganiseringer);
+        List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
+
+        List<IOrgenhet> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
+
+        aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.stream().forEach( oe ->
             result.append(oe.getUniqueAgressoId() + " [" + oe.getGyldigFom() + " - " + oe.getGyldigTom() + "]\n")
         );
 
@@ -151,9 +180,11 @@ public class SanityCheck {
         List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
         aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
 
-        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
-        List<IOrgenhet> aktiveEnheterUtenAktivUnderEnhet = enheterForAgressoIder(aktiveEnheter, aktiveOverEnheterUniqueAgressoIder);
-        List<IOrgenhet> aktiveEnheterUtenOrganisering = enheterUtenAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
+        List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
+        List<IOrgenhet> aktiveEnheterUtenAktivUnderEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveOverEnheterUniqueAgressoIder);
+
+        List<IOrgenhet> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
+        List<IOrgenhet> aktiveEnheterUtenOrganisering = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
 
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
 
@@ -163,6 +194,7 @@ public class SanityCheck {
 
         result.append("     Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
         result.append("     Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
+        result.append("     Aktive enheter med UnderEnheter uten OverEnheter: %s\n".formatted(aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.size()));
         result.append("     Aktive enheter uten noen organisering: %s\n".formatted(aktiveEnheterUtenOrganisering.size()));
         log.info("Resultat so far:\n{}", result);
 
@@ -244,12 +276,12 @@ public class SanityCheck {
     }
 
     private List<IOrgenhet> enheterForAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
-        // Enheter som ikke er enhet i angitte organiseringer
-        return enheter.stream().filter( oe -> !uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
+        return enheter.stream().filter( oe -> uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
 
-    private List<IOrgenhet> enheterUtenAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
-        return enheter.stream().filter( oe -> uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
+    private List<IOrgenhet> enheterIkkeBlandtAgressoIder(List<IOrgenhet> enheter, List<String> uniqueAgessoIder) {
+        // Enheter som ikke er enhet i angitte organiseringer
+        return enheter.stream().filter( oe -> !uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
 
 
