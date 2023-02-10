@@ -10,7 +10,6 @@ app:
     employees-path: ${UNIT4_EMPLOYEES_PATH}
     api-username: ${NOM_UNIT4_API_USERNAME}
     api-password: ${NOM_UNIT4_API_PASSWORD}
-    felles-kobling-value: L03034
   proxy:
     base-url: ${NOM_PROXY_BASEURL}
     aad-client-id: api://${NOM_PROXY_CLIENT_ID}/.default
@@ -104,4 +103,3 @@ spring:
     activate:
       on-profile: prod && !dev
 
-app.unit4.felles-kobling-value: 000000

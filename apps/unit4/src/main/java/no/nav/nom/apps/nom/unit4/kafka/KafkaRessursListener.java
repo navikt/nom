@@ -31,7 +31,7 @@ public class KafkaRessursListener {
     private final Unit4Client unit4Client;
     private final Duration blockSeconds;
 
-    @Value("${app.unit4.fells-kobling-value:000000}")
+    @Value("${app.unit4.felles-kobling-value:000000}")
     private String fellesKoblingValue;
 
     public KafkaRessursListener(Unit4Client unit4Client, AppProperties appProperties) {
