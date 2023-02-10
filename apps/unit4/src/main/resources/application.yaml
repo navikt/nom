@@ -94,6 +94,11 @@ app:
   unit4:
     felles-kobling-value: L03034
 
+
+logging:
+  level:
+    no.nav.nom.apps.nom.unit4: DEBUG
+
 --- # PROD
 spring:
   config:

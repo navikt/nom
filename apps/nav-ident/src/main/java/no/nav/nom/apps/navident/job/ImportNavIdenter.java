@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -39,6 +41,8 @@ public class ImportNavIdenter {
 
     private final KafkaTemplate<String, SourceEvent> producer;
 
+    private Map<String, String> importerteNavIdenter;
+    private int skippedLines = 0;
 
     public ImportNavIdenter(SourceEventRepository sourceEventRepository, EventSourceService eventSourceService, KafkaTemplate<String, SourceEvent> producer) {
         this.sourceEventRepository = sourceEventRepository;
@@ -66,47 +70,64 @@ public class ImportNavIdenter {
     }
 
     public String importFromReader(BufferedReader reader) throws IOException {
+        importerteNavIdenter = new HashMap<>();
         LocalDateTime start = LocalDateTime.now();
-        int total = 0, updated = 0;
+        int total = 0;
         String line;
         while ((line = reader.readLine()) != null) {
             total++;
-            if (importTestNavIdent(line) ) updated++;
+            importTestNavIdent(line);
         }
-        String result = "Totalt importert %s av %s (inkludert header) - tid brukt: %s".formatted(updated, total, durationAsH24(start));
+        String result = "Totalt importert %s av %s (inkludert header). Skipped = %s - tid brukt: %s".formatted(importerteNavIdenter.size(), total, skippedLines, durationAsH24(start));
         log.info(result);
         return result;
     }
 
     // NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME
-    public boolean importTestNavIdent(String importLine) {
+    public void importTestNavIdent(String importLine) {
         log.debug("line: {}", importLine);
-        var splitted = importLine.split(",");
-        if (splitted.length < 3) {
+        var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
+        if (kolonner.length < 3) {
             log.error("importLine kan ikke splittes på ',': {}", importLine);
-            return false;
+            return;
         }
-        var navIdent = splitted[0];
-        var personIdent = splitted[1];
-        var sektor = splitted[8];
+        var navIdent = kolonner[0];
+        var personIdent = kolonner[4];
+        var status = kolonner[7];
+        var sektor = kolonner[8];
 
-        if (navIdent.equals("NAV-ID")) {
-            log.debug("Skipping header");
-            return false;
+        if (!status.equals("Aktiv")) {
+            if (!status.equals("Slettet")) {
+                log.info("Skipping - men status != Slettet. => {}: {}", status, importLine);
+            }
+            log.debug("Skipping rad uten status Aktiv");
+            skippedLines++;
+            return;
         }
         if (navIdent.length() != 7) {
             log.error("Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", navIdent, importLine);
-            return false;
+            return;
         }
         if (finnesAllerede(navIdent)) {
             log.error("Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
-            return false;
+            return;
         }
 
-        if (personIdent.length() != 11) {
-            log.error("Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", personIdent, importLine);
-            return false;
+        if (personIdent.length() == 0) {
+            log.error("Lest personIdent fra importlinje er tom", personIdent, importLine);
+            return;
         }
+
+        if (importerteNavIdenter.get(navIdent) != null) {
+            if (importerteNavIdenter.get(navIdent).equals(personIdent)) {
+                log.info("Navident '{}' allerede importert på samme personid", navIdent);
+            } else {
+                log.error("Navident '{}' allerede importert, men på en annen personid ({}): {}", navIdent, importerteNavIdenter.get(navIdent), importLine);
+            }
+            return;
+        }
+
+        importerteNavIdenter.put(navIdent, personIdent);
 
         val sourceEvent = SourceEvent.builder()
             .event(EventType.OPPRETT)
@@ -118,12 +139,10 @@ public class ImportNavIdenter {
                     .build()
             ).build();
 
-
         sourceEventRepository.save(sourceEvent);
         producer.send(eventSourceTopic, sourceEvent);
 
         log.debug("Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
-        return true;
     }
 
     private IdentType parse(String identType) {

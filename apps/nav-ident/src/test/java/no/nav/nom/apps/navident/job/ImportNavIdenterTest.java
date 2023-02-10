@@ -6,6 +6,7 @@ import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
+import org.junit.Ignore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -16,6 +17,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -114,4 +118,21 @@ A867804,01010100006,HAE4403,Horisontal,Abakus,4403,NAV ARBEID OG YTELSER KRISTIA
 
         assertTrue(res.startsWith("Totalt importert 5 av 6"), res);
     }
+
+    @Test
+    @Ignore
+    @SneakyThrows
+    @DisplayName("Manual import of local file. ")
+    void importManuallyLocalFile() {
+        Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_preprod_20230207.csv");
+
+        BufferedReader br = Files.newBufferedReader(path);
+        String res = importNavIdenter.importFromReader(br);
+
+        verify(producer, times(25107)).send(any(), any());
+        verify(sourceEventRepository, times(25107)).save(any());
+
+        assertTrue(res.startsWith("Totalt importert 25107 av 124461"), res);
+    }
+
 }

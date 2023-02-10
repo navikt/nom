@@ -72,8 +72,10 @@ nom:
 
 logging:
   level:
-    no.nav.nom: DEBUG
+    no.nav.nom: INFO
     org:
       springframework:
         kafka:
-          core: TRACE
+          core: INFO
+      apache:
+        kafka: ERROR

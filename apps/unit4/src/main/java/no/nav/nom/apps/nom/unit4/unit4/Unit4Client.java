@@ -39,7 +39,7 @@ public class Unit4Client {
 
     public void createRessursByProxy(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
         val body = objectMapper.writeValueAsString(unit4RessursDto);
-
+        log.debug("create unit4 ressurs:\n{}", body);
         try {
             webClient.post()
                     .uri(appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT)
@@ -56,6 +56,7 @@ public class Unit4Client {
         } catch (WebClientResponseException wce) {
             HttpStatus httpStatus = wce.getStatusCode();
             log.error(SECURE_LOGS, "Error posting to Unit4[{}], dumping dto({}): {} ", appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
+            log.debug("Error creating unit4 ressurs", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
