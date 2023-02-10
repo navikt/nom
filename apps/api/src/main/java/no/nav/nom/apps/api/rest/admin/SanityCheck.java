@@ -120,7 +120,7 @@ public class SanityCheck {
         List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
 
         aktiveEnheterUtenAktivOverEnhet.stream().forEach( oe ->
-            result.append(oe.getId() +"," + oe.getUniqueAgressoId() + "," + oe.getGyldigFom() + ", " + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n")
+            result.append(oe.getId() +";" + oe.getUniqueAgressoId() + ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n")
         );
 
         return result.toString();
@@ -150,7 +150,7 @@ public class SanityCheck {
         List<IOrgenhet> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
 
         aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.stream().forEach( oe ->
-            result.append(oe.getUniqueAgressoId() + " [" + oe.getGyldigFom() + " - " + oe.getGyldigTom() + "]\n")
+            result.append(oe.getId() +";" + oe.getUniqueAgressoId() + ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n")
         );
 
         return result.toString();

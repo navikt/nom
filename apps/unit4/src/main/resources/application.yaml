@@ -83,23 +83,21 @@ unleash:
   endpoint:
     url: https://unleash.nais.io/api
 
-
---- # DEV
+---
+# DEV
 spring:
   config:
     activate:
       on-profile: dev && !prod
 
-app:
-  unit4:
-    felles-kobling-value: L03034
-
+app.unit4.felles-kobling-value: L03034
 
 logging:
   level:
     no.nav.nom.apps.nom.unit4: DEBUG
 
---- # PROD
+---
+# PROD
 spring:
   config:
     activate:
