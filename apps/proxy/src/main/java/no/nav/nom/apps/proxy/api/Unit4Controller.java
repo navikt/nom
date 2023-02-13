@@ -84,7 +84,10 @@ public class Unit4Controller {
 
         var proxiedRequest = RequestEntity
                 .get(appProperties.getUnit4().getBaseUrl())
-                .headers(h -> h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password() ))
+                .headers(h -> {
+                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
+                    h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
+                })
                 .build();
 
         return restTemplate.exchange(proxiedRequest, String.class).getBody(); // nullptr ?
