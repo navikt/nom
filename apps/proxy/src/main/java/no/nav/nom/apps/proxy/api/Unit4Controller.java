@@ -83,7 +83,7 @@ public class Unit4Controller {
         log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+target);
 
         var proxiedRequest = RequestEntity
-                .get(appProperties.getUnit4().getBaseUrl())
+                .get(target)
                 .headers(h -> {
                     h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
                     h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
