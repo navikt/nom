@@ -78,7 +78,7 @@ public class Unit4Controller {
 
     @GetMapping("/**")
     public String unit4GetProxy(HttpServletRequest request){
-        var target = appProperties.getUnit4().getBaseUrl() + request.getRequestURI().replaceFirst("/proxy/unit4", "");
+        var target = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getApiPath() + request.getRequestURI().replaceFirst("/proxy/unit4", "");
         target = request.getQueryString() == null || request.getQueryString().isEmpty() ? target : target + "?" + request.getQueryString();
         log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+target);
 
