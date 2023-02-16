@@ -8,6 +8,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventPayload;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
@@ -88,7 +89,7 @@ public class ImportNavIdenter {
         log.debug("line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
         if (kolonner.length < 3) {
-            log.error("importLine kan ikke splittes på ',': {}", importLine);
+            log.error(LogConfig.SECURE_LOGS, "importLine kan ikke splittes på ',': {}", importLine);
             return;
         }
         var navIdent = kolonner[0];
@@ -98,31 +99,31 @@ public class ImportNavIdenter {
 
         if (!status.equals("Aktiv")) {
             if (!status.equals("Slettet")) {
-                log.info("Skipping - men status != Slettet. => {}: {}", status, importLine);
+                log.info(LogConfig.SECURE_LOGS, "Skipping - men status != Slettet. => {}: {}", status, importLine);
             }
             log.debug("Skipping rad uten status Aktiv");
             skippedLines++;
             return;
         }
         if (navIdent.length() != 7) {
-            log.error("Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", navIdent, importLine);
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje er ikke 7 tegn: {}", navIdent, importLine);
             return;
         }
         if (finnesAllerede(navIdent)) {
-            log.error("Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
+            log.error(LogConfig.SECURE_LOGS, "Lest navIdent '{}' fra importlinje finnes i fra før: {}", navIdent, importLine);
             return;
         }
 
         if (personIdent.length() == 0) {
-            log.error("Lest personIdent fra importlinje er tom", personIdent, importLine);
+            log.error(LogConfig.SECURE_LOGS, "Lest personIdent fra importlinje er tom", personIdent, importLine);
             return;
         }
 
         if (importerteNavIdenter.get(navIdent) != null) {
             if (importerteNavIdenter.get(navIdent).equals(personIdent)) {
-                log.info("Navident '{}' allerede importert på samme personid", navIdent);
+                log.info(LogConfig.SECURE_LOGS,"Navident '{}' allerede importert på samme personid", navIdent);
             } else {
-                log.error("Navident '{}' allerede importert, men på en annen personid ({}): {}", navIdent, importerteNavIdenter.get(navIdent), importLine);
+                log.error(LogConfig.SECURE_LOGS, "Navident '{}' allerede importert, men på en annen personid ({}): {}", navIdent, importerteNavIdenter.get(navIdent), importLine);
             }
             return;
         }
@@ -142,7 +143,7 @@ public class ImportNavIdenter {
         sourceEventRepository.save(sourceEvent);
         producer.send(eventSourceTopic, sourceEvent);
 
-        log.debug("Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+        log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
     }
 
     private IdentType parse(String identType) {

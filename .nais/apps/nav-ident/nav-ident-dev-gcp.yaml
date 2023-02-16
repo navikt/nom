@@ -65,7 +65,7 @@ spec:
           age: 14
       - name: nav-ident-storage-bucket
         cascadingDelete: true
-        
+
   azure:
     application:
       enabled: true
