@@ -106,7 +106,7 @@ unleash:
 spring:
   config:
     activate:
-      on-profile: dev & !prod
+      on-profile: (dev || test) && !prod
   flyway:
     locations: classpath:/db/migration,classpath:/db/dev/migration
 
@@ -121,7 +121,7 @@ REDIS_HOST: nav-ident-redis.org.svc.cluster.local
 spring:
   config:
     activate:
-      on-profile: prod & !dev
+      on-profile: prod && !dev
   flyway:
     locations: classpath:/db/migration,classpath:/db/prod/migration
 
