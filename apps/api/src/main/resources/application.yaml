@@ -145,6 +145,9 @@ app:
         nom-write:
           group-id: "${NOM_WRITE_GROUPID}"
           scopes: ["MUTATE_RESSURS"]
+  proxy:
+    enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
+
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i dev)
 #  dvh-load:
