@@ -51,7 +51,7 @@ public class ImportNavIdenter {
         this.producer = producer;
     }
 
-    public String fromBucketObject(String objectName) {
+    public String fromBucketObject(String objectName, boolean kunLes) {
         log.info("ImportNavIdenter: {} - {}/{}", gsProjectId, bucketName, objectName);
         Storage storage = StorageOptions.newBuilder().setProjectId(gsProjectId).build().getService();
 
@@ -63,21 +63,21 @@ public class ImportNavIdenter {
         StringBuffer sb = new StringBuffer();
         try (ReadChannel reader = storage.reader(BlobId.of(bucketName, objectName))) {
             BufferedReader br = new BufferedReader(Channels.newReader(reader, "UTF-8"));
-            return importFromReader(br);
+            return importFromReader(br, kunLes);
         } catch (Exception e) {
             log.error("Unable to read input", e);
             return "Unable to read. " + e.getMessage();
         }
     }
 
-    public String importFromReader(BufferedReader reader) throws IOException {
+    public String importFromReader(BufferedReader reader, boolean kunLes) throws IOException {
         importerteNavIdenter = new HashMap<>();
         LocalDateTime start = LocalDateTime.now();
         int total = 0;
         String line;
         while ((line = reader.readLine()) != null) {
             total++;
-            importTestNavIdent(line);
+            importTestNavIdent(line, kunLes);
         }
         String result = "Totalt importert %s av %s (inkludert header). Skipped = %s - tid brukt: %s".formatted(importerteNavIdenter.size(), total, skippedLines, durationAsH24(start));
         log.info(result);
@@ -85,7 +85,7 @@ public class ImportNavIdenter {
     }
 
     // NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME
-    public void importTestNavIdent(String importLine) {
+    public void importTestNavIdent(String importLine, boolean kunLes) {
         log.debug("line: {}", importLine);
         var kolonner = importLine.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1); // Split på komma, ignorer komma i "
         if (kolonner.length < 3) {
@@ -140,10 +140,12 @@ public class ImportNavIdenter {
                     .build()
             ).build();
 
-        sourceEventRepository.save(sourceEvent);
-        producer.send(eventSourceTopic, sourceEvent);
+        if (!kunLes) {
+            sourceEventRepository.save(sourceEvent);
+            producer.send(eventSourceTopic, sourceEvent);
 
-        log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+            log.debug(LogConfig.SECURE_LOGS, "Persisted SourceEvent posted: %s".formatted(sourceEvent.maskedToString()));
+        }
     }
 
     private IdentType parse(String identType) {
