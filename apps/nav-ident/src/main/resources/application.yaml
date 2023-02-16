@@ -16,7 +16,6 @@ app:
     timeoutInMillis: 2500
   redis:
     rnrClientTokenCacheName: rnrClientTokenCache
-  gs-bucket-name: nav-ident-storage-bucket
 
 authentication:
   aad:
@@ -111,6 +110,9 @@ spring:
   flyway:
     locations: classpath:/db/migration,classpath:/db/dev/migration
 
+app:
+  gs-bucket-name: no-nav-org-dev-nav-ident-storage-bucket
+
 PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
 REDIS_HOST: nav-ident-redis.org.svc.cluster.local
@@ -122,6 +124,9 @@ spring:
       on-profile: prod & !dev
   flyway:
     locations: classpath:/db/migration,classpath:/db/prod/migration
+
+app:
+  gs-bucket-name: no-nav-org-prod-nav-ident-storage-bucket
 
 PDL_CLIENT_ID: prod-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.prod-fss-pub.nais.io
