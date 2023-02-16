@@ -27,6 +27,7 @@ import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
 @Slf4j
 public class Unit4Client {
 
+    private final static MediaType UNIT4_MEDIETYPE_JSON_PATCH = new MediaType("application", "json-patch+json");
     private final WebClient webClient = WebClient.create();
     private final ObjectMapper objectMapper;
 
@@ -84,7 +85,7 @@ public class Unit4Client {
             webClient.patch()
                     .uri(url)
                     .headers(httpHeaders -> {
-                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                        httpHeaders.setContentType(UNIT4_MEDIETYPE_JSON_PATCH);
                         httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
                         httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
                     })
