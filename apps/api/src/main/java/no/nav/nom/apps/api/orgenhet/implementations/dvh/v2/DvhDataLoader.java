@@ -129,16 +129,8 @@ public class DvhDataLoader {
 
                 if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
                     stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
-                        if (orgEnhetState.id().equals("je333r")) {
-                            log.info("Laster \n{}", objectMapper.valueToTree(parsedEnhet).toPrettyString());
-                            log.info("For state \n{}", objectMapper.valueToTree(orgEnhetState).toPrettyString());
-                        }
-
                         // Parsed DVH enhet found in state
                         if (parsedEnhet.getGyldigTom().isPresent() && orgEnhetState.gyldigTom().isEmpty()) {
-                            if (orgEnhetState.id().equals("je333r")) {
-                                log.info("Kicking in avvikle enhet");
-                            }
                             avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
                             // Need to keep track of Eventual gyldigTom in case there are more parsed enheter for same uniqueAgressoId to process
                             fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom().get());

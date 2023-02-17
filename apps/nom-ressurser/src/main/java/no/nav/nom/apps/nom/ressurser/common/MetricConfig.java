@@ -47,7 +47,7 @@ public class MetricConfig {
     public Counter kakfaRessursCounter(){
         return Counter
                 .builder("kafka.messages.produced.count")
-                .tag("topic", "aapen-nom-ressurs-v1")
+                .tag("topic", "nom-ressurser")
                 .register(meterRegistry);
     }
 }

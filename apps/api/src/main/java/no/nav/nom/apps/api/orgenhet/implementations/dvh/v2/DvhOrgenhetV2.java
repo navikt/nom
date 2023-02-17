@@ -70,12 +70,13 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public Optional<LocalDate> getGyldigTom() {
-        final var ignoreDate = !"ORGENHET".equals(orgNiv) || "0".equals(agressoGyldigFom) || "209999".equals(agressoGyldigTom);
-        if (ignoreDate) {
+        // Alle Enheter !"ORGENHET" har alltid agressoGyldigFom="0" && agressoGyldigTom = "209912" => Så alltid return empty()
+        // "ORGENHET" har aldri agressoGyldigFom="0"
+        if (!"ORGENHET".equals(orgNiv)) {
             return Optional.empty();
         }
 
-        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom));
+        final var agressoGyldigTomDato = getDate(getLastDay(agressoGyldigTom)); // getDate returnerer Optional.Empty hvis Max dato (2099-12-31)
         if (agressoGyldigTomDato.isPresent()) {
             return agressoGyldigTomDato;
         }
