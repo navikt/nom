@@ -175,27 +175,28 @@ public class DvhDataLoader {
 
         // Parkerte orgenheter som har ikke stillinger ble filtrert bort, men skal fjernes fra State om de er der fra før
         validations.get(ValidationType.PARKED_WITHOUT_STILLINGER)
-            .stream()
-            .filter(dvhOrgenhetV2 -> dvhOrgenhetV2.getGyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
             .forEach(orgenhetV2 -> {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
-                    stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
+                    stateEnheterPerUniqueAgressoId
+                        .stream()
+                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .forEach(orgEnhetState -> {
 
-                        LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
-                        avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
-                    });
+                            LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
+                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                        });
                 }
             );
 
         validations.get(ValidationType.PARKED_INVALID_PERIOD)
-            .stream()
-            .filter(dvhOrgenhetV2 -> dvhOrgenhetV2.getGyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
             .forEach(orgenhetV2 -> {
                     val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
-                    stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
-
-                        avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
-                    });
+                    stateEnheterPerUniqueAgressoId
+                        .stream()
+                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .forEach(orgEnhetState -> {
+                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
+                        });
                 }
             );
 
