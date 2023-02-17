@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -173,25 +174,30 @@ public class DvhDataLoader {
         );
 
         // Parkerte orgenheter som har ikke stillinger ble filtrert bort, men skal fjernes fra State om de er der fra før
-        // todo: check if uniqueagressoid in validaitons is unique
-        validations.get(ValidationType.PARKED_WITHOUT_STILLINGER).forEach(orgenhetV2 -> {
-                val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
-                stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
+        validations.get(ValidationType.PARKED_WITHOUT_STILLINGER)
+            .stream()
+            .filter(dvhOrgenhetV2 -> dvhOrgenhetV2.getGyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+            .forEach(orgenhetV2 -> {
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
 
-                    LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
-                    avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
-                });
-            }
-        );
+                        LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
+                        avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                    });
+                }
+            );
 
-        validations.get(ValidationType.PARKED_INVALID_PERIOD).forEach(orgenhetV2 -> {
-                val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
-                stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
+        validations.get(ValidationType.PARKED_INVALID_PERIOD)
+            .stream()
+            .filter(dvhOrgenhetV2 -> dvhOrgenhetV2.getGyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+            .forEach(orgenhetV2 -> {
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    stateEnheterPerUniqueAgressoId.forEach(orgEnhetState -> {
 
-                    avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
-                });
-            }
-        );
+                        avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
+                    });
+                }
+            );
 
         log.info("Ferdig med orgenhet last");
     }
