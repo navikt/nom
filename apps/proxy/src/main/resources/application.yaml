@@ -25,6 +25,7 @@ app:
     unit4Password: ${NOM_UNIT4_API_PASSWORD}
     baseUrl: ${UNIT4_BASE_URL}
     employeesPath: ${UNIT4_EMPLOYEES_PATH}
+    apiPath: ${UNIT4_API_PATH}
 
 authentication:
   sts:
@@ -89,6 +90,7 @@ LDAP_URL: ldaps://ldapgw.preprod.local:636
 LDAP_BASE: DC=preprod,DC=local
 UNIT4_BASE_URL: https://agresso.test.local
 UNIT4_EMPLOYEES_PATH: '/agrt01-web-api/v1/employees'
+UNIT4_API_PATH: '/agrt01-web-api/v1'
 
 ---
 spring:
@@ -104,3 +106,4 @@ LDAP_URL: ldaps://ldapgw.adeo.no:636
 LDAP_BASE: DC=adeo,DC=no
 UNIT4_BASE_URL: https://agresso.adeo.no
 UNIT4_EMPLOYEES_PATH: '/agressowebapi/v1/employees'
+UNIT4_API_PATH: '/agressowebapi/v1'

@@ -60,9 +60,10 @@ spec:
           - name: nav-ident-db
             envVarPrefix: DATABASE
     buckets:
-      - name: nav-ident-storage-bucket
+      - name: no-nav-org-dev-nav-ident-storage-bucket   #Bucket names er globally unique across all google.
         lifecycleCondition:
           age: 14
+
   azure:
     application:
       enabled: true

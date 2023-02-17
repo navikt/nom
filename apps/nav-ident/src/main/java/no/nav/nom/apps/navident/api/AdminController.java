@@ -52,6 +52,6 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_${group.id.nom.write}')")
     public String importerNavIdenter(@RequestParam String bucketObjectName, @RequestParam(required = false) boolean kunLes) {
         logger.info("Starter NavIdent innlesning. kunLes={}", kunLes);
-        return importNavIdenter.fromBucketObject(bucketObjectName);
+        return importNavIdenter.fromBucketObject(bucketObjectName, kunLes);
     }
 }

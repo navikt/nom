@@ -52,7 +52,7 @@ class ImportNavIdenterTest extends SpringBootTestBase {
             "A861330,DAA0501,Demokratisk,Abakus,19437702929,0501,NAV LILLEHAMMER-GAUSDAL,Aktiv,NAV Statlig,,,02.01.2023 14:57:00,01.02.2023,"
         ));
 
-        importNavIdenter.importFromReader(br);
+        importNavIdenter.importFromReader(br, false);
 
         verify(producer, times(1)).send(any(), eventCaptor.capture());
         verify(sourceEventRepository, times(1)).save(any());
@@ -71,7 +71,7 @@ class ImportNavIdenterTest extends SpringBootTestBase {
         ));
 
         when(eventSourceService.finnesNavIdent(any())).thenReturn(true);
-        String res = importNavIdenter.importFromReader(br);
+        String res = importNavIdenter.importFromReader(br, false);
 
         verify(producer, times(0)).send(any(), any());
         verify(sourceEventRepository, times(0)).save(any());
@@ -87,7 +87,7 @@ class ImportNavIdenterTest extends SpringBootTestBase {
             "NAV-ID,Person id,Bruker id,Fornavn,Etternavn,Enhets-ID,Enhet,Status,Sektor,I permisjon?,I permisjon dato,Reg. dato,Tiltredelsesdato,Status-History.Slettet.TIME"
         ));
 
-        String res = importNavIdenter.importFromReader(br);
+        String res = importNavIdenter.importFromReader(br, false);
 
         verify(producer, times(0)).send(any(), any());
         verify(sourceEventRepository, times(0)).save(any());
@@ -111,7 +111,7 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
             """
         ));
 
-        String res = importNavIdenter.importFromReader(br);
+        String res = importNavIdenter.importFromReader(br, false);
 
         verify(producer, times(5)).send(any(), any());
         verify(sourceEventRepository, times(5)).save(any());
@@ -127,7 +127,7 @@ A867804,HAE4403,Horisontal,Abakus,27469208996,4403,NAV ARBEID OG YTELSER KRISTIA
         Path path = Paths.get("/Users/g155033/Documents/atom/Remedy_preprod_20230207.csv");
 
         BufferedReader br = Files.newBufferedReader(path);
-        String res = importNavIdenter.importFromReader(br);
+        String res = importNavIdenter.importFromReader(br, false);
 
         verify(producer, times(25107)).send(any(), any());
         verify(sourceEventRepository, times(25107)).save(any());

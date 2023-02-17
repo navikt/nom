@@ -10,7 +10,7 @@
       "status": "N",
       "RelatedValues": [
         {
-          "positionId": "265",
+          "positionId": "265",    # dette er property for rådgiver stillingen på 14xx ett eller annet
           "relationGroup": "",
           "status": "N",
           "isDefaulted": false,
