@@ -42,6 +42,7 @@ public class SecurityTestUtils {
                 .subject(subject)
                 .audience(audience)
                 .claim("oid", oid)
+                .claim("azp_name", subject)
                 .jwtID(UUID.randomUUID().toString())
                 .issueTime(new Date())
                 .issuer(format("http://localhost:%s/aad", wiremockPort))
