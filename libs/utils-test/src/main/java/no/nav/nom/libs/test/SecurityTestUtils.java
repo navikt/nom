@@ -39,14 +39,13 @@ public class SecurityTestUtils {
         final var wiremockPort = env.getRequiredProperty("wiremock.server.port");
 
         return new JWTClaimsSet.Builder()
-                .subject(subject)
-                .audience(audience)
-                .claim("oid", oid)
-                .claim("azp_name", subject)
-                .jwtID(UUID.randomUUID().toString())
-                .issueTime(new Date())
-                .issuer(format("http://localhost:%s/aad", wiremockPort))
-                .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));
+            .subject(subject)
+            .audience(audience)
+            .claim("oid", oid)
+            .jwtID(UUID.randomUUID().toString())
+            .issueTime(new Date())
+            .issuer(format("http://localhost:%s/aad", wiremockPort))
+            .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));
     }
 
     public SignedJWT createSignedJWT(JWTClaimsSet.Builder builder) throws JOSEException {

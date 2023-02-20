@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.remedy;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
@@ -171,7 +172,7 @@ public class RemedyControllerTest extends RestTestBase {
 
         val headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
 
         val response = testRestTemplate.exchange(
             "/api/v1/remedy/ressurs/",
@@ -185,6 +186,14 @@ public class RemedyControllerTest extends RestTestBase {
         Assertions.assertEquals(navn.getEtternavn(), response.getBody().getNavn().getEtternavn());
 
         Mockito.verify(nikConsumer).opprettNavident(eq(personident), isNull(), isNull(), eq(false));
+    }
+
+    private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {
+        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
+        final var subject = jwtClaimsBuilder.getClaims().get("sub");
+        securityTestUtils.validJwtClaims().claim("azp", subject);
+
+        return securityTestUtils.validJwtClaims().claim("azp_name", subject);
     }
 
 }
