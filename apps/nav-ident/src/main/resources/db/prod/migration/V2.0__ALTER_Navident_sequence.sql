@@ -1,0 +1,1 @@
+alter sequence navident_seq restart with 168000;
