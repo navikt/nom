@@ -112,6 +112,9 @@ spec:
         - application: oh-ressurs-behandler
           namespace: oppgavehandtering
           cluster: prod-gcp
+        - application: nks-statistikk
+          namespace: nks-statistikk
+          cluster: knada
     outbound:
       rules:
         - application: nav-ident
