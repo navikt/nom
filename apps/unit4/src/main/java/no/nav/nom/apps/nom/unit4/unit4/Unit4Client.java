@@ -40,7 +40,7 @@ public class Unit4Client {
 
     public void createRessursByProxy(Unit4RessursDto unit4RessursDto) throws Unit4Exception, JsonProcessingException {
         val body = objectMapper.writeValueAsString(unit4RessursDto);
-        log.debug("create unit4 ressurs:\n{}", body);
+        log.debug(SECURE_LOGS, "create unit4 ressurs:\n{}", body);
         try {
             webClient.post()
                     .uri(appProperties.proxy().baseUrl() + RESSURS_POST_ENDPOINT)
