@@ -39,7 +39,7 @@
     "@graphql-codegen/typescript": "^2.8.2",
     "@graphql-codegen/typescript-operations": "^2.5.7",
     "@graphql-codegen/typescript-react-apollo": "^3.3.7",
-    "@graphql-codegen/typescript-resolvers": "^2.7.7",
+    "@graphql-codegen/typescript-resolvers": "^3.0.0",
     "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.6",
