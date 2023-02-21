@@ -2,6 +2,8 @@ package no.nav.nom.apps.proxy.common;
 
 import io.micrometer.core.instrument.Tag;
 import lombok.val;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTags;
 import org.springframework.boot.actuate.metrics.web.client.RestTemplateExchangeTagsProvider;
@@ -18,7 +20,9 @@ import java.util.Arrays;
 
 @EnableScheduling
 @Configuration(proxyBeanMethods = false)
-class CommonConfig {
+public class CommonConfig {
+    // Marker for use with logger to ensure that sensitive logs are filtered into the correct log
+    public static final Marker SECURE_LOGS = MarkerFactory.getMarker("SECURE_LOGS");
 
     @Bean
     @Qualifier("restTemplateDvh")
