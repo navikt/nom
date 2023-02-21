@@ -26,8 +26,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +55,7 @@ public class RemedyController {
         this.ressursCommadService = ressursCommadService;
     }
 
-    @GetMapping("/ressurs/{personident}")
+    @PostMapping("/finnRessurs")
     @Operation(
         description = "Personoppslag",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -66,7 +64,15 @@ public class RemedyController {
         @ApiResponse(responseCode = "200", description = "Success"),
     })
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
-    public ResponseEntity<RessursDTO> finnRessurs(@PathVariable("personident") String personident) {
+    public ResponseEntity<RessursDTO> finnRessurs(@RequestBody FinnRessursRequest request) {
+
+        var personident = request.getPersonident();
+        if (personident.isBlank()) {
+            return ResponseEntity.ok(createErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Gitt personident er ikke gyldig"
+            ));
+        }
 
         var response = ressursService.findByPersonident(personident)
             .map(this::mapFrom);
@@ -86,7 +92,7 @@ public class RemedyController {
     }
 
 
-    @PostMapping("/ressurs")
+    @PostMapping("/opprettRessurs")
     @Transactional
     @Operation(
         description = "Henter en eksisterende eller oppretter en ny navident",

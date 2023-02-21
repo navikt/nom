@@ -77,10 +77,13 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
 
+        FinnRessursRequest request = new FinnRessursRequest();
+        request.setPersonident(personident);
+
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/ressurs/" + personident,
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
+            "/api/v1/remedy/finnRessurs",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
             RessursDTO.class
         );
         assertNotNull(response.getBody());
@@ -100,10 +103,13 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
 
+        FinnRessursRequest request = new FinnRessursRequest();
+        request.setPersonident(personident);
+
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/ressurs/" + personident,
-            HttpMethod.GET,
-            new HttpEntity<>(headers),
+            "/api/v1/remedy/finnRessurs",
+            HttpMethod.POST,
+            new HttpEntity<>(request, headers),
             RessursDTO.class
         );
         assertNotNull(response.getBody());
@@ -132,7 +138,7 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
 
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/ressurs/",
+            "/api/v1/remedy/opprettRessurs/",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             RessursDTO.class
@@ -175,7 +181,7 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
 
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/ressurs/",
+            "/api/v1/remedy/opprettRessurs/",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             RessursDTO.class
