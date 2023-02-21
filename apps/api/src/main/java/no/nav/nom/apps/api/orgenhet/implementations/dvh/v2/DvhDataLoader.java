@@ -22,6 +22,7 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -171,6 +172,34 @@ public class DvhDataLoader {
                         .flatMap(List::stream)
                         .toList()
         );
+
+        // Parkerte orgenheter som har ikke stillinger ble filtrert bort, men skal fjernes fra State om de er der fra før
+        validations.get(ValidationType.PARKED_WITHOUT_STILLINGER)
+            .forEach(orgenhetV2 -> {
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    stateEnheterPerUniqueAgressoId
+                        .stream()
+                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .forEach(orgEnhetState -> {
+
+                            LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
+                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                        });
+                }
+            );
+
+        validations.get(ValidationType.PARKED_INVALID_PERIOD)
+            .forEach(orgenhetV2 -> {
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(orgenhetV2.getUniqueAgressoId());
+                    stateEnheterPerUniqueAgressoId
+                        .stream()
+                        .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
+                        .forEach(orgEnhetState -> {
+                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
+                        });
+                }
+            );
+
         log.info("Ferdig med orgenhet last");
     }
 
@@ -224,9 +253,13 @@ public class DvhDataLoader {
     }
 
     private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2) {
+        avvikleOrgEnhet(fid, dvhOrgenhetV2, dvhOrgenhetV2.getGyldigTom().get());
+    }
+
+    private void avvikleOrgEnhet(String fid, DvhOrgenhetV2 dvhOrgenhetV2, LocalDate gyldigTom) {
         final var avvikleOrgEnhet = new AvvikleOrgEnhet(
-                dvhOrgenhetV2.getGyldigTom().get(),
-                new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
+            gyldigTom,
+            new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
         orgEnhetCommandService.avikleOrgEnhet(fid, avvikleOrgEnhet);
     }
