@@ -3,6 +3,8 @@ kind: "PrometheusRule"
 metadata:
   name: nom-api-alerts
   namespace: nom
+  labels:
+    team: nom
 spec:
   groups:
     - name: NOM-API pod nede
