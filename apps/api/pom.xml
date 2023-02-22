@@ -32,7 +32,6 @@
         <apache.common.csv.version>1.9.0</apache.common.csv.version>
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
-
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
 
