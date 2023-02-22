@@ -25,11 +25,11 @@
 
         <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
         <postgresql.version>42.5.4</postgresql.version>
-        <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
-        <hypersistence-utils-hibernate-55.version>3.0.1</hypersistence-utils-hibernate-55.version>
-        <graphql-extended-scalars.version>19.1</graphql-extended-scalars.version>
-        <unleash.version>7.0.0</unleash.version>
-        <apache.common.csv.version>1.9.0</apache.common.csv.version>
+        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <hypersistence-utils-hibernate-55.version>3.2.0</hypersistence-utils-hibernate-55.version>
+        <graphql-extended-scalars.version>20.0</graphql-extended-scalars.version>
+        <unleash.version>7.1.0</unleash.version>
+        <apache.common.csv.version>1.10.0</apache.common.csv.version>
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <testcontainers.version>1.17.6</testcontainers.version>
