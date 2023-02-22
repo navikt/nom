@@ -16,6 +16,8 @@
         <unleash.version>7.0.0</unleash.version>
         <wiremock.version>2.35.0</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
+
+        <commons-fileupload.version>1.5</commons-fileupload.version>
     </properties>
 
     <dependencies>
@@ -89,6 +91,17 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
             <version>${wiremock.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-fileupload</groupId>
+                    <artifactId>commons-fileupload</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload.version}</version>
         </dependency>
 
     </dependencies>
