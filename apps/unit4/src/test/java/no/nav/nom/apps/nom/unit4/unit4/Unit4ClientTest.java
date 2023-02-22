@@ -33,37 +33,37 @@ class Unit4ClientTest {
     @Test
     @SneakyThrows
     void createRessursByProxy_OK() {
-        unit4Client.createRessursByProxy(dummyRessurs("010199000001"));
+        unit4Client.createRessurs(dummyRessurs("010199000001"));
     }
 
     @Test
     void createRessursByProxy_CONFLICT() {
-        assertThrows(Unit4ConflictException.class, () -> unit4Client.createRessursByProxy(dummyRessurs("010199000002")));
+        assertThrows(Unit4ConflictException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000002")));
     }
 
     @Test
     void createRessursByProxy_422_BadRequest() {
-        assertThrows(Unit4RequestException.class, () -> unit4Client.createRessursByProxy(dummyRessurs("010199000003")));
+        assertThrows(Unit4RequestException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000003")));
     }
 
     @Test
     void createRessursByProxy_422_BadRequest_Logging(CapturedOutput output) {
         try {
-            unit4Client.createRessursByProxy(dummyRessurs("010199000003"));
+            unit4Client.createRessurs(dummyRessurs("010199000003"));
         } catch (Exception ignored) {}
         assertTrue(output.getOut().contains("Leverandør-ID og ressurs-ID må være identiske, i henhold til systemparameteren HS_EQUAL_ID."));
     }
 
     @Test
     void createRessursByProxy_422_BadRequest2() {
-        assertThrows(Unit4RequestException.class, () -> unit4Client.createRessursByProxy(dummyRessurs("010199000004")));
+        assertThrows(Unit4RequestException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000004")));
     }
 
     @Test
     @SneakyThrows
     void createRessursByProxy_422_BadRequest2_Logging(CapturedOutput output) {
         try  {
-            unit4Client.createRessursByProxy(dummyRessurs("010199000004"));
+            unit4Client.createRessurs(dummyRessurs("010199000004"));
         } catch (Exception ignored) {}
         assertTrue(output.getOut().contains("Obligatorisk relasjon for begrepet FELLES."));
     }

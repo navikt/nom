@@ -22,6 +22,6 @@ public class RessursController {
     @PostMapping
     @SneakyThrows
     public void createRessursByProxy(@RequestBody NomRessursDTO ressursDTO){
-        unit4Client.createRessursByProxy(new Unit4RessursDto(ressursDTO, fellesKoblingValue));
+        unit4Client.createRessurs(new Unit4RessursDto(ressursDTO, fellesKoblingValue));
     }
 }

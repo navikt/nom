@@ -1,9 +1,11 @@
 package no.nav.nom.apps.nom.unit4.unit4.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import no.nav.nom.apps.nom.unit4.unit4.Utils;
@@ -24,6 +26,8 @@ import java.util.stream.Stream;
 @Value
 @Builder
 @RequiredArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Jacksonized
 public class Unit4RessursDto {
 
     @JsonIgnore
@@ -44,8 +48,6 @@ public class Unit4RessursDto {
     Unit4Status status = Unit4Status.AKTIV;
     List<ContactPoint> contactPoints = getContactPointsDefault();
     List<RelatedValue> relatedValues;
-
-
 
     public Unit4RessursDto(NomRessursDTO nomRessursDTO, String fellesKoblingValue) {
         String ressursNr = nomRessursDTO.getNavident().substring(1);

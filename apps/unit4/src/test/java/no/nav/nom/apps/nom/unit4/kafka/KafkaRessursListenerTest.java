@@ -54,7 +54,7 @@ class KafkaRessursListenerTest {
         kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2"));
 
         verify(unit4Client, times(1))
-                .createRessursByProxy(
+                .createRessurs(
                     argThat((Unit4RessursDto dto) -> dto.getPersonalInformation().getNationalIdentityNo().equals(personident))
                 );
     }
@@ -73,7 +73,7 @@ class KafkaRessursListenerTest {
 
         doThrow(new Unit4ConflictException(""))
                 .when(unit4Client)
-                .createRessursByProxy(any());
+                .createRessurs(any());
 
         kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2"));
 
@@ -84,7 +84,7 @@ class KafkaRessursListenerTest {
     public void messageUnit4_RequestException(CapturedOutput output) throws Exception{
         doThrow(new Unit4RequestException(""))
                 .when(unit4Client)
-                .createRessursByProxy(any());
+                .createRessurs(any());
 
         Exception exception = assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2")));
         assertTrue(output.getOut().contains("Bailer ut"));

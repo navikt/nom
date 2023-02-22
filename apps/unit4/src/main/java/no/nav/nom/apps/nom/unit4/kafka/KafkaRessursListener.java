@@ -54,7 +54,7 @@ public class KafkaRessursListener {
                 }
 
                 try {
-                    unit4Client.createRessursByProxy(unit4RessursDto);
+                    unit4Client.createRessurs(unit4RessursDto);
                 } catch (Unit4ConflictException e) {
                     log.warn("Ressurs finnes i Unit4. Oppdatere i stedet? På meldings-key: {}", uuid);
                 } catch (Unit4ServerException e) {  // Andre Unit4 feil (5xx) ? -> Vent x-sec før behandle på nytt

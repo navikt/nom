@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +37,30 @@ public class SyntetiskDataRestController {
     }
 
     @Operation(
+        description = "Finn Unit4 ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    @GetMapping(value = "/ressurs")
+    public String finnRessurs(@PathVariable String ressursId) {
+        // Slett Unit4 Employee med tilhørende Employments
+        try {
+            return unit4Client.findRessurs(ressursId).toPrettyString();
+        } catch (Unit4NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Unit4RequestException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Unit4Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+
+    @Operation(
         description = "Slett ressurs",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -44,8 +69,8 @@ public class SyntetiskDataRestController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @DeleteMapping(value = "/slettRessurs")
-    public void slettRessurser(@PathVariable String ressursId) {
+    @DeleteMapping(value = "/ressurs")
+    public void slettRessurs(@PathVariable String ressursId) {
         // Slett Unit4 Employee med tilhørende Employments
         try {
             unit4Client.deleteEmployee(ressursId);
