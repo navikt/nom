@@ -22,6 +22,7 @@
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
 
+        <postgresql.version>42.5.4</postgresql.version>
         <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <gcp.libraries-bom.version>26.3.0</gcp.libraries-bom.version>
@@ -109,6 +110,13 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+            <exclusions>
+                <exclusion> <!-- Nyere versjon 3.28.0 (over 3.5.0) lastes i google-cloud-storage !-->
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
