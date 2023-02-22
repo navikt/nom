@@ -25,6 +25,8 @@
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
     </properties>
 
+    <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -25,6 +25,8 @@
 
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
 
+        <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
+
         <postgresql.version>42.5.4</postgresql.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
         <token-support.version>2.1.9</token-support.version> <!-- latest release before spring-boot 3.0.0 -->
