@@ -7,7 +7,7 @@ metadata:
     team: nom
 spec:
   groups:
-    - name: NOM-API pod nede
+    - name: nom-api_down
       rules:
         - alert: NOM-API pod nede
           expr: 'kube_deployment_status_replicas_unavailable{deployment="nom-api"} > 0'
@@ -18,10 +18,9 @@ spec:
           labels:
             namespace: nom
             severity: critical
-
-    - name: NOM-API høy feilrate i logger
+    - name: nom-api_high_failrate
       rules:
-        - alert: høy feilrate i logger
+        - alert: NOM-API høy feilrate i logger
           expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="nom-api",log_team="nom",log_level=~"Warning|Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="nom-api",log_team="nom"}[3m]))) > 10
           for: 3m
           annotations:
