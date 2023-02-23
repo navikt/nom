@@ -84,7 +84,7 @@ spring:
 management:
   metrics:
     tags:
-      app: ${app.appName}
+      app: ${app.name}
   endpoints:
     web:
       base-path: /internal
