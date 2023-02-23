@@ -10,7 +10,7 @@ spec:
     - name: nom-ui_down
       rules:
         - alert: NOM-UI applikasjon nede
-          expr: 'kube_deployment_status_replicas_unavailable{deployment="nom-ui"} > 0'
+          expr: kube_deployment_status_replicas_unavailable{deployment="nom-ui"} > 0
           for: 3m
           annotations:
             consequence: Application is unavailable

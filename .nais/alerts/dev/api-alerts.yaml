@@ -10,7 +10,7 @@ spec:
     - name: nom-api_down
       rules:
         - alert: NOM-API pod nede
-          expr: 'kube_deployment_status_replicas_unavailable{deployment="nom-api"} > 0'
+          expr: kube_deployment_status_replicas_unavailable{deployment="nom-api"} > 0
           for: 3m
           annotations:
             action: "`kubectl describe pod {{ $labels.pod }}` for events, og `kubectl logs {{ $labels.pod }} -c {{ $labels.app }}` for logger"
