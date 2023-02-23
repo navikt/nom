@@ -45,7 +45,7 @@ public class SyntetiskDataRestController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @DeleteMapping(value = "/ressurs")
+    @DeleteMapping(value = "/ressurs/{ressursId}")
     public void slettRessurs(@PathVariable String ressursId) {
         // Slett Unit4 Employee med tilhørende Employments
         try {

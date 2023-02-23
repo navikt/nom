@@ -54,3 +54,7 @@ spec:
           namespace: {{namespace}}
           cluster: {{cluster}}
       {{/each}}
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true

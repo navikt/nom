@@ -38,7 +38,7 @@ public class AdminRestController {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @GetMapping(value = "/ressurs")
+    @GetMapping(value = "/ressurs/{ressursId}")
     public String finnRessurs(@PathVariable String ressursId) {
         try {
             return unit4Client.findRessurs(ressursId).toPrettyString();
