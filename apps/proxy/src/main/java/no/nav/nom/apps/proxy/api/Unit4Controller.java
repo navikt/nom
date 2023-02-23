@@ -59,7 +59,7 @@ public class Unit4Controller {
     }
 
     @PatchMapping("/ressurs/{personId}")
-    public ResponseEntity<String> postRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
+    public ResponseEntity<String> patchRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
         log.info("Mottatt /proxy/unit4/ressurs PATCH request");
         log.debug(SECURE_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
 
@@ -93,8 +93,30 @@ public class Unit4Controller {
             .delete(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
             .headers(h -> {
                     h.setBasicAuth(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password());
-                    //Content-type i request må være application/json-patch+json
-                    h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
+                    h.setContentType(MediaType.APPLICATION_JSON);
+                }
+            ).build();
+        ResponseEntity<String> response;
+        try{
+            response = restTemplate.exchange(request, String.class);
+        } catch (RestClientResponseException restClientResponseException){
+            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
+                .body(restClientResponseException.getMessage());
+        }
+        return response;
+    }
+
+    @GetMapping("/ressurs/{personId}")
+    public ResponseEntity<String> getRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt) {
+        log.info("Mottatt /proxy/unit4/ressurs GET request");
+        log.debug(SECURE_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
+
+
+        var request = RequestEntity
+            .get(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
+            .headers(h -> {
+                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password());
+                    h.setContentType(MediaType.APPLICATION_JSON);
                 }
             ).build();
         ResponseEntity<String> response;
