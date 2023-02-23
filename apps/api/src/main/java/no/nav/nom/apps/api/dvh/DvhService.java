@@ -85,9 +85,9 @@ public class DvhService {
                 .collect(toUnmodifiableList())
         );
 
-        log.warn(orgenhetAndRessursMissing.size() + " koblinger hvor orgEnhet og ressurs mangler");
-        log.warn(orgenhetMissing.size() + " koblinger hvor orgEnhet");
-        log.warn(ressursMissing.size() + " hvor ressurs mangler");
+        log.info(orgenhetAndRessursMissing.size() + " koblinger hvor orgEnhet og ressurs mangler");
+        log.info(orgenhetMissing.size() + " koblinger hvor orgEnhet mangler");
+        log.info(ressursMissing.size() + " hvor ressurs mangler");
     }
 
     public void saveLedere(List<DvhLeder> ledere) {
@@ -122,8 +122,8 @@ public class DvhService {
                         .toList()
         );
 
-        log.warn(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
-        log.warn(enhetMissing.size() + " leder koblinger hvor enhet mangler");
-        log.warn(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
+        log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
+        log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
+        log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
     }
 }
