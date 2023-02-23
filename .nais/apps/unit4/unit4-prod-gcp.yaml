@@ -14,7 +14,7 @@ env:
     value: https://nom-proxy.prod-fss-pub.nais.io
   - name: NOM_PROXY_CLIENT_ID
     value: prod-fss.nom.nom-proxy
-inboundrules:
+inbound-rules:
   - application: org-token-tool
     namespace: org
     cluster: prod-gcp

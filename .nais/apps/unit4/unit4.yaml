@@ -41,16 +41,16 @@ spec:
     - secret: nom-unit4-api-credentials
   env:
   {{#each env}}
-      - name: {{this.name}}
-        value: {{this.value}}
+    - name: {{this.name}}
+      value: {{this.value}}
   {{/each}}
   secureLogs:
     enabled: true
   accessPolicy:
     inbound:
       rules:
-      {{#each inboundrules}}
-        - application: {{this.application}}
-          namespace: {{this.namespace}}
-          cluster: {{this.cluster}}
+      {{#each inbound-rules}}
+        - application: {{application}}
+          namespace: {{namespace}}
+          cluster: {{cluster}}
       {{/each}}
