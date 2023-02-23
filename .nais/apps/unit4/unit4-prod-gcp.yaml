@@ -15,6 +15,6 @@ env:
   - name: NOM_PROXY_CLIENT_ID
     value: prod-fss.nom.nom-proxy
 inboundrules:
-  - application: nom-unit4  # midlertidig
+  - application: org-token-tool
     namespace: org
     cluster: prod-gcp

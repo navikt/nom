@@ -18,3 +18,6 @@ inboundrules:
   - application: ida
     namespace: traktor
     cluster: prod-fss
+  - application: org-token-tool
+    namespace: org
+    cluster: dev-gcp

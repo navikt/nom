@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-@Tag(name = "Admin for å adminsitrere syntetisk test data")
+@Tag(name = "Admin for å administrere syntetisk test data")
 @RestController
 @Profile("!prod")
 @RequestMapping("/api/v1/test/syntetisk")
@@ -35,30 +35,6 @@ public class SyntetiskDataRestController {
     public SyntetiskDataRestController(Unit4Client unit4Client) {
         this.unit4Client = unit4Client;
     }
-
-    @Operation(
-        description = "Finn Unit4 ressurs",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    @GetMapping(value = "/ressurs")
-    public String finnRessurs(@PathVariable String ressursId) {
-        // Slett Unit4 Employee med tilhørende Employments
-        try {
-            return unit4Client.findRessurs(ressursId).toPrettyString();
-        } catch (Unit4NotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (Unit4RequestException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        } catch (Unit4Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
-
 
     @Operation(
         description = "Slett ressurs",
