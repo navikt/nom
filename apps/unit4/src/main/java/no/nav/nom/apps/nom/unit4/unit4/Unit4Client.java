@@ -39,12 +39,12 @@ public class Unit4Client {
 
     public JsonNode findRessurs(String personId) throws Unit4Exception{
         val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + "/" + personId;
-        log.debug("Get unit4 ressurs [{}]:\n{}", url);
+        log.debug("Get unit4 ressurs [{}]", url);
 
         try {
             JsonNode response =
                 webClient.get()
-                    .uri(appProperties.proxy().baseUrl() + RESSURS_ENDPOINT)
+                    .uri(url)
                     .headers(httpHeaders -> {
                         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                         httpHeaders.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
