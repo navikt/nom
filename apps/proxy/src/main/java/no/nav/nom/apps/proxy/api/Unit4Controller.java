@@ -21,6 +21,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
 
@@ -60,23 +61,24 @@ public class Unit4Controller {
 
     @PatchMapping("/ressurs/{personId}")
     public ResponseEntity<String> patchRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
-        log.info("Mottatt /proxy/unit4/ressurs PATCH request");
+        String url = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId;
+        log.info("Mottatt /proxy/unit4/ressurs PATCH request -> {}", url);
         log.debug(SECURE_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
 
-
         var request = RequestEntity
-                .patch(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
+                .patch(url)
                 .headers(h -> {
                             h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
                             //Content-type i request må være application/json-patch+json
                             h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
-                }
-                )
+                            h.setAccept(List.of(MediaType.APPLICATION_JSON));
+                })
                 .body(body);
         ResponseEntity<String> response;
         try{
             response = restTemplate.exchange(request, String.class);
         } catch (RestClientResponseException restClientResponseException){
+            log.error("Error in Unit4 patch request", restClientResponseException);
             response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
                     .body(restClientResponseException.getMessage());
         }
