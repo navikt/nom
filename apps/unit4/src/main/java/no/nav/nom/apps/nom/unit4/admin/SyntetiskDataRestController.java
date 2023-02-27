@@ -1,5 +1,6 @@
 package no.nav.nom.apps.nom.unit4.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,18 +11,21 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Exception;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4NotFoundException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4ServerException;
-import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Employment;
+import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4PatchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Tag(name = "Admin for å administrere syntetisk test data")
 @RestController
@@ -49,12 +53,35 @@ public class SyntetiskDataRestController {
     public void slettRessurs(@PathVariable String ressursId) {
         // Slett Unit4 Employee med tilhørende Employments
         try {
-            unit4Client.deleteEmployee(ressursId);
+            unit4Client.deleteRessurs(ressursId);
         } catch (Unit4NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (Unit4RequestException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Unit4Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Operation(
+        description = "Lag eller endre Employment for ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    @PatchMapping(value = "/ressurs/employments/{ressursId}")
+    public void addEmployment(@PathVariable String ressursId, @RequestBody Employment employment) {
+        List<Unit4PatchRequest> patch = Unit4PatchRequest.createEndreEmploymentsPatchRequest(ressursId, employment);
+        try {
+            unit4Client.patchRessurs(ressursId, patch);
+        } catch (Unit4NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (Unit4RequestException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Unit4Exception|JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

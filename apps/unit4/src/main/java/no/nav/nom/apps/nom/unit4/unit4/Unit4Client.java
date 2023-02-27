@@ -122,7 +122,7 @@ public class Unit4Client {
         }
     }
 
-    public JsonNode patchEmployee(String personId, List<Unit4PatchRequest> unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
+    public JsonNode patchRessurs(String personId, List<Unit4PatchRequest> unit4PatchRequest) throws Unit4Exception, JsonProcessingException{
         val body = objectMapper.writeValueAsString(unit4PatchRequest);
         val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + "/" + personId;
         log.debug(SECURE_LOGS, "Patch unit4 ressurs [{}]:\n{}", url, body);
@@ -142,7 +142,7 @@ public class Unit4Client {
                     .block()
                     .getBody() ;
 
-            log.debug(SECURE_LOGS, "Response fra create unit4 ressurs:\n{}", response.toPrettyString());
+            log.debug(SECURE_LOGS, "Response fra patch unit4 ressurs:\n{}", response.toPrettyString());
             return response;
         } catch (WebClientResponseException wce) {
             HttpStatus httpStatus = wce.getStatusCode();
@@ -166,7 +166,7 @@ public class Unit4Client {
         }
     }
 
-    public void deleteEmployee(String personId) throws Unit4Exception {
+    public void deleteRessurs(String personId) throws Unit4Exception {
         val url = appProperties.proxy().baseUrl() + RESSURS_ENDPOINT + "/" + personId;
         log.debug("Delete unit4 ressurs [{}]:\n{}", url);
 
@@ -184,7 +184,7 @@ public class Unit4Client {
 
         } catch (WebClientResponseException wce) {
             HttpStatus httpStatus = wce.getStatusCode();
-            log.error(SECURE_LOGS, "Error in delete Employee to Unit4[{}]", wce);
+            log.error(SECURE_LOGS, "Error in delete Ressurs to Unit4[{}]", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
