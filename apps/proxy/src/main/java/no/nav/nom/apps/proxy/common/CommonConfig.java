@@ -2,6 +2,8 @@ package no.nav.nom.apps.proxy.common;
 
 import io.micrometer.core.instrument.Tag;
 import lombok.val;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,7 +38,11 @@ public class CommonConfig {
     @Bean
     @Primary
     RestTemplate restTemplate(){
-        return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+        RestTemplate restTemplate = new RestTemplate();
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        restTemplate.setRequestFactory(requestFactory);
+        return restTemplate;
     }
 
     @Bean
