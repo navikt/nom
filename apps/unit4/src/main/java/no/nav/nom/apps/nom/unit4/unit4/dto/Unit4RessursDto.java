@@ -17,6 +17,7 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOppret
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -93,7 +94,7 @@ public class Unit4RessursDto {
                 .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                 .build()
         );
-        employments = null;
+        employments = new ArrayList<>();
     }
 
     public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue) throws IllegalArgumentException {
@@ -154,7 +155,7 @@ public class Unit4RessursDto {
                         )
                         .orElseThrow(() -> new NoSuchElementException("Agresso unit id is missing from event"))
         );
-        employments = null;
+        employments = new ArrayList<>();
     }
 
     private List<ContactPoint> getContactPointsDefault(){
@@ -224,6 +225,6 @@ public class Unit4RessursDto {
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
 
-        ).toList();
+        ).collect(Collectors.toList());
     }
 }
