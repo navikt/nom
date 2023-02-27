@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Value
 @Builder
@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class EmploymentRelatedValue {
     String positionId;
     Unit4Status status = Unit4Status.AKTIV;
-    LocalDateTime dateFrom;
-    LocalDateTime dateTo;
+    LocalDate dateFrom;
+    LocalDate dateTo;
     Integer percentage = 100;
     boolean isDefaulted = false;
     boolean useInFixedPd = false;
