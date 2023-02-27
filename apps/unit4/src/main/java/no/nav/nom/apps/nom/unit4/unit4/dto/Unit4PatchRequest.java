@@ -130,6 +130,45 @@ public record Unit4PatchRequest(
         );
     }
 
+    /*
+    [
+        {
+            "op": "AddOrReplaceById",
+            "path": "employments",
+            "value": {
+              "status": "N",
+              "positionId": "265",
+              "relatedValues": [
+                {
+                    "positionId": "265",
+                    "status": "N",
+                    "dateFrom": "2023-01-12T00:00:00",
+                    "dateTo": "2099-12-31T00:00:00.000",
+                    "percentage": 100.0,
+                    "relationGroup": "",
+                    "isDefaulted": false,
+                    "useInFixedPd": false,
+                    "useInAccountingCategories": false,
+                    "useInRateCalculation": false,
+                    "useInReport": false,
+                    "relationId": "M0",
+                    "relationName": "ORGENHET",
+                    "relatedValue": "0316006"
+                }
+              ]
+            }
+        }
+    ]
+     */
+    public static List<Unit4PatchRequest> createEndreEmploymentsPatchRequest(String agressoId, Employment employment) {
+        return List.of(
+            new Unit4PatchRequest(Operation.ADD_OR_REPLACE_BY_ID,
+                "employments",
+                employment
+            )
+        );
+    }
+
     enum Operation {
         ADD("Add"),
         REPLACE("Replace"),

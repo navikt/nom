@@ -48,6 +48,7 @@ public class Unit4RessursDto {
     Unit4Status status = Unit4Status.AKTIV;
     List<ContactPoint> contactPoints = getContactPointsDefault();
     List<RelatedValue> relatedValues;
+    List<Employment> employments;
 
     public Unit4RessursDto(NomRessursDTO nomRessursDTO, String fellesKoblingValue) {
         String ressursNr = nomRessursDTO.getNavident().substring(1);
@@ -92,6 +93,7 @@ public class Unit4RessursDto {
                 .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                 .build()
         );
+        employments = null;
     }
 
     public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue) throws IllegalArgumentException {
@@ -152,6 +154,7 @@ public class Unit4RessursDto {
                         )
                         .orElseThrow(() -> new NoSuchElementException("Agresso unit id is missing from event"))
         );
+        employments = null;
     }
 
     private List<ContactPoint> getContactPointsDefault(){
@@ -221,6 +224,6 @@ public class Unit4RessursDto {
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
 
-        ).collect(Collectors.toList());
+        ).toList();
     }
 }

@@ -32,22 +32,22 @@ class Unit4ClientTest {
 
     @Test
     @SneakyThrows
-    void createRessursByProxy_OK() {
+    void createRessurs_OK() {
         unit4Client.createRessurs(dummyRessurs("010199000001"));
     }
 
     @Test
-    void createRessursByProxy_CONFLICT() {
+    void createRessurs_CONFLICT() {
         assertThrows(Unit4ConflictException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000002")));
     }
 
     @Test
-    void createRessursByProxy_422_BadRequest() {
+    void createRessurs_422_BadRequest() {
         assertThrows(Unit4RequestException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000003")));
     }
 
     @Test
-    void createRessursByProxy_422_BadRequest_Logging(CapturedOutput output) {
+    void createRessurs_422_BadRequest_Logging(CapturedOutput output) {
         try {
             unit4Client.createRessurs(dummyRessurs("010199000003"));
         } catch (Exception ignored) {}
@@ -55,13 +55,13 @@ class Unit4ClientTest {
     }
 
     @Test
-    void createRessursByProxy_422_BadRequest2() {
+    void createRessurs_422_BadRequest2() {
         assertThrows(Unit4RequestException.class, () -> unit4Client.createRessurs(dummyRessurs("010199000004")));
     }
 
     @Test
     @SneakyThrows
-    void createRessursByProxy_422_BadRequest2_Logging(CapturedOutput output) {
+    void createRessurs_422_BadRequest2_Logging(CapturedOutput output) {
         try  {
             unit4Client.createRessurs(dummyRessurs("010199000004"));
         } catch (Exception ignored) {}
