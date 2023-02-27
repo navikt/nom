@@ -1,7 +1,7 @@
 apiVersion: "monitoring.coreos.com/v1"
 kind: "PrometheusRule"
 metadata:
-  name: nav-ui-alerts
+  name: nom-ui-alerts
   namespace: org
   labels:
     team: org
