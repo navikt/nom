@@ -13,9 +13,6 @@ import java.util.List;
 public class Employment {
     Unit4Status status = Unit4Status.AKTIV;
     String positionId;
-    String relatedValue;
     Integer percentage = 100;
-    LocalDateTime dateFrom;
-    LocalDateTime dateTo;
     List<EmploymentRelatedValue> relatedValues;
 }
