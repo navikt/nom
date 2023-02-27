@@ -13,6 +13,5 @@ import java.util.List;
 public class Employment {
     Unit4Status status = Unit4Status.AKTIV;
     String positionId;
-    Integer percentage = 100;
     List<EmploymentRelatedValue> relatedValues;
 }
