@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -35,7 +36,7 @@ public class CommonConfig {
     @Bean
     @Primary
     RestTemplate restTemplate(){
-        return new RestTemplate();
+        return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
     }
 
     @Bean
