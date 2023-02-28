@@ -1,7 +1,5 @@
 = Domenet
 
-TODO: gå igjennom gyldigFom/gyldigTom og si noe om kvalitet
-TODO: burde Orgenhet.koblinger omdøpes til Orgenhet.orgtilknytninger?
 
 == Organisering
 [cols="3"]
