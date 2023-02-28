@@ -1,6 +1,5 @@
 = Domenet
 
-Modellen som eksponeres via graphQL kan ses her: https://nom-api.dev.intern.nav.no/voyager[Voyager] (TODO, ny URL eller fjern)
 TODO: gå igjennom gyldigFom/gyldigTom og si noe om kvalitet
 TODO: burde Orgenhet.koblinger omdøpes til Orgenhet.orgtilknytninger?
 
@@ -20,8 +19,8 @@ En orgEnhet kan ha flere underenheter, men en orgEnhet kan bare ha én overenhet
 |Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
 |retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over"/"under"                         |Unit4 via DVH
 |orgEnhet       |Ja         |OrgEnhet over eller under avhengig av retning                        |Se OrgEnhet                            |Unit4 via DVH
-|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med                            |2009-01-22                             |Unit4 via DVH
-|gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med                            |2020-02-14, NULL hvis ikke satt.       |Unit4 via DVH
+|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med. I dag vises kun dummyverdi (dagens dato).  |2009-01-22            |Dummy
+|gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med. I dag vises kun dummyverdi NULL            |2020-02-14, NULL hvis ikke satt.       |Dummy
 |===
 
 
@@ -48,8 +47,8 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
 |id             |Ja         |NOMs unike ID for en orgEnhet. Formatet er <XX999X>. Id-en er en syntetisk nøkkel, og altså ikke meningsbærende.                      |pa649a          |NOM
 |navn           |Ja         |Navnet på en orgEnheten                                     |NAV Halden Stab          | Unit4 via DVH
-|gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid.     |2009-01-22          | Unit4 via DVH
-|gyldigTom      |Nei        |Siste dag orgEnheten var (eller skal være) virksom. Kan være frem i tid.           |2020-02-14, NULL hvis ikke satt.         | Unit4 via DVH
+|gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid. For orgEnheter over nederste nivå vil gyldigFom alltid være første innlastingsdato i DVH.    |2009-01-22          | Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag orgEnheten var (eller skal være) virksom. Kan være frem i tid. For orgEnheter over nederste nivå vil gyldigTom alltid være NULL, også for de som er avviklet.           |2020-02-14, NULL hvis ikke satt.         | Unit4 via DVH
 |orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
 |agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
 |agressoOrgenhetType | Ja   |Enhetstype slik det er definert i Unit4. Alle enheter i direktoratet er f.eks. DIR, et NAV-kontor er LOKAL | LOKAL/DIR... | Unit4 via DVH
