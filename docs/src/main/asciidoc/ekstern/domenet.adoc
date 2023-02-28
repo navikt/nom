@@ -55,7 +55,7 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 |orgEnhetskategori  |Nei    |Enkelte orgenheter kan klassifiseres som et ARBEIDSOMRÅDE (også kalt ENHET), DRIFTSENHET eller LINJEENHET. Dette feltet er satt for de orgEnhetene som kan klassifiseres som et av disse tre verdiene. Per januar 2023 er ikke feltet populert.    |DRIFTSENHET    |NOM
 |organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter.        |Se Organiseringer-objektet         | Unit4 via DVH
 |leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se OrgEnhetsleder-objektet         | Unit4 via DVH
-|type           |Nei        |Typen orgEnhet. Per januar 2023 er ikke feltet populert.                  |Familie- og pensjonsytelser, eller NAV-kontor         |Unit4 via DVH 
+|orgEnhetstype  |Nei        |Typen orgEnhet. Per januar 2023 er ikke feltet populert.                  |Familie- og pensjonsytelser, eller NAV-kontor |NOM 
 |koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. |Se OrgEnhetskobling | Unit4 via DVH
 |===
 
@@ -71,7 +71,7 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 OrgEnhetskobling er knytningen mellom en orgEnhet og en ressurs. En orgEnhet kan flere orgEnhetskoblinger samtidig, men ikke flere for samme ressurs på et gitt tidspunkt. 
 
 *Eksempler:* +
-OrgEnhet _NAV Halden_ har en orgEnhetskobling til ansatt Ola i perioden 01.01.2020 - 31.03.2022
+OrgEnhet _NAV Halden Stab_ har en orgEnhetskobling til ansatt Ola i perioden 01.01.2020 - 31.03.2022
 
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
@@ -159,7 +159,7 @@ Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne 
 RessursOrgTilknytning er knytningen mellom en ressurs og en organisasjonsenhet. En ressurs kan flere ressursOrgTilknytninger samtidig, f.eks. hvis vedkommende er ansatt i en orgEnhet og utlånt til en annen orgEnhet. En ressurs kan maks ha én ressursOrgTilknytning til en gitt orgEnhet på et gitt tidspunkt.
 
 *Eksempler:* +
-Ansatt Ola har en ressursOrgTilknytning til orgEnhet NAV Halden i perioden 01.01.2020 - 31.03.2022
+Ansatt Ola har en ressursOrgTilknytning til orgEnhet _NAV Halden Stab_ i perioden 01.01.2020 - 31.03.2022
 
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
