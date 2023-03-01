@@ -42,6 +42,11 @@ export function Footer() {
           #nom
         </a>
       </div>
+
+      <div className={css`margin-left: 1rem;`}>
+          <a href="/" className={css`color: var(--navds-global-color-white);`}>Om NOM på Navet</a>
+      </div>
+
       <div
         className={css`
           display: flex;
@@ -51,14 +56,14 @@ export function Footer() {
       >
         <EmailFilled />
         <div>
-          Spørsmål eller tilbakemeldinger? Send oss en{" "}
+          Spørsmål eller tilbakemeldinger? &nbsp;
           <a
             className={css`
               color: var(--navds-global-color-white);
             `}
-            href="mailto:mugunthan.dharmadas@nav.no;linn.renate.fredriksen@nav.no?subject=Tilbakemelding NOM"
+            href="mailto:mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no?subject=Tilbakemelding NOM"
           >
-            e-post
+            Send oss en e-post
           </a>
         </div>
       </div>
