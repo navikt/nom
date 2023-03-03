@@ -31,7 +31,6 @@ public class DvhOrgtilknytning implements Orgtilknytning {
             gyldigTomText != null ?
                 (LocalDate.parse(gyldigTomText).equals(LocalDate.parse("2099-12-31")) ? null : LocalDate.parse(gyldigTomText))
                 : null);
-
     }
 
     public String getUniqueAgressoId() {
