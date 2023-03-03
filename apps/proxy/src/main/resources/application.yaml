@@ -105,5 +105,5 @@ STS_BASEURL: https://security-token-service.nais.adeo.no
 LDAP_URL: ldaps://ldapgw.adeo.no:636
 LDAP_BASE: DC=adeo,DC=no
 UNIT4_BASE_URL: https://agresso.adeo.no
-UNIT4_EMPLOYEES_PATH: '/agressowebapi/v1/employees'
-UNIT4_API_PATH: '/agressowebapi/v1'
+UNIT4_EMPLOYEES_PATH: '/AgressoWebApi/v1/employees'
+UNIT4_API_PATH: '/AgressoWebApi/v1'
