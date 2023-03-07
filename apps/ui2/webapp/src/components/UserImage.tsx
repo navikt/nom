@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
@@ -25,24 +25,22 @@ const UserImage = (properties: UserImageProperties) => {
     }
   }, [navident]);
 
-  const stl = css({
-    height: size || "65px",
-    width: size || "65px",
-    borderRadius: "100%",
-  });
+  const STYLE = css`
+    height: ${size || "65px"};
+    width: ${size || "65px"};
+    border-radius: 100%;
+  `;
 
   if (!navident) {
-    return (
-      <img alt="manglende nav ident" className={stl} src={questionMarkIcon} />
-    );
+    return <img alt="manglende nav ident" css={STYLE} src={questionMarkIcon} />;
   }
 
   return (
     <>
-      {loading && <Loader className={stl} />}
+      {loading && <Loader css={STYLE} />}
       <img
         alt={altText || "Fotografi av " + (navn || navident)}
-        className={stl}
+        css={STYLE}
         hidden={loading}
         onError={() => {
           setImage(person);

@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { BodyShort, Heading, Search } from "@navikt/ds-react";
 import { encode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
@@ -15,32 +15,31 @@ export function SearchForPerson() {
 
   return (
     <div
-      className={css`
+      css={css`
         min-height: 300px;
         margin: 0 auto;
         width: 70%;
-        padding: var(--navds-spacing-8);
-        border: 1px solid var(--navds-global-color-gray-400);
-        border-top: 5px solid var(--navds-global-color-lightblue-800);
+        padding: var(--a-spacing-8);
+        border: 1px solid var(--a-gray-400);
+        border-top: 5px solid var(--a-lightblue-800);
         border-radius: 5px;
         display: flex;
         flex-direction: column;
         background: white;
-        gap: var(--navds-spacing-4);
+        gap: var(--a-spacing-4);
       `}
     >
       <img
         alt="Opprett ressurs ikon"
-        className={css`
+        css={css`
           height: 65px;
           width: 65px;
           align-self: center;
-          color: var(--nom-primary);
         `}
         src={opprettRessursIkon}
       />
       <Heading
-        className={css`
+        css={css`
           align-self: center;
         `}
         size="large"
@@ -56,11 +55,11 @@ export function SearchForPerson() {
           Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret
         </BodyShort>
         <div
-          className={css(
+          css={css(
             css`
               display: flex;
-              gap: var(--navds-spacing-4);
-              margin-top: var(--navds-spacing-4);
+              gap: var(--a-spacing-4);
+              margin-top: var(--a-spacing-4);
             `
           )}
         >

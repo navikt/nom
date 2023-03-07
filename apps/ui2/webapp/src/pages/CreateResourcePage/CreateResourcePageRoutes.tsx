@@ -1,11 +1,12 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { SuccessStroke } from "@navikt/ds-icons";
 import type { ReactNode } from "react";
 import { Outlet, Route, Routes, useMatch } from "react-router";
 
+import { PageBanner } from "~/components/PageBanner";
+import { UserRole, useSessionContext } from "~/main";
+
 import ContentWrapper from "../../components/ContentWrapper";
-import { PageBanner } from "../../components/PageBanner";
-import { UserRole, useSessionContext } from "../../main";
 import { NotAuthorizedPage } from "../NotAuthorizedPage";
 import CreateResourceForm from "./components/CreateResourceForm";
 import { SearchForPerson } from "./components/SearchForPerson";
@@ -44,16 +45,16 @@ function Wrapper() {
       <ContentWrapper>
         <>
           <div
-            className={css`
+            css={css`
               display: flex;
               flex-direction: column;
               align-items: center;
-              gap: var(--navds-spacing-3);
-              margin-bottom: var(--navds-spacing-12);
+              gap: var(--a-spacing-3);
+              margin-bottom: var(--a-spacing-12);
             `}
           >
             <div
-              className={css`
+              css={css`
                 display: flex;
                 align-items: center;
               `}
@@ -61,9 +62,9 @@ function Wrapper() {
               <FilledCircle filled={!isAtReceiptPage}>
                 {isAtReceiptPage ? (
                   <SuccessStroke
-                    className={css`
+                    css={css`
                       path {
-                        stroke: var(--navds-global-color-lightblue-800);
+                        stroke: var(--a-lightblue-800);
                         stroke-width: 2px;
                       }
                     `}
@@ -73,10 +74,10 @@ function Wrapper() {
                 )}
               </FilledCircle>
               <div
-                className={css`
+                css={css`
                   width: 205px;
                   height: 2px;
-                  background: var(--navds-global-color-lightblue-800);
+                  background: var(--a-lightblue-800);
                 `}
               />
               <FilledCircle filled={isAtReceiptPage}>
@@ -84,10 +85,10 @@ function Wrapper() {
               </FilledCircle>
             </div>
             <div
-              className={css`
+              css={css`
                 display: flex;
                 gap: 100px;
-                color: var(--navds-global-color-lightblue-800);
+                color: var(--a-lightblue-800);
               `}
             >
               <b>Personopplysninger</b>
@@ -110,24 +111,24 @@ function FilledCircle({
 }) {
   return (
     <div
-      className={css(
+      css={css(
         css`
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid var(--navds-global-color-lightblue-800);
+          border: 2px solid var(--a-lightblue-800);
           border-radius: 50%;
           height: 42px;
           width: 42px;
         `,
         filled
           ? css`
-              background: var(--navds-global-color-lightblue-800);
-              color: var(--navds-global-color-white);
+              background: var(--a-lightblue-800);
+              color: var(--a-white);
             `
           : css`
-              background: var(--navds-global-color-white);
-              color: var(--navds-global-color-lightblue-800);
+              background: var(--a-white);
+              color: var(--a-lightblue-800);
             `
       )}
     >

@@ -1,21 +1,21 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 
-import { mediaQueryContentWidth } from "../resources/NomStyles";
+import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
 export function PageBanner({ text }: { text: string }) {
   return (
     <div
-      className={css`
+      css={css`
         width: 100%;
         height: 78px;
-        background: var(--nom-primary);
-        color: var(--navds-global-color-white);
+        background: var(--a-lightblue-800);
+        color: var(--a-white);
         display: flex;
       `}
     >
       <Heading
-        className={css(
+        css={css(
           mediaQueryContentWidth,
           css`
             align-self: center;

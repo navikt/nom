@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Back } from "@navikt/ds-icons";
 import { Link } from "react-router-dom";
 
@@ -7,11 +7,11 @@ export const BackFromRessurs = (properties: {
   ressursIsLeder?: boolean;
 }) => (
   <Link
-    className={css`
+    css={css`
       display: grid;
       grid-template-columns: min-content auto;
-      color: var(--navds-global-color-gray-900);
-      margin-top: var(--navds-spacing-4);
+      color: var(--a-gray-900);
+      margin-top: var(--a-spacing-4);
     `}
     to={properties.valgtEnhetUrl}
   >

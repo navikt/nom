@@ -1,12 +1,13 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
 import { Link } from "react-router-dom";
 
-import type { Ressurs } from "../../../api/generated/graphql_generated";
+import type { Ressurs } from "~/api/generated/graphql_generated";
+import { formatTlf } from "~/resources/utils/utils";
+
 import UserImage from "../../../components/UserImage";
-import { formatTlf } from "../../../resources/utils/utils";
 import { SektorNameMapping } from "../../CreateResourcePage/components/CreateResourceForm";
 
 export const FocusedRessursView = ({
@@ -19,27 +20,25 @@ export const FocusedRessursView = ({
   return (
     <div ref={scrollReference}>
       <div
-        className={css`
-          height: var(--navds-spacing-2);
+        css={css`
+          height: var(--a-spacing-2);
           border-radius: 4px 4px 0 0;
-          background: var(--nom-primary);
         `}
       />
       <div
-        className={css`
+        css={css`
           justify-content: space-between;
           display: flex;
           background: var(--nom-secondary-hover);
-          border: 1px solid var(--navds-global-color-gray-500);
+          border: 1px solid var(--a-gray-500);
           border-radius: 0 0 4px 4px;
           padding: 40px;
-          --navds-semantic-color-link: var(--navds-global-color-gray-900);
         `}
       >
         <div>
           <Heading
-            className={css`
-              margin-bottom: var(--navds-spacing-3);
+            css={css`
+              margin-bottom: var(--a-spacing-3);
             `}
             level={"2"}
             size="large"
@@ -53,12 +52,12 @@ export const FocusedRessursView = ({
             </strong>
           ) : undefined}
           <div
-            className={css`
+            css={css`
               display: grid;
               grid-auto-flow: dense;
               grid-template-columns: 1fr 1fr;
-              margin-top: var(--navds-spacing-8);
-              gap: var(--navds-spacing-4);
+              margin-top: var(--a-spacing-8);
+              gap: var(--a-spacing-4);
 
               @media (max-width: 80rem) {
                 grid-template-columns: auto;
@@ -85,7 +84,7 @@ export const FocusedRessursView = ({
                 orgTilknytning.organisasjonsenhet;
               return (
                 <span
-                  className={css`
+                  css={css`
                     grid-column-start: 1;
                   `}
                   key={agressoId}
@@ -103,7 +102,7 @@ export const FocusedRessursView = ({
               const { agressoId, orgNiv } = orgTilknytning[0]?.orgEnhet ?? {};
               return (
                 <span
-                  className={css`
+                  css={css`
                     grid-column-start: 2;
                   `}
                   key={navident}

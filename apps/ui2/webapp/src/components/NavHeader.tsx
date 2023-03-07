@@ -1,9 +1,10 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { PeopleFilled } from "@navikt/ds-icons";
 import { Link } from "react-router-dom";
 
-import { UserRole, useSessionContext } from "../main";
-import { mediaQueryContentWidth } from "../resources/NomStyles";
+import { UserRole, useSessionContext } from "~/main";
+import { mediaQueryContentWidth } from "~/resources/NomStyles";
+
 import { BurgerMenu } from "./BurgerMenu";
 import { nomLogoCircle } from "./Images";
 import { SearchBar } from "./Searchbar";
@@ -54,9 +55,9 @@ const NavHeader = () => {
   const hasWrite = ses.roles.includes(UserRole.ROLE_WRITE);
 
   return (
-    <div className={outerDiv}>
-      <div className={innerDiv}>
-        <Link className={verticallyCenter} title={"Hjem"} to="/">
+    <div css={outerDiv}>
+      <div css={innerDiv}>
+        <Link css={verticallyCenter} title={"Hjem"} to="/">
           <img alt="Forside NOM" src={nomLogoCircle} />
         </Link>
 
@@ -69,19 +70,19 @@ const NavHeader = () => {
         {/*></Search>*/}
         <SearchBar />
         <span
-          className={css`
+          css={css`
             display: flex;
             align-items: center;
           `}
         >
           <PeopleFilled
-            className={css({
-              minWidth: "2rem",
-            })}
-            color="var(--nom-primary)"
-            fontSize={"2rem"}
+            css={css`
+              color: var(--a-lightblue-800);
+              width: 32px;
+              height: 32px;
+            `}
           />
-          <span className={userText}>{ses.navident}</span>
+          <span css={userText}>{ses.navident}</span>
           {hasWrite && <BurgerMenu />}
         </span>
       </div>

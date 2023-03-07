@@ -1,13 +1,11 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Next } from "@navikt/ds-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-import type {
-  OrgEnhet,
-  Ressurs,
-} from "../../../api/generated/graphql_generated";
+import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
+
 import { building, peopleFilledIcon } from "../../../components/Images";
 import UserImage from "../../../components/UserImage";
 
@@ -20,7 +18,7 @@ export function DynamicColumnContainer({
 }) {
   return (
     <div
-      className={css(
+      css={css(
         css`
           display: grid;
           grid-template-rows: min-content;
@@ -49,7 +47,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
   return (
     <Link
-      className={hideLinkCss}
+      css={hideLinkCss}
       to={`/org/${orgEnhet.agressoId}/${orgEnhet.orgNiv}`}
     >
       <UnitContainerLink>
@@ -58,7 +56,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           <img alt={"Enhet"} src={building} />
         </VerticalEdge>
         <div
-          className={css`
+          css={css`
             padding: 1rem 0;
           `}
         >
@@ -78,14 +76,14 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 
 export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <Link className={hideLinkCss} key={ressurs.navident} to={ressurs.navident}>
+    <Link css={hideLinkCss} key={ressurs.navident} to={ressurs.navident}>
       <UnitContainerLink>
         <VerticalEdge>
           {/*<PeopleFilled color="white" />*/}
           <img alt={"Person"} src={peopleFilledIcon} />
         </VerticalEdge>
         <Heading
-          className={css`
+          css={css`
             padding: 1rem 0;
           `}
           level={"2"}
@@ -102,11 +100,11 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
 function UnitContainerLink({ children }: { children: ReactNode }) {
   return (
     <div
-      className={css`
+      css={css`
         height: 100%;
         border-radius: 5px;
-        border: 1px solid var(--navds-global-color-gray-400);
-        background-color: var(--navds-global-color-white);
+        border: 1px solid var(--a-gray-400);
+        background-color: var(--a-white);
         display: grid;
         grid-template-columns: min-content 1fr max-content 40px;
         align-items: center;
@@ -127,8 +125,8 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
 function VerticalEdge({ children }: { children: ReactNode }) {
   return (
     <div
-      className={css`
-        background-color: var(--navds-global-color-lightblue-800);
+      css={css`
+        background-color: var(--a-lightblue-800);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -145,8 +143,8 @@ function VerticalEdge({ children }: { children: ReactNode }) {
 export function HorizontalEdge() {
   return (
     <div
-      className={css`
-        background-color: var(--navds-global-color-lightblue-800);
+      css={css`
+        background-color: var(--a-lightblue-800);
         height: 0.5rem;
         width: 100%;
       `}
@@ -157,10 +155,10 @@ export function HorizontalEdge() {
 export function OverEnheterDivider() {
   return (
     <div
-      className={css`
+      css={css`
         align-self: center;
-        height: var(--navds-spacing-4);
-        background-color: var(--navds-global-color-lightblue-800);
+        height: var(--a-spacing-4);
+        background-color: var(--a-lightblue-800);
         width: 2px;
       `}
     />

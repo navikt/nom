@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Hamburger } from "@navikt/ds-icons";
 import { AddPersonFilled } from "@navikt/ds-icons";
 import { Button } from "@navikt/ds-react";
@@ -20,18 +20,18 @@ export function BurgerMenu() {
         <b>Meny</b>
       </Button>
       <Dropdown.Menu
-        className={css`
-          --navdsi-dropdown-item-color-text: black;
+        css={css`
           padding: 0;
+          color: var(--a-text-default);
 
           button {
-            padding: var(--navds-spacing-4);
+            padding: var(--a-spacing-4);
           }
         `}
       >
         <Dropdown.Menu.List>
           <Dropdown.Menu.List.Item onClick={() => navigate("ressurs/create")}>
-            <AddPersonFilled fontSize="24px" />
+            <AddPersonFilled color="black" fontSize="24px" />
             <span>Opprett ressurs</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item onClick={() => navigate("org")}>

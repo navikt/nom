@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { SuccessFilled } from "@navikt/ds-icons";
 import { ExternalLink } from "@navikt/ds-icons";
 import {
@@ -12,8 +12,9 @@ import {
 import type { ReactNode } from "react";
 import { useParams } from "react-router";
 
-import type { Ressurs } from "../../../api/generated/graphql_generated";
-import { useHentRessursMedNavidentQuery } from "../../../api/generated/graphql_generated";
+import type { Ressurs } from "~/api/generated/graphql_generated";
+import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+
 import { isInDevelopment as isInDevelopment } from "../../../resources/utils/utils";
 import { FocusedRessursView } from "../../OrganisasjonsHierarkiPage/components/FocusedRessursView";
 
@@ -27,7 +28,7 @@ export function ResourceCreatedReceiptPage() {
   if (hentRessursQuery.loading) {
     return (
       <Loader
-        className={css`
+        css={css`
           align-self: center;
         `}
         size="2xlarge"
@@ -51,38 +52,38 @@ export function ResourceCreatedReceiptPage() {
 function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
   return (
     <div
-      className={css`
+      css={css`
         display: flex;
         flex-direction: column;
-        gap: var(--navds-spacing-6);
+        gap: var(--a-spacing-6);
       `}
     >
       <FocusedRessursView focusedRessurs={ressurs} />
       <div
-        className={css`
+        css={css`
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: var(--navds-spacing-8);
-          background: var(--navds-global-color-white);
-          padding: var(--navds-spacing-8) var(--navds-spacing-14);
+          gap: var(--a-spacing-8);
+          background: var(--a-white);
+          padding: var(--a-spacing-8) var(--a-spacing-14);
           border-radius: 5px;
-          border: 1px solid var(--navds-global-color-gray-500);
+          border: 1px solid var(--a-gray-500);
         `}
       >
         <Heading size="medium">Du er nå ferdig med 1 av 2 steg</Heading>
         <div
-          className={css`
+          css={css`
             display: grid;
             grid-template-columns: min-content 1fr;
-            gap: var(--navds-spacing-3);
+            gap: var(--a-spacing-3);
           `}
         >
           <SuccessFilled
-            className={css`
+            css={css`
               height: 28px;
               width: 28px;
-              color: var(--navds-global-color-lightblue-700);
+              color: var(--a-lightblue-700);
             `}
           />
           <span>
@@ -113,7 +114,7 @@ function Unit4Link() {
   return (
     <Button
       as="a"
-      className={css`
+      css={css`
         width: max-content;
       `}
       href={`${unit4BaseUrl}/agrt01/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
@@ -135,7 +136,7 @@ function RemedyLink() {
 
   return (
     <BodyShort
-      className={css`
+      css={css`
         text-align: center;
       `}
     >
@@ -154,9 +155,8 @@ function RemedyLink() {
 function CircleWithNumber({ children }: { children: ReactNode }) {
   return (
     <div
-      className={css`
-        border: 2px solid var(--nom-primary);
-        color: var(--nom-primary);
+      css={css`
+        border: 2px solid var(--a-lightblue-800);
         display: flex;
         align-items: center;
         justify-content: center;

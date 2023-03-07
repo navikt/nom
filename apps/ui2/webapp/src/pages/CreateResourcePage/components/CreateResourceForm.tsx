@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import {
   Alert,
   Button,
@@ -36,15 +36,15 @@ import { capitalizeName } from "~/resources/utils/utils";
 import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";
 import { ResourceMetadata } from "./ResourceMetadata";
 
-const rowStyles = css({
-  display: "flex",
-  gap: "1rem",
-  alignItems: "flex-start",
+const rowStyles = css`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
 
-  "& > *": {
-    flex: 1,
-  },
-});
+  & > * {
+    flex: 1;
+  }
+`;
 
 export default function CreateResourceForm() {
   const { personidentInBase64 } = useParams();
@@ -70,7 +70,7 @@ export default function CreateResourceForm() {
   if (hentPersonQuery.loading || searchOrgenheterQuery.loading) {
     return (
       <Loader
-        className={css`
+        css={css`
           align-self: center;
         `}
         size="2xlarge"
@@ -169,25 +169,21 @@ function CreateResourceFormInner({
   return (
     <form>
       <div
-        className={css`
+        css={css`
           display: flex;
           flex-direction: column;
-          gap: var(--navds-spacing-5);
-          margin-top: var(--navds-spacing-8);
+          gap: var(--a-spacing-5);
+          margin-top: var(--a-spacing-8);
         `}
       >
         <Heading size="small">Opplysninger til NOM</Heading>
-        <Alert
-          className={css({ marginTop: "1rem" })}
-          size="medium"
-          variant="info"
-        >
+        <Alert css={css({ marginTop: "1rem" })} size="medium" variant="info">
           Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle
           navn du ikke vil ha med. Ressursen må ha minst ett fornavn og minst
           ett etternavn.
         </Alert>
 
-        <div className={rowStyles}>
+        <div css={rowStyles}>
           <TextField
             autoComplete="off"
             error={errors.visningsfornavn?.message}
@@ -243,24 +239,24 @@ function CreateResourceFormInner({
                 )}
                 <Select
                   backspaceRemovesValue
-                  className={css`
-                    cursor: text;
-                    min-width: 200px;
-                    border-radius: var(--navds-border-radius-medium);
-                    border: 1px solid var(--navds-select-color-border);
-                    z-index: 2; // 10.01.2023: Hack to get around the datepicker button having a z-index of 1 and overlaying on the dropdown.
-
-                    &:focus-within {
-                      outline: none;
-                      box-shadow: var(--navds-shadow-focus);
-                    }
-                  `}
                   components={{
                     // eslint-disable-next-line unicorn/no-null
                     DropdownIndicator: () => null, // Remove dropdown icon
                     // eslint-disable-next-line unicorn/no-null
                     IndicatorSeparator: () => null, // Remove separator
                   }}
+                  css={css`
+                    cursor: text;
+                    min-width: 200px;
+                    border-radius: var(--a-border-radius-medium);
+                    border: 1px solid var(--a-border-strong);
+                    z-index: 2; // 10.01.2023: Hack to get around the datepicker button having a z-index of 1 and overlaying on the dropdown.
+
+                    &:focus-within {
+                      outline: none;
+                      box-shadow: var(--a-shadow-focus);
+                    }
+                  `}
                   defaultMenuIsOpen={false}
                   escapeClearsValue={true}
                   filterOption={
@@ -296,7 +292,7 @@ function CreateResourceFormInner({
                       border: 0,
                       cursor: "text",
                       div: {
-                        div: { color: `var(--navds-dropdown-menu-color)` },
+                        div: { color: `var(--a-text-default)` },
                       },
                     }),
                     // Make border and size of input box to be identical with those from DesignSystem
@@ -327,7 +323,7 @@ function CreateResourceFormInner({
           )}
         />
 
-        <div className={rowStyles}>
+        <div css={rowStyles}>
           <CreateResourceConfirmationModal
             formValues={watch()}
             loading={loading}

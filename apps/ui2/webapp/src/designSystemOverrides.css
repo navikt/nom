@@ -1,22 +1,24 @@
 
 :root {
     /*Define the primary color used in nom*/
-    --nom-primary: var(--navds-global-color-lightblue-800);
-    --nom-primary-hover: var(--navds-global-color-lightblue-900);
-    --nom-primary-active: var(--navds-global-color-deepblue-500);
+    --nom-primary: var(--a-lightblue-800);
+    --nom-primary-hover: var(--a-lightblue-900);
+    --nom-primary-active: var(--a-deepblue-500);
     --nom-secondary-hover: #DEECEF;
 
-    --navds-button-color-primary-background: var(--nom-primary);
-    --navds-button-color-primary-background-active: var(--nom-primary-active);
+    /* --a prefixes overrides general building blocks of design system tokens */
+    --a-surface-action: var(--a-lightblue-800);
+    --a-surface-action-hover: var(--a-lightblue-900);
+    --a-surface-active: var(--a-deepblue-500);
+    --a-surface-action-subtle-hover: var(--nom-secondary-hover);
+    --a-border-action: var(--a-lightblue-800);
+    --a-text-action: var(--a-lightblue-800);
+    --a-text-action-on-action-subtle: var(--a-lightblue-800);
+    --a-border-focus: var(--a-lightblue-800);
 
-    --navds-semantic-color-interaction-primary: var(--nom-primary);
-    --navds-semantic-color-interaction-primary-hover: var(--nom-primary-hover);
-    --navds-semantic-color-interaction-primary-hover-subtle: var(--nom-secondary-hover);
-    --navds-semantic-color-focus: var(--nom-primary);
-    --navds-text-field-color-border-hover: var(--nom-primary);
-    --navds-semantic-color-link: var(--nom-primary);
+    /*--ac prefixes overrides tokens for specific components*/
+    --ac-dropdown-item-text: var(--a-text-default);
 }
-
 
 
 a {

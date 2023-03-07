@@ -1,6 +1,6 @@
 import type { ApolloError } from "@apollo/client";
 import type { GraphQLErrors } from "@apollo/client/errors";
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
 import partition from "lodash/partition";
 import sortBy from "lodash/sortBy";
@@ -10,11 +10,12 @@ import { Fragment } from "react";
 import React from "react";
 import { useParams } from "react-router";
 
-import type { OrgEnhet, Ressurs } from "../../api/generated/graphql_generated";
-import type { HentHierarkiQueryHookResult } from "../../api/generated/graphql_generated";
+import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
+import type { HentHierarkiQueryHookResult } from "~/api/generated/graphql_generated";
+import { PageBanner } from "~/components/PageBanner";
+
 import * as Gq from "../../api/generated/graphql_generated";
 import ContentWrapper from "../../components/ContentWrapper";
-import { PageBanner } from "../../components/PageBanner";
 import { BackFromRessurs } from "./components/BackFromRessurs";
 import {
   DynamicColumnContainer,
@@ -126,7 +127,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
 
   return (
     <div
-      className={css`
+      css={css`
         display: flex;
         flex-direction: column;
       `}
@@ -140,7 +141,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
 
       {ressursQuery.loading && !currentRessurs && (
         <Loader
-          className={css`
+          css={css`
             align-self: center;
           `}
           size="2xlarge"
@@ -227,13 +228,13 @@ function OrganisasjonsHierarkiPageOuter() {
       <PageBanner text="NAV organisasjon" />
       <ContentWrapper>
         <div
-          className={css`
+          css={css`
             display: grid;
           `}
         >
           {hentHierarkiQuery.loading && !hentHierarkiQuery.data ? (
             <div
-              className={css`
+              css={css`
                 justify-self: center;
               `}
             >

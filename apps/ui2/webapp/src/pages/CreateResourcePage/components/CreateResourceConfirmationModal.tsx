@@ -1,8 +1,9 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
 import { useState } from "react";
 
-import type { OpprettRessursRequest } from "../../../api/generated/graphql_generated";
+import type { OpprettRessursRequest } from "~/api/generated/graphql_generated";
+
 import { SektorNameMapping } from "./CreateResourceForm";
 
 export function CreateResourceConfirmationModal({
@@ -37,7 +38,7 @@ export function CreateResourceConfirmationModal({
         Opprett ressurs
       </Button>
       <Modal
-        className={css({ minWidth: "500px", padding: "1rem" })}
+        css={css({ minWidth: "500px", padding: "1rem" })}
         onClose={() => setShowModal(false)}
         open={showModal}
       >
@@ -46,12 +47,12 @@ export function CreateResourceConfirmationModal({
             Opprett ressurs
           </Heading>
           <div
-            className={css`
-              margin: var(--navds-spacing-7) 0;
+            css={css`
+              margin: var(--a-spacing-7) 0;
               display: grid;
               grid-template-columns: max-content 1fr;
-              column-gap: var(--navds-spacing-4);
-              row-gap: var(--navds-spacing-2);
+              column-gap: var(--a-spacing-4);
+              row-gap: var(--a-spacing-2);
             `}
           >
             <span>Navn:</span>
@@ -65,14 +66,14 @@ export function CreateResourceConfirmationModal({
             Du kan ikke endre opplysningene etter at ressursen er opprettet
           </Alert>
           <div
-            className={css({
+            css={css({
               display: "flex",
               alignItems: "center",
               marginTop: "2rem",
             })}
           >
             <Button
-              className={css({ marginRight: "1rem" })}
+              css={css({ marginRight: "1rem" })}
               onClick={() => {
                 onConfirm();
                 setShowModal(false);

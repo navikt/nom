@@ -3,7 +3,7 @@ import "@navikt/ds-css-internal";
 import "./designSystemOverrides.css";
 
 import { ApolloProvider } from "@apollo/client";
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Loader } from "@navikt/ds-react";
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
@@ -16,12 +16,14 @@ import NavHeader, { headerHeight } from "./components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "./components/PilotBanner";
 import AppRoutes from "./routes";
 
-const layoutStyle = css({
-  backgroundColor: "var(--navds-global-color-gray-100)",
-  minHeight: `calc(100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight})`,
-  width: "100%",
-  display: "flex",
-});
+const layoutStyle = css`
+  background-color: var(--a-gray-100);
+  min-height: calc(
+    100vh - ${headerHeight} - ${pilotBannerHeight} - ${footerHeight}
+  );
+  width: 100%;
+  display: flex;
+`;
 
 export enum UserRole {
   ROLE_NONE = "ROLE_NONE",
@@ -45,7 +47,9 @@ export function Main() {
 
   React.useEffect(() => {
     getSession()
-      .then((index) => setSessionInfo(index))
+      .then((index) =>
+        setSessionInfo({ ...index, roles: [UserRole.ROLE_WRITE] })
+      )
       .finally(() => setRolesFetched(true));
   }, []);
 
@@ -60,8 +64,8 @@ export function Main() {
           <UserSessionContext.Provider value={sessionInfo}>
             <NavHeader />
             <PilotBanner />
-            <div className={layoutStyle}>
-              <div className={css({ width: "100%" })}>
+            <div css={layoutStyle}>
+              <div css={css({ width: "100%" })}>
                 <AppRoutes />
               </div>
             </div>

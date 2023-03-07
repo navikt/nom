@@ -1,10 +1,11 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
-import type { OrgEnhet } from "../../../api/generated/graphql_generated";
+import type { OrgEnhet } from "~/api/generated/graphql_generated";
+
 import { building2 } from "../../../components/Images";
 import UserImage from "../../../components/UserImage";
 import { HorizontalEdge } from "./CardViews";
@@ -28,8 +29,8 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
 
   return (
     <Link
-      className={css`
-        color: var(--navds-global-color-gray-900);
+      css={css`
+        color: var(--a-gray-900);
       `}
       ref={reference}
       to={`/org/${agressoId}/${orgNiv}/${navident}`}
@@ -47,18 +48,18 @@ export const ValgtEnhet = ({
   scrollReference: RefObject<HTMLDivElement>;
 }) => (
   <div
-    className={css`
+    css={css`
       display: grid;
       border-radius: 5px;
       margin-bottom: 1rem;
       background-color: var(--nom-secondary-hover);
-      border: 1px solid var(--navds-global-color-gray-400);
+      border: 1px solid var(--a-gray-400);
     `}
     ref={scrollReference}
   >
     <HorizontalEdge />
     <div
-      className={css`
+      css={css`
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -69,7 +70,7 @@ export const ValgtEnhet = ({
         <Heading level={"2"} size="large">
           <img
             alt={"Enhet"}
-            className={css`
+            css={css`
               margin-right: 1rem;
             `}
             src={building2}

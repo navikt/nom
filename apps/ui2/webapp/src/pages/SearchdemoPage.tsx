@@ -1,4 +1,4 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Switch } from "@navikt/ds-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -135,7 +135,7 @@ function SearchdemoPage() {
 
   return (
     <div
-      className={css`
+      css={css`
         padding: 2rem 20%;
       `}
     >
@@ -151,7 +151,7 @@ function SearchdemoPage() {
       </span>
       <span>{searchState}</span>
       <div
-        className={css`
+        css={css`
           display: grid;
           grid-template-columns: min-content min-content 1fr;
           column-gap: 1rem;

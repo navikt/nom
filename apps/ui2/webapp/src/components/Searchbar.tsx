@@ -1,4 +1,5 @@
-import { css } from "@emotion/css";
+import type { SerializedStyles } from "@emotion/react";
+import { css } from "@emotion/react";
 import { Tag } from "@navikt/ds-react";
 import { useNavigate } from "react-router-dom";
 import type { OptionProps } from "react-select";
@@ -12,7 +13,7 @@ type SearchOption = {
   label: string;
   tag: string;
   url: string;
-  className: string;
+  css: SerializedStyles;
 };
 
 type SearchResultRaw =
@@ -39,13 +40,13 @@ const Option = (properties: OptionProps<SearchOption>) => {
   return (
     <components.Option {...properties}>
       <div
-        className={css`
+        css={css`
           display: flex;
           justify-content: space-between;
         `}
       >
         <span>{properties.data.label}</span>
-        <Tag className={properties.data.className} size="small" variant="info">
+        <Tag css={properties.data.css} size="small" variant="info">
           {properties.data.tag}
         </Tag>
       </div>
@@ -59,19 +60,19 @@ export function SearchBar() {
   return (
     <AsyncSelect
       cacheOptions
-      className={css`
+      components={{ Option }}
+      controlShouldRenderValue={false}
+      css={css`
         cursor: text;
         min-width: 200px;
-        border-radius: var(--navds-border-radius-medium);
-        border: 1px solid var(--navds-select-color-border);
+        border-radius: var(--a-border-radius-medium);
+        border: 1px solid var(--a-border-strong);
 
         &:focus-within {
           outline: none;
-          box-shadow: var(--navds-shadow-focus);
+          box-shadow: var(--a-shadow-focus);
         }
       `}
-      components={{ Option }}
-      controlShouldRenderValue={false}
       isClearable
       loadOptions={searchRessurs}
       loadingMessage={() => "Søker..."}
@@ -93,7 +94,7 @@ export function SearchBar() {
           boxShadow: "none",
           border: 0,
           cursor: "text",
-          div: { div: { color: `var(--navds-dropdown-menu-color)` } },
+          div: { div: { color: `var(--a-text-default)` } },
         }),
         // Make border and size of input box to be identical with those from DesignSystem
         valueContainer: (base) => ({ ...base, padding: "8px", color: "black" }),
@@ -190,7 +191,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
           tag: "Ressurs",
           url: url,
           label: r.visningsnavn,
-          className: searchResultClassname1,
+          css: searchResultClassname1,
           value: r.navident,
         };
       }
@@ -199,7 +200,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
           tag: "OrgEnhet",
           url: /org/ + r.agressoId + "/" + r.orgNiv,
           label: r.navn,
-          className: searchResultClassname2,
+          css: searchResultClassname2,
           value: r.agressoId,
         };
       }

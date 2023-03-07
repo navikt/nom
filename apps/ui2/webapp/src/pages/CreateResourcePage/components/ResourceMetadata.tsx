@@ -1,14 +1,14 @@
-import { css } from "@emotion/css";
+import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 
-import type { FolkeregisterPerson } from "../../../api/generated/graphql_generated";
+import type { FolkeregisterPerson } from "~/api/generated/graphql_generated";
 
-const contentStyles = css({
-  backgroundColor: "var(--nom-secondary-hover)",
-  border: "1px solid var(--navds-global-color-gray-400)",
-  borderRadius: "4px",
-  padding: "1rem",
-});
+const contentStyles = css`
+  background-color: var(--nom-secondary-hover);
+  border: 1px solid var(--a-gray-400);
+  border-radius: 4px;
+  padding: 1rem;
+`;
 
 export const ResourceMetadata = ({
   person,
@@ -16,11 +16,11 @@ export const ResourceMetadata = ({
   person: FolkeregisterPerson;
 }) => {
   return (
-    <div className={contentStyles}>
+    <div css={contentStyles}>
       <Heading size="small">Opplysninger fra Folkeregisteret</Heading>
       <div
-        className={css`
-          margin-top: var(--navds-spacing-6);
+        css={css`
+          margin-top: var(--a-spacing-6);
           display: grid;
           grid-auto-flow: column;
           grid-template-rows: 1fr 1fr;
