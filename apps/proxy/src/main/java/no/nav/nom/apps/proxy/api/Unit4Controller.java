@@ -53,6 +53,7 @@ public class Unit4Controller {
         try{
             response = restTemplate.exchange(request, String.class);
         } catch (RestClientResponseException restClientResponseException){
+            log.error("Error in Unit4 post request", restClientResponseException);
             response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
                     .body(restClientResponseException.getMessage());
         }
@@ -102,6 +103,7 @@ public class Unit4Controller {
         try{
             response = restTemplate.exchange(request, String.class);
         } catch (RestClientResponseException restClientResponseException){
+            log.error("Error in Unit4 delete request", restClientResponseException);
             response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
                 .body(restClientResponseException.getMessage());
         }
@@ -110,7 +112,7 @@ public class Unit4Controller {
 
     @GetMapping("/ressurs/{personId}")
     public ResponseEntity<String> getRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt) {
-        log.info("Mottatt /proxy/unit4/ressurs GET request");
+        log.info("Mottatt /proxy/unit4/{personId} ressurs GET request");
         log.debug(SECURE_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
 
 
@@ -125,6 +127,7 @@ public class Unit4Controller {
         try{
             response = restTemplate.exchange(request, String.class);
         } catch (RestClientResponseException restClientResponseException){
+            log.error("Error in Unit4 get ressurs/{personId} request", restClientResponseException);
             response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
                 .body(restClientResponseException.getMessage());
         }
