@@ -38,6 +38,9 @@
         </encoder>
     </appender>
 
+    <!-- NOM loggers -->
+    <logger name="no.nav.nom" level="DEBUG" />
+
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
         <appender-ref ref="SECURE_LOGS"/>
