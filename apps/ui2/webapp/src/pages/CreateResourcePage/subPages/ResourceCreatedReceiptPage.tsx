@@ -117,7 +117,7 @@ function Unit4Link() {
       css={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/agrt01/ContentContainer.aspx?type=topgen&menu_id=002820&activityStepId=1-1&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
+      href={`${unit4BaseUrl}/agresso/ContentContainer.aspx?type=topgen&menu_id=003316&activityStepId=1-1&attribute_id=S108&helptext=1&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
       icon={<ExternalLink aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"
