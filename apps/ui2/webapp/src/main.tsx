@@ -47,9 +47,7 @@ export function Main() {
 
   React.useEffect(() => {
     getSession()
-      .then((index) =>
-        setSessionInfo({ ...index, roles: [UserRole.ROLE_WRITE] })
-      )
+      .then((index) => setSessionInfo(index))
       .finally(() => setRolesFetched(true));
   }, []);
 
