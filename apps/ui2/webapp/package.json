@@ -7,6 +7,7 @@
     "dev-debug": "vite --debug",
     "start": "vite",
     "build": "eslint src/**/*.ts src/**/*.tsx && tsc && vite build",
+    "check-types": "tsc --noemit",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
@@ -62,7 +63,7 @@
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.12.0",
     "graphql": "^16.6.0",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.5",
     "vite": "^3.1.6"
   }
 }
