@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "vite",
     "dev-debug": "vite --debug",
-    "start": "vite",
-    "build": "eslint src/**/*.ts src/**/*.tsx && tsc && vite build",
+    "build": "tsc && vite build",
     "check-types": "tsc --noemit",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
