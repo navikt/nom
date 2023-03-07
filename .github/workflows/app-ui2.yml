@@ -26,9 +26,9 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install webapp dependencies, excluding devDependencies
+      - name: Install webapp dependencies
         working-directory: apps/ui2/webapp
-        run: npm ci --omit=dev
+        run: npm install
 
       - name: Add version
         env:
