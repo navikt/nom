@@ -1,10 +1,12 @@
 import type { SerializedStyles } from "@emotion/react";
 import { css } from "@emotion/react";
 import { Tag } from "@navikt/ds-react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
-import AsyncSelect from "react-select/async";
+
+import { AsyncSearch } from "./CustomSelectComponents";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 
@@ -36,7 +38,7 @@ type SearchResultRaw =
       }[];
     };
 
-const Option = (properties: OptionProps<SearchOption>) => {
+const OptionWithTag = (properties: OptionProps<SearchOption, false>) => {
   return (
     <components.Option {...properties}>
       <div
@@ -58,49 +60,19 @@ export function SearchBar() {
   const navigate = useNavigate();
 
   return (
-    <AsyncSelect
-      cacheOptions
-      components={{ Option }}
+    <AsyncSearch
+      components={{ Option: OptionWithTag }}
       controlShouldRenderValue={false}
-      css={css`
-        cursor: text;
-        min-width: 200px;
-        border-radius: var(--a-border-radius-medium);
-        border: 1px solid var(--a-border-strong);
-
-        &:focus-within {
-          outline: none;
-          box-shadow: var(--a-shadow-focus);
-        }
-      `}
-      isClearable
       loadOptions={searchRessurs}
-      loadingMessage={() => "Søker..."}
-      menuPortalTarget={document.body}
       noOptionsMessage={({ inputValue }: { inputValue: string }) =>
         inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT
           ? "Du må skrive minst 3 tegn for å søke"
           : `Fant ingen resultater for "${inputValue}"`
       }
-      // NOTE 27 Oct 2022 (Johannes Moskvil): Stupid hack to please TS. SelectedOption can be multiple if used as a multi select therefore ensure only one value is processed
       onChange={(selectedOption) =>
-        selectedOption && navigate([selectedOption].flat()[0].url)
+        selectedOption && navigate(selectedOption.url)
       }
       placeholder="Søk etter ressurser eller organisasjonsenheter"
-      styles={{
-        // Removes default focus-border so it can be replaced with focus from DesignSystem
-        control: (base) => ({
-          ...base,
-          boxShadow: "none",
-          border: 0,
-          cursor: "text",
-          div: { div: { color: `var(--a-text-default)` } },
-        }),
-        // Make border and size of input box to be identical with those from DesignSystem
-        valueContainer: (base) => ({ ...base, padding: "8px", color: "black" }),
-        indicatorSeparator: (base) => ({ ...base, display: "none" }),
-        dropdownIndicator: (base) => ({ ...base, display: "none" }),
-      }}
     />
   );
 }
@@ -146,41 +118,25 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
     statusSelection: "ALLE",
   };
 
-  const fetchresult = await fetch("/nom-api/graphql", {
-    body: JSON.stringify({
-      operationName: "search",
-      query: searchQuery,
-      variables: {
-        searchString: searchString,
-        orgEnhetFilter: orgEnhetFilter,
-        ressursFilter: ressursFilter,
-      },
-    }),
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
+  const result = await axios.post("/nom-api/graphql", {
+    operationName: "search",
+    query: searchQuery,
+    variables: {
+      searchString: searchString,
+      orgEnhetFilter: orgEnhetFilter,
+      ressursFilter: ressursFilter,
     },
   });
-  const json = await fetchresult.json();
-  return json.data.search;
+
+  return result.data.data.search;
 }
 
-const searchResultClassname1 = css`
-  background: #e0d8e9;
-  border-color: #c0b2d2;
-`;
-
-const searchResultClassname2 = css`
-  background: #ebcbd4;
-  border-color: #d4a9b6;
-`;
-
 async function createOptions(inputValue: string): Promise<SearchOption[]> {
-  // får bedre resultat av en eller annen grunn når man tar termene i single-quotes
+  // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
   const wrappedInputValue = "'" + inputValue + "'";
-  const results = await performSearch(wrappedInputValue);
+  const searchResults = await performSearch(wrappedInputValue);
 
-  return results.map((r) => {
+  return searchResults.map((r) => {
     switch (r.__typename) {
       case "Ressurs": {
         const oe = r.orgTilknytning[0]?.orgEnhet;
@@ -191,7 +147,10 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
           tag: "Ressurs",
           url: url,
           label: r.visningsnavn,
-          css: searchResultClassname1,
+          css: css`
+            background: #e0d8e9;
+            border-color: #c0b2d2;
+          `,
           value: r.navident,
         };
       }
@@ -200,7 +159,10 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
           tag: "OrgEnhet",
           url: /org/ + r.agressoId + "/" + r.orgNiv,
           label: r.navn,
-          css: searchResultClassname2,
+          css: css`
+            background: #ebcbd4;
+            border-color: #d4a9b6;
+          `,
           value: r.agressoId,
         };
       }

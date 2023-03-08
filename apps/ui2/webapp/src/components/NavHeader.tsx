@@ -7,7 +7,7 @@ import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
 import { BurgerMenu } from "./BurgerMenu";
 import { nomLogoCircle } from "./Images";
-import { SearchBar } from "./Searchbar";
+import { SearchBar } from "./select/Searchbar";
 
 export const headerHeight = "6rem";
 

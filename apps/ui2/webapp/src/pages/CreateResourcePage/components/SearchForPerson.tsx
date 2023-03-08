@@ -22,7 +22,6 @@ export function SearchForPerson() {
         padding: var(--a-spacing-8);
         border: 1px solid var(--a-gray-400);
         border-top: 5px solid var(--a-lightblue-800);
-        border-radius: 5px;
         display: flex;
         flex-direction: column;
         background: white;
@@ -30,7 +29,7 @@ export function SearchForPerson() {
       `}
     >
       <img
-        alt="Opprett ressurs ikon"
+        alt=""
         css={css`
           height: 65px;
           width: 65px;

@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   Heading,
-  Label,
   Loader,
   Radio,
   RadioGroup,
@@ -12,11 +11,8 @@ import {
   UNSAFE_useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
-import Select, { createFilter } from "react-select";
-import type { FilterOptionOption } from "react-select/dist/declarations/src/filters";
-import { v4 as uuidv4 } from "uuid";
 
 import type {
   FolkeregisterPerson,
@@ -31,6 +27,7 @@ import {
   useOpprettRessursMutation,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
+import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { capitalizeName } from "~/resources/utils/utils";
 
 import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";
@@ -130,15 +127,8 @@ function CreateResourceFormInner({
   personident: string;
   orgEnheter: OrgEnhet[];
 }) {
-  const MIN_INPUT_LENGTH = 3;
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors },
-  } = useForm({
+  const methods = useForm({
     defaultValues: {
       personident: personident,
       visningsfornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
@@ -149,6 +139,14 @@ function CreateResourceFormInner({
       startDato: new Date(),
     },
   });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors },
+  } = methods;
 
   const { datepickerProps, inputProps } = UNSAFE_useDatepicker({
     defaultSelected: watch("startDato"),
@@ -167,191 +165,104 @@ function CreateResourceFormInner({
     });
 
   return (
-    <form>
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: var(--a-spacing-5);
-          margin-top: var(--a-spacing-8);
-        `}
-      >
-        <Heading size="small">Opplysninger til NOM</Heading>
-        <Alert css={css({ marginTop: "1rem" })} size="medium" variant="info">
-          Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle
-          navn du ikke vil ha med. Ressursen må ha minst ett fornavn og minst
-          ett etternavn.
-        </Alert>
+    <FormProvider {...methods}>
+      <form>
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            gap: var(--a-spacing-5);
+            margin-top: var(--a-spacing-8);
+          `}
+        >
+          <Heading size="small">Opplysninger til NOM</Heading>
+          <Alert css={css({ marginTop: "1rem" })} size="medium" variant="info">
+            Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern
+            eventuelle navn du ikke vil ha med. Ressursen må ha minst ett
+            fornavn og minst ett etternavn.
+          </Alert>
 
-        <div css={rowStyles}>
-          <TextField
-            autoComplete="off"
-            error={errors.visningsfornavn?.message}
-            label="Fornavn"
-            type="text"
-            {...register("visningsfornavn", { required: "Må oppgis" })}
-          />
-          <TextField
-            autoComplete="off"
-            error={errors.visningsmellomnavn?.message}
-            label="Mellomnavn"
-            type="text"
-            {...register("visningsmellomnavn")}
-          />
-          <TextField
-            autoComplete="off"
-            error={errors.visningsetternavn?.message}
-            label="Etternavn"
-            type="text"
-            {...register("visningsetternavn", { required: "Må oppgis" })}
-          />
-        </div>
+          <div css={rowStyles}>
+            <TextField
+              autoComplete="off"
+              error={errors.visningsfornavn?.message}
+              label="Fornavn"
+              type="text"
+              {...register("visningsfornavn", { required: "Må oppgis" })}
+            />
+            <TextField
+              autoComplete="off"
+              error={errors.visningsmellomnavn?.message}
+              label="Mellomnavn"
+              type="text"
+              {...register("visningsmellomnavn")}
+            />
+            <TextField
+              autoComplete="off"
+              error={errors.visningsetternavn?.message}
+              label="Etternavn"
+              type="text"
+              {...register("visningsetternavn", { required: "Må oppgis" })}
+            />
+          </div>
 
-        <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
-          <Radio checked value={Sektor.NavStatlig}>
-            {SektorNameMapping[Sektor.NavStatlig]}
-          </Radio>
-          <Radio disabled value={Sektor.NavKommunal}>
-            {SektorNameMapping[Sektor.NavKommunal]}
-          </Radio>
-          <Radio disabled value={Sektor.Ekstern}>
-            {SektorNameMapping[Sektor.Ekstern]}
-          </Radio>
-        </RadioGroup>
+          <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
+            <Radio checked value={Sektor.NavStatlig}>
+              {SektorNameMapping[Sektor.NavStatlig]}
+            </Radio>
+            <Radio disabled value={Sektor.NavKommunal}>
+              {SektorNameMapping[Sektor.NavKommunal]}
+            </Radio>
+            <Radio disabled value={Sektor.Ekstern}>
+              {SektorNameMapping[Sektor.Ekstern]}
+            </Radio>
+          </RadioGroup>
 
-        <Controller
-          control={control}
-          name="orgEnhetId"
-          render={({
-            field: { onChange, value, name },
-            fieldState: { error },
-          }) => {
-            const fieldId = `${name}_${uuidv4()}`;
-            return (
-              <>
-                <Label htmlFor={fieldId} size="medium">
-                  Org.enhet
-                </Label>
-                {error && (
-                  <Alert size="small" variant="error">
-                    {error.message}
-                  </Alert>
-                )}
-                <Select
-                  backspaceRemovesValue
-                  components={{
-                    // eslint-disable-next-line unicorn/no-null
-                    DropdownIndicator: () => null, // Remove dropdown icon
-                    // eslint-disable-next-line unicorn/no-null
-                    IndicatorSeparator: () => null, // Remove separator
-                  }}
-                  css={css`
-                    cursor: text;
-                    min-width: 200px;
-                    border-radius: var(--a-border-radius-medium);
-                    border: 1px solid var(--a-border-strong);
-                    z-index: 2; // 10.01.2023: Hack to get around the datepicker button having a z-index of 1 and overlaying on the dropdown.
+          <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
 
-                    &:focus-within {
-                      outline: none;
-                      box-shadow: var(--a-shadow-focus);
-                    }
-                  `}
-                  defaultMenuIsOpen={false}
-                  escapeClearsValue={true}
-                  filterOption={
-                    (candidate: FilterOptionOption<OrgEnhet>, input: string) =>
-                      input.length >= MIN_INPUT_LENGTH &&
-                      createFilter({})(candidate, input) // Use Select's default filtering for string matching by creating filter
-                  }
-                  getOptionLabel={(orgenhet) =>
-                    `${orgenhet.navn} (${orgenhet.id})`
-                  }
-                  getOptionValue={(orgenhet: OrgEnhet) => orgenhet.id}
-                  inputId={fieldId}
-                  isClearable
-                  isMulti={false}
-                  noOptionsMessage={(input) => {
-                    if (input.inputValue.length < MIN_INPUT_LENGTH) {
-                      return "Du må skrive minst 3 tegn for å søke";
-                    }
-                    return "Ingen valg tilgjengelig";
-                  }}
-                  onChange={(orgEnhet: OrgEnhet | null) =>
-                    onChange(orgEnhet?.id)
-                  }
-                  openMenuOnClick={false}
-                  openMenuOnFocus={false}
-                  options={orgEnheter}
-                  placeholder="Søk etter organisasjonsenhet..."
-                  styles={{
-                    // Removes default focus-border, so that it can be replaced with focus from DesignSystem
-                    control: (base) => ({
-                      ...base,
-                      boxShadow: "none",
-                      border: 0,
-                      cursor: "text",
-                      div: {
-                        div: { color: `var(--a-text-default)` },
-                      },
-                    }),
-                    // Make border and size of input box to be identical with those from DesignSystem
-                    valueContainer: (base) => ({
-                      ...base,
-                      padding: "8px",
-                      color: "black",
-                    }),
-                  }}
-                  value={orgEnheter.find((enhet) => enhet.id === value)}
+          <Controller
+            control={control}
+            name="startDato"
+            render={({ field: { onChange } }) => (
+              <UNSAFE_DatePicker {...datepickerProps} onSelect={onChange}>
+                <UNSAFE_DatePicker.Input
+                  {...inputProps}
+                  label="Første arbeidsdag"
                 />
-              </>
-            );
-          }}
-          rules={{ required: "Må angis" }}
-        />
-
-        <Controller
-          control={control}
-          name="startDato"
-          render={({ field: { onChange } }) => (
-            <UNSAFE_DatePicker {...datepickerProps} onSelect={onChange}>
-              <UNSAFE_DatePicker.Input
-                {...inputProps}
-                label="Første arbeidsdag"
-              />
-            </UNSAFE_DatePicker>
-          )}
-        />
-
-        <div css={rowStyles}>
-          <CreateResourceConfirmationModal
-            formValues={watch()}
-            loading={loading}
-            onConfirm={() =>
-              handleSubmit((submittedValues) => {
-                opprettRessursMutation({
-                  variables: {
-                    request: {
-                      ...submittedValues,
-                      startDato: submittedValues.startDato
-                        .toISOString()
-                        .slice(0, 10),
-                    },
-                  },
-                });
-              })()
-            }
+              </UNSAFE_DatePicker>
+            )}
           />
-          <Button
-            onClick={() => navigate("/ressurs/create", { replace: true })}
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-        </div>
 
-        {error ? <Alert variant="error">{error.message}</Alert> : undefined}
-      </div>
-    </form>
+          <div css={rowStyles}>
+            <CreateResourceConfirmationModal
+              formValues={watch()}
+              loading={loading}
+              onConfirm={() =>
+                handleSubmit((submittedValues) => {
+                  opprettRessursMutation({
+                    variables: {
+                      request: {
+                        ...submittedValues,
+                        startDato: submittedValues.startDato
+                          .toISOString()
+                          .slice(0, 10),
+                      },
+                    },
+                  });
+                })()
+              }
+            />
+            <Button
+              onClick={() => navigate("/ressurs/create", { replace: true })}
+              variant="secondary"
+            >
+              Avbryt
+            </Button>
+          </div>
+
+          {error ? <Alert variant="error">{error.message}</Alert> : undefined}
+        </div>
+      </form>
+    </FormProvider>
   );
 }
