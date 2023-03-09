@@ -110,6 +110,9 @@ public class Unit4RessursDto {
         String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)
                 .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
 
+        firstName = Utils.formatName(firstName);
+        surName = Utils.formatName(surName);
+
         String aliasName = (firstName.substring(0,2) + surName.substring(0,2)).toUpperCase();
 
         Unit4RessursGender kjoenn = additionalData.kjoenn().map(k ->
@@ -128,8 +131,8 @@ public class Unit4RessursDto {
         additionalInformation = AdditionalInformation.builder()
                 .relatedPersonId(ressursNr)
                 .build();
-        
-        name = firstName + " " + surName;
+
+        name = surName + ", " + firstName;
         nameInformation = NameInformation.builder()
                 .aliasName(aliasName)
                 .firstName(firstName)
