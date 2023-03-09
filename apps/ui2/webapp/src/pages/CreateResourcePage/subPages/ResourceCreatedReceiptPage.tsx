@@ -15,7 +15,7 @@ import { useParams } from "react-router";
 import type { Ressurs } from "~/api/generated/graphql_generated";
 import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 
-import { isInDevelopment as isInDevelopment } from "../../../resources/utils/utils";
+import { isInDevelopment as isInDevelopment } from "../../../utils";
 import { FocusedRessursView } from "../../OrganisasjonsHierarkiPage/components/FocusedRessursView";
 
 export function ResourceCreatedReceiptPage() {

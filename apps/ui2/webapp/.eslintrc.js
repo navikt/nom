@@ -24,6 +24,7 @@ module.exports = {
     },
     plugins: ["lodash", "react", "prettier", "@typescript-eslint", "simple-import-sort"],
     rules: {
+        "no-console": "error",
         "lodash/import-scope": ["error", "method"],
         "react/jsx-key": "error",
         "react/jsx-sort-props": "error",

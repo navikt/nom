@@ -124,6 +124,7 @@ export function SelectLayoutWrapper({
 }) {
   return (
     <div
+      className="navds-form-field"
       css={css`
         display: flex;
         flex-direction: column;

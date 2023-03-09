@@ -1,20 +1,28 @@
 import { css } from "@emotion/react";
 import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
+import { format } from "date-fns";
 import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
-import type { OpprettRessursRequest } from "~/api/generated/graphql_generated";
+import type { OrgEnhet } from "~/api/generated/graphql_generated";
+import { DATE_FORMATS } from "~/utils";
 
+import type { FormValues } from "./CreateResourceForm";
 import { SektorNameMapping } from "./CreateResourceForm";
 
 export function CreateResourceConfirmationModal({
   formValues,
   onConfirm,
   loading,
+  orgEnheter,
 }: {
-  formValues: OpprettRessursRequest;
+  orgEnheter: OrgEnhet[];
+  formValues: Partial<FormValues>;
   onConfirm: () => void;
   loading: boolean;
 }) {
+  const { trigger } = useFormContext();
+
   const [showModal, setShowModal] = useState(false);
   const {
     visningsfornavn,
@@ -22,23 +30,33 @@ export function CreateResourceConfirmationModal({
     visningsmellomnavn,
     sektor,
     startDato,
+    orgEnhetId,
   } = formValues;
 
   const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
     .filter((navn) => !!navn)
     .join(" ");
+  const selectOrgEnhet = orgEnheter.find(({ id }) => id === orgEnhetId);
 
   return (
     <>
       <Button
         loading={loading}
-        onClick={() => setShowModal(true)}
+        onClick={async () => {
+          const validationSuccessful = await trigger();
+          if (validationSuccessful) {
+            setShowModal(true);
+          }
+        }}
         type="button"
       >
         Opprett ressurs
       </Button>
       <Modal
-        css={css({ minWidth: "500px", padding: "1rem" })}
+        css={css`
+          width: 600px;
+          padding: var(--a-spacing-4);
+        `}
         onClose={() => setShowModal(false)}
         open={showModal}
       >
@@ -58,22 +76,27 @@ export function CreateResourceConfirmationModal({
             <span>Navn:</span>
             <b>{formattedName}</b>
             <span>Sektor:</span>
-            <b>{SektorNameMapping[sektor]}</b>
+            <b>{sektor && SektorNameMapping[sektor]}</b>
+            <span>Org enhet:</span>
+            <b>{selectOrgEnhet?.navn}</b>
             <span>Første arbeidsdag:</span>
-            <b>{startDato.toLocaleDateString()}</b>
+            <b>{startDato && format(new Date(startDato), DATE_FORMATS.no)}</b>
           </div>
-          <Alert variant="warning">
-            Du kan ikke endre opplysningene etter at ressursen er opprettet
+          <Alert variant="info">
+            Du kan ikke endre opplysningene i NOM når ressursen er opprettet.
+            Dette må gjøres i Unit4 og Identrutina i Remedy.
           </Alert>
           <div
-            css={css({
-              display: "flex",
-              alignItems: "center",
-              marginTop: "2rem",
-            })}
+            css={css`
+              margin-top: var(--a-spacing-5);
+              display: flex;
+              gap: var(--a-spacing-4);
+              button {
+                flex: 1;
+              }
+            `}
           >
             <Button
-              css={css({ marginRight: "1rem" })}
               onClick={() => {
                 onConfirm();
                 setShowModal(false);

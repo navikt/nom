@@ -1,3 +1,5 @@
+import { formatISO } from "date-fns";
+
 export const sortItems = (a: string, b: string) => {
   if (a.localeCompare(b, "no") < 0) {
     return -1;
@@ -23,6 +25,7 @@ export function isNotDuplicate<T>(
     .map((element) => extractKey(element));
   const wasDuplicate = seen.includes(extractKey(it));
   if (wasDuplicate) {
+    // eslint-disable-next-line no-console
     console.warn(
       { arrCtx: arrayContext, dupKey: extractKey(it), idx: index },
       "Duplicate removed: Key was seen more than once -> "
@@ -64,4 +67,12 @@ export function formatTlf(nr: string) {
     out.push(temporaryNumber.slice(k, k + 2));
   }
   return out.join(" ");
+}
+
+export const DATE_FORMATS = {
+  no: "dd.MM.yyyy",
+};
+
+export function formatDateWithoutTimezone(date: Date) {
+  return formatISO(date, { representation: "date" });
 }

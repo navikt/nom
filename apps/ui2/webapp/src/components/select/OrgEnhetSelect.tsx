@@ -17,7 +17,7 @@ export function OrgEnhetSelectFormPart({
   return (
     <Controller
       control={control}
-      name="orgEnhet"
+      name="orgEnhetId"
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
           error={fieldState.error}
@@ -69,7 +69,7 @@ function OrgEnhetSelect({
             : `Fant ingen resultater for "${inputValue}"`
         }
         onChange={(option) => onChange(option?.value)}
-        placeholder="Søk etter organisasjonsenhet"
+        placeholder="Søk etter enhetsnavn eller ID"
         value={currentValue ?? null}
       />
     </SelectLayoutWrapper>

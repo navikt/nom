@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
   Button,
@@ -11,8 +12,10 @@ import {
   UNSAFE_useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
+import * as yup from "yup";
 
 import type {
   FolkeregisterPerson,
@@ -28,7 +31,7 @@ import {
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
-import { capitalizeName } from "~/resources/utils/utils";
+import { capitalizeName, formatDateWithoutTimezone } from "~/utils";
 
 import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";
 import { ResourceMetadata } from "./ResourceMetadata";
@@ -128,7 +131,7 @@ function CreateResourceFormInner({
   orgEnheter: OrgEnhet[];
 }) {
   const navigate = useNavigate();
-  const methods = useForm({
+  const methods = useForm<Partial<FormValues>>({
     defaultValues: {
       personident: personident,
       visningsfornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
@@ -136,20 +139,23 @@ function CreateResourceFormInner({
       visningsetternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
       sektor: Sektor.NavStatlig,
       orgEnhetId: undefined,
-      startDato: new Date(),
+      startDato: undefined,
     },
+    resolver: yupResolver(validationSchema),
   });
 
   const {
     register,
     handleSubmit,
-    control,
     watch,
+    setValue,
     formState: { errors },
   } = methods;
 
-  const { datepickerProps, inputProps } = UNSAFE_useDatepicker({
-    defaultSelected: watch("startDato"),
+  const startDatePicker = UNSAFE_useDatepicker({
+    onDateChange: (date) =>
+      setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: undefined,
   });
 
   const [opprettRessursMutation, { loading, error }] =
@@ -164,105 +170,110 @@ function CreateResourceFormInner({
       },
     });
 
+  const submitHandler: SubmitHandler<FormValues> = (validatedValues) => {
+    opprettRessursMutation({
+      variables: {
+        request: validatedValues,
+      },
+    });
+  };
+
   return (
     <FormProvider {...methods}>
-      <form>
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            gap: var(--a-spacing-5);
-            margin-top: var(--a-spacing-8);
-          `}
-        >
-          <Heading size="small">Opplysninger til NOM</Heading>
-          <Alert css={css({ marginTop: "1rem" })} size="medium" variant="info">
-            Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern
-            eventuelle navn du ikke vil ha med. Ressursen må ha minst ett
-            fornavn og minst ett etternavn.
-          </Alert>
+      <form
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: var(--a-spacing-5);
+          margin-top: var(--a-spacing-8);
+        `}
+      >
+        <Heading size="small">Opplysninger til NOM</Heading>
+        <Alert size="medium" variant="info">
+          Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle
+          navn du ikke vil ha med. Ressursen må ha minst ett fornavn og minst
+          ett etternavn.
+        </Alert>
 
-          <div css={rowStyles}>
-            <TextField
-              autoComplete="off"
-              error={errors.visningsfornavn?.message}
-              label="Fornavn"
-              type="text"
-              {...register("visningsfornavn", { required: "Må oppgis" })}
-            />
-            <TextField
-              autoComplete="off"
-              error={errors.visningsmellomnavn?.message}
-              label="Mellomnavn"
-              type="text"
-              {...register("visningsmellomnavn")}
-            />
-            <TextField
-              autoComplete="off"
-              error={errors.visningsetternavn?.message}
-              label="Etternavn"
-              type="text"
-              {...register("visningsetternavn", { required: "Må oppgis" })}
-            />
-          </div>
-
-          <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
-            <Radio checked value={Sektor.NavStatlig}>
-              {SektorNameMapping[Sektor.NavStatlig]}
-            </Radio>
-            <Radio disabled value={Sektor.NavKommunal}>
-              {SektorNameMapping[Sektor.NavKommunal]}
-            </Radio>
-            <Radio disabled value={Sektor.Ekstern}>
-              {SektorNameMapping[Sektor.Ekstern]}
-            </Radio>
-          </RadioGroup>
-
-          <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
-
-          <Controller
-            control={control}
-            name="startDato"
-            render={({ field: { onChange } }) => (
-              <UNSAFE_DatePicker {...datepickerProps} onSelect={onChange}>
-                <UNSAFE_DatePicker.Input
-                  {...inputProps}
-                  label="Første arbeidsdag"
-                />
-              </UNSAFE_DatePicker>
-            )}
+        <div css={rowStyles}>
+          <TextField
+            autoComplete="off"
+            error={errors.visningsfornavn?.message}
+            label="Fornavn"
+            type="text"
+            {...register("visningsfornavn")}
           />
-
-          <div css={rowStyles}>
-            <CreateResourceConfirmationModal
-              formValues={watch()}
-              loading={loading}
-              onConfirm={() =>
-                handleSubmit((submittedValues) => {
-                  opprettRessursMutation({
-                    variables: {
-                      request: {
-                        ...submittedValues,
-                        startDato: submittedValues.startDato
-                          .toISOString()
-                          .slice(0, 10),
-                      },
-                    },
-                  });
-                })()
-              }
-            />
-            <Button
-              onClick={() => navigate("/ressurs/create", { replace: true })}
-              variant="secondary"
-            >
-              Avbryt
-            </Button>
-          </div>
-
-          {error ? <Alert variant="error">{error.message}</Alert> : undefined}
+          <TextField
+            autoComplete="off"
+            error={errors.visningsmellomnavn?.message}
+            label="Mellomnavn"
+            type="text"
+            {...register("visningsmellomnavn")}
+          />
+          <TextField
+            autoComplete="off"
+            error={errors.visningsetternavn?.message}
+            label="Etternavn"
+            type="text"
+            {...register("visningsetternavn")}
+          />
         </div>
+
+        <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
+          <Radio checked value={Sektor.NavStatlig}>
+            {SektorNameMapping[Sektor.NavStatlig]}
+          </Radio>
+          <Radio disabled value={Sektor.NavKommunal}>
+            {SektorNameMapping[Sektor.NavKommunal]}
+          </Radio>
+          <Radio disabled value={Sektor.Ekstern}>
+            {SektorNameMapping[Sektor.Ekstern]}
+          </Radio>
+        </RadioGroup>
+
+        <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
+
+        <UNSAFE_DatePicker {...startDatePicker.datepickerProps}>
+          <UNSAFE_DatePicker.Input
+            {...startDatePicker.inputProps}
+            error={errors.startDato?.message?.toString()}
+            label="Første arbeidsdag"
+          />
+        </UNSAFE_DatePicker>
+
+        <div css={rowStyles}>
+          <CreateResourceConfirmationModal
+            formValues={watch()}
+            loading={loading}
+            onConfirm={handleSubmit((validValues) =>
+              submitHandler(validValues as FormValues)
+            )}
+            orgEnheter={orgEnheter}
+          />
+          <Button
+            onClick={() => navigate("/ressurs/create", { replace: true })}
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </div>
+        {error ? <Alert variant="error">{error.message}</Alert> : undefined}
       </form>
     </FormProvider>
   );
 }
+
+const validationSchema = yup.object({
+  personident: yup.string().required("Obligatorisk"),
+  visningsfornavn: yup.string().required("Obligatorisk"),
+  visningsmellomnavn: yup.string().optional(),
+  visningsetternavn: yup.string().required("Obligatorisk"),
+  sektor: yup
+    .mixed<Sektor>()
+    .oneOf(Object.values(Sektor))
+    .required("Obligatorisk"),
+  orgEnhetId: yup.string().required("Obligatorisk"),
+  startDato: yup.string().required("Obligatorisk"),
+});
+
+export type FormValues = yup.InferType<typeof validationSchema>;

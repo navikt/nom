@@ -1,8 +1,10 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { Main } from "./main";
 
-const container = document.querySelector("#root");
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const root = createRoot(container!);
-root.render(<Main />);
+createRoot(document.querySelector("#root") as HTMLElement).render(
+  <StrictMode>
+    <Main />
+  </StrictMode>
+);

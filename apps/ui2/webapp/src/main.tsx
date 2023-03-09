@@ -4,7 +4,7 @@ import "./designSystemOverrides.css";
 
 import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/react";
-import { Loader } from "@navikt/ds-react";
+import { Loader, Modal } from "@navikt/ds-react";
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
 
@@ -51,26 +51,32 @@ export function Main() {
       .finally(() => setRolesFetched(true));
   }, []);
 
+  /**
+   * Must set where a modal is mounted for screen readers to work properly: https://aksel.nav.no/designsystem/komponenter/modal
+   * Not sure if setting it at the root like this is sufficient, or if it should be part of every modal's useEffects()
+   */
+  if (Modal.setAppElement) {
+    Modal.setAppElement(document.querySelector("#root"));
+  }
+
   if (!rolesFetched || !sessionInfo) {
     return <Loader />;
   }
 
   return (
-    <React.StrictMode>
-      <BrowserRouter>
-        <ApolloProvider client={apolloClient}>
-          <UserSessionContext.Provider value={sessionInfo}>
-            <NavHeader />
-            <PilotBanner />
-            <div css={layoutStyle}>
-              <div css={css({ width: "100%" })}>
-                <AppRoutes />
-              </div>
+    <BrowserRouter>
+      <ApolloProvider client={apolloClient}>
+        <UserSessionContext.Provider value={sessionInfo}>
+          <NavHeader />
+          <PilotBanner />
+          <div css={layoutStyle}>
+            <div css={css({ width: "100%" })}>
+              <AppRoutes />
             </div>
-            <Footer />
-          </UserSessionContext.Provider>
-        </ApolloProvider>
-      </BrowserRouter>
-    </React.StrictMode>
+          </div>
+          <Footer />
+        </UserSessionContext.Provider>
+      </ApolloProvider>
+    </BrowserRouter>
   );
 }

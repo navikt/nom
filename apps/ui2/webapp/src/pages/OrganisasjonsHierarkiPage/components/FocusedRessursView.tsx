@@ -5,7 +5,7 @@ import type { RefObject } from "react";
 import { Link } from "react-router-dom";
 
 import type { Ressurs } from "~/api/generated/graphql_generated";
-import { formatTlf } from "~/resources/utils/utils";
+import { formatTlf } from "~/utils";
 
 import UserImage from "../../../components/UserImage";
 import { SektorNameMapping } from "../../CreateResourcePage/components/CreateResourceForm";

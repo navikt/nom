@@ -67,7 +67,7 @@ export type Navn = {
 
 /**  Requests */
 export type OpprettRessursRequest = {
-  orgEnhet?: InputMaybe<Scalars['String']>;
+  orgEnhetId?: InputMaybe<Scalars['String']>;
   personident: Scalars['String'];
   sektor: Sektor;
   startDato?: InputMaybe<Scalars['Date']>;
@@ -568,6 +568,11 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
+/** Mapping of union types */
+export type ResolversUnionTypes = {
+  SearchResult: ( OrgEnhet ) | ( Ressurs );
+};
+
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
@@ -606,7 +611,7 @@ export type ResolversTypes = {
   ResultCode: ResultCode;
   ResultLimit: ResultLimit;
   Retning: Retning;
-  SearchResult: ResolversTypes['OrgEnhet'] | ResolversTypes['Ressurs'];
+  SearchResult: ResolverTypeWrapper<ResolversUnionTypes['SearchResult']>;
   Sektor: Sektor;
   SektorSelection: SektorSelection;
   StatusSelection: StatusSelection;
@@ -647,7 +652,7 @@ export type ResolversParentTypes = {
   RessursSearch: RessursSearch;
   RessursSearchFilter: RessursSearchFilter;
   RessurserSearch: RessurserSearch;
-  SearchResult: ResolversParentTypes['OrgEnhet'] | ResolversParentTypes['Ressurs'];
+  SearchResult: ResolversUnionTypes['SearchResult'];
   String: Scalars['String'];
   Telefon: Telefon;
 };
