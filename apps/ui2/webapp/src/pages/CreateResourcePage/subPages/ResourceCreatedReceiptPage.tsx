@@ -37,14 +37,14 @@ export function ResourceCreatedReceiptPage() {
     );
   }
 
-  if (hentRessursQuery.error) {
-    return <Alert variant="error">{hentRessursQuery.error.message}</Alert>;
-  }
-
   const ressurs = hentRessursQuery.data?.ressurs;
 
   if (ressurs) {
     return <InnerResourceCreatedPage ressurs={ressurs as Ressurs} />;
+  }
+
+  if (hentRessursQuery.error) {
+    return <Alert variant="error">{hentRessursQuery.error.message}</Alert>;
   }
 
   return <></>;
