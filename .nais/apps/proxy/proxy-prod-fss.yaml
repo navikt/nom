@@ -16,6 +16,7 @@ spec:
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser
+    - secret: nom-unit4-cred
   image: {{image}}
   port: 8080
   azure:
