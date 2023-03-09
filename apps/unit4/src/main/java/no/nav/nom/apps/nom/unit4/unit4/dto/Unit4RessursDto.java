@@ -218,7 +218,7 @@ public class Unit4RessursDto {
                         .relatedValue("SPK") // SPK: Pensjonstrekk SPK 2%
                         .dateFrom(dateFrom.withDayOfMonth(1)) // Alltid første dag i startmåned
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
-                        .build()
+                        .build(),
 
                 // Flagg for å indikere at ressursen er opprettet av NOM
                 RelatedValue.builder()
