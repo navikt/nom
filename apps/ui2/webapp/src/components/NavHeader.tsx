@@ -60,14 +60,6 @@ const NavHeader = () => {
         <Link css={verticallyCenter} title={"Hjem"} to="/">
           <img alt="Forside NOM" src={nomLogoCircle} />
         </Link>
-
-        {/*<Search*/}
-        {/*  disabled={true}*/}
-        {/*  label={"Søk etter ressurser"}*/}
-        {/*  placeholder={"Søkefunksjonalitet kommer"}*/}
-        {/*  size="medium"*/}
-        {/*  variant="secondary"*/}
-        {/*></Search>*/}
         <SearchBar />
         <span
           css={css`

@@ -1,10 +1,12 @@
 import { css } from "@emotion/react";
-import { Heading } from "@navikt/ds-react";
+import { InformationFilled } from "@navikt/ds-icons";
+import { Button, Heading, Popover } from "@navikt/ds-react";
 import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
+import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
 import { formatTlf } from "~/utils";
 
 import UserImage from "../../../components/UserImage";
@@ -56,6 +58,7 @@ export const FocusedRessursView = ({
               display: grid;
               grid-auto-flow: dense;
               grid-template-columns: 1fr 1fr;
+              align-items: center;
               margin-top: var(--a-spacing-8);
               gap: var(--a-spacing-4);
 
@@ -64,17 +67,8 @@ export const FocusedRessursView = ({
               }
             `}
           >
-            <span>
-              E-post: <strong>{focusedRessurs.epost || "Mangler epost"}</strong>
-            </span>
-            <span>
-              Tlf:{" "}
-              <strong>
-                {focusedRessurs.telefon
-                  .map((telefon) => formatTlf(telefon.nummer))
-                  .join(", ") || "Mangler tlf"}
-              </strong>
-            </span>
+            <ShowEmailWithFallback epost={focusedRessurs.epost ?? ""} />
+            <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
 
             {uniqBy(
               focusedRessurs.koblinger,
@@ -126,3 +120,93 @@ export const FocusedRessursView = ({
     </div>
   );
 };
+
+function ShowEmailWithFallback({ epost }: { epost: string }) {
+  return (
+    <span>
+      E-post:{" "}
+      <b>
+        {epost ?? (
+          <InformationPopover
+            text="Kommer"
+            tooltipContent="E-post vil vises her 1-2 dager etter at identansvarlig/leder har fullført skjermbildet for on-boarding av ressursen i Identrutina (Remedy)."
+          />
+        )}
+      </b>
+    </span>
+  );
+}
+
+function ShowTlfWithFallback({ telefon }: { telefon: Telefon[] }) {
+  const formattedTlfNumbers = telefon
+    .map(({ nummer }) => formatTlf(nummer))
+    .join(", ");
+
+  return (
+    <span>
+      Tlf:{" "}
+      <b>
+        {formattedTlfNumbers || (
+          <InformationPopover
+            text="Kommer"
+            tooltipContent="Telefonnummet hentes fra mobilabonnmentet som er
+registrert på den ansatte hos telelevarandøren (Telenor).
+Ved registrering av abonnement tar det noen dager før det vises i NOM."
+          />
+        )}
+      </b>
+    </span>
+  );
+}
+
+function InformationPopover({
+  tooltipContent,
+  text,
+}: {
+  tooltipContent: string;
+  text: string;
+}) {
+  const buttonReference = useRef<HTMLButtonElement>(null);
+  const [openState, setOpenState] = useState(false);
+
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: var(--a-spacing-2);
+      `}
+    >
+      {text}
+      <Button
+        css={css`
+          &:hover {
+            svg {
+              color: var(--a-surface-action-hover);
+            }
+          }
+        `}
+        icon={<InformationFilled fontSize={24} />}
+        onClick={() => setOpenState(true)}
+        ref={buttonReference}
+        size="small"
+        variant="tertiary"
+      />
+
+      <Popover
+        anchorEl={buttonReference.current}
+        onClose={() => setOpenState(false)}
+        open={openState}
+      >
+        <Popover.Content
+          css={css`
+            max-width: 400px;
+            font-weight: normal;
+          `}
+        >
+          {tooltipContent}
+        </Popover.Content>
+      </Popover>
+    </span>
+  );
+}
