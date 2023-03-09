@@ -58,7 +58,7 @@ public class Unit4Client {
             return response;
         } catch (WebClientResponseException wce) {
             HttpStatus httpStatus = wce.getStatusCode();
-            log.debug("Error finding unit4 ressurs", wce);
+            log.error("Error finding unit4 ressurs", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 

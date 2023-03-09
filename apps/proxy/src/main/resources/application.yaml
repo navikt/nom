@@ -98,7 +98,6 @@ spring:
     activate:
       on-profile: prod & !dev
 
-
 DVH_BASE_URL: https://tdv-p.adeo.no
 APP_TEL_BASE_URL: "" # why empty?
 STS_BASEURL: https://security-token-service.nais.adeo.no
