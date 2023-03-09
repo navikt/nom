@@ -221,14 +221,12 @@ public class Unit4RessursDto {
                         .build()
 
                 // Flagg for å indikere at ressursen er opprettet av NOM
-/*
                 RelatedValue.builder()
                         .relationId("NOM")  // NOM: Begrep=AUTO_GEN_NOM, Beskrivelse=Generert av NOM
                         .relatedValue("1")  // 1: Generert av NOM
                         .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build()
-*/
         ).collect(Collectors.toList());
     }
 }
