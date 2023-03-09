@@ -104,7 +104,7 @@ public class Unit4RessursDto {
         String navident = additionalData.navident().orElseThrow(() -> new NoSuchElementException("Navident is missing from event"));
         String ressursNr = navident.substring(1);
 
-        String firstName = additionalData.folkeregistrertNavn().map(navn -> navn.fornavn() + Optional.ofNullable(navn.mellomnavn()).orElse(""))
+        String firstName = additionalData.folkeregistrertNavn().map(navn -> navn.fornavn() + (navn.mellomnavn() != null && !navn.mellomnavn().equals("") ? " " + navn.mellomnavn() : ""))
                 .orElseThrow(() -> new NoSuchElementException("FolkeregistrertNavn is missing from event"));
 
         String surName = additionalData.folkeregistrertNavn().map(FolkeregistrertNavn::etternavn)
