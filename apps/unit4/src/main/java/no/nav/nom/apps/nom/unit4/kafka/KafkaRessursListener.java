@@ -25,7 +25,6 @@ import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
 
 @Component
 @Slf4j
-@Profile("!prod")
 public class KafkaRessursListener {
 
     private final Unit4Client unit4Client;
