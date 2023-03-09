@@ -11,7 +11,7 @@ env:
   - name: LOGGING_CONFIG
     value: 'classpath:logback-nais.xml'
   - name: NOM_PROXY_BASEURL
-    value: https://nom-proxy_ILLEGAL.prod-fss-pub.nais.io
+    value: https://nom-proxy.prod-fss-pub.nais.io
   - name: NOM_PROXY_CLIENT_ID
     value: prod-fss.nom.nom-proxy
 inbound-rules:
