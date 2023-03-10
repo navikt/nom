@@ -4,7 +4,9 @@ import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
+import { apolloClient } from "~/api/apolloclient";
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
+import { HentHierarkiDocument } from "~/api/generated/graphql_generated";
 
 import { building, peopleFilledIcon } from "../../../components/Images";
 import UserImage from "../../../components/UserImage";
@@ -48,6 +50,16 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <Link
       css={hideLinkCss}
+      onMouseOver={() => {
+        apolloClient.query({
+          query: HentHierarkiDocument,
+          variables: {
+            agressoId: orgEnhet.agressoId,
+            orgNiv: orgEnhet.orgNiv,
+          },
+          fetchPolicy: "cache-first",
+        });
+      }}
       to={`/org/${orgEnhet.agressoId}/${orgEnhet.orgNiv}`}
     >
       <UnitContainerLink>

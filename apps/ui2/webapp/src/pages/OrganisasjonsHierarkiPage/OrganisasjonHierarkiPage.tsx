@@ -97,7 +97,6 @@ const OrganisasjonHierarkiPageInner = (properties: {
       navident: resourceId,
     },
     skip: !resourceId,
-    errorPolicy: "all",
   });
 
   const firstOverEnhet = (
@@ -220,7 +219,6 @@ function OrganisasjonsHierarkiPageOuter() {
       agressoId: agressoId ?? "",
       orgNiv: orgNiv ?? "",
     },
-    errorPolicy: "all",
   });
 
   return (

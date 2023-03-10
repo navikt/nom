@@ -1,10 +1,7 @@
 import { css } from "@emotion/react";
-import { Loader } from "@navikt/ds-react";
 import React, { useEffect } from "react";
 
 import { person, questionMarkIcon } from "./Images";
-
-const imageSource = (navident: string) => `/teamcat/resource/${navident}/photo`;
 
 type UserImageProperties = {
   navident?: string;
@@ -16,12 +13,10 @@ type UserImageProperties = {
 const UserImage = (properties: UserImageProperties) => {
   const { navident, size, altText, navn } = properties;
   const [image, setImage] = React.useState<string>();
-  const [loading, setLoading] = React.useState(true);
 
   useEffect(() => {
-    setLoading(true);
     if (navident) {
-      setImage(imageSource(navident));
+      setImage(`/teamcat/resource/${navident}/photo`);
     }
   }, [navident]);
 
@@ -32,22 +27,18 @@ const UserImage = (properties: UserImageProperties) => {
   `;
 
   if (!navident) {
-    return <img alt="manglende nav ident" css={STYLE} src={questionMarkIcon} />;
+    return <img alt="manglende navident" css={STYLE} src={questionMarkIcon} />;
   }
 
   return (
     <>
-      {loading && <Loader css={STYLE} />}
       <img
         alt={altText || "Fotografi av " + (navn || navident)}
         css={STYLE}
-        hidden={loading}
         onError={() => {
           setImage(person);
-          setLoading(false);
         }}
-        onLoad={() => setLoading(false)}
-        src={image}
+        src={image || person}
       />
     </>
   );

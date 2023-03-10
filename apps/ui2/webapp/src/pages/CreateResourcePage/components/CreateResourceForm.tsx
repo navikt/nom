@@ -52,7 +52,6 @@ export default function CreateResourceForm() {
 
   const hentPersonQuery = useHentPersonQuery({
     variables: { personident: personident ?? "" },
-    errorPolicy: "all",
   });
 
   const searchOrgenheterQuery = useSearchOrgenheterQuery({
@@ -64,7 +63,6 @@ export default function CreateResourceForm() {
         limit: ResultLimit.Unlimited,
       },
     },
-    errorPolicy: "all",
   });
 
   if (hentPersonQuery.loading || searchOrgenheterQuery.loading) {
