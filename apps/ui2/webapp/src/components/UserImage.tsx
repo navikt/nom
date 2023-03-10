@@ -7,11 +7,10 @@ type UserImageProperties = {
   navident?: string;
   navn?: string;
   size?: string;
-  altText?: string;
 };
 
 const UserImage = (properties: UserImageProperties) => {
-  const { navident, size, altText, navn } = properties;
+  const { navident, size, navn } = properties;
   const [image, setImage] = React.useState<string>();
 
   useEffect(() => {
@@ -33,8 +32,9 @@ const UserImage = (properties: UserImageProperties) => {
   return (
     <>
       <img
-        alt={altText || "Fotografi av " + (navn || navident)}
+        alt={"Fotografi av " + (navn || navident)}
         css={STYLE}
+        key={navident}
         onError={() => {
           setImage(person);
         }}
