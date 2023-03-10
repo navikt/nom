@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { person, questionMarkIcon } from "./Images";
 
@@ -11,10 +11,12 @@ type UserImageProperties = {
 
 const UserImage = (properties: UserImageProperties) => {
   const { navident, size, navn } = properties;
-  const [image, setImage] = React.useState<string>();
+  const [image, setImage] = useState<string>();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (navident) {
+      setIsLoaded(false);
       setImage(`/teamcat/resource/${navident}/photo`);
     }
   }, [navident]);
@@ -31,14 +33,14 @@ const UserImage = (properties: UserImageProperties) => {
 
   return (
     <>
+      {!isLoaded && <img alt="" css={STYLE} src={person} />}
       <img
         alt={"Fotografi av " + (navn || navident)}
         css={STYLE}
+        hidden={!isLoaded}
         key={navident}
-        onError={() => {
-          setImage(person);
-        }}
-        src={image || person}
+        onLoad={() => setIsLoaded(true)}
+        src={image}
       />
     </>
   );
