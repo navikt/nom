@@ -116,9 +116,11 @@ function CustomMenuList<
 export function SelectLayoutWrapper({
   label,
   children,
+  htmlFor,
   error,
 }: {
   label: string;
+  htmlFor: string;
   children: ReactNode;
   error?: FieldError;
 }) {
@@ -131,7 +133,7 @@ export function SelectLayoutWrapper({
         gap: var(--a-spacing-2);
       `}
     >
-      <Label>{label}</Label>
+      <Label htmlFor={htmlFor}>{label}</Label>
       {children}
       {error && <ErrorMessage>{error.message}</ErrorMessage>}
     </div>

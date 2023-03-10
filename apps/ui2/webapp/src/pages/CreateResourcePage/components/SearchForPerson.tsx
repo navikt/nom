@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { BodyShort, Heading, Search } from "@navikt/ds-react";
+import { Heading, Search } from "@navikt/ds-react";
 import { encode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
 import { Outlet, useNavigate, useParams } from "react-router";
@@ -50,41 +50,34 @@ export function SearchForPerson() {
           navigate(`/ressurs/create/${encode(values.personident ?? "")}`)
         )}
       >
-        <BodyShort size="medium">
-          Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret
-        </BodyShort>
-        <div
-          css={css(
-            css`
-              display: flex;
-              gap: var(--a-spacing-4);
-              margin-top: var(--a-spacing-4);
-            `
+        <Controller
+          control={control}
+          name="personident"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <Search
+              autoComplete="off"
+              css={css`
+                label {
+                  font-weight: var(--a-font-weight-regular);
+                }
+              `}
+              error={error?.message}
+              hideLabel={false}
+              label="Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret"
+              onChange={(newValue) => onChange(newValue)}
+              onClear={() => {
+                reset({ personident: "" });
+                navigate("/ressurs/create");
+              }}
+              type="number"
+              value={value}
+              variant="secondary"
+            />
           )}
-        >
-          <Controller
-            control={control}
-            name="personident"
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <Search
-                error={error?.message}
-                hideLabel={false}
-                label=""
-                onChange={(newValue) => onChange(newValue)}
-                onClear={() => {
-                  reset({ personident: "" });
-                  navigate("/ressurs/create");
-                }}
-                type="number"
-                value={value}
-                variant="secondary"
-              />
-            )}
-            rules={{
-              validate: (value) => value?.length === 11 || "Må være 11 siffer",
-            }}
-          />
-        </div>
+          rules={{
+            validate: (value) => value?.length === 11 || "Må være 11 siffer",
+          }}
+        />
       </form>
       <Outlet />
     </div>

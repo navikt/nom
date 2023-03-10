@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 import { createFilter } from "react-select";
@@ -51,7 +52,7 @@ function OrgEnhetSelect({
   const currentValue = options.find((option) => option.value === value);
 
   return (
-    <SelectLayoutWrapper error={error} label={label}>
+    <SelectLayoutWrapper error={error} htmlFor={label} label={label}>
       {/*
         Even though this is not an Async search, there is a good reason why this AsyncSearch> is used instead of BaseSelect.
         Presently there are over 1000 orgenheter. These are all fetched at once and input to this component simply filters that list.
@@ -62,6 +63,26 @@ function OrgEnhetSelect({
       */}
       <AsyncSearch
         components={{ Option: OptionWithValue }}
+        css={[
+          css`
+            &:hover {
+              border-color: var(
+                --ac-textfield-hover-border,
+                var(--a-border-action)
+              );
+            }
+          `,
+          error &&
+            css`
+              border-color: var(
+                --ac-textfield-error-border,
+                var(--a-border-danger)
+              );
+              box-shadow: 0 0 0 1px
+                var(--ac-textfield-error-border, var(--a-border-danger));
+            `,
+        ]}
+        inputId={label}
         loadOptions={search(options)}
         noOptionsMessage={({ inputValue }) =>
           inputValue.length === 0
