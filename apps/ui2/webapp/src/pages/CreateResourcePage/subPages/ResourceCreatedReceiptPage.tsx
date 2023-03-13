@@ -88,8 +88,7 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
           />
           <span>
             Opprettelse av ressurs er vellykket! NAV-ident {ressurs.navident} er
-            opprettet for {ressurs.visningsnavn}. Personens e-post og
-            telefonnummer vil være synlig om noen dager.
+            opprettet for {ressurs.visningsnavn}.
           </span>
           <CircleWithNumber>2</CircleWithNumber>
           <span>

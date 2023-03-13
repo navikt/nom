@@ -126,7 +126,7 @@ function ShowEmailWithFallback({ epost }: { epost: string }) {
     <span>
       E-post:{" "}
       <b>
-        {epost ?? (
+        {epost || (
           <InformationPopover
             text="Kommer"
             tooltipContent="E-post vil vises her 1-2 dager etter at identansvarlig/leder har fullført skjermbildet for on-boarding av ressursen i Identrutina (Remedy)."
