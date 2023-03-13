@@ -1,5 +1,4 @@
 import { css } from "@emotion/react";
-import axios from "axios";
 import React from "react";
 import { useQuery } from "react-query";
 
@@ -14,9 +13,15 @@ type UserImageProperties = {
 const UserImage = (properties: UserImageProperties) => {
   const { navident, size, navn } = properties;
 
-  const a = useQuery({
+  const imageQuery = useQuery({
     queryKey: ["PHOTO", navident],
-    queryFn: () => axios.get(`/teamcat/resource/${navident}/photo`),
+    queryFn: async () => {
+      const response = await fetch(
+        new Request(`/teamcat/resource/${navident}/photo`)
+      );
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    },
     enabled: !!navident,
     staleTime: Number.POSITIVE_INFINITY,
     cacheTime: Number.POSITIVE_INFINITY,
@@ -33,18 +38,17 @@ const UserImage = (properties: UserImageProperties) => {
     return <img alt="manglende navident" css={STYLE} src={questionMarkIcon} />;
   }
 
-  return (
-    <>
-      {!a.isSuccess && <img alt="" css={STYLE} src={person} />}
+  if (imageQuery.isSuccess) {
+    return (
       <img
         alt={"Fotografi av " + (navn || navident)}
         css={STYLE}
-        hidden={!a.isSuccess}
-        key={navident}
-        src={a.data?.data}
+        src={imageQuery.data}
       />
-    </>
-  );
+    );
+  }
+
+  return <img alt="" css={STYLE} src={person} />;
 };
 
 export default UserImage;
