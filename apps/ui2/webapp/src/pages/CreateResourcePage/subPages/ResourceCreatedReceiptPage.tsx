@@ -87,8 +87,8 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
             `}
           />
           <span>
-            Opprettelse av ressurs er vellykket! NAV-ident {ressurs.navident} er
-            opprettet for {ressurs.visningsnavn}.
+            Opprettelse av ressurs er vellykket! NAV-ident{" "}
+            <b>{ressurs.navident}</b> er opprettet for {ressurs.visningsnavn}.
           </span>
           <CircleWithNumber>2</CircleWithNumber>
           <span>
@@ -156,6 +156,7 @@ function CircleWithNumber({ children }: { children: ReactNode }) {
     <div
       css={css`
         border: 2px solid var(--a-lightblue-800);
+        color: var(--nom-primary);
         display: flex;
         align-items: center;
         justify-content: center;

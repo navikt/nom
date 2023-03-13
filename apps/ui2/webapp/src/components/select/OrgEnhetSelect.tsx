@@ -90,7 +90,7 @@ function OrgEnhetSelect({
             : `Fant ingen resultater for "${inputValue}"`
         }
         onChange={(option) => onChange(option?.value)}
-        placeholder="Søk etter enhetsnavn eller ID"
+        placeholder="Søk etter navn på org.enhet"
         value={currentValue ?? null}
       />
     </SelectLayoutWrapper>
