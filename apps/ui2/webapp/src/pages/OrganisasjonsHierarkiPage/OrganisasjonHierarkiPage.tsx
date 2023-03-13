@@ -221,6 +221,31 @@ function OrganisasjonsHierarkiPageOuter() {
     },
   });
 
+  let innerContent;
+  if (hentHierarkiQuery.data) {
+    innerContent = (
+      <OrganisasjonHierarkiPageInner data={hentHierarkiQuery.data} />
+    );
+  } else if (hentHierarkiQuery.loading) {
+    innerContent = (
+      <div
+        css={css`
+          justify-self: center;
+        `}
+      >
+        <Loader size="3xlarge" variant="neutral" />
+      </div>
+    );
+  } else if (hentHierarkiQuery.error) {
+    innerContent = (
+      <Alert variant="error">
+        <Heading level="3" size="small">
+          Kunne ikke hente hierarki
+        </Heading>
+      </Alert>
+    );
+  }
+
   return (
     <>
       <PageBanner text="NAV organisasjon" />
@@ -230,25 +255,7 @@ function OrganisasjonsHierarkiPageOuter() {
             display: grid;
           `}
         >
-          {hentHierarkiQuery.loading && !hentHierarkiQuery.data ? (
-            <div
-              css={css`
-                justify-self: center;
-              `}
-            >
-              <Loader size="3xlarge" variant="neutral" />
-            </div>
-          ) : undefined}
-          {hentHierarkiQuery.error && (
-            <Alert variant="error">
-              <Heading level="3" size="small">
-                Kunne ikke hente hierarki
-              </Heading>
-            </Alert>
-          )}
-          {hentHierarkiQuery.data && (
-            <OrganisasjonHierarkiPageInner data={hentHierarkiQuery.data} />
-          )}
+          {innerContent}
         </div>
       </ContentWrapper>
     </>
