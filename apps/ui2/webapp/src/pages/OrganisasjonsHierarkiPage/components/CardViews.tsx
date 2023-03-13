@@ -66,6 +66,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
             queryFn: () => getPhotoQuery.queryFn(navident as string),
             staleTime: getPhotoQuery.staleTime,
             cacheTime: getPhotoQuery.cacheTime,
+            retry: false,
           });
         }
       }
