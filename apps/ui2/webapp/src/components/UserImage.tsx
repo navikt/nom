@@ -10,21 +10,12 @@ type UserImageProperties = {
   size?: string;
 };
 
-const UserImage = (properties: UserImageProperties) => {
+export function UserImage(properties: UserImageProperties) {
   const { navident, size, navn } = properties;
 
   const imageQuery = useQuery({
-    queryKey: ["PHOTO", navident],
-    queryFn: async () => {
-      const response = await fetch(
-        new Request(`/teamcat/resource/${navident}/photo`)
-      );
-      if (response.status !== 200) {
-        throw new Error("Failed to load image");
-      }
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
-    },
+    queryKey: getPhotoQuery.queryKey(navident as string),
+    queryFn: () => getPhotoQuery.queryFn(navident as string),
     enabled: !!navident,
     staleTime: Number.POSITIVE_INFINITY,
     cacheTime: Number.POSITIVE_INFINITY,
@@ -48,6 +39,20 @@ const UserImage = (properties: UserImageProperties) => {
   }
 
   return <img alt="" css={STYLE} src={person} />;
+}
+
+export const getPhotoQuery = {
+  queryKey: (navident: string) => ["PHOTO", navident],
+  queryFn: fetchPhoto,
 };
 
-export default UserImage;
+async function fetchPhoto(navident: string) {
+  const response = await fetch(
+    new Request(`/teamcat/resource/${navident}/photo`)
+  );
+  if (response.status !== 200) {
+    throw new Error("Failed to load image");
+  }
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}

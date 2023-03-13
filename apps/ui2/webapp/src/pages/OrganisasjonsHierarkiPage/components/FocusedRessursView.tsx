@@ -7,9 +7,9 @@ import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
+import { UserImage } from "~/components/UserImage";
 import { formatTlf } from "~/utils";
 
-import UserImage from "../../../components/UserImage";
 import { SektorNameMapping } from "../../CreateResourcePage/components/CreateResourceForm";
 
 export const FocusedRessursView = ({

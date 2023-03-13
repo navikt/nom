@@ -5,9 +5,9 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
+import { UserImage } from "~/components/UserImage";
 
 import { building2 } from "../../../components/Images";
-import UserImage from "../../../components/UserImage";
 import { HorizontalEdge } from "./CardViews";
 
 const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {

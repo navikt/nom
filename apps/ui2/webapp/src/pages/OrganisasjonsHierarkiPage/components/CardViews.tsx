@@ -2,14 +2,14 @@ import { css } from "@emotion/react";
 import { Next } from "@navikt/ds-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
+import { useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
 
-import { apolloClient } from "~/api/apolloclient";
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
-import { HentHierarkiDocument } from "~/api/generated/graphql_generated";
+import * as Gq from "~/api/generated/graphql_generated";
+import { getPhotoQuery, UserImage } from "~/components/UserImage";
 
 import { building, peopleFilledIcon } from "../../../components/Images";
-import UserImage from "../../../components/UserImage";
 
 export function DynamicColumnContainer({
   children,
@@ -42,24 +42,37 @@ export function DynamicColumnContainer({
 }
 
 export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const queryClient = useQueryClient();
   const fornavnAndEtternavnForImg =
     orgEnhet.leder[0]?.ressurs.visningsnavn ?? "";
 
   const navidentForImg = orgEnhet.leder[0]?.ressurs.navident;
 
+  // Optimistically fetch orgEnhet this view links to.
+  Gq.useHentHierarkiQuery({
+    variables: {
+      agressoId: orgEnhet.agressoId,
+      orgNiv: orgEnhet.orgNiv,
+    },
+    fetchPolicy: "cache-first",
+    // Optimistically fetch all photos required for the page this component links to.
+    onCompleted: (data) => {
+      for (const underEnhet of data.enhetsKoblinger?.underenheter ?? []) {
+        const navident =
+          underEnhet.organisasjonsenhet.leder[0].ressurs.navident;
+        if (navident) {
+          queryClient.prefetchQuery({
+            queryKey: getPhotoQuery.queryKey(navident as string),
+            queryFn: () => getPhotoQuery.queryFn(navident as string),
+          });
+        }
+      }
+    },
+  });
+
   return (
     <Link
       css={hideLinkCss}
-      onMouseOver={() => {
-        apolloClient.query({
-          query: HentHierarkiDocument,
-          variables: {
-            agressoId: orgEnhet.agressoId,
-            orgNiv: orgEnhet.orgNiv,
-          },
-          fetchPolicy: "cache-first",
-        });
-      }}
       to={`/org/${orgEnhet.agressoId}/${orgEnhet.orgNiv}`}
     >
       <UnitContainerLink>
