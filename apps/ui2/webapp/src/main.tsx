@@ -6,6 +6,7 @@ import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/react";
 import { Loader, Modal } from "@navikt/ds-react";
 import React from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter } from "react-router-dom";
 
 import { apolloClient } from "./api/apolloclient";
@@ -24,6 +25,8 @@ const layoutStyle = css`
   width: 100%;
   display: flex;
 `;
+
+const queryClient = new QueryClient();
 
 export enum UserRole {
   ROLE_NONE = "ROLE_NONE",
@@ -65,18 +68,20 @@ export function Main() {
 
   return (
     <BrowserRouter>
-      <ApolloProvider client={apolloClient}>
-        <UserSessionContext.Provider value={sessionInfo}>
-          <NavHeader />
-          <PilotBanner />
-          <div css={layoutStyle}>
-            <div css={css({ width: "100%" })}>
-              <AppRoutes />
+      <QueryClientProvider client={queryClient}>
+        <ApolloProvider client={apolloClient}>
+          <UserSessionContext.Provider value={sessionInfo}>
+            <NavHeader />
+            <PilotBanner />
+            <div css={layoutStyle}>
+              <div css={css({ width: "100%" })}>
+                <AppRoutes />
+              </div>
             </div>
-          </div>
-          <Footer />
-        </UserSessionContext.Provider>
-      </ApolloProvider>
+            <Footer />
+          </UserSessionContext.Provider>
+        </ApolloProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }

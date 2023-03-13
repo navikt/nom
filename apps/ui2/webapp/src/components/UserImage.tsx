@@ -1,5 +1,7 @@
 import { css } from "@emotion/react";
-import React, { useEffect, useState } from "react";
+import axios from "axios";
+import React from "react";
+import { useQuery } from "react-query";
 
 import { person, questionMarkIcon } from "./Images";
 
@@ -11,15 +13,15 @@ type UserImageProperties = {
 
 const UserImage = (properties: UserImageProperties) => {
   const { navident, size, navn } = properties;
-  const [image, setImage] = useState<string>();
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    if (navident) {
-      setIsLoaded(false);
-      setImage(`/teamcat/resource/${navident}/photo`);
-    }
-  }, [navident]);
+  const a = useQuery({
+    queryKey: ["PHOTO", navident],
+    queryFn: () => axios.get(`/teamcat/resource/${navident}/photo`),
+    enabled: !!navident,
+    staleTime: Number.POSITIVE_INFINITY,
+    cacheTime: Number.POSITIVE_INFINITY,
+    retry: false,
+  });
 
   const STYLE = css`
     height: ${size || "65px"};
@@ -33,14 +35,13 @@ const UserImage = (properties: UserImageProperties) => {
 
   return (
     <>
-      {!isLoaded && <img alt="" css={STYLE} src={person} />}
+      {!a.isSuccess && <img alt="" css={STYLE} src={person} />}
       <img
         alt={"Fotografi av " + (navn || navident)}
         css={STYLE}
-        hidden={!isLoaded}
+        hidden={!a.isSuccess}
         key={navident}
-        onLoad={() => setIsLoaded(true)}
-        src={image}
+        src={a.data?.data}
       />
     </>
   );
