@@ -17,8 +17,8 @@ export function UserImage(properties: UserImageProperties) {
     queryKey: getPhotoQuery.queryKey(navident as string),
     queryFn: () => getPhotoQuery.queryFn(navident as string),
     enabled: !!navident,
-    staleTime: Number.POSITIVE_INFINITY,
-    cacheTime: Number.POSITIVE_INFINITY,
+    staleTime: getPhotoQuery.staleTime,
+    cacheTime: getPhotoQuery.cacheTime,
     retry: false,
   });
 
@@ -44,6 +44,8 @@ export function UserImage(properties: UserImageProperties) {
 export const getPhotoQuery = {
   queryKey: (navident: string) => ["PHOTO", navident],
   queryFn: fetchPhoto,
+  staleTime: Number.POSITIVE_INFINITY,
+  cacheTime: Number.POSITIVE_INFINITY,
 };
 
 async function fetchPhoto(navident: string) {

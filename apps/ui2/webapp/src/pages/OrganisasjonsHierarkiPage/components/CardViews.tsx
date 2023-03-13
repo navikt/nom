@@ -64,6 +64,8 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           queryClient.prefetchQuery({
             queryKey: getPhotoQuery.queryKey(navident as string),
             queryFn: () => getPhotoQuery.queryFn(navident as string),
+            staleTime: getPhotoQuery.staleTime,
+            cacheTime: getPhotoQuery.cacheTime,
           });
         }
       }
@@ -77,7 +79,6 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     >
       <UnitContainerLink>
         <VerticalEdge>
-          {/*<Building />*/}
           <img alt={"Enhet"} src={building} />
         </VerticalEdge>
         <div
