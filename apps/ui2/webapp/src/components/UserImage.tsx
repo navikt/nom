@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { person, questionMarkIcon } from "./Images";
+import { person } from "./Images";
 
 type UserImageProperties = {
   navident?: string;
@@ -19,6 +19,9 @@ const UserImage = (properties: UserImageProperties) => {
       const response = await fetch(
         new Request(`/teamcat/resource/${navident}/photo`)
       );
+      if (response.status !== 200) {
+        throw new Error("Failed to load image");
+      }
       const blob = await response.blob();
       return URL.createObjectURL(blob);
     },
@@ -33,10 +36,6 @@ const UserImage = (properties: UserImageProperties) => {
     width: ${size || "65px"};
     border-radius: 100%;
   `;
-
-  if (!navident) {
-    return <img alt="manglende navident" css={STYLE} src={questionMarkIcon} />;
-  }
 
   if (imageQuery.isSuccess) {
     return (
