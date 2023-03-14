@@ -140,6 +140,12 @@ spec:
         - application: oh-ressurs-behandler
           namespace: oppgavehandtering
           cluster: dev-gcp
+        - application: melosys
+          namespace: teammelosys
+          cluster: dev-fss
+        - application: melosys-q1
+          namespace: teammelosys
+          cluster: dev-fss
     outbound:
       rules:
         - application: nav-ident

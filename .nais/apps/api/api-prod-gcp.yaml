@@ -115,6 +115,9 @@ spec:
         - application: nks-statistikk
           namespace: nks-statistikk
           cluster: knada
+        - application: melosys
+          namespace: teammelosys
+          cluster: prod-fss
     outbound:
       rules:
         - application: nav-ident
