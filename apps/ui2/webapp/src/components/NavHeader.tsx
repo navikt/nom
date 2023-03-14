@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
 import { PeopleFilled } from "@navikt/ds-icons";
-import { Link } from "react-router-dom";
+import { Link } from "@navikt/ds-react";
+import { Link as ReactRouterLink } from "react-router-dom";
 
-import { UserRole, useSessionContext } from "~/main";
+import { useGetSession, useHasWriteAccess } from "~/api/useGetSession";
 import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
 import { BurgerMenu } from "./BurgerMenu";
@@ -51,13 +52,13 @@ const verticallyCenter = css({
 });
 
 const NavHeader = () => {
-  const ses = useSessionContext();
-  const hasWrite = ses.roles.includes(UserRole.ROLE_WRITE);
+  const session = useGetSession();
+  const hasWrite = useHasWriteAccess();
 
   return (
     <div css={outerDiv}>
       <div css={innerDiv}>
-        <Link css={verticallyCenter} title={"Hjem"} to="/">
+        <Link as={ReactRouterLink} css={verticallyCenter} title={"Hjem"} to="/">
           <img alt="Forside NOM" src={nomLogoCircle} />
         </Link>
         <SearchBar />
@@ -74,7 +75,7 @@ const NavHeader = () => {
               height: 32px;
             `}
           />
-          <span css={userText}>{ses.navident}</span>
+          <span css={userText}>{session.data?.navident}</span>
           {hasWrite && <BurgerMenu />}
         </span>
       </div>

@@ -3,8 +3,8 @@ import { SuccessStroke } from "@navikt/ds-icons";
 import type { ReactNode } from "react";
 import { Outlet, Route, Routes, useMatch } from "react-router";
 
+import { useHasWriteAccess } from "~/api/useGetSession";
 import { PageBanner } from "~/components/PageBanner";
-import { UserRole, useSessionContext } from "~/main";
 
 import ContentWrapper from "../../components/ContentWrapper";
 import { NotAuthorizedPage } from "../NotAuthorizedPage";
@@ -13,8 +13,7 @@ import { SearchForPerson } from "./components/SearchForPerson";
 import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
 
 export function CreateResourcePageRoutes() {
-  const ses = useSessionContext();
-  const hasWrite = ses.roles.includes(UserRole.ROLE_WRITE);
+  const hasWrite = useHasWriteAccess();
 
   return hasWrite ? (
     <Routes>

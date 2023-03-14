@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { Next } from "@navikt/ds-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import * as Gq from "~/api/generated/graphql_generated";
@@ -56,8 +56,11 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   });
 
   return (
-    <Link
-      css={hideLinkCss}
+    <ReactRouterLink
+      css={css`
+        text-decoration: none;
+        color: var(--a-gray-900);
+      `}
       to={`/org/${orgEnhet.agressoId}/${orgEnhet.orgNiv}`}
     >
       <UnitContainerLink>
@@ -79,16 +82,21 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         </div>
         <UserImage navident={navidentForImg} navn={fornavnAndEtternavnForImg} />
       </UnitContainerLink>
-    </Link>
+    </ReactRouterLink>
   );
 }
 
 export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <Link css={hideLinkCss} key={ressurs.navident} to={ressurs.navident}>
+    <ReactRouterLink
+      css={css`
+        text-decoration: none;
+        color: var(--a-gray-900);
+      `}
+      to={ressurs.navident}
+    >
       <UnitContainerLink>
         <VerticalEdge>
-          {/*<PeopleFilled color="white" />*/}
           <img alt={"Person"} src={peopleFilledIcon} />
         </VerticalEdge>
         <Heading
@@ -102,7 +110,7 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
         </Heading>
         <div />
       </UnitContainerLink>
-    </Link>
+    </ReactRouterLink>
   );
 }
 
@@ -110,6 +118,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
   return (
     <div
       css={css`
+        width: 100%;
         height: 100%;
         border-radius: 5px;
         border: 1px solid var(--a-gray-400);
@@ -173,8 +182,3 @@ export function OverEnheterDivider() {
     />
   );
 }
-
-const hideLinkCss = css`
-  text-decoration: none;
-  color: inherit;
-`;

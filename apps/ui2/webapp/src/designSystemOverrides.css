@@ -18,14 +18,5 @@
 
     /*--ac prefixes overrides tokens for specific components*/
     --ac-dropdown-item-text: var(--a-text-default);
-}
-
-
-a {
-    font-weight: 600;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
+    --ac-link-text: var(--a-gray-900);
 }

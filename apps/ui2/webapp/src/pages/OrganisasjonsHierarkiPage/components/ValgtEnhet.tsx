@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
-import { Heading } from "@navikt/ds-react";
+import { Heading, Link } from "@navikt/ds-react";
 import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
@@ -29,9 +29,7 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
 
   return (
     <Link
-      css={css`
-        color: var(--a-gray-900);
-      `}
+      as={ReactRouterLink}
       ref={reference}
       to={`/org/${agressoId}/${orgNiv}/${navident}`}
     >

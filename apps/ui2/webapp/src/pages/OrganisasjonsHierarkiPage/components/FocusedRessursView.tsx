@@ -1,10 +1,10 @@
 import { css } from "@emotion/react";
 import { InformationFilled } from "@navikt/ds-icons";
-import { Button, Heading, Popover } from "@navikt/ds-react";
+import { Button, Heading, Link, Popover } from "@navikt/ds-react";
 import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
@@ -84,7 +84,7 @@ export const FocusedRessursView = ({
                   key={agressoId}
                 >
                   Org.enhet:{" "}
-                  <Link to={`/org/${agressoId}/${orgNiv}`}>
+                  <Link as={ReactRouterLink} to={`/org/${agressoId}/${orgNiv}`}>
                     <strong>{navn}</strong>
                   </Link>
                 </span>
@@ -102,7 +102,10 @@ export const FocusedRessursView = ({
                   key={navident}
                 >
                   Leder:{" "}
-                  <Link to={`/org/${agressoId}/${orgNiv}/${navident}`}>
+                  <Link
+                    as={ReactRouterLink}
+                    to={`/org/${agressoId}/${orgNiv}/${navident}`}
+                  >
                     <strong>{visningsnavn ?? "Uten navn"}</strong>
                   </Link>
                 </span>

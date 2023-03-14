@@ -606,5 +606,10 @@ query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
         id,
         agressoId,
         navn
+        leder {
+            ressurs {
+                visningsnavn
+            }
+        }
     }
 }

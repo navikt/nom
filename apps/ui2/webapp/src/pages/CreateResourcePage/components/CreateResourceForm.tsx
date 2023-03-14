@@ -150,6 +150,9 @@ function CreateResourceFormInner({
     formState: { errors },
   } = methods;
 
+  const selectedOrgEnhet = orgEnheter.find(
+    (orgEnhet) => orgEnhet.id === watch("orgEnhetId")
+  );
   const startDatePicker = UNSAFE_useDatepicker({
     onDateChange: (date) =>
       setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
@@ -235,6 +238,12 @@ function CreateResourceFormInner({
         </RadioGroup>
 
         <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
+        {selectedOrgEnhet ? (
+          <span>
+            Leder for org.enhet:{" "}
+            {selectedOrgEnhet.leder[0]?.ressurs.visningsnavn}
+          </span>
+        ) : undefined}
 
         <UNSAFE_DatePicker {...startDatePicker.datepickerProps}>
           <UNSAFE_DatePicker.Input

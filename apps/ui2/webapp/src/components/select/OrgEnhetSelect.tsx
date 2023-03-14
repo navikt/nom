@@ -1,12 +1,13 @@
 import { css } from "@emotion/react";
+import { Label } from "@navikt/ds-react";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
-import { createFilter } from "react-select";
+import type { OptionProps } from "react-select";
+import { components, createFilter } from "react-select";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
 
 import { AsyncSearch, SelectLayoutWrapper } from "./CustomSelectComponents";
-import { OptionWithValue } from "./OptionWithValue";
 
 export function OrgEnhetSelectFormPart({
   orgEnheter,
@@ -48,6 +49,7 @@ function OrgEnhetSelect({
   const options = orgEnheter.map((orgEnhet) => ({
     value: orgEnhet.id,
     label: orgEnhet.navn,
+    agressoId: orgEnhet.agressoId,
   }));
   const currentValue = options.find((option) => option.value === value);
 
@@ -62,7 +64,7 @@ function OrgEnhetSelect({
         By instead using the AsyncSearch we can get better control over when the filter function is called to dramatically improve performance.
       */}
       <AsyncSearch
-        components={{ Option: OptionWithValue }}
+        components={{ Option: OptionWithIds }}
         css={[
           css`
             &:hover {
@@ -98,7 +100,7 @@ function OrgEnhetSelect({
 }
 
 const search =
-  (options: { value: string; label: string }[]) =>
+  (options: { value: string; label: string; agressoId: string }[]) =>
   async (searchTerm: string) => {
     const filterFunction = createFilter();
 
@@ -107,3 +109,24 @@ const search =
       filterFunction({ ...option, data: {} }, searchTerm)
     );
   };
+
+type Option = { value: string; label: string; agressoId: string };
+
+function OptionWithIds(properties: OptionProps<Option, false>) {
+  return (
+    <components.Option {...properties}>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+          gap: var(--a-spacing-4);
+        `}
+      >
+        <span>{properties.data.label}</span>
+        <Label size="small">
+          {properties.data.value} ({properties.data.agressoId})
+        </Label>
+      </div>
+    </components.Option>
+  );
+}

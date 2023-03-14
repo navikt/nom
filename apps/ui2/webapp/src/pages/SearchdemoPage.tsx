@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
-import { Switch } from "@navikt/ds-react";
+import { Link, Switch } from "@navikt/ds-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 type SearchResultRow =
   | {
@@ -166,7 +166,9 @@ function SearchdemoPage() {
               <>
                 <span>{r.kind}</span>
                 <span>{r.navident}</span>
-                <Link to={r.urlPath}>{r.navn}</Link>
+                <Link as={ReactRouterLink} to={r.urlPath}>
+                  {r.navn}
+                </Link>
               </>
             )}
             {r.kind === "orgenhet" && (
@@ -175,7 +177,9 @@ function SearchdemoPage() {
                 <span>
                   {r.orgNiv}_{r.agressoId}
                 </span>
-                <Link to={r.urlPath}>{r.navn}</Link>
+                <Link as={ReactRouterLink} to={r.urlPath}>
+                  {r.navn}
+                </Link>
               </>
             )}
           </>

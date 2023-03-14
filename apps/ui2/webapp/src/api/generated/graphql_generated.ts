@@ -499,7 +499,7 @@ export type SearchOrgenheterQueryVariables = Exact<{
 }>;
 
 
-export type SearchOrgenheterQuery = { __typename?: 'Query', searchOrgEnhet: Array<{ __typename?: 'OrgEnhet', id: string, agressoId: string, navn: string }> };
+export type SearchOrgenheterQuery = { __typename?: 'Query', searchOrgEnhet: Array<{ __typename?: 'OrgEnhet', id: string, agressoId: string, navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null } }> }> };
 
 
 
@@ -1890,6 +1890,11 @@ export const SearchOrgenheterDocument = gql`
     id
     agressoId
     navn
+    leder {
+      ressurs {
+        visningsnavn
+      }
+    }
   }
 }
     `;
