@@ -38,6 +38,7 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(e -> e.getAgressoId() + "" + e.getOrgNiv(), Function.identity()));
 
+        log.debug("saveOrgTilknyninger - cachedEnehter for 8435000ORGENHET is {}-{}", cachedEnheter.get("8435000ORGENHET").getId(), cachedEnheter.get("8435000ORGENHET").getNavn());
         final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
         final var orgenhetMissing = new LinkedList<Orgtilknytning>();
         final var ressursMissing = new LinkedList<Orgtilknytning>();
