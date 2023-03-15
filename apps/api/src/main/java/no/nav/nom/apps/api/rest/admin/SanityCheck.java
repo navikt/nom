@@ -190,7 +190,6 @@ public class SanityCheck {
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
         List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
 
-
         ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( r ->
             {
                 result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + " => ");
@@ -210,6 +209,34 @@ public class SanityCheck {
 
         result.append("\n");
         uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( s -> result.append(s + "\n"));
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "List tilknytninger med gyldighet utover enhetens gyldighetsperiode",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listTilkoblingerUtoverOgEnhetGyldighetPeriode")
+    public String listTilkoblingerUtoverOgEnhetGyldighetPeriode() {
+        StringBuffer result = new StringBuffer();
+
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+        List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
+
+        aktiveTilknytningerUtoverEnhetPeriode.stream().forEach( t -> {
+            var oe = orgenhetService.getById(t.getOrgEnhetId()).get();
+            result.append(t.getNavIdent() + ";" + t.getUniqueAgressoId() + ";" + t.getOrgEnhetId() + ";" + t.getGyldigFom() + ";" + (t.getGyldigTom()
+                .isPresent() ? t.getGyldigTom().get() : "") +
+                ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n");
+        });
 
         return result.toString();
     }
@@ -296,11 +323,14 @@ public class SanityCheck {
         List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
 //        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
 
+        List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
+
         result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
         result.append("   Aktive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
         result.append("   Ressurser med aktive orgtilknytninger: %s\n".formatted(ressurserMedAktiveTilknytninger.size()));
         result.append("   Ressurser uten aktive orgtilknytninger: %s\n".formatted(ressurserUtenAktiveTilknytninger.size()));
         result.append("   Ressurser med aktive orgtilknytninger for enhet om er inaktiv eller uten organisering: %s\n".formatted(ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.size()));
+        result.append("   Ressurser med tilknytninger i periode utover enhetens gyldighet: %s\n".formatted(aktiveTilknytningerUtoverEnhetPeriode.size()));
 //        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
 
         log.info("Total resultat:\n{}", result);
@@ -341,6 +371,21 @@ public class SanityCheck {
                 o.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
                 (o.getGyldigTom() == null || o.getGyldigTom().isAfter(LocalDate.now()))
         ).toList();
+    }
+
+
+    private List<DvhOrgtilknytning> tilknytningerUtoverEnhetPeriode(List<DvhOrgtilknytning> aktiveTilknytninger) {
+        return aktiveTilknytninger.stream()
+            .filter( t -> {
+                var orgEnhet = orgenhetService.getById(t.getOrgEnhetId());
+                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.getGyldigFom())) {
+                    return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
+                }
+                if (t.getGyldigTom().isPresent() && orgEnhet.get().getGyldigFom().isAfter(t.getGyldigTom().get())) {
+                    return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
+                }
+                return false;
+            } ).toList();
     }
 
     public List<String> uniqueAgressoIdForOverEnhet(List<DvhOrganisering> organiseringer) {

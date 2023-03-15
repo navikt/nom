@@ -47,7 +47,7 @@ public class DvhService {
 
             orgenhetService.getAllEnheter().stream()
                 .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv()))
-                .get("8435000ORGENHET").stream().forEach(e -> log.info("{} {} {} {} {}", e.getId(), e.getUniqueAgressoId(), e.getNavn(), e.getGyldigFom(), e.getGyldigTom()));
+                .get("8435000ORGENHET").forEach(e -> log.info("{} {} {} {} {}", e.getId(), e.getUniqueAgressoId(), e.getNavn(), e.getGyldigFom(), e.getGyldigTom()));
         }
 
         final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
