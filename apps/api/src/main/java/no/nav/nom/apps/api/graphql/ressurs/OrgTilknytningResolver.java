@@ -34,26 +34,18 @@ public class OrgTilknytningResolver {
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
-        var navidenter = ressurser.stream().map(Ressurs::getNavIdent).collect(toSet());
-        var koblingerContext = orgtilknytningService.getKoblingerByNavidenter(navidenter, it -> it).values().stream().flatMap(Collection::stream).collect(toSet());
-        var agressoIdSet = koblingerContext.stream().map(kob -> new IOrgenhet.AgressoIdCombo(kob.getAgressoId(), kob.getOrgNiv())).collect(toSet());
-        var orgEnheterContext = orgenhetService.findEnheterByAgressoIdConcatOrgnivIn(agressoIdSet);
-
         return ressurser.stream()
                 .collect(toMap(
                         Function.identity(),
                         ressurs -> orgtilknytningService.getKoblingerByNavIdent(ressurs.getNavIdent())
                                 .stream()
-                                .map(kobling -> this.fromDvhKobling(kobling, orgEnheterContext))
+                                .map(kobling -> this.fromDvhKobling(kobling))
                                 .toList()
                 ));
     }
 
-    private RessursOrgTilknytning fromDvhKobling(Orgtilknytning orgtilknytning, List<IOrgenhet> orgenhetContext) {
-        final var orgenhet = orgenhetContext.stream()
-                .filter(oe -> oe.getOrgNiv().equals(orgtilknytning.getOrgNiv()) && oe.getAgressoId().equals(orgtilknytning.getAgressoId()))
-                .findFirst()
-                .get();
+    private RessursOrgTilknytning fromDvhKobling(Orgtilknytning orgtilknytning) {
+        final var orgenhet = orgenhetService.getById(orgtilknytning.getOrgEnhetId()).get();
         final var orgEnhetGqlResponse = OrgEnhetResolver.convertToOrgEnhet(orgenhet);
 
         return RessursOrgTilknytning.builder()

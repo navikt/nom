@@ -10,6 +10,8 @@ public interface Orgtilknytning {
 
     String getOrgenhetNavn();
 
+    String getOrgEnhetId();
+
     String getNavIdent();
 
     LocalDate getGyldigFom();
