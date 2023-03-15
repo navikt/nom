@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -74,6 +75,9 @@ public abstract class TestBase {
 
     @Autowired
     protected OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    protected RessursStateRepository ressursStateRepository;
 
     @Autowired
     protected DvhOrgtilknytningMockUtils dvhOrgtilknytningMockUtils;

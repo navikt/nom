@@ -38,8 +38,15 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(e -> e.getAgressoId() + "" + e.getOrgNiv(), Function.identity()));
 
-        if (cachedEnheter.containsKey("8435000ORGENHET"))
-            log.debug("saveOrgTilknyninger - cachedEnehter for 8435000ORGENHET is {}-{}", cachedEnheter.get("8435000ORGENHET").getId(), cachedEnheter.get("8435000ORGENHET").getNavn());
+        if (cachedEnheter.containsKey("8435000ORGENHET")) {
+            log.info(
+                "saveOrgTilknyninger - cachedEnehter for 8435000ORGENHET is {}-{}",
+                cachedEnheter.get("8435000ORGENHET").getId(),
+                cachedEnheter.get("8435000ORGENHET").getNavn()
+            );
+
+            orgenhetService.getAllEnheter().stream().filter( e -> (e.getAgressoId() + "" + e.getOrgNiv()).equals("8435000ORGENHET")).forEach(e -> log.info("{} {} {} {} {}", e.getId(), e.getUniqueAgressoId(), e.getNavn(), e.getGyldigFom(), e.getGyldigTom()));
+        }
 
         final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
         final var orgenhetMissing = new LinkedList<Orgtilknytning>();
