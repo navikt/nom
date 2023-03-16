@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Alert } from "@navikt/ds-react";
+import { Alert, Link } from "@navikt/ds-react";
 import { useParams } from "react-router";
 import { useLocation } from "react-router-dom";
 
@@ -33,8 +33,12 @@ export const ResourceView = () => {
           <>
             {state?.alreadyExists ? (
               <Alert variant="info">
-                Ressurs finnes allerede i NAV. Endringer kan gjøres i Remedy og
-                Unit4
+                Ressurs finnes allerede i NOM. Statlige ressurser må også
+                etableres i{" "}
+                <Link href="https://agresso.adeo.no/agresso/">Unit4</Link>.
+                Tilganger tildeles i identrutina i{" "}
+                <Link href="https://it-hjelpa.adeo.no/arsys/home">Remedy</Link>{" "}
+                for alle ressurser.
               </Alert>
             ) : undefined}
             <FocusedRessursView

@@ -1,12 +1,12 @@
 import { css } from "@emotion/react";
-import { InformationFilled } from "@navikt/ds-icons";
-import { Button, Heading, Link, Popover } from "@navikt/ds-react";
+import { Heading, HelpText, Link } from "@navikt/ds-react";
 import uniqBy from "lodash/uniqBy";
 import type { RefObject } from "react";
-import React, { useRef, useState } from "react";
+import React from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
+import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { formatTlf } from "~/utils";
 
@@ -49,7 +49,7 @@ export const FocusedRessursView = ({
           </Heading>
           {focusedRessurs.sektor[0] ? (
             <strong>
-              {SektorNameMapping[focusedRessurs.sektor[0]]} ansatt (
+              {SektorNameMapping[focusedRessurs.sektor[0]]} (
               {focusedRessurs.navident})
             </strong>
           ) : undefined}
@@ -68,7 +68,9 @@ export const FocusedRessursView = ({
             `}
           >
             <ShowEmailWithFallback epost={focusedRessurs.epost ?? ""} />
-            <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
+            {focusedRessurs.sektor.includes(Sektor.NavStatlig) && (
+              <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
+            )}
 
             {uniqBy(
               focusedRessurs.koblinger,
@@ -130,10 +132,14 @@ function ShowEmailWithFallback({ epost }: { epost: string }) {
       E-post:{" "}
       <b>
         {epost || (
-          <InformationPopover
-            text="Kommer"
-            tooltipContent="E-post vil vises her 1-2 dager etter at identansvarlig/leder har fullført skjermbildet for on-boarding av ressursen i Identrutina (Remedy)."
-          />
+          <>
+            Kommer
+            <HelpText>
+              E-post vil vises her 1-2 dager etter at identansvarlig/leder har
+              fullført skjermbildet for on-boarding av ressursen i Identrutina
+              (Remedy).
+            </HelpText>
+          </>
         )}
       </b>
     </span>
@@ -150,66 +156,16 @@ function ShowTlfWithFallback({ telefon }: { telefon: Telefon[] }) {
       Tlf:{" "}
       <b>
         {formattedTlfNumbers || (
-          <InformationPopover
-            text="Kommer"
-            tooltipContent="Telefonnummet hentes fra mobilabonnmentet som er
-registrert på den ansatte hos telelevarandøren (Telenor).
-Ved registrering av abonnement tar det noen dager før det vises i NOM."
-          />
+          <>
+            Kommer
+            <HelpText>
+              Telefonnummet hentes fra mobilabonnmentet som er registrert på den
+              ansatte hos telelevarandøren (Telenor). Ved registrering av
+              abonnement tar det noen dager før det vises i NOM.
+            </HelpText>
+          </>
         )}
       </b>
-    </span>
-  );
-}
-
-function InformationPopover({
-  tooltipContent,
-  text,
-}: {
-  tooltipContent: string;
-  text: string;
-}) {
-  const buttonReference = useRef<HTMLButtonElement>(null);
-  const [openState, setOpenState] = useState(false);
-
-  return (
-    <span
-      css={css`
-        display: inline-flex;
-        align-items: center;
-        gap: var(--a-spacing-2);
-      `}
-    >
-      {text}
-      <Button
-        css={css`
-          &:hover {
-            svg {
-              color: var(--a-surface-action-hover);
-            }
-          }
-        `}
-        icon={<InformationFilled fontSize={24} />}
-        onClick={() => setOpenState(true)}
-        ref={buttonReference}
-        size="small"
-        variant="tertiary"
-      />
-
-      <Popover
-        anchorEl={buttonReference.current}
-        onClose={() => setOpenState(false)}
-        open={openState}
-      >
-        <Popover.Content
-          css={css`
-            max-width: 400px;
-            font-weight: normal;
-          `}
-        >
-          {tooltipContent}
-        </Popover.Content>
-      </Popover>
     </span>
   );
 }

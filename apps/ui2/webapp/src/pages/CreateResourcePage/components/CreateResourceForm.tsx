@@ -3,7 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
   Button,
-  Heading,
+  Label,
   Loader,
   Radio,
   RadioGroup,
@@ -189,11 +189,18 @@ function CreateResourceFormInner({
           margin-top: var(--a-spacing-8);
         `}
       >
-        <Heading size="small">Opplysninger til NOM</Heading>
-        <Alert size="medium" variant="info">
-          Navnet under vil bli brukt i alle NAVs applikasjoner. Fjern eventuelle
-          navn du ikke vil ha med. Ressursen må ha minst ett fornavn og minst
-          ett etternavn.
+        <Label as="span">Visningnavn</Label>
+        <Alert
+          css={css`
+            margin-top: calc(-1 * var(--a-spacing-3));
+          `}
+          size="medium"
+          variant="info"
+        >
+          Navnet under vil bli brukt i alle NAVs applikasjoner. Se hvilket navn
+          ressursen selv har brukt i Webcruiter, og fjern eventuelle navn som
+          ikke skal være med. Ressursen må ha minst ett fornavn og minst ett
+          etternavn.
         </Alert>
 
         <div css={rowStyles}>
