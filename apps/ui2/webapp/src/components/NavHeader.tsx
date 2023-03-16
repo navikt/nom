@@ -47,10 +47,6 @@ const userText = css({
   marginRight: "1rem",
 });
 
-const verticallyCenter = css({
-  textAlign: "center",
-});
-
 const NavHeader = () => {
   const session = useGetSession();
   const hasWrite = useHasWriteAccess();
@@ -58,7 +54,15 @@ const NavHeader = () => {
   return (
     <div css={outerDiv}>
       <div css={innerDiv}>
-        <Link as={ReactRouterLink} css={verticallyCenter} title={"Hjem"} to="/">
+        <Link
+          as={ReactRouterLink}
+          css={css`
+            background-color: transparent !important;
+            text-align: center;
+          `}
+          title={"Hjem"}
+          to="/"
+        >
           <img alt="Forside NOM" src={nomLogoCircle} />
         </Link>
         <SearchBar />

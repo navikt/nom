@@ -172,7 +172,7 @@ function ShowTlfWithFallback({ telefon }: { telefon: Telefon[] }) {
             Kommer
             <HelpText>
               Telefonnummet hentes fra mobilabonnmentet som er registrert på den
-              ansatte hos telelevarandøren (Telenor). Ved registrering av
+              ansatte hos teleleverandøren (Telenor). Ved registrering av
               abonnement tar det noen dager før det vises i NOM.
             </HelpText>
           </>
