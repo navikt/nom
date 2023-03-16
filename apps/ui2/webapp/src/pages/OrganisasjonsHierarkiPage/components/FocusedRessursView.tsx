@@ -130,7 +130,12 @@ function ShowEmailWithFallback({ epost }: { epost: string }) {
   return (
     <span>
       E-post:{" "}
-      <b>
+      <b
+        css={css`
+          display: inline-flex;
+          gap: var(--a-spacing-2);
+        `}
+      >
         {epost || (
           <>
             Kommer
@@ -154,7 +159,12 @@ function ShowTlfWithFallback({ telefon }: { telefon: Telefon[] }) {
   return (
     <span>
       Tlf:{" "}
-      <b>
+      <b
+        css={css`
+          display: inline-flex;
+          gap: var(--a-spacing-2);
+        `}
+      >
         {formattedTlfNumbers || (
           <>
             Kommer
