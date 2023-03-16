@@ -27,7 +27,7 @@ import { ValgtEnhet } from "./components/ValgtEnhet";
 
 const scrollToReference = (reference: RefObject<HTMLDivElement>) => {
   if (reference.current) {
-    window.scrollTo(0, reference.current.offsetTop - 100);
+    reference.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 };
 
@@ -106,17 +106,17 @@ const OrganisasjonHierarkiPageInner = (properties: {
     : [];
   const underEnheter = sortUnderenheterForHierarchyFrontPage(properties.data);
 
+  const currentRessurs = ressursQuery.data?.ressurs;
+  const valgtEnhet = properties.data?.enhet;
+
   const scrollReference = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     if (overEnheter.length > 0) scrollToReference(scrollReference);
-  }, []);
+  }, [currentRessurs, valgtEnhet]);
 
-  const valgtEnhet = properties.data?.enhet;
   const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
     ({ ressurs }) => ressurs
   );
-
-  const currentRessurs = ressursQuery.data?.ressurs;
 
   // If we are viewing a ressurs we must include valgEnhet in the overEnheter list.
   const allOverEnheter = currentRessurs
