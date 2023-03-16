@@ -6,6 +6,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import * as Gq from "~/api/generated/graphql_generated";
+import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 
 import { building, peopleFilledIcon } from "../../../components/Images";
@@ -86,7 +87,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
-export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
+export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
   return (
     <ReactRouterLink
       css={css`
@@ -106,7 +107,9 @@ export function ResourceView({ ressurs }: { ressurs: Ressurs }) {
           level={"2"}
           size="medium"
         >
-          {ressurs.visningsnavn ?? "Uten navn"}
+          {`${ressurs.visningsnavn ?? "uten navn"} ${
+            ressurs.sektor.includes(Sektor.Ekstern) ? "(Ekstern)" : ""
+          }`}
         </Heading>
         <div />
       </UnitContainerLink>

@@ -14,7 +14,7 @@ import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
 import { NotfoundPage } from "./pages/NotfoundPage";
 import OrganisasjonHierarkiPage from "./pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
-import ResourceView from "./pages/ResourceView";
+import { ResourceView } from "./pages/ResourceView";
 import SearchdemoPage from "./pages/SearchdemoPage";
 
 const layoutStyle = css`

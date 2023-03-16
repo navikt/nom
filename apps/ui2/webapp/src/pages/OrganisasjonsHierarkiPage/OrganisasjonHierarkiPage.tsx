@@ -21,7 +21,7 @@ import {
   DynamicColumnContainer,
   OrgEnhetView,
   OverEnheterDivider,
-  ResourceView,
+  ResourceLink,
 } from "./components/CardViews";
 import { FocusedRessursView } from "./components/FocusedRessursView";
 import { ValgtEnhet } from "./components/ValgtEnhet";
@@ -199,7 +199,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
               uniqBy(ressurser, (ressurs) => ressurs.navident),
               "visningsnavn"
             ).map((ressurs) => (
-              <ResourceView
+              <ResourceLink
                 key={ressurs.navident}
                 ressurs={ressurs as Ressurs}
               />

@@ -16,10 +16,10 @@ const linkStyles = css`
   display: flex;
 `;
 
-const ResourceView = () => {
+export const ResourceView = () => {
   const { id } = useParams();
   const { state } = useLocation();
-  const query = Gq.useHentRessursMedNavidentQuery({
+  const hentRessursQuery = Gq.useHentRessursMedNavidentQuery({
     variables: { navident: id },
   });
 
@@ -34,9 +34,11 @@ const ResourceView = () => {
           gap: var(--a-spacing-4);
         `}
       >
-        {query.loading && <div>...laster graphql data fra nom-api</div>}
-        {query.error && <p>{query.error.message}</p>}
-        {query.data?.ressurs && (
+        {hentRessursQuery.loading && (
+          <div>...laster graphql data fra nom-api</div>
+        )}
+        {hentRessursQuery.error && <p>{hentRessursQuery.error.message}</p>}
+        {hentRessursQuery.data?.ressurs && (
           <>
             {state?.alreadyExists ? (
               <Alert variant="info">
@@ -45,7 +47,7 @@ const ResourceView = () => {
               </Alert>
             ) : undefined}
             <FocusedRessursView
-              focusedRessurs={query.data.ressurs as Ressurs}
+              focusedRessurs={hentRessursQuery.data.ressurs as Ressurs}
             />
           </>
         )}
@@ -63,5 +65,3 @@ const ResourceView = () => {
     </ContentWrapper>
   );
 };
-
-export default ResourceView;
