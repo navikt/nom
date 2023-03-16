@@ -16,7 +16,6 @@ import { PageBanner } from "~/components/PageBanner";
 
 import * as Gq from "../../api/generated/graphql_generated";
 import ContentWrapper from "../../components/ContentWrapper";
-import { BackFromRessurs } from "./components/BackFromRessurs";
 import {
   DynamicColumnContainer,
   OrgEnhetView,
@@ -157,16 +156,10 @@ const OrganisasjonHierarkiPageInner = (properties: {
       )}
 
       {currentRessurs && (
-        <>
-          <FocusedRessursView
-            focusedRessurs={currentRessurs as Ressurs}
-            scrollReference={scrollReference}
-          />
-          <BackFromRessurs
-            ressursIsLeder={ressurser.length === 0}
-            valgtEnhetUrl={`/org/${valgtEnhet?.agressoId}/${valgtEnhet?.orgNiv}`}
-          />
-        </>
+        <FocusedRessursView
+          focusedRessurs={currentRessurs as Ressurs}
+          scrollReference={scrollReference}
+        />
       )}
       {!(currentRessurs || ressursQuery.loading) && (
         <>

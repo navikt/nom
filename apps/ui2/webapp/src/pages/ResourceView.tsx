@@ -1,20 +1,13 @@
 import { css } from "@emotion/react";
-import { Back } from "@navikt/ds-icons";
-import { Alert, BodyShort, Link } from "@navikt/ds-react";
+import { Alert } from "@navikt/ds-react";
 import { useParams } from "react-router";
-import { Link as ReactRouterLink, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import type { Ressurs } from "~/api/generated/graphql_generated";
-import { useHasWriteAccess } from "~/api/useGetSession";
 
 import * as Gq from "../api/generated/graphql_generated";
 import ContentWrapper from "../components/ContentWrapper";
 import { FocusedRessursView } from "./OrganisasjonsHierarkiPage/components/FocusedRessursView";
-
-const linkStyles = css`
-  margin-top: 20px;
-  display: flex;
-`;
 
 export const ResourceView = () => {
   const { id } = useParams();
@@ -22,8 +15,6 @@ export const ResourceView = () => {
   const hentRessursQuery = Gq.useHentRessursMedNavidentQuery({
     variables: { navident: id },
   });
-
-  const hasWrite = useHasWriteAccess();
 
   return (
     <ContentWrapper>
@@ -50,16 +41,6 @@ export const ResourceView = () => {
               focusedRessurs={hentRessursQuery.data.ressurs as Ressurs}
             />
           </>
-        )}
-        {hasWrite && (
-          <Link as={ReactRouterLink} to={"/ressurs/create"}>
-            <div css={linkStyles}>
-              <Back className="navds-link-panel__chevron" />
-              <BodyShort css={css({ fontWeight: "600" })} size="medium">
-                Gå til oppretting av ressurser
-              </BodyShort>
-            </div>
-          </Link>
         )}
       </div>
     </ContentWrapper>

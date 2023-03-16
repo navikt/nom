@@ -63,6 +63,7 @@ export function SearchBar() {
     <AsyncSearch
       components={{ Option: OptionWithTag }}
       controlShouldRenderValue={false}
+      isClearable={false}
       loadOptions={searchRessurs}
       noOptionsMessage={({ inputValue }: { inputValue: string }) =>
         inputValue.length < RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT

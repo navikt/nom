@@ -78,9 +78,7 @@ export function AsyncSearch<
 >(properties: AsyncProps<Option, IsMulti, Group>) {
   return (
     <AsyncSelect
-      {...properties}
       cacheOptions
-      components={{ MenuList: CustomMenuList, ...properties.components }}
       css={commonSelectCss}
       isClearable
       loadingMessage={() => "Søker..."}
@@ -89,6 +87,8 @@ export function AsyncSearch<
         ...commonSelectOverwriteStyles,
         dropdownIndicator: (base) => ({ ...base, display: "none" }),
       }}
+      {...properties}
+      components={{ MenuList: CustomMenuList, ...properties.components }}
     />
   );
 }
