@@ -68,8 +68,10 @@ export const FocusedRessursView = ({
             `}
           >
             <ShowEmailWithFallback epost={focusedRessurs.epost ?? ""} />
-            {focusedRessurs.sektor.includes(Sektor.NavStatlig) && (
+            {focusedRessurs.sektor.includes(Sektor.NavStatlig) ? (
               <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
+            ) : (
+              <span />
             )}
 
             {uniqBy(
