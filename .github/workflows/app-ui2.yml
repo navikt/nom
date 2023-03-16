@@ -9,6 +9,8 @@ on:
       - '.github/workflows/app-ui2.yml'
       - 'apps/ui2/**'
       - '.nais/apps/ui/ui*'
+  workflow_dispatch:
+
 env:
   IMAGE: ghcr.io/${{ github.repository }}/nom-ui2:${{ github.sha }}
 
