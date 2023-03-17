@@ -116,7 +116,7 @@ function Unit4Link() {
       css={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}144278&PersonellType=F`}
+      href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
       icon={<ExternalLink aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"
