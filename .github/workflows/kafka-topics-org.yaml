@@ -6,7 +6,8 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - '.nais/topics/topics-org.yaml'
+      - '.nais/topics/topics-internal.yaml'
+      - '.nais/topics/topics-kafka-api.yaml'
 
 jobs:
   deploy-kafka-topics-dev:
@@ -19,7 +20,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
-          RESOURCE: .nais/topics/topics-org.yaml
+          RESOURCE: .nais/topics/topics-internal.yaml,.nais/topics/topics-kafka-api.yaml
 
   deploy-kafka-topics-prod:
     name: Deploy to Aiven Prod
@@ -32,4 +33,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           VAR: kafka-pool=nav-prod
-          RESOURCE: .nais/topics/topics-org.yaml
+          RESOURCE: .nais/topics/topics-internal.yaml,.nais/topics/topics-kafka-api.yaml
