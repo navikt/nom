@@ -51,7 +51,7 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: readwrite
+      access: read
     - team: org
       application: nom-orgenhet-eventsrc-to-state
       access: readwrite
@@ -102,4 +102,4 @@ spec:
   acl:
     - team: org
       application: org-kafka-manager
-      access: readwrite
+      access: read

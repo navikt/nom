@@ -21,6 +21,9 @@ spec:
       application: nom-ressurs-eventsrc-to-state
       access: read
     - team: org
+      application: nom-intern-ressurs-state
+      access: read
+    - team: org
       application: org-kafka-manager
       access: read
     - team: org
@@ -44,12 +47,12 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
+    - team: org
+      application: nom-intern-ressurs-state
+      access: readwrite
     - team: nom
       application: nom-api
       access: read
-    - team: org
-      application: nom-ressurs-eventsrc-to-state
-      access: readwrite
     - team: org
       application: org-kafka-manager
       access: read
@@ -77,9 +80,12 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: readwrite
+      access: read
     - team: org
       application: nom-orgenhet-eventsrc-to-state
+      access: read
+    - team: org
+      application: nom-intern-orgenhet-state
       access: read
 
 ---
@@ -99,12 +105,12 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
+    - team: org
+      application: nom-intern-orgenhet-state
+      access: readwrite
     - team: nom
       application: nom-api
-      access: readwrite
+      access: read
     - team: org
       application: org-kafka-manager
-      access: readwrite
-    - team: org
-      application: nom-orgenhet-eventsrc-to-state
       access: readwrite
