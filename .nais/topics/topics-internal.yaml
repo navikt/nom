@@ -32,6 +32,33 @@ spec:
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
+  name: nom.intern-ressurs-state
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: nom
+      application: nom-api
+      access: read
+    - team: org
+      application: nom-ressurs-eventsrc-to-state
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
   name: nom.orgenhet-eventsource
   namespace: org
   labels:
@@ -55,3 +82,29 @@ spec:
       application: nom-orgenhet-eventsrc-to-state
       access: read
 
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.intern-orgenhet-state
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: nom
+      application: nom-api
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: readwrite
+    - team: org
+      application: nom-orgenhet-eventsrc-to-state
+      access: readwrite

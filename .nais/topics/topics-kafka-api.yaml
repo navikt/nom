@@ -55,3 +55,51 @@ spec:
     - team: org
       application: nom-orgenhet-eventsrc-to-state
       access: readwrite
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.api-ressurs-state-v2
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: org
+      application: org-kafka-manager
+      access: read
+    - team: team-nof
+      application: fullmaktsregister-state-converter
+      access: read
+    - team: pdl
+      application: pdl-fullmakt
+      access: read
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.api-orgenhet-state-v2
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    cleanupPolicy: compact
+  acl:
+    - team: org
+      application: org-kafka-manager
+      access: readwrite
