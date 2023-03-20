@@ -1,10 +1,10 @@
 app:
   kafka:
     ressurs:
-      stateTopic: org.nom.ressurs-state-v1
+      stateTopic: org.nom.intern-ressurs-state
       eventsourceTopic: org.nom.ressurs-eventsource
     orgEnhet:
-      stateTopic: org.nom.orgenhet-state-v1
+      stateTopic: org.nom.intern-orgenhet-state
       eventsourceTopic: org.nom.orgenhet-eventsource
   name: ${NAIS_APP_NAME:nom-api}
   proxy:
