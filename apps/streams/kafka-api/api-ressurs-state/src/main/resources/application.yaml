@@ -1,6 +1,6 @@
 app:
   kafka:
-    stateTopic.v2: org.nom.ressurs-state-v2
+    stateTopic.v2: org.nom.api-ressurs-state-v2
     eventsourceTopic: org.nom.ressurs-eventsource
 
 spring:
