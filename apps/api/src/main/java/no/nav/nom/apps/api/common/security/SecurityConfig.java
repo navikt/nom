@@ -59,7 +59,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(final CorsRegistry registry) {
                 registry.addMapping("/graphql/**")
-                    .allowedOrigins(CorsConfiguration.ALL)
+                    .allowedOrigins("https://nav.no, 'https://navno.sharepoint.com")
                     .allowedHeaders(CorsConfiguration.ALL)
                     .allowedMethods(CorsConfiguration.ALL);
             }
