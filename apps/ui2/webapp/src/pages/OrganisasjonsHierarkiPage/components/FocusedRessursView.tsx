@@ -169,11 +169,13 @@ function ShowTlfWithFallback({ telefon }: { telefon: Telefon[] }) {
       >
         {formattedTlfNumbers || (
           <>
-            Kommer
+            Ikke tilgjengelig
             <HelpText>
-              Telefonnummet hentes fra mobilabonnmentet som er registrert på den
-              ansatte hos teleleverandøren (Telenor). Ved registrering av
-              abonnement tar det noen dager før det vises i NOM.
+              Telefonnummet hentes fra mobilabonnementet som er registrert på
+              den ansatte hos Telenor. Ved registrering av abonnement tar det
+              noen dager før det vises i NOM. <br /> <br />
+              Dersom den ansatte ikke har abonnement gjennom Telenor vil
+              telefonnummer ikke vises.
             </HelpText>
           </>
         )}
