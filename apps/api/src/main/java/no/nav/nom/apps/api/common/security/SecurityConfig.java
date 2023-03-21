@@ -15,6 +15,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
+
 @Configuration(proxyBeanMethods = false)
 @EnableGlobalMethodSecurity(
         prePostEnabled = true
@@ -59,7 +61,8 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(final CorsRegistry registry) {
                 registry.addMapping("/graphql/**")
-                    .allowedOrigins(CorsConfiguration.ALL)
+                    .allowedOrigins("https://nav.no","https://navno.sharepoint.com")
+//                    .allowedOrigins(CorsConfiguration.ALL)
                     .allowedHeaders(CorsConfiguration.ALL)
                     .allowedMethods(CorsConfiguration.ALL);
             }
