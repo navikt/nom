@@ -13,9 +13,6 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
-    - team: nom
-      application: nom-api
-      access: read
     - team: org
       application: nom-ressurs-eventsrc-to-state
       access: readwrite
@@ -46,9 +43,6 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
-    - team: nom
-      application: nom-api
-      access: readwrite
     - team: org
       application: org-kafka-manager
       access: read
