@@ -65,16 +65,16 @@ jobs:
           VAR: kafka-pool=nav-dev
           RESOURCE: .nais/streams/kafka-api-ressurs-state.yaml
 
-#  deploy-prod:
-#    name: Deploy to NAIS dev-prod
-#    needs: build-jar-docker
-#    if: github.ref == 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3.1.0
-#      - uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
-#          CLUSTER: prod-gcp
-#          VAR: kafka-pool=nav-prod
-#          RESOURCE: .nais/streams/kafka-api-ressurs-state.yaml
+  deploy-prod:
+    name: Deploy to NAIS dev-prod
+    needs: build-jar-docker
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+          CLUSTER: prod-gcp
+          VAR: kafka-pool=nav-prod
+          RESOURCE: .nais/streams/kafka-api-ressurs-state.yaml
