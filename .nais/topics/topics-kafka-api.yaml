@@ -19,9 +19,6 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
-    - team: team-nof
-      application: fullmaktsregister-state-converter
-      access: read
     - team: pdl
       application: pdl-fullmakt
       access: read
@@ -72,9 +69,6 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
-      access: read
-    - team: team-nof
-      application: fullmaktsregister-state-converter
       access: read
     - team: pdl
       application: pdl-fullmakt
