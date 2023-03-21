@@ -17,5 +17,6 @@
         <module>ressurs-eventsrc-to-state</module>
         <module>orgenhet-eventsrc-to-state</module>
         <module>internal</module>
+        <module>kafka-api</module>
     </modules>
 </project>
