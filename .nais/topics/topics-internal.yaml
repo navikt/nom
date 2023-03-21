@@ -24,6 +24,9 @@ spec:
       application: nom-intern-ressurs-state
       access: read
     - team: org
+      application: nom-kafka-api-ressurs-state
+      access: read
+    - team: org
       application: org-kafka-manager
       access: read
     - team: org
@@ -79,13 +82,16 @@ spec:
       application: nom-api
       access: readwrite
     - team: org
-      application: org-kafka-manager
-      access: read
-    - team: org
       application: nom-orgenhet-eventsrc-to-state
       access: read
     - team: org
       application: nom-intern-orgenhet-state
+      access: read
+    - team: org
+      application: nom-kafka-api-orgenhet-state
+      access: read
+    - team: org
+      application: org-kafka-manager
       access: read
 
 ---

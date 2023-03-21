@@ -74,6 +74,9 @@ spec:
     cleanupPolicy: compact
   acl:
     - team: org
+      application: nom-kafka-api-ressurs-state
+      access: readwrite
+    - team: org
       application: org-kafka-manager
       access: read
     - team: team-nof
@@ -82,6 +85,7 @@ spec:
     - team: pdl
       application: pdl-fullmakt
       access: read
+
 
 ---
 
@@ -100,6 +104,9 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
+    - team: org
+      application: nom-kafka-api-orgenhet-state
+      access: readwrite
     - team: org
       application: org-kafka-manager
       access: read
