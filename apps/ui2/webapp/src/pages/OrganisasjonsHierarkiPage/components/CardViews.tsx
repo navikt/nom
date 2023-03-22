@@ -166,8 +166,9 @@ export function HorizontalEdge() {
     <div
       css={css`
         background-color: var(--a-lightblue-800);
-        height: 0.5rem;
+        height: var(--a-spacing-2);
         width: 100%;
+        border-radius: 4px 4px 0 0;
       `}
     />
   );

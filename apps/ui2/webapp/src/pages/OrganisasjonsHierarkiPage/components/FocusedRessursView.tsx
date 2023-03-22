@@ -8,6 +8,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
 import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
+import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { formatTlf } from "~/utils";
 
 import { SektorNameMapping } from "../../CreateResourcePage/components/CreateResourceForm";
@@ -20,20 +21,21 @@ export const FocusedRessursView = ({
   scrollReference?: RefObject<HTMLDivElement>;
 }) => {
   return (
-    <div ref={scrollReference}>
-      <div
-        css={css`
-          height: var(--a-spacing-2);
-          border-radius: 4px 4px 0 0;
-        `}
-      />
+    <div
+      css={css`
+        display: grid;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        background-color: var(--nom-secondary-hover);
+        border: 1px solid var(--a-gray-400);
+      `}
+      ref={scrollReference}
+    >
+      <HorizontalEdge />
       <div
         css={css`
           justify-content: space-between;
           display: flex;
-          background: var(--nom-secondary-hover);
-          border: 1px solid var(--a-gray-500);
-          border-radius: 0 0 4px 4px;
           padding: 40px;
         `}
       >
