@@ -13,6 +13,8 @@ spec:
       value: dev
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
+    - name: JAVA_OPTS
+      value: "-Xms512m -Xmx1024m"
   envFrom:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser
