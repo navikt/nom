@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgTilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
@@ -38,8 +38,6 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhRestConsumer {
 
-    public static final String UNLEASH_LAST_NY_ORGTILKNYTNING = "nom.orgtilknytning.last";
-
     public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
@@ -55,7 +53,8 @@ public class DvhRestConsumer {
     private final DvhDataLoader dvhDataLoader;
     private final Environment environment;
 
-    private final Unleash unleash;
+    private final RessursStillingLoader ressursStillingLoader;
+
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -154,6 +153,13 @@ public class DvhRestConsumer {
                 .collect(Collectors.toList());
 
         dvhService.saveOrgtilknytning(koblinger);
+
+        // Ny håndtering for orgtilknytninger og persistering
+        try {
+            ressursStillingLoader.load();
+        } catch(Exception e) {
+            log.error("Feilet i last av ressursStillinger", e);
+        }
     }
 
     private void loadTlfFromDvh() {
@@ -256,4 +262,5 @@ public class DvhRestConsumer {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
     }
+
 }

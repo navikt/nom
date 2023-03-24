@@ -42,6 +42,24 @@ public class DvhRessursStilling {
         payload = json.toString();
 
         navident = getNullableOrErrorStringNode(json, "NAV_ID");
+
+        if (navident.isEmpty()) {
+            // Run along - nothing to see here....
+            stillingDatoFom = null;
+            stillingDatoTom = null;
+            stillingAgressoId = null;
+            stillingOrgenhetNavn = null;
+            ressursAgressoId = null;
+            ressursOrgenhetNiv = null;
+            ressursRemedyEnehetId = null;
+            stillingRessursAgressoId = null;
+            ressursAgressoDatoFom = null;
+            ressursAgressoDatoTom = null;
+            ressursDvhDatoFom = null;
+            ressursDvhDatoTom = null;
+            return;
+        }
+
         stillingDatoFom = LocalDate.parse(json.get("FRA_DATO").asText());
         stillingDatoTom = LocalDate.parse(json.get("TIL_DATO").asText());
 
@@ -53,7 +71,7 @@ public class DvhRessursStilling {
 
         ressursRemedyEnehetId = getNullableOrErrorStringNode(json, "REMEDY_ENHET_ID");
 
-        stillingRessursAgressoId = getNullableOrErrorStringNode(json, "stilling.ORGENHET_PAA_RESSURS");
+        stillingRessursAgressoId = getNullableOrErrorStringNode(json, "STILLING_ORGENHET_PAA_RESSURS");
 
         ressursAgressoDatoFom = LocalDate.parse(json.get("AGRESSO_DATE_FROM").asText());
         ressursAgressoDatoTom = LocalDate.parse(json.get("AGRESSO_DATE_TO").asText());
@@ -66,5 +84,12 @@ public class DvhRessursStilling {
         return (node.isNull() || node.asText().startsWith("-")) ?
             Optional.empty() :
             Optional.of(node.asText());
+    }
+
+    private Optional<LocalDate> getNullableDateNode(JsonNode json, String field_name) {
+        JsonNode node = json.get(field_name);
+        return (node.isNull() || node.asText().startsWith("-")) ?
+            Optional.empty() :
+            Optional.of(LocalDate.parse(node.asText()));
     }
 }

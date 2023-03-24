@@ -20,6 +20,7 @@ public record AppProperties(
             String baseUrl,
             String enhetPath,
             String orgtilknytningPath,
+            String ressursStillingerPath,
             String aadClientId
     ) {}
 

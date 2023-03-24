@@ -11,6 +11,7 @@ app:
     baseUrl: ${NOM_PROXY_BASEURL}
     enhetPath: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
     orgtilknytningPath: /proxy/dvh/json/Hr/NOM2/stilling2nom
+    ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURSER_STILLINGER
     aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
   nik:
     baseUrl: ${NIK_BASEURL}
@@ -21,6 +22,7 @@ app:
     aadClientId: api://${PDL_CLIENT_ID}/.default
   dvh-load:
     cron-ressurs-og-orgenhet: "0 0 6 * * *"
+    nom-ressurser-stillinger-respons-navn: "NOM_RESSURSER_STILLINGERResponse"
 
 authentication:
   aad:
@@ -147,7 +149,8 @@ app:
           scopes: ["MUTATE_RESSURS"]
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
-
+  dvh-load:
+    nom-ressurser-stillinger-respons-navn: "NOM_RESSURSER_STILLINGERResponse"
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i dev)
 #  dvh-load:
@@ -188,6 +191,8 @@ app:
         write:
           group-id: "${NOM_WRITE_GROUPID}"
           scopes: ["MUTATE_RESSURS"]
+  dvh-load:
+    nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i prod)
 #  dvh-load:
