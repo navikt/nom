@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhRestConsumer {
 
+    public static final String UNLEASH_LAST_NY_ORGTILKNYTNING = "nom.orgtilknytning.last";
+
     public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
@@ -51,6 +54,8 @@ public class DvhRestConsumer {
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
     private final Environment environment;
+
+    private final Unleash unleash;
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();

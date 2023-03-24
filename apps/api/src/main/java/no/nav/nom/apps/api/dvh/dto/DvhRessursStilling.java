@@ -1,12 +1,16 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
-@Getter
+@Value
+@Builder
+@AllArgsConstructor
 public class DvhRessursStilling {
     Optional<String> navident;
     LocalDate stillingDatoFom;                  // DVH sin HRRES_STILLINGER.FRA_DATO            Fra dato for brekkpunktet for dette datapunktet
@@ -34,27 +38,33 @@ public class DvhRessursStilling {
     // -4 = Manlger - Feltet er blankt i kilden, men det burde ha vært en verdi der.
     // -5 = Skjult - Kode 6 / 7 eller annet grunnlag for å skjule denne opplysningen.
 
-    public DvhRessursStilling(JsonNode node) {
-        payload = node.toString();
-        navident = Optional.ofNullable(node.get("NAV_ID").asText());
-        stillingDatoFom = LocalDate.parse(node.get("FRA_DATO").asText());
-        stillingDatoTom = LocalDate.parse(node.get("TIL_DATO").asText());
+    public DvhRessursStilling(JsonNode json) {
+        payload = json.toString();
 
-        String tmpStillingAgressoId = node.get("ORGENHET").asText();
-        stillingAgressoId = Optional.ofNullable( tmpStillingAgressoId.startsWith("-") ? null : tmpStillingAgressoId);
-        stillingOrgenhetNavn = node.get("ORGENHET_BESK").asText();
+        navident = getNullableOrErrorStringNode(json, "NAV_ID");
+        stillingDatoFom = LocalDate.parse(json.get("FRA_DATO").asText());
+        stillingDatoTom = LocalDate.parse(json.get("TIL_DATO").asText());
 
-        String tmpRessursAgressoId = node.get("ORGENHET_PAA_RESSURS").asText();
-        ressursAgressoId = Optional.ofNullable( tmpRessursAgressoId.startsWith("-") ? null : tmpRessursAgressoId);
-        String tmpRessursOrgenhetNiv = node.get("ORGENHET_PAA_RESSURS_NIVA").asText();
-        ressursAgressoId = Optional.ofNullable( tmpRessursOrgenhetNiv.startsWith("-") ? null : tmpRessursOrgenhetNiv);
+        stillingAgressoId = getNullableOrErrorStringNode(json, "ORGENHET");
+        stillingOrgenhetNavn = json.get("ORGENHET_BESK").asText();
 
-        String tmpRessursRemedyEnehetId = node.get("REMEDY_ENHET_ID").asText();
-        ressursAgressoId = Optional.ofNullable( tmpRessursRemedyEnehetId.startsWith("-") ? null : tmpRessursRemedyEnehetId);
+        ressursAgressoId = getNullableOrErrorStringNode(json, "ORGENHET_PAA_RESSURS");
+        ressursOrgenhetNiv = getNullableOrErrorStringNode(json, "ORGENHET_PAA_RESSURS_NIVA");
 
-        ressursAgressoDatoFom = LocalDate.parse(node.get("AGRESSO_DATE_FROM").asText());
-        ressursAgressoDatoTom = LocalDate.parse(node.get("AGRESSO_DATE_FROM").asText());
-        ressursDvhDatoFom = LocalDate.parse(node.get("DATE_FROM").asText());
-        ressursDvhDatoTom = LocalDate.parse(node.get("DATE_TO").asText());
+        ressursRemedyEnehetId = getNullableOrErrorStringNode(json, "REMEDY_ENHET_ID");
+
+        stillingRessursAgressoId = getNullableOrErrorStringNode(json, "stilling.ORGENHET_PAA_RESSURS");
+
+        ressursAgressoDatoFom = LocalDate.parse(json.get("AGRESSO_DATE_FROM").asText());
+        ressursAgressoDatoTom = LocalDate.parse(json.get("AGRESSO_DATE_TO").asText());
+        ressursDvhDatoFom = LocalDate.parse(json.get("DATE_FROM").asText());
+        ressursDvhDatoTom = LocalDate.parse(json.get("DATE_TO").asText());
+    }
+
+    private Optional<String> getNullableOrErrorStringNode(JsonNode json, String field_name) {
+        JsonNode node = json.get(field_name);
+        return (node.isNull() || node.asText().startsWith("-")) ?
+            Optional.empty() :
+            Optional.of(node.asText());
     }
 }
