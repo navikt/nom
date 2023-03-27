@@ -21,7 +21,7 @@ public class DvhRessursStilling {
     Optional<String> ressursAgressoId;          // DVH sin HRRES_RESSURS.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til NÅ
                                                 //                                              Kan være NULL/TOM/MANGLENDE
     Optional<String> ressursOrgenhetNiv;
-    Optional<String> ressursRemedyEnehetId;
+    Optional<String> ressursRemedyEnhetId;
     Optional<String> stillingRessursAgressoId;  // DVH sin HRRES_STILLINGER.ORGENHET_PAA_RESSURS   Agresso id som unit4-ressursen er knyttet til i perioden for FRA/TIL_DATO
                                                 //                                                 Kan være NULL/TOM/MANGLENDE
 
@@ -51,7 +51,7 @@ public class DvhRessursStilling {
             stillingOrgenhetNavn = null;
             ressursAgressoId = null;
             ressursOrgenhetNiv = null;
-            ressursRemedyEnehetId = null;
+            ressursRemedyEnhetId = null;
             stillingRessursAgressoId = null;
             ressursAgressoDatoFom = null;
             ressursAgressoDatoTom = null;
@@ -69,7 +69,7 @@ public class DvhRessursStilling {
         ressursAgressoId = getNullableOrErrorStringNode(json, "ORGENHET_PAA_RESSURS");
         ressursOrgenhetNiv = getNullableOrErrorStringNode(json, "ORGENHET_PAA_RESSURS_NIVA");
 
-        ressursRemedyEnehetId = getNullableOrErrorStringNode(json, "REMEDY_ENHET_ID");
+        ressursRemedyEnhetId = getNullableOrErrorStringNode(json, "REMEDY_ENHET_ID");
 
         stillingRessursAgressoId = getNullableOrErrorStringNode(json, "STILLING_ORGENHET_PAA_RESSURS");
 

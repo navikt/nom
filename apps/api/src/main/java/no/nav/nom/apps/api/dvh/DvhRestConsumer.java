@@ -156,7 +156,7 @@ public class DvhRestConsumer {
 
         // Ny håndtering for orgtilknytninger og persistering
         try {
-            ressursStillingLoader.load();
+            ressursStillingLoader.loadAndProcess();
         } catch(Exception e) {
             log.error("Feilet i last av ressursStillinger", e);
         }

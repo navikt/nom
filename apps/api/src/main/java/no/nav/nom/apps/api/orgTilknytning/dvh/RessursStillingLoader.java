@@ -19,9 +19,11 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Spliterator;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
 @Service
@@ -50,19 +52,50 @@ public class RessursStillingLoader {
         this.unleash = unleash;
     }
 
-    public void load() {
+    public void loadAndProcess() {
         if (unleash.isEnabled(UNLEASH_LAST_NY_ORGTILKNYTNING)) {
-            log.info("Laster ressursStillinger fra {}", appProperties.proxy().ressursStillingerPath());
-            LocalDateTime start = LocalDateTime.now();
-            val jsonRessursStillinger = dvhExchange(appProperties.proxy().ressursStillingerPath());
-            val listField = jsonRessursStillinger.fields().next();
-            log.info("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), ((ArrayNode)listField.getValue()).size());
-            List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
-                .map(DvhRessursStilling::new)
-                .collect(Collectors.toList());
-            log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
+            List<DvhRessursStilling> ressursStillinger = load();
+
+            Map <String, List<DvhRessursStilling>> ressursStillingerGruppert = grupperPerNavident(ressursStillinger);
+            log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
+
+            ressursStillingerGruppert.forEach((navident, rsList) -> {
+                strukturerNavidentensRessursStillinger(rsList);
+            });
         }
     }
+
+    private List<DvhRessursStilling> load() {
+        log.info("Laster ressursStillinger fra {}", appProperties.proxy().ressursStillingerPath());
+        LocalDateTime start = LocalDateTime.now();
+        val jsonRessursStillinger = dvhExchange(appProperties.proxy().ressursStillingerPath());
+        val listField = jsonRessursStillinger.fields().next();
+        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), ((ArrayNode)listField.getValue()).size());
+        List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
+            .map(DvhRessursStilling::new)
+            .collect(Collectors.toList());
+        log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
+        return ressursStillinger;
+    }
+
+    private Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
+        return ressursStillinger.stream()
+            .filter(rs -> rs.getNavident().isPresent())
+            .collect(groupingBy(rs -> rs.getNavident().get()));
+    }
+    public void strukturerNavidentensRessursStillinger(List<DvhRessursStilling> ressursStillinger) {
+        // Grupper per org tilknytning
+        // Altså:
+        //      Per Stillingens - AgressoId+enhetNavn                           (stillingAgressoId/stillingOrgenhetNavn)
+        //      Splitt også på hva ressursen hadde som AgressoId på stillingen  (stillingRessursAgressoId)
+        //
+        //      Remedy enhet og ressurs orgenhet er nå-tid info, og skal kun vurderes på den stillingen som er nå
+
+        // grupper først på Stillingens - AgressoId+enhetNavn
+        //ressursStillinger.stream().collect(groupingBy( rs -> new StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn())
+    }
+
+    record StillingAgressoOrgIdOgNavn(String id, String navn, String ressurs) {};
 
     // Shameless duplication from DvhRestConsumer
     private JsonNode dvhExchange(String urlPath) {

@@ -61,7 +61,7 @@ class DvhRessursStillingTest {
                 .stillingOrgenhetNavn("Innlandet Arbeidslivssenter")
                 .ressursAgressoId(Optional.of("0499000"))
                 .ressursOrgenhetNiv(Optional.of("ORGENHET"))
-                .ressursRemedyEnehetId(Optional.of("0491"))
+                .ressursRemedyEnhetId(Optional.of("0491"))
                 .stillingRessursAgressoId(Optional.of("0499000"))
                 .ressursAgressoDatoFom(LocalDate.of(2006,04,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
@@ -116,7 +116,7 @@ class DvhRessursStillingTest {
                 .stillingOrgenhetNavn("Innlandet Arbeidslivssenter")
                 .ressursAgressoId(Optional.empty())
                 .ressursOrgenhetNiv(Optional.of("Mangler"))
-                .ressursRemedyEnehetId(Optional.empty())
+                .ressursRemedyEnhetId(Optional.empty())
                 .stillingRessursAgressoId(Optional.of("0499000"))
                 .ressursAgressoDatoFom(LocalDate.of(2006,04,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
@@ -165,18 +165,7 @@ class DvhRessursStillingTest {
             DvhRessursStilling.builder()
                 .payload(node.toString())
                 .navident(Optional.empty())
-                .stillingDatoFom(null)
-                .stillingDatoTom(null)
-                .stillingAgressoId(null)
-                .stillingOrgenhetNavn(null)
-                .ressursAgressoId(null)
-                .ressursOrgenhetNiv(null)
-                .ressursRemedyEnehetId(null)
-                .stillingRessursAgressoId(null)
-                .ressursAgressoDatoFom(null)
-                .ressursAgressoDatoTom(null)
-                .ressursDvhDatoFom(null)
-                .ressursDvhDatoTom(null)
+                // Null på resten
                 .build();
         assertEquals(expected, actual);
     }
