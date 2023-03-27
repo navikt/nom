@@ -66,7 +66,7 @@ public class SecurityConfig {
 //                    .allowedOrigins(CorsConfiguration.ALL)    // BRUK DENNE HVIS DET OVER IKKE FUNKER
                     .allowedHeaders(CorsConfiguration.ALL)
                     .allowCredentials(true)
-Allow creds = true                    .allowedMethods(CorsConfiguration.ALL);
+                    .allowedMethods(CorsConfiguration.ALL);
             }
         };
     }
