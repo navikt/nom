@@ -65,7 +65,8 @@ public class SecurityConfig {
 //                    .allowedOrigins("https://nom.nav.no","https://nom.dev.nav.no","https://navno.sharepoint.com")
 //                    .allowedOrigins(CorsConfiguration.ALL)    // BRUK DENNE HVIS DET OVER IKKE FUNKER
                     .allowedHeaders(CorsConfiguration.ALL)
-                    .allowedMethods(CorsConfiguration.ALL);
+                    .allowCredentials(true)
+Allow creds = true                    .allowedMethods(CorsConfiguration.ALL);
             }
         };
     }
