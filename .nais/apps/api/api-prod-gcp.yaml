@@ -124,7 +124,9 @@ spec:
           namespace: org
           cluster: prod-gcp
       external:
+        - host: unleash.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_12

@@ -157,7 +157,7 @@ app:
 #    cron-ressurs-og-orgenhet: "0 0 * * * *"
 #    cron-ressurs-og-orgenhet: "0 */5 * * * *"
 
-NIK_BASEURL: "https://nav-ident.dev.intern.nav.no"
+NIK_BASEURL: "https://nav-ident.org"
 NIK_CLIENT_ID: "dev-gcp.org.nav-ident"
 
 PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io"
