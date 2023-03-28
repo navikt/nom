@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import no.nav.nom.apps.nom.unit4.unit4.Utils;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Jacksonized
+@Slf4j
 public class Unit4RessursDto {
 
     @JsonIgnore
@@ -97,7 +99,7 @@ public class Unit4RessursDto {
         employments = new ArrayList<>();
     }
 
-    public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue) throws IllegalArgumentException {
+    public Unit4RessursDto(RessursOpprettetEventV1 record, String fellesKoblingValue, boolean leverEkstraAvgRelasjon) throws IllegalArgumentException {
         RessursOpprettetEventData eventData = (RessursOpprettetEventData) record.getData();
         RessursOpprettetAdditionalData additionalData = (RessursOpprettetAdditionalData) record.getAdditionalData();
 
@@ -158,6 +160,20 @@ public class Unit4RessursDto {
                         )
                         .orElseThrow(() -> new NoSuchElementException("Agresso unit id is missing from event"))
         );
+        if (leverEkstraAvgRelasjon) {
+            log.info("Ressurs opprettes med MNAO - EKTRAAGA relasjon (ekstra arbeidsgiveravgift 2023)");
+            relatedValues.add(
+                // Foreløpig oppsett for 2023 og ekstra arbeidsgiveravgift.
+                RelatedValue.builder()
+                    .relationId("MNAO")  // NOM: Begrep=MNAO, Beskrivelse=EKSTRAAGA
+                    .relatedValue("EA")  // EA
+                    .dateFrom(dateFrom)
+                    .dateTo(LocalDate.of(2023,12,31).atStartOfDay()) // Midlertidig til for 2023
+                    .build()
+            );
+        } else {
+            log.info("Ressurs opprettes uten MNAO - EKTRAAGA relasjon (ekstra arbeidsgiveravgift 2023)");
+        }
         employments = new ArrayList<>();
     }
 

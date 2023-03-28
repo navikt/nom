@@ -26,6 +26,8 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+
+        <unleash.version>7.1.0</unleash.version>
     </properties>
 
     <dependencies>
@@ -89,7 +91,11 @@
             <artifactId>springdoc-openapi-security</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.getunleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+            <version>${unleash.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
