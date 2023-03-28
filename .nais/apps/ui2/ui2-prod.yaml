@@ -25,9 +25,10 @@ spec:
       autoLogin: true
   accessPolicy:
     outbound:
-      - application: nom-api
-      - namespace: nom
-      - cluster: prod-gcp
+      rules:
+        - application: nom-api
+          namespace: nom
+          cluster: prod-gcp
   ingresses:
     - https://nom-ui2.intern.nav.no
     - https://nom.nav.no
