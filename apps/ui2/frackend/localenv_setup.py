@@ -32,10 +32,11 @@ AZURE_APP_CERTIFICATE_KEY_ID=base64Decode("AZURE_APP_CERTIFICATE_KEY_ID", False)
 AZURE_APP_TENANT_ID=base64Decode("AZURE_APP_TENANT_ID", False)
 AZURE_APP_CLIENT_SECRET=base64Decode("AZURE_APP_CLIENT_SECRET", False)
 AZURE_APP_JWK=base64Decode("AZURE_APP_JWK", False)
+AZURE_OPENID_CONFIG_JWKS_URI=base64Decode("AZURE_OPENID_CONFIG_JWKS_URI", True)
 
 # En liste med alle secretene vi er ute etter
 # For å legge til disse i destinasjonsfilen må variabelen leggs til i listen her
-kubectlSecrets = [AZURE_APP_CLIENT_ID, AZURE_APP_WELL_KNOWN_URL, AZURE_OPENID_CONFIG_ISSUER, AZURE_OPENID_CONFIG_TOKEN_ENDPOINT, AZURE_APP_CERTIFICATE_KEY_ID, AZURE_APP_TENANT_ID, AZURE_APP_CLIENT_SECRET, AZURE_APP_JWK]
+kubectlSecrets = [AZURE_APP_CLIENT_ID, AZURE_APP_WELL_KNOWN_URL, AZURE_OPENID_CONFIG_ISSUER, AZURE_OPENID_CONFIG_TOKEN_ENDPOINT, AZURE_APP_CERTIFICATE_KEY_ID, AZURE_APP_TENANT_ID, AZURE_APP_CLIENT_SECRET, AZURE_APP_JWK, AZURE_OPENID_CONFIG_JWKS_URI]
 
 # Brukes for å huske hvilke linjer i .localenv som skal redigeres
 kubectlSecretIndexes = []
@@ -44,7 +45,7 @@ kubectlSecretIndexes = []
 
 # Filnavn på template fila og på hva navnet på fila skal være
 startFile = "template.localenv"
-destinationFile = ".localenv"
+destinationFile = ".env"
 sp.run(["cp", startFile, destinationFile])
 
 # Redigering av detinationFile

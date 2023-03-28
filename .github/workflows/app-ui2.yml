@@ -8,7 +8,7 @@ on:
     paths:
       - '.github/workflows/app-ui2.yml'
       - 'apps/ui2/**'
-      - '.nais/apps/ui/ui*'
+      - '.nais/apps/ui2/**'
   workflow_dispatch:
 
 env:
@@ -70,8 +70,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: .nais/apps/ui/ui.yaml
-          VARS: .nais/apps/ui/ui-dev-gcp-vars.yaml
+          RESOURCE: .nais/apps/ui2/ui2-dev.yaml
 
   deploy-prod:
     name: Deploy prod-gcp
@@ -84,5 +83,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: .nais/apps/ui/ui.yaml
-          VARS: .nais/apps/ui/ui-prod-gcp-vars.yaml
+          RESOURCE: .nais/apps/ui2/ui2-prod.yaml

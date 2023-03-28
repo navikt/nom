@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: {{name}}
+  name: nom-ui2
   namespace: org
   labels:
     team: org
@@ -12,27 +12,25 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
+      singlePageApplication: true
       claims:
         extra:
           - NAVident
           - azp_name
-      tenant: {{azure.application.tenant}}
+      tenant: nav.no
       replyURLs:
-      {{#each azure.application.replyURLs as |url|}}
-         - {{url}}
-      {{/each}}
+        - http://localhost:8080/oauth2/callback
+    sidecar:
+      enabled: true
+      autoLogin: true
   accessPolicy:
     outbound:
-      rules:
-        {{#each accessPolicy.outbound.rules}}
-         - application: {{this.application}}
-           namespace: {{this.namespace}}
-           cluster: {{this.cluster}}
-        {{/each}}
+      - application: nom-api
+      - namespace: nom
+      - cluster: prod-gcp
   ingresses:
-  {{#each ingresses as |url|}}
-    - {{url}}
-  {{/each}}
+    - https://nom-ui2.intern.nav.no
+    - https://nom.nav.no
   replicas:
     min: 1
     max: 1
@@ -57,7 +55,17 @@ spec:
     enabled: true
     path: internal/prometheus
   env:
-  {{#each env}}
-      - name: {{this.name}}
-        value: {{this.value}}
-  {{/each}}
+    - name: NODE_ENV
+      value: "production"
+    - name: EXPRESS_HOST
+      value: "::"
+    - name: EXPRESS_PORT
+      value: "8080"
+    - name: NOM_API_URL
+      value: https://nom-api.intern.nav.no
+    - name: NOM_API_SCOPE
+      value: api://prod-gcp.nom.nom-api/.default
+    - name: TEAM_CATALOG_API_URL
+      value: https://teamkatalog-api.prod-fss-pub.nais.io
+    - name: TEAM_CATALOG_SCOPE
+      value: api://prod-fss.nom.team-catalog-backend/.default
