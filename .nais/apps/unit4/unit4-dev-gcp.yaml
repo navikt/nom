@@ -21,3 +21,6 @@ inbound-rules:
   - application: org-token-tool
     namespace: org
     cluster: dev-gcp
+outbound-external:
+  - host: unleash.nais.io
+  - host: nom-proxy.dev-fss-pub.nais.io

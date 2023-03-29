@@ -54,6 +54,11 @@ spec:
           namespace: {{namespace}}
           cluster: {{cluster}}
       {{/each}}
+    outbound:
+      external:
+      {{#each outbound-external}}
+        - host: {{host}}
+      {{/each}}
   azure:
     application:
       enabled: true
