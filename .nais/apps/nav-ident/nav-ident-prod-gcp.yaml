@@ -88,6 +88,9 @@ spec:
     outbound:
       rules:
         - application: nav-ident-redis
+      external:
+        - host: unleash.nais.io
+        - host: pdl-api.prod-fss-pub.nais.io
 
 ---
 
