@@ -198,7 +198,7 @@ app:
 #  dvh-load:
 #    cron-ressurs-og-orgenhet: "0 */15 * * * *"
 
-NIK_BASEURL: "https://nav-ident.org"
+NIK_BASEURL: "https://nav-ident.intern.nav.no"
 NIK_CLIENT_ID: "prod-gcp.org.nav-ident"
 
 PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
