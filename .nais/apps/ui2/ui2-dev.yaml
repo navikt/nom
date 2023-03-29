@@ -63,7 +63,7 @@ spec:
     - name: EXPRESS_PORT
       value: "8080"
     - name: NOM_API_URL
-      value: https://nom-api.dev.intern.nav.no
+      value: https://nom-api.nom
     - name: NOM_API_SCOPE
       value: api://dev-gcp.nom.nom-api/.default
     - name: TEAM_CATALOG_API_URL
