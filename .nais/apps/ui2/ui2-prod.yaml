@@ -30,7 +30,7 @@ spec:
           namespace: nom
           cluster: prod-gcp
       external:
-        -host: teamkatalog-api.prod-fss-pub.nais.io
+        - host: teamkatalog-api.prod-fss-pub.nais.io
   ingresses:
     - https://nom-ui2.intern.nav.no
     - https://nom.nav.no
