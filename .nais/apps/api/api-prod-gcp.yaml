@@ -65,6 +65,8 @@ spec:
           cluster: prod-gcp
         - application: team-catalog-frackend
           namespace: org
+        - application: org-ekstern-proxy
+          namespace: org
         - application: team-catalog-backend
           cluster: prod-fss
         - application: veilarbveileder
