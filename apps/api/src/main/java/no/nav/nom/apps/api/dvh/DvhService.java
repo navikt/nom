@@ -38,18 +38,6 @@ public class DvhService {
                 .map(Optional::get)
                 .collect(Collectors.toMap(e -> e.getAgressoId() + "" + e.getOrgNiv(), Function.identity()));
 
-        if (cachedEnheter.containsKey("8435000ORGENHET")) {
-            log.info(
-                "saveOrgTilknyninger - cachedEnehter for 8435000ORGENHET is {}-{}",
-                cachedEnheter.get("8435000ORGENHET").getId(),
-                cachedEnheter.get("8435000ORGENHET").getNavn()
-            );
-
-            orgenhetService.getAllEnheter().stream()
-                .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv()))
-                .get("8435000ORGENHET").forEach(e -> log.info("{} {} {} {} {}", e.getId(), e.getUniqueAgressoId(), e.getNavn(), e.getGyldigFom(), e.getGyldigTom()));
-        }
-
         final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
         final var orgenhetMissing = new LinkedList<Orgtilknytning>();
         final var ressursMissing = new LinkedList<Orgtilknytning>();
@@ -79,10 +67,6 @@ public class DvhService {
                         final var lastOrgtilknytning = orgTilknytninger.get(i);
                         for (int j = 0; j < i; j++) {
                             final var orgtilknytningCompare = orgTilknytninger.get(j);
-                            if (lastOrgtilknytning.getNavIdent().equals("L133198")) {
-                                log.info("{}: {}-{} [{}-{}]", lastOrgtilknytning.getNavIdent(), lastOrgtilknytning.getOrgEnhetId(), lastOrgtilknytning.getOrgenhetNavn(), lastOrgtilknytning.getGyldigFom(),lastOrgtilknytning.getGyldigTom());
-                                log.info("{}: {}-{} [{}-{}]", orgtilknytningCompare.getNavIdent(), orgtilknytningCompare.getOrgEnhetId(), orgtilknytningCompare.getOrgenhetNavn(), orgtilknytningCompare.getGyldigFom(),orgtilknytningCompare.getGyldigTom());
-                            }
                             boolean shouldMerge = DateUtils.isPeriodsOverlapping(
                                 orgtilknytningCompare.getGyldigFom(),
                                 orgtilknytningCompare.getGyldigTom(),
