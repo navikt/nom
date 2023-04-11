@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
@@ -10,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
@@ -73,6 +75,17 @@ public class RessursCommadService {
                 inputMetadata
         ));
     }
+
+    public ListenableFuture<SendResult<String, RessursEvent>> oppdaterSektorEvent(OppdaterSektorCommand oppdaterSektorCommand, InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursSektorOppdatertV1(
+            oppdaterSektorCommand.fid(),
+            new RessursSektorOppdatertV1.SektorOppdatertEventData(
+                oppdaterSektorCommand.sektor()
+            ),
+            inputMetadata
+        ));
+    }
+
 
     private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
         return eventProducer.sendMessage(new RessursOpprettetEventV1(

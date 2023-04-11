@@ -8,6 +8,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -290,5 +291,61 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         Assertions.assertEquals(ressursMock.ETTERNAVN(), eventData.visningsnavn().etternavn());
         Assertions.assertTrue(eventData.visningsnavn().mellomnavn().isEmpty());
     }
+
+    @Test
+    @DisplayName("Ansatt som endrer sektor RessursSektorOppdatertEvent")
+    public void test7() {
+        ArgumentCaptor<RessursEvent> eventArgumentCaptor = ArgumentCaptor.forClass(RessursEvent.class);
+
+        final var response = List.of(
+            new DvhRessursUtils.RessursMock(
+                "O123456",
+                "12345678901",
+                "Navn 1",
+                "ENavn 1",
+                "NAV Statlig",
+                LocalDate.parse("2099-12-31")
+            )
+        );
+        dvhRessursUtils.addToResponse(response);
+        loadFromDvh();
+
+
+        final var ressursv1 = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "12345678901",
+            "O123456",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "Navn 1",
+                Optional.empty(),
+                "ENavn 1"
+            ),
+            Optional.empty()
+        );
+
+        createRessursHendelseEventSource(ressursv1);
+
+        dvhRessursUtils.createEmptyResponse();
+
+        final var response2 = List.of(
+            new DvhRessursUtils.RessursMock(
+                "O123456",
+                "12345678901",
+                ressursv1.visningsnavn().fornavn(),
+                ressursv1.visningsnavn().etternavn(),
+                "NAV Kommunalt",
+                LocalDate.parse("2099-12-31")
+            )
+        );
+        dvhRessursUtils.addToResponse(response2);
+        loadFromDvh();
+
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
+        Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSektorOppdatertV1));
+    }
+
 
 }

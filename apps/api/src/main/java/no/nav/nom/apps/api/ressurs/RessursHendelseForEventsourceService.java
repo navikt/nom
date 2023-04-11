@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
@@ -91,6 +92,12 @@ public class RessursHendelseForEventsourceService {
         if(!Objects.equals(ressursState.visningsnavn().getFormattedVisningsnavn(), currentVisningsnavn.getFormattedVisningsnavn())) {
             ressursEndretPersonalia(ressursState.fid(), dvhRessurs);
         }
+
+        final var currentSektor = dvhRessurs.getRemedyAnsattType();
+
+        if (currentSektor != null && !DvhRessurs.toSektor(currentSektor).equals(ressursState.sektor())) {
+            ressursEndretSektor(ressursState.fid(), dvhRessurs);
+        }
     }
 
     public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
@@ -99,6 +106,10 @@ public class RessursHendelseForEventsourceService {
 
     public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.oppdaterPersonaliaEvent(new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)), createInputMetadata(dvhRessurs.getRawData()));
+    }
+
+    public void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.oppdaterSektorEvent(new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())), createInputMetadata(dvhRessurs.getRawData()));
     }
 
     public InputMetadata createInputMetadata(Object rawData) {
