@@ -7,6 +7,7 @@ on:
       - 'dev/**'
     paths:
       - 'apps/streams/kafka-api/api-ressurs-state/**'
+      - 'libs/contract-nom-dto/**'
       - '.nais/streams/kafka-api-ressurs-state.yaml'
       - '.github/*/streams-kafka-api-ressurs-state.yaml'
 
