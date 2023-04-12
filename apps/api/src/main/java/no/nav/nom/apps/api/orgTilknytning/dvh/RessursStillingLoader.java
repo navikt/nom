@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.orgTilknytning.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -39,10 +38,6 @@ public class RessursStillingLoader {
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
 
-//    @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
-
-
-
     private final Unleash unleash;
 
     public RessursStillingLoader(TokenRepository tokenRepository, DvhRepository dvhRepository, RestTemplate restTemplate, AppProperties appProperties,
@@ -74,12 +69,12 @@ public class RessursStillingLoader {
         }
     }
 
-    private List<DvhRessursStilling> load() {
+    protected List<DvhRessursStilling> load() {
         log.info("Laster ressursStillinger fra {}", appProperties.proxy().ressursStillingerPath());
         LocalDateTime start = LocalDateTime.now();
         val jsonRessursStillinger = dvhExchange(appProperties.proxy().ressursStillingerPath());
         val listField = jsonRessursStillinger.fields().next();
-        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), ((ArrayNode)listField.getValue()).size());
+        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
         List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
             .map(DvhRessursStilling::new)
             .collect(Collectors.toList());
@@ -111,7 +106,8 @@ public class RessursStillingLoader {
             var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
             if (log.isDebugEnabled()) {
                 StringBuffer sb = new StringBuffer("Perioder:");
-                sorted.forEach( rs -> log.debug("\n\t{} - {}", rs.getStillingDatoFom(), rs.getStillingDatoTom()));
+                sorted.forEach( rs -> sb.append("\n\t%s - %s".formatted(rs.getStillingDatoFom(), rs.getStillingDatoTom())));
+                log.debug(sb.toString());
             }
             LocalDate periodStart = sorted.get(0).getStillingDatoFom();
             LocalDate previousEnd = sorted.get(0).getStillingDatoTom();

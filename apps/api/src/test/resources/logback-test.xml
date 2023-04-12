@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-<!--    <logger name="no.nav.nom" level="debug" />-->
+    <logger name="no.nav.nom" level="DEBUG"/>
 
     <!-- Quiet down kafka logging -->
     <logger name="org.apache.kafka" level="warn" />
