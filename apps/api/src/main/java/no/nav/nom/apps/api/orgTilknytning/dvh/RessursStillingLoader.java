@@ -17,9 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -60,7 +64,12 @@ public class RessursStillingLoader {
             log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
 
             ressursStillingerGruppert.forEach((navident, rsList) -> {
-                strukturerNavidentensRessursStillinger(rsList);
+                log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
+                var stillingerGruppert = strukturerNavidentensRessursStillinger(rsList);
+                if (log.isDebugEnabled()) {
+                    log.debug("Resultat:");
+                    stillingerGruppert.forEach( s -> log.debug("\t{}", s));
+                }
             });
         }
     }
@@ -78,24 +87,76 @@ public class RessursStillingLoader {
         return ressursStillinger;
     }
 
-    private Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
+    public Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
         return ressursStillinger.stream()
             .filter(rs -> rs.getNavident().isPresent())
             .collect(groupingBy(rs -> rs.getNavident().get()));
     }
-    public void strukturerNavidentensRessursStillinger(List<DvhRessursStilling> ressursStillinger) {
+
+    public List<StillingPeriode> strukturerNavidentensRessursStillinger(List<DvhRessursStilling> ressursStillinger) {
         // Grupper per org tilknytning
         // Altså:
-        //      Per Stillingens - AgressoId+enhetNavn                           (stillingAgressoId/stillingOrgenhetNavn)
-        //      Splitt også på hva ressursen hadde som AgressoId på stillingen  (stillingRessursAgressoId)
+        //      A. Per Stillingens - AgressoId+enhetNavn         (stillingAgressoId/stillingOrgenhetNavn)
+        //      B. Splitt også på hva ressursen har nå orgenhet  (ressurs på orgenhet)
         //
-        //      Remedy enhet og ressurs orgenhet er nå-tid info, og skal kun vurderes på den stillingen som er nå
+        // TODO: Stemmer denne kommentaren?     Remedy enhet og ressurs orgenhet er nå-tid info, og skal kun vurderes på den stillingen som er nå
 
-        // grupper først på Stillingens - AgressoId+enhetNavn
-        //ressursStillinger.stream().collect(groupingBy( rs -> new StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn())
+        // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
+        var grupperteStillinger = ressursStillinger.stream().collect(groupingBy( rs -> new StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn(), rs.getRessursAgressoId(), rs.getRessursOrgenhetNiv())));
+        List<StillingPeriode> perioderGruppert = new ArrayList<>();
+
+        // Sorter og slå sammen sammenhengende perioder
+        grupperteStillinger.forEach( (stillingAgressoOrgIdOgNavn, grupperteRessursStillinger)  -> {
+            log.debug("Slår sammen for {}", stillingAgressoOrgIdOgNavn);
+            var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
+            if (log.isDebugEnabled()) {
+                StringBuffer sb = new StringBuffer("Perioder:");
+                sorted.forEach( rs -> log.debug("\n\t{} - {}", rs.getStillingDatoFom(), rs.getStillingDatoTom()));
+            }
+            LocalDate periodStart = sorted.get(0).getStillingDatoFom();
+            LocalDate previousEnd = sorted.get(0).getStillingDatoTom();
+            for (int i = 1; i < sorted.size(); i++) {
+                var rs = sorted.get(i);
+                var start = rs.getStillingDatoFom();
+                var end =  rs.getStillingDatoTom();
+                if(start.isEqual(previousEnd.plusDays(1))) {
+                    //Stillings raden er  med fortsettelse på forrige stilling - slå sammen
+                    previousEnd = end;
+                } else if (start.isAfter(previousEnd)){
+                    // Her er det brudd i stilling - Lag en orgtilknytning på forrige periode
+                    perioderGruppert.add(
+                        new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd)
+                    );
+                    periodStart = start;
+                    previousEnd = end;
+                } else {
+                    // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
+                    // Dette håndterer vi ikke per nå
+                    log.warn("Overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
+                }
+            }
+            // Siste RessursStilling er slått sammen
+            perioderGruppert.add(
+                new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd)
+            );
+        });
+        return perioderGruppert;
     }
 
-    record StillingAgressoOrgIdOgNavn(String id, String navn, String ressurs) {};
+    record StillingAgressoOrgIdOgNavn(Optional<String> agressoId, String enhetNavn, Optional<String> ressursAgressoId, Optional<String> ressursAgressoOrgNiv) {
+        @Override
+        public String toString() {
+            return "HRRES_STILLING[" + agressoId.orElse("NULL") + "-" + enhetNavn + "]/HRRES_RESSURS[" + ressursAgressoId.orElse("NULL") + "-" + ressursAgressoOrgNiv.orElse("NULL") + "]";
+        }
+    };
+
+    record StillingPeriode(StillingAgressoOrgIdOgNavn stilling, LocalDate gyldigFom, LocalDate gyldigTom) {
+        @Override
+        public String toString() {
+            return stilling.toString() + ": " + gyldigFom + " - " + gyldigTom;
+        }
+    }
+
 
     // Shameless duplication from DvhRestConsumer
     private JsonNode dvhExchange(String urlPath) {

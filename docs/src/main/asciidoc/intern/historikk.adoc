@@ -18,7 +18,7 @@ Data skal ses på i tre lag. Aggregerte operasjoner, tidslinjer, og samples.
     "h": 0,
     "op": "opprett enhet",
     "gyldigFom": "2020-01-01",
-    "gyldigTil": null,
+    "gyldigTom": null,
     "data": {
         "id": 4321,
         "navn": "NAV Oslo"
@@ -32,7 +32,7 @@ Data skal ses på i tre lag. Aggregerte operasjoner, tidslinjer, og samples.
     "h": 1,
     "op": "opprett enhet",
     "gyldigFom": "2020-01-01",
-    "gyldigTil": null,
+    "gyldigTom": null,
     "data": {
         "id": 1234,
         "navn": "NAV Helsfyr"
@@ -46,7 +46,7 @@ Data skal ses på i tre lag. Aggregerte operasjoner, tidslinjer, og samples.
     "h": 2,
     "op": "opprett kobling",
     "gyldigFom": "2020-01-01",
-    "gyldigTil": null,
+    "gyldigTom": null,
     "data": {
         "id": 300,
         "overEnhet": "4321",
@@ -61,7 +61,7 @@ Data skal ses på i tre lag. Aggregerte operasjoner, tidslinjer, og samples.
     "h": 3,
     "op": "endre kobling",
     "gyldigFom": "2020-05-10",
-    "gyldigTil": null,
+    "gyldigTom": null,
     "data": {
         "id": 300,
         "overEnhet": "1234",
