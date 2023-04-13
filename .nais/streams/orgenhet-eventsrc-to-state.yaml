@@ -11,8 +11,6 @@ spec:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
   port: 8080
-  ingresses:
-    - https://nom-orgenhet-eventsrc-to-state.dev.intern.nav.no
   replicas:
     min: 1
     max: 1
