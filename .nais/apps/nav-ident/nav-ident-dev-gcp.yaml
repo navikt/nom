@@ -18,7 +18,8 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://nav-ident.dev.intern.nav.no
+    - https://nav-ident.intern.dev.nav.no
+    - https://nav-ident.dev.intern.nav.no   # Deprecate this
   webproxy: true
   leaderElection: false
   replicas:

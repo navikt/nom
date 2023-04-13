@@ -1,5 +1,6 @@
 ingresses:
-  - https://nom-unit4.dev.intern.nav.no
+  - https://nom-unit4.dev.intern.nav.no   # deprecate this
+  - https://nom-unit4.intern.dev.nav.no
 kafka-pool: nav-dev
 env:
   - name: SPRING_PROFILES_ACTIVE

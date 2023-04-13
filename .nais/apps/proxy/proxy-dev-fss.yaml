@@ -46,7 +46,8 @@ spec:
           cluster: dev-gcp
   webproxy: true
   ingresses:
-    - https://nom-proxy.dev.intern.nav.no
+    - https://nom-proxy.dev.intern.nav.no   # deprecate this
+    - https://nom-proxy.intern.dev.nav.no
     - https://nom-proxy.dev-fss-pub.nais.io
   replicas:
     min: 2

@@ -16,7 +16,8 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - https://nom-api.dev.intern.nav.no
+    - https://nom-api.dev.intern.nav.no   # Deprecate this
+    - https://nom-api.intern.dev.nav.no
   replicas:
     min: 2
     max: 2
