@@ -96,6 +96,8 @@ public class RessursStillingLoader {
         //
         // TODO: Stemmer denne kommentaren?     Remedy enhet og ressurs orgenhet er nå-tid info, og skal kun vurderes på den stillingen som er nå
 
+        // TODO: Hva med primærtilknytning?
+
         // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
         var grupperteStillinger = ressursStillinger.stream().collect(groupingBy( rs -> new StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn(), rs.getRessursAgressoId(), rs.getRessursOrgenhetNiv())));
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
