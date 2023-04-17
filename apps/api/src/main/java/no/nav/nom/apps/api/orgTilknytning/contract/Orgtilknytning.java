@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgTilknytning.contract;
+package no.nav.nom.apps.api.orgtilknytning.contract;
 
 import java.time.LocalDate;
 import java.util.Optional;

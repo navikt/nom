@@ -38,7 +38,7 @@ public class OrgEnhetStateRepository {
     }
 
     public List<OrgEnhetState> findByIdIn(List<String> ids) {
-        return orgEnhetByFid.entrySet().stream()
+        return orgEnhetById.entrySet().stream()
             .filter( e -> ids.contains(e.getKey()))
             .map(Map.Entry::getValue)
             .collect(Collectors.toList());

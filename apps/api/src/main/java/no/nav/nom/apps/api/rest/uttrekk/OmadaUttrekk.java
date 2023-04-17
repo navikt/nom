@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.orgTilknytning.OrgtilknytningDvhService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;

@@ -1,10 +1,10 @@
-package no.nav.nom.apps.api.orgTilknytning;
+package no.nav.nom.apps.api.orgtilknytning;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 
 import java.time.LocalDate;
 import java.util.Optional;

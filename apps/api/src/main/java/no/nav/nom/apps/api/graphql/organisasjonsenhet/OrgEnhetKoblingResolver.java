@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;

@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgTilknytning.DvhOrgtilknytning;
-import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -23,10 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController

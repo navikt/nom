@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgTilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.getunleash.Unleash;

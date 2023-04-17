@@ -34,13 +34,13 @@ public class OrgEnhetStateListener {
 
     public OrgEnhetStateListener(
         @Value("${app.kafka.orgEnhet.stateTopic}") String stateTopic,
-        OrgEnhetStateRepository ressursStateService,
+        OrgEnhetStateRepository orgEnhetStateService,
         Admin adminClient, LuceneService luceneService,
         KafkaAdmin admin,
         KafkaProperties kafkaProperties
     ) {
         this.stateTopic = stateTopic;
-        this.orgEnhetStateService = ressursStateService;
+        this.orgEnhetStateService = orgEnhetStateService;
         this.adminClient = adminClient;
         this.kafkaProperties = kafkaProperties;
         this.luceneService = luceneService;

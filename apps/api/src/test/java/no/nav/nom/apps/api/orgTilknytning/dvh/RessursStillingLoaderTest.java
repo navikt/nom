@@ -1,8 +1,7 @@
-package no.nav.nom.apps.api.orgTilknytning.dvh;
+package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
-import no.nav.nom.apps.api.graphql.search.SearchResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.orgTilknytning.dvh.RessursStillingLoader.UNLEASH_LAST_NY_ORGTILKNYTNING;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader.UNLEASH_LAST_NY_ORGTILKNYTNING;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Tester gruppering og periodisering av RessursStillinger fra DVH")

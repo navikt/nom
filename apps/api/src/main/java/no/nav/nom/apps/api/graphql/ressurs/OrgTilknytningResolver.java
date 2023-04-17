@@ -2,9 +2,8 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
-import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
-import no.nav.nom.apps.api.orgTilknytning.contract.OrgtilknytningService;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 @Component

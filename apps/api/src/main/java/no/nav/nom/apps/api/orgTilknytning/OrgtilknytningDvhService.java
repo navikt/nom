@@ -1,8 +1,8 @@
-package no.nav.nom.apps.api.orgTilknytning;
+package no.nav.nom.apps.api.orgtilknytning;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.orgTilknytning.contract.Orgtilknytning;
-import no.nav.nom.apps.api.orgTilknytning.contract.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import org.springframework.stereotype.Service;
 

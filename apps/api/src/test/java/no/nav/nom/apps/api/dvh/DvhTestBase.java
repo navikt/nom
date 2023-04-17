@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.dvh;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
-import no.nav.nom.apps.api.orgTilknytning.contract.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
