@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.eventsourcing.postgresql;
+package no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

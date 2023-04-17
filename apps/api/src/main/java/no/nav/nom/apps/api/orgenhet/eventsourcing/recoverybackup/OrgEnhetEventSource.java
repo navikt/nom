@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.eventsourcing.postgresql;
+package no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
@@ -18,13 +18,13 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Builder
-@Table(name = "T_RESSURS_EVENTSOURCE")
+@Table(name = "T_ORGENHET_EVENTSOURCE")
 @AllArgsConstructor
 @NoArgsConstructor
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
-public class RessursEventSource {
+public class OrgEnhetEventSource {
     @Id
     @Column(name = "EVENT_KEY", nullable = false, updatable = false)
     private String eventKey;

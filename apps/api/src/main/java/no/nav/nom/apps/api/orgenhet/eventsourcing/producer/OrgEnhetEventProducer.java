@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.postgresql.OrgEnhetEventSource;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.postgresql.OrgEnhetEventSourceRepository;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSource;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSourceRepository;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
