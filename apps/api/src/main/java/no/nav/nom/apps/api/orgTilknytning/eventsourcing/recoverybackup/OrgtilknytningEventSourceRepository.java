@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgTilknytning.eventsourcing.recoverybackup;
+package no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

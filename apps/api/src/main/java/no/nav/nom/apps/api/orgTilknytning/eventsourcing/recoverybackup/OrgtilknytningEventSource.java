@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgTilknytning.eventsourcing.recoverybackup;
+package no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
