@@ -24,8 +24,15 @@ async function initVendorStorage() {
 
     const bodies: Record<string, any> = {};
     for (const s of Object.keys(fetches)) {
-      // eslint-disable-next-line unicorn/no-await-expression-member
-      bodies[s] = (await fetches[s]).text();
+      try {
+        // eslint-disable-next-line unicorn/no-await-expression-member
+        bodies[s] = (await fetches[s]).text();
+      } catch (e) {
+        console.error(
+          { err: e, graphqlsrc: s, graphqlsrcUrl: graphiqlSource[s] },
+          "Error during vendoring of graphiql"
+        );
+      }
     }
     await Promise.allSettled(Object.values(bodies));
 
@@ -111,6 +118,7 @@ export function setupGqlPlaygroundProxy(app: Express) {
   app.get("/nom-gql-graphiql", (request, response) => {
     if (!vendorStorage) {
       response.status(404).send("graphiql currently unavailable");
+      return;
     }
     response.send(htmlForGqlGraphiql);
   });
@@ -118,8 +126,13 @@ export function setupGqlPlaygroundProxy(app: Express) {
   for (const s of Object.keys(graphiqlSource)) {
     const path = extractPath(graphiqlSource[s]);
     app.get("/vendor" + path, (request, response) => {
+      const out = vendorStorage[s];
+      if (!out) {
+        response.send(404).send(`${s} not found`);
+        return;
+      }
       const mimeType = getMimeType(path);
-      response.type(mimeType).send(vendorStorage[s]);
+      response.type(mimeType).send(out);
     });
   }
 }
