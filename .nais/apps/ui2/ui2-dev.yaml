@@ -31,6 +31,7 @@ spec:
           cluster: dev-gcp
       external:
         - host: teamkatalog-api.dev-fss-pub.nais.io
+        - host: unpkg.com
   ingresses:
     - https://nom-ui2.dev.intern.nav.no   # deprecate this
     - https://nom-ui2.intern.dev.nav.no
