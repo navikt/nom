@@ -84,6 +84,9 @@ spec:
         - application: amt-tiltak
           namespace: amt
           cluster: prod-gcp
+        - application: amt-person-service
+          namespace: amt
+          cluster: prod-gcp
         - application: modiapersonoversikt-api
           namespace: personoversikt
           cluster: prod-fss

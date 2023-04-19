@@ -92,6 +92,9 @@ spec:
         - application: amt-tiltak
           namespace: amt
           cluster: dev-gcp
+        - application: amt-person-service
+          namespace: amt
+          cluster: dev-gcp
         - application: remedy-identrutina
           namespace: default
           cluster: dev-fss
