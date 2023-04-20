@@ -26,17 +26,12 @@ public class SearchResolver {
     private final OrgenhetService orgenhetService;
     private final LuceneService luceneService;
 
-    public static final String UNLEASH_LUCENE_TOGGLE = "nom.ressurs.lucene_search_toggle";
-
-    private final Unleash unleash;
-
     public SearchResolver(IRessursService ressursService,
                           OrgenhetService orgenhetService,
                           LuceneService luceneService, Unleash unleash) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.luceneService = luceneService;
-        this.unleash = unleash;
     }
 
     public List<Object> search(String term_inp, RessursSearchFilter ressursSearchFilter, OrgEnhetSearchFilter orgEnhetSearchFilter) {

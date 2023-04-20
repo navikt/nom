@@ -92,7 +92,6 @@ public abstract class TestBase {
         kafkaUtils.clearKafka();
         ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
-        luceneEnabled(false);
     }
 
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
@@ -140,9 +139,5 @@ public abstract class TestBase {
 
     protected void createRessursHendelseEventSource(RessursState ressursState) {
         kafkaUtils.send(ressursState.fid(), ressursState);
-    }
-
-    protected void luceneEnabled(boolean toggle) {
-        Mockito.when(unleash.isEnabled(SearchResolver.UNLEASH_LUCENE_TOGGLE)).thenReturn(toggle);
     }
 }

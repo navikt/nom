@@ -121,7 +121,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario51() {
-        luceneEnabled(true);
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
@@ -141,8 +140,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
     public void scenario61() {
-        luceneEnabled(true);
-
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();
         final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("Not-to-find").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
@@ -165,7 +162,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario52() {
-        luceneEnabled(true);
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
 
         createRessursHendelseEventSource("1");
@@ -188,7 +184,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk etter orgenhet")
     public void scenario71() {
-        luceneEnabled(true);
         var passedDate = LocalDate.now().minusMonths(1L);
         final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
         final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn").build();
@@ -230,7 +225,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk etter orgenhet orgniv filter")
     public void scenario71_orgniv() {
-        luceneEnabled(true);
         final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
         final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavnet").build();
         final var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn")
@@ -256,9 +250,6 @@ public class SearchTest extends GraphQLTestBase {
 
         assertThat(all.toString(), containsString("test"));
         assertThat(all.size(), equalTo(2));
-
-
-
     }
 
 }
