@@ -1,14 +1,16 @@
 package no.nav.nom.apps.api.dvh.orgtilknytning;
 
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
-import no.nav.nom.apps.api.DvhRessursUtils;
 import no.nav.nom.apps.api.dvh.DvhTestBase;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -20,6 +22,11 @@ import static org.junit.Assert.assertTrue;
 
 
 public class OrgtilknytningTest extends DvhTestBase {
+
+    @Autowired
+    protected OrgtilknytningDvhService orgtilknytningDvhService;
+    @Autowired
+    protected OrgtilknytningStateService orgtilknytningStateService;
 
     @Test
     @DisplayName("Leser orgtilknytning fra DVH")
@@ -39,8 +46,9 @@ public class OrgtilknytningTest extends DvhTestBase {
             )
         );
         loadFromDvh();
+        // TODO: Test evtsrc generering, og test service metoder
 
-        Assertions.assertEquals(1, orgtilknytningService.getKoblingerByNavIdent(ressursState.navident()).size());
+        Assertions.assertEquals(1, orgtilknytningDvhService.getKoblingerByNavIdentOld(ressursState.navident()).size());
     }
 
     @Test
@@ -68,8 +76,9 @@ public class OrgtilknytningTest extends DvhTestBase {
             )
         );
         loadFromDvh();
+        // TODO: Test evtsrc generering, og test service metoder
 
-        Assertions.assertEquals(1, orgtilknytningService.getKoblingerByNavIdent(ressursState.navident()).size());
+        Assertions.assertEquals(1, orgtilknytningDvhService.getKoblingerByNavIdentOld(ressursState.navident()).size());
     }
 
     @Test
@@ -98,8 +107,9 @@ public class OrgtilknytningTest extends DvhTestBase {
             )
         );
         loadFromDvh();
+        // TODO: Test evtsrc generering, og test service metoder
 
-        Assertions.assertEquals(2, orgtilknytningService.getKoblingerByNavIdent(ressursState.navident()).size());
+        Assertions.assertEquals(2, orgtilknytningDvhService.getKoblingerByNavIdentOld(ressursState.navident()).size());
     }
 
     @Test

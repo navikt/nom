@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -8,9 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import org.apache.commons.csv.CSVFormat;
@@ -34,22 +36,31 @@ import java.time.format.DateTimeFormatter;
 @RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
 
+
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
 
     private final OrgtilknytningDvhService orgtilknytningDvhService;
+    private final OrgtilknytningStateService orgtilknytningStateService;
 
     private final DvhRepository dvhRepository;
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
+    private final Unleash unleash;
 
-    public OmadaUttrekk(IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService, DvhRepository dvhRepository) {
+    public OmadaUttrekk(IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService,
+                        OrgtilknytningStateService orgtilknytningStateService,
+                        DvhRepository dvhRepository, Unleash unleash
+    ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningDvhService = orgtilknytningDvhService;
+        this.orgtilknytningStateService = orgtilknytningStateService;
         this.dvhRepository = dvhRepository;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -104,7 +115,7 @@ public class OmadaUttrekk {
 
         try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
 
-            orgtilknytningDvhService.getAllKoblinger().forEach(kobling -> {
+            orgtilknytningDvhService.getAllKoblingerOld().forEach(kobling -> {
                 try {
                     printer.printRecord(
                         kobling.getNavIdent(),

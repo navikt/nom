@@ -1,10 +1,12 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +24,29 @@ import static java.util.stream.Collectors.toMap;
 
 public class OrgTilknytningResolver {
 
-    private final OrgtilknytningService orgtilknytningService;
+    private final OrgtilknytningService orgtilknytningStateService;
+    private final OrgtilknytningDvhService orgtilknytningDvhService;
     private final IOrgenhetService orgenhetService;
 
+    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
+    private final Unleash unleash;
+
     @Autowired
-    public OrgTilknytningResolver(OrgtilknytningService orgtilknytningService, IOrgenhetService orgenhetService) {
-        this.orgtilknytningService = orgtilknytningService;
+    public OrgTilknytningResolver(
+        OrgtilknytningService orgtilknytningStateService, OrgtilknytningDvhService orgtilknytningDvhService, IOrgenhetService orgenhetService,
+        Unleash unleash
+    ) {
+        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.orgenhetService = orgenhetService;
+        this.unleash = unleash;
     }
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
         return ressurser.stream()
                 .collect(toMap(
                         Function.identity(),
-                        ressurs -> orgtilknytningService.getKoblingerByNavIdent(ressurs.getNavIdent())
+                        ressurs -> orgtilknytningDvhService.getKoblingerByNavIdentOld(ressurs.getNavIdent())
                                 .stream()
                                 .map(kobling -> this.fromDvhKobling(kobling))
                                 .toList()

@@ -1,9 +1,11 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,18 +35,33 @@ public class OrgtilknytningDvhService implements OrgtilknytningService {
     }
 
     @Override
-    public Collection<Orgtilknytning> getAllKoblinger() {
+    public Collection<OrgtilknytningState> getAllKoblinger() {
+        throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
+    }
+
+    @Override
+    public List<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
+        throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
+    }
+
+    @Override
+    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+        throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
+    }
+
+    @Override
+    public Collection<Orgtilknytning> getAllKoblingerOld() {
         return this.navidentKoblingMap.values().stream().flatMap(Collection::stream).toList();
     }
 
     @Override
-    public List<Orgtilknytning> getKoblingerByNavIdent(String navIdent) {
+    public List<Orgtilknytning> getKoblingerByNavIdentOld(String navIdent) {
         var hit = this.navidentKoblingMap.get(navIdent);
         return hit == null ? Collections.emptyList() : hit;
     }
 
     @Override
-    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<Orgtilknytning, T> transformer) {
+    public <T> Map<String, List<T>> getKoblingerByNavidenterOld(Set<String> navidenter, Function<Orgtilknytning, T> transformer) {
         return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
             var value = this.navidentKoblingMap.get(navident);
             return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
@@ -84,6 +101,4 @@ public class OrgtilknytningDvhService implements OrgtilknytningService {
             this.agressoIdComboKoblingMap.put(key, newList);
         }
     }
-
-
 }

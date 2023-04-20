@@ -1,11 +1,13 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
-import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
+import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -30,13 +32,24 @@ public class LederResolver {
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
-    private final OrgtilknytningService orgtilknytningService;
+    private final OrgtilknytningService orgtilknytningStateService;
+    private final OrgtilknytningDvhService orgtilknytningDvhService;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService) {
+
+    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
+    private final Unleash unleash;
+
+    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService,
+                         OrgtilknytningService orgtilknytningStateService,
+                         OrgtilknytningDvhService orgtilknytningDvhService,
+                         Unleash unleash
+    ) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
-        this.orgtilknytningService = orgtilknytningService;
+        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningDvhService = orgtilknytningDvhService;
+        this.unleash = unleash;
     }
 
     public <T> Map<Ressurs, List<T>> load(Collection<Ressurs> ressurser, Function<Ressurs, List<T>> loader) {
@@ -57,7 +70,7 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        return orgtilknytningService.getKoblingerByNavIdent(navIdent)
+        return orgtilknytningDvhService.getKoblingerByNavIdentOld(navIdent)
                 .stream()
                 .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom().orElse(null)))
                 .filter(distinctByKey(k -> k.getAgressoId() + k.getOrgNiv()))
