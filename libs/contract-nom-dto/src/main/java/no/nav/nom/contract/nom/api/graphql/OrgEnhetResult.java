@@ -8,7 +8,6 @@ import lombok.Value;
 @Builder
 @AllArgsConstructor
 public class OrgEnhetResult {
-
     ResultCode code;
     String id;
     String orgNiv;

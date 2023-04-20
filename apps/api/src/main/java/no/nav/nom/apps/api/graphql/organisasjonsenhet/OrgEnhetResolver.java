@@ -27,6 +27,9 @@ public class OrgEnhetResolver {
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch search) {
+        if( search.getId() != null){
+            return orgenhetService.getById(search.getId()).map(OrgEnhetResolver::convertToOrgEnhet);
+        }
         if (search.getAgressoId() != null && search.getOrgNiv() != null) {
             return orgenhetService.getEnhetByAgressoIdNivaAndName(search.getAgressoId(), search.getOrgNiv(), search.getNavn())
                     .map(OrgEnhetResolver::convertToOrgEnhet);
@@ -35,29 +38,19 @@ public class OrgEnhetResolver {
     }
 
     public List<OrgEnhetResult> orgEnheter(OrgEnheterSearch search) {
-        Stream<IOrgenhet> result;
-        final var agressoIder = search.resolveAgressoIder();
-        if (agressoIder.isEmpty()) {
-            result = orgenhetService.getAllEnheter().stream();
-        } else {
-            result = orgenhetService.findEnheterByAgressoIdIn(agressoIder).stream();
+
+        final var ider = search.resolveIder();
+        if(ider.isEmpty()){
+            return orgenheterByAgressoData(search);
         }
 
-        final var orgNiv = search.getOrgNiv();
-        final var orgenhetkategori = search.resolveOrgEnhetsKategori()
-                .stream()
-                .map(OrgEnhetsKategori::valueOf)
-                .collect(Collectors.toSet());
-        final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
-                .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getOrgEnhetsKategori().orElse(null)))
-                .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
-                .map(OrgEnhetResolver::convertToOrgEnhet)
-                .map(OrgEnhetResult::new)
-                .collect(toList());
+        final var orgenhetkategori = search.resolveOrgEnhetsKategoriEnum();
 
-        orgEnhetResults.addAll(agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv)).toList());
-
-        return orgEnhetResults;
+        final var mapResult = orgenhetService.getByIdBulk(ider.stream().toList());
+        return mapResult.values().stream()
+            .map(OrgEnhetResolver::convertToOrgEnhet)
+            .filter(oe -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(oe.getOrgEnhetsKategori()))
+            .map(OrgEnhetResult::new).toList();
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
@@ -78,6 +71,28 @@ public class OrgEnhetResolver {
                 .orgEnhetsKategori(orgenhet.getOrgEnhetsKategori().orElse(null))
                 .orgEnhetsType(orgenhet.getOrgEnhetsType().orElse(null))
                 .build();
+    }
+
+    private List<OrgEnhetResult> orgenheterByAgressoData(OrgEnheterSearch search){
+        Stream<IOrgenhet> result;
+        final var agressoIder = search.resolveAgressoIder();
+        if (agressoIder.isEmpty()) {
+            result = orgenhetService.getAllEnheter().stream();
+        } else {
+            result = orgenhetService.findEnheterByAgressoIdIn(agressoIder).stream();
+        }
+
+        final var orgNiv = search.getOrgNiv();
+        final var orgenhetkategori = search.resolveOrgEnhetsKategoriEnum();
+        final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
+            .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getOrgEnhetsKategori().orElse(null)))
+            .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
+            .map(OrgEnhetResolver::convertToOrgEnhet)
+            .map(OrgEnhetResult::new)
+            .collect(toList());
+
+        orgEnhetResults.addAll(agressoIder.stream().map(id -> new OrgEnhetResult(id, orgNiv)).toList());
+        return orgEnhetResults;
     }
 
 }

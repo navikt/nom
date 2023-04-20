@@ -33,12 +33,14 @@ input OrgEnhetSearch {
     agressoId: String
     orgNiv: String
     navn: String
+    id: String
 }
 
 input OrgEnheterSearch {
     agressoIder: [String!]
     orgEnhetsKategori: [OrgEnhetsKategori!]
     orgNiv: String
+    ider: [String!]
 }
 
 input RessursSearch {

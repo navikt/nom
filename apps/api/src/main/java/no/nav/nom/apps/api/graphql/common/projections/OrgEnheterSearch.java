@@ -1,8 +1,10 @@
 package no.nav.nom.apps.api.graphql.common.projections;
 
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import org.springframework.data.web.ProjectedPayload;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptySet;
 
@@ -20,6 +22,8 @@ public interface OrgEnheterSearch {
 
     String getOrgNiv();
 
+    Set<String> getIder();
+
     default Set<String> resolveAgressoIder() {
         if (getAgressoIder() == null) {
             return emptySet();
@@ -32,6 +36,20 @@ public interface OrgEnheterSearch {
             return emptySet();
         }
         return getOrgEnhetsKategori();
+    }
+
+    default Set<OrgEnhetsKategori> resolveOrgEnhetsKategoriEnum() {
+        return this.resolveOrgEnhetsKategori()
+            .stream()
+            .map(OrgEnhetsKategori::valueOf)
+            .collect(Collectors.toSet());
+    }
+
+    default Set<String> resolveIder() {
+        if (getIder() == null){
+            return emptySet();
+        }
+        return getIder();
     }
 
     static OrgEnheterSearch emptyOrgEnheterSearch() {
@@ -49,6 +67,11 @@ public interface OrgEnheterSearch {
             @Override
             public String getOrgNiv() {
                 return null;
+            }
+
+            @Override
+            public Set<String> getIder() {
+                return emptySet();
             }
         };
     }

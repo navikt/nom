@@ -50,7 +50,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+        final var evAgg = dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
+        orgEnhetStateRepository.putEventAggregate(evAgg);
 
         final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql")
             .path("organisasjonsenhet")
@@ -59,6 +60,13 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         assertEquals(mockedEnhet.getORGENHET_KODE(), outputEnhet.getAgressoId());
         assertEquals(mockedEnhet.getENHETTYPE_NAVN(), outputEnhet.getAgressoOrgenhetType());
+
+        final var outputEnhet2 = postForResource("organisasjonsenhet/scenario13.graphql")
+            .path("orgEnhet")
+            .entity(OrgEnhet.class)
+            .get();
+
+        assertEquals(evAgg.id(),outputEnhet2.getId());
     }
 
     @Test

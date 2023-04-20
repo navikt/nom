@@ -9,4 +9,6 @@ public interface OrgEnhetSearch {
     String getOrgNiv();
 
     String getNavn();
+
+    String getId();
 }

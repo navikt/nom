@@ -1,0 +1,6 @@
+query {
+    orgEnhet(where: {id: "ID_1"}) {
+        id
+        navn
+    }
+}
