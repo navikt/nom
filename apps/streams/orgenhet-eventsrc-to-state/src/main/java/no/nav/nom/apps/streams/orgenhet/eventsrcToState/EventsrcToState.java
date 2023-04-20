@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -57,6 +58,7 @@ class EventsrcToState {
         Optional<String> overordnetOrgEnhetFid = Optional.ofNullable(eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null);
         Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null);
         Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsKategori") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("orgEnhetsKategori").asText()) : null);
+        Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
 
         // Agresso data
         var additionalData = Optional.ofNullable(eventStateAggregate.hasNonNull("additionalData") ? eventStateAggregate.get("additionalData") : null);
@@ -74,6 +76,7 @@ class EventsrcToState {
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
                 overordnetOrgEnhetFid,
                 lederFid,
+                orgEnhetsType,
                 orgEnhetsKategori,
                 uniqueAgressoId,
                 agressoId,

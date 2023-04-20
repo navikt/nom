@@ -71,7 +71,8 @@ public class EventsrcToStateTest {
                 eventData.navn(),
                 eventData.gyldigFom(),
                 Optional.empty(),
-                Optional.ofNullable(eventData.orgEnhetsKategori())
+                Optional.ofNullable(eventData.orgEnhetsKategori()),
+                Optional.empty()
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);

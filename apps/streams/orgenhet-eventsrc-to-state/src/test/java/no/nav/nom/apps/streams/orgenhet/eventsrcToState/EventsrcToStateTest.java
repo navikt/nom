@@ -74,6 +74,7 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 eventData.overordnetOrgEnhetFid(),
                 eventData.lederRessursFid(),
+                Optional.empty(),
                 Optional.ofNullable(eventData.orgEnhetsKategori()),
                 Optional.ofNullable(additionalData.uniqueAgressoId()),
                 Optional.ofNullable(additionalData.agressoId()),

@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -24,6 +25,8 @@ public interface IOrgenhet {
     Optional<LocalDate> getGyldigTom();
 
     Optional<OrgEnhetsKategori> getOrgEnhetsKategori();
+
+    Optional<OrgEnhetsType> getOrgEnhetsType();
 
     String getUniqueAgressoId();
 

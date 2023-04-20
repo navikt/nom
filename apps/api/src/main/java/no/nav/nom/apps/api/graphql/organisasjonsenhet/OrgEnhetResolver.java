@@ -76,6 +76,7 @@ public class OrgEnhetResolver {
                 .gyldigFom(orgenhet.getGyldigFom())
                 .gyldigTom(orgenhet.getGyldigTom().orElse(null))
                 .orgEnhetsKategori(orgenhet.getOrgEnhetsKategori().orElse(null))
+                .orgEnhetsType(orgenhet.getOrgEnhetsType().orElse(null))
                 .build();
     }
 

@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeResolver;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
@@ -52,6 +53,7 @@ public class DvhRestConsumer {
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
     private final Environment environment;
+    private final OrgEnhetTypeResolver orgEnhetTypeResolver;
 
     private final RessursStillingLoader ressursStillingLoader;
 
@@ -70,6 +72,9 @@ public class DvhRestConsumer {
 
         }
         loadKoblingerLedereOgTlfFromDvh();
+
+        //TODO: Foreløpig setted den bak loadKoblinger siden den er avhengig at koblinger er til stede.
+        resolveOrgEnhetsTypes();
     }
 
     @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
@@ -261,6 +266,10 @@ public class DvhRestConsumer {
     private String getAsText(JsonNode e, String field) {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
+    }
+
+    private void resolveOrgEnhetsTypes(){
+        orgEnhetTypeResolver.mapOrgEnhetType();
     }
 
 }

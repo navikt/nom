@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +67,20 @@ public class DvhOrgEnhetMockUtils {
         String agressoNiv = dvhMock.getORGNODE_NIV();
         String agressoType = dvhMock.getENHETTYPE_NAVN();
         String uniqueAgressoId = agressoId + "-" + agressoNavn + "-" + agressoNiv;
-        return new OrgEnhetState("FID_" + nr, "ID_" + nr, agressoNavn, fromDate, toDate, Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(uniqueAgressoId), Optional.of(agressoId), Optional.of(agressoNiv), Optional.of(agressoType));
+        OrgEnhetsType orgenhetstype = dvhMock.getORGENHET_TYPE();
+        return new OrgEnhetState(
+            "FID_" + nr,
+            "ID_" + nr,
+            agressoNavn,
+            fromDate,
+            toDate,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.ofNullable(orgenhetstype),
+            Optional.empty(),
+            Optional.of(uniqueAgressoId),
+            Optional.of(agressoId),
+            Optional.of(agressoNiv),
+            Optional.of(agressoType));
     }
 }

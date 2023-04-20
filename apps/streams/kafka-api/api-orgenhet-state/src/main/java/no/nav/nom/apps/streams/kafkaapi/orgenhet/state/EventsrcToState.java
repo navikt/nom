@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v2.OrgEnhetState;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import org.apache.kafka.common.serialization.Serdes;
@@ -55,6 +56,7 @@ class EventsrcToState {
 
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
         Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsKategori") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("orgEnhetsKategori").asText()) : null);
+        Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
 
         try {
             return new OrgEnhetState(
@@ -62,7 +64,8 @@ class EventsrcToState {
                 eventStateAggregate.get("navn").asText(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                orgEnhetsKategori
+                orgEnhetsKategori,
+                orgEnhetsType
             );
         } catch (Exception e){
             log.error("Error mapping to OrgEnhetState", e);

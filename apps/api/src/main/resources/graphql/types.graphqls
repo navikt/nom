@@ -11,6 +11,7 @@ type OrgEnhet {
     koblinger: [OrgEnhetsKobling!]!
     orgEnhetsKategori: OrgEnhetsKategori
     type: Kode
+    orgEnhetsType: OrgEnhetsType
 }
 
 type Organisering {
@@ -117,4 +118,9 @@ enum OrgEnhetsKategori {
     LINJEENHET
     DRIFTSENHET
     ARBEIDSOMRAADE
+}
+
+enum OrgEnhetsType {
+    DIR
+    ETAT
 }

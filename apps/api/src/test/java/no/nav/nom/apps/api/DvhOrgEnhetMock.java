@@ -3,6 +3,7 @@ package no.nav.nom.apps.api;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 
@@ -31,6 +32,8 @@ public class DvhOrgEnhetMock {
     private String LEDER_RESSURSNR;
     @JsonProperty("LASTET_DATO")
     private LocalDate LASTET_DATO;
+    @JsonProperty("ORGENHET_TYPE")
+    private OrgEnhetsType ORGENHET_TYPE;
 
     public static DvhOrgEnhetMockBuilder getBuilderWithDefault() {
         return DvhOrgEnhetMock.builder()

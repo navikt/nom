@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgenhet.implementations;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 
 import java.time.LocalDate;
@@ -57,5 +58,10 @@ public class OrgEnhet implements IOrgenhet {
     @Override
     public String getUniqueAgressoId() {
         return orgEnhetState.uniqueAgressoId().orElse(null);
+    }
+
+    @Override
+    public Optional<OrgEnhetsType> getOrgEnhetsType() {
+        return orgEnhetState.orgEnhetsType();
     }
 }

@@ -3,6 +3,7 @@ package no.nav.nom.contract.nom.api.graphql;
 import lombok.Builder;
 import lombok.Value;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 
@@ -18,4 +19,5 @@ public class OrgEnhet {
     LocalDate gyldigTom;
     Kode type;
     OrgEnhetsKategori orgEnhetsKategori;
+    OrgEnhetsType orgEnhetsType;
 }

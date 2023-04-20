@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeResolver;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +24,13 @@ public class DvhLast {
 
     private final DvhRestConsumer dvhRestConsumer;
     private final DvhDataLoader dvhDataLoader;
+    private final OrgEnhetTypeResolver orgEnhetTypeResolver;
 
 
-    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader) {
+    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeResolver orgEnhetTypeResolver) {
         this.dvhRestConsumer = dvhRestConsumer;
         this.dvhDataLoader = dvhDataLoader;
+        this.orgEnhetTypeResolver = orgEnhetTypeResolver;
     }
 
     @Operation(
@@ -66,6 +69,18 @@ public class DvhLast {
         triggerKoblingerOgLederLast();
     }
 
+    @Operation(
+        description = "Start last av typer for orgenheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/resolveOrgEnhetsTyper")
+    public void resolveOrgEnhetsTyper() {
+        triggerOrgEnhetsTypeLast();
+    }
+
     @Async
     public void triggerRessursLast() {
         dvhRestConsumer.loadRessurserFromDvh();
@@ -79,5 +94,10 @@ public class DvhLast {
     @Async
     public void triggerKoblingerOgLederLast() {
         dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+    }
+
+    @Async
+    public void triggerOrgEnhetsTypeLast(){
+        orgEnhetTypeResolver.mapOrgEnhetType();
     }
 }

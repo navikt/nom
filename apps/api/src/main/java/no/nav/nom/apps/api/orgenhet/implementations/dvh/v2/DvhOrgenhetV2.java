@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -87,6 +88,11 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
     @Override
     public Optional<OrgEnhetsKategori> getOrgEnhetsKategori() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<OrgEnhetsType> getOrgEnhetsType() {
         return Optional.empty();
     }
 

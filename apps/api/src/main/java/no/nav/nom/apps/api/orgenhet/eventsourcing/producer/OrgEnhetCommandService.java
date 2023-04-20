@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
@@ -11,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -110,6 +112,16 @@ public class OrgEnhetCommandService {
                 korrigerOrgEnhet.inputMetadata(),
                 additionalAgressoData
                 ));
+    }
+
+    public ListenableFuture<SendResult<String, OrgEnhetEvent>> endreOrgEnhetsType(String fid, EndreOrgEnhetsType endreOrgEnhetsType) {
+        return eventProducer.sendMessage(new OrgEnhetTypeEndretEventV1(
+            fid,
+            new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(
+                endreOrgEnhetsType.orgEnhetsType()
+            ),
+            endreOrgEnhetsType.inputMetadata()
+        ));
     }
 
 }

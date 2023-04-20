@@ -37,6 +37,7 @@ public class MappingUtils {
                 .gyldigFom(orgEnhet.getGyldigFom())
                 .gyldigTom(orgEnhet.getGyldigTom().orElse(null))
                 .orgEnhetsKategori(orgEnhet.getOrgEnhetsKategori().orElse(null))
+                .orgEnhetsType(orgEnhet.getOrgEnhetsType().orElse(null))
                 .build();
     }
 
