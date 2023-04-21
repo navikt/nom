@@ -253,7 +253,7 @@ public class DvhRestConsumer {
     private boolean validateKobling(JsonNode e) {
         final var validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO") && e.hasNonNull("ORGENHET");
         if (!validate) {
-            log.info(
+            log.debug(
                     "Ugyldig kobling fra dvh, NAV_ID: {}, ORGENHET: {}, FRA_DATO: {}",
                     getAsText(e, "NAV_ID"),
                     getAsText(e, "ORGENHET"),

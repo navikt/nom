@@ -143,7 +143,7 @@ public class OrgEnhetTypeResolver {
             }
         }
 
-        logger.warn("Kunne ikke finne overordnet for orgenhet {}", orgEnhetState.id());
+        logger.debug("Kunne ikke finne overordnet for orgenhet {}", orgEnhetState.id());
         return Optional.empty();
     }
 
