@@ -50,8 +50,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   // Optimistically fetch orgEnhet this view links to.
   Gq.useHentHierarkiQuery({
     variables: {
-      agressoId: orgEnhet.agressoId,
-      orgNiv: orgEnhet.orgNiv,
+      id: orgEnhet.id,
     },
     fetchPolicy: "cache-first",
   });
@@ -62,7 +61,7 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         text-decoration: none;
         color: var(--a-gray-900);
       `}
-      to={`/org/${orgEnhet.agressoId}/${orgEnhet.orgNiv}`}
+      to={`/org/${orgEnhet.id}`}
     >
       <UnitContainerLink>
         <VerticalEdge>

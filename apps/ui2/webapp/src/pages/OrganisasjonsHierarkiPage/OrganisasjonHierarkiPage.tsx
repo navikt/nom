@@ -132,7 +132,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
     >
       {allOverEnheter.map((overEnhet) => (
         <>
-          <OrgEnhetView key={overEnhet.agressoId} orgEnhet={overEnhet} />
+          <OrgEnhetView key={overEnhet.id} orgEnhet={overEnhet} />
           <OverEnheterDivider />
         </>
       ))}
@@ -173,7 +173,7 @@ const OrganisasjonHierarkiPageInner = (properties: {
             shouldUseDynamicSecondColumn={underEnheter.length > 5}
           >
             {underEnheter.map((underEnhet, index) => (
-              <Fragment key={underEnhet.agressoId}>
+              <Fragment key={underEnhet.id}>
                 {valgtEnhet?.navn === "NAV" && index === 0 && (
                   <Heading size="small">Direktoratet</Heading>
                 )}
@@ -205,12 +205,11 @@ const OrganisasjonHierarkiPageInner = (properties: {
 };
 
 function OrganisasjonsHierarkiPageOuter() {
-  const { agressoId, orgNiv } = useParams();
+  const { id } = useParams();
 
   const hentHierarkiQuery = Gq.useHentHierarkiQuery({
     variables: {
-      agressoId: agressoId ?? "",
-      orgNiv: orgNiv ?? "",
+      id: id ?? "",
     },
   });
 

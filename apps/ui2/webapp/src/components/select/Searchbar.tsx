@@ -23,9 +23,8 @@ type SearchOption = {
 type SearchResultRaw =
   | {
       __typename: "OrgEnhet";
-      agressoId: string;
+      id: string;
       navn: string;
-      orgNiv: string;
     }
   | {
       __typename: "Ressurs";
@@ -33,8 +32,7 @@ type SearchResultRaw =
       visningsnavn: string;
       orgTilknytning: {
         orgEnhet: {
-          agressoId: string;
-          orgNiv: string;
+          id: string;
           navn: string;
         };
       }[];
@@ -97,16 +95,14 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
           visningsnavn
           orgTilknytning {
             orgEnhet {
-              agressoId
-              orgNiv
+              id
               navn
             }
           }
         }
         ... on OrgEnhet {
-          agressoId
+          id
           navn
-          orgNiv
         }
       }
     }`;
@@ -143,8 +139,7 @@ async function navidentSearch(navident: string): Promise<SearchResultRaw[]> {
           visningsnavn
           orgTilknytning {
             orgEnhet {
-              agressoId
-              orgNiv
+              id
               navn
             }
           }
@@ -178,7 +173,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
       case "Ressurs": {
         const oe = r.orgTilknytning[0]?.orgEnhet;
         const url = oe
-          ? "/org/" + oe.agressoId + "/" + oe.orgNiv + "/" + r.navident
+          ? "/org/" + oe.id + "/" + r.navident
           : "/ressurs/" + r.navident;
         return {
           tag: "Ressurs",
@@ -194,13 +189,13 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
       case "OrgEnhet": {
         return {
           tag: "OrgEnhet",
-          url: /org/ + r.agressoId + "/" + r.orgNiv,
+          url: /org/ + r.id,
           label: r.navn,
           css: css`
             background: #ebcbd4;
             border-color: #d4a9b6;
           `,
-          value: r.agressoId,
+          value: r.id,
         };
       }
     }

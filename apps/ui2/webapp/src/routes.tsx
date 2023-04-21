@@ -10,6 +10,7 @@ import {
 import { Footer, footerHeight } from "~/components/Footer";
 import NavHeader, { headerHeight } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { isInDevelopment } from "~/utils";
 
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
 import { NotfoundPage } from "./pages/NotfoundPage";
@@ -26,19 +27,18 @@ const layoutStyle = css`
   display: flex;
 `;
 
+const rootOrgEnhet = isInDevelopment() ? "sa312u" : "py437s";
+
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />} path="/">
-      <Route element={<Navigate to="/org/NAV/ORGNIV0" />} path="/" />
+      <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/" />
       <Route element={<ResourceView />} path="/ressurs/:id" />
       <Route element={<CreateResourcePageRoutes />} path="/ressurs/create/*" />
       <Route element={<SearchdemoPage />} path={"/searchdemo"} />
 
-      <Route element={<Navigate to="/org/NAV/ORGNIV0" />} path="/org" />
-      <Route
-        element={<OrganisasjonHierarkiPage />}
-        path="/org/:agressoId/:orgNiv"
-      >
+      <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/org" />
+      <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
         <Route element={<OrganisasjonHierarkiPage />} path=":resourceId" />
         <Route element={<NotfoundPage />} path="*" />
       </Route>

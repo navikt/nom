@@ -49,7 +49,7 @@ function OrgEnhetSelect({
   const options = orgEnheter.map((orgEnhet) => ({
     value: orgEnhet.id,
     label: orgEnhet.navn,
-    agressoId: orgEnhet.agressoId,
+    id: orgEnhet.id,
   }));
   const currentValue = options.find((option) => option.value === value);
 
@@ -100,7 +100,7 @@ function OrgEnhetSelect({
 }
 
 const search =
-  (options: { value: string; label: string; agressoId: string }[]) =>
+  (options: { value: string; label: string; id: string }[]) =>
   async (searchTerm: string) => {
     const filterFunction = createFilter();
 
@@ -110,7 +110,7 @@ const search =
     );
   };
 
-type Option = { value: string; label: string; agressoId: string };
+type Option = { value: string; label: string; id: string };
 
 function OptionWithIds(properties: OptionProps<Option, false>) {
   return (
@@ -124,7 +124,7 @@ function OptionWithIds(properties: OptionProps<Option, false>) {
       >
         <span>{properties.data.label}</span>
         <Label size="small">
-          {properties.data.value} ({properties.data.agressoId})
+          {properties.data.value} ({properties.data.id})
         </Label>
       </div>
     </components.Option>

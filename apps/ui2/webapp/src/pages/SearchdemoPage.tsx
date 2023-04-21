@@ -6,10 +6,9 @@ import { Link as ReactRouterLink } from "react-router-dom";
 type SearchResultRow =
   | {
       kind: "orgenhet";
-      agressoId: string;
-      orgNiv: string;
       navn: string;
       urlPath: string;
+      id: string;
     }
   | {
       kind: "ressurs";
@@ -19,11 +18,10 @@ type SearchResultRow =
     };
 
 type SearchRowRaw = {
+  id: string;
   navident?: string;
   visningsnavn?: string;
-  agressoId?: string;
   navn?: string;
-  orgNiv: string;
   __typename: "Ressurs" | "OrgEnhet";
 };
 
@@ -32,11 +30,9 @@ function transform(inp: SearchRowRaw): SearchResultRow {
     case "OrgEnhet": {
       return {
         kind: "orgenhet",
-        agressoId: inp.agressoId || "",
         navn: inp.navn || "",
-        orgNiv: inp.orgNiv || "",
-        urlPath: "/org/" + inp.agressoId + "/" + inp.orgNiv,
-        // inp.navn,
+        urlPath: "/org/" + inp.id,
+        id: inp.id || "",
       };
     }
     case "Ressurs": {
@@ -59,9 +55,8 @@ function getBothQuery(searchString: string) {
                   visningsnavn
                 }
                 ... on OrgEnhet {
-                  agressoId
                   navn
-                  orgNiv
+                  id
                 }
               }
             }`;
@@ -74,10 +69,9 @@ function getOrgenhetQuery(searchString: string) {
     filter: {orgnivSelection: ORGNIV_ORGENHET, gyldigTomSelection: IKKE_PASSERT}
   ) {
       __typename
-      agressoId
-      orgNiv
       navn
       gyldigTom
+      id
     }
   }`;
 }
@@ -174,9 +168,7 @@ function SearchdemoPage() {
             {r.kind === "orgenhet" && (
               <>
                 <span>{r.kind}</span>
-                <span>
-                  {r.orgNiv}_{r.agressoId}
-                </span>
+                <span>{r.id}</span>
                 <Link as={ReactRouterLink} to={r.urlPath}>
                   {r.navn}
                 </Link>

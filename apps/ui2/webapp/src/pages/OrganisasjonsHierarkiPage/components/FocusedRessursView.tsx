@@ -78,19 +78,18 @@ export const FocusedRessursView = ({
 
             {uniqBy(
               focusedRessurs.koblinger,
-              (kobling) => kobling.organisasjonsenhet.agressoId
+              (kobling) => kobling.organisasjonsenhet.id
             ).map((orgTilknytning) => {
-              const { agressoId, navn, orgNiv } =
-                orgTilknytning.organisasjonsenhet;
+              const { navn, id } = orgTilknytning.organisasjonsenhet;
               return (
                 <span
                   css={css`
                     grid-column-start: 1;
                   `}
-                  key={agressoId}
+                  key={id}
                 >
                   Org.enhet:{" "}
-                  <Link as={ReactRouterLink} to={`/org/${agressoId}/${orgNiv}`}>
+                  <Link as={ReactRouterLink} to={`/org/${id}`}>
                     <strong>{navn}</strong>
                   </Link>
                 </span>
@@ -99,7 +98,7 @@ export const FocusedRessursView = ({
 
             {focusedRessurs.ledere.map((leder) => {
               const { navident, visningsnavn, orgTilknytning } = leder.ressurs;
-              const { agressoId, orgNiv } = orgTilknytning[0]?.orgEnhet ?? {};
+              const { id } = orgTilknytning[0]?.orgEnhet ?? {};
               return (
                 <span
                   css={css`
@@ -108,10 +107,7 @@ export const FocusedRessursView = ({
                   key={navident}
                 >
                   Leder:{" "}
-                  <Link
-                    as={ReactRouterLink}
-                    to={`/org/${agressoId}/${orgNiv}/${navident}`}
-                  >
+                  <Link as={ReactRouterLink} to={`/org/${id}/${navident}`}>
                     <strong>{visningsnavn ?? "Uten navn"}</strong>
                   </Link>
                 </span>
