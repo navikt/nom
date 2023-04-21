@@ -36,6 +36,7 @@ query HentRessursMedNavident($navident: String) {
     orgTilknytning {
       orgEnhet {
         navn
+        id
         leder {
           ressurs {
             navident
