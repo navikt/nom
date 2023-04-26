@@ -17,7 +17,7 @@ public interface IOrgenhetService {
 
     List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds);
 
-    List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet);
+//    List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet);
 
     Collection<IOrgenhet> getAllEnheter();
 
