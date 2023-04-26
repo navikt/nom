@@ -1,16 +1,20 @@
-package no.nav.nom.apps.api.dvh;
+package no.nav.nom.apps.api.orgenhet;
 
 import lombok.val;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeResolver;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class OrgEnhetTypeResolverTest extends TestBase {
+public class OrgEnhetTypeAndNivaaResolverTest extends TestBase {
 
     @MockBean
     private DvhRepository dvhRepository;
@@ -35,11 +39,15 @@ public class OrgEnhetTypeResolverTest extends TestBase {
     private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
-    private OrgEnhetTypeResolver orgEnhetTypeResolver;
+    private OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;
 
+    @BeforeEach
+    public void init(){
+        orgEnhetStateRepository.clear();
+    }
 
     @Test
     public void sould_resolve_orgenhettype_for_all_nodes(){
@@ -82,7 +90,7 @@ public class OrgEnhetTypeResolverTest extends TestBase {
         mockOrganisering(mockedEnhet3, mockedEnhet4);
         mockOrganisering(mockedEnhet4, mockedEnhet5);
 
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
 
         final var endreType = new EndreOrgEnhetsType(
             Optional.of(OrgEnhetsType.DIR),
@@ -128,7 +136,7 @@ public class OrgEnhetTypeResolverTest extends TestBase {
         mockOrganisering(mockedEnhet2, mockedEnhet4);
         mockOrganisering(mockedEnhet3, mockedEnhet4);
 
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
 
         final var endreType = new EndreOrgEnhetsType(
             Optional.of(OrgEnhetsType.DIR),
@@ -174,7 +182,7 @@ public class OrgEnhetTypeResolverTest extends TestBase {
         mockOrganisering(mockedEnhet2, mockedEnhet3);
         mockOrganisering(mockedEnhet3, mockedEnhet4);
 
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
 
         final var endreType = new EndreOrgEnhetsType(
             Optional.of(OrgEnhetsType.DIR),
@@ -222,7 +230,7 @@ public class OrgEnhetTypeResolverTest extends TestBase {
         mockOrganisering(mockedEnhet2, mockedEnhet3);
         mockOrganisering(mockedEnhet3, mockedEnhet4);
 
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
 
         final var endreType = new EndreOrgEnhetsType(
             Optional.empty(),
@@ -252,6 +260,86 @@ public class OrgEnhetTypeResolverTest extends TestBase {
             current.getORGENHET_NAVN(),
             LocalDate.now().minusDays(5),
             LocalDate.now().plusDays(5)
+        );
+    }
+
+    @Test
+    public void sould_resolve_nomnivaa_for_all_nodes_when_dir(){
+        val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("testId1")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .ENHETTYPE_NAVN("Dir")
+            .build();
+        val mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault()  //ARBEIDSOMRAADE
+            .ORGENHET_KODE("testId2")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGNIV2")
+            .build();
+        val mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault()  //DRIFTSENHET
+            .ORGENHET_KODE("testId3")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGNIV1")
+            .build();
+
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+
+        mockOrganisering(mockedEnhet1, mockedEnhet2);
+        mockOrganisering(mockedEnhet2, mockedEnhet3);
+
+        orgEnhetTypeAndNivaaResolver.resolve();
+
+        verify(orgEnhetCommandService, times(2)).endreNomNivaa(any(), any());
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.ARBEIDSOMRAADE)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.DRIFTSENHET)));
+    }
+
+    @Test
+    public void sould_resolve_nomnivaa_for_all_nodes(){
+        val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
+            .ORGENHET_KODE("testId1")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .build();
+        val mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault()  //ARBEIDSOMRAADE
+            .ORGENHET_KODE("testId2")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGNIV3")
+            .build();
+        val mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault()  //DRIFTSENHET
+            .ORGENHET_KODE("testId3")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGNIV2")
+            .build();
+        val mockedEnhet4 = DvhOrgEnhetMock.getBuilderWithDefault()  //LINJEENHET
+            .ORGENHET_KODE("testId4")
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGNIV1")
+            .build();
+
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet1, 1, "202204", Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet2, 2, "202204", Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet3, 3, "202204", Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet4, 4, "202204", Optional.empty()));
+
+        mockOrganisering(mockedEnhet1, mockedEnhet2);
+        mockOrganisering(mockedEnhet2, mockedEnhet3);
+        mockOrganisering(mockedEnhet3, mockedEnhet4);
+
+        orgEnhetTypeAndNivaaResolver.resolve();
+
+        verify(orgEnhetCommandService, times(3)).endreNomNivaa(any(), any());
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.ARBEIDSOMRAADE)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.DRIFTSENHET)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_4"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.LINJEENHET)));
+    }
+
+    private EndreNomNivaa createMockEndreNomNivaaCommand(OrgEnhetsKategori nomNivaa) {
+        return new EndreNomNivaa(
+            Optional.ofNullable(nomNivaa),
+            new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
         );
     }
 }

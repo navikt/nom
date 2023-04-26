@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetV2;
+import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetAvvikletEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
@@ -65,8 +67,7 @@ public class OrgEnhetCommandService {
                         opprettOrgEnhet.navn(),
                         opprettOrgEnhet.gyldigFom(),
                         opprettOrgEnhet.overordnetOrgEnhetFid(),
-                        opprettOrgEnhet.lederRessursFid(),
-                        opprettOrgEnhet.orgEnhetsKategori()
+                        opprettOrgEnhet.lederRessursFid()
                 ),
                 opprettOrgEnhet.inputMetadata(),
                 additionalAgressoData
@@ -106,8 +107,7 @@ public class OrgEnhetCommandService {
                         korrigerOrgEnhet.gyldigFom(),
                         korrigerOrgEnhet.gyldigTom(),
                         korrigerOrgEnhet.overordnetOrgEnhetFid(),
-                        korrigerOrgEnhet.lederRessursFid(),
-                        korrigerOrgEnhet.orgEnhetsKategori()
+                        korrigerOrgEnhet.lederRessursFid()
                 ),
                 korrigerOrgEnhet.inputMetadata(),
                 additionalAgressoData
@@ -121,6 +121,16 @@ public class OrgEnhetCommandService {
                 endreOrgEnhetsType.orgEnhetsType()
             ),
             endreOrgEnhetsType.inputMetadata()
+        ));
+    }
+
+    public ListenableFuture<SendResult<String, OrgEnhetEvent>> endreNomNivaa(String fid, EndreNomNivaa endreNomNivaa) {
+        return eventProducer.sendMessage(new NomNivaaEndretEventV1(
+            fid,
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData(
+                endreNomNivaa.nomNivaa()
+            ),
+            endreNomNivaa.inputMetadata()
         ));
     }
 

@@ -57,7 +57,8 @@ class EventsrcToState {
     public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
         Optional<String> overordnetOrgEnhetFid = Optional.ofNullable(eventStateAggregate.hasNonNull("overordnetOrgEnhetFid") ? eventStateAggregate.get("overordnetOrgEnhetFid").asText() : null);
         Optional<String> lederFid = Optional.ofNullable(eventStateAggregate.hasNonNull("lederRessursFid") ? eventStateAggregate.get("lederRessursFid").asText() : null);
-        Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsKategori") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("orgEnhetsKategori").asText()) : null);
+
+        Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("nomNivaa") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null);
         Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
 
         // Agresso data

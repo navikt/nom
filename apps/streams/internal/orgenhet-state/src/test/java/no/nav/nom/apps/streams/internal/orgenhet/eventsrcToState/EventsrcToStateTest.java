@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
@@ -49,8 +50,7 @@ public class EventsrcToStateTest {
                 "TestName",
                 LocalDate.of(2022, 12, 01),
                 Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123"),
-                OrgEnhetsKategori.LINJEENHET
+                Optional.of("ressurs_123")
         );
 
 
@@ -78,7 +78,7 @@ public class EventsrcToStateTest {
                 eventData.overordnetOrgEnhetFid(),
                 eventData.lederRessursFid(),
                 Optional.empty(),
-                Optional.ofNullable(eventData.orgEnhetsKategori()),
+            Optional.empty(),
                 Optional.ofNullable(additionalData.uniqueAgressoId()),
                 Optional.ofNullable(additionalData.agressoId()),
                 Optional.ofNullable(additionalData.agressoOrgNivaa()),
@@ -102,8 +102,7 @@ public class EventsrcToStateTest {
             "TestName",
             LocalDate.of(2022, 12, 01),
             Optional.of("orgEnhet_123"),
-            Optional.of("ressurs_123"),
-            OrgEnhetsKategori.LINJEENHET
+            Optional.of("ressurs_123")
         );
 
         final OrgEnhetEvent createEvent = new OrgEnhetOpprettetEventV1(
@@ -124,7 +123,7 @@ public class EventsrcToStateTest {
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
             Optional.empty(),
-            Optional.ofNullable(createEventData.orgEnhetsKategori()),
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -135,7 +134,6 @@ public class EventsrcToStateTest {
             .containsExactly(
                 KeyValue.pair(createEvent.getFid(), expected)
             );
-
 
         final OrgEnhetEvent updateTypeEvent = new OrgEnhetTypeEndretEventV1(
             createEvent.getFid(),
@@ -154,7 +152,7 @@ public class EventsrcToStateTest {
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
             Optional.of(OrgEnhetsType.DIR),
-            Optional.ofNullable(createEventData.orgEnhetsKategori()),
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -164,6 +162,35 @@ public class EventsrcToStateTest {
         Assertions.assertThat(outputTopic.readKeyValuesToList())
             .containsExactly(
                 KeyValue.pair(updateTypeEvent.getFid(), expectedAfterUpdate)
+            );
+
+        final OrgEnhetEvent updateNomNivaaEvent = new NomNivaaEndretEventV1(
+            createEvent.getFid(),
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData(Optional.of(OrgEnhetsKategori.ARBEIDSOMRAADE)),
+            new Event.Metadata(null, LocalDateTime.now())
+        );
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), updateNomNivaaEvent);
+
+        final OrgEnhetState expectedAfterUpdate2 = new OrgEnhetState(
+            createEvent.getFid(),
+            createEventData.id(),
+            createEventData.navn(),
+            createEventData.gyldigFom(),
+            Optional.empty(),
+            createEventData.overordnetOrgEnhetFid(),
+            createEventData.lederRessursFid(),
+            Optional.of(OrgEnhetsType.DIR),
+            Optional.of(OrgEnhetsKategori.ARBEIDSOMRAADE),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        );
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(updateNomNivaaEvent.getFid(), expectedAfterUpdate2)
             );
     }
 

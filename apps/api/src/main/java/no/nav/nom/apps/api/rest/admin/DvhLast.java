@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeResolver;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +24,13 @@ public class DvhLast {
 
     private final DvhRestConsumer dvhRestConsumer;
     private final DvhDataLoader dvhDataLoader;
-    private final OrgEnhetTypeResolver orgEnhetTypeResolver;
+    private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
 
-    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeResolver orgEnhetTypeResolver) {
+    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver) {
         this.dvhRestConsumer = dvhRestConsumer;
         this.dvhDataLoader = dvhDataLoader;
-        this.orgEnhetTypeResolver = orgEnhetTypeResolver;
+        this.orgEnhetTypeAndNivaaResolver = orgEnhetTypeAndNivaaResolver;
     }
 
     @Operation(
@@ -78,6 +78,7 @@ public class DvhLast {
     })
     @GetMapping(value = "/resolveOrgEnhetsTyper")
     public void resolveOrgEnhetsTyper() {
+        triggerKoblingerOgLederLast();
         triggerOrgEnhetsTypeLast();
     }
 
@@ -98,6 +99,6 @@ public class DvhLast {
 
     @Async
     public void triggerOrgEnhetsTypeLast(){
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
     }
 }

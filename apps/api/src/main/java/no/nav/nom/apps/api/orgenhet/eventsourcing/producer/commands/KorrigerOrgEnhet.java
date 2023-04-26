@@ -13,6 +13,5 @@ public record KorrigerOrgEnhet(
         Optional<LocalDate> gyldigTom,
         Optional<String> overordnetOrgEnhetFid,
         Optional<String> lederRessursFid,
-        OrgEnhetsKategori orgEnhetsKategori,
         InputMetadata inputMetadata
 ) {}

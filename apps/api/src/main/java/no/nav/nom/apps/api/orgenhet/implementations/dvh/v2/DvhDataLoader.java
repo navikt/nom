@@ -22,7 +22,6 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.chrono.ChronoLocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -246,7 +245,6 @@ public class DvhDataLoader {
                 dvhOrgenhetV2.getGyldigFom(),
                 Optional.empty(),
                 Optional.empty(),
-                StaticOrgenhetkategoriMapping.resolveFor(dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv()),
             new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
         );
         return orgEnhetCommandService.opprettOrgEnhet(opprettOrgEnhet);
@@ -272,8 +270,7 @@ public class DvhDataLoader {
         val navnEndret = !orgEnhetState.navn().equals(dvhOrgenhetV2.getNavn());
         val datoFOMEndret = !orgEnhetState.gyldigFom().equals(dvhOrgenhetV2.getGyldigFom());
         val datoTOMEndret = orgEnhetState.gyldigTom().isPresent() && !dvhOrgenhetV2.getGyldigTom().equals(orgEnhetState.gyldigTom());
-        val kategoriEndret = !orgEnhetState.orgEnhetsKategori().equals(Optional.ofNullable(StaticOrgenhetkategoriMapping.resolveFor(dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv())));
-        if (navnEndret || datoFOMEndret || datoTOMEndret || kategoriEndret) {
+        if (navnEndret || datoFOMEndret || datoTOMEndret) {
             val korrigering = new KorrigerOrgEnhet(
                     orgEnhetState.id(),
                     dvhOrgenhetV2.getNavn(),
@@ -281,7 +278,6 @@ public class DvhDataLoader {
                     dvhOrgenhetV2.getGyldigTom(),
                     orgEnhetState.overordnetOrgEnhetFid(),
                     orgEnhetState.lederFid(),
-                    StaticOrgenhetkategoriMapping.resolveFor(dvhOrgenhetV2.getAgressoId(), dvhOrgenhetV2.getOrgNiv()),
                     new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrgenhetV2.getRawData(), new Origination("nom-api", "nom-api"))
             );
             orgEnhetCommandService.korrigerOrgEnhet(orgEnhetState.fid(), korrigering);

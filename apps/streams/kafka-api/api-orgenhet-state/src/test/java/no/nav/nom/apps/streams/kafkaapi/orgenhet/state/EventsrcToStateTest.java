@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v2.OrgEnhetState;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
@@ -46,8 +45,7 @@ public class EventsrcToStateTest {
                 "TestName",
                 LocalDate.of(2022, 12, 01),
                 Optional.of("orgEnhet_123"),
-                Optional.of("ressurs_123"),
-                OrgEnhetsKategori.LINJEENHET
+                Optional.of("ressurs_123")
         );
 
 
@@ -71,7 +69,7 @@ public class EventsrcToStateTest {
                 eventData.navn(),
                 eventData.gyldigFom(),
                 Optional.empty(),
-                Optional.ofNullable(eventData.orgEnhetsKategori()),
+            Optional.empty(),
                 Optional.empty()
         );
 

@@ -2,8 +2,10 @@ package no.nav.nom.apps.api.orgenhet;
 
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -12,18 +14,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Component
-public class OrgEnhetTypeResolver {
+public class OrgEnhetTypeAndNivaaResolver {
 
-    private final Logger logger = LoggerFactory.getLogger(OrgEnhetTypeResolver.class);
+    private final Logger logger = LoggerFactory.getLogger(OrgEnhetTypeAndNivaaResolver.class);
 
     private final DvhRepository dvhRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
 
-    public OrgEnhetTypeResolver(
+    //Unntakstilfelle, orgenheter som mappes til DIR men skal ikke være det. TODO: fiks
+    private final List<String> excludeNonDirAgressoId;
+
+    public OrgEnhetTypeAndNivaaResolver(
         DvhRepository dvhRepository,
         OrgEnhetStateRepository orgEnhetStateRepository,
         OrgEnhetCommandService orgEnhetCommandService
@@ -31,9 +38,13 @@ public class OrgEnhetTypeResolver {
         this.dvhRepository = dvhRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
+
+        excludeNonDirAgressoId = List.of("7");
     }
 
-    public void mapOrgEnhetType() {
+    public void resolve() {
+        logger.info("Starts resolving orgenhet type and nom nivaa");
+
         var orgEnhetStateList = orgEnhetStateRepository.getAll();
 
         // Sett DIR hvis agressoOrgenhetType er Dir og lag en wrapper instanse
@@ -50,9 +61,10 @@ public class OrgEnhetTypeResolver {
                 var children = wrapperList.stream().filter(c -> c.isUnderordnetTo(wrapper.orgEnhetState)).toList();
                 var dirCount = children.stream().filter(c -> OrgEnhetsType.DIR.equals(c.orgEnhetsType)).count();
                 var isAlreadyDirInState = wrapper.orgEnhetState.orgEnhetsType().map(type -> type.equals(OrgEnhetsType.DIR)).orElse(false);
+                var isExcluded = wrapper.orgEnhetState.agressoId().map(agressoId -> excludeNonDirAgressoId.contains(agressoId)).orElse(false);
 
                 // hvis antallet på underordnede er over 50%
-                if ((float) dirCount / children.size() >= 0.5) {
+                if ((float) dirCount / children.size() >= 0.5 && !isExcluded) {
                     wrapper.orgEnhetsType = OrgEnhetsType.DIR;
 
                     if (!isAlreadyDirInState) {
@@ -66,6 +78,24 @@ public class OrgEnhetTypeResolver {
                     }
                 }
             });
+
+        //Etter typer er satt, gå gjennom igjen og sett nom nivå
+        wrapperList
+            .forEach(wrapper ->  {
+                resolveNomNivaa(wrapper);
+            });
+
+        logger.info("Done resolving orgenhet type and nom nivaa");
+    }
+
+    private void resolveNomNivaa(OrgEnhetStateWrapper wrappedOrgEnhet) {
+        var current = wrappedOrgEnhet.orgEnhetState.orgEnhetsKategori();
+        var resolved = NomNivaaMapper.resolve(wrappedOrgEnhet.orgEnhetsType, wrappedOrgEnhet.orgNivaa);
+
+        if(!current.equals(resolved)){
+            logger.debug("OrgEnhet {} nom nivaa settes til {}", wrappedOrgEnhet.orgEnhetState.uniqueAgressoId(), resolved.orElse(null));
+            endreNomNivaa(wrappedOrgEnhet.orgEnhetState.fid(), resolved.orElse(null));
+        }
     }
 
     private void endreOrgEnhetsType(String fid, OrgEnhetsType type) {
@@ -75,6 +105,15 @@ public class OrgEnhetTypeResolver {
         );
 
         orgEnhetCommandService.endreOrgEnhetsType(fid, endreType);
+    }
+
+    private void endreNomNivaa(String fid, OrgEnhetsKategori nomNivaa) {
+        final var endreNomNivaa = new EndreNomNivaa(
+            Optional.ofNullable(nomNivaa),
+            new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
+        );
+
+        orgEnhetCommandService.endreNomNivaa(fid, endreNomNivaa);
     }
 
     static class OrgEnhetStateWrapper {
@@ -101,8 +140,9 @@ public class OrgEnhetTypeResolver {
         if (orgEnhetState.agressoOrgNivaa().map(niva -> niva.equals("ORGENHET")).orElse(false)) {
             var isDir = orgEnhetState.agressoOrgenhetType().map(type -> type.equals("Dir")).orElse(false);
             var isAlreadyDirInState = orgEnhetState.orgEnhetsType().map(type -> type.equals(OrgEnhetsType.DIR)).orElse(false);
+            var isActive = orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isAfter(LocalDate.now())).orElse(true);
 
-            if (isDir) {
+            if (isDir & isActive) {
                 wrapper.orgEnhetsType = OrgEnhetsType.DIR;
 
                 if (!isAlreadyDirInState) {

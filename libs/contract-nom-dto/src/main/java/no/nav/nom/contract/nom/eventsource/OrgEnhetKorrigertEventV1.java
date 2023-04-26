@@ -23,8 +23,7 @@ public class OrgEnhetKorrigertEventV1 extends OrgEnhetEvent {
             LocalDate gyldigFom,
             Optional<LocalDate> gyldigTom,
             Optional<String> overordnetOrgEnhetFid,
-            Optional<String> lederRessursFid,
-            OrgEnhetsKategori orgEnhetsKategori
+            Optional<String> lederRessursFid
     ) implements Data{ }
 
     public record OrgEnhetKorrigertAdditionalAgressoData(

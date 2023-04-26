@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeResolver;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
@@ -53,7 +53,7 @@ public class DvhRestConsumer {
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
     private final Environment environment;
-    private final OrgEnhetTypeResolver orgEnhetTypeResolver;
+    private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
     private final RessursStillingLoader ressursStillingLoader;
 
@@ -269,7 +269,7 @@ public class DvhRestConsumer {
     }
 
     private void resolveOrgEnhetsTypes(){
-        orgEnhetTypeResolver.mapOrgEnhetType();
+        orgEnhetTypeAndNivaaResolver.resolve();
     }
 
 }
