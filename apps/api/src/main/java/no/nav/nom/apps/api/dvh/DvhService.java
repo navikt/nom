@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +33,8 @@ public class DvhService {
 
     public void saveOrgtilknytning(List<DvhOrgtilknytning> koblinger) {
         val cachedEnheter = orgenhetService.getAllEnheter().stream()
+                .filter( e -> !e.getGyldigFom().isAfter(LocalDate.now())) // Ikke lag orgtilknytning til enhet som er gyldig kun i fremtiden
+                .filter( e -> e.getGyldigTom().isEmpty() || e.getGyldigTom().get().isAfter(LocalDate.now())) // Og ikke enheter som er avsluttet i fortiden
                 .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv())).values().stream()
                 .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
                 .filter(Optional::isPresent)
