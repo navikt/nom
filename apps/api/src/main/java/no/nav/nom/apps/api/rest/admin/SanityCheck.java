@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -222,7 +224,6 @@ public class SanityCheck {
     public String listTilkoblingerUtoverOgEnhetGyldighetPeriode() {
         StringBuffer result = new StringBuffer();
 
-        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
         List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
         List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
@@ -232,6 +233,39 @@ public class SanityCheck {
             result.append(t.getNavIdent() + ";" + t.getUniqueAgressoId() + ";" + t.getOrgEnhetId() + ";" + t.getGyldigFom() + ";" + (t.getGyldigTom()
                 .isPresent() ? t.getGyldigTom().get() : "") +
                 ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n");
+        });
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "List aktive enheter som er duplikat på samme unique agresso id ('agressoId+orgNiv+Navn')",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/listDuplikateEnheter")
+    public String listDuplikateEnheter() {
+        StringBuffer result = new StringBuffer();
+
+        List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
+        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
+        Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
+
+        result.append("Totalt antall duplikater: %s\n".formatted(aktiveEnheterDuplikatAvSammeUniqueAgressoId.size()));
+        aktiveEnheterDuplikatAvSammeUniqueAgressoId.forEach( (faktiskId, duplikater) -> {
+            IOrgenhet faktisk = orgenhetService.getById(faktiskId).get();
+            String uniqueAgressoId = faktisk.getAgressoId() + "-" + faktisk.getNavn() + "-" + faktisk.getOrgNiv();
+            String periode = faktisk.getGyldigFom().toString() + " - " + (faktisk.getGyldigTom().isPresent() ? faktisk.getGyldigTom().get() :  " ");
+            result.append("   Enhet %s for UniqueAgressoId %s og periode [%s] har duplikater:\n".formatted(faktiskId, uniqueAgressoId, periode));
+            duplikater.forEach( duplikat -> {
+                String duplikatUniqueAgressoId = duplikat.getAgressoId() + "-" + duplikat.getNavn() + "-" + duplikat.getOrgNiv();
+                String duplikatPeriode = duplikat.getGyldigFom().toString() + " - " + (duplikat.getGyldigTom().isPresent() ? duplikat.getGyldigTom().get() :  " ");
+                result.append("      %s (%s) periode [%s]\n".formatted(duplikat.getId(), duplikatUniqueAgressoId, duplikatPeriode));
+            });
         });
 
         return result.toString();
@@ -271,6 +305,8 @@ public class SanityCheck {
         List<IOrgenhet> aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet = enheterForAgressoIder(aktiveEnheterUtenAktivOverEnhet, aktiveUnderEnheterUniqueAgressoIder);
         List<IOrgenhet> aktiveEnheterUtenOrganisering = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveOrganiseringerUniqueAgressoIder);
 
+        Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
+
         result.append("Aktive enheter: %s\n".formatted(aktiveEnheter.size()));
 
         result.append("     Aktive organiseringer: %s\n".formatted(aktiveOrganiseringer.size()));
@@ -280,7 +316,9 @@ public class SanityCheck {
         result.append("     Aktive enheter uten OverEnheter: %s\n".formatted(aktiveEnheterUtenAktivOverEnhet.size()));
         result.append("     Aktive enheter uten UnderEnheter: %s\n".formatted(aktiveEnheterUtenAktivUnderEnhet.size()));
         result.append("     Aktive enheter med UnderEnheter uten OverEnheter: %s\n".formatted(aktiveEnheterMedAktivUnderEnhetUtenAktivOverEnhet.size()));
-        result.append("     Aktive enheter uten noen organisering: %s\n".formatted(aktiveEnheterUtenOrganisering.size()));
+        result.append("     Aktive enheter uten noen organisering: %s\n\n".formatted(aktiveEnheterUtenOrganisering.size()));
+
+        result.append("     Duplikate enheter: %s\n".formatted(aktiveEnheterDuplikatAvSammeUniqueAgressoId.size()));
         log.info("Resultat so far:\n{}", result);
 
         return result.toString();
@@ -409,6 +447,23 @@ public class SanityCheck {
         return enheter.stream().filter( oe -> !uniqueAgessoIder.contains(oe.getUniqueAgressoId())).toList();
     }
 
+
+    private Map<String, List<IOrgenhet>> duplikatPaaSammeUniqueAgresssoId(List<IOrgenhet> aktiveEnheter) {
+        var duplicateListMap = new HashMap<String, List<IOrgenhet>>();
+        aktiveEnheter.forEach( e -> {
+                IOrgenhet enhetPaaUniqueAgressoId = orgenhetService.getEnhetByAgressoIdNivaAndName(e.getAgressoId(), e.getOrgNiv(), e.getNavn()).get();
+                if (!enhetPaaUniqueAgressoId.getId().equals(e.getId())) {
+                    List<IOrgenhet> duplicates = duplicateListMap.get(enhetPaaUniqueAgressoId.getId());
+                    if (duplicates == null) {
+                        duplicates = new ArrayList<>();
+                        duplicateListMap.put(enhetPaaUniqueAgressoId.getId(), duplicates);
+                    }
+                    duplicates.add(e);
+                }
+            }
+        );
+        return duplicateListMap;
+    }
 
     private List<DvhOrgtilknytning> aktiveOrgtilknytninger(List<DvhOrgtilknytning> orgtilknytninger) {
         // FOM er før eller lik dagens dato, samt at TOM er null eller fremtidig
