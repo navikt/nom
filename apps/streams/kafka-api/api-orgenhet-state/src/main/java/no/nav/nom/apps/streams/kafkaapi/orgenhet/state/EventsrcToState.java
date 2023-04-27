@@ -3,8 +3,7 @@ package no.nav.nom.apps.streams.kafkaapi.orgenhet.state;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v2.OrgEnhetState;
-import no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v2.OrgEnhetsKategori;
+import no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v3.OrgEnhetState;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
@@ -30,7 +29,7 @@ class EventsrcToState {
 
     public EventsrcToState(
             @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
-            @Value("${app.kafka.stateTopic.v2}") String stateTopic,
+            @Value("${app.kafka.stateTopic.v3}") String stateTopic,
             ObjectMapper objectMapper,
             JsonSerde<Object> objectSerde,
             StreamsBuilder streamsBuilder
@@ -51,12 +50,12 @@ class EventsrcToState {
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
                 )
-                .mapValues(this::toOrgEnhetStateV2)
+                .mapValues(this::toOrgEnhetState)
                 .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgEnhetState.class)));
     }
 
-    public OrgEnhetState toOrgEnhetStateV2(String fid, JsonNode eventStateAggregate){
-        Optional<OrgEnhetsKategori> orgEnhetsKategori = Optional.ofNullable(eventStateAggregate.hasNonNull("nomNivaa") ? OrgEnhetsKategori.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null);
+    public OrgEnhetState toOrgEnhetState(String fid, JsonNode eventStateAggregate){
+        Optional<NomNivaa> nomNivaa = Optional.ofNullable(eventStateAggregate.hasNonNull("nomNivaa") ? NomNivaa.valueOf(eventStateAggregate.get("nomNivaa").asText()) : null);
         Optional<OrgEnhetsType> orgEnhetsType =  Optional.ofNullable(eventStateAggregate.hasNonNull("orgEnhetsType") ? OrgEnhetsType.valueOf(eventStateAggregate.get("orgEnhetsType").asText()) : null);
 
         try {
@@ -65,7 +64,7 @@ class EventsrcToState {
                 eventStateAggregate.get("navn").asText(),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                orgEnhetsKategori,
+                nomNivaa,
                 orgEnhetsType
             );
         } catch (Exception e){
