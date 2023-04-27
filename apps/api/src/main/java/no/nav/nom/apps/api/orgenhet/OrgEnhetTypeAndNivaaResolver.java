@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -89,7 +89,7 @@ public class OrgEnhetTypeAndNivaaResolver {
     }
 
     private void resolveNomNivaa(OrgEnhetStateWrapper wrappedOrgEnhet) {
-        var current = wrappedOrgEnhet.orgEnhetState.orgEnhetsKategori();
+        var current = wrappedOrgEnhet.orgEnhetState.nomNivaa();
         var resolved = NomNivaaMapper.resolve(wrappedOrgEnhet.orgEnhetsType, wrappedOrgEnhet.orgNivaa);
 
         if(!current.equals(resolved)){
@@ -107,7 +107,7 @@ public class OrgEnhetTypeAndNivaaResolver {
         orgEnhetCommandService.endreOrgEnhetsType(fid, endreType);
     }
 
-    private void endreNomNivaa(String fid, OrgEnhetsKategori nomNivaa) {
+    private void endreNomNivaa(String fid, NomNivaa nomNivaa) {
         final var endreNomNivaa = new EndreNomNivaa(
             Optional.ofNullable(nomNivaa),
             new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))

@@ -1,10 +1,9 @@
 package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneRessurs;
@@ -97,7 +96,7 @@ public class LuceneService {
                     .map(orgenhet -> new LuceneOrgEnhet(
                             orgenhet.getId(),
                             orgenhet.getNavn(),
-                            orgenhet.getOrgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(null),
+                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(null),
                             orgenhet.getOrgNiv(),
                             orgenhet.getGyldigTom()
                     ));
@@ -120,7 +119,7 @@ public class LuceneService {
                 .map(orgenhet -> new LuceneOrgEnhet(
                         orgenhet.getFid().toString(),
                         orgenhet.getNavn(),
-                        orgenhet.getOrgEnhetsKategori().toString(),
+                        orgenhet.getNomNivaa().toString(),
                         orgenhet.getOrgNiv(),
                         orgenhet.getGyldigTom()
                     )

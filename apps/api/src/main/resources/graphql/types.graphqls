@@ -9,7 +9,8 @@ type OrgEnhet {
     organiseringer (retning: Retning) : [Organisering!]!
     leder: [OrgEnhetsLeder!]!
     koblinger: [OrgEnhetsKobling!]!
-    orgEnhetsKategori: OrgEnhetsKategori
+    orgEnhetsKategori: NomNivaa  @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
+    nomNivaa: NomNivaa
     type: Kode
     orgEnhetsType: OrgEnhetsType
 }
@@ -114,7 +115,7 @@ enum Sektor {
     EKSTERN
 }
 
-enum OrgEnhetsKategori {
+enum NomNivaa {
     LINJEENHET
     DRIFTSENHET
     ARBEIDSOMRAADE

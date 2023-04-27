@@ -1,6 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ public record OrgEnhetState (
     Optional<String> overordnetOrgEnhetFid,
     Optional<String> lederFid,
     Optional<OrgEnhetsType> orgEnhetsType,
-    Optional<OrgEnhetsKategori> orgEnhetsKategori,
+    Optional<NomNivaa> nomNivaa,
     Optional<String> uniqueAgressoId,
     Optional<String> agressoId,
     Optional<String> agressoOrgNivaa,

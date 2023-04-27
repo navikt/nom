@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class OrgtilknytningCommandService {
 
-    private final OrgtilknytningEventProducer eventProducer;
+    private final no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer;
     private final ObjectMapper objectMapper;
-    public OrgtilknytningCommandService(OrgtilknytningEventProducer eventProducer, ObjectMapper objectMapper) {
+    public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer, ObjectMapper objectMapper) {
         this.eventProducer = eventProducer;
         this.objectMapper = objectMapper;
     }
@@ -54,7 +54,7 @@ public class OrgtilknytningCommandService {
                         opprettOrgEnhet.gyldigFom(),
                         opprettOrgEnhet.overordnetOrgEnhetFid(),
                         opprettOrgEnhet.lederRessursFid(),
-                        opprettOrgEnhet.orgEnhetsKategori()
+                        opprettOrgEnhet.nomNivaa()
                 ),
                 opprettOrgEnhet.inputMetadata(),
                 additionalAgressoData
@@ -95,7 +95,7 @@ public class OrgtilknytningCommandService {
                         korrigerOrgEnhet.gyldigTom(),
                         korrigerOrgEnhet.overordnetOrgEnhetFid(),
                         korrigerOrgEnhet.lederRessursFid(),
-                        korrigerOrgEnhet.orgEnhetsKategori()
+                        korrigerOrgEnhet.nomNivaa()
                 ),
                 korrigerOrgEnhet.inputMetadata(),
                 additionalAgressoData

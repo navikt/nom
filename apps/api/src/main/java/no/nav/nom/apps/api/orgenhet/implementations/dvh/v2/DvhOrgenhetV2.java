@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
 import lombok.val;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
@@ -87,7 +87,7 @@ public class DvhOrgenhetV2 implements IOrgenhet {
     }
 
     @Override
-    public Optional<OrgEnhetsKategori> getOrgEnhetsKategori() {
+    public Optional<NomNivaa> getNomNivaa() {
         return Optional.empty();
     }
 

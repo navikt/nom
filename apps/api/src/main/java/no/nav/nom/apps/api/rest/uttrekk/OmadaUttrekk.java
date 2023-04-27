@@ -14,7 +14,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
@@ -198,7 +198,7 @@ public class OmadaUttrekk {
                                     .findAny()
                                     .map(DvhLeder::getNavIdent)
                                     .orElse(""),
-                        orgenhet.getOrgEnhetsKategori().map(OrgEnhetsKategori::name).orElse(""),
+                        orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
                         dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
                             .filter(organisering ->
                                     organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&

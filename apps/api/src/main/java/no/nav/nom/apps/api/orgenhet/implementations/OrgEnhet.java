@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.implementations;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 
@@ -51,8 +51,8 @@ public class OrgEnhet implements IOrgenhet {
     public Optional<LocalDate> getGyldigTom() { return orgEnhetState.gyldigTom(); }
 
     @Override
-    public Optional<OrgEnhetsKategori> getOrgEnhetsKategori() {
-        return orgEnhetState.orgEnhetsKategori();
+    public Optional<NomNivaa> getNomNivaa() {
+        return orgEnhetState.nomNivaa();
     }
 
     @Override

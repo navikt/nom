@@ -1,6 +1,6 @@
 package no.nav.nom.contract.nom;
 
-public enum OrgEnhetsKategori {
+public enum NomNivaa {
     LINJEENHET,
     DRIFTSENHET,
     ARBEIDSOMRAADE

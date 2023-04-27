@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.NomNivaaEndretEventV1;
@@ -166,7 +166,7 @@ public class EventsrcToStateTest {
 
         final OrgEnhetEvent updateNomNivaaEvent = new NomNivaaEndretEventV1(
             createEvent.getFid(),
-            new NomNivaaEndretEventV1.NomNivaaEndretEventData(Optional.of(OrgEnhetsKategori.ARBEIDSOMRAADE)),
+            new NomNivaaEndretEventV1.NomNivaaEndretEventData(Optional.of(NomNivaa.ARBEIDSOMRAADE)),
             new Event.Metadata(null, LocalDateTime.now())
         );
 
@@ -181,7 +181,7 @@ public class EventsrcToStateTest {
             createEventData.overordnetOrgEnhetFid(),
             createEventData.lederRessursFid(),
             Optional.of(OrgEnhetsType.DIR),
-            Optional.of(OrgEnhetsKategori.ARBEIDSOMRAADE),
+            Optional.of(NomNivaa.ARBEIDSOMRAADE),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

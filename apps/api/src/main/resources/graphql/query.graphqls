@@ -38,7 +38,8 @@ input OrgEnhetSearch {
 
 input OrgEnheterSearch {
     agressoIder: [String!]
-    orgEnhetsKategori: [OrgEnhetsKategori!]
+    orgEnhetsKategori: [NomNivaa!] @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
+    nomNivaa: [NomNivaa!]
     orgNiv: String
     ider: [String!]
 }

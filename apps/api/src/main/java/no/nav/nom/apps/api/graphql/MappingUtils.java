@@ -36,7 +36,8 @@ public class MappingUtils {
                 .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())
                 .gyldigFom(orgEnhet.getGyldigFom())
                 .gyldigTom(orgEnhet.getGyldigTom().orElse(null))
-                .orgEnhetsKategori(orgEnhet.getOrgEnhetsKategori().orElse(null))
+                .orgEnhetsKategori(orgEnhet.getNomNivaa().orElse(null))
+                .nomNivaa(orgEnhet.getNomNivaa().orElse(null))
                 .orgEnhetsType(orgEnhet.getOrgEnhetsType().orElse(null))
                 .build();
     }

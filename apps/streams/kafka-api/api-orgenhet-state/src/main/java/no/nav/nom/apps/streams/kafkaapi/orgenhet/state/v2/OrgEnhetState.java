@@ -1,6 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.orgenhet.state.v2;
 
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;

@@ -69,7 +69,7 @@ public class EventsrcToStateTest {
                 eventData.navn(),
                 eventData.gyldigFom(),
                 Optional.empty(),
-            Optional.empty(),
+                Optional.empty(),
                 Optional.empty()
         );
 

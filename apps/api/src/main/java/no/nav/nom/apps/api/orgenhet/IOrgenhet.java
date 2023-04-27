@@ -1,11 +1,10 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IOrgenhet {
     String getFid();
@@ -24,7 +23,7 @@ public interface IOrgenhet {
 
     Optional<LocalDate> getGyldigTom();
 
-    Optional<OrgEnhetsKategori> getOrgEnhetsKategori();
+    Optional<NomNivaa> getNomNivaa();
 
     Optional<OrgEnhetsType> getOrgEnhetsType();
 

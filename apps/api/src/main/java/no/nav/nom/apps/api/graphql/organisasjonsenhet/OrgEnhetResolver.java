@@ -4,7 +4,6 @@ import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -44,12 +42,12 @@ public class OrgEnhetResolver {
             return orgenheterByAgressoData(search);
         }
 
-        final var orgenhetkategori = search.resolveOrgEnhetsKategoriEnum();
+        final var nomNivaa = search.resolveNomNivaaEnum();
 
         final var mapResult = orgenhetService.getByIdBulk(ider.stream().toList());
         return mapResult.values().stream()
             .map(OrgEnhetResolver::convertToOrgEnhet)
-            .filter(oe -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(oe.getOrgEnhetsKategori()))
+            .filter(oe -> nomNivaa.isEmpty() || nomNivaa.contains(oe.getNomNivaa()))
             .map(OrgEnhetResult::new).toList();
     }
 
@@ -68,7 +66,8 @@ public class OrgEnhetResolver {
                 .agressoOrgenhetType(orgenhet.getAgressoOrgenhetType())
                 .gyldigFom(orgenhet.getGyldigFom())
                 .gyldigTom(orgenhet.getGyldigTom().orElse(null))
-                .orgEnhetsKategori(orgenhet.getOrgEnhetsKategori().orElse(null))
+                .orgEnhetsKategori(orgenhet.getNomNivaa().orElse(null))
+                .nomNivaa(orgenhet.getNomNivaa().orElse(null))
                 .orgEnhetsType(orgenhet.getOrgEnhetsType().orElse(null))
                 .build();
     }
@@ -83,9 +82,9 @@ public class OrgEnhetResolver {
         }
 
         final var orgNiv = search.getOrgNiv();
-        final var orgenhetkategori = search.resolveOrgEnhetsKategoriEnum();
+        final var orgenhetkategori = search.resolveNomNivaaEnum();
         final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
-            .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getOrgEnhetsKategori().orElse(null)))
+            .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa().orElse(null)))
             .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
             .map(OrgEnhetResolver::convertToOrgEnhet)
             .map(OrgEnhetResult::new)

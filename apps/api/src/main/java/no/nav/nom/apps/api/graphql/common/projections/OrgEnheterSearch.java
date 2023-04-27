@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.graphql.common.projections;
 
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import org.springframework.data.web.ProjectedPayload;
 
 import java.util.Set;
@@ -31,17 +31,17 @@ public interface OrgEnheterSearch {
         return getAgressoIder();
     }
 
-    default Set<String> resolveOrgEnhetsKategori() {
+    default Set<String> resolveNomNivaa() {
         if (getOrgEnhetsKategori() == null) {
             return emptySet();
         }
         return getOrgEnhetsKategori();
     }
 
-    default Set<OrgEnhetsKategori> resolveOrgEnhetsKategoriEnum() {
-        return this.resolveOrgEnhetsKategori()
+    default Set<NomNivaa> resolveNomNivaaEnum() {
+        return this.resolveNomNivaa()
             .stream()
-            .map(OrgEnhetsKategori::valueOf)
+            .map(NomNivaa::valueOf)
             .collect(Collectors.toSet());
     }
 

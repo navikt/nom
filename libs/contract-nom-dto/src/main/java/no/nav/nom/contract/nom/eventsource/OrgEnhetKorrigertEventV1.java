@@ -1,7 +1,6 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
 
 import java.time.LocalDate;
 import java.util.Optional;

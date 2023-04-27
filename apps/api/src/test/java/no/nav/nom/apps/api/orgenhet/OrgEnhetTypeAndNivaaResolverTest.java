@@ -5,12 +5,11 @@ import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.contract.nom.OrgEnhetsKategori;
+import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -292,8 +291,8 @@ public class OrgEnhetTypeAndNivaaResolverTest extends TestBase {
         orgEnhetTypeAndNivaaResolver.resolve();
 
         verify(orgEnhetCommandService, times(2)).endreNomNivaa(any(), any());
-        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.ARBEIDSOMRAADE)));
-        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.DRIFTSENHET)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(NomNivaa.ARBEIDSOMRAADE)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(NomNivaa.DRIFTSENHET)));
     }
 
     @Test
@@ -331,12 +330,12 @@ public class OrgEnhetTypeAndNivaaResolverTest extends TestBase {
         orgEnhetTypeAndNivaaResolver.resolve();
 
         verify(orgEnhetCommandService, times(3)).endreNomNivaa(any(), any());
-        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.ARBEIDSOMRAADE)));
-        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.DRIFTSENHET)));
-        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_4"), eq(createMockEndreNomNivaaCommand(OrgEnhetsKategori.LINJEENHET)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_2"), eq(createMockEndreNomNivaaCommand(NomNivaa.ARBEIDSOMRAADE)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_3"), eq(createMockEndreNomNivaaCommand(NomNivaa.DRIFTSENHET)));
+        verify(orgEnhetCommandService).endreNomNivaa(eq("FID_4"), eq(createMockEndreNomNivaaCommand(NomNivaa.LINJEENHET)));
     }
 
-    private EndreNomNivaa createMockEndreNomNivaaCommand(OrgEnhetsKategori nomNivaa) {
+    private EndreNomNivaa createMockEndreNomNivaaCommand(NomNivaa nomNivaa) {
         return new EndreNomNivaa(
             Optional.ofNullable(nomNivaa),
             new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
