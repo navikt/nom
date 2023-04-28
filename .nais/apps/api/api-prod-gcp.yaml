@@ -96,9 +96,9 @@ spec:
         - application: pdl-fullmakt
           namespace: pdl
           cluster: prod-fss
-        - application: oppgavestatistikk
+        - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
-          cluster: prod-fss
+          cluster: prod-gcp
         - application: remedy-identrutina
           namespace: idm
           cluster: prod-fss

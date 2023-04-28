@@ -128,9 +128,9 @@ spec:
         - application: pdl-fullmakt
           namespace: pdl
           cluster: dev-fss
-        - application: oppgavestatistikk
+        - application: oppgavestyring-ressurs-synkronisering
           namespace: oppgavehandtering
-          cluster: dev-fss
+          cluster: dev-gcp
         - application: abac-test
           namespace: teamabac
           cluster: dev-fss
