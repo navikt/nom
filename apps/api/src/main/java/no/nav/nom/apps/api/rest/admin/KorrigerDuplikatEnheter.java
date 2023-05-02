@@ -3,8 +3,11 @@ package no.nav.nom.apps.api.rest.admin;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
@@ -36,13 +39,17 @@ public class KorrigerDuplikatEnheter {
         this.orgEnhetCommandService = orgEnhetCommandService;
     }
 
+    @Operation(
+        description = "Lag avvikle eventer for duplikater. Kjør med False for kun dry-run",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     @GetMapping()
-    public void korrigere(@RequestParam(defaultValue = "false") boolean performUpdate) {
+    public String korrigere(@RequestParam(defaultValue = "false") boolean performUpdate) {
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
         Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
         ObjectMapper mapper = new ObjectMapper();
-
+        StringBuffer str = new StringBuffer();
         aktiveEnheterDuplikatAvSammeUniqueAgressoId.forEach( (faktiskId, duplikater) -> {
             duplikater.forEach( duplikat -> {
                 ObjectNode node = mapper.createObjectNode();
@@ -59,10 +66,13 @@ public class KorrigerDuplikatEnheter {
                             new Origination("nom-api", "nom-api")
                         )
                     );
-                log.info("AnvikleEvent for fid={}, id={}, date={} og inputmeta={}", duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
+                String eventStr =  "AvikleEvent for fid=%s, id=%s, date=%s og inputmeta=%s".formatted(duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
+                str.append(eventStr + "\n");
+                log.info(eventStr);
                 if (performUpdate) orgEnhetCommandService.avikleOrgEnhet(duplikat.getFid(), avvikleOrgEnhet);
             });
         });
+        return str.toString();
     }
 
     private List<IOrgenhet> aktiveEnheter(List<IOrgenhet> enheter) {
