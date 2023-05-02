@@ -5,6 +5,8 @@ metadata:
   namespace: org
   labels:
     team: org
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafka-pool}}
   config:
@@ -29,6 +31,8 @@ metadata:
   namespace: org
   labels:
     team: org
+  annotations:
+    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
 spec:
   pool: {{kafka-pool}}
   config:
