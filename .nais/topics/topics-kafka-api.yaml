@@ -1,58 +1,6 @@
 apiVersion: kafka.nais.io/v1
 kind: Topic
 metadata:
-  name: nom.ressurs-state-v1
-  namespace: org
-  labels:
-    team: org
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    cleanupPolicy: compact
-  acl:
-    - team: org
-      application: nom-ressurs-eventsrc-to-state
-      access: readwrite
-    - team: org
-      application: org-kafka-manager
-      access: read
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
-  name: nom.orgenhet-state-v1
-  namespace: org
-  labels:
-    team: org
-  annotations:
-    kafka.nais.io/removeDataWhenResourceIsDeleted: "true"
-spec:
-  pool: {{kafka-pool}}
-  config:
-    minimumInSyncReplicas: 1
-    partitions: 1
-    replication: 3
-    cleanupPolicy: compact
-  acl:
-    - team: org
-      application: org-kafka-manager
-      access: read
-    - team: org
-      application: nom-orgenhet-eventsrc-to-state
-      access: readwrite
-
----
-
-apiVersion: kafka.nais.io/v1
-kind: Topic
-metadata:
   name: nom.api-ressurs-state-v2
   namespace: org
   labels:
