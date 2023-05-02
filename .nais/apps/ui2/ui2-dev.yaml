@@ -33,9 +33,7 @@ spec:
         - host: teamkatalog-api.dev-fss-pub.nais.io
         - host: unpkg.com
   ingresses:
-    - https://nom-ui2.dev.intern.nav.no   # deprecate this
     - https://nom-ui2.intern.dev.nav.no
-    - https://nom.dev.nav.no              # deprecate this
     - https://nom.ekstern.dev.nav.no
   replicas:
     min: 1
