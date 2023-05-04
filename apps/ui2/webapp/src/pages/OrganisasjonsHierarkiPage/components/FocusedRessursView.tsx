@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
-import { Heading, HelpText, Link } from "@navikt/ds-react";
+import { Heading, HelpText, Label, Link, Tag } from "@navikt/ds-react";
+import { format, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import React from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
@@ -9,17 +10,19 @@ import type { Ressurs, Telefon } from "~/api/generated/graphql_generated";
 import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
-import { formatTlf } from "~/utils";
+import { DATE_FORMATS, formatTlf } from "~/utils";
 
 import { SektorNameMapping } from "../../CreateResourcePage/components/CreateResourceForm";
 
-export const FocusedRessursView = ({
+function BaseView({
   focusedRessurs,
   scrollReference,
+  children,
 }: {
+  children: ReactNode;
   focusedRessurs: Ressurs;
   scrollReference?: RefObject<HTMLDivElement>;
-}) => {
+}) {
   return (
     <div
       css={css`
@@ -39,83 +42,7 @@ export const FocusedRessursView = ({
           padding: 40px;
         `}
       >
-        <div>
-          <Heading
-            css={css`
-              margin-bottom: var(--a-spacing-3);
-            `}
-            level={"2"}
-            size="large"
-          >
-            {focusedRessurs.visningsnavn ?? "Uten navn"}
-          </Heading>
-          {focusedRessurs.sektor[0] ? (
-            <strong>
-              {SektorNameMapping[focusedRessurs.sektor[0]]} (
-              {focusedRessurs.navident})
-            </strong>
-          ) : undefined}
-          <div
-            css={css`
-              display: grid;
-              grid-auto-flow: dense;
-              grid-template-columns: 1fr 1fr;
-              align-items: center;
-              margin-top: var(--a-spacing-8);
-              gap: var(--a-spacing-4);
-
-              @media (max-width: 80rem) {
-                grid-template-columns: auto;
-              }
-            `}
-          >
-            <ShowEmailWithFallback epost={focusedRessurs.epost ?? ""} />
-            {focusedRessurs.sektor.includes(Sektor.NavStatlig) ? (
-              <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
-            ) : (
-              <span />
-            )}
-
-            {uniqBy(
-              focusedRessurs.koblinger,
-              (kobling) => kobling.organisasjonsenhet.id
-            ).map((orgTilknytning) => {
-              const { navn, id } = orgTilknytning.organisasjonsenhet;
-              return (
-                <span
-                  css={css`
-                    grid-column-start: 1;
-                  `}
-                  key={id}
-                >
-                  Org.enhet:{" "}
-                  <Link as={ReactRouterLink} to={`/org/${id}`}>
-                    <strong>{navn}</strong>
-                  </Link>
-                </span>
-              );
-            })}
-
-            {focusedRessurs.ledere.map((leder) => {
-              const { navident, visningsnavn, orgTilknytning } = leder.ressurs;
-              const { id } = orgTilknytning[0]?.orgEnhet ?? {};
-              return (
-                <span
-                  css={css`
-                    grid-column-start: 2;
-                  `}
-                  key={navident}
-                >
-                  Leder:{" "}
-                  <Link as={ReactRouterLink} to={`/org/${id}/${navident}`}>
-                    <strong>{visningsnavn ?? "Uten navn"}</strong>
-                  </Link>
-                </span>
-              );
-            })}
-          </div>
-        </div>
-
+        <div>{children}</div>
         <UserImage
           navident={focusedRessurs.navident}
           navn={focusedRessurs.visningsnavn ?? ""}
@@ -124,7 +51,137 @@ export const FocusedRessursView = ({
       </div>
     </div>
   );
+}
+export const FocusedRessursView = ({
+  focusedRessurs,
+  scrollReference,
+}: {
+  focusedRessurs: Ressurs;
+  scrollReference?: RefObject<HTMLDivElement>;
+}) => {
+  if (
+    focusedRessurs.sluttdato &&
+    isBefore(new Date(focusedRessurs.sluttdato), new Date())
+  ) {
+    return (
+      <BaseView
+        focusedRessurs={focusedRessurs}
+        scrollReference={scrollReference}
+      >
+        <RessursHasQuit ressurs={focusedRessurs} />
+      </BaseView>
+    );
+  }
+
+  return (
+    <BaseView focusedRessurs={focusedRessurs} scrollReference={scrollReference}>
+      <Heading level="2" size="large" spacing>
+        {focusedRessurs.visningsnavn ?? "Uten navn"}
+      </Heading>
+      {focusedRessurs.sektor[0] ? (
+        <strong>
+          {SektorNameMapping[focusedRessurs.sektor[0]]} (
+          {focusedRessurs.navident})
+        </strong>
+      ) : undefined}
+      <div
+        css={css`
+          display: grid;
+          grid-auto-flow: dense;
+          grid-template-columns: 1fr 1fr;
+          align-items: center;
+          margin-top: var(--a-spacing-8);
+          gap: var(--a-spacing-4);
+
+          @media (max-width: 80rem) {
+            grid-template-columns: auto;
+          }
+        `}
+      >
+        <ShowEmailWithFallback epost={focusedRessurs.epost ?? ""} />
+        {focusedRessurs.sektor.includes(Sektor.NavStatlig) ? (
+          <ShowTlfWithFallback telefon={focusedRessurs.telefon} />
+        ) : (
+          <span />
+        )}
+
+        {uniqBy(
+          focusedRessurs.koblinger,
+          (kobling) => kobling.organisasjonsenhet.id
+        ).map((orgTilknytning) => {
+          const { navn, id } = orgTilknytning.organisasjonsenhet;
+          return (
+            <span
+              css={css`
+                grid-column-start: 1;
+              `}
+              key={id}
+            >
+              Org.enhet:{" "}
+              <Link as={ReactRouterLink} to={`/org/${id}`}>
+                <strong>{navn}</strong>
+              </Link>
+            </span>
+          );
+        })}
+
+        {focusedRessurs.ledere.map((leder) => {
+          const { navident, visningsnavn, orgTilknytning } = leder.ressurs;
+          const { id } = orgTilknytning[0]?.orgEnhet ?? {};
+          return (
+            <span
+              css={css`
+                grid-column-start: 2;
+              `}
+              key={navident}
+            >
+              Leder:{" "}
+              <Link as={ReactRouterLink} to={`/org/${id}/${navident}`}>
+                <strong>{visningsnavn ?? "Uten navn"}</strong>
+              </Link>
+            </span>
+          );
+        })}
+      </div>
+    </BaseView>
+  );
 };
+
+function RessursHasQuit({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <>
+      <div
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        `}
+      >
+        <Heading level="2" size="large">
+          {ressurs.visningsnavn}
+        </Heading>
+        <Tag variant="warning">Sluttet</Tag>
+      </div>
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: max-content 1fr;
+          gap: var(--a-spacing-3);
+        `}
+      >
+        <span>NAV-ident:</span>
+        <Label as="span">{ressurs.navident}</Label>
+        <span>Sektor:</span>
+        <span>
+          {ressurs.sektor.map((sektor) => SektorNameMapping[sektor]).join(", ")}
+        </span>
+        <span>Sluttdato:</span>
+        <span>{format(new Date(ressurs.sluttdato), DATE_FORMATS.no)}</span>
+      </div>
+    </>
+  );
+}
 
 function ShowEmailWithFallback({ epost }: { epost: string }) {
   return (

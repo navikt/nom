@@ -65,6 +65,12 @@ export type Navn = {
   mellomnavn?: Maybe<Scalars['String']>;
 };
 
+export enum NomNivaa {
+  Arbeidsomraade = 'ARBEIDSOMRAADE',
+  Driftsenhet = 'DRIFTSENHET',
+  Linjeenhet = 'LINJEENHET'
+}
+
 /**  Requests */
 export type OpprettRessursRequest = {
   orgEnhetId?: InputMaybe<Scalars['String']>;
@@ -96,7 +102,9 @@ export type OrgEnhet = {
   koblinger: Array<OrgEnhetsKobling>;
   leder: Array<OrgEnhetsLeder>;
   navn: Scalars['String'];
-  orgEnhetsKategori?: Maybe<OrgEnhetsKategori>;
+  nomNivaa?: Maybe<NomNivaa>;
+  /** @deprecated orgEnhetsKategori er erstattet med nomNivaa */
+  orgEnhetsKategori?: Maybe<NomNivaa>;
   orgEnhetsType?: Maybe<OrgEnhetsType>;
   orgNiv: Scalars['String'];
   organiseringer: Array<Organisering>;
@@ -112,6 +120,7 @@ export type OrgEnhetResult = {
   __typename?: 'OrgEnhetResult';
   code: ResultCode;
   id: Scalars['String'];
+  nomId: Scalars['String'];
   orgEnhet?: Maybe<OrgEnhet>;
   orgNiv?: Maybe<Scalars['String']>;
   /** @deprecated organisasjonsenhet er erstattet med orgEnhet */
@@ -134,15 +143,9 @@ export type OrgEnhetSearchFilter = {
 export type OrgEnheterSearch = {
   agressoIder?: InputMaybe<Array<Scalars['String']>>;
   ider?: InputMaybe<Array<Scalars['String']>>;
-  orgEnhetsKategori?: InputMaybe<Array<OrgEnhetsKategori>>;
+  nomNivaa?: InputMaybe<Array<NomNivaa>>;
   orgNiv?: InputMaybe<Scalars['String']>;
 };
-
-export enum OrgEnhetsKategori {
-  Arbeidsomraade = 'ARBEIDSOMRAADE',
-  Driftsenhet = 'DRIFTSENHET',
-  Linjeenhet = 'LINJEENHET'
-}
 
 export type OrgEnhetsKobling = {
   __typename?: 'OrgEnhetsKobling';
@@ -406,7 +409,7 @@ export type HentRessursMedNavidentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -556,6 +559,7 @@ export type ResolversTypes = {
   LederOrgEnhet: ResolverTypeWrapper<LederOrgEnhet>;
   Mutation: ResolverTypeWrapper<{}>;
   Navn: ResolverTypeWrapper<Navn>;
+  NomNivaa: NomNivaa;
   OpprettRessursRequest: OpprettRessursRequest;
   OpprettRessursResponse: ResolverTypeWrapper<OpprettRessursResponse>;
   OrgEnhet: ResolverTypeWrapper<OrgEnhet>;
@@ -563,7 +567,6 @@ export type ResolversTypes = {
   OrgEnhetSearch: OrgEnhetSearch;
   OrgEnhetSearchFilter: OrgEnhetSearchFilter;
   OrgEnheterSearch: OrgEnheterSearch;
-  OrgEnhetsKategori: OrgEnhetsKategori;
   OrgEnhetsKobling: ResolverTypeWrapper<OrgEnhetsKobling>;
   OrgEnhetsLeder: ResolverTypeWrapper<OrgEnhetsLeder>;
   OrgEnhetsType: OrgEnhetsType;
@@ -690,7 +693,8 @@ export type OrgEnhetResolvers<ContextType = any, ParentType extends ResolversPar
   koblinger?: Resolver<Array<ResolversTypes['OrgEnhetsKobling']>, ParentType, ContextType>;
   leder?: Resolver<Array<ResolversTypes['OrgEnhetsLeder']>, ParentType, ContextType>;
   navn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  orgEnhetsKategori?: Resolver<Maybe<ResolversTypes['OrgEnhetsKategori']>, ParentType, ContextType>;
+  nomNivaa?: Resolver<Maybe<ResolversTypes['NomNivaa']>, ParentType, ContextType>;
+  orgEnhetsKategori?: Resolver<Maybe<ResolversTypes['NomNivaa']>, ParentType, ContextType>;
   orgEnhetsType?: Resolver<Maybe<ResolversTypes['OrgEnhetsType']>, ParentType, ContextType>;
   orgNiv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   organiseringer?: Resolver<Array<ResolversTypes['Organisering']>, ParentType, ContextType, Partial<OrgEnhetOrganiseringerArgs>>;
@@ -701,6 +705,7 @@ export type OrgEnhetResolvers<ContextType = any, ParentType extends ResolversPar
 export type OrgEnhetResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['OrgEnhetResult'] = ResolversParentTypes['OrgEnhetResult']> = {
   code?: Resolver<ResolversTypes['ResultCode'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nomId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   orgEnhet?: Resolver<Maybe<ResolversTypes['OrgEnhet']>, ParentType, ContextType>;
   orgNiv?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   organisasjonsenhet?: Resolver<Maybe<ResolversTypes['OrgEnhet']>, ParentType, ContextType>;
@@ -977,6 +982,7 @@ export const HentRessursMedNavidentDocument = gql`
     epost
     sektor
     visningsnavn
+    sluttdato
     telefon {
       beskrivelse
       nummer
