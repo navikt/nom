@@ -28,7 +28,6 @@ export const ResourceView = () => {
         {hentRessursQuery.loading && (
           <div>...laster graphql data fra nom-api</div>
         )}
-        {hentRessursQuery.error && <p>{hentRessursQuery.error.message}</p>}
         {hentRessursQuery.data?.ressurs && (
           <>
             {state?.alreadyExists ? (
