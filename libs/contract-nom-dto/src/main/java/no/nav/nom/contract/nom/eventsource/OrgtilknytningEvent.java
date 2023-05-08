@@ -26,4 +26,10 @@ public abstract class OrgtilknytningEvent extends Event {
             property = "type"
     )
     public interface Data extends Event.Data { }
+
+    public record AdditionalAgressoData (
+        String hrresStillingRessursEnhet,
+        String hrresStillingerPerioderFormatert
+    ) implements OrgtilknytningEvent.Data {
+    }
 }

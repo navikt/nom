@@ -6,6 +6,7 @@ public class PrefixedUlidCreator {
 
     private static final String RESSURS_ULID_PREFIX = "ressurs-";
     private static final String ORGENHET_ULID_PREFIX = "orgEnhet-";
+    private static final String ORGTILKNYTNING_ULID_PREFIX = "orgtilknytning-";
     private static final String EVENT_ULID_PREFIX = "event-";
 
     private static String createPrefixedUlid(String prefix) {
@@ -18,6 +19,9 @@ public class PrefixedUlidCreator {
 
     public static String createOrgEnhetUlid() {
         return createPrefixedUlid(ORGENHET_ULID_PREFIX);
+    }
+    public static String createOrgtilknytningUlid() {
+        return createPrefixedUlid(ORGTILKNYTNING_ULID_PREFIX);
     }
 
     public static String createEventUlid() {

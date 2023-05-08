@@ -2,7 +2,21 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndrePrimaeOrgtilknytning;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningPrimaerEndretEventV1;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
 
 @Slf4j
 @Service
@@ -15,91 +29,79 @@ public class OrgtilknytningCommandService {
         this.objectMapper = objectMapper;
     }
 
-    /* TODO: Implement commands */
-
-    /*
-    public String opprettOrgEnhet(OpprettOrgEnhet opprettOrgEnhet) {
-        String fid = PrefixedUlidCreator.createOrgEnhetUlid();
-        opprettOrgEnhet(fid, opprettOrgEnhet);
+    public String opprettOrgtilknytning(OpprettOrgtilknytning opprettOrgtilknytning) {
+        String fid = PrefixedUlidCreator.createOrgtilknytningUlid();
+        opprettOrgtilknytning(fid, opprettOrgtilknytning);
         return fid;
     }
 
-    private ListenableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
-        return eventProducer.sendMessage(getOpprettEvent(fid, opprettOrgEnhet));
+    private ListenableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgtilknytning(String fid, OpprettOrgtilknytning opprettOrgtilknytning) {
+        return eventProducer.sendMessage(new OrgtilknytningOpprettetEventV1(
+            fid,
+            new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
+                opprettOrgtilknytning.navident(),
+                opprettOrgtilknytning.orgEnhetId(),
+                opprettOrgtilknytning.gyldigFom()
+            ),
+            opprettOrgtilknytning.inputMetadata(),
+            opprettOrgtilknytning.additionalAgressoData()
+        ));
     }
 
-    private OrgEnhetOpprettetEventV1 getOpprettEvent(String fid, OpprettOrgEnhet opprettOrgEnhet) {
-        OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData additionalAgressoData = null;
-        if (opprettOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
-            var input = objectMapper.valueToTree(opprettOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
-            try {
-                var dvhOrgenhet2 = new DvhOrgenhetV2(input.isArray() ? input.get(0): input);
-                additionalAgressoData = new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData(
-                    dvhOrgenhet2.getAgressoId(),
-                    dvhOrgenhet2.getNavn(),
-                    dvhOrgenhet2.getOrgNiv(),
-                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
-                    dvhOrgenhet2.getUniqueAgressoId()
-                );
-            } catch (Exception e) {
-                log.error("Problem converting orgEnhet info from dvh", e);
-                log.info("dvh data: {}", input.toPrettyString());
-            }
-        }
-        return new OrgEnhetOpprettetEventV1(
-                fid,
-                new OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData(
-                        opprettOrgEnhet.id(),
-                        opprettOrgEnhet.navn(),
-                        opprettOrgEnhet.gyldigFom(),
-                        opprettOrgEnhet.overordnetOrgEnhetFid(),
-                        opprettOrgEnhet.lederRessursFid(),
-                        opprettOrgEnhet.nomNivaa()
-                ),
-                opprettOrgEnhet.inputMetadata(),
-                additionalAgressoData
-        );
+    private ListenableFuture<SendResult<String, OrgtilknytningEvent>> endrePrimaerOrgtilknytning(String fid, EndrePrimaeOrgtilknytning primaeOrgtilknytningEndret) {
+        return eventProducer.sendMessage(new OrgtilknytningPrimaerEndretEventV1(
+            fid,
+            new OrgtilknytningPrimaerEndretEventV1.OrgtilknytningPrimaerEndretEventData(
+                primaeOrgtilknytningEndret.navident(),
+                primaeOrgtilknytningEndret.orgEnhetId(),
+                primaeOrgtilknytningEndret.gyldigFom(),
+                primaeOrgtilknytningEndret.gyldigTom(),
+                primaeOrgtilknytningEndret.primaer()
+            ),
+            primaeOrgtilknytningEndret.inputMetadata(),
+            primaeOrgtilknytningEndret.additionalAgressoData()
+        ));
     }
 
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> avikleOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
-        return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
-                fid,
-                new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
-                        avvikleOrgEnhet.gyldigTom()
-                ),
-                avvikleOrgEnhet.inputMetadata()
+    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> avvikleOrgtilknytning(String fid, AvvikleOrgtilknytning avvikleOrgtilknytning) {
+        return eventProducer.sendMessage(new OrgtilknytningAvsluttetEventV1(
+            fid,
+            new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
+                avvikleOrgtilknytning.navident(),
+                avvikleOrgtilknytning.orgEnhetId(),
+                avvikleOrgtilknytning.gyldigTom()
+            ),
+            avvikleOrgtilknytning.inputMetadata(),
+            avvikleOrgtilknytning.additionalAgressoData()
         ));
     }
 
     // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
-        OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
-        if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
-            var input = objectMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
-            var dvhOrgenhet2 = new DvhOrgenhetV2(input.isArray() ? input.get(0): input);
-            additionalAgressoData = new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData(
-                    dvhOrgenhet2.getAgressoId(),
-                    dvhOrgenhet2.getNavn(),
-                    dvhOrgenhet2.getOrgNiv(),
-                    Optional.ofNullable(dvhOrgenhet2.getAgressoOrgenhetType()),
-                    dvhOrgenhet2.getUniqueAgressoId()
-            );
-        }
-
-        return eventProducer.sendMessage(new OrgEnhetKorrigertEventV1(
-                fid,
-                new OrgEnhetKorrigertEventV1.OrgEnhetKorrigertEventData(
-                        korrigerOrgEnhet.id(),
-                        korrigerOrgEnhet.navn(),
-                        korrigerOrgEnhet.gyldigFom(),
-                        korrigerOrgEnhet.gyldigTom(),
-                        korrigerOrgEnhet.overordnetOrgEnhetFid(),
-                        korrigerOrgEnhet.lederRessursFid(),
-                        korrigerOrgEnhet.nomNivaa()
-                ),
-                korrigerOrgEnhet.inputMetadata(),
-                additionalAgressoData
-                ));
+    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> korrigerOrgtilknytningDato(String fid, KorrigerOrgtilknytningDato korrigerOrgtilknytningDato) {
+        return eventProducer.sendMessage(new OrgtilknytningDatoEndretEventV1(
+            fid,
+            new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
+                korrigerOrgtilknytningDato.navident(),
+                korrigerOrgtilknytningDato.orgEnhetId(),
+                korrigerOrgtilknytningDato.gyldigFom(),
+                korrigerOrgtilknytningDato.gyldigTom()
+            ),
+            korrigerOrgtilknytningDato.inputMetadata(),
+            korrigerOrgtilknytningDato.additionalAgressoData()
+        ));
     }
-    */
+
+    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> fjernOrgtilknytning(String fid, FjernOrgtilknytning fjernOrgtilknytning) {
+        return eventProducer.sendMessage(new OrgtilknytningFjernetEventV1(
+            fid,
+            new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(
+                fjernOrgtilknytning.navident(),
+                fjernOrgtilknytning.orgEnhetId(),
+                fjernOrgtilknytning.gyldigFom(),
+                fjernOrgtilknytning.gyldigTom()
+            ),
+            fjernOrgtilknytning.inputMetadata(),
+            fjernOrgtilknytning.additionalAgressoData()
+        ));
+    }
 }
