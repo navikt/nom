@@ -171,13 +171,9 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
   return searchResults.map((r) => {
     switch (r.__typename) {
       case "Ressurs": {
-        const oe = r.orgTilknytning[0]?.orgEnhet;
-        const url = oe
-          ? "/org/" + oe.id + "/" + r.navident
-          : "/ressurs/" + r.navident;
         return {
           tag: "Ressurs",
-          url: url,
+          url: `/ressurs/${r.navident}`,
           label: r.visningsnavn,
           css: css`
             background: #e0d8e9;
