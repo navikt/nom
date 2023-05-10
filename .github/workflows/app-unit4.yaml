@@ -61,7 +61,6 @@ jobs:
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
       - name: Deploy to NAIS dev-gcp
-        runs-on: ubuntu-latest
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
@@ -70,7 +69,6 @@ jobs:
           VARS: .nais/apps/unit4/unit4-dev-gcp.yaml
           IMAGE: ${{ steps.docker-push.outputs.image }}
       - name: Deploy to NAIS prod-gcp
-        runs-on: ubuntu-latest
         if: github.ref == 'refs/heads/main'
         uses: nais/deploy/actions/deploy@v1
         env:
