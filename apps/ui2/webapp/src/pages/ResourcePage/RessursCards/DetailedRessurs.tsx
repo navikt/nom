@@ -122,7 +122,7 @@ function OrganisationHierarchyTree({
       `}
     >
       <ExpansionCard.Header>
-        <ExpansionCard.Title>Data</ExpansionCard.Title>
+        <ExpansionCard.Title>{orgHierarki.enhet?.navn}</ExpansionCard.Title>
         <ExpansionCard.Description>
           Leder:{" "}
           <Link
@@ -295,7 +295,7 @@ function TeamCatSection({ navident }: { navident: string }) {
 
       <div>
         <Link href={`${teamcatBaseUrl}/resource/${navident}`}>
-          Se mer i teamkatalogen
+          Se mer i Teamkatalogen
         </Link>
       </div>
     </>
