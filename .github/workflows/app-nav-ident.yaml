@@ -18,8 +18,10 @@ env:
   IMAGE_LATEST: ghcr.io/${{ github.repository }}/nav-ident:latest
 
 jobs:
-  build-jar-docker:
-    name: build-jar-docker
+  build_and_push:
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     steps:
@@ -36,46 +38,103 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Build
-        env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :nav-ident --also-make --batch-mode
-      - name: Docker login
-        uses: docker/login-action@v2
+      - uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker container
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
-          build-args: JAR_PATH=apps/nav-ident/target/app.jar
-
-  deploy-dev:
-    name: Deploy to NAIS dev-gcp
-    needs: build-jar-docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+          team: nom
+          tag: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
+          push_image: true
+#          pull: true # optional, default false
+          dockerfile: Dockerfile # optional, default Dockerfile
+          docker_context: . # optional, default .
+#          image_suffix: # optional, default empty
+#          cache_from: type=gha # optional, default type=gha
+#          cache_to: type=gha,mode=max # optional, default type=gha,mode=max
+          build_args:
+            JAR_PATH=apps/nav-ident/target/app.jar
+          build_secrets:
+#            | # optional, default empty. See https://docs.docker.com/build/ci/github-actions/secrets/
+#            key=string
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+      - name: Deploy to NAIS dev-gcp
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/nav-ident/nav-ident-dev-gcp.yaml
-
-  deploy-prod:
-    name: Deploy to NAIS prod-gcp
-    needs: deploy-dev
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+      - name: Deploy to NAIS prod-gcp
+        uses: nais/deploy/actions/deploy@v1
+        needs: deploy-dev
+        if: github.ref == 'refs/heads/main'
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/nav-ident/nav-ident-prod-gcp.yaml
+
+
+
+
+
+#jobs:
+#  build-jar-docker:
+#    name: build-jar-docker
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Cache Depdendencies
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-maven-
+#      - name: JDK
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: 17
+#      - name: Build
+#        env:
+#          GITHUB_USERNAME: x-access-token
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+#        run: mvn clean package --projects :nav-ident --also-make --batch-mode
+#      - name: Docker login
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Build and push Docker container
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: .
+#          push: true
+#          tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
+#          build-args: JAR_PATH=apps/nav-ident/target/app.jar
+
+#  deploy-dev:
+#    name: Deploy to NAIS dev-gcp
+#    needs: build-jar-docker
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: .nais/apps/nav-ident/nav-ident-dev-gcp.yaml
+#
+#  deploy-prod:
+#    name: Deploy to NAIS prod-gcp
+#    needs: deploy-dev
+#    if: github.ref == 'refs/heads/main'
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+#          CLUSTER: prod-gcp
+#          RESOURCE: .nais/apps/nav-ident/nav-ident-prod-gcp.yaml
