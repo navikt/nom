@@ -1,5 +1,3 @@
-import type { ApolloError } from "@apollo/client";
-import type { GraphQLErrors } from "@apollo/client/errors";
 import { css } from "@emotion/react";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
 import partition from "lodash/partition";
@@ -22,7 +20,6 @@ import {
   OverEnheterDivider,
   ResourceLink,
 } from "./components/CardViews";
-import { FocusedRessursView } from "./components/FocusedRessursView";
 import { ValgtEnhet } from "./components/ValgtEnhet";
 
 const scrollToReference = (reference: RefObject<HTMLDivElement>) => {
@@ -52,7 +49,9 @@ function sortUnderenheterForHierarchyFrontPage(
   return [...direktoratet, ...linjene];
 }
 
-function getOverEnheterBackToRootRecursively(orgEnhet: OrgEnhet): OrgEnhet[] {
+export function getOverEnheterBackToRootRecursively(
+  orgEnhet: OrgEnhet
+): OrgEnhet[] {
   if (!orgEnhet || !orgEnhet.organiseringer) {
     return [];
   }
@@ -64,40 +63,9 @@ function getOverEnheterBackToRootRecursively(orgEnhet: OrgEnhet): OrgEnhet[] {
     : [orgEnhet];
 }
 
-const deduplicateGraphqlErrors = (errors: GraphQLErrors) => {
-  const result: Map<string, number> = new Map();
-  for (const error of errors) {
-    const message = error.message;
-    result.set(message, (result.get(message) || 0) + 1);
-  }
-  return result;
-};
-
-const graphqlErrorWrapper = (errors: ApolloError, keyPrefix: string) => {
-  return (
-    <ul>
-      {[...deduplicateGraphqlErrors(errors.graphQLErrors)].map(
-        (error, index) => (
-          <li key={`${keyPrefix}-error-${index}`}>
-            {error[0]} ({error[1]})
-          </li>
-        )
-      )}
-    </ul>
-  );
-};
-
-const OrganisasjonHierarkiPageInner = (properties: {
+export const OrganisasjonHierarkiPageInner = (properties: {
   data: HentHierarkiQueryHookResult["data"];
 }) => {
-  const { resourceId } = useParams();
-  const ressursQuery = Gq.useHentRessursQuery({
-    variables: {
-      navident: resourceId,
-    },
-    skip: !resourceId,
-  });
-
   const firstOverEnhet = (
     properties.data?.enhetsKoblinger?.overenheter ?? []
   ).map(({ organisasjonsenhet }) => organisasjonsenhet)[0];
@@ -106,22 +74,16 @@ const OrganisasjonHierarkiPageInner = (properties: {
     : [];
   const underEnheter = sortUnderenheterForHierarchyFrontPage(properties.data);
 
-  const currentRessurs = ressursQuery.data?.ressurs;
   const valgtEnhet = properties.data?.enhet;
 
   const scrollReference = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     if (overEnheter.length > 0) scrollToReference(scrollReference);
-  }, [currentRessurs, valgtEnhet]);
+  }, [valgtEnhet]);
 
   const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
     ({ ressurs }) => ressurs
   );
-
-  // If we are viewing a ressurs we must include valgEnhet in the overEnheter list.
-  const allOverEnheter = currentRessurs
-    ? [...overEnheter, valgtEnhet as OrgEnhet]
-    : overEnheter;
 
   return (
     <div
@@ -130,76 +92,47 @@ const OrganisasjonHierarkiPageInner = (properties: {
         flex-direction: column;
       `}
     >
-      {allOverEnheter.map((overEnhet) => (
+      {overEnheter.map((overEnhet) => (
         <>
           <OrgEnhetView key={overEnhet.id} orgEnhet={overEnhet} />
           <OverEnheterDivider />
         </>
       ))}
 
-      {ressursQuery.loading && !currentRessurs && (
-        <Loader
-          css={css`
-            align-self: center;
-          `}
-          size="2xlarge"
-        />
-      )}
+      <>
+        {valgtEnhet && (
+          <ValgtEnhet
+            scrollReference={scrollReference}
+            valgtEnhet={valgtEnhet as OrgEnhet}
+          />
+        )}
+        <DynamicColumnContainer
+          shouldUseDynamicSecondColumn={underEnheter.length > 5}
+        >
+          {underEnheter.map((underEnhet, index) => (
+            <Fragment key={underEnhet.id}>
+              {valgtEnhet?.navn === "NAV" && index === 0 && (
+                <Heading size="small">Direktoratet</Heading>
+              )}
+              {valgtEnhet?.navn === "NAV" && index === 1 && (
+                <Heading size="small">Linjene</Heading>
+              )}
+              <OrgEnhetView orgEnhet={underEnhet as OrgEnhet} />
+            </Fragment>
+          ))}
+        </DynamicColumnContainer>
 
-      {ressursQuery.error && (
-        <Alert variant="error">
-          <Heading level="3" size="small">
-            Kunne ikke hente ressurs
-          </Heading>
-          {graphqlErrorWrapper(ressursQuery.error, "ressursQuery")}
-        </Alert>
-      )}
-
-      {currentRessurs && (
-        <FocusedRessursView
-          focusedRessurs={currentRessurs as Ressurs}
-          scrollReference={scrollReference}
-        />
-      )}
-      {!(currentRessurs || ressursQuery.loading) && (
-        <>
-          {valgtEnhet && (
-            <ValgtEnhet
-              scrollReference={scrollReference}
-              valgtEnhet={valgtEnhet as OrgEnhet}
-            />
-          )}
-          <DynamicColumnContainer
-            shouldUseDynamicSecondColumn={underEnheter.length > 5}
-          >
-            {underEnheter.map((underEnhet, index) => (
-              <Fragment key={underEnhet.id}>
-                {valgtEnhet?.navn === "NAV" && index === 0 && (
-                  <Heading size="small">Direktoratet</Heading>
-                )}
-                {valgtEnhet?.navn === "NAV" && index === 1 && (
-                  <Heading size="small">Linjene</Heading>
-                )}
-                <OrgEnhetView orgEnhet={underEnhet as OrgEnhet} />
-              </Fragment>
-            ))}
-          </DynamicColumnContainer>
-
-          <DynamicColumnContainer
-            shouldUseDynamicSecondColumn={ressurser.length > 5}
-          >
-            {sortBy(
-              uniqBy(ressurser, (ressurs) => ressurs.navident),
-              "visningsnavn"
-            ).map((ressurs) => (
-              <ResourceLink
-                key={ressurs.navident}
-                ressurs={ressurs as Ressurs}
-              />
-            ))}
-          </DynamicColumnContainer>
-        </>
-      )}
+        <DynamicColumnContainer
+          shouldUseDynamicSecondColumn={ressurser.length > 5}
+        >
+          {sortBy(
+            uniqBy(ressurser, (ressurs) => ressurs.navident),
+            "visningsnavn"
+          ).map((ressurs) => (
+            <ResourceLink key={ressurs.navident} ressurs={ressurs as Ressurs} />
+          ))}
+        </DynamicColumnContainer>
+      </>
     </div>
   );
 };

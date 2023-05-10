@@ -93,7 +93,7 @@ export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
         text-decoration: none;
         color: var(--a-gray-900);
       `}
-      to={ressurs.navident}
+      to={`/ressurs/${ressurs.navident}`}
     >
       <UnitContainerLink>
         <VerticalEdge>
@@ -142,7 +142,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
   );
 }
 
-function VerticalEdge({ children }: { children: ReactNode }) {
+export function VerticalEdge({ children }: { children: ReactNode }) {
   return (
     <div
       css={css`
@@ -177,7 +177,7 @@ export function OverEnheterDivider() {
   return (
     <div
       css={css`
-        align-self: center;
+        margin-left: 13px;
         height: var(--a-spacing-4);
         background-color: var(--a-lightblue-800);
         width: 2px;

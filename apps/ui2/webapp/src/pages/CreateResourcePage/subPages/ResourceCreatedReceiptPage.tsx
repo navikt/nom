@@ -14,9 +14,9 @@ import { useParams } from "react-router";
 
 import type { Ressurs } from "~/api/generated/graphql_generated";
 import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+import { ReceiptRessurs } from "~/pages/ResourcePage/RessursCards/ReceiptRessurs";
 
 import { isInDevelopment as isInDevelopment } from "../../../utils";
-import { FocusedRessursView } from "../../OrganisasjonsHierarkiPage/components/FocusedRessursView";
 
 export function ResourceCreatedReceiptPage() {
   const { navident } = useParams();
@@ -58,7 +58,7 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
         gap: var(--a-spacing-6);
       `}
     >
-      <FocusedRessursView focusedRessurs={ressurs} />
+      <ReceiptRessurs ressurs={ressurs} />
       <div
         css={css`
           display: flex;

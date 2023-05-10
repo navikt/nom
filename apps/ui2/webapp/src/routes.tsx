@@ -15,7 +15,7 @@ import { isInDevelopment } from "~/utils";
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
 import { NotfoundPage } from "./pages/NotfoundPage";
 import OrganisasjonHierarkiPage from "./pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
-import { ResourceView } from "./pages/ResourceView";
+import { ResourcePage } from "./pages/ResourcePage/ResourcePage";
 import SearchdemoPage from "./pages/SearchdemoPage";
 
 const layoutStyle = css`
@@ -33,13 +33,12 @@ export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />} path="/">
       <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/" />
-      <Route element={<ResourceView />} path="/ressurs/:id" />
+      <Route element={<ResourcePage />} path="/ressurs/:id" />
       <Route element={<CreateResourcePageRoutes />} path="/ressurs/create/*" />
       <Route element={<SearchdemoPage />} path={"/searchdemo"} />
 
       <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/org" />
       <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
-        <Route element={<OrganisasjonHierarkiPage />} path=":resourceId" />
         <Route element={<NotfoundPage />} path="*" />
       </Route>
     </Route>

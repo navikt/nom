@@ -13,7 +13,7 @@ import { HorizontalEdge } from "./CardViews";
 const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
   const reference = useRef<HTMLAnchorElement>(null);
 
-  const { leder, id } = properties.enhet;
+  const { leder } = properties.enhet;
   const firstLeder = leder[0]?.ressurs;
   const { navident, visningsnavn } = firstLeder ?? {};
 
@@ -28,7 +28,7 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
   }
 
   return (
-    <Link as={ReactRouterLink} ref={reference} to={`/org/${id}/${navident}`}>
+    <Link as={ReactRouterLink} ref={reference} to={`/ressurs/${navident}`}>
       {visningsnavn ?? "Uten navn"}
     </Link>
   );

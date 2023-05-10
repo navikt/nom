@@ -1,10 +1,10 @@
 import { css } from "@emotion/react";
-import type { ReactElement } from "react";
+import type { ReactNode } from "react";
 
 import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
 type ContentWrapperProperties = {
-  children: ReactElement;
+  children: ReactNode;
 };
 
 const ContentWrapper = (properties: ContentWrapperProperties) => (

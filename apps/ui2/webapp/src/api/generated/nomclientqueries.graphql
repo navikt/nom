@@ -34,6 +34,12 @@ query HentRessursMedNavident($navident: String) {
         }
       }
     }
+    lederFor {
+        orgEnhet {
+            id
+            navn
+        }
+    }
     orgTilknytning {
       orgEnhet {
         navn
