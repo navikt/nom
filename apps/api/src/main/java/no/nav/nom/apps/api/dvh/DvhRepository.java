@@ -73,7 +73,10 @@ public class DvhRepository {
                 .map(Optional::get)
                 .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
-        this.organiseringer = organiseringer.stream().filter(o -> {
+        this.organiseringer = organiseringer.stream()
+                .distinct()
+                .filter(o -> {
+
                     final var overEnhet = cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver());
                     final var underEnhet = cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder());
                     if (overEnhet == null && underEnhet == null) {

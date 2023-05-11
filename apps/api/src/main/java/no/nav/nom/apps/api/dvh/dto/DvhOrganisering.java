@@ -64,4 +64,19 @@ public class DvhOrganisering {
         return agressoIdOver + "-" + navnOver + "-" + orgNivOver;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DvhOrganisering that = (DvhOrganisering) o;
+        return Objects.equals(agressoIdOver, that.agressoIdOver) && Objects.equals(orgNivOver, that.orgNivOver) && Objects.equals(
+            navnOver,
+            that.navnOver
+        ) && Objects.equals(agressoIdUnder, that.agressoIdUnder) && Objects.equals(orgNivUnder, that.orgNivUnder) && Objects.equals(navnUnder, that.navnUnder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agressoIdOver, orgNivOver, navnOver, agressoIdUnder, orgNivUnder, navnUnder);
+    }
 }
