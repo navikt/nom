@@ -56,7 +56,7 @@ jobs:
           tag: ${{ env.IMAGE }}
           push_image: true
           dockerfile: Dockerfile
-          docker_context: apps/ui2/frackend
+          docker_context: ./apps/ui2/frackend
           build_args: |
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
