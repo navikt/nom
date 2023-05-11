@@ -19,8 +19,10 @@ defaults:
     working-directory: apps
 
 jobs:
-  build:
-    name: Build and push docker, nom-ui2
+  build_and_push:
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,41 +48,33 @@ jobs:
         working-directory: apps/ui2/webapp
         run: cp -r dist/ ../frackend/public
 
-      - name: Login to GitHub Docker Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker container
-        uses: docker/build-push-action@v3
+        uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          context: apps/ui2/frackend
-          push: true
-          tags: ${{ env.IMAGE }}
-
-  deploy-dev:
-    name: Deploy dev-gcp
-    needs: build
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+          team: nom
+          tag: ${{ env.IMAGE }}
+          push_image: true
+          dockerfile: Dockerfile
+          docker_context: apps/ui2/frackend
+          build_args: |
+          build_secrets: |
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+      - name: Deploy to NAIS dev-gcp
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/ui2/ui2-dev.yaml
-
-  deploy-prod:
-    name: Deploy prod-gcp
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v1
+          IMAGE: ${{ steps.docker-push.outputs.image }}
+      - name: Deploy to NAIS prod-gcp
+        if: github.ref == 'refs/heads/main'
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/ui2/ui2-prod.yaml
+          IMAGE: ${{ steps.docker-push.outputs.image }}
+
