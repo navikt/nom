@@ -22,7 +22,7 @@ docker-compose up # Alternativt legg til -d flag for detached mode.
 Dersom du har gjort endringer i frackend og vil kun bygge Express-server på nytt
 
 ```bash
-docker-compose up -d --build upstread
+docker-compose up -d --build upstream
 ```
 
 ### Til slutt starte devserver for frontend
