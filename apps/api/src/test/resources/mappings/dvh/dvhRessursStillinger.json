@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/proxy/dvh/json/Hr/Nom/NOM_RESSURSER_STILLINGER"
+    "url": "/proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER"
   },
   "response": {
     "status": 200,
