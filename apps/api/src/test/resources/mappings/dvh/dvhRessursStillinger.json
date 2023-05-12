@@ -9,7 +9,7 @@
       "response-template"
     ],
     "jsonBody": {
-      "NOM_RESSURSER_STILLINGERResponse": [
+      "NOM_RESSURSER_STILLINGResponse": [
         {
           "NAV_ID": "G123321",
           "RESOURCE_ID": "123321",
