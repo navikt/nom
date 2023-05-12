@@ -1,7 +1,5 @@
 import { css } from "@emotion/react";
 import { Heading, Link } from "@navikt/ds-react";
-import type { RefObject } from "react";
-import { useEffect, useRef } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
@@ -11,36 +9,22 @@ import { building2 } from "../../../components/Images";
 import { HorizontalEdge } from "./CardViews";
 
 const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
-  const reference = useRef<HTMLAnchorElement>(null);
-
   const { leder } = properties.enhet;
   const firstLeder = leder[0]?.ressurs;
   const { navident, visningsnavn } = firstLeder ?? {};
-
-  // Give autofocus on initial load.
-  // This way the user can continue navigation from where they were before page change.
-  useEffect(() => {
-    reference.current?.focus();
-  }, []);
 
   if (!navident) {
     return <span>Ingen leder</span>;
   }
 
   return (
-    <Link as={ReactRouterLink} ref={reference} to={`/ressurs/${navident}`}>
+    <Link as={ReactRouterLink} to={`/ressurs/${navident}`}>
       {visningsnavn ?? "Uten navn"}
     </Link>
   );
 };
 
-export const ValgtEnhet = ({
-  valgtEnhet,
-  scrollReference,
-}: {
-  valgtEnhet: OrgEnhet;
-  scrollReference: RefObject<HTMLDivElement>;
-}) => (
+export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
   <div
     css={css`
       display: grid;
@@ -49,7 +33,6 @@ export const ValgtEnhet = ({
       background-color: var(--nom-secondary-hover);
       border: 1px solid var(--a-gray-400);
     `}
-    ref={scrollReference}
   >
     <HorizontalEdge />
     <div

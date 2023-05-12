@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { Next } from "@navikt/ds-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
@@ -41,7 +42,13 @@ export function DynamicColumnContainer({
   );
 }
 
-export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+export function OrgEnhetView({
+  orgEnhet,
+  autoFocus = false,
+}: {
+  orgEnhet: OrgEnhet;
+  autoFocus?: boolean;
+}) {
   const fornavnAndEtternavnForImg =
     orgEnhet.leder[0]?.ressurs.visningsnavn ?? "";
 
@@ -55,12 +62,22 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     fetchPolicy: "cache-first",
   });
 
+  const reference = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    // Give autofocus on initial load.
+    // This way the user can continue navigation from where they were before page change.
+    if (autoFocus) {
+      reference.current?.focus();
+    }
+  }, []);
+
   return (
     <ReactRouterLink
       css={css`
         text-decoration: none;
         color: var(--a-gray-900);
       `}
+      ref={reference}
       to={`/org/${orgEnhet.id}`}
     >
       <UnitContainerLink>
@@ -86,13 +103,28 @@ export function OrgEnhetView({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   );
 }
 
-export function ResourceLink({ ressurs }: { ressurs: Ressurs }) {
+export function ResourceLink({
+  ressurs,
+  autoFocus = false,
+}: {
+  ressurs: Ressurs;
+  autoFocus?: boolean;
+}) {
+  const reference = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    // Give autofocus on initial load.
+    // This way the user can continue navigation from where they were before page change.
+    if (autoFocus) {
+      reference.current?.focus();
+    }
+  }, []);
   return (
     <ReactRouterLink
       css={css`
         text-decoration: none;
         color: var(--a-gray-900);
       `}
+      ref={reference}
       to={`/ressurs/${ressurs.navident}`}
     >
       <UnitContainerLink>

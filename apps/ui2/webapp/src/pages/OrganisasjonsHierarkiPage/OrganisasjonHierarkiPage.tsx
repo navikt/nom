@@ -3,7 +3,6 @@ import { Alert, Heading, Loader } from "@navikt/ds-react";
 import partition from "lodash/partition";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
-import type { RefObject } from "react";
 import { Fragment } from "react";
 import React from "react";
 import { useParams } from "react-router";
@@ -21,12 +20,6 @@ import {
   ResourceLink,
 } from "./components/CardViews";
 import { ValgtEnhet } from "./components/ValgtEnhet";
-
-const scrollToReference = (reference: RefObject<HTMLDivElement>) => {
-  if (reference.current) {
-    reference.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }
-};
 
 function sortUnderenheterForHierarchyFrontPage(
   orgHierarchy: HentHierarkiQueryHookResult["data"]
@@ -76,11 +69,6 @@ export const OrganisasjonHierarkiPageInner = (properties: {
 
   const valgtEnhet = properties.data?.enhet;
 
-  const scrollReference = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    if (overEnheter.length > 0) scrollToReference(scrollReference);
-  }, [valgtEnhet]);
-
   const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
     ({ ressurs }) => ressurs
   );
@@ -93,19 +81,14 @@ export const OrganisasjonHierarkiPageInner = (properties: {
       `}
     >
       {overEnheter.map((overEnhet) => (
-        <>
-          <OrgEnhetView key={overEnhet.id} orgEnhet={overEnhet} />
+        <Fragment key={overEnhet.id}>
+          <OrgEnhetView orgEnhet={overEnhet} />
           <OverEnheterDivider />
-        </>
+        </Fragment>
       ))}
 
       <>
-        {valgtEnhet && (
-          <ValgtEnhet
-            scrollReference={scrollReference}
-            valgtEnhet={valgtEnhet as OrgEnhet}
-          />
-        )}
+        {valgtEnhet && <ValgtEnhet valgtEnhet={valgtEnhet as OrgEnhet} />}
         <DynamicColumnContainer
           shouldUseDynamicSecondColumn={underEnheter.length > 5}
         >
@@ -117,7 +100,10 @@ export const OrganisasjonHierarkiPageInner = (properties: {
               {valgtEnhet?.navn === "NAV" && index === 1 && (
                 <Heading size="small">Linjene</Heading>
               )}
-              <OrgEnhetView orgEnhet={underEnhet as OrgEnhet} />
+              <OrgEnhetView
+                autoFocus={index === 0}
+                orgEnhet={underEnhet as OrgEnhet}
+              />
             </Fragment>
           ))}
         </DynamicColumnContainer>
@@ -128,8 +114,12 @@ export const OrganisasjonHierarkiPageInner = (properties: {
           {sortBy(
             uniqBy(ressurser, (ressurs) => ressurs.navident),
             "visningsnavn"
-          ).map((ressurs) => (
-            <ResourceLink key={ressurs.navident} ressurs={ressurs as Ressurs} />
+          ).map((ressurs, index) => (
+            <ResourceLink
+              autoFocus={index === 0}
+              key={ressurs.navident}
+              ressurs={ressurs as Ressurs}
+            />
           ))}
         </DynamicColumnContainer>
       </>
