@@ -8,7 +8,9 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,17 +33,20 @@ public class OrgtilknytningStateService implements OrgtilknytningService {
 
     @Override
     public Collection<OrgtilknytningState> getAllKoblinger() {
-        return null;
+        // TODO: Implement
+        return new ArrayList<>();
     }
 
     @Override
     public List<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
-        return null;
+        // TODO: Implement
+        return new ArrayList<>();
     }
 
     @Override
     public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
-        return null;
+        // TODO: Implement
+        return new HashMap<>();
     }
 
     @Override

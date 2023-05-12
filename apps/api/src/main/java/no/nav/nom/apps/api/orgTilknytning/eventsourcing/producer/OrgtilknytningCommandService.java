@@ -48,7 +48,7 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    private ListenableFuture<SendResult<String, OrgtilknytningEvent>> endrePrimaerOrgtilknytning(String fid, EndrePrimaeOrgtilknytning primaeOrgtilknytningEndret) {
+    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> endrePrimaerOrgtilknytning(String fid, EndrePrimaeOrgtilknytning primaeOrgtilknytningEndret) {
         return eventProducer.sendMessage(new OrgtilknytningPrimaerEndretEventV1(
             fid,
             new OrgtilknytningPrimaerEndretEventV1.OrgtilknytningPrimaerEndretEventData(
