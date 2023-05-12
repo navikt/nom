@@ -5,8 +5,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
-import no.nav.nom.contract.nom.NomNivaa;
-import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -21,10 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader.UNLEASH_LAST_NY_ORGTILKNYTNING;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @DisplayName("Tester gruppering og periodisering av RessursStillinger fra DVH")
