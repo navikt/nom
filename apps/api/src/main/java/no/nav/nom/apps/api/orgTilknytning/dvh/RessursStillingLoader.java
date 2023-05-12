@@ -539,51 +539,53 @@ public class RessursStillingLoader {
         // Nå er alle stillingPeriodene gruppert på periode for agressoId.
         // Finn så NOM orgenhet for disse. Hvis gyldig periode for enhet ikke dekker hele perioden for stillingPerioden, så må stillingperioden splittes.
         List<StillingPeriode> perioderGruppertMedOrgenhet = new ArrayList<>();
-        perioderGruppert.forEach(stillingPeriode -> {
-            List<IOrgenhet> nomEnheter = Collections.emptyList();
-            // Kan kun matche for på stilling agressoId hvis denne finnes og er presis
-            if (stillingPeriode.stilling.agressoId().isPresent() && stillingPeriode.stilling.agressoId().get().length() == 7) {
-                nomEnheter = finnNomEnheterForIdOgNavn(stillingPeriode.stilling.agressoId.get(), stillingPeriode.stilling.enhetNavn, stillingPeriode.gyldigFom, stillingPeriode.gyldigTom);
-            } else if (
-                // Hvis det er en aktiv periode, og ressurs agressoId er presis
-                // så kan vi matche på ressurs agressoId, hvis denne matcher stilling eller stilling er tom
-                (isCurrentPeriode(stillingPeriode) && stillingPeriode.stilling.ressursAgressoId.isPresent() && stillingPeriode.stilling.ressursAgressoId.get().length() == 7)
-                &&
-                (stillingPeriode.stilling.agressoId().isEmpty() || stillingPeriode.stilling.ressursAgressoId.get().startsWith(stillingPeriode.stilling.agressoId.get()))) {
+        perioderGruppert.stream()
+            .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
+            .forEach(stillingPeriode -> {
+                List<IOrgenhet> nomEnheter = Collections.emptyList();
+                // Kan kun matche for på stilling agressoId hvis denne finnes og er presis
+                if (stillingPeriode.stilling.agressoId().isPresent() && stillingPeriode.stilling.agressoId().get().length() == 7) {
+                    nomEnheter = finnNomEnheterForIdOgNavn(stillingPeriode.stilling.agressoId.get(), stillingPeriode.stilling.enhetNavn, stillingPeriode.gyldigFom, stillingPeriode.gyldigTom);
+                } else if (
+                    // Hvis det er en aktiv periode, og ressurs agressoId er presis
+                    // så kan vi matche på ressurs agressoId, hvis denne matcher stilling eller stilling er tom
+                    (isCurrentPeriode(stillingPeriode) && stillingPeriode.stilling.ressursAgressoId.isPresent() && stillingPeriode.stilling.ressursAgressoId.get().length() == 7)
+                    &&
+                    (stillingPeriode.stilling.agressoId().isEmpty() || stillingPeriode.stilling.ressursAgressoId.get().startsWith(stillingPeriode.stilling.agressoId.get()))) {
 
-                nomEnheter = finnNomEnheterForId(stillingPeriode.stilling.ressursAgressoId.get(), stillingPeriode.gyldigFom, stillingPeriode.gyldigTom);
-            } else {
-                // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7 lang)
-                log.warn("StillingPeriode er ikke presis nok på stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles: {}", stillingPeriode);
-            }
+                    nomEnheter = finnNomEnheterForId(stillingPeriode.stilling.ressursAgressoId.get(), stillingPeriode.gyldigFom, stillingPeriode.gyldigTom);
+                } else {
+                    // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7 lang)
+                    log.warn("StillingPeriode er ikke presis nok på stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles: {}", stillingPeriode);
+                }
 
-            if (nomEnheter.size() == 0) {
-                // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
-                log.warn("Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId. Den vil ikke behandles: {}", stillingPeriode);
-            } else if (nomEnheter.size() == 1) {
-                // Exact one match
-                perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
-            } else {
-                // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
-                log.debug("StillingPerioden {} matcher flere NOM Orgenheter\n  {}", stillingPeriode, orgenheterToString(nomEnheter));
-                List<StillingPeriode> nyeStillingPerioder = new ArrayList<>();
-                AtomicReference<LocalDate> nextGyldigFom = new AtomicReference<>(stillingPeriode.gyldigFom);
-                nomEnheter.stream()
-                    .sorted(Comparator.comparing(IOrgenhet::getGyldigFom))
-                    .forEach( oe -> {
-                        nyeStillingPerioder.add(new StillingPeriode(stillingPeriode.stilling, nextGyldigFom.get(), oe.getGyldigTom().orElse(NO_END_DATE), oe));
-                        nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1)));
-                    });
-                log.debug("Splittet opp i {}", nyeStillingPerioder);
-                perioderGruppertMedOrgenhet.addAll(nyeStillingPerioder);
-            }
-        });
+                if (nomEnheter.size() == 0) {
+                    // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
+                    log.warn("Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId. Den vil ikke behandles: {}", stillingPeriode);
+                } else if (nomEnheter.size() == 1) {
+                    // Exact one match
+                    perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
+                } else {
+                    // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
+                    log.debug("StillingPerioden {} matcher flere NOM Orgenheter\n  {}", stillingPeriode, orgenheterToString(nomEnheter));
+                    List<StillingPeriode> nyeStillingPerioder = new ArrayList<>();
+                    AtomicReference<LocalDate> nextGyldigFom = new AtomicReference<>(stillingPeriode.gyldigFom);
+                    nomEnheter.stream()
+                        .sorted(Comparator.comparing(IOrgenhet::getGyldigFom))
+                        .forEach( oe -> {
+                            nyeStillingPerioder.add(new StillingPeriode(stillingPeriode.stilling, nextGyldigFom.get(), oe.getGyldigTom().orElse(NO_END_DATE), oe));
+                            nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1)));
+                        });
+                    log.debug("Splittet opp i {}", nyeStillingPerioder);
+                    perioderGruppertMedOrgenhet.addAll(nyeStillingPerioder);
+                }
+            });
 
         return perioderGruppertMedOrgenhet;
     }
 
     // Alle ORGENHET enheter med agressoId som overlapper i perioden
-    private List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
+    public List<IOrgenhet> finnNomEnheterForId(String agressoId, LocalDate gyldigFom, LocalDate gyldigTom) {
         return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter( oe ->
                         "ORGENHET".equals(oe.getOrgNiv()) &&
@@ -593,7 +595,7 @@ public class RessursStillingLoader {
 
 
     // Alle ORGENHET enheter med agressoId og navn som overlapper i perioden
-    private List<IOrgenhet> finnNomEnheterForIdOgNavn(String agressoId, String enhetNavn, LocalDate gyldigFom, LocalDate gyldigTom) {
+    public List<IOrgenhet> finnNomEnheterForIdOgNavn(String agressoId, String enhetNavn, LocalDate gyldigFom, LocalDate gyldigTom) {
         return orgenhetService.matchByAgressoId(agressoId).stream()
             .filter( oe ->
                     "ORGENHET".equals(oe.getOrgNiv()) &&
