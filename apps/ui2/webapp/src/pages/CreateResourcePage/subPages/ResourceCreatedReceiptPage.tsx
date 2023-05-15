@@ -1,6 +1,5 @@
 import { css } from "@emotion/react";
-import { SuccessFilled } from "@navikt/ds-icons";
-import { ExternalLink } from "@navikt/ds-icons";
+import { CheckmarkCircleFillIcon, ExternalLinkIcon } from "@navikt/aksel-icons";
 import {
   Alert,
   BodyShort,
@@ -79,7 +78,7 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
             gap: var(--a-spacing-3);
           `}
         >
-          <SuccessFilled
+          <CheckmarkCircleFillIcon
             css={css`
               height: 28px;
               width: 28px;
@@ -117,7 +116,7 @@ function Unit4Link() {
         width: max-content;
       `}
       href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
-      icon={<ExternalLink aria-hidden />}
+      icon={<ExternalLinkIcon aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"
       target="_blank"

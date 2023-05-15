@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { PeopleFilled } from "@navikt/ds-icons";
+import { PersonFillIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
@@ -72,7 +72,7 @@ const NavHeader = () => {
             align-items: center;
           `}
         >
-          <PeopleFilled
+          <PersonFillIcon
             css={css`
               color: var(--a-lightblue-800);
               width: 32px;

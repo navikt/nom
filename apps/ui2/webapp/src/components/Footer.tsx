@@ -1,9 +1,9 @@
 import { css } from "@emotion/react";
 import {
-  EmailFilled,
-  HelptextFilled,
-  InformationFilled,
-} from "@navikt/ds-icons";
+  EnvelopeClosedFillIcon,
+  InformationSquareFillIcon,
+  QuestionmarkDiamondFillIcon,
+} from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
 
 import { slackNom } from "./Images";
@@ -50,7 +50,7 @@ export function Footer() {
         rel="noopener noreferrer"
         target="_blank"
       >
-        <InformationFilled />
+        <InformationSquareFillIcon />
         Om NOM
       </Link>
 
@@ -59,12 +59,12 @@ export function Footer() {
         rel="noopener noreferrer"
         target="_blank"
       >
-        <HelptextFilled />
+        <QuestionmarkDiamondFillIcon />
         Brukerveiledning
       </Link>
 
       <Link href="mailto:mugunthan.dharmadas@nav.no;line.eeg-larsen@nav.no?subject=Tilbakemelding NOM">
-        <EmailFilled />
+        <EnvelopeClosedFillIcon />
         Spørsmål eller tilbakemeldinger?
       </Link>
     </div>

@@ -1,6 +1,5 @@
 import { css } from "@emotion/react";
-import { Hamburger } from "@navikt/ds-icons";
-import { AddPersonFilled } from "@navikt/ds-icons";
+import { MenuHamburgerIcon, PersonPlusFillIcon } from "@navikt/aksel-icons";
 import { Button } from "@navikt/ds-react";
 import { Dropdown } from "@navikt/ds-react-internal";
 import { useNavigate } from "react-router";
@@ -13,7 +12,7 @@ export function BurgerMenu() {
     <Dropdown>
       <Button
         as={Dropdown.Toggle}
-        icon={<Hamburger />}
+        icon={<MenuHamburgerIcon />}
         size="medium"
         variant="secondary"
       >
@@ -31,7 +30,7 @@ export function BurgerMenu() {
       >
         <Dropdown.Menu.List>
           <Dropdown.Menu.List.Item onClick={() => navigate("ressurs/create")}>
-            <AddPersonFilled color="black" fontSize="24px" />
+            <PersonPlusFillIcon color="black" fontSize="24px" />
             <span>Opprett ressurs</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item onClick={() => navigate("org")}>

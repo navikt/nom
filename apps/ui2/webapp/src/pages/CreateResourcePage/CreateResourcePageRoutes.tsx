@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { SuccessStroke } from "@navikt/ds-icons";
+import { CheckmarkIcon } from "@navikt/aksel-icons";
 import type { ReactNode } from "react";
 import { Outlet, Route, Routes, useMatch } from "react-router";
 
@@ -60,7 +60,7 @@ function Wrapper() {
             >
               <FilledCircle filled={!isAtReceiptPage}>
                 {isAtReceiptPage ? (
-                  <SuccessStroke
+                  <CheckmarkIcon
                     css={css`
                       path {
                         stroke: var(--a-lightblue-800);

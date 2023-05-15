@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Next } from "@navikt/ds-icons";
+import { ChevronRightIcon } from "@navikt/aksel-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
@@ -169,7 +169,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
       `}
     >
       {children}
-      <Next height="2rem" width="2rem" />
+      <ChevronRightIcon height="2rem" width="2rem" />
     </div>
   );
 }

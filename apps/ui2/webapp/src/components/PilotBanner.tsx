@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Collapse, Expand } from "@navikt/ds-icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@navikt/aksel-icons";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import { useState } from "react";
 
@@ -50,8 +50,8 @@ const PilotBanner = () => {
         <img alt="Pilot info" css={iconStyles} src={InfoIcon} />
         <Heading size="small">Løsningen er i pilot</Heading>
         <div css={buttonDivStyles}>
-          {isOpen && <Collapse fontSize="32px" />}
-          {!isOpen && <Expand fontSize="32px" />}
+          {isOpen && <ChevronUpIcon fontSize="32px" />}
+          {!isOpen && <ChevronDownIcon fontSize="32px" />}
         </div>
       </div>
 
