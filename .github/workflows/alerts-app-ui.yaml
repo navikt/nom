@@ -6,6 +6,7 @@ on:
     paths:
       - '.nais/alerts/dev/ui-alerts.yaml'
       - '.nais/alerts/prod/ui-alerts.yaml'
+      - '.github/workflows/alerts-app-ui.yaml'
 
 jobs:
   apply-alerts:
