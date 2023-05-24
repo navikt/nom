@@ -157,6 +157,8 @@ public class DvhRestConsumer {
                 .map(DvhOrgtilknytning::new)
                 .collect(Collectors.toList());
 
+        log.info("Antall koblinger lastet {}", koblinger.size());
+
         dvhService.saveOrgtilknytning(koblinger);
 
         // Ny håndtering for orgtilknytninger og persistering

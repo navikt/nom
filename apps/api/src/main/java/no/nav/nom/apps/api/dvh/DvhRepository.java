@@ -99,6 +99,12 @@ public class DvhRepository {
     }
 
     public void saveKoblinger(List<Orgtilknytning> koblinger) {
+        // Ny last av koblinger
+        log.info("{} antall koblinger byttes ut med {}", this.koblinger.size(), koblinger.size());
+        if (koblinger.size() < 500) {
+            log.warn("Unormalt få koblinger lastet fra DVH?");
+        }
+
         this.koblinger = koblinger;
         this.updateListeners();
     }
