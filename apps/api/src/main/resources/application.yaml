@@ -26,6 +26,11 @@ app:
   dvh-load:
     cron-ressurs-og-orgenhet: "0 0 6 * * *"
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
+  email:
+    url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
+    enabled: true
+    max-attempts: 3
+    backoff-duration-millis: 2000
 
 authentication:
   aad:
@@ -57,6 +62,18 @@ spring:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          email:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - https://graph.microsoft.com/.default
+        provider:
+          azure:
+            issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
   graphql:
     graphiql:
       enabled: true # Enable playground
