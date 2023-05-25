@@ -36,10 +36,10 @@ export function CompactOrganisasjonHierarki({
   return (
     <>
       {overEnheter.map((overEnhet) => (
-        <>
+        <React.Fragment key={overEnhet.id}>
           <CompactOrgEnhet orgEnhet={overEnhet} selected={false} />
           <OverEnheterDivider />
-        </>
+        </React.Fragment>
       ))}
       {valgtEnhet && (
         <CompactOrgEnhet orgEnhet={valgtEnhet as OrgEnhet} selected />

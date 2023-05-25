@@ -165,7 +165,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
   const wrappedInputValue = "'" + inputValue + "'";
   const inputValueIsNavident = inputValue.match(/^[A-Za-z]\d{6}$/) !== null;
   const searchResults = inputValueIsNavident
-    ? await navidentSearch(inputValue)
+    ? await navidentSearch(inputValue.toUpperCase())
     : await performSearch(wrappedInputValue);
 
   return searchResults.map((r) => {
