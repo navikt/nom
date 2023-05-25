@@ -27,7 +27,8 @@ app:
     cron-ressurs-og-orgenhet: "0 0 6 * * *"
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
   email:
-    url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
+    url: https://graph.microsoft.com/v1.0/me/sendMail
+#    url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
     enabled: true
     max-attempts: 3
     backoff-duration-millis: 2000
