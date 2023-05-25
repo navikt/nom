@@ -14,6 +14,9 @@ app:
           scopes:
             - QUERY_PERSON
             - MUTATE_RESSURS
+  email:
+    url: http://localhost:${wiremock.server.port}
+    max-attempts: 1
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080
@@ -35,6 +38,18 @@ spring:
         jwt:
           issuer-uri: http://localhost:${wiremock.server.port}/aad
           audiences: test
+      client:
+        registration:
+          email:
+            provider: azure
+            client-id: TEST
+            client-secret: TEST
+            authorization-grant-type: client_credentials
+            scope:
+              - https://graph.microsoft.com/.default
+        provider:
+          azure:
+            issuer-uri: http://localhost:${wiremock.server.port}/aad
 
 # Testcontainers automagikk. Med jdbc:tc: driver kjøres basen automatisk opp i en test container
 # https://www.testcontainers.org/modules/databases/jdbc/
