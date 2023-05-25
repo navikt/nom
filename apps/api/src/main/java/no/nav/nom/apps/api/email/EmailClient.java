@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -14,7 +14,7 @@ import reactor.util.retry.Retry;
 
 import java.time.Duration;
 
-@Service
+@Component
 public class EmailClient {
 
     public static final Logger logger = LogManager.getLogger(EmailClient.class);
@@ -44,7 +44,7 @@ public class EmailClient {
 
         if (enabled) {
 
-            webClient.post()
+            Mono<String> s = webClient.post()
                 .body(Mono.just(emailMessage), EmailMessage.class)
                 .exchangeToMono(response -> {
 
@@ -59,6 +59,8 @@ public class EmailClient {
                             .flatMap(Mono::error);
                     }
                 });
+
+            logger.info("EMAIL Response " + s.block());
 
 
 //            return webClient.post()
