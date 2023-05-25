@@ -102,7 +102,8 @@ public class DvhRepository {
         // Ny last av koblinger
         log.info("{} antall koblinger byttes ut med {}", this.koblinger == null ? 0 :this.koblinger.size(), koblinger.size());
         if (koblinger.size() < 500) {
-            log.warn("Unormalt få koblinger lastet fra DVH?");
+            log.warn("Unormalt få koblinger lastet fra DVH? Ikke bytt ut");
+            return;
         }
 
         this.koblinger = koblinger;
