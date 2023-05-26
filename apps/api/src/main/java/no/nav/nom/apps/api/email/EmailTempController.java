@@ -25,9 +25,9 @@ public class EmailTempController {
         logger.info("Pinging email");
 
         EmailMessage emailMessage = new EmailMessage("Test ping Email NOM",
-            "This is a ping message from NOM", List.of("eziz.annagurban@nav.no"));
+            "This is x ping message from NOM", List.of("eziz.annagurban@nav.no"));
 
-        emailClient.sendEmail(emailMessage);
+        emailClient.sendEmail(emailMessage).block();
 
 
     }

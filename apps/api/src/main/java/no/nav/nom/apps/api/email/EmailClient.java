@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.email;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
@@ -40,47 +39,26 @@ public class EmailClient {
         this.webClient = WebClient.builder().filter(oAuth2Filter).baseUrl(baseUrl).build();
     }
 
-    public void sendEmail(EmailMessage emailMessage) {
-
+    public Mono<Void> sendEmail(EmailMessage emailMessage) {
         if (enabled) {
-
-            Mono<String> s = webClient.post()
+            return webClient.post()
                 .body(Mono.just(emailMessage), EmailMessage.class)
-                .exchangeToMono(response -> {
+                .retrieve()
+                .bodyToMono(Void.class)
+                .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
+                .doOnError(WebClientResponseException.class, (WebClientResponseException webClientResponseException) -> {
+                    String errorMsg = String.format(
+                        "POST %s resulted in status %s with body %s",
+                        webClientResponseException.getRequest() != null ? webClientResponseException.getRequest().getURI() : "n/a",
+                        webClientResponseException.getStatusCode().value(),
+                        webClientResponseException.getResponseBodyAsString()
+                    );
 
-                    logger.info("THE EMAIL CALL STATUS IS " + response.statusCode() + " " + response.toString());
-
-                    if (response.statusCode().equals(HttpStatus.OK)) {
-                        return response.bodyToMono(String.class);
-                    } else if (response.statusCode().is4xxClientError()) {
-                        return Mono.just("Error response");
-                    } else {
-                        return response.createException()
-                            .flatMap(Mono::error);
-                    }
+                    throw new EmailClientUnforseenException(errorMsg);
                 });
-
-            logger.info("EMAIL Response " + s.block());
-
-
-//            return webClient.post()
-//                .body(Mono.just(emailMessage), EmailMessage.class)
-//                .retrieve()
-//                .bodyToMono(Void.class)
-//                .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
-//                .doOnError(WebClientResponseException.class, (WebClientResponseException webClientResponseException) -> {
-//                    String errorMsg = String.format(
-//                        "POST %s resulted in status %s with body %s",
-//                        webClientResponseException.getRequest() != null ? webClientResponseException.getRequest().getURI() : "n/a",
-//                        webClientResponseException.getStatusCode().value(),
-//                        webClientResponseException.getResponseBodyAsString()
-//                    );
-//
-//                    throw new EmailClientUnforseenException(errorMsg);
-//                });
         } else {
             logger.info("Email which would have been sent: {}", emailMessage);
-            //return Mono.empty();
+            return Mono.empty();
         }
     }
 
