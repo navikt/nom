@@ -18,7 +18,7 @@ record StillingPeriode(
 
     @Override
     public String toString() {
-        return stilling.toString() + ": " + gyldigFom + " - " + gyldigTom + " for nom orgenhet [" + (orgenhet != null ? orgenhet.getId() + "-" + orgenhet.getNavn() : " - ") + "]";
+        return (stilling == null ? "Ingen stilling" : stilling.toString()) + ": " + gyldigFom + " - " + gyldigTom + " for nom orgenhet [" + (orgenhet != null ? orgenhet.getId() + "-" + orgenhet.getNavn() : " - ") + "]";
     }
 
     public static String stillingperioderToString(List<StillingPeriode> stillingPerioder) {

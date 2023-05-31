@@ -29,7 +29,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 @Component
 @Slf4j
 public class RessursStillingProcessor {
-    private static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
+    public static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
 
     private final IOrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
@@ -46,6 +46,7 @@ public class RessursStillingProcessor {
         stillingPerioderPerNavident.forEach(this::process);
     }
 
+    // Prosesserer ett sett med stillingPerioder fra DVH som allerede er slått sammen/splittet på enhet/periode
     public void process(String navident, List<StillingPeriode> stillingPerioder) {
         Set<String> behandledeOrgtilknytningerFids = new HashSet<>();
 
@@ -243,15 +244,15 @@ public class RessursStillingProcessor {
     }
 
 
-    private boolean isMatchingPeriod(OrgtilknytningState orgtilknytningState, StillingPeriode stillingPeriode) {
+    public boolean isMatchingPeriod(OrgtilknytningState orgtilknytningState, StillingPeriode stillingPeriode) {
         return
             stillingPeriode.gyldigFom().equals(orgtilknytningState.gyldigFom())
                 &&
                 stillingPeriode.gyldigTom().equals(orgtilknytningState.gyldigTom().orElse(NO_END_DATE));
     }
 
-    private boolean erStillingPeriodenPrimaer(StillingPeriode stillingPeriode) {
-        // Er forventet at dette kun spørres på for en aktiv eller fremtidig stilling.
+    public boolean erStillingPeriodenPrimaer(StillingPeriode stillingPeriode) {
+        // Er forventet at dette kun spørres på for en aktiv eller fremtidig stilling. Men sjekkes ikke
         var stillingEnhetId = stillingPeriode.stilling().agressoId();
         var ressursEnhetId = stillingPeriode.stilling().ressursAgressoId();
 
@@ -266,11 +267,11 @@ public class RessursStillingProcessor {
      * Kan brukes på historiske rader, hvor DVH kan angi overnode og ikke løv-node (ORGENHET)
      * Altså en stillingPeriode med angivelse av f.eks. ORGNIV3 node '060200' vil da matche en orgtilknytning i nom for ORGENHET '0602002'
      */
-    private boolean orgtilknytningEnhetMatcherAgressoId(StillingPeriode stillingPeriode, OrgtilknytningState ot) {
+    public boolean orgtilknytningEnhetMatcherAgressoId(StillingPeriode stillingPeriode, OrgtilknytningState ot) {
         return orgenhetService.getById(ot.orgEnhetId()).get().getAgressoId().startsWith(stillingPeriode.stilling().agressoId().orElse("NULL"));
     }
 
-    private String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+    public String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -289,7 +290,7 @@ public class RessursStillingProcessor {
         );
     }
 
-    private void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+    public void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -302,7 +303,7 @@ public class RessursStillingProcessor {
             new KorrigerOrgtilknytningDato(
                 originalOrgtilknytning.navident(),
                 originalOrgtilknytning.orgEnhetId(),
-                originalOrgtilknytning.gyldigFom(),
+                stillingPeriode.gyldigFom(),
                 originalOrgtilknytning.gyldigTom(),
                 metadata,
                 additionalData
@@ -310,7 +311,7 @@ public class RessursStillingProcessor {
         );
     }
 
-    private void endreOrgtilknytningGyldigTOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+    public void endreOrgtilknytningGyldigTOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -344,7 +345,7 @@ public class RessursStillingProcessor {
         }
     }
 
-    private void settOrgtilknytningSluttDato(String fid, String navident, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+    public void settOrgtilknytningSluttDato(String fid, String navident, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -386,7 +387,7 @@ public class RessursStillingProcessor {
         );
     }
 
-    private void fjernOrgtilknytning(OrgtilknytningState originalOrgtilknytning) {
+    public void fjernOrgtilknytning(OrgtilknytningState originalOrgtilknytning) {
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"));
 
         orgtilknytningCommandService.fjernOrgtilknytning(

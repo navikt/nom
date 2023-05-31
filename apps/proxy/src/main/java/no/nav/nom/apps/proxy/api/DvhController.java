@@ -72,7 +72,5 @@ public class DvhController {
     public String getTlf(@AuthenticationPrincipal Jwt jwt) {
         return restTemplateDvh.exchange(appProperties.getDvh().getTelDvh().getUrl(),
                 HttpMethod.GET, null, String.class).getBody();
-
     }
-
 }
