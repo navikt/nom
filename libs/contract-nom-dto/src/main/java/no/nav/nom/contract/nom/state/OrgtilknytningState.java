@@ -7,7 +7,7 @@ public record OrgtilknytningState(
     String fid,
     String navident,
     String orgEnhetId,
-    boolean erPrimaer,
+    boolean erDagligOppfolging,
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom
 ) {}

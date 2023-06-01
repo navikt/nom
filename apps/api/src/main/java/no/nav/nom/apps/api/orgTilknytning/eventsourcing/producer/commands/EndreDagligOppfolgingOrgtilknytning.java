@@ -6,12 +6,12 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public record EndrePrimaeOrgtilknytning(
+public record EndreDagligOppfolgingOrgtilknytning(
     String navident,
     String orgEnhetId,
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom,
-    boolean primaer,
+    boolean DagligOppfolging,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
 ) {}

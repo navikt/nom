@@ -4,16 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndrePrimaeOrgtilknytning;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningPrimaerEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -23,10 +23,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 public class OrgtilknytningCommandService {
 
     private final no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer;
-    private final ObjectMapper objectMapper;
-    public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer, ObjectMapper objectMapper) {
+
+    public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer) {
         this.eventProducer = eventProducer;
-        this.objectMapper = objectMapper;
     }
 
     public String opprettOrgtilknytning(OpprettOrgtilknytning opprettOrgtilknytning) {
@@ -48,15 +47,15 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> endrePrimaerOrgtilknytning(String fid, EndrePrimaeOrgtilknytning primaeOrgtilknytningEndret) {
-        return eventProducer.sendMessage(new OrgtilknytningPrimaerEndretEventV1(
+    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(String fid, EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret) {
+        return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
             fid,
-            new OrgtilknytningPrimaerEndretEventV1.OrgtilknytningPrimaerEndretEventData(
+            new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
                 primaeOrgtilknytningEndret.navident(),
                 primaeOrgtilknytningEndret.orgEnhetId(),
                 primaeOrgtilknytningEndret.gyldigFom(),
                 primaeOrgtilknytningEndret.gyldigTom(),
-                primaeOrgtilknytningEndret.primaer()
+                primaeOrgtilknytningEndret.DagligOppfolging()
             ),
             primaeOrgtilknytningEndret.inputMetadata(),
             primaeOrgtilknytningEndret.additionalAgressoData()

@@ -90,33 +90,33 @@ class RessursStillingProcessorTestUtilityMetoder {
     }
 
     @Test
-    @DisplayName("Tester erStillingPeriodenPrimaer() utility funksjon.")
+    @DisplayName("Tester erStillingPeriodenDagligOppfolging() utility funksjon.")
     // Er primær hvis stillingens enhet er match/partial match på ressursens enhet. Og også hvs en av enhetene mangler
-    public void test_erStillingPeriodenPrimaer() {
+    public void test_erStillingPeriodenDagligOppfolging() {
         StillingPeriode stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.of("0123456"), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
 
         // Identisk match på id
-        assertTrue(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertTrue(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
 
         // Partial match på id
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("01234"), null, Optional.of("0123456"), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
-        assertTrue(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertTrue(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
 
         // Partial match på id
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.of("01234"), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
-        assertTrue(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertTrue(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
 
         // Stilling mangler enehet
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.empty(), null, Optional.of("01234"), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
-        assertTrue(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertTrue(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
 
         // Ressurs mangler enehet
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
-        assertTrue(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertTrue(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
 
         // Ingen match
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("6543210"), null, Optional.of("0123456"), Optional.empty()), LocalDate.of(2022, 05, 15), NO_END_DATE, null);
-        assertFalse(ressursStillingProcessor.erStillingPeriodenPrimaer(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
+        assertFalse(ressursStillingProcessor.erStillingPeriodenDagligOppfolging(stillingPeriode), "StillingPeriode: %s".formatted(stillingPeriode));
     }
 
     @Test
