@@ -66,22 +66,10 @@ function OrgEnhetSelect({
       <AsyncSearch
         components={{ Option: OptionWithIds }}
         css={[
-          css`
-            &:hover {
-              border-color: var(
-                --ac-textfield-hover-border,
-                var(--a-border-action)
-              );
-            }
-          `,
           error &&
             css`
-              border-color: var(
-                --ac-textfield-error-border,
-                var(--a-border-danger)
-              );
-              box-shadow: 0 0 0 1px
-                var(--ac-textfield-error-border, var(--a-border-danger));
+              border-color: var(--a-border-danger);
+              box-shadow: 0 0 0 1px var(--a-border-danger);
             `,
         ]}
         inputId={label}

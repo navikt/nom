@@ -27,6 +27,10 @@ jobs:
         working-directory: apps/ui2/webapp
         run: npm run lint
 
+      - name: Run stylelint
+        working-directory: apps/ui2/webapp
+        run: npm run stylelint
+
       - name: Check for typescript errors
         working-directory: apps/ui2/webapp
         run: npm run check-types

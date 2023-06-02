@@ -31,7 +31,7 @@ export function DynamicColumnContainer({
         `,
         shouldUseDynamicSecondColumn &&
           css`
-            @media (min-width: 60rem) {
+            @media (width >= 60rem) {
               grid-template-columns: 1fr 1fr;
             }
           `

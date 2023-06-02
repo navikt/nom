@@ -91,6 +91,7 @@ export function CreateResourceConfirmationModal({
               margin-top: var(--a-spacing-5);
               display: flex;
               gap: var(--a-spacing-4);
+
               button {
                 flex: 1;
               }

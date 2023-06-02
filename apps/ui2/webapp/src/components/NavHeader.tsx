@@ -27,7 +27,8 @@ const innerDiv = css(
     justify-self: center;
     grid-template-columns: auto 1fr auto;
     column-gap: 2rem;
-    @media (max-width: 60rem) {
+
+    @media (width <= 60rem) {
       grid-template-columns: 1fr;
       justify-items: left;
       row-gap: 1rem;

@@ -71,7 +71,9 @@ function CompactOrgEnhet({
           ? css`
               background-color: var(--nom-secondary-hover);
             `
-          : css`var(--a-white)`,
+          : css`
+              background-color: var(--a-white);
+            `,
       ]}
     >
       <VerticalEdge>

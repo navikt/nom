@@ -9,6 +9,8 @@
     "check-types": "tsc --noemit",
     "preview": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "stylelint": "stylelint '**/*.{tsx,css}'",
+    "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
   },
   "dependencies": {
@@ -41,6 +43,7 @@
     "@graphql-codegen/typescript-operations": "4.0.0",
     "@graphql-codegen/typescript-react-apollo": "3.3.7",
     "@graphql-codegen/typescript-resolvers": "4.0.0",
+    "@navikt/aksel-stylelint": "3.4.2",
     "@types/lodash": "4.14.195",
     "@types/react": "18.2.7",
     "@types/react-dom": "18.2.4",
@@ -60,6 +63,9 @@
     "eslint-plugin-you-dont-need-lodash-underscore": "6.12.0",
     "graphql": "16.6.0",
     "prettier": "2.8.8",
+    "postcss-styled-syntax": "0.4.0",
+    "stylelint": "15.6.2",
+    "stylelint-config-standard": "33.0.0",
     "typescript": "5.0.4",
     "vite": "4.3.9"
   }
