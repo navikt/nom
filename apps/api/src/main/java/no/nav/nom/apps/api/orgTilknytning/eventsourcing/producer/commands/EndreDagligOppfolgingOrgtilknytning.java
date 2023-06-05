@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public record EndreDagligOppfolgingOrgtilknytning(
     String navident,
-    String orgEnhetId,
+    String orgenhetId,
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom,
     boolean DagligOppfolging,

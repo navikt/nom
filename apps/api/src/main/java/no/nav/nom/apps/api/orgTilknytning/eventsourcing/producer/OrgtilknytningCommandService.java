@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
@@ -39,7 +38,7 @@ public class OrgtilknytningCommandService {
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
                 opprettOrgtilknytning.navident(),
-                opprettOrgtilknytning.orgEnhetId(),
+                opprettOrgtilknytning.orgenhetId(),
                 opprettOrgtilknytning.gyldigFom()
             ),
             opprettOrgtilknytning.inputMetadata(),
@@ -52,7 +51,7 @@ public class OrgtilknytningCommandService {
             fid,
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
                 primaeOrgtilknytningEndret.navident(),
-                primaeOrgtilknytningEndret.orgEnhetId(),
+                primaeOrgtilknytningEndret.orgenhetId(),
                 primaeOrgtilknytningEndret.gyldigFom(),
                 primaeOrgtilknytningEndret.gyldigTom(),
                 primaeOrgtilknytningEndret.DagligOppfolging()
@@ -67,7 +66,7 @@ public class OrgtilknytningCommandService {
             fid,
             new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
                 avvikleOrgtilknytning.navident(),
-                avvikleOrgtilknytning.orgEnhetId(),
+                avvikleOrgtilknytning.orgenhetId(),
                 avvikleOrgtilknytning.gyldigTom()
             ),
             avvikleOrgtilknytning.inputMetadata(),
@@ -81,7 +80,7 @@ public class OrgtilknytningCommandService {
             fid,
             new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
                 korrigerOrgtilknytningDato.navident(),
-                korrigerOrgtilknytningDato.orgEnhetId(),
+                korrigerOrgtilknytningDato.orgenhetId(),
                 korrigerOrgtilknytningDato.gyldigFom(),
                 korrigerOrgtilknytningDato.gyldigTom()
             ),
@@ -95,7 +94,7 @@ public class OrgtilknytningCommandService {
             fid,
             new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(
                 fjernOrgtilknytning.navident(),
-                fjernOrgtilknytning.orgEnhetId(),
+                fjernOrgtilknytning.orgenhetId(),
                 fjernOrgtilknytning.gyldigFom(),
                 fjernOrgtilknytning.gyldigTom()
             ),
