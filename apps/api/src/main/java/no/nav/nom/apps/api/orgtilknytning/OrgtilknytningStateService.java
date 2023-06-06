@@ -19,28 +19,20 @@ import java.util.function.Function;
 @Service
 public class OrgtilknytningStateService implements OrgtilknytningService {
 
-    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
-
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
-    private final OrgtilknytningDvhService orgtilknytningDvhService;
-    private final Unleash unleash;
 
-    public OrgtilknytningStateService(OrgtilknytningStateRepository orgtilknytningStateRepository, OrgtilknytningDvhService orgtilknytningDvhService, Unleash unleash) {
+    public OrgtilknytningStateService(OrgtilknytningStateRepository orgtilknytningStateRepository) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
-        this.orgtilknytningDvhService = orgtilknytningDvhService;
-        this.unleash = unleash;
     }
 
     @Override
     public Collection<OrgtilknytningState> getAllKoblinger() {
-        // TODO: Implement
-        return new ArrayList<>();
+        return orgtilknytningStateRepository.getAll();
     }
 
     @Override
-    public List<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
-        // TODO: Implement
-        return new ArrayList<>();
+    public List<OrgtilknytningState> getKoblingerByNavIdent(String navident) {
+        return orgtilknytningStateRepository.findByNavident(navident);
     }
 
     @Override

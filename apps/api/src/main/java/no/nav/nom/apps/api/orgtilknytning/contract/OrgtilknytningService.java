@@ -11,7 +11,7 @@ import java.util.function.Function;
 public interface OrgtilknytningService {
     Collection<OrgtilknytningState> getAllKoblinger();
 
-    List<OrgtilknytningState> getKoblingerByNavIdent(String navIdent);
+    List<OrgtilknytningState> getKoblingerByNavIdent(String navident);
 
     default Map<String, List<OrgtilknytningState>> getKoblingerByNavidenter(Set<String> navidenter) {
         // Use a NOOP-transformer to preserve original use.
