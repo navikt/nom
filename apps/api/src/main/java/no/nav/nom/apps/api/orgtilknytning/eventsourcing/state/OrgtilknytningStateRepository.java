@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +30,7 @@ public class OrgtilknytningStateRepository {
     }
 
     public List<OrgtilknytningState> findByNavident(String navident) {
-        return orgtilknytningerByNavident.get(navident);
+        return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyList());
     }
 
     public List<OrgtilknytningState> findByNavidentIn(List<String> navidents) {
