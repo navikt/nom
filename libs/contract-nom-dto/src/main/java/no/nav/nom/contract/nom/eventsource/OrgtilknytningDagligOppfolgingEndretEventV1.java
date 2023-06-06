@@ -21,7 +21,7 @@ public class OrgtilknytningDagligOppfolgingEndretEventV1 extends OrgtilknytningE
             String orgEnhetId,
             LocalDate gyldigFom,
             Optional<LocalDate> gyldigTom,
-            boolean DagligOppfolging
+            boolean dagligOppfolging
     ) implements Data{ }
 
 }
