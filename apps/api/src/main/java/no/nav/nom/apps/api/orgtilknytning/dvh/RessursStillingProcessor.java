@@ -66,7 +66,7 @@ public class RessursStillingProcessor {
         stillingPerioder.forEach( stillingPeriode -> {
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH
                 if (orgtilknytninger.size() == 0) {
-                    log.debug("Historisk stillingPeriode fra DVH ({}) men NOM har ingen orgtilknytninger for ident {}", stillingPeriode, navident);
+                    log.debug("Navident {} har historisk stillingPeriode fra DVH ({}) men NOM har ingen orgtilknytninger for ident {}", navident, stillingPeriode, navident);
                 } else {
                     // Finn orgtilknytninger på matchende datoperiode
                     var sammePeriode = orgtilknytninger.stream().filter(ot -> isMatchingPeriod(ot, stillingPeriode)).toList();
@@ -76,7 +76,7 @@ public class RessursStillingProcessor {
                         // Historikken stemmer - move on
                         behandledeOrgtilknytningerFids.add(matcherAgressoId.stream().findFirst().get().fid());
                     } else if (matcherAgressoId.size() > 0) {
-                        log.warn("Historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", stillingPeriode, matcherAgressoId);
+                        log.warn("Navident {} har historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
                         // Burde ikke vært her - men vi markerer alle disse tidligere orgtilknytningene som behandlet
                         behandledeOrgtilknytningerFids.addAll(matcherAgressoId.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                     } else {
@@ -92,10 +92,10 @@ public class RessursStillingProcessor {
                             if (matcherStartDatoOgAgressoId.size() == 0) {
                                 // Matcher ingen i NOM, DVH historisk finnes ikke i NOM, så da behandler vi den ikke.
                                 // TODO: Har vi kommet til ett sted hvor gyldigFOM på historisk periode kan ha endret seg i DVH?
-                                log.debug("Historisk stillingPeriode fra DVH ({}) matcher ingen orgtilknytninger {}", stillingPeriode, matcherAgressoId);
+                                log.debug("Navident {} har historisk stillingPeriode fra DVH ({}) matcher ingen orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
-                                log.warn("Historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", stillingPeriode, matcherAgressoId);
+                                log.warn("Navident {} har historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
                                 // Burde ikke vært her - men vi markerer alle disse tidligere orgtilknytningene som behandlet
                                 behandledeOrgtilknytningerFids.addAll(matcherStartDatoOgAgressoId.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                             } else {
@@ -122,10 +122,10 @@ public class RessursStillingProcessor {
                 boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
 
                 if (matcherAgressoId.size() > 1) {
-                    log.warn("Navident har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}\nDette kan ikke behandles", stillingPeriode, matcherAgressoId);
+                    log.warn("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherAgressoId);
                     // Har ingen behandling av denne stilling perioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                 } else if (matcherAgressoId.size() == 0) {
-                    log.debug("Navident har aktiv stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", stillingPeriode);
+                    log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", navident, stillingPeriode);
 
                     String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.stillingperioderToString(stillingPerioder));
                     if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
@@ -135,7 +135,7 @@ public class RessursStillingProcessor {
                         endreOrgtilknytningDagligOppfolging(fid, navident, true, stillingPeriode, StillingPeriode.stillingperioderToString(stillingPerioder));
                     }
                 } else {
-                    log.debug("Navident har aktiv stillingPeriode i DVH\n  {}\n som matcher en aktiv orgtilknytning i state\n  {}\n Sjekker denne for dato endringer og evt. endring av primær", stillingPeriode, matcherAgressoId);
+                    log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher en aktiv orgtilknytning i state\n  {}\n Sjekker denne for dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                     OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
                     if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
                         endreOrgtilknytningGyldigTOM(orgtilknytning, stillingPeriode, StillingPeriode.stillingperioderToString(stillingPerioder));
@@ -171,10 +171,10 @@ public class RessursStillingProcessor {
                     if (matcherIdOgGyldigFom.size() > 0) {
                         if (matcherIdOgGyldigFom.size() > 1) {
                             // Vi har flere orgtilknytninger i state som har samme fra og med dato og agressoId som stillignPeriode.
-                            log.warn("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigFom for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", stillingPeriode, matcherIdOgGyldigFom);
+                            log.warn("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigFom for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgGyldigFom);
                             // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                         } else {
-                            log.debug("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig fra dato endringer og evt. endring av primær", stillingPeriode, matcherAgressoId);
+                            log.debug("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig fra dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                             OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
 
                             if (!orgtilknytning.gyldigFom().equals(stillingPeriode.gyldigFom())) {
@@ -189,10 +189,10 @@ public class RessursStillingProcessor {
                         if (matcherIdOgGyldigTom.size() > 0) {
                             if (matcherIdOgGyldigTom.size() > 1) {
                                 // Vi har flere orgtilknytninger i state som har samme til og med dato og agressoId som stillignPeriode.
-                                log.warn("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigTom flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", stillingPeriode, matcherIdOgGyldigTom);
+                                log.warn("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigTom flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgGyldigTom);
                                 // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                             } else {
-                                log.debug("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig til dato endringer og evt. endring av primær", stillingPeriode, matcherAgressoId);
+                                log.debug("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig til dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                                 OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
 
                                 if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
@@ -203,7 +203,7 @@ public class RessursStillingProcessor {
                                 }
                             }
                         } else {
-                            log.debug("Navident har fremtidig stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", stillingPeriode);
+                            log.debug("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.",navident, stillingPeriode);
 
                             String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.stillingperioderToString(stillingPerioder));
                             if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
@@ -216,11 +216,11 @@ public class RessursStillingProcessor {
                     }
                 } else if (matcherIdOgPeriode.size() > 1) {
                     // Vi har flere orgtilknytninger i state som har samme dato periode og agressoId som stillignPeriode.
-                    log.warn("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og periode for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", stillingPeriode, matcherIdOgPeriode);
+                    log.warn("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og periode for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgPeriode);
                     // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                 } else {
                     // Vi har en presis match på stillingPeriode og Orgtilknytning state
-                    log.warn("Navident har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og periode for en fremtidige orgtilknytninger i state\n  {}\nSjekker evt endring på primær", stillingPeriode, matcherIdOgPeriode);
+                    log.warn("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og periode for en fremtidige orgtilknytninger i state\n  {}\nSjekker evt endring på primær", navident, stillingPeriode, matcherIdOgPeriode);
                     OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
                     if (orgtilknytning.erDagligOppfolging() != erDagligOppfolging) {
                         endreOrgtilknytningDagligOppfolging(orgtilknytning.fid(), navident, erDagligOppfolging, stillingPeriode, StillingPeriode.stillingperioderToString(stillingPerioder));
