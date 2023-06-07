@@ -6,7 +6,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -27,7 +31,7 @@ import java.util.Optional;
 import java.util.Properties;
 
 public class KafkaProcessorTest {
-    private ObjectMapper objectMapper = configureObjectMapper();
+    private final ObjectMapper objectMapper = configureObjectMapper();
     private TestInputTopic<String, OrgtilknytningEvent> inputTopic;
     private TestOutputTopic<String, OrgtilknytningState> outputTopic;
 
@@ -39,36 +43,15 @@ public class KafkaProcessorTest {
     @Test
     @DisplayName("OrgtilknytningOpprettetEventV1 oppretter OrgtilknytningState i output topic")
     public void test_001(){
-        final OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData eventData =
-            new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
-                "navident",
-                "ORGENHET_ID",
-                LocalDate.now()
-        );
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.now();
+        
+        final OrgtilknytningEvent event = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
 
-        final OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData =
-            new OrgtilknytningEvent.AdditionalAgressoData(
-                "dummy_hrresStillingRessursEnhet_String",
-                "dummy_hrresStillingerPerioderFormatert_String"
-        );
+        final OrgtilknytningState expected = lagStateObjekt(navident, orgEnhetId, false, gyldigFom, null);
 
-        final OrgtilknytningEvent event = new OrgtilknytningOpprettetEventV1(
-            "FID_1",
-            eventData,
-            (Event.Metadata) null,
-            additionalAgressoData
-        );
-
-        final OrgtilknytningState expected = new OrgtilknytningState(
-            event.getFid(),
-            eventData.navident(),
-            eventData.orgEnhetId(),
-            false,
-            eventData.gyldigFom(),
-            Optional.empty()
-        );
-
-        inputTopic.pipeInput("FID_1", event);
+        inputTopic.pipeInput(event.getFid(), event);
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
@@ -76,162 +59,261 @@ public class KafkaProcessorTest {
                 );
     }
 
-/*
     @Test
-    @DisplayName("Merger RessursSluttet event merges sammen inn i state")
-    public void test21(){
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                )
+    @DisplayName("Merger OrgtilknytningOpprettet og OrgtilknytningAvsluttet event sammen inn i state")
+    public void test_002(){
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+        LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
+
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
+
+        final OrgtilknytningState expectedOpprettet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            null
         );
 
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(LocalDate.now()),
-                Optional.empty()
-        );
-
-        final RessursEvent event = new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-
-        );
-
-        final RessursSluttetEventV1.RessursSluttetEventData sluttetEventData = new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now());
-        final RessursEvent sluttetEvent = new RessursSluttetEventV1(
-                event.getFid(),
-                sluttetEventData,
-                (Event.Metadata) null
+        final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            gyldigTom
         );
 
 
-        final RessursState expectedOpprettet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty()
-        );
-
-        final RessursState expectedSluttet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.of(sluttetEventData.sluttdato())
-        );
-
-
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
-        inputTopic.pipeInput(UUID.randomUUID().toString(), sluttetEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), avsluttetEvent);
 
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
                 .containsExactly(
-                        KeyValue.pair(event.getFid(), expectedOpprettet),
-                        KeyValue.pair(event.getFid(), expectedSluttet)
+                        KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
+                        KeyValue.pair(opprettEvent.getFid(), expectedAvsluttet)
                 );
     }
 
     @Test
-    @DisplayName("Merger PersonopplysningerEndret event merges sammen inn i state")
-    public void test31(){
-        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
-                "personident",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        null,
-                        "etternavn"
-                )
+    @DisplayName("Merger OrgtilknytningOpprettet, OrgtilknytningDagligOppfølgingEndret og OrgtilknytningAvsluttet eventer sammen inn i state")
+    public void test_003(){
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+        LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
+
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent dagligOppfolgingEndretEvent = lagDagligOppfolgingEndretEvent(navident, orgEnhetId, gyldigFom, null, true);
+        final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
+
+        final OrgtilknytningState expectedOpprettet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            null
         );
 
-        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.of("navident"),
-                null,
-                null,
-                null,
-                Optional.of(LocalDate.now()),
-                Optional.empty()
+        final OrgtilknytningState expectedDagligOppforingEndret = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            true,
+            gyldigFom,
+            null
         );
 
-        final RessursEvent event = new RessursOpprettetEventV1(
-                UUID.randomUUID().toString(),
-                eventData,
-                (Event.Metadata) null,
-                additionalData
-
-        );
-
-        final RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData personaliaOppdatertEventData = new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
-                new Visningsnavn(
-                        "fornavnEndret",
-                        Optional.empty(),
-                        "etternavnEndret"
-                )
-        );
-        final RessursEvent personopplysningerEndretEvent = new RessursPersonaliaOppdatertV1(
-                event.getFid(),
-                personaliaOppdatertEventData,
-                (Event.Metadata) null
+        final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            true,
+            gyldigFom,
+            gyldigTom
         );
 
 
-        final RessursState expectedOpprettet = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.empty(),
-                        "etternavn"
-                ),
-                Optional.empty()
-        );
-
-        final RessursState expectedEndret = new RessursState(
-                event.getFid(),
-                eventData.personident(),
-                additionalData.navident().get(),
-                eventData.sektor(),
-                personaliaOppdatertEventData.visningsnavn(),
-                Optional.empty()
-        );
-
-
-        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
-        inputTopic.pipeInput(UUID.randomUUID().toString(), personopplysningerEndretEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), dagligOppfolgingEndretEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), avsluttetEvent);
 
 
         Assertions.assertThat(outputTopic.readKeyValuesToList())
-                .containsExactly(
-                        KeyValue.pair(event.getFid(), expectedOpprettet),
-                        KeyValue.pair(event.getFid(), expectedEndret)
-                );
+            .containsExactly(
+                KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
+                KeyValue.pair(opprettEvent.getFid(), expectedDagligOppforingEndret),
+                KeyValue.pair(opprettEvent.getFid(), expectedAvsluttet)
+            );
     }
-*/
 
+    @Test
+    @DisplayName("Lag orgtilknytning, sett avsluttet, endre datoer, og til sist fjern den")
+    public void test_004(){
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+        LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
+        LocalDate nyGyldigFom = LocalDate.of(2023, 1,  1);
+        LocalDate nyGyldigTom = LocalDate.of(2023, 12, 31);
+
+        final OrgtilknytningEvent opprettEvent = lagOpprettEvent(navident, orgEnhetId, gyldigFom);
+        final OrgtilknytningEvent avsluttetEvent = lagAvsluttEvent(navident, orgEnhetId, gyldigTom);
+        final OrgtilknytningEvent endretDatoEvent = lagDatoEndretEvent(navident, orgEnhetId, nyGyldigFom, nyGyldigTom);
+        final OrgtilknytningEvent fjernetEvent = lagFjernetEvent(navident, orgEnhetId, nyGyldigFom, nyGyldigTom);
+
+        final OrgtilknytningState expectedOpprettet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            null
+        );
+
+        final OrgtilknytningState expectedAvsluttet = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            gyldigTom
+        );
+
+        final OrgtilknytningState expectedEndret = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            nyGyldigFom,
+            nyGyldigTom
+        );
+
+        inputTopic.pipeInput(opprettEvent.getFid(), opprettEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), avsluttetEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), endretDatoEvent);
+        inputTopic.pipeInput(opprettEvent.getFid(), fjernetEvent);
+
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
+                KeyValue.pair(opprettEvent.getFid(), expectedAvsluttet),
+                KeyValue.pair(opprettEvent.getFid(), expectedEndret),
+                KeyValue.pair(opprettEvent.getFid(), null)
+            );
+
+    }
+
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, LocalDate gyldigFom) {
+        return lagOpprettEvent("FID_1", navident, orgEnhetId, gyldigFom);
+    }
+
+    private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom) {
+        return new OrgtilknytningOpprettetEventV1(
+            fid,
+            new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
+                navident,
+                orgEnhetId,
+                gyldigFom
+            ),
+            (Event.Metadata) null,
+            dummyAdditionalAgressoData
+        );
+    }
+
+    private OrgtilknytningAvsluttetEventV1 lagAvsluttEvent(String navident, String orgEnhetId, LocalDate gyldigTom) {
+        return lagAvsluttEvent("FID_1", navident, orgEnhetId, gyldigTom);
+    }
+
+    private OrgtilknytningAvsluttetEventV1 lagAvsluttEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigTom) {
+        return new OrgtilknytningAvsluttetEventV1(
+            fid,
+            new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
+                navident,
+                orgEnhetId,
+                gyldigTom
+            ),
+            (Event.Metadata) null,
+            dummyAdditionalAgressoData
+        );
+    }
+
+    private OrgtilknytningDagligOppfolgingEndretEventV1 lagDagligOppfolgingEndretEvent(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging) {
+        return lagDagligOppfolgingEndretEvent("FID_1", navident, orgEnhetId, gyldigFom, gyldigTom, dagligOppfolging);
+    }
+
+    private OrgtilknytningDagligOppfolgingEndretEventV1 lagDagligOppfolgingEndretEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom, boolean dagligOppfolging) {
+        return new OrgtilknytningDagligOppfolgingEndretEventV1(
+            fid,
+            new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
+                navident,
+                orgEnhetId,
+                gyldigFom,
+                Optional.ofNullable(gyldigTom),
+                dagligOppfolging
+            ),
+            (Event.Metadata) null,
+            dummyAdditionalAgressoData
+        );
+    }
+
+    private OrgtilknytningDatoEndretEventV1 lagDatoEndretEvent(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return lagDatoEndretEvent("FID_1", navident, orgEnhetId, gyldigFom, gyldigTom);
+    }
+
+    private OrgtilknytningDatoEndretEventV1 lagDatoEndretEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return new OrgtilknytningDatoEndretEventV1(
+            fid,
+            new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
+                navident,
+                orgEnhetId,
+                gyldigFom,
+                Optional.ofNullable(gyldigTom)
+            ),
+            (Event.Metadata) null,
+            dummyAdditionalAgressoData
+        );
+    }
+
+    private OrgtilknytningFjernetEventV1 lagFjernetEvent(String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return lagFjernetEvent("FID_1", navident, orgEnhetId, gyldigFom, gyldigTom);
+    }
+
+    private OrgtilknytningFjernetEventV1 lagFjernetEvent(String fid, String navident, String orgEnhetId, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return new OrgtilknytningFjernetEventV1(
+            fid,
+            new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(
+                navident,
+                orgEnhetId,
+                gyldigFom,
+                Optional.ofNullable(gyldigTom)
+            ),
+            (Event.Metadata) null,
+            dummyAdditionalAgressoData
+        );
+    }
+
+    private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return lagStateObjekt("FID_1", navident, orgEnhetId, erDagligOppfolging, gyldigFom, gyldigTom);
+    }
+
+    private static OrgtilknytningState lagStateObjekt(String fid, String navident, String orgEnhetId, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
+        return new OrgtilknytningState(
+            fid,
+            navident,
+            orgEnhetId,
+            erDagligOppfolging,
+            gyldigFom,
+            Optional.ofNullable(gyldigTom)
+        );
+    }
+
+
+    final OrgtilknytningEvent.AdditionalAgressoData dummyAdditionalAgressoData =
+        new OrgtilknytningEvent.AdditionalAgressoData(
+            "dummy_hrresStillingRessursEnhet_String",
+            "dummy_hrresStillingerPerioderFormatert_String"
+        );
+    
     private void setupKafkaTransformer(){
         KafkaConfig kafkaConfig = new KafkaConfig();
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
@@ -269,3 +351,4 @@ public class KafkaProcessorTest {
 
 
 }
+
