@@ -4,6 +4,7 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,10 +20,16 @@ import org.springframework.core.env.Environment;
 @EnableConfigurationProperties(UnleashPropeties.class)
 public class UnleashAutoconfiguration {
 
+    final Environment environment;
+
+    public UnleashAutoconfiguration(Environment environment) {
+        this.environment = environment;
+    }
+
     @Bean
     @ConditionalOnMissingBean
     StrategySupplier strategies() {
-        return () -> new Strategy[]{new ByClusterStrategy()};
+        return () -> new Strategy[]{new ByClusterStrategy(), new ByUserIdStrategy(environment)};
     }
 
     @Bean
