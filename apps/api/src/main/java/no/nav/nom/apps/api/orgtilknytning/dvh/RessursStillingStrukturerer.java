@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,23 +19,46 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.*;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentPeriode;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPeriod;
 
 @Component
 @Slf4j
 public class RessursStillingStrukturerer {
     private final IOrgenhetService orgenhetService;
+    private final Environment environment;
+    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = 20; // mindre enn 1 tar med alle - Kun for testing under utvikling
 
-    private static final LocalDate NO_END_DATE = LocalDate.of(2099, 12, 31);
-
-    public RessursStillingStrukturerer(IOrgenhetService orgenhetService) {
+    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, Environment environment) {
         this.orgenhetService = orgenhetService;
+        this.environment = environment;
     }
 
     public Map<String, List<DvhRessursStilling>> grupperPerNavident(List<DvhRessursStilling> ressursStillinger) {
         return ressursStillinger.stream()
             .filter(rs -> rs.getNavident().isPresent())
             .collect(groupingBy(rs -> rs.getNavident().get()));
+    }
+
+    public Map<String, List<StillingPeriode>> StrukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
+        Map <String, List<DvhRessursStilling>> ressursStillingerGruppert = grupperPerNavident(ressursStillinger);
+        log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
+
+        Map <String, List<StillingPeriode>> stillingPerioderPerNavident = new HashMap<>();
+
+        ressursStillingerGruppert.forEach((navident, rsList) -> {
+
+            if (harBehandletNok_LOCAL_RUN(stillingPerioderPerNavident, navident)) return; // Har nå behandlet nok navidenter som starter på denne bokstaven. Hop til neste
+
+            log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
+            var stillingerGruppert = strukturerNavidentensRessursStillinger(rsList);
+            if (log.isDebugEnabled()) {
+                log.debug("Resultat:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
+                stillingPerioderPerNavident.put(navident, stillingerGruppert);
+            }
+        });
+        return stillingPerioderPerNavident;
     }
 
     public List<StillingPeriode> strukturerNavidentensRessursStillinger(List<DvhRessursStilling> ressursStillinger) {
@@ -69,7 +94,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
                     // Dette håndterer vi ikke per nå
-                    log.warn("Overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
+                    log.debug("Overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
                 }
             }
             // Siste RessursStilling er slått sammen
@@ -99,12 +124,20 @@ public class RessursStillingStrukturerer {
                     nomEnheter = finnNomEnheterForId(stillingPeriode.stilling().ressursAgressoId().get(), stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom());
                 } else {
                     // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7 lang)
-                    log.warn("StillingPeriode er ikke presis nok på stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
+                    if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
+                        log.debug("StillingPeriode er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
+                    } else {
+                        log.warn("StillingPeriode er ikke presis nok på aktiv/fremtidig stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
+                    }
                 }
 
                 if (nomEnheter.size() == 0) {
                     // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
-                    log.warn("Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId. Den vil ikke behandles:\n\t{}", stillingPeriode);
+                    if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
+                        log.debug("Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId. Den vil ikke behandles:\n\t{}", stillingPeriode);
+                    } else {
+                        log.warn("Klarer ikke finne NOM orgenhet for aktiv/fremtidig stillingPeriode/agressoId. Den vil ikke behandles:\n\t{}", stillingPeriode);
+                    }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
                     perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
@@ -148,21 +181,10 @@ public class RessursStillingStrukturerer {
             ).toList();
     }
 
-    public Map<String, List<StillingPeriode>> StrukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
-        Map <String, List<DvhRessursStilling>> ressursStillingerGruppert = grupperPerNavident(ressursStillinger);
-        log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
-
-        Map <String, List<StillingPeriode>> stilingPerioderPerNavident = new HashMap<>();
-
-        ressursStillingerGruppert.forEach((navident, rsList) -> {
-            log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
-            var stillingerGruppert = strukturerNavidentensRessursStillinger(rsList);
-            if (log.isDebugEnabled()) {
-                log.debug("Resultat:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
-                stilingPerioderPerNavident.put(navident, stillingerGruppert);
-            }
-        });
-        return stilingPerioderPerNavident;
+    private boolean harBehandletNok_LOCAL_RUN(Map<String, List<StillingPeriode>> stillingPerioderPerNavident, String navident) {
+        return isLocalEnvRun() &&
+            NUM_TO_PROCESS_PER_NAVIDENT_LETTER > 0 &&
+            stillingPerioderPerNavident.keySet().stream().filter(k -> k.charAt(0) == navident.charAt(0)).count() >= NUM_TO_PROCESS_PER_NAVIDENT_LETTER;
     }
 
     private String orgenheterToString(List<IOrgenhet> orgenheter) {
@@ -179,5 +201,9 @@ public class RessursStillingStrukturerer {
                 .append("]")
         );
         return str.toString();
+    }
+
+    private boolean isLocalEnvRun() {
+        return Arrays.stream(environment.getActiveProfiles()).anyMatch("local"::equals);
     }
 }

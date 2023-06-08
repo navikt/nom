@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingProcessor.NO_END_DATE;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +40,8 @@ class RessursStillingProcessorTestUtilityMetoder {
 
     @Mock
     OrgenhetService orgenhetService;
-
+    @Mock
+    IRessursService ressursService;
     RessursStillingProcessor ressursStillingProcessor;
 
     @Captor
@@ -56,7 +58,7 @@ class RessursStillingProcessorTestUtilityMetoder {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursService);
     }
 
     @Test

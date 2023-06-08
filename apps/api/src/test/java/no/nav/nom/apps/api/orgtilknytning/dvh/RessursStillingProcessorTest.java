@@ -9,8 +9,10 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreD
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,8 @@ public class RessursStillingProcessorTest {
     OrgtilknytningCommandService orgtilknytningCommandService;
     @Mock
     OrgtilknytningStateService orgtilknytningStateService;
+    @Mock
+    IRessursService ressursService;
     RessursStillingProcessor ressursStillingProcessor;
     OrgenhetService orgenhetService;
     OrgEnhetStateRepository orgEnhetStateRepository;
@@ -65,7 +69,7 @@ public class RessursStillingProcessorTest {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
         orgenhetService = new OrgenhetService(orgEnhetStateRepository);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService, ressursService);
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_X");
 
@@ -133,8 +137,10 @@ public class RessursStillingProcessorTest {
             )
         );
 
-        // Ingen ekststerende orgtilknytninger
+        // Ingen eksitsterende orgtilknytninger
         when(orgtilknytningStateService.getAllKoblinger()).thenReturn(Collections.emptyList());
+        // Alle er sttatlig ansatte
+        svarAtAlleNavidenterErStatlig(navident);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -152,6 +158,10 @@ public class RessursStillingProcessorTest {
             .forNavident(navident)
             .tilEnhet("a001bc")
             .erDagligOppfolging(true);
+    }
+
+    private void svarAtAlleNavidenterErStatlig(String navident) {
+        when(ressursService.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty())));
     }
 
     @Test
@@ -301,7 +311,7 @@ public class RessursStillingProcessorTest {
             return this;
         }
         public OrgtilknytningAssert erDagligOppfolging(boolean erDagligOppfolging){
-            fail("Orgtilknytning CMD objektet har ikke DagligOppfolging flagg, kan ikke teste på det");
+            fail("Orgtilknytning CMD objektet har ikke dagligOppfolging flagg, kan ikke teste på det");
             return this;
         }
 
@@ -461,7 +471,7 @@ public class RessursStillingProcessorTest {
         }
 
         public OrgtilknytningAssert erDagligOppfolging(boolean erDagligOppfolging){
-            assertEquals(erDagligOppfolging, endreDagligOppfolgingOrgtilknytning.DagligOppfolging(), "ErDagligOppfolging er ikke korrekt for EndreDagligOppfolgingOrgtilknytning");
+            assertEquals(erDagligOppfolging, endreDagligOppfolgingOrgtilknytning.dagligOppfolging(), "ErDagligOppfolging er ikke korrekt for EndreDagligOppfolgingOrgtilknytning");
             return this;
         }
     }

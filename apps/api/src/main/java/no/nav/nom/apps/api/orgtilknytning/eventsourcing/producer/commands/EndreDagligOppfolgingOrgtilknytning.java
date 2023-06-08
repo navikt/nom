@@ -11,7 +11,7 @@ public record EndreDagligOppfolgingOrgtilknytning(
     String orgenhetId,
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom,
-    boolean DagligOppfolging,
+    boolean dagligOppfolging,
     InputMetadata inputMetadata,
     OrgtilknytningEvent.AdditionalAgressoData additionalAgressoData
 ) {}

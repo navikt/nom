@@ -54,7 +54,7 @@ public class OrgtilknytningCommandService {
                 primaeOrgtilknytningEndret.orgenhetId(),
                 primaeOrgtilknytningEndret.gyldigFom(),
                 primaeOrgtilknytningEndret.gyldigTom(),
-                primaeOrgtilknytningEndret.DagligOppfolging()
+                primaeOrgtilknytningEndret.dagligOppfolging()
             ),
             primaeOrgtilknytningEndret.inputMetadata(),
             primaeOrgtilknytningEndret.additionalAgressoData()
