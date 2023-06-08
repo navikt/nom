@@ -8,6 +8,7 @@ on:
       - 'qa/*'
     paths:
       - 'apps/api/**'
+      - 'libs/utils-common/**'
       - '.nais/apps/api/api*.yaml'
       - '.github/*/app-api.yaml'
       - 'apps/pom.xml'
