@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class OrgtilknytningStateRepository {
     private final Map<String, OrgtilknytningState> orgtilknytningByFid = new ConcurrentHashMap<>();
-    private final Map<String, List<OrgtilknytningState>> orgtilknytningerByNavident = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, OrgtilknytningState>> orgtilknytningerByNavident = new ConcurrentHashMap<>();
 
     public Optional<OrgtilknytningState> findByFid(String fid) {
         return Optional.ofNullable(orgtilknytningByFid.get(fid));
@@ -29,15 +29,15 @@ public class OrgtilknytningStateRepository {
             .collect(Collectors.toList());
     }
 
-    public List<OrgtilknytningState> findByNavident(String navident) {
-        return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyList());
+    public Collection<OrgtilknytningState> findByNavident(String navident) {
+        return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyMap()).values();
     }
 
     public List<OrgtilknytningState> findByNavidentIn(List<String> navidents) {
         return orgtilknytningerByNavident.entrySet().stream()
             .filter( e -> navidents.contains(e.getKey()))
             .map(Map.Entry::getValue)
-            .flatMap(Collection::stream)
+            .flatMap( identTilknytninger -> identTilknytninger.values().stream() )
             .collect(Collectors.toList());
     }
 
@@ -54,10 +54,10 @@ public class OrgtilknytningStateRepository {
 
         var navidentOrgtilknytninger = orgtilknytningerByNavident.get(newOrgtilknytningState.navident());
         if (navidentOrgtilknytninger == null) {
-            navidentOrgtilknytninger = new CopyOnWriteArrayList<>(); // Det er kostbart med en CopyOnWrite, men per navIdent er dette en sjelden operasjon
+            navidentOrgtilknytninger = new ConcurrentHashMap<>();
             orgtilknytningerByNavident.put(newOrgtilknytningState.navident(), navidentOrgtilknytninger);
         }
-        navidentOrgtilknytninger.add(newOrgtilknytningState);
+        navidentOrgtilknytninger.put(newOrgtilknytningState.fid(), newOrgtilknytningState); // Sett inn ny orgtilknytning, eller bytt ut med ny state evt.
     }
 
     public void clear() {

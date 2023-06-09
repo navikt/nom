@@ -28,7 +28,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 public class RessursStillingStrukturerer {
     private final IOrgenhetService orgenhetService;
     private final Environment environment;
-    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = 1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
+    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = -1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
 
     public RessursStillingStrukturerer(IOrgenhetService orgenhetService, Environment environment) {
         this.orgenhetService = orgenhetService;
@@ -54,7 +54,7 @@ public class RessursStillingStrukturerer {
             log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
             var stillingerGruppert = strukturerNavidentensRessursStillinger(rsList);
             if (log.isDebugEnabled()) {
-                log.debug("Resultat:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
+                log.debug("Resultat av gruppering og matching til orgenhet:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
                 stillingPerioderPerNavident.put(navident, stillingerGruppert);
             }
         });
@@ -102,6 +102,15 @@ public class RessursStillingStrukturerer {
                 new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
             );
         });
+        if (log.isDebugEnabled()) {
+            log.debug("DVH Periodene er nå gruppert:\n{}",
+                StillingPeriode.stillingperioderToString(
+                    perioderGruppert.stream()
+                        .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
+                        .toList(),
+                    true));
+            log.debug("Må nå matche til orgenheter, og periodene evt endres ift til dette");
+        }
         // Nå er alle stillingPeriodene gruppert på periode for agressoId.
         // Finn så NOM orgenhet for disse. Hvis gyldig periode for enhet ikke dekker hele perioden for stillingPerioden, så må stillingperioden splittes.
         List<StillingPeriode> perioderGruppertMedOrgenhet = new ArrayList<>();
@@ -140,6 +149,7 @@ public class RessursStillingStrukturerer {
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
+                    log.debug("StillingPerioden matcher en orgenhet: {}", orgenhetToString(nomEnheter.get(0)));
                     // Må nå sjekke om stillingPerioden går utover enhetens periode. Hvis så, må enhetens periode brukes, og overskytende stillingsperiode må forkastes.
                     if (stillingPeriode.gyldigFom().isBefore(nomEnheter.get(0).getGyldigFom())) {
                         log.debug("Stillingperioden starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor");
@@ -223,15 +233,21 @@ public class RessursStillingStrukturerer {
         StringBuffer str = new StringBuffer();
         orgenheter.forEach( oe ->
             str.append("\n\t")
-                .append(oe.getId())
-                .append("-")
-                .append(oe.getNavn())
-                .append(" [")
-                .append(oe.getGyldigFom())
-                .append(" - ")
-                .append(oe.getGyldigTom().orElse(NO_END_DATE))
-                .append("]")
+               .append(orgenhetToString(oe))
         );
+        return str.toString();
+    }
+
+    private String orgenhetToString(IOrgenhet orgenhet) {
+        StringBuffer str = new StringBuffer();
+        str.append(orgenhet.getId())
+           .append("-")
+           .append(orgenhet.getNavn())
+           .append(" [")
+           .append(orgenhet.getGyldigFom())
+           .append(" - ")
+           .append(orgenhet.getGyldigTom().orElse(NO_END_DATE))
+           .append("]");
         return str.toString();
     }
 

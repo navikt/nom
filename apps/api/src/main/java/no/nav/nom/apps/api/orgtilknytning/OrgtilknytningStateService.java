@@ -31,7 +31,7 @@ public class OrgtilknytningStateService implements OrgtilknytningService {
     }
 
     @Override
-    public List<OrgtilknytningState> getKoblingerByNavIdent(String navident) {
+    public Collection<OrgtilknytningState> getKoblingerByNavIdent(String navident) {
         return orgtilknytningStateRepository.findByNavident(navident);
     }
 

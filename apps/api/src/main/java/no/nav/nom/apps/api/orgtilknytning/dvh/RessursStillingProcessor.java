@@ -19,6 +19,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -145,7 +146,8 @@ public class RessursStillingProcessor {
                 boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
 
                 if (matcherAgressoId.size() > 1) {
-                    log.error("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherAgressoId);
+                    log.error("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}", navident, stillingPeriode, matcherAgressoId);
+                    log.error("Dette kan ikke behandles (Eller - det er nok mulig å implementere at duplikat tilknytninger skal fjernes, men det er ikke implementert)");
                     // Har ingen behandling av denne stilling perioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                 } else if (matcherAgressoId.size() == 0) {
                     log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", navident, stillingPeriode);
@@ -289,7 +291,17 @@ public class RessursStillingProcessor {
      * Altså en stillingPeriode med angivelse av f.eks. ORGNIV3 node '060200' vil da matche en orgtilknytning i nom for ORGENHET '0602002'
      */
     public boolean orgtilknytningEnhetMatcherAgressoId(StillingPeriode stillingPeriode, OrgtilknytningState ot) {
-        return orgenhetService.getById(ot.orgEnhetId()).get().getAgressoId().startsWith(stillingPeriode.stilling().agressoId().orElse("NULL"));
+        if (isCurrentPeriode(stillingPeriode)) {
+            // For aktiv periode, match mot stilling sin AgressoId, men hvis denne er null - match mot ressursens agressso ID.
+            return orgenhetService.getById(
+                ot.orgEnhetId()).get().getAgressoId().startsWith(
+                stillingPeriode.stilling().agressoId().orElse(
+                    stillingPeriode.stilling().ressursAgressoId().orElse("NULL")
+                )
+            );
+        } else {
+            return orgenhetService.getById(ot.orgEnhetId()).get().getAgressoId().startsWith(stillingPeriode.stilling().agressoId().orElse("NULL"));
+        }
     }
 
     public String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
@@ -431,7 +443,7 @@ public class RessursStillingProcessor {
         orgtilknytningCommandService.fjernOrgtilknytning(originalOrgtilknytning.fid(), command);
     }
 
-    private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, List<OrgtilknytningState> orgtilknytninger) {
+    private void loggOppsummering(String navident, List<StillingPeriode> stillingPerioder, Collection<OrgtilknytningState> orgtilknytninger) {
         if (log.isDebugEnabled()) {
             StringBuffer strbuf = new StringBuffer();
             strbuf.append("Oppsummering for navident %s".formatted(navident));
@@ -445,7 +457,11 @@ public class RessursStillingProcessor {
             strbuf.append("\n\t\tFremtidige: %s".formatted(orgtilknytninger.stream().filter(PeriodeUtil::isFuturePeriod).count()));
 
             strbuf.append("\n\t===> Har laget følgende evtsrc hendelser:");
-            evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
+            if (evtsrcCommandsPerNavident.get(navident).size() == 0) {
+                strbuf.append("\n\t\tIngen");
+            } else {
+                evtsrcCommandsPerNavident.get(navident).forEach(strbuf::append);
+            }
             log.debug(strbuf.toString());
         }
         evtsrcCommandsPerNavident = new HashMap<>();

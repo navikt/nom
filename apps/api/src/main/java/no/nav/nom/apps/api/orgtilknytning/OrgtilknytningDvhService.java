@@ -40,7 +40,7 @@ public class OrgtilknytningDvhService implements OrgtilknytningService {
     }
 
     @Override
-    public List<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
+    public Collection<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
         throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
     }
 
