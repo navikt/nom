@@ -107,6 +107,7 @@ public class DvhConsumerProcessorService {
                 case "K":
                 case "M":
                 case "N":
+                case "R":
                     return "Eksternt".equals(ansattType) ? Ressurstype.EKSTERN : Ressurstype.INTERN;
                 default:
                     return Ressurstype.EKSTERN;
