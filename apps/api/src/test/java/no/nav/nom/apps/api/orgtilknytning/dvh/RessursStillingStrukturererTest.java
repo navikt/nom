@@ -220,6 +220,48 @@ class RessursStillingStrukturererTest extends TestBase {
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
     }
 
+    @Test
+    @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingen periode går ut over periode til kjent Orgenhet")
+    public void test_009() {
+        String navid_1 = "A001001";
+
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navid_1, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2018, 1, 1), MAX_DATE)
+        );
+
+        IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2020, 1, 1), null, "AGRID_1");
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet));
+
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(ressursStillinger);
+        assertEquals(1, result.size());
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("FID_1", result.get(0).orgenhet().getFid());
+        assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom()); // Strukturert stilling skal kun tas med fra enhet start dato
+    }
+
+    @Test
+    @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingen periode feilaktige Orgenheter som er like med overlapp på dato (dette er en feil i orgenhet i såfall)")
+    // Dette vil gå igjennom, men blir error melding på enhets feil, og kobling blir gjort mot første treff
+    public void test_010() {
+        String navid_1 = "A001001";
+
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navid_1, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE)
+        );
+
+        IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2018, 1, 1), null, "AGRID_1");
+        IOrgenhet enhet2 = getNomEnhet("FID_2", "x321yz", "Enhet_1", LocalDate.of(2018, 1, 1), null, "AGRID_1");
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet, enhet2));
+
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(ressursStillinger);
+        assertEquals(1, result.size());
+        assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
+        assertEquals("FID_1", result.get(0).orgenhet().getFid());
+        assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom()); // Strukturert stilling skal kun tas med fra enhet start dato
+    }
+
     private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {
         return getTestRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, from, to);
     }

@@ -55,6 +55,7 @@ public class OrgtilknytningStateRepository {
         var navidentOrgtilknytninger = orgtilknytningerByNavident.get(newOrgtilknytningState.navident());
         if (navidentOrgtilknytninger == null) {
             navidentOrgtilknytninger = new CopyOnWriteArrayList<>(); // Det er kostbart med en CopyOnWrite, men per navIdent er dette en sjelden operasjon
+            orgtilknytningerByNavident.put(newOrgtilknytningState.navident(), navidentOrgtilknytninger);
         }
         navidentOrgtilknytninger.add(newOrgtilknytningState);
     }

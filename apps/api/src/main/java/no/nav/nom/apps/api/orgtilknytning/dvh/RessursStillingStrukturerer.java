@@ -28,7 +28,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 public class RessursStillingStrukturerer {
     private final IOrgenhetService orgenhetService;
     private final Environment environment;
-    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = 20; // mindre enn 1 tar med alle - Kun for testing under utvikling
+    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = 1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
 
     public RessursStillingStrukturerer(IOrgenhetService orgenhetService, Environment environment) {
         this.orgenhetService = orgenhetService;
@@ -140,7 +140,28 @@ public class RessursStillingStrukturerer {
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
-                    perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
+                    // Må nå sjekke om stillingPerioden går utover enhetens periode. Hvis så, må enhetens periode brukes, og overskytende stillingsperiode må forkastes.
+                    if (stillingPeriode.gyldigFom().isBefore(nomEnheter.get(0).getGyldigFom())) {
+                        log.debug("Stillingperioden starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor");
+                        perioderGruppertMedOrgenhet.add(
+                            new StillingPeriode(
+                                stillingPeriode.stilling(),
+                                nomEnheter.get(0).getGyldigFom(),
+                                stillingPeriode.gyldigTom(),
+                                nomEnheter.get(0))
+                        );
+                    } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
+                        log.debug("Stillingperioden slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor");
+                        perioderGruppertMedOrgenhet.add(
+                            new StillingPeriode(
+                                stillingPeriode.stilling(),
+                                stillingPeriode.gyldigFom(),
+                                nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE),
+                                nomEnheter.get(0))
+                        );
+                    }else {
+                        perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
+                    }
                 } else {
                     // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
                     log.debug("StillingPerioden {} matcher flere NOM Orgenheter\t{}", stillingPeriode, orgenheterToString(nomEnheter));
@@ -149,8 +170,19 @@ public class RessursStillingStrukturerer {
                     nomEnheter.stream()
                         .sorted(Comparator.comparing(IOrgenhet::getGyldigFom))
                         .forEach( oe -> {
-                            nyeStillingPerioder.add(new StillingPeriode(stillingPeriode.stilling(), nextGyldigFom.get(), oe.getGyldigTom().orElse(NO_END_DATE), oe));
-                            nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE).plusDays(1));
+                            if (nextGyldigFom.get().isAfter(oe.getGyldigTom().orElse(NO_END_DATE).minusDays(1))) {
+                                // Har truffet snag med match på flere enheter som har overlapp i periode
+                                // Vi må baile ut - Kan ikke matche på flere enheter. Orgenheter må korrigeres
+                                log.error("Har funnet matchende orgenheter med overlappende perioder. Dette kan ikke behandles.");
+                            } else {
+                                nyeStillingPerioder.add(new StillingPeriode(
+                                    stillingPeriode.stilling(),
+                                    nextGyldigFom.get(),
+                                    oe.getGyldigTom().orElse(NO_END_DATE),
+                                    oe
+                                ));
+                                nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE).plusDays(1));
+                            }
                         });
                     log.debug("Splittet opp i\n\t{}", nyeStillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n\t")));
                     perioderGruppertMedOrgenhet.addAll(nyeStillingPerioder);

@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
@@ -49,6 +50,7 @@ public class DvhRestConsumer {
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
+    private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
@@ -64,7 +66,7 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
-        while (!ressursStateListener.initloadComplete()) {
+        while (!ressursStateListener.initloadComplete() && !orgtilknytningStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {

@@ -47,24 +47,24 @@ public class OrgtilknytningStateListener {
         this.luceneService = luceneService;
     }
 
-    // TODO: Skru på listener når topic er laget
-//    @KafkaListener(
-//            containerFactory = "orgtilknytningStateKafkaListenerContainerFactory",
-//            clientIdPrefix = "orgtilknytningStateListener",
-//            topicPartitions = @TopicPartition(
-//                    topic = "${app.kafka.orgtilknytning.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
-//            )
-//    )
+    @KafkaListener(
+            containerFactory = "orgtilknytningStateKafkaListenerContainerFactory",
+            clientIdPrefix = "orgtilknytningStateListener",
+            topicPartitions = @TopicPartition(
+                    topic = "${app.kafka.orgtilknytning.state-topic}", partitionOffsets = @PartitionOffset(partition = "0", initialOffset = "0")
+            )
+    )
     public void onMessage(ConsumerRecords<String, OrgtilknytningState> records, Consumer<String, String> consumer) {
-        StreamSupport.stream(records.spliterator(), false).forEach(it -> {
+        StreamSupport.stream(records.spliterator(), false)
+            .filter( it -> it.value() != null)
+            .forEach(it -> {
             var OrgtilknytningState = it.value();
             orgtilknytningStateService.putEventAggregate(OrgtilknytningState);
         });
 
-        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgtilknytningState listener initial load finished - {} OrgEnheter", orgtilknytningStateService.count()));
+        KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgtilknytningState listener initial load finished - {} Orgtilknytninger", orgtilknytningStateService.count()));
     }
 
-    // TODO: Og når listener er skurdd på, legg til sjekk på denne i DvhRestConsumer
     public boolean initloadComplete() {
         if (!initialLoadComplete.get()) {
             try {
