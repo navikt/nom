@@ -34,9 +34,9 @@ spec:
     failureThreshold: 5
   startup:
     path: internal/health/readiness
-    initialDelay: 30
+    initialDelay: 60
     failureThreshold: 30
-    periodSeconds: 10
+    periodSeconds: 20
   resources:
     requests:
       cpu: 300m
