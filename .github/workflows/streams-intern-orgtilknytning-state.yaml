@@ -1,4 +1,4 @@
-name: Build, Deploy nom-intern-orgenhet-state
+name: Build, Deploy nom-intern-orgtilknytning-state
 
 on:
   push:

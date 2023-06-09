@@ -18,9 +18,6 @@ spec:
       application: nom-api
       access: readwrite
     - team: org
-      application: nom-ressurs-eventsrc-to-state
-      access: read
-    - team: org
       application: nom-intern-ressurs-state
       access: read
     - team: org
@@ -82,9 +79,6 @@ spec:
       application: nom-api
       access: readwrite
     - team: org
-      application: nom-orgenhet-eventsrc-to-state
-      access: read
-    - team: org
       application: nom-intern-orgenhet-state
       access: read
     - team: org
@@ -139,6 +133,9 @@ spec:
     retentionBytes: -1
     retentionHours: -1
   acl:
+    - team: org
+      application: nom-intern-orgtilknytning-state
+      access: read
     - team: nom
       application: nom-api
       access: readwrite
@@ -163,6 +160,9 @@ spec:
     replication: 3
     cleanupPolicy: compact
   acl:
+    - team: org
+      application: nom-intern-orgtilknytning-state
+      access: readwrite
     - team: nom
       application: nom-api
       access: read
