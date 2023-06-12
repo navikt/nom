@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,13 +45,33 @@ public class OrgTilknytningResolver {
 
     public Map<Ressurs, List<RessursOrgTilknytning>> getOrgTilknytning(Collection<Ressurs> ressurser) {
         return ressurser.stream()
-                .collect(toMap(
-                        Function.identity(),
-                        ressurs -> orgtilknytningDvhService.getKoblingerByNavIdentOld(ressurs.getNavIdent())
-                                .stream()
-                                .map(kobling -> this.fromDvhKobling(kobling))
-                                .toList()
-                ));
+                .collect(toMap(Function.identity(), this::getOrgTilknytningerForRessurs));
+    }
+
+    private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
+        if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+            return orgtilknytningStateService
+                .getKoblingerByNavIdent(ressurs.getNavIdent()).stream()
+                .map(this::fromOrgtilknytningState)
+                .toList();
+        } else {
+            return orgtilknytningDvhService.getKoblingerByNavIdentOld(ressurs.getNavIdent())
+                .stream()
+                .map(this::fromDvhKobling)
+                .toList();
+        }
+    }
+
+    private RessursOrgTilknytning fromOrgtilknytningState(OrgtilknytningState orgtilknytning) {
+        final var orgenhet = orgenhetService.getById(orgtilknytning.orgEnhetId()).get();
+        final var orgEnhetGqlResponse = OrgEnhetResolver.convertToOrgEnhet(orgenhet);
+
+        return RessursOrgTilknytning.builder()
+            .organisasjonsenhet(orgEnhetGqlResponse)
+            .orgEnhet(orgEnhetGqlResponse)
+            .gyldigFom(orgtilknytning.gyldigFom())
+            .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
+            .build();
     }
 
     private RessursOrgTilknytning fromDvhKobling(Orgtilknytning orgtilknytning) {

@@ -114,22 +114,42 @@ public class OmadaUttrekk {
         final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
 
         try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+            if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+                orgtilknytningStateService.getAllKoblinger().forEach(kobling -> {
+                    try {
+                        printer.printRecord(
+                            kobling.navident(),
+                            kobling.orgEnhetId(),
+                            kobling.gyldigFom().format(dateTimeFormatter),
+                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse(""));
 
-            orgtilknytningDvhService.getAllKoblingerOld().forEach(kobling -> {
-                try {
-                    printer.printRecord(
-                        kobling.getNavIdent(),
-                        orgenhetService.getEnhetByAgressoIdNivaAndName(kobling.getAgressoId(), kobling.getOrgNiv(), kobling.getOrgenhetNavn()).map(IOrgenhet::getId).orElseThrow(),
-                        kobling.getGyldigFom().format(dateTimeFormatter),
-                        kobling.getGyldigTom().map(dateTimeFormatter::format).orElse("")
-                    );
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
 
-                    writer.close();
-                } catch (IOException e) {
-                    log.error("Error writing to CSV", e);
-                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                }
-            });
+                });
+
+            } else {
+                orgtilknytningDvhService.getAllKoblingerOld().forEach(kobling -> {
+                    try {
+                        printer.printRecord(
+                            kobling.getNavIdent(),
+                            orgenhetService.getEnhetByAgressoIdNivaAndName(kobling.getAgressoId(), kobling.getOrgNiv(), kobling.getOrgenhetNavn())
+                                .map(IOrgenhet::getId)
+                                .orElseThrow(),
+                            kobling.getGyldigFom().format(dateTimeFormatter),
+                            kobling.getGyldigTom().map(dateTimeFormatter::format).orElse("")
+                        );
+
+                        writer.close();
+                    } catch (IOException e) {
+                        log.error("Error writing to CSV", e);
+                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                    }
+                });
+            }
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }

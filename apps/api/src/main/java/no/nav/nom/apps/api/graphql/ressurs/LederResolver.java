@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
@@ -70,7 +71,25 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        return orgtilknytningDvhService.getKoblingerByNavIdentOld(navIdent)
+        if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+            return orgtilknytningStateService.getKoblingerByNavIdent(navIdent)
+                .stream()
+                .filter(dto -> DateUtil.isNow(dto.gyldigFom(), dto.gyldigTom().orElse(null)))
+                .flatMap(kobling -> {
+                    String orgenhetId = kobling.orgEnhetId();
+                    IOrgenhet orgenhet = orgenhetService.getById(orgenhetId).get();
+                    var ledere = lederFor(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), navIdent);
+
+                    if (ledere.isEmpty()) {
+                        // Om ressurs er leder for sin enhet henter vi leder fra nivå over
+                        return lederForRecursive(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn(), navIdent).stream();
+                    }
+                    return ledere.stream();
+                })
+                .map(RessursLeder::new)
+                .collect(Collectors.toList());
+        } else {
+            return orgtilknytningDvhService.getKoblingerByNavIdentOld(navIdent)
                 .stream()
                 .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom().orElse(null)))
                 .filter(distinctByKey(k -> k.getAgressoId() + k.getOrgNiv()))
@@ -88,6 +107,7 @@ public class LederResolver {
                 })
                 .map(RessursLeder::new)
                 .collect(Collectors.toList());
+        }
     }
 
     private List<Ressurs> lederForRecursive(String agressoId, String orgNiv, String orgenhetNavn, String excludeNavIdent) {

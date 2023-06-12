@@ -133,7 +133,7 @@ spring:
 
 logging:
   level:
-    no.nav.nom: INFO
+    # no.nav.nom: INFO
     # Kjør med ekstra logging i oppstarten av orgtilknytning
     no.nav.nom.apps.api.orgtilknytning: DEBUG
 
