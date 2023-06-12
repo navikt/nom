@@ -131,18 +131,18 @@ class RessursStillingProcessorTestUtilityMetoder {
         when(orgenhetService.getById("ENHET_1")).thenReturn(orgenhetMedAgressoId("0123456)"));
         when(orgenhetService.getById("ENHET_2")).thenReturn(orgenhetMedAgressoId("6543210)"));
 
-        StillingPeriode stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.empty(), Optional.empty()), null, null, null);
-        OrgtilknytningState orgtilknytningState = new OrgtilknytningState(null, null, "ENHET_1", false, null, Optional.empty());
+        StillingPeriode stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 1, 1), NO_END_DATE, null);
+        OrgtilknytningState orgtilknytningState = new OrgtilknytningState(null, null, "ENHET_1", false, LocalDate.of(2022, 1, 1), Optional.empty());
 
         assertTrue(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
 
         orgtilknytningState = new OrgtilknytningState(null, null, "ENHET_2", false, null, Optional.empty());
         assertFalse(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
 
-        stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("6543"), null, Optional.empty(), Optional.empty()), null, null, null);
+        stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("6543"), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 1, 1), NO_END_DATE, null);
         assertTrue(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
 
-        stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.empty(), null, Optional.empty(), Optional.empty()), null, null, null);
+        stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.empty(), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 1, 1), NO_END_DATE, null);
         assertFalse(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
     }
 
