@@ -52,6 +52,7 @@ public class RessursStillingProcessor {
     }
 
     public void process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
+        processCmdResult = new ProcessCmdResult();
         stillingPerioderPerNavident.forEach(this::process);
 
         log.debug("Ferdig prossesert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}", stillingPerioderPerNavident.size(), processCmdResult.summary());
