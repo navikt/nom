@@ -119,20 +119,20 @@ public class RessursStillingStrukturerer {
             .forEach(stillingPeriode -> {
                 List<IOrgenhet> nomEnheter = Collections.emptyList();
                 // Kan kun matche for på stilling agressoId hvis denne finnes og er presis
-                if (stillingPeriode.stilling().agressoId().orElse("").length() == 7) {
+                if (stillingPeriode.stilling().agressoId().orElse("").length() >= 7) {
                     nomEnheter = finnNomEnheterForIdOgNavn(stillingPeriode.stilling().agressoId().get(), stillingPeriode.stilling().enhetNavn(), stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom());
                 } else if (
                     // Hvis det er en aktiv periode,
                     // og ressurs agressoId er presis
                     // og hvis denne matcher stilling partial eller tom agressoId (Eg. stilling agressoId er overenhet for ressursens agressoId)
                         isCurrentPeriode(stillingPeriode)
-                        && stillingPeriode.stilling().ressursAgressoId().orElse("").length() == 7
+                        && stillingPeriode.stilling().ressursAgressoId().orElse("").length() >= 7
                         && stillingPeriode.stilling().ressursAgressoId().get().startsWith(stillingPeriode.stilling().agressoId().orElse(""))
                 ) {
                     // så kan vi matche på ressurs sin agressoId
                     nomEnheter = finnNomEnheterForId(stillingPeriode.stilling().ressursAgressoId().get(), stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom());
                 } else {
-                    // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7 lang)
+                    // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7-8 tegn lang)
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
                         log.debug("StillingPeriode er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
                     } else {
