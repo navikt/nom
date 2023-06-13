@@ -156,9 +156,6 @@ public class RessursStillingProcessor {
                         matcherAgressoId
                     );
                     matcherAgressoId = fjernDuplikater(matcherAgressoId);
-                    log.error(
-                        "Dette kan ikke behandles (Eller - det er nok mulig å implementere at duplikat tilknytninger skal fjernes, men det er ikke implementert)");
-                    // Har ingen behandling av denne stilling perioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                 }
                 if (matcherAgressoId.size() > 1) {
                     log.error(
@@ -299,6 +296,7 @@ public class RessursStillingProcessor {
                     fjernOrgtilknytning(ot);
             } else {
                 // There is a difference? Cannot remove possible overlapping dates, but not equal?
+                log.info("Fjerner duplikat orgtilknytning for Navident {}: {}", ot.navident(), ot);
                 statesToKeep.add(ot);
             }
         });
