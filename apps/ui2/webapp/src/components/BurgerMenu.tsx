@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { MenuHamburgerIcon, PersonPlusFillIcon } from "@navikt/aksel-icons";
-import { Button } from "@navikt/ds-react";
-import { Dropdown } from "@navikt/ds-react-internal";
+import { Button, Dropdown } from "@navikt/ds-react";
 import { useNavigate } from "react-router";
 
 import { hierarchy2 } from "./Images";

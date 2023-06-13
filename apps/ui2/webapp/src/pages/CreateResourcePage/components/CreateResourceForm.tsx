@@ -3,13 +3,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
   Button,
+  DatePicker,
   Label,
   Loader,
   Radio,
   RadioGroup,
   TextField,
-  UNSAFE_DatePicker,
-  UNSAFE_useDatepicker,
+  useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
 import type { SubmitHandler } from "react-hook-form";
@@ -153,7 +153,7 @@ function CreateResourceFormInner({
   const selectedOrgEnhet = orgEnheter.find(
     (orgEnhet) => orgEnhet.id === watch("orgEnhetId")
   );
-  const startDatePicker = UNSAFE_useDatepicker({
+  const startDatePicker = useDatepicker({
     onDateChange: (date) =>
       setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
     defaultSelected: undefined,
@@ -252,13 +252,13 @@ function CreateResourceFormInner({
           </span>
         ) : undefined}
 
-        <UNSAFE_DatePicker {...startDatePicker.datepickerProps}>
-          <UNSAFE_DatePicker.Input
+        <DatePicker {...startDatePicker.datepickerProps}>
+          <DatePicker.Input
             {...startDatePicker.inputProps}
             error={errors.startDato?.message?.toString()}
             label="Første arbeidsdag"
           />
-        </UNSAFE_DatePicker>
+        </DatePicker>
 
         <div css={rowStyles}>
           <CreateResourceConfirmationModal

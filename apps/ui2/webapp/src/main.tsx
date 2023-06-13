@@ -1,5 +1,4 @@
 import "@navikt/ds-css";
-import "@navikt/ds-css-internal";
 import "./designSystemOverrides.css";
 
 import { Loader, Modal } from "@navikt/ds-react";
