@@ -18,7 +18,9 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -147,9 +149,25 @@ public class RessursStillingProcessor {
                 boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
 
                 if (matcherAgressoId.size() > 1) {
-                    log.error("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}", navident, stillingPeriode, matcherAgressoId);
-                    log.error("Dette kan ikke behandles (Eller - det er nok mulig å implementere at duplikat tilknytninger skal fjernes, men det er ikke implementert)");
+                    log.error(
+                        "Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}",
+                        navident,
+                        stillingPeriode,
+                        matcherAgressoId
+                    );
+                    matcherAgressoId = fjernDuplikater(matcherAgressoId);
+                    log.error(
+                        "Dette kan ikke behandles (Eller - det er nok mulig å implementere at duplikat tilknytninger skal fjernes, men det er ikke implementert)");
                     // Har ingen behandling av denne stilling perioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
+                }
+                if (matcherAgressoId.size() > 1) {
+                    log.error(
+                        "Selv etter forsøk på å fjerne duplikat tilknytninger så har Navident {} har stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}",
+                        navident,
+                        stillingPeriode,
+                        matcherAgressoId
+                    );
+                    log.error("Dette kan ikke behandles (det er forsøkt i fjernDuplikater over)");
                 } else if (matcherAgressoId.size() == 0) {
                     log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", navident, stillingPeriode);
 
@@ -266,6 +284,25 @@ public class RessursStillingProcessor {
         // TODO: Hva med primær flag som evt ikke har klart å bli satt, selv om det kun er en knytning for periode
 
         loggOppsummering(navident, stillingPerioder, orgtilknytninger);
+    }
+
+    private List<OrgtilknytningState> fjernDuplikater(List<OrgtilknytningState> matcherAgressoId) {
+        OrgtilknytningState toKeep = matcherAgressoId.get(0);
+        List<OrgtilknytningState> statesToKeep = new ArrayList<>(List.of(toKeep));
+        matcherAgressoId.stream().skip(1).forEach( ot -> {
+            // Make sure they are indeed duplicates
+            if (ot.navident().equals(toKeep.navident())
+                && ot.orgEnhetId().equals(toKeep.orgEnhetId())
+                && ot.gyldigFom().equals(toKeep.gyldigFom())
+                && (ot.gyldigTom().isPresent() ? ot.gyldigTom().get().equals(toKeep.gyldigTom().orElse(null)) : toKeep.gyldigTom().isEmpty())) {
+                    // Plain duplicate - remove
+                    fjernOrgtilknytning(ot);
+            } else {
+                // There is a difference? Cannot remove possible overlapping dates, but not equal?
+                statesToKeep.add(ot);
+            }
+        });
+        return statesToKeep;
     }
 
     public boolean isMatchingPeriod(OrgtilknytningState orgtilknytningState, StillingPeriode stillingPeriode) {
