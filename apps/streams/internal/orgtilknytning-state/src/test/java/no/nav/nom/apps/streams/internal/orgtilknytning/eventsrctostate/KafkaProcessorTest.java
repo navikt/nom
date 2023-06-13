@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
@@ -139,7 +140,6 @@ public class KafkaProcessorTest {
         inputTopic.pipeInput(opprettEvent.getFid(), dagligOppfolgingEndretEvent);
         inputTopic.pipeInput(opprettEvent.getFid(), avsluttetEvent);
 
-
         Assertions.assertThat(outputTopic.readKeyValuesToList())
             .containsExactly(
                 KeyValue.pair(opprettEvent.getFid(), expectedOpprettet),
@@ -200,7 +200,26 @@ public class KafkaProcessorTest {
                 KeyValue.pair(opprettEvent.getFid(), expectedEndret),
                 KeyValue.pair(opprettEvent.getFid(), null)
             );
+    }
 
+
+    @Test
+    @DisplayName("Send kun en Fjern orgtilknytning event")
+    public void test_005(){
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+        LocalDate gyldigTom = LocalDate.of(2022, 12, 31);
+
+        final OrgtilknytningEvent fjernetEvent = lagFjernetEvent(navident, orgEnhetId, gyldigFom, gyldigTom);
+
+
+        inputTopic.pipeInput(fjernetEvent.getFid(), fjernetEvent);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(fjernetEvent.getFid(), null)
+            );
     }
 
     private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, LocalDate gyldigFom) {
@@ -331,7 +350,6 @@ public class KafkaProcessorTest {
         Topology topology = streamsBuilder.build();
 
         TopologyTestDriver topologyTestDriver = new TopologyTestDriver(topology, new Properties());
-
         inputTopic = topologyTestDriver.createInputTopic("inputTopic", new StringSerializer(), objectSerde.copyWithType(OrgtilknytningEvent.class).serializer());
 
         final var orgtilknytningStateSerde = objectSerde.copyWithType(OrgtilknytningState.class);

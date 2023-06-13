@@ -3,11 +3,13 @@ package no.nav.nom.apps.streams.internal.orgtilknytning.eventsrctostate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -37,26 +39,33 @@ class KafkaStreamProcessor {
         final var eventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
-                .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
-                .aggregate(
-                        objectMapper::createObjectNode,
-                        (key, event, state) -> {
-                            if(event instanceof OrgtilknytningFjernetEventV1) {
-                               return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream.
-                                // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
-                            } else {
-                                state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                                return state;
-                            }
-                        },
-                        Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
-                )
-                .mapValues(this::toOrgtilknytningState)
-                .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
+            .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
+            .aggregate(
+                    objectMapper::createObjectNode,
+                    (key, event, state) -> {
+                        if(event instanceof OrgtilknytningFjernetEventV1) {
+                            state.put("TOMBSTONE", true);
+//                           return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                            // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+//                              NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                        } else {
+                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        }
+                            return state;
+                    },
+                    Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
+            )
+            .mapValues(this::toOrgtilknytningState)
+            .toStream()
+//            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
+            .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 
     public OrgtilknytningState toOrgtilknytningState(String fid, JsonNode eventStateAggregate){
         try {
+            if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
+                return null;
+            }
             return new OrgtilknytningState(
                     fid,
                     eventStateAggregate.get("navident").asText(),
