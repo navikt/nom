@@ -98,6 +98,11 @@ public class DvhLast {
     }
 
     @Async
+    public void triggerlastOrgtilknytningerTilEvtsrc() {
+        dvhRestConsumer.lastOrgtilknytningerTilEvtsrc();
+    }
+
+    @Async
     public void triggerOrgEnhetsTypeLast(){
         orgEnhetTypeAndNivaaResolver.resolve();
     }

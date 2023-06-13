@@ -71,11 +71,10 @@ public class DvhRestConsumer {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
             }
-
         }
         loadKoblingerLedereOgTlfFromDvh();
 
-        //TODO: Foreløpig setted den bak loadKoblinger siden den er avhengig at koblinger er til stede.
+        //TODO: Foreløpig settes den bak loadKoblinger siden den er avhengig at koblinger er til stede.
         resolveOrgEnhetsTypes();
     }
 
@@ -164,11 +163,15 @@ public class DvhRestConsumer {
         dvhService.saveOrgtilknytning(koblinger);
 
         // Ny håndtering for orgtilknytninger og persistering
+        // Men ikke på startup
+        if (initialLoadComplete.get() && leaderElection.isLeader()) {
+            lastOrgtilknytningerTilEvtsrc();
+        }
+    }
+
+    public void lastOrgtilknytningerTilEvtsrc() {
         try {
-            // Men ikke på startup
-            if (initialLoadComplete.get()) {
-                ressursStillingLoader.loadAndProcess();
-            }
+            ressursStillingLoader.loadAndProcess();
         } catch(Exception e) {
             log.error("Feilet i last av ressursStillinger", e);
         }

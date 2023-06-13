@@ -56,10 +56,9 @@ public class OrgtilknytningStateListener {
     )
     public void onMessage(ConsumerRecords<String, OrgtilknytningState> records, Consumer<String, String> consumer) {
         StreamSupport.stream(records.spliterator(), false)
-            .filter( it -> it.value() != null)
             .forEach(it -> {
             var OrgtilknytningState = it.value();
-            orgtilknytningStateService.putEventAggregate(OrgtilknytningState);
+            orgtilknytningStateService.putEventAggregate(it.key(), OrgtilknytningState);
         });
 
         KafkaUtils.verifyUpToDate(consumer, stateTopic, initialLoadComplete, () -> log.info("Kafka OrgtilknytningState listener initial load finished - {} Orgtilknytninger", orgtilknytningStateService.count()));

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.state;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrgtilknytningStateRepository {
     private final Map<String, OrgtilknytningState> orgtilknytningByFid = new ConcurrentHashMap<>();
     private final Map<String, Map<String, OrgtilknytningState>> orgtilknytningerByNavident = new ConcurrentHashMap<>();
@@ -49,20 +51,26 @@ public class OrgtilknytningStateRepository {
         return orgtilknytningByFid.size();
     }
 
-    public void putEventAggregate(OrgtilknytningState newOrgtilknytningState) {
-        orgtilknytningByFid.put(newOrgtilknytningState.fid(), newOrgtilknytningState);
+    public void putEventAggregate(String fid, OrgtilknytningState newOrgtilknytningState) {
+        if (newOrgtilknytningState == null) {
+            log.debug("Got Tombestone for orgtilknytning fid {}", fid);
+            var eksisterede = orgtilknytningByFid.get(fid);
+            if (eksisterede != null) {
+                var navidentOrgtilknytninger = orgtilknytningerByNavident.get(eksisterede.navident());
+                if (navidentOrgtilknytninger != null) {
+                    navidentOrgtilknytninger.remove(fid);
+                }
+            }
+            orgtilknytningByFid.remove(fid);
+        } else {
+            orgtilknytningByFid.put(newOrgtilknytningState.fid(), newOrgtilknytningState);
 
-        var navidentOrgtilknytninger = orgtilknytningerByNavident.get(newOrgtilknytningState.navident());
-        if (navidentOrgtilknytninger == null) {
-            navidentOrgtilknytninger = new ConcurrentHashMap<>();
-            orgtilknytningerByNavident.put(newOrgtilknytningState.navident(), navidentOrgtilknytninger);
+            var navidentOrgtilknytninger = orgtilknytningerByNavident.get(newOrgtilknytningState.navident());
+            if (navidentOrgtilknytninger == null) {
+                navidentOrgtilknytninger = new ConcurrentHashMap<>();
+                orgtilknytningerByNavident.put(newOrgtilknytningState.navident(), navidentOrgtilknytninger);
+            }
+            navidentOrgtilknytninger.put(newOrgtilknytningState.fid(), newOrgtilknytningState); // Sett inn ny orgtilknytning, eller bytt ut med ny state evt.
         }
-        navidentOrgtilknytninger.put(newOrgtilknytningState.fid(), newOrgtilknytningState); // Sett inn ny orgtilknytning, eller bytt ut med ny state evt.
     }
-
-    public void clear() {
-        orgtilknytningByFid.clear();
-        orgtilknytningerByNavident.clear();
-    }
-
 }
