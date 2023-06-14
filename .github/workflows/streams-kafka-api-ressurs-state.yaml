@@ -67,7 +67,7 @@ jobs:
           RESOURCE: .nais/streams/kafka-api-ressurs-state.yaml
 
   deploy-prod:
-    name: Deploy to NAIS dev-prod
+    name: Deploy to NAIS prod-gcp
     needs: build-jar-docker
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
