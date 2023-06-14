@@ -70,6 +70,18 @@ public class DvhLast {
     }
 
     @Operation(
+        description = "Start last av kun orgtilknytninger",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/loadOrgtilknytninger")
+    public void loadOrgtilknytninger() {
+        triggerlastOrgtilknytningerTilEvtsrc();
+    }
+
+    @Operation(
         description = "Start last av typer for orgenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
