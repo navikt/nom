@@ -55,7 +55,7 @@ public class RessursStillingProcessor {
         processCmdResult = new ProcessCmdResult();
         stillingPerioderPerNavident.forEach(this::process);
 
-        log.debug("Ferdig prossesert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}", stillingPerioderPerNavident.size(), processCmdResult.summary());
+        log.info("Ferdig prossesert stillingPerioder for {} navidenter. Laget følgene evtSrc commands:{}", stillingPerioderPerNavident.size(), processCmdResult.summary());
     }
 
     // Prosesserer ett sett med stillingPerioder fra DVH som allerede er slått sammen/splittet på enhet/periode
@@ -504,32 +504,32 @@ public class RessursStillingProcessor {
     private void loggCommand(String navident, OpprettOrgtilknytning cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tOpprettOrgtilknytning for enhet %s gyldigFom %s".formatted(cmd.orgenhetId(), cmd.gyldigFom()));
-            processCmdResult.numOpprett++;
         }
+        processCmdResult.numOpprett++;
     }
     private void loggCommand(String navident, String fid, AvvikleOrgtilknytning cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigTom()));
-            processCmdResult.numAvviklet++;
         }
+        processCmdResult.numAvviklet++;
     }
     private void loggCommand(String navident, String fid, KorrigerOrgtilknytningDato cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigFom(), cmd.gyldigTom()));
-            processCmdResult.numKorrigertDato++;
         }
+        processCmdResult.numKorrigertDato++;
     }
     private void loggCommand(String navident, String fid, EndreDagligOppfolgingOrgtilknytning cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tEndreDagligOppfolgingOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s => %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigFom(), cmd.gyldigTom(), cmd.dagligOppfolging()));
-            processCmdResult.numEndretDagligOppfolging++;
         }
+        processCmdResult.numEndretDagligOppfolging++;
     }
     private void loggCommand(String navident, String fid, FjernOrgtilknytning cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tFjernOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigFom(), cmd.gyldigTom()));
-            processCmdResult.numFjernet++;
         }
+        processCmdResult.numFjernet++;
     }
 
     public class ProcessCmdResult {
