@@ -1,20 +1,5 @@
-# Oppdater disse med nyeste verdier fra dev-miljø for å kjøre lokalt
-
-  #!/bin/sh
-  CTX=dev-gcp
-  NS=org
-  SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}' --context=${CTX} --namespace=${NS}|grep ^azure-nav-ident|grep -v token|tail -1|cut -d ' ' -f1`
-  SECRET=`kubectl get secret $SECRET_NAME -o json --context=${CTX} --namespace=${NS}`
-  CLIENT_ID=`echo $SECRET |jq '.data.AZURE_APP_CLIENT_ID' -r|base64 -d`
-  TENANT_ID=`echo $SECRET |jq '.data.AZURE_APP_TENANT_ID' -r|base64 -d`
-  JWK=`echo $SECRET |jq '.data.AZURE_APP_JWK' -r|base64 -d`
-  echo
-  echo 'AZURE_APP_TENANT_ID: '$TENANT_ID
-  echo 'AZURE_APP_CLIENT_ID: '$CLIENT_ID
-  echo 'AZURE_APP_JWK: '\'$JWK\'
-
-AZURE_APP_CLIENT_ID: 'placeholder'
 AZURE_APP_TENANT_ID: 'placeholder'
+AZURE_APP_CLIENT_ID: 'placeholder'
 AZURE_APP_JWK: 'placeholder'
 
 NAIS_APP_NAME: 'nav-ident'
@@ -24,7 +9,7 @@ PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
 PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 
 # Embedded kafka
-KAFKA_BROKERS: "localhost:9092"
+KAFKA_BROKERS: localhost:39092
 spring.kafka.properties.security.protocol: PLAINTEXT
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
@@ -37,4 +22,7 @@ DATABASE_PASSWORD: password
 #Embedded redis
 REDIS_HOST: "localhost"
 
-server.port: 8081
+server.port: 8088
+
+app:
+  gs-bucket-name: no-nav-org-dev-nav-ident-storage-bucket

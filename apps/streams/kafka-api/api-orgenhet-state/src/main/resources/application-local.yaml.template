@@ -8,3 +8,5 @@ spring:
       cleanup:
         on-shutdown: true
         on-startup: true
+
+server.port: 8085

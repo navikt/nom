@@ -1,0 +1,8 @@
+AZURE_APP_CLIENT_ID: 'placeholder'
+AZURE_APP_TENANT_ID: 'placeholder'
+AZURE_APP_JWK: 'placeholder'
+
+KAFKA_BROKERS: localhost:39092
+spring.kafka.properties.security.protocol: PLAINTEXT
+
+server.port: 8086

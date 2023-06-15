@@ -22,6 +22,9 @@ spring:
       ssl.truststore.location: NO_VALUE
       ssl.truststore.password: NO_VALUE
 
+server.port: 8090
+ELECTOR_PATH: Dummy
+
 management:
   endpoints:
     enabled-by-default: true
