@@ -210,7 +210,9 @@ public class RessursStillingStrukturerer {
             .filter( oe ->
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
-            ).toList();
+            )
+            .filter( oe -> !gyldigFom.equals(gyldigTom)) // Ekskluder enheter hvor fra-til dato er lik
+            .toList();
     }
 
 
@@ -221,7 +223,9 @@ public class RessursStillingStrukturerer {
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     enhetNavn.equals(oe.getNavn()) &&
                     (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
-            ).toList();
+            )
+            .filter( oe -> !gyldigFom.equals(gyldigTom)) // Ekskluder enheter hvor fra-til dato er lik
+            .toList();
     }
 
     private boolean harBehandletNok_LOCAL_RUN(Map<String, List<StillingPeriode>> stillingPerioderPerNavident, String navident) {
