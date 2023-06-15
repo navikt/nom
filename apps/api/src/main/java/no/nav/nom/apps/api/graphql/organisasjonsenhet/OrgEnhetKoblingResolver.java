@@ -34,9 +34,10 @@ public class OrgEnhetKoblingResolver {
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
         if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
-            orgtilknytningStateService.getOrgtilknytningerByEnhet(orgEnhet.getId()).stream()
-                .map(orgtilknytning -> tilOrgEnhetsKobling(orgtilknytning));
-            return null;
+            return orgtilknytningStateService.getOrgtilknytningerByEnhet(orgEnhet.getId())
+                .stream()
+                .map(this::tilOrgEnhetsKobling)
+                .toList();
         } else {
             return dvhRepository.getKoblingerByAgressoId(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
                 .stream()
