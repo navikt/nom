@@ -52,7 +52,7 @@ public class RessursStillingStrukturerer {
             if (harBehandletNok_LOCAL_RUN(stillingPerioderPerNavident, navident)) return; // Har nå behandlet nok navidenter som starter på denne bokstaven. Hop til neste
 
             log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
-            var stillingerGruppert = strukturerNavidentensRessursStillinger(rsList);
+            var stillingerGruppert = strukturerNavidentensRessursStillinger(navident, rsList);
             if (log.isDebugEnabled()) {
                 log.debug("Resultat av gruppering og matching til orgenhet:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
                 stillingPerioderPerNavident.put(navident, stillingerGruppert);
@@ -61,7 +61,7 @@ public class RessursStillingStrukturerer {
         return stillingPerioderPerNavident;
     }
 
-    public List<StillingPeriode> strukturerNavidentensRessursStillinger(List<DvhRessursStilling> ressursStillinger) {
+    public List<StillingPeriode> strukturerNavidentensRessursStillinger(String navident, List<DvhRessursStilling> ressursStillinger) {
         // grupper først på Stillingens - stilling enhet/navn +enhetNavn+ressurs (A+B)
         var grupperteStillinger = ressursStillinger.stream().collect(groupingBy( rs -> new StillingPeriode.StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn(), rs.getRessursAgressoId(), rs.getRessursOrgenhetNiv())));
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
@@ -94,7 +94,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
                     // Dette håndterer vi ikke per nå
-                    log.debug("Overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
+                    log.debug("NAvident {} har overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", navident, stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
                 }
             }
             // Siste RessursStilling er slått sammen
@@ -134,18 +134,18 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Kan ikke finne orgenhet for stillingPeriode siden agressoId tilgjengelig ikke er presis (7-8 tegn lang)
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug("StillingPeriode er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
+                        log.debug("StillingPeriode for navident {} er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", navident, stillingPeriode);
                     } else {
-                        log.warn("StillingPeriode er ikke presis nok på aktiv/fremtidig stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", stillingPeriode);
+                        log.warn("StillingPeriode for navident {} er ikke presis nok på aktiv/fremtidig stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", navident, stillingPeriode);
                     }
                 }
 
                 if (nomEnheter.size() == 0) {
                     // Klarer ikke finne NOM orgenhet for stillingPeriode/agressoId
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
-                        log.debug("Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId. Den vil ikke behandles:\n\t{}", stillingPeriode);
+                        log.debug("Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}", navident, stillingPeriode);
                     } else {
-                        log.warn("Klarer ikke finne NOM orgenhet for aktiv/fremtidig stillingPeriode/agressoId. Den vil ikke behandles:\n\t{}", stillingPeriode);
+                        log.warn("Klarer ikke finne NOM orgenhet for aktiv/fremtidig stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}", navident, stillingPeriode);
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
@@ -173,8 +173,9 @@ public class RessursStillingStrukturerer {
                         perioderGruppertMedOrgenhet.add(new StillingPeriode(stillingPeriode, nomEnheter.get(0)));
                     }
                 } else {
+                    final var nomEnheterString = orgenheterToString(nomEnheter);
                     // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
-                    log.debug("StillingPerioden {} matcher flere NOM Orgenheter\t{}", stillingPeriode, orgenheterToString(nomEnheter));
+                    log.debug("StillingPerioden {} matcher flere NOM Orgenheter\t{}", stillingPeriode, nomEnheterString);
                     List<StillingPeriode> nyeStillingPerioder = new ArrayList<>();
                     AtomicReference<LocalDate> nextGyldigFom = new AtomicReference<>(stillingPeriode.gyldigFom());
                     nomEnheter.stream()
@@ -183,7 +184,7 @@ public class RessursStillingStrukturerer {
                             if (nextGyldigFom.get().isAfter(oe.getGyldigTom().orElse(NO_END_DATE).minusDays(1))) {
                                 // Har truffet snag med match på flere enheter som har overlapp i periode
                                 // Vi må baile ut - Kan ikke matche på flere enheter. Orgenheter må korrigeres
-                                log.error("Har funnet matchende orgenheter\n{} med overlappende perioder for stillingperiode \n{}.\nDette kan ikke behandles.", orgenheterToString(nomEnheter), stillingPeriode);
+                                log.error("Har funnet matchende orgenheter\n{} med overlappende perioder for stillingperiode for navident {} \n{}.\nDette kan ikke behandles.", navident, nomEnheterString, stillingPeriode);
                             } else {
                                 nyeStillingPerioder.add(new StillingPeriode(
                                     stillingPeriode.stilling(),
