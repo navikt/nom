@@ -183,7 +183,7 @@ public class RessursStillingStrukturerer {
                             if (nextGyldigFom.get().isAfter(oe.getGyldigTom().orElse(NO_END_DATE).minusDays(1))) {
                                 // Har truffet snag med match på flere enheter som har overlapp i periode
                                 // Vi må baile ut - Kan ikke matche på flere enheter. Orgenheter må korrigeres
-                                log.error("Har funnet matchende orgenheter med overlappende perioder. Dette kan ikke behandles.");
+                                log.error("Har funnet matchende orgenheter\n{} med overlappende perioder for stillingperiode \n{}.\nDette kan ikke behandles.", orgenheterToString(nomEnheter), stillingPeriode);
                             } else {
                                 nyeStillingPerioder.add(new StillingPeriode(
                                     stillingPeriode.stilling(),
