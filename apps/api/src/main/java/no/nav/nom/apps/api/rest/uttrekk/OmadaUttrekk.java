@@ -115,7 +115,7 @@ public class OmadaUttrekk {
 
         try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
-                orgtilknytningStateService.getAllKoblinger().forEach(kobling -> {
+                orgtilknytningStateService.getAllOrgtilknytninger().forEach(kobling -> {
                     try {
                         printer.printRecord(
                             kobling.navident(),

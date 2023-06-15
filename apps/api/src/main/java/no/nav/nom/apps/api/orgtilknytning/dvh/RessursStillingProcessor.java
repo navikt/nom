@@ -18,9 +18,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,7 +87,7 @@ public class RessursStillingProcessor {
         }
 
         // Hent orgtilknytninger fra State
-        var orgtilknytninger = orgtilknytningStateService.getKoblingerByNavIdent(navident);
+        var orgtilknytninger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident);
         stillingPerioder.forEach( stillingPeriode -> {
             if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH
                 if (orgtilknytninger.size() == 0) {

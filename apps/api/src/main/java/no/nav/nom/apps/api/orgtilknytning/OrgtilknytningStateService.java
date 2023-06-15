@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class OrgtilknytningStateService implements OrgtilknytningService {
@@ -26,19 +28,28 @@ public class OrgtilknytningStateService implements OrgtilknytningService {
     }
 
     @Override
-    public Collection<OrgtilknytningState> getAllKoblinger() {
+    public Collection<OrgtilknytningState> getAllOrgtilknytninger() {
         return orgtilknytningStateRepository.getAll();
     }
 
     @Override
-    public Collection<OrgtilknytningState> getKoblingerByNavIdent(String navident) {
+    public Collection<OrgtilknytningState> getOrgtilknytningerByNavIdent(String navident) {
         return orgtilknytningStateRepository.findByNavident(navident);
     }
 
     @Override
-    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
-        // TODO: Implement
-        return new HashMap<>();
+    public List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id) {
+        return getAllOrgtilknytninger().stream()
+            .filter(ot -> ot.orgEnhetId().equals(id))
+            .toList();
+    }
+
+    @Override
+    public <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+        return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
+            var value = this.getOrgtilknytningerByNavIdent(navident);
+            return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
+        }));
     }
 
     @Override

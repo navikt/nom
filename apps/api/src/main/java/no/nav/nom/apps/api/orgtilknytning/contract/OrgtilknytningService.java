@@ -9,16 +9,17 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface OrgtilknytningService {
-    Collection<OrgtilknytningState> getAllKoblinger();
+    Collection<OrgtilknytningState> getAllOrgtilknytninger();
 
-    Collection<OrgtilknytningState> getKoblingerByNavIdent(String navident);
+    Collection<OrgtilknytningState> getOrgtilknytningerByNavIdent(String navident);
 
-    default Map<String, List<OrgtilknytningState>> getKoblingerByNavidenter(Set<String> navidenter) {
+    default Map<String, Collection<OrgtilknytningState>> getOrgtilknytningerByNavidenter(Set<String> navidenter) {
         // Use a NOOP-transformer to preserve original use.
-        return getKoblingerByNavidenter(navidenter, Function.identity());
+        return getOrgtilknytningerByNavidenter(navidenter, Function.identity());
     }
+    List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id);
 
-    <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);
+    <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);
 
 
     Collection<Orgtilknytning> getAllKoblingerOld();
@@ -31,4 +32,5 @@ public interface OrgtilknytningService {
     }
 
     <T> Map<String, List<T>> getKoblingerByNavidenterOld(Set<String> navidenter, Function<Orgtilknytning, T> transformer);
+
 }

@@ -35,17 +35,22 @@ public class OrgtilknytningDvhService implements OrgtilknytningService {
     }
 
     @Override
-    public Collection<OrgtilknytningState> getAllKoblinger() {
+    public Collection<OrgtilknytningState> getAllOrgtilknytninger() {
         throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
     }
 
     @Override
-    public Collection<OrgtilknytningState> getKoblingerByNavIdent(String navIdent) {
+    public Collection<OrgtilknytningState> getOrgtilknytningerByNavIdent(String navIdent) {
         throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
     }
 
     @Override
-    public <T> Map<String, List<T>> getKoblingerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+    public <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+        throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
+    }
+
+    @Override
+    public List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id) {
         throw new NotImplementedException("Gammel service klasse implementerer ikke nye metoder");
     }
 

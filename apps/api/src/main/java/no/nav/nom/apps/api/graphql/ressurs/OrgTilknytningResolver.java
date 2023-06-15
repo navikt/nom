@@ -51,7 +51,7 @@ public class OrgTilknytningResolver {
     private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
         if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
             return orgtilknytningStateService
-                .getKoblingerByNavIdent(ressurs.getNavIdent()).stream()
+                .getOrgtilknytningerByNavIdent(ressurs.getNavIdent()).stream()
                 .map(this::fromOrgtilknytningState)
                 .toList();
         } else {

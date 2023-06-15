@@ -72,7 +72,7 @@ public class LederResolver {
 
     public List<RessursLeder> ledere(String navIdent) {
         if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
-            return orgtilknytningStateService.getKoblingerByNavIdent(navIdent)
+            return orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
                 .stream()
                 .filter(dto -> DateUtil.isNow(dto.gyldigFom(), dto.gyldigTom().orElse(null)))
                 .flatMap(kobling -> {

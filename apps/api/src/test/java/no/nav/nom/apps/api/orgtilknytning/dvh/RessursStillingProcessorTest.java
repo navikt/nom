@@ -97,7 +97,7 @@ public class RessursStillingProcessorTest {
         );
 
         // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningStateService.getAllKoblinger()).thenReturn(Collections.emptyList());
+        when(orgtilknytningStateService.getAllOrgtilknytninger()).thenReturn(Collections.emptyList());
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -138,7 +138,7 @@ public class RessursStillingProcessorTest {
         );
 
         // Ingen eksitsterende orgtilknytninger
-        when(orgtilknytningStateService.getAllKoblinger()).thenReturn(Collections.emptyList());
+        when(orgtilknytningStateService.getAllOrgtilknytninger()).thenReturn(Collections.emptyList());
         // Alle er sttatlig ansatte
         svarAtAlleNavidenterErStatlig(navident);
 
@@ -186,7 +186,7 @@ public class RessursStillingProcessorTest {
         );
 
         // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningStateService.getAllKoblinger()).thenReturn(Collections.emptyList());
+        when(orgtilknytningStateService.getAllOrgtilknytninger()).thenReturn(Collections.emptyList());
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
