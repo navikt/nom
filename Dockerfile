@@ -15,6 +15,10 @@ COPY /docker_run-java.sh /run-java.sh
 RUN chown apprunner:root /run-java.sh && \
     chmod +x /run-java.sh && \
     chmod 0755 /run-java.sh
+
+RUN mkdir /secure-logs
+RUN chown -R apprunner /secure-logs
+
 USER apprunner
 
 COPY --from=builder --chown=apprunner:apprunner application/dependencies/ ./
