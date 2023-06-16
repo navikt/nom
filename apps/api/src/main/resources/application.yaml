@@ -144,6 +144,8 @@ management:
         include: prometheus,health,mappings,flyway,info,loggers,metrics
 
 app:
+  email:
+    enabled: false
   graphql:
     auth:
       clients:

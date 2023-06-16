@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
@@ -31,10 +32,16 @@ public class RessursCommadService {
     private final Logger log = LoggerFactory.getLogger(RessursCommadService.class);
     private final RessursEventProducer eventProducer;
     private final RessursStateListener ressursStateListener;
+    private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
-    public RessursCommadService(RessursEventProducer eventProducer, RessursStateListener ressursStateListener) {
+    public RessursCommadService(
+        RessursEventProducer eventProducer,
+        RessursStateListener ressursStateListener,
+        RessursOpprettetEmailService ressursOpprettetEmailService
+    ) {
         this.eventProducer = eventProducer;
         this.ressursStateListener = ressursStateListener;
+        this.ressursOpprettetEmailService = ressursOpprettetEmailService;
     }
 
     public ListenableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
@@ -88,28 +95,33 @@ public class RessursCommadService {
 
 
     private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
-        return eventProducer.sendMessage(new RessursOpprettetEventV1(
-                fid,
-                new RessursOpprettetEventV1.RessursOpprettetEventData(
-                        opprettRessursCommand.personident(),
-                        opprettRessursCommand.sektor(),
-                        opprettRessursCommand.visningsnavn()
-                ),
-                opprettRessursCommand.inputMetadata(),
-                new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                        Optional.ofNullable(opprettRessursCommand.navident()),
-                        opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
-                        opprettRessursCommand.pdlPerson()
-                                .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
-                                        pdlPerson.getFornavn(),
-                                        pdlPerson.getMellomnavn(),
-                                        pdlPerson.getEtternavn()
-                                )),
-                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
-                        Optional.ofNullable(opprettRessursCommand.startdato()),
-                        Optional.ofNullable(opprettRessursCommand.orgEnhetId())
-                )
+
+        var future = eventProducer.sendMessage(new RessursOpprettetEventV1(
+            fid,
+            new RessursOpprettetEventV1.RessursOpprettetEventData(
+                opprettRessursCommand.personident(),
+                opprettRessursCommand.sektor(),
+                opprettRessursCommand.visningsnavn()
+            ),
+            opprettRessursCommand.inputMetadata(),
+            new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+                Optional.ofNullable(opprettRessursCommand.navident()),
+                opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
+                opprettRessursCommand.pdlPerson()
+                    .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
+                        pdlPerson.getFornavn(),
+                        pdlPerson.getMellomnavn(),
+                        pdlPerson.getEtternavn()
+                    )),
+                opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
+                Optional.ofNullable(opprettRessursCommand.startdato()),
+                Optional.ofNullable(opprettRessursCommand.orgEnhetId())
+            )
         ));
+
+        ressursOpprettetEmailService.notifyByEmail(opprettRessursCommand.navident());
+
+        return future;
     }
 
 }
