@@ -211,7 +211,7 @@ public class RessursStillingStrukturerer {
                 "ORGENHET".equals(oe.getOrgNiv()) &&
                     (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
             )
-            .filter( oe -> !oe.getGyldigFom().equals(oe.getGyldigTom())) // Ekskluder enheter hvor fra-til dato er lik
+            .filter( oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
     }
 
@@ -224,7 +224,7 @@ public class RessursStillingStrukturerer {
                     enhetNavn.equals(oe.getNavn()) &&
                     (gyldigTom.isAfter(oe.getGyldigFom().minusDays(1)) && gyldigFom.isBefore(oe.getGyldigTom().orElse(NO_END_DATE.plusDays(1))))
             )
-            .filter( oe -> !oe.getGyldigFom().equals(oe.getGyldigTom())) // Ekskluder enheter hvor fra-til dato er lik
+            .filter( oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
     }
 
