@@ -41,7 +41,7 @@ public class RessursStillingProcessor {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final IRessursService ressursService;
-    private ProcessCmdResult processCmdResult;
+    private ProcessCmdResult processCmdResult = new ProcessCmdResult();
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
 
     public RessursStillingProcessor(IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
