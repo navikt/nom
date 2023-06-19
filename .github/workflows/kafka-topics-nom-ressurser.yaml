@@ -1,4 +1,4 @@
-name: Update Kafka Topics
+name: 'update-kafka-topics: nom-ressurser'
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - '.nais/topics/nom-ressurser-topics.yaml'
+      - '.github/workflows/kafka-topics-nom-ressurser.yaml'
 
 jobs:
   deploy-kafka-topics-dev:

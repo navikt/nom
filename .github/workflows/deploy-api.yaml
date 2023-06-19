@@ -1,20 +1,22 @@
-name: Build, Deploy nom-ressurser
+name: 'deploy: api'
 
 on:
   push:
     branches:
       - 'main'
       - 'dev/*'
+      - 'qa/*'
     paths:
-      - 'apps/nom-ressurser/**'
-      - '.nais/apps/nom-ressurser/nom-ressurser*.yaml'
-      - '.github/workflows/app-nom-ressurser.yaml'
+      - 'apps/api/**'
+      - 'libs/utils-common/**'
+      - '.nais/apps/api/api*.yaml'
+      - '.github/*/deploy-api.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/nom-ressurser:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/nom-ressurser:latest
+  IMAGE: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/api:latest
 
 jobs:
   build_and_push:
@@ -40,7 +42,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :nom-ressurser --also-make --batch-mode
+        run: mvn clean package --projects :api --also-make --batch-mode
       - name: Build and push Docker container
         uses: nais/docker-build-push@v0
         id: docker-push
@@ -51,22 +53,35 @@ jobs:
           dockerfile: Dockerfile
           docker_context: .
           build_args: |
-            JAR_PATH=apps/nom-ressurser/target/app.jar
+            JAR_PATH=apps/api/target/app.jar
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
       - name: Deploy to NAIS dev-gcp
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: .nais/apps/nom-ressurser/nom-ressurser-dev-fss.yaml
+          CLUSTER: dev-gcp
+          RESOURCE: .nais/apps/api/api-dev-gcp.yaml
+          TIMEOUT: 20m
+          IMAGE: ${{ steps.docker-push.outputs.image }}
+      - name: Deploy to NAIS prod-gcp QA
+        if: startsWith(github.ref, 'refs/heads/qa')
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/apps/api/api-qa.yaml
           IMAGE: ${{ steps.docker-push.outputs.image }}
       - name: Deploy to NAIS prod-gcp
         if: github.ref == 'refs/heads/main'
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: prod-fss
-          RESOURCE: .nais/apps/nom-ressurser/nom-ressurser-prod-fss.yaml
+          CLUSTER: prod-gcp
+          RESOURCE: .nais/apps/api/api-prod-gcp.yaml
+          TIMEOUT: 20m
           IMAGE: ${{ steps.docker-push.outputs.image }}
+
+

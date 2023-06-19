@@ -1,4 +1,4 @@
-name: Update Kafka Topics
+name: 'update-kafka-topics: nav-ident'
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - '.nais/topics/nav-ident-topics.yaml'
+      - '.github/workflows/kafka-topics-nav-ident.yaml'
 
 jobs:
   deploy-kafka-topics-dev:

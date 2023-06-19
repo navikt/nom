@@ -1,4 +1,4 @@
-name: Update Kafka Dev Only Topics
+name: 'update-kafka-topics: dev-only'
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - 'dev/*'
     paths:
       - '.nais/topics/topics-dev-only.yaml'
+      - '.github/workflows/kafka-topics-dev-only.yaml'
 
 jobs:
   deploy-kafka-topics-dev:

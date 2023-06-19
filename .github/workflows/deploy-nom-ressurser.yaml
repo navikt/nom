@@ -1,4 +1,4 @@
-name: Build, Deploy Nom-unit4
+name: 'deploy: nom-ressurser'
 
 on:
   push:
@@ -6,16 +6,15 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - 'apps/unit4/**'
-      - 'libs/contract-nom-dto/**'
-      - '.nais/apps/unit4/**'
-      - '.github/workflows/app-unit4.yaml'
+      - 'apps/nom-ressurser/**'
+      - '.nais/apps/nom-ressurser/nom-ressurser*.yaml'
+      - '.github/workflows/deploy-nom-ressurser.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/nom-unit4:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/nom-unit4:latest
+  IMAGE: ghcr.io/${{ github.repository }}/nom-ressurser:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/nom-ressurser:latest
 
 jobs:
   build_and_push:
@@ -41,7 +40,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :unit4 --also-make --batch-mode
+        run: mvn clean package --projects :nom-ressurser --also-make --batch-mode
       - name: Build and push Docker container
         uses: nais/docker-build-push@v0
         id: docker-push
@@ -51,25 +50,23 @@ jobs:
           push_image: true
           dockerfile: Dockerfile
           docker_context: .
-          build_args: | 
-            JAR_PATH=apps/unit4/target/app.jar
-          build_secrets: | 
+          build_args: |
+            JAR_PATH=apps/nom-ressurser/target/app.jar
+          build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
       - name: Deploy to NAIS dev-gcp
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: .nais/apps/unit4/unit4.yaml
-          VARS: .nais/apps/unit4/unit4-dev-gcp.yaml
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: .nais/apps/nom-ressurser/nom-ressurser-dev-fss.yaml
           IMAGE: ${{ steps.docker-push.outputs.image }}
       - name: Deploy to NAIS prod-gcp
         if: github.ref == 'refs/heads/main'
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/apps/unit4/unit4.yaml
-          VARS: .nais/apps/unit4/unit4-prod-gcp.yaml
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: .nais/apps/nom-ressurser/nom-ressurser-prod-fss.yaml
           IMAGE: ${{ steps.docker-push.outputs.image }}

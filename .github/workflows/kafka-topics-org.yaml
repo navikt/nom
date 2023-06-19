@@ -1,4 +1,4 @@
-name: Update Kafka Topics
+name: 'update-kafka-topics: org'
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
     paths:
       - '.nais/topics/topics-internal.yaml'
       - '.nais/topics/topics-kafka-api.yaml'
+      - '.github/workflows/kafka-topics-org.yaml'
 
 jobs:
   deploy-kafka-topics-dev:

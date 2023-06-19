@@ -1,4 +1,4 @@
-name: Build n Deploy NAV-IDENT
+name: "deploy: nav-ident"
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - 'apps/nav-ident/**'
       - 'libs/utils-common/**'
       - '.nais/apps/nav-ident/nav-ident*.yaml'
-      - '.github/*/app-nav-ident.yaml'
+      - '.github/*/deploy-nav-ident.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
 

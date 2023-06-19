@@ -1,4 +1,4 @@
-name: nom-ui2
+name: 'deploy: nom-ui2'
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - '.github/workflows/app-ui2.yml'
+      - '.github/workflows/deploy-ui2.yml'
       - 'apps/ui2/**'
       - '.nais/apps/ui2/**'
   workflow_dispatch:

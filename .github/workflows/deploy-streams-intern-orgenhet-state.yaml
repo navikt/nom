@@ -1,4 +1,4 @@
-name: Build, Deploy nom-intern-orgtilknytning-state
+name: 'deploy: nom-intern-orgenhet-state'
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - 'apps/streams/internal/orgtilknytning-state/**'
+      - 'apps/streams/internal/orgenhet-state/**'
       - 'libs/contract-nom-dto/**'
-      - '.nais/streams/intern-orgtilknytning-state.yaml'
-      - '.github/*/streams-intern-orgtilknytning-state.yaml'
+      - '.nais/streams/intern-orgenhet-state.yaml'
+      - '.github/*/deploy-streams-intern-orgenhet-state.yaml'
 
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/streams-intern-orgtilknytning-state:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-intern-orgtilknytning-state:latest
+  IMAGE: ghcr.io/${{ github.repository }}/streams-intern-orgenhet-state:${{ github.sha }}
+  IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-intern-orgenhet-state:latest
 
 jobs:
   build-jar-docker:
@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :orgtilknytning-state --also-make --batch-mode
+        run: mvn clean package --projects :orgenhet-state --also-make --batch-mode
       - name: Docker login
         uses: docker/login-action@v2
         with:
@@ -50,7 +50,7 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
-          build-args: JAR_PATH=apps/streams/internal/orgtilknytning-state/target/app.jar
+          build-args: JAR_PATH=apps/streams/internal/orgenhet-state/target/app.jar
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
@@ -64,7 +64,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           VAR: kafka-pool=nav-dev
-          RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml
+          RESOURCE: .nais/streams/intern-orgenhet-state.yaml
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -78,4 +78,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           VAR: kafka-pool=nav-prod
-          RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml
+          RESOURCE: .nais/streams/intern-orgenhet-state.yaml

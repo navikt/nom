@@ -1,4 +1,4 @@
-name: Build, Deploy PROXY
+name: 'deploy: proxy'
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
     paths:
       - 'apps/proxy/**'
       - '.nais/apps/proxy/proxy*.yaml'
-      - '.github/workflows/app-proxy.yaml'
+      - '.github/workflows/deploy-proxy.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
 
