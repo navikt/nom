@@ -22,10 +22,12 @@ public class RessursStillingLoadStatus {
         currentLoad = new Load(LocalDateTime.now(), null, new ArrayList<>());
     }
     public void endLoad() {
+        if (currentLoad == null) startNewLoad();
         currentLoad = currentLoad.end();
     }
 
     public void addError(String navident, String message) {
+        if (currentLoad == null) startNewLoad();
         currentLoad.errors().add(new Error(navident, message));
     }
     public String report(String navident) {
