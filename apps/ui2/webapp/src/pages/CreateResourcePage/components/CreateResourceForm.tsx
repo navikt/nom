@@ -12,7 +12,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
 import * as yup from "yup";
 
@@ -153,6 +153,7 @@ function CreateResourceFormInner({
     handleSubmit,
     watch,
     setValue,
+    control,
     formState: { errors },
   } = methods;
 
@@ -173,7 +174,7 @@ function CreateResourceFormInner({
         navigate(
           `/ressurs/create/${
             data.opprettRessurs?.navident ?? ""
-          }/receipt?ansettelsesType${ansettelsesType}`,
+          }/receipt?ansettelsesType=${ansettelsesType}`,
           {
             replace: true,
           }
@@ -229,35 +230,43 @@ function CreateResourceFormInner({
           />
         </div>
 
-        <RadioGroup legend="Sektor" size="medium" {...register("sektor")}>
-          <Alert size="medium" variant="info">
-            For øyeblikket kan du kun bruke NOM til å opprette faste, statlige
-            ansatte. Midlertidige statlige ansatte må du opprette ved hjelp av
-            ordinær prosess i Unit4.
-          </Alert>
-          <Radio checked value={Sektor.NavStatlig}>
-            {SektorNameMapping[Sektor.NavStatlig]}
-          </Radio>
-          <Radio disabled value={Sektor.NavKommunal}>
-            {SektorNameMapping[Sektor.NavKommunal]}
-          </Radio>
-          <Radio disabled value={Sektor.Ekstern}>
-            {SektorNameMapping[Sektor.Ekstern]}
-          </Radio>
-        </RadioGroup>
+        <Controller
+          control={control}
+          name="sektor"
+          render={({ field }) => (
+            <RadioGroup legend="Sektor" size="medium" {...field}>
+              <Alert size="medium" variant="info">
+                For øyeblikket kan du kun bruke NOM til å opprette faste,
+                statlige ansatte. Midlertidige statlige ansatte må du opprette
+                ved hjelp av ordinær prosess i Unit4.
+              </Alert>
+              <Radio checked value={Sektor.NavStatlig}>
+                {SektorNameMapping[Sektor.NavStatlig]}
+              </Radio>
+              <Radio disabled value={Sektor.NavKommunal}>
+                {SektorNameMapping[Sektor.NavKommunal]}
+              </Radio>
+              <Radio disabled value={Sektor.Ekstern}>
+                {SektorNameMapping[Sektor.Ekstern]}
+              </Radio>
+            </RadioGroup>
+          )}
+        />
 
-        <RadioGroup
-          legend="Ansettelsestype"
-          size="medium"
-          {...register("ansettelsesType")}
-        >
-          <Radio checked value={AnsettelsesType.Fast}>
-            {AnsettelsesTypeNameMapping[AnsettelsesType.Fast]}
-          </Radio>
-          <Radio value={AnsettelsesType.Midlertidig}>
-            {AnsettelsesTypeNameMapping[AnsettelsesType.Midlertidig]}
-          </Radio>
-        </RadioGroup>
+        <Controller
+          control={control}
+          name="ansettelsesType"
+          render={({ field }) => (
+            <RadioGroup {...field} legend="Ansettelsestype" size="medium">
+              <Radio checked value={AnsettelsesType.Fast}>
+                {AnsettelsesTypeNameMapping[AnsettelsesType.Fast]}
+              </Radio>
+              <Radio value={AnsettelsesType.Midlertidig}>
+                {AnsettelsesTypeNameMapping[AnsettelsesType.Midlertidig]}
+              </Radio>
+            </RadioGroup>
+          )}
+        />
 
         <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
         {selectedOrgEnhet ? (
