@@ -135,4 +135,9 @@ public class DvhOrgenhetV2 implements IOrgenhet {
 
         return this;
     }
+
+    @Override
+    public Optional<String> getOverordnetOrgEnhetFid() {
+        return Optional.empty();
+    }
 }

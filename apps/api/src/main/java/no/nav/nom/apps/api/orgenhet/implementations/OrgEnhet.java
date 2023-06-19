@@ -64,4 +64,8 @@ public class OrgEnhet implements IOrgenhet {
     public Optional<OrgEnhetsType> getOrgEnhetsType() {
         return orgEnhetState.orgEnhetsType();
     }
+
+    public Optional<String> getOverordnetOrgEnhetFid() {
+        return orgEnhetState.overordnetOrgEnhetFid();
+    }
 }

@@ -29,6 +29,8 @@ public interface IOrgenhet {
 
     String getUniqueAgressoId();
 
+    Optional<String> getOverordnetOrgEnhetFid();
+
     record AgressoIdCombo(
             String agressoId,
             String orgNiv

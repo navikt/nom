@@ -33,6 +33,7 @@
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <testcontainers.version>1.17.6</testcontainers.version>
+        <opencsv.version>5.7.1</opencsv.version>
     </properties>
 
 
@@ -159,6 +160,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${apache.common.csv.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
         </dependency>
 
         <dependency>

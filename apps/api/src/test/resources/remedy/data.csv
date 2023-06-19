@@ -1,0 +1,445 @@
+AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;FINAL AgressoId;FINAL orgNIv;FINAL nomID;Kommentar
+000000;0000;ORGNIV3;Deltar i rekruttering;Beholdt;;;NEI;000000;;leggInn;Vurdert med Renate å ikke ta med.
+010100;0101;ORGNIV3;Halden;Beholdt;;;JA;010100;ORGNIV3;leggInn;
+010400;0104;ORGNIV3;Moss;Beholdt;;;JA;010400;ORGNIV3;leggInn;
+010500;0105;ORGNIV3;Sarpsborg;Beholdt;;;JA;010500;ORGNIV3;leggInn;
+010600;0106;ORGNIV3;Fredrikstad;Beholdt;;;JA;010600;ORGNIV3;leggInn;
+011100;0111;ORGNIV3;Hvaler;Beholdt;;;JA;011100;ORGNIV3;leggInn;
+011900;0119;ORGNIV3;Marker;Beholdt;;;JA;011900;ORGNIV3;leggInn;
+012400;0124;ORGNIV3;Indre Østfold;Beholdt;;;JA;012400;ORGNIV3;leggInn;
+012800;0128;ORGNIV3;Rakkestad;Beholdt;;;JA;012800;ORGNIV3;leggInn;
+013500;0135;ORGNIV3;Råde;Beholdt;;;JA;013500;ORGNIV3;leggInn;
+013700;0137;ORGNIV3;Våler  ( I Østfold );Beholdt;;;JA;013700;ORGNIV3;leggInn;
+028010;0200;ORGNIV3;Øst-Viken Region;Opp til ORGNIV2;R02;;JA;R02;ORGNIV2;leggInn;
+021100;0211;ORGNIV3;Vestby;Beholdt;;;JA;021100;ORGNIV3;leggInn;
+021300;0213;ORGNIV3;Nordre Follo;Beholdt;;;JA;021300;ORGNIV3;leggInn;
+021400;0214;ORGNIV3;Ås;Beholdt;;;JA;021400;ORGNIV3;leggInn;
+021500;0215;ORGNIV3;Frogn;Beholdt;;;JA;021500;ORGNIV3;leggInn;
+021600;0216;ORGNIV3;Nesodden;Beholdt;;;JA;021600;ORGNIV3;leggInn;
+021900;0219;ORGNIV3;Bærum;Beholdt;;;JA;021900;ORGNIV3;leggInn;
+022000;0220;ORGNIV3;Asker;Beholdt;;;JA;022000;ORGNIV3;leggInn;
+022100;0221;ORGNIV3;Aurskog-Høland;Beholdt;;;JA;022100;ORGNIV3;leggInn;
+022800;0228;ORGNIV3;Rælingen;Beholdt;;;JA;022800;ORGNIV3;leggInn;
+022900;0229;ORGNIV3;Enebakk;Beholdt;;;JA;022900;ORGNIV3;leggInn;
+023000;0230;ORGNIV3;Lørenskog;Beholdt;;;JA;023000;ORGNIV3;leggInn;
+023100;0231;ORGNIV3;Lillestrøm;Beholdt;;;JA;023100;ORGNIV3;leggInn;
+023300;0233;ORGNIV3;Nittedal;Beholdt;;;JA;023300;ORGNIV3;leggInn;
+023500;0235;ORGNIV3;Ullensaker;Beholdt;;;JA;023500;ORGNIV3;leggInn;
+023600;0236;ORGNIV3;Nes;Beholdt;;;JA;023600;ORGNIV3;leggInn;
+023700;0237;ORGNIV3;Eidsvoll;Beholdt;;;JA;023700;ORGNIV3;leggInn;
+023800;0238;ORGNIV3;Nannestad;Beholdt;;;JA;023800;ORGNIV3;leggInn;
+0287000;0287;AGRESSOORGENHET;Øst-Viken Tiltak;Opp til ORGNIV4;028700;;JA;028700;ORGNIV4;leggInn;Ser det er flere enheter på orgEnhetsnivå under 028700 som ikke har egne remedyEnheter. Stikkprøve på en ansatt i en annen enhet under 028700 viser at de også har brukt 0287 som remedyEnhet. Derfor flyttet agressoId et hakk opp.
+0299000;0291;AGRESSOORGENHET;Øst-Viken Arbeidslivssenter;Opp til ORGNIV4;029900;;JA;029900;ORGNIV4;leggInn;Tilsvarende som rad 31. Også sjekket en ansatt på parallell enhet
+029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV3;leggInn;Merk at det finnes enhet på denne agressoId både i niv3 og niv4, og det er niv4 som er den aktive nå…
+039000;0300;ORGNIV3;Oslo;Opp til ORGNIV2;03;;JA;03;ORGNIV2;leggInn;Testet på leder av NAV Oslo, som er på orgNiv2, men de har også en orgEnhet på orgNiv3, som er denne. Og lederen for den, og leder for en underliggende har alle XXX0300 som trygdeident, så riktig
+031200;0312;ORGNIV3;Frogner;Beholdt;;;JA;031200;ORGNIV3;leggInn;
+031300;0313;ORGNIV3;St. Hanshaugen;Beholdt;;;JA;031300;ORGNIV3;leggInn;
+031400;0314;ORGNIV3;Sagene;Beholdt;;;JA;031400;ORGNIV3;leggInn;
+031500;0315;ORGNIV3;Grünerløkka;Beholdt;;;JA;031500;ORGNIV3;leggInn;
+031600;0316;ORGNIV3;Gamle Oslo;Beholdt;;;JA;031600;ORGNIV3;leggInn;
+031800;0318;ORGNIV3;Nordstrand;Beholdt;;;JA;031800;ORGNIV3;leggInn;
+031900;0319;ORGNIV3;Søndre Nordstrand;Beholdt;;;JA;031900;ORGNIV3;leggInn;
+032100;0321;ORGNIV3;Østensjø;Beholdt;;;JA;032100;ORGNIV3;leggInn;
+032600;0326;ORGNIV3;Alna;Beholdt;;;JA;032600;ORGNIV3;leggInn;
+032700;0327;ORGNIV3;Stovner;Beholdt;;;JA;032700;ORGNIV3;leggInn;
+032800;0328;ORGNIV3;Grorud;Beholdt;;;JA;032800;ORGNIV3;leggInn;
+033000;0330;ORGNIV3;Bjerke;Beholdt;;;JA;033000;ORGNIV3;leggInn;
+033100;0331;ORGNIV3;Nordre Aker;Beholdt;;;JA;033100;ORGNIV3;leggInn;
+033400;0334;ORGNIV3;Vestre Aker;Beholdt;;;JA;033400;ORGNIV3;leggInn;
+033500;0335;ORGNIV3;Ullern;Beholdt;;;JA;033500;ORGNIV3;leggInn;
+038700;0387;ORGNIV3;Oslo Tiltak;Beholdt;;;JA;038700;ORGNIV3;leggInn;
+039900;0391;ORGNIV3;Oslo Arbeidslivssenter;Beholdt;;;JA;039900;ORGNIV3;leggInn;
+039300;0393;ORGNIV3;Oslo Oppfølging Utland;Beholdt;;;JA;039300;ORGNIV3;leggInn;
+039610;0396;ORGNIV3;Arbeid og helse Oslo;Beholdt;;;JA;039610;ORGNIV3;leggInn;
+048010;0400;ORGNIV3;Innlandet Region;Opp til ORGNIV2;R04;;JA;R04;ORGNIV2;leggInn;
+040200;0402;ORGNIV3;Kongsvinger;Beholdt;;;JA;040200;ORGNIV3;leggInn;
+040300;0403;ORGNIV3;Hamar;Beholdt;;;JA;040300;ORGNIV3;leggInn;
+041200;0412;ORGNIV3;Ringsaker;Beholdt;;;JA;041200;ORGNIV3;leggInn;
+041500;0415;ORGNIV3;Løten;Beholdt;;;JA;041500;ORGNIV3;leggInn;
+041700;0417;ORGNIV3;Stange;Beholdt;;;JA;041700;ORGNIV3;leggInn;
+041950;0419;ORGNIV3;Odal;Beholdt;;;JA;041950;ORGNIV3;leggInn;
+042000;0420;ORGNIV3;Eidskog;Beholdt;;;JA;042000;ORGNIV3;leggInn;
+042300;0423;ORGNIV3;Grue;Beholdt;;;JA;042300;ORGNIV3;leggInn;
+042500;0425;ORGNIV3;Åsnes;Beholdt;;;JA;042500;ORGNIV3;leggInn;
+042600;0426;ORGNIV3;Våler i Solør;Beholdt;;;JA;042600;ORGNIV3;leggInn;
+042700;0427;ORGNIV3;Elverum;Beholdt;;;JA;042700;ORGNIV3;leggInn;
+042800;0428;ORGNIV3;Trysil;Beholdt;;;JA;042800;ORGNIV3;leggInn;
+042900;0429;ORGNIV3;Åmot;Beholdt;;;JA;042900;ORGNIV3;leggInn;
+043000;0430;ORGNIV3;Stor-Elvdal;Beholdt;;;JA;043000;ORGNIV3;leggInn;
+043400;0434;ORGNIV3;Engerdal;Beholdt;;;JA;043400;ORGNIV3;leggInn;
+043750;0437;ORGNIV3;Nord-Østerdal;Beholdt;;;JA;043750;ORGNIV3;leggInn;
+0499000;0491;AGRESSOORGENHET;Innlandet Arbeidslivssenter;Beholdt, MEN;;;JA;0499000;ORGENHET;leggInn;MERK: her er det to orgEnheter med samme navn, på samme nivå, under samme parent… Avdekket i U4 at det egentlig er to enheter på ulik nivå hvor den ene er parent til den andre. Renate kontakter ØT for å rette.
+049210;0492;ORGNIV3;;Endret;0492100;ga822h;JA;0492100;ORGNIV3;ga822h;Fant ikke i NOM. Fant i NORG. Har ingen organiseringer i NORG. Er en ROL-enhet i NORG. Utfra navn i NORG fant jeg enheten 0492100 i på nivå ORGENHET i NOM. Sjekket opp trygdeident til en ansatt her og det treffer på 0492
+0496000;0496;AGRESSOORGENHET;Innlandet Arbeidspsykologisk og pedagogisk rådgivning;Beholdt;;;JA;0496000;ORGENHET;leggInn;
+050150;0501;ORGNIV3;Lillehammer-Gausdal;Beholdt;;;JA;050150;ORGNIV3;leggInn;
+050200;0502;ORGNIV3;Gjøvik;Beholdt;;;JA;050200;ORGNIV3;leggInn;
+051150;0511;ORGNIV3;Lesja-Dovre;Beholdt;;;JA;051150;ORGNIV3;leggInn;
+051350;0513;ORGNIV3;Lom og Skjåk;Beholdt;;;JA;051350;ORGNIV3;leggInn;
+051500;0515;ORGNIV3;Vågå;Beholdt;;;JA;051500;ORGNIV3;leggInn;
+051650;0516;ORGNIV3;Midt-Gubrandsdal;Beholdt;;;JA;051650;ORGNIV3;leggInn;
+051700;0517;ORGNIV3;Sel;Beholdt;;;JA;051700;ORGNIV3;leggInn;
+052100;0521;ORGNIV3;Øyer;Beholdt;;;JA;052100;ORGNIV3;leggInn;
+052800;0528;ORGNIV3;Østre Toten;Beholdt;;;JA;052800;ORGNIV3;leggInn;
+052900;0529;ORGNIV3;Vestre Toten;Beholdt;;;JA;052900;ORGNIV3;leggInn;
+053200;0532;ORGNIV3;Jevnaker;Beholdt;;;JA;053200;ORGNIV3;leggInn;
+053400;0534;ORGNIV3;Hadeland;Beholdt;;;JA;053400;ORGNIV3;leggInn;
+053600;0536;ORGNIV3;Søndre Land;Beholdt;;;JA;053600;ORGNIV3;leggInn;
+053800;0538;ORGNIV3;Nordre Land;Beholdt;;;JA;053800;ORGNIV3;leggInn;
+054250;0542;ORGNIV3;Valdres;Beholdt;;;JA;054250;ORGNIV3;leggInn;
+0587000;0587;AGRESSOORGENHET;Innlandet Tiltak;Beholdt, MEN;;;JA;0587000;ORGENHET;leggInn;MERK: her er det to orgEnheter med samme navn, på samme nivå, under samme parent… Avdekket i U4 at det egentlig er to enheter på ulik nivå hvor den ene er parent til den andre. Renate kontakter ØT for å rette.
+068010;0600;ORGNIV3;Vest-Viken Region;Opp til ORGNIV2;R06;;JA;R06;ORGNIV2;leggInn;Testet på leder i underliggende enhet som ikke har egen remedyEnhet. Vedkommendes trygdeident er på XXX0600
+060200;0602;ORGNIV3;Drammen;Beholdt;;;JA;060200;ORGNIV3;leggInn;
+060400;0604;ORGNIV3;Kongsberg;Beholdt;;;JA;060400;ORGNIV3;leggInn;
+060500;0605;ORGNIV3;Ringerike;Beholdt;;;JA;060500;ORGNIV3;leggInn;
+061200;0612;ORGNIV3;Hole;Beholdt;;;JA;061200;ORGNIV3;leggInn;
+061700;0617;ORGNIV3;Hallingdal;Beholdt;;;JA;061700;ORGNIV3;leggInn;
+062300;0623;ORGNIV3;Midt-Buskerud;Beholdt;;;JA;062300;ORGNIV3;leggInn;
+062400;0624;ORGNIV3;Øvre Eiker;Beholdt;;;JA;062400;ORGNIV3;leggInn;
+062600;0626;ORGNIV3;Lier;Beholdt;;;JA;062600;ORGNIV3;leggInn;
+063200;0632;ORGNIV3;Numedal;Beholdt;;;JA;063200;ORGNIV3;leggInn;
+0687000;0687;AGRESSOORGENHET;Vest-Viken Forvaltningstjenester Leder;FEIL, se kommentar;;;JA;0687000;ORGENHET;leggInn;To orgenheter på niv 4 har ansatte/leder som har 0687 i trygdeident. Både Vest-Viken Forvaltningstjeneste og Vest-Viken Forvaltningstjeneste leder. Antatt at det er slik at leder skal ligge under den andre, og dermed bør 0687 mappe til den over, altså by896h.
+0699200;0691;AGRESSOORGENHET;Vest-Viken Arbeidslivssenter avdeling 1;Opp til ORGNIV4;069900;;JA;069900;ORGNIV4;leggInn;
+0696100;0696;AGRESSOORGENHET;Vest-Viken Arbeidsrådgivning;Beholdt;;;JA;0696100;ORGENHET;leggInn;
+070100;0701;ORGNIV3;Horten;Beholdt;;;JA;070100;ORGNIV3;leggInn;
+070400;0704;ORGNIV3;Tønsberg;Beholdt;;;JA;070400;ORGNIV3;leggInn;
+071000;0710;ORGNIV3;Sandefjord;Beholdt;;;JA;071000;ORGNIV3;leggInn;
+088010;0800;ORGNIV3;Vestfold og Telemark Region;Beholdt;;;JA;088010;ORGNIV3;leggInn;Merk: her har orgNiv3 og orgNiv4 samme agressoId. Det er orgNiv3 vi velger her
+080500;0805;ORGNIV3;Porsgrunn;Beholdt;;;JA;080500;ORGNIV3;leggInn;
+080600;0806;ORGNIV3;Skien;Beholdt;;;JA;080600;ORGNIV3;leggInn;
+080700;0807;ORGNIV3;Notodden;Beholdt;;;JA;080700;ORGNIV3;leggInn;
+081100;0811;ORGNIV3;Siljan;Beholdt;;;JA;081100;ORGNIV3;leggInn;
+081400;0814;ORGNIV3;Bamble;Beholdt;;;JA;081400;ORGNIV3;leggInn;
+081500;0815;ORGNIV3;Kragerø;Beholdt;;;JA;081500;ORGNIV3;leggInn;
+081700;0817;ORGNIV3;Drangedal;Beholdt;;;JA;081700;ORGNIV3;leggInn;
+082100;0821;ORGNIV3;Midt-Telemark;Beholdt;;;JA;082100;ORGNIV3;leggInn;
+082600;0826;ORGNIV3;Tinn;Beholdt;;;JA;082600;ORGNIV3;leggInn;
+083300;0833;ORGNIV3;Vest-Telemark;Beholdt;;;JA;083300;ORGNIV3;leggInn;
+0899000;0891;AGRESSOORGENHET;Vestfold og Telemark Arbeid og helse;Opp til ORGNIV4;088040;jy912s;JA;088040;ORGNIV4;jy912s;
+090100;0901;ORGNIV3;Risør;Beholdt;;;JA;090100;ORGNIV3;leggInn;
+090400;0904;ORGNIV3;Grimstad;Beholdt;;;JA;090400;ORGNIV3;leggInn;
+090600;0906;ORGNIV3;Arendal;Beholdt;;;JA;090600;ORGNIV3;leggInn;
+091400;0914;ORGNIV3;Øst i Agder;Beholdt;;;JA;091400;ORGNIV3;leggInn;
+092600;0926;ORGNIV3;Lillesand;Beholdt;;;JA;092600;ORGNIV3;leggInn;
+092800;0928;ORGNIV3;Birkenes;Beholdt;;;JA;092800;ORGNIV3;leggInn;
+092900;0929;ORGNIV3;Åmli;Beholdt;;;JA;092900;ORGNIV3;leggInn;
+093700;0937;ORGNIV3;Evje og Hornnes;Beholdt;;;JA;093700;ORGNIV3;leggInn;
+108010;1000;ORGNIV3;Agder Regionkontor;Opp til ORGNIV2;R10;pa932k;JA;R10;ORGNIV2;pa932k;
+100110;1001;ORGNIV3;Kristiansand;Beholdt;;;JA;100110;ORGNIV3;leggInn;
+100200;1002;ORGNIV3;Lindesnes;Beholdt;;;JA;100200;ORGNIV3;leggInn;
+101400;1014;ORGNIV3;Midt-Agder;Beholdt;;;JA;101400;ORGNIV3;leggInn;
+103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
+1087000;1087;AGRESSOORGENHET;Agder Tiltak;Beholdt;;dy786g;JA;1087000;ORGENHET;dy786g;
+1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;bu966s;JA;1099000;ORGENHET;bu966s;
+1096100;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;1096100;ORGENHET;leggInn;
+119100;1100;ORGNIV3;Rogaland Fylkeskontor;Opp til ORGNIV2;11;hy244v;JA;11;ORGNIV2;hy244v;
+110100;1101;ORGNIV3;Dalane;Beholdt;;;JA;110100;ORGNIV3;leggInn;
+110200;1102;ORGNIV3;Sandnes-Forsand;Beholdt;;;JA;110200;ORGNIV3;leggInn;
+110600;1106;ORGNIV3;Haugesund-Utsira;Beholdt;;;JA;110600;ORGNIV3;leggInn;
+111900;1119;ORGNIV3;Hå;Beholdt;;;JA;111900;ORGNIV3;leggInn;
+112000;1120;ORGNIV3;Klepp-Time;Beholdt;;;JA;112000;ORGNIV3;leggInn;
+112200;1122;ORGNIV3;Gjesdal;Beholdt;;;JA;112200;ORGNIV3;leggInn;
+112400;1124;ORGNIV3;Sola;Beholdt;;;JA;112400;ORGNIV3;leggInn;
+112700;1127;ORGNIV3;Randaberg-Kvitsøy;Beholdt;;;JA;112700;ORGNIV3;leggInn;
+113000;1130;ORGNIV3;Strand;Beholdt;;;JA;113000;ORGNIV3;leggInn;
+113300;1133;ORGNIV3;Hjelmeland;Beholdt;;;JA;113300;ORGNIV3;leggInn;
+113400;1134;ORGNIV3;Suldal;Beholdt;;;JA;113400;ORGNIV3;leggInn;
+113500;1135;ORGNIV3;Sauda;Beholdt;;;JA;113500;ORGNIV3;leggInn;
+114600;1146;ORGNIV3;Tysvær;Beholdt;;;JA;114600;ORGNIV3;leggInn;
+114900;1149;ORGNIV3;Karmøy;Beholdt;;;JA;114900;ORGNIV3;leggInn;
+116000;1160;ORGNIV3;Vindafjord;Beholdt;;;JA;116000;ORGNIV3;leggInn;
+116100;1161;ORGNIV3;Eiganes og Tasta;Beholdt;;;JA;116100;ORGNIV3;leggInn;
+116200;1162;ORGNIV3;Hundvåg og Storhaug;Beholdt;;;JA;116200;ORGNIV3;leggInn;
+116400;1164;ORGNIV3;Hillevåg og Hinna;Beholdt;;;JA;116400;ORGNIV3;leggInn;
+116500;1165;ORGNIV3;Madla;Beholdt;;;JA;116500;ORGNIV3;leggInn;
+116900;1169;ORGNIV3;Rennesøy og Finnøy;Beholdt;;;JA;116900;ORGNIV3;leggInn;
+118700;1187;ORGNIV3;Rogaland Tiltak;Beholdt;;ku572e;JA;118700;ORGNIV3;ku572e;
+1199000;1191;AGRESSOORGENHET;Rogaland Arbeidslivssenter;Opp til ORGNIV4;119900;ba853h;JA;119900;ORGNIV4;ba853h;
+1196100;1196;AGRESSOORGENHET;Rogaland Arbeidsrådgivning;Beholdt;;ma120m;JA;1196100;ORGENHET;ma120m;
+128010;1200;ORGNIV3;Vestland Region;Opp til ORGNIV2;R12;se226g;JA;R12;ORGNIV2;se226g;
+120200;1202;ORGNIV3;Bergen sør;Beholdt;;;JA;120200;ORGNIV3;leggInn;
+120300;1203;ORGNIV3;Bergen nord;Beholdt;;;JA;120300;ORGNIV3;leggInn;
+120600;1206;ORGNIV3;Bergen vest;Beholdt;;;JA;120600;ORGNIV3;leggInn;
+120800;1208;ORGNIV3;Årstad (regionkontor Bergen);Beholdt;;;JA;120800;ORGNIV3;leggInn;
+120900;1209;ORGNIV3;Bergenhus;Beholdt;;;JA;120900;ORGNIV3;leggInn;
+121600;1216;ORGNIV3;Sveio;Beholdt;;;JA;121600;ORGNIV3;leggInn;
+121900;1219;ORGNIV3;Bømlo;Beholdt;;;JA;121900;ORGNIV3;leggInn;
+122100;1221;ORGNIV3;Stord (regionkontor Sunnhordaland);Beholdt;;;JA;122100;ORGNIV3;leggInn;
+122200;1222;ORGNIV3;Fitjar;Beholdt;;;JA;122200;ORGNIV3;leggInn;
+122300;1223;ORGNIV3;Tysnes;Beholdt;;;JA;122300;ORGNIV3;leggInn;
+122400;1224;ORGNIV3;Kvinnherad;Beholdt;;;JA;122400;ORGNIV3;leggInn;
+122800;1228;ORGNIV3;Odda;Beholdt;;;JA;122800;ORGNIV3;leggInn;
+123200;1232;ORGNIV3;Eidfjord;Beholdt;;;JA;123200;ORGNIV3;leggInn;
+123300;1233;ORGNIV3;Ulvik;Beholdt;;;JA;123300;ORGNIV3;leggInn;
+123500;1235;ORGNIV3;Voss (regionkontor Voss/Hardanger);Beholdt;;;JA;123500;ORGNIV3;leggInn;
+123800;1238;ORGNIV3;Kvam;Beholdt;;;JA;123800;ORGNIV3;leggInn;
+124200;1242;ORGNIV3;Samnanger;Beholdt;;;JA;124200;ORGNIV3;leggInn;
+124300;1243;ORGNIV3;Bjørnafjorden (regionkontor Midthordaland);Beholdt;;;JA;124300;ORGNIV3;leggInn;
+124400;1244;ORGNIV3;Austevoll;Beholdt;;;JA;124400;ORGNIV3;leggInn;
+124600;1246;ORGNIV3;Øygarden;Beholdt;;;JA;124600;ORGNIV3;leggInn;
+124700;1247;ORGNIV3;Askøy (regionkontor vest);Beholdt;;;JA;124700;ORGNIV3;leggInn;
+125100;1251;ORGNIV3;Vaksdal;Beholdt;;;JA;125100;ORGNIV3;leggInn;
+125300;1253;ORGNIV3;Osterøy;Beholdt;;;JA;125300;ORGNIV3;leggInn;
+126300;1263;ORGNIV3;Alver (regionkontor Nordhordaland);Beholdt;;;JA;126300;ORGNIV3;leggInn;
+126600;1266;ORGNIV3;Masfjorden;Beholdt;;;JA;126600;ORGNIV3;leggInn;
+1299000;1291;AGRESSOORGENHET;Vestland Arbeidslivssenter;Opp til ORGNIV25;1299;me595c;JA;1299;ORGNIV25;me595c;
+1296100;1296;AGRESSOORGENHET;Vestland Arbeidsrådgivning;Opp til ORGNIV25;1296;my580h;JA;1296;ORGNIV25;my580h;
+140100;1401;ORGNIV3;Kinn;Beholdt;;;JA;140100;ORGNIV3;leggInn;
+141200;1412;ORGNIV3;Solund;Beholdt;;;JA;141200;ORGNIV3;leggInn;
+141300;1413;ORGNIV3;Hyllestad;Beholdt;;;JA;141300;ORGNIV3;leggInn;
+141600;1416;ORGNIV3;Høyanger;Beholdt;;;JA;141600;ORGNIV3;leggInn;
+141700;1417;ORGNIV3;Vik;Beholdt;;;JA;141700;ORGNIV3;leggInn;
+142000;1420;ORGNIV3;Sogndal (regionkontor Sogn);Beholdt;;;JA;142000;ORGNIV3;leggInn;
+142100;1421;ORGNIV3;Aurland;Beholdt;;;JA;142100;ORGNIV3;leggInn;
+142200;1422;ORGNIV3;Lærdal;Beholdt;;;JA;142200;ORGNIV3;leggInn;
+142400;1424;ORGNIV3;Årdal;Beholdt;;;JA;142400;ORGNIV3;leggInn;
+142600;1426;ORGNIV3;Luster;Beholdt;;;JA;142600;ORGNIV3;leggInn;
+142800;1428;ORGNIV3;Askvoll;Beholdt;;;JA;142800;ORGNIV3;leggInn;
+142900;1429;ORGNIV3;Fjaler;Beholdt;;;JA;142900;ORGNIV3;leggInn;
+143200;1432;ORGNIV3;Sunnfjord (Regionkontor Sunnfjord);Beholdt;;;JA;143200;ORGNIV3;leggInn;
+143800;1438;ORGNIV3;Bremanger;Beholdt;;;JA;143800;ORGNIV3;leggInn;
+144300;1443;ORGNIV3;Eid;Beholdt;;;JA;144300;ORGNIV3;leggInn;
+144500;1445;ORGNIV3;Gloppen;Beholdt;;;JA;144500;ORGNIV3;leggInn;
+144900;1449;ORGNIV3;Stryn (regionkontor Nordfjord);Beholdt;;;JA;144900;ORGNIV3;leggInn;
+159100;1500;ORGNIV3;Møre og Romsdal Fylkesleddet;Opp til ORGNIV2;15;gy192s;JA;15;ORGNIV2;gy192s;
+150200;1502;ORGNIV3;Molde;Beholdt;;;JA;150200;ORGNIV3;leggInn;
+150400;1504;ORGNIV3;Ålesund;Beholdt;;;JA;150400;ORGNIV3;leggInn;
+150500;1505;ORGNIV3;Kristiansund;Beholdt;;;JA;150500;ORGNIV3;leggInn;
+151500;1515;ORGNIV3;Herøy - Møre;Beholdt;;;JA;151500;ORGNIV3;leggInn;
+151700;1517;ORGNIV3;Hareid-Ulstein-Sande;Beholdt;;;JA;151700;ORGNIV3;leggInn;
+152000;1520;ORGNIV3;Ørsta/Volda;Beholdt;;;JA;152000;ORGNIV3;leggInn;
+152800;1528;ORGNIV3;Sykkylven;Beholdt;;;JA;152800;ORGNIV3;leggInn;
+153100;1531;ORGNIV3;Sula;Beholdt;;;JA;153100;ORGNIV3;leggInn;
+153200;1532;ORGNIV3;Giske;Beholdt;;;JA;153200;ORGNIV3;leggInn;
+153500;1535;ORGNIV3;Vestnes;Beholdt;;;JA;153500;ORGNIV3;leggInn;
+153900;1539;ORGNIV3;Rauma;Beholdt;;;JA;153900;ORGNIV3;leggInn;
+154700;1547;ORGNIV3;Aukra;Beholdt;;;JA;154700;ORGNIV3;leggInn;
+154800;1548;ORGNIV3;Hustadvika;Beholdt;;;JA;154800;ORGNIV3;leggInn;
+155400;1554;ORGNIV3;Averøy;Beholdt;;;JA;155400;ORGNIV3;leggInn;
+155700;1557;ORGNIV3;Gjemnes;Beholdt;;;JA;155700;ORGNIV3;leggInn;
+156300;1563;ORGNIV3;NAV Indre Nordmøre;Beholdt;;;JA;156300;ORGNIV3;leggInn;
+157300;1573;ORGNIV3;Smøla;Beholdt;;;JA;157300;ORGNIV3;leggInn;
+157600;1576;ORGNIV3;Aure;Beholdt;;;JA;157600;ORGNIV3;leggInn;
+1599000;1591;AGRESSOORGENHET;Møre og Romsdal Arbeidslivssenter;Opp til ORGNIV3;159900;ma928e;JA;159900;ORGNIV3;ma928e;Ligger flere underenheter under den nye enheten i ORGNIV3, men stikkprøver av ansatte i alle disse underliggende viser at det er 1591 i trydeident på alle.
+161200;1612;ORGNIV3;Hemne;Beholdt;;;JA;161200;ORGNIV3;leggInn;
+162000;1620;ORGNIV3;Frøya;Beholdt;;;JA;162000;ORGNIV3;leggInn;
+162100;1621;ORGNIV3;Ørland;Beholdt;;;JA;162100;ORGNIV3;leggInn;
+163000;1630;ORGNIV3;Nord-Fosen;Beholdt;;;JA;163000;ORGNIV3;leggInn;
+163400;1634;ORGNIV3;Oppdal;Beholdt;;;JA;163400;ORGNIV3;leggInn;
+163800;1638;ORGNIV3;Orkland;Beholdt;;;JA;163800;ORGNIV3;leggInn;
+164000;1640;ORGNIV3;Røros;Beholdt;;;JA;164000;ORGNIV3;leggInn;
+164800;1648;ORGNIV3;Midtre Gauldal;Beholdt;;;JA;164800;ORGNIV3;leggInn;
+165300;1653;ORGNIV3;Melhus;Beholdt;;;JA;165300;ORGNIV3;leggInn;
+165700;1657;ORGNIV3;Skaun;Beholdt;;;JA;165700;ORGNIV3;leggInn;
+166300;1663;ORGNIV3;Malvik;Beholdt;;;JA;166300;ORGNIV3;leggInn;
+170200;1702;ORGNIV3;Inn-Trøndelag;Beholdt;;;JA;170200;ORGNIV3;leggInn;
+170300;1703;ORGNIV3;Midtre Namdal;Beholdt;;;JA;170300;ORGNIV3;leggInn;
+171900;1719;ORGNIV3;Levanger;Beholdt;;;JA;171900;ORGNIV3;leggInn;
+172100;1721;ORGNIV3;Verdal;Beholdt;;;JA;172100;ORGNIV3;leggInn;
+174500;1742;ORGNIV3;Indre Namdal;Beholdt;;;JA;174500;ORGNIV3;leggInn;
+175100;1751;ORGNIV3;Nærøy;Beholdt;;;JA;175100;ORGNIV3;leggInn;
+178300;1783;ORGNIV3;Værnes;Beholdt;;;JA;178300;ORGNIV3;leggInn;
+1899000;1800;AGRESSOORGENHET;Arbeidslivssenter Nordland;TODO, se kommentar;;;JA;1899000;ORGENHET;leggInn;Rart. Vanligvis pleier xx00 å peke til fylkesleddet. I NORG peker 1800 til NAV Nordland, men i mappingen her peker det på NAV Nordland Arbeidslivssenter og det er snodig. Se 1891
+180400;1804;ORGNIV3;Bodø;Beholdt;;;JA;180400;ORGNIV3;leggInn;
+180500;1805;ORGNIV3;Narvik;Beholdt;;;JA;180500;ORGNIV3;leggInn;
+181300;1813;ORGNIV3;Sør-Helgeland;Beholdt;;;JA;181300;ORGNIV3;leggInn;
+182000;1820;ORGNIV3;Ytre Helgeland;Beholdt;;;JA;182000;ORGNIV3;leggInn;
+182400;1824;ORGNIV3;Vefsna;Beholdt;;;JA;182400;ORGNIV3;leggInn;
+182600;1826;ORGNIV3;Hattfjelldal;Beholdt;;;JA;182600;ORGNIV3;leggInn;
+182800;1828;ORGNIV3;Nesna;Beholdt;;;JA;182800;ORGNIV3;leggInn;
+183200;1832;ORGNIV3;Hemnes;Beholdt;;;JA;183200;ORGNIV3;leggInn;
+183300;1833;ORGNIV3;Rana;Beholdt;;;JA;183300;ORGNIV3;leggInn;
+183400;1834;ORGNIV3;Lurøy;Beholdt;;;JA;183400;ORGNIV3;leggInn;
+183600;1836;ORGNIV3;Rødøy;Beholdt;;;JA;183600;ORGNIV3;leggInn;
+183700;1837;ORGNIV3;Meløy;Beholdt;;;JA;183700;ORGNIV3;leggInn;
+183800;1838;ORGNIV3;Gildeskål;Beholdt;;;JA;183800;ORGNIV3;leggInn;
+184100;1841;ORGNIV3;Indre Salten;Beholdt;;;JA;184100;ORGNIV3;leggInn;
+184800;1848;ORGNIV3;Steigen;Beholdt;;;JA;184800;ORGNIV3;leggInn;
+185100;1851;ORGNIV3;Lødingen;Beholdt;;;JA;185100;ORGNIV3;leggInn;
+185600;1856;ORGNIV3;Røst;Beholdt;;;JA;185600;ORGNIV3;leggInn;
+185700;1857;ORGNIV3;Værøy;Beholdt;;;JA;185700;ORGNIV3;leggInn;
+186000;1860;ORGNIV3;Lofoten;Beholdt;;;JA;186000;ORGNIV3;leggInn;
+186600;1866;ORGNIV3;Hadsel;Beholdt;;;JA;186600;ORGNIV3;leggInn;
+186700;1867;ORGNIV3;Bø;Beholdt;;;JA;186700;ORGNIV3;leggInn;
+186800;1868;ORGNIV3;Øksnes;Beholdt;;;JA;186800;ORGNIV3;leggInn;
+187000;1870;ORGNIV3;Sortland;Beholdt;;;JA;187000;ORGNIV3;leggInn;
+187100;1871;ORGNIV3;Andøy;Beholdt;;;JA;187100;ORGNIV3;leggInn;
+189100;1891;ORGNIV3;Nordland Fylkesleddet;TODO, se kommentar;;;JA;189100;ORGNIV3;leggInn;1891 i NORG er Arbeidslivssenter Nordland, som virker mer riktig. Antagelig skal 1800 og 1891 bytte plass her da de mapper til feil agressoEnhet virker det som.
+189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;189610;ORGNIV3;leggInn;
+1980100;1900;AGRESSOORGENHET;Troms og Finnmark Regionkontor;Opp til ORGNIV2;R19;vy324v;JA;R19;ORGNIV2;vy324v;
+190200;1902;ORGNIV3;Tromsø;Beholdt;;;JA;190200;ORGNIV3;leggInn;
+190300;1903;ORGNIV3;NAV Sør-Troms;Beholdt;;;JA;190300;ORGNIV3;leggInn;
+192300;1923;ORGNIV3;Salangen-Lavangen-Dyrøy;Beholdt;;;JA;192300;ORGNIV3;leggInn;
+192400;1924;ORGNIV3;Målselv-Bardu;Beholdt;;;JA;192400;ORGNIV3;leggInn;
+193100;1931;ORGNIV3;Senja-Sørreisa;Beholdt;;;JA;193100;ORGNIV3;leggInn;
+193300;1933;ORGNIV3;Balsfjord;Beholdt;;;JA;193300;ORGNIV3;leggInn;
+193600;1936;ORGNIV3;Karlsøy;Beholdt;;;JA;193600;ORGNIV3;leggInn;
+193800;1938;ORGNIV3;Lyngen;Beholdt;;;JA;193800;ORGNIV3;leggInn;
+194000;1940;ORGNIV3;Kåfjord;Beholdt;;;JA;194000;ORGNIV3;leggInn;
+194100;1941;ORGNIV3;Skjervøy;Beholdt;;;JA;194100;ORGNIV3;leggInn;
+194200;1942;ORGNIV3;Nordreisa;Beholdt;;;JA;194200;ORGNIV3;leggInn;
+1987000;1987;AGRESSOORGENHET;Troms og Finnmark Tiltak;Beholdt;;;JA;1987000;ORGENHET;leggInn;
+1999000;1991;AGRESSOORGENHET;Troms og Finnmark Arbeidslivssenter, avd Troms;TODO, se kommentar;TODO;To enheter;Avventer;TODO;ORGENHET;To enheter;Må mappe til to enheter: både arblivssenter avd finnmark (ta977f) og arblivssenter avd. troms (ra553p) da begge har ansatte på 1991. Kan ikke flytte til nivået over fordi det er noen der som skal til 1900.
+200200;2002;ORGNIV3;Vardø;Beholdt;;;JA;200200;ORGNIV3;leggInn;
+200300;2003;ORGNIV3;Vadsø;Beholdt;;;JA;200300;ORGNIV3;leggInn;
+200400;2004;ORGNIV3;Hammerfest-Måsøy;Beholdt;;;JA;200400;ORGNIV3;leggInn;
+201100;2011;ORGNIV3;Kautokeino;Beholdt;;;JA;201100;ORGNIV3;leggInn;
+201200;2012;ORGNIV3;Alta - Kvænangen - Loppa;Beholdt;;;JA;201200;ORGNIV3;leggInn;
+201500;2015;ORGNIV3;Hasvik;Beholdt;;;JA;201500;ORGNIV3;leggInn;
+201900;2019;ORGNIV3;Nordkapp;Beholdt;;;JA;201900;ORGNIV3;leggInn;
+202000;2020;ORGNIV3;Porsanger;Beholdt;;;JA;202000;ORGNIV3;leggInn;
+202100;2021;ORGNIV3;Kárásjohka - Karasjok;Beholdt;;;JA;202100;ORGNIV3;leggInn;
+202200;2022;ORGNIV3;Lebesby;Beholdt;;;JA;202200;ORGNIV3;leggInn;
+202300;2023;ORGNIV3;Gamvik;Beholdt;;;JA;202300;ORGNIV3;leggInn;
+202400;2024;ORGNIV3;Berlevåg;Beholdt;;;JA;202400;ORGNIV3;leggInn;
+202500;2025;ORGNIV3;Tana;Beholdt;;;JA;202500;ORGNIV3;leggInn;
+202700;2027;ORGNIV3;Nesseby;Beholdt;;;JA;202700;ORGNIV3;leggInn;
+202800;2028;ORGNIV3;Båtsfjord;Beholdt;;;JA;202800;ORGNIV3;leggInn;
+203000;2030;ORGNIV3;Sør-Varanger;Beholdt;;;JA;203000;ORGNIV3;leggInn;
+2096100;2096;AGRESSOORGENHET;Troms og Finnmark Arbeidsrådgivning;Beholdt;;;JA;2096100;ORGENHET;leggInn;
+210300;2103;ORGNIV3;;Vikafossen;;;Avventer;210300;;leggInn;Denne skal ikke ha en orgEnhet, da folk til Vikafossen kommer fra ulike orgEnheter og vi skal ikke vite hvor de kommer fra. Må tas inn senere helhetlig når vi støtter opprettelse av Vikafossen.
+230000;2300;ORGNIV3;HELFO Hovedkontor;Beholdt;;;JA;230000;ORGNIV3;leggInn;
+231000;2310;ORGNIV3;HELFO Oslo;Beholdt;;;JA;231000;ORGNIV3;leggInn;norgEnhet er under avvikling. MEN det er 23 aktive nav-identer på 2310 i HRRES_RESSURS
+239000;2390;ORGNIV3;;FEIL, se kommentar;;;Avventer;239000;;leggInn;Representerer HELSEDIR. orgEnhet her er antagelig lagt inn av Rune og Co og ikke reell. Antagelig må vi håndtere disse siden. Disse skal antagelig bare opprettes i NOM, og ikke inn i U4.
+8101111;2810;AGRESSOORGENHET;Sekretariatet;Opp til ORGNIV2;8101;ga846n;JA;8101;ORGNIV2;ga846n;Kun 1 enhet nedover
+8102000;2811;AGRESSOORGENHET;Internrevisjon;Opp til ORGNIV2;812;vu140n;JA;812;ORGNIV2;vu140n;Flere orgEnheter i bunn, men alle deler 2811 ved oppslag på trygdeident, så flytter til øverste Internrev.node
+820300;2820;ORGNIV3;HR-avdelingen;Opp til ORGNIV2;821;ra316y;JA;821;ORGNIV2;ra316y;Burde vært mappet til ORGNIV2
+820200;2821;ORGNIV3;Økonomi- og styringsavdelingen;Opp til ORGNIV2;8202;ke338b;JA;8202;ORGNIV2;ke338b;
+8554;2822;ORGNIV25;IT design arkitektur og agile coaching;TODO, ITAVD;;;Avklar, ITAVD;8554;;leggInn;Snakk med Bjørnar og A. Palerud
+8105000;2823;AGRESSOORGENHET;Kommunikasjonsavdelingen;Opp til ORGNIV2;815;bu613r;JA;815;ORGNIV2;bu613r;
+8106000;2826;AGRESSOORGENHET;Kunnskapsavdelingen;Opp til ORGNIV2;816;pa885p;JA;816;ORGNIV2;pa885p;
+8320000;2830;AGRESSOORGENHET;Ytelsesavdelingen;Opp til ORGNIV2;830;su430w;JA;830;ORGNIV2;su430w;
+8430000;2840;AGRESSOORGENHET;Arbeids- og tjenesteavdelingen;Opp til ORGNIV2;840;ja556h;JA;840;ORGNIV2;ja556h;
+855310;2910;ORGNIV3;IT forretningsplattformer og standardprodukter;TODO, ITAVD;;;Avklar, ITAVD;855310;;leggInn;Snakk med Bjørnar og A. Palerud
+855220;2920;ORGNIV3;Data;TODO, ITAVD;;;Avklar, ITAVD;855220;;leggInn;Snakk med Bjørnar og A. Palerud
+855330;2930;ORGNIV3;Funksjonell brukerstøtte;TODO, ITAVD;;;Avklar, ITAVD;855330;;leggInn;Snakk med Bjørnar og A. Palerud
+854100;2940;ORGNIV3;IT virksomhetsstyring;TODO, ITAVD;;;Avklar, ITAVD;854100;;leggInn;Snakk med Bjørnar og A. Palerud
+5224000;2960;AGRESSOORGENHET;Felles;Opp til ORGNIV2;53;gy118b;JA;53;ORGNIV2;gy118b;
+855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;855110;;leggInn;Snakk med Bjørnar og A. Palerud
+855210;2990;ORGNIV3;IT utvikling 1;TODO, ITAVD;;;Avklar, ITAVD;855210;;leggInn;Snakk med Bjørnar og A. Palerud
+2530000;4100;AGRESSOORGENHET;Kontaktsenter Styringsenhet Ledelse;Opp til ORGNIV2;25;ba923j;JA;25;ORGNIV2;ba923j;
+2501000;4101;AGRESSOORGENHET;NAV Kontaktsenter Øst-Viken;Opp til ORGNIV3;250100;my611u;JA;250100;ORGNIV3;my611u;
+2505000;4105;AGRESSOORGENHET;Kontaktsenter Innlandet leder;Opp til ORGNIV3;250500;de895u;JA;250500;ORGNIV3;de895u;
+2506000;4106;AGRESSOORGENHET;Kontaktsenter Oslo og Vest-Viken;Opp til ORGNIV3;250600;gy945k;JA;250600;ORGNIV3;gy945k;
+2507000;4107;AGRESSOORGENHET;Kontaktsenter Vestfold og Telemark;Opp til ORGNIV3;250700;da280f;JA;250700;ORGNIV3;da280f;
+2510000;4110;AGRESSOORGENHET;Kontaktsenter Agder;Opp til ORGNIV3;251000;fu159f;JA;251000;ORGNIV3;fu159f;
+2511000;4111;AGRESSOORGENHET;Kontaktsenter Rogaland;Opp til ORGNIV3;251100;pe138p;JA;251100;ORGNIV3;pe138p;
+2512000;4112;AGRESSOORGENHET;Kontaktsenter Vestland;Opp til ORGNIV3;251200;ny920w;JA;251200;ORGNIV3;ny920w;
+2514000;4114;AGRESSOORGENHET;Kontaktsenter Nord- Vestlandet 0;Opp til ORGNIV3;251400;ka534z;JA;251400;ORGNIV3;ka534z;
+2516000;4116;AGRESSOORGENHET;Kontaktsenter Trøndelag;Opp til ORGNIV3;251600;he953e;JA;251600;ORGNIV3;he953e;
+2518000;4118;AGRESSOORGENHET;Kontaktsenter Nordland Bodø;Opp til ORGNIV3;251800;ra469a;JA;251800;ORGNIV3;ra469a;
+2519000;4119;AGRESSOORGENHET;Kontaktsenter Troms og Finnmark;Opp til ORGNIV3;251900;va130k;JA;251900;ORGNIV3;va130k;
+2521000;4121;AGRESSOORGENHET;Kontaktsenter Nordland Mo adm;Opp til ORGNIV3;252100;ty313a;JA;252100;ORGNIV3;ty313a;
+522100;4151;ORGNIV3;Styring og utvikling;Opp til ORGNIV2;52;ka700c;JA;52;ORGNIV2;ka700c;
+420000;4200;ORGNIV3;Styringsenhet Klageinstans;Opp til ORGNIV2;42;ke488u;JA;42;ORGNIV2;ke488u;
+4221000;4250;AGRESSOORGENHET;Klageinstans Sør;Opp til ORGNIV3;722100;ka589p;JA;722100;ORGNIV3;ka589p;Byttet ut til helt annen enhet da gamle Klageinstanser er nedlagt. Brukt trygdeident-kobling til å avdekke.
+4430000;4400;AGRESSOORGENHET;Arbeid og Ytelser Styringsenhet;Opp til ORGNIV2;44;ve910k;JA;44;ORGNIV2;ve910k;
+4430100;4401;AGRESSOORGENHET;Arbeid og Ytelser Sarpsborg;Opp til ORGNIV3;443010;be901f;JA;443010;ORGNIV3;be901f;
+4430200;4402;AGRESSOORGENHET;Arbeid og Ytelser Romerike;Opp til ORGNIV3;443020;sa360f;JA;443020;ORGNIV3;sa360f;
+4430300;4403;AGRESSOORGENHET;Arbeid og Ytelser Kristiania;Opp til ORGNIV3;443030;hu598v;JA;443030;ORGNIV3;hu598v;
+4430500;4405;AGRESSOORGENHET;Arbeid og Ytelser Innlandet;Opp til ORGNIV3;443050;gy284w;JA;443050;ORGNIV3;gy284w;
+4430700;4407;AGRESSOORGENHET;Arbeid og ytelser Tønsberg Avdelingsdirektør og stab;Opp til ORGNIV3;443070;ka810n;JA;443070;ORGNIV3;ka810n;
+4430800;4408;AGRESSOORGENHET;Arbeid og Ytelser Skien Ledelse 00;Opp til ORGNIV3;443080;gy330t;JA;443080;ORGNIV3;gy330t;
+4431000;4410;AGRESSOORGENHET;Arbeid og ytelser Sørlandet;Opp til ORGNIV3;443100;ha338t;JA;443100;ORGNIV3;ha338t;
+4431100;4411;AGRESSOORGENHET;Arbeid og ytelser Karmøy 00;Opp til ORGNIV3;443110;by293x;JA;443110;ORGNIV3;by293x;
+4431500;4415;AGRESSOORGENHET;Arbeid og Ytelser Molde, stab;Opp til ORGNIV3;443150;my788g;JA;443150;ORGNIV3;my788g;
+4431600;4416;AGRESSOORGENHET;Arbeid og ytelser Trondheim;Opp til ORGNIV3;443160;ge651c;JA;443160;ORGNIV3;ge651c;
+4431800;4418;AGRESSOORGENHET;Arbeid og ytelser Fauske;Opp til ORGNIV3;443180;se689m;JA;443180;ORGNIV3;se689m;
+4430307;4425;AGRESSOORGENHET;Arbeid og ytelser Kristiania Lønnsgranti;Beholdt;;;JA;4430307;ORGENHET;leggInn;
+4430306;4426;AGRESSOORGENHET;Arbeid og Ytelser Kristiania Sykepenger;TODO- se kommentar;4430307;su769c;JA;4430307;ORGENHET;su769c;I NORG heter denne NAY lønnsgaranti Vardø. Menneskene på denne tilhører 4430307 (Kristiania lønnsgaranti), og flyttes derfor til den.
+443030;4480;ORGNIV3;Arbeid og Ytelser Kristiania;Ned til ORGENHET;4430305;fe768k;JA;4430305;ORGENHET;fe768k;Ser at 4480 er brukt på enheten 4430305, NAY Kristiania Rådgivende overelegetjeneste
+450000;4500;ORGNIV3;Styringsenhet Kontroll;Opp til ORGNIV2;45;va593c;JA;45;ORGNIV2;va593c;
+451030;4503;ORGNIV3;Kontroll Øst;Beholdt;;;JA;451030;ORGNIV3;leggInn;
+451110;4511;ORGNIV3;Kontroll Vest;Beholdt;;;JA;451110;ORGNIV3;leggInn;
+451190;4519;ORGNIV3;Kontroll Nord;Beholdt;;;JA;451190;ORGNIV3;leggInn;
+4550000;4530;AGRESSOORGENHET;Kontroll Medlemskap og avgift, Stab;Opp til ORGNIV3;455000;ny692k;JA;455000;ORGNIV3;ny692k;
+453400;4534;ORGNIV3;Registerforvaltning;Beholdt;;;JA;453400;ORGNIV3;leggInn;
+4520300;4550;AGRESSOORGENHET;Kontroll Analyse;Opp til ORGNIV3;452030;vy687j;JA;452030;ORGNIV3;vy687j;Merk at her finnes det to identiske (med samme nomID) orgEnheter på niv ORGENHET
+240000;4700;ORGNIV3;Styringsenhet Hjelpemidler og tilrettelegging;Opp til ORGNIV2;24;ve474w;JA;24;ORGNIV2;ve474w;
+240100;4701;ORGNIV3;HMS Østfold;Beholdt;;;JA;240100;ORGNIV3;leggInn;
+240300;4703;ORGNIV3;;FEIL, se kommentar;243201;ge927t;JA;243201;ORGNIV3;ge927t;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på at NORG sa det var HMS Oslo
+240400;4704;ORGNIV3;;FEIL, se kommentar;240401;je378k;JA;240401;ORGNIV3;je378k;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
+240500;4705;ORGNIV3;HMS Oppland;Beholdt;;;JA;240500;ORGNIV3;leggInn;
+240600;4706;ORGNIV3;HMS Buskerud;Beholdt;;;JA;240600;ORGNIV3;leggInn;
+240700;4707;ORGNIV3;HMS Vestfold og Telemark;Beholdt;;;JA;240700;ORGNIV3;leggInn;
+240900;4709;ORGNIV3;HMS Aust-Agder;TODO;;;NEI;240900;;leggInn;Vurder om denne skal legges ned. NORG står som under avvikling. Ingen aktive navIdenter med 4709 som remedyEnhet i HRRES_RESSURS
+241000;4710;ORGNIV3;HMS Agder;Beholdt;;;JA;241000;ORGNIV3;leggInn;
+241100;4711;ORGNIV3;;FEIL, se kommentar;241101;ha941h;JA;241101;ORGNIV3;ha941h;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
+241200;4712;ORGNIV3;HMS Hordaland;Beholdt;;;JA;241200;ORGNIV3;leggInn;
+241400;4714;ORGNIV3;HMS Sogn og Fjordane;Beholdt;;;JA;241400;ORGNIV3;leggInn;
+241500;4715;ORGNIV3;HMS Møre og Romsdal;Beholdt;;;JA;241500;ORGNIV3;leggInn;
+241600;4716;ORGNIV3;HMS Trøndelag;Beholdt;;;JA;241600;ORGNIV3;leggInn;
+241800;4718;ORGNIV3;;FEIL, se kommentar;241801;sa567s;JA;241801;ORGNIV3;sa567s;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
+241900;4719;ORGNIV3;;FEIL, se kommentar;241901;je572g;JA;241901;ORGNIV3;je572g;orgEnheten finnes ikke. Har lagt inn riktig enhet basert på NORG, og stikkprøve på trygdeIdent
+242000;4720;ORGNIV3;HMS Finnmark;TODO;;;NEI;242000;;leggInn;Vurder om denne skal legges ned. NORG står som under avvikling. Ingen aktive navIdenter med 4720 som remedyEnhet i HRRES_RESSURS
+2430000;4750;AGRESSOORGENHET;Fagsenteret for NAV Hjelpemidler og tilrettelegging;Tas bort;;;NEI;2430000;;leggInn;orgEnheten er avviklet. remedyEnheten står under avvikling i NORG.
+480000;4800;ORGNIV3;Familie og pensjonsytelser Styringsenhet;Opp til ORGNIV2;48;tu808x;JA;48;ORGNIV2;tu808x;
+480300;4803;ORGNIV3;Familie- og pensjonsytelser Oslo 2;Beholdt;;;JA;480300;ORGNIV3;leggInn;
+480600;4806;ORGNIV3;Familie- og pensjonsytelser Drammen;Beholdt;;;JA;480600;ORGNIV3;leggInn;
+480800;4808;ORGNIV3;Familie- og pensjonsytelser Porsgrunn;Beholdt;;;JA;480800;ORGNIV3;leggInn;
+481200;4812;ORGNIV3;Familie- og pensjonsytelser Bergen;Beholdt;;;JA;481200;ORGNIV3;leggInn;
+481500;4815;ORGNIV3;Familie- og pensjonsytelser Ålesund;Beholdt;;;JA;481500;ORGNIV3;leggInn;
+481700;4817;ORGNIV3;Familie- og pensjonsytelser Steinkjer;Beholdt;;;JA;481700;ORGNIV3;leggInn;
+5222000;4819;AGRESSOORGENHET;Økonomi Pensjon;Opp til ORGNIV2;51;se121j;JA;51;ORGNIV2;se121j;
+482000;4820;ORGNIV3;Familie- og pensjonsytelser Vadsø;Beholdt;;;JA;482000;ORGNIV3;leggInn;
+483300;4833;ORGNIV3;Familie og pensjonsytelser Oslo 1;Beholdt;;;JA;483300;ORGNIV3;leggInn;
+484200;4842;ORGNIV3;Familie- og pensjonsytelser Stord;Beholdt;;;JA;484200;ORGNIV3;leggInn;
+484900;4849;ORGNIV3;Familie- og pensjonsytelser Tromsø;Beholdt;;;JA;484900;ORGNIV3;leggInn;
+070200;5301;ORGNIV3;Holmestrand;Beholdt;;;JA;070200;ORGNIV3;leggInn;
+072200;5302;ORGNIV3;Færder;Beholdt;;;JA;072200;ORGNIV3;leggInn;
+070900;5303;ORGNIV3;Larvik;Beholdt;;;JA;070900;ORGNIV3;leggInn;
+1690100;5700;AGRESSOORGENHET;Trøndelag Administrasjon;Opp til ORGNIV2;R50;ny592m;JA;R50;ORGNIV2;ny592m;
+160300;5701;ORGNIV3;Falkenborg;Beholdt;;;JA;160300;ORGNIV3;leggInn;
+160500;5702;ORGNIV3;Lerkendal;Beholdt;;;JA;160500;ORGNIV3;leggInn;
+162400;5703;ORGNIV3;Indre Fosen;Beholdt;;;JA;162400;ORGNIV3;leggInn;
+1687000;5771;AGRESSOORGENHET;Trøndelag Tiltak;Opp til ORGNIV3;168700;fu609w;JA;168700;ORGNIV3;fu609w;
+1699000;5772;AGRESSOORGENHET;Trøndelag Arbeidslivssenter stab;Opp til ORGNIV3;169900;vy201a;JA;169900;ORGNIV3;vy201a;
+1696100;5773;AGRESSOORGENHET;Trøndelag Rådgivningstjeneste;Opp til ORGNIV3;169610;hy609j;JA;169610;ORGNIV3;hy609j;
+SKATT;9401;ORGNIV0;;Beholdt, MEN;;;JA;SKATT;ORGNIV0;leggInn;
+945100;9451;ORGNIV3;;TODO, se kommentar;;;NEI;945100;;leggInn;"9451 er ""Sentralt frikjøpte tillitsvalgte"". orgEnhet finnes ikke"
+RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;leggInn;"Finnes ikke i NOM, finnes i NORG under navnet ""Riksrevisjonen"". Skal antagelig inn på sikt, men finnes p.t. ikke som orgEnhet. Tas ikke inn i første om gang."
+999900;9999;ORGNIV3;;TODO, se kommentar;;;NEI;999900;;leggInn;"Finnes ikke i NOM, finnes i NORG under navnet ""Andre eksterne"""
+;4292;;Klageinstans Midt-Norge;Manglet i uttrekket;721050;se331z;JA;721050;ORGNIV3;se331z;
+;4295;;Klageinstans Nord;Manglet i uttrekket;721190;me103b;JA;721190;ORGNIV3;me103b;
+;4291;;Klageinstans Oslo/Akershus;Manglet i uttrekket;721030;sa137m;JA;721030;ORGNIV3;sa137m;
+;4294;;Klageinstans Vest;Manglet i uttrekket;721140;tu974w;JA;721140;ORGNIV3;tu974w;
+;4293;;Klageinstans Øst;Manglet i uttrekket;721070;pe947d;JA;721070;ORGNIV3;pe947d;
+;0896;;Vestfold og Telemark Arbeid og helse, avd. Helse;TODO - manglet i uttrekket;0899002;dy270x;JA;0899002;ORGENHET;dy270x;Alle ansatte på 0896 i HRRES_RESSURS var på 0899002, så mappet til den.
+;2980;;;TODO, ITAVD;;;Avklar, ITAVD;0;;leggInn;Snakk med Bjørnar og A. Palerud
+;0293;;NAV Dokumentsenter Øst-Viken;Hentet fra Norg-uttrekk;029300;re831r;JA;029300;ORGNIV4;re831r;Bør nok inn i mappingen. Det finnes folk på 0293 i DVH. Skal antagelig mappes til 029300, men må også ryddes litt under da 0293010 også burde ligge under 029300, men har fått feil parent. Sendt til ØT for opprydding, avventer.
+;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
+;1034;;NAV Hægebostad;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive navIdenter i HRRES_RESSURS. Disse to personene har orgEnhet 103700 som er NAV Lister, som har sin egen remedyEnhet 1037. Mulig 1034 da kan avvikles? Sjekk med RemedyOversikt. Antagelig kan 1034 fjernes siden orgEnheten for Hægebosstad er nedlagt i Unit4, og fysiske arbeidsstedet er 1037.
+;1084;;NAV Intro Kristiansand;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;1193;;NAV Marked Nord-Rogaland;Hentet fra Norg-uttrekk;1194310;ge984x;JA;1194310;ORGENHET;ge984x;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her hører til 1194310 (ge984x). Bør inn i mapping.
+;1194;;NAV Marked Sør-Rogaland;Hentet fra Norg-uttrekk;1194330;bu781r;JA;1194330;ORGENHET;bu781r;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her hører til 1194330 (bu781r). Bør inn i mapping.
+;1195;;NAV IPS Rogaland;Hentet fra Norg-uttrekk;119510;ny183y;JA;119510;ORGNIV3;ny183y;Har aktive navIdenter i HRRES_RESSURS. Alle ansatte her er på 1195100, og siden den ikke har søsken, så plasseres mapping på parent 119510 (ny183y)
+;1287;;NAV Tiltak Vestland;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;2827;;Juridisk avdeling;Hentet fra Norg-uttrekk;8204;fu472x;JA;8204;ORGNIV2;fu472x;Har aktive navIdenter i HRRES_RESSURS. Mapper til flere orgEnheter i DVH, men alle er under Juridisk avd, så plasserer høyere opp, på ORGNIV2 for Juridisk avd, agressoID=8204 (fu472x)
+;2831;;Robotadministrasjon ytelseslinjen;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive roboter i HRRES_RESSURS. Ingen orgEnhet-knytning i DVH
+;2841;;Robotadministrasjon arbeids- og tjenestelinjen;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive roboter i HRRES_RESSURS. Ingen orgEnhet-knytning i DVH
+;2950;;NAV Drift og Utvikling - Administrative tjenester;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4000;;Innsatsteam EU-EØS;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4303;;NAV Id og fordeling;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4540;;NAV Sentralt yrkessykdomskontor;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4702;;NAV Hjelpemiddelsentral Akershus;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4860;;NAV Familie- og pensjonsytelser Farskap;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;4862;;NAV Familie- og pensjonsytelser utland Ålesund;Hentet fra Norg-uttrekk;;;NEI;0;;leggInn;Har ingen aktive navidenter i HRRES_RESSURS. Burde denne vært nedlagt i NORG? Slettet i Remedy
+;2800;;DIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;2971;;RTV IT-TESTSENTER (KTL);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;2972;;RTV IT-TESTSENTER (SENTRALT TESTSTED);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;2973;;RTV IT-TESTSENTER (LITE TK);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;2974;;RTV IT-TESTSENTER (STORT TK);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;2975;;RTV IT-TESTSENTER (OPPLÆRING);Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;3100;;AETAT DIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;3401;;NAV SERVICEKONTOR SPANIA;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;4141;;NAV PASIENTFORMIDLING;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;7338;;IT-TESTSENTER;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;9101;;IBM HAMAR;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;9450;;AVYO;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 3 ansatte i HRRES_RESSURS
+;9500;;SJØFARTSDIREKTORATET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;9501;;TOLL OG AVGIFTSDIREKTORATET;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 2 ansatte i HRRES_RESSURS
+;9503;;ENHETSREGISTERET I BRØNNØYSUND;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;9505;;PENSJONSTRYGDEN FOR SJØMENN;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
+;9506;;NAV EKSTERNE UTEN FØDSELSNUMMER;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 7 ansatte i HRRES_RESSURS
+;9507;;FYLKESMENNENE;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 39 ansatte i HRRES_RESSURS
+;9508;;IKKE-ANSATTE MED IDENT I LØNNSSYSTEMET;Hentet fra Remedy-uttrekk;;;Avventer;0;;leggInn;Finnes ikke i NORG - 1555 ansatte i HRRES_RESSURS.
+;9998;;ARBEIDSDEPARTEMENTET;Hentet fra Remedy-uttrekk;;;NEI;0;;leggInn;Finnes ikke i NORG - Ingen ansatte i HRRES_RESSURS
