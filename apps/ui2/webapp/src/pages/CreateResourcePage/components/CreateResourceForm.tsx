@@ -12,7 +12,6 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { decode } from "js-base64";
-import type { SubmitHandler } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 import { Navigate, useNavigate, useParams } from "react-router";
 import * as yup from "yup";
@@ -129,7 +128,7 @@ function CreateResourceFormInner({
   orgEnheter: OrgEnhet[];
 }) {
   const navigate = useNavigate();
-  const methods = useForm<Partial<FormValues>>({
+  const methods = useForm({
     defaultValues: {
       personident: personident,
       visningsfornavn: capitalizeName(personResult?.navn.fornavn ?? ""),
@@ -170,14 +169,6 @@ function CreateResourceFormInner({
         );
       },
     });
-
-  const submitHandler: SubmitHandler<FormValues> = (validatedValues) => {
-    opprettRessursMutation({
-      variables: {
-        request: validatedValues,
-      },
-    });
-  };
 
   return (
     <FormProvider {...methods}>
@@ -265,7 +256,11 @@ function CreateResourceFormInner({
             formValues={watch()}
             loading={loading}
             onConfirm={handleSubmit((validValues) =>
-              submitHandler(validValues as FormValues)
+              opprettRessursMutation({
+                variables: {
+                  request: validValues,
+                },
+              })
             )}
             orgEnheter={orgEnheter}
           />
