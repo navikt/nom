@@ -69,11 +69,11 @@ public class RessursStillingLoader {
         LocalDateTime start = LocalDateTime.now();
         val jsonRessursStillinger = dvhExchange(appProperties.proxy().ressursStillingerPath());
         val listField = jsonRessursStillinger.fields().next();
-        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), (Integer)listField.getValue().size());
+        log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
         List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
             .map(DvhRessursStilling::new)
             .collect(Collectors.toList());
-        log.info("Lastet {} ressursStillinger. Tok {}", (Integer)ressursStillinger.size(), durationAsH24(start));
+        log.info("Lastet {} ressursStillinger. Tok {}", ressursStillinger.size(), durationAsH24(start));
         return ressursStillinger;
     }
 

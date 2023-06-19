@@ -43,8 +43,9 @@ public class RessursStillingLoadStatus {
 
         StringBuffer strBuf = new StringBuffer();
         strBuf.append(currentLoad.getLoadTiming());
+        strBuf.append("\n");
         errorsToReport.forEach( e -> {
-            strBuf.append("\n\t");
+            strBuf.append("\n\n");
             strBuf.append(e.message);
         });
         return strBuf.toString();
@@ -60,7 +61,7 @@ public class RessursStillingLoadStatus {
         }
 
         public String getLoadTiming() {
-            return "Started - ended: %s - %s\nDuration%s".formatted(started, ended, durationAsH24(started, ended));
+            return "Started - ended: %s - %s\nDuration %s".formatted(started, ended, durationAsH24(started, ended));
         }
 
         private String durationAsH24(LocalDateTime start, LocalDateTime end) {
