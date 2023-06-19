@@ -46,6 +46,8 @@ public class RessursStillingProcessorTest {
     OrgtilknytningStateService orgtilknytningStateService;
     @Mock
     IRessursService ressursService;
+    @Mock
+    RessursStillingLoadStatus ressursStillingLoadStatus;
     RessursStillingProcessor ressursStillingProcessor;
     OrgenhetService orgenhetService;
     OrgEnhetStateRepository orgEnhetStateRepository;
@@ -69,7 +71,9 @@ public class RessursStillingProcessorTest {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
         orgenhetService = new OrgenhetService(orgEnhetStateRepository);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService, ressursService);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService,
+            ressursStillingLoadStatus,
+            ressursService);
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_X");
 

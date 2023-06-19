@@ -16,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -38,16 +39,18 @@ public class RessursStillingProcessor {
     private final IOrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final IRessursService ressursService;
     private ProcessCmdResult processCmdResult;
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
 
     public RessursStillingProcessor(IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
-                                    IRessursService ressursService
+                                    RessursStillingLoadStatus ressursStillingLoadStatus, IRessursService ressursService
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
+        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursService = ressursService;
     }
 
@@ -80,7 +83,9 @@ public class RessursStillingProcessor {
         // Enn sålenge skal vi ikke behandle eksterne
         RessursState ressurs = ressursService.findByNavident(navident).orElse(null);
         if (ressurs == null) {
-            log.error("Navident {} finnes ikke. Behandler ikke DVH ressursStillinger", navident);
+            String msg = "Navident %s finnes ikke. Behandler ikke DVH ressursStillinger\n%s".formatted(navident, stillingPerioder);
+            log.error(msg);
+            ressursStillingLoadStatus.addError(navident, msg);
         } else if (ressurs.sektor() == Sektor.EKSTERN) {
             log.debug("Navident {} er ekstern. Enn sålenge behandler vi ikke disse", navident);
             return;
@@ -101,7 +106,9 @@ public class RessursStillingProcessor {
                         // Historikken stemmer - move on
                         behandledeOrgtilknytningerFids.add(matcherAgressoId.stream().findFirst().get().fid());
                     } else if (matcherAgressoId.size() > 0) {
-                        log.warn("Navident {} har historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
+                        String msg ="Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(navident, stillingPeriode, matcherAgressoId);
+                        log.warn(msg);
+                        ressursStillingLoadStatus.addError(navident, msg);
                         // Burde ikke vært her - men vi markerer alle disse tidligere orgtilknytningene som behandlet
                         behandledeOrgtilknytningerFids.addAll(matcherAgressoId.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                     } else {
@@ -120,7 +127,9 @@ public class RessursStillingProcessor {
                                 log.debug("Navident {} har historisk stillingPeriode fra DVH ({}) matcher ingen orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
                             } else if (matcherStartDatoOgAgressoId.size() > 1) {
                                 // Matcher flere i NOM - dette må være feil!....
-                                log.warn("Navident {} har historisk stillingPeriode fra DVH ({}) matcher flere orgtilknytninger {}", navident, stillingPeriode, matcherAgressoId);
+                                String msg = "Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(navident, stillingPeriode, matcherAgressoId);
+                                log.warn(msg);
+                                ressursStillingLoadStatus.addError(navident, msg);
                                 // Burde ikke vært her - men vi markerer alle disse tidligere orgtilknytningene som behandlet
                                 behandledeOrgtilknytningerFids.addAll(matcherStartDatoOgAgressoId.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                             } else {
@@ -147,22 +156,18 @@ public class RessursStillingProcessor {
                 boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
 
                 if (matcherAgressoId.size() > 1) {
-                    log.error(
-                        "Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}",
-                        navident,
-                        stillingPeriode,
-                        matcherAgressoId
-                    );
+                    String msg = "Navident %s har aktiv stillingPeriode i DVH\n  %s\n som matcher flere aktive orgtilknytninger i state\n  %s"
+                        .formatted(navident,stillingPeriode,matcherAgressoId);
+                    log.error(msg);
+                    ressursStillingLoadStatus.addError(navident, msg);
                     matcherAgressoId = fjernDuplikater(matcherAgressoId);
                 }
                 if (matcherAgressoId.size() > 1) {
-                    log.error(
-                        "Selv etter forsøk på å fjerne duplikat tilknytninger så har Navident {} har stillingPeriode i DVH\n  {}\n som matcher flere aktive orgtilknytninger i state\n  {}",
-                        navident,
-                        stillingPeriode,
-                        matcherAgressoId
-                    );
+                    String msg = "Selv etter forsøk på å fjerne duplikat tilknytninger så har Navident %s har stillingPeriode i DVH\n  %s\n som matcher flere aktive orgtilknytninger i state\n  %s"
+                        .formatted(navident,stillingPeriode,matcherAgressoId);
+                    log.error(msg);
                     log.error("Dette kan ikke behandles (det er forsøkt i fjernDuplikater over)");
+                    ressursStillingLoadStatus.addError(navident, msg);
                 } else if (matcherAgressoId.size() == 0) {
                     log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som ikke finnes i orgtilknytning state. Behandler denne som ny.", navident, stillingPeriode);
 
@@ -210,8 +215,11 @@ public class RessursStillingProcessor {
                     if (matcherIdOgGyldigFom.size() > 0) {
                         if (matcherIdOgGyldigFom.size() > 1) {
                             // Vi har flere orgtilknytninger i state som har samme fra og med dato og agressoId som stillignPeriode.
-                            log.error("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigFom for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgGyldigFom);
+                            String msg = "Navident %s har fremtidig stillingPeriode i DVH\n  %s\n som matcher enhetId og GyldigFom for flere fremtidige orgtilknytninger i state\n  %s\nDette kan ikke behandles"
+                                .formatted(navident, stillingPeriode, matcherIdOgGyldigFom);
+                            log.error(msg);
                             // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
+                            ressursStillingLoadStatus.addError(navident, msg);
                         } else {
                             log.debug("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig fra dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                             OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
@@ -227,9 +235,12 @@ public class RessursStillingProcessor {
                         var matcherIdOgGyldigTom =  matcherAgressoId.stream().filter( ot -> ot.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())).toList();
                         if (matcherIdOgGyldigTom.size() > 0) {
                             if (matcherIdOgGyldigTom.size() > 1) {
+                                String msg = "Navident %s har fremtidig stillingPeriode i DVH\n  %s\n som matcher enhetId og GyldigTom flere fremtidige orgtilknytninger i state\n  %s\nDette kan ikke behandles"
+                                    .formatted(navident, stillingPeriode, matcherIdOgGyldigTom);
                                 // Vi har flere orgtilknytninger i state som har samme til og med dato og agressoId som stillignPeriode.
-                                log.error("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og GyldigTom flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgGyldigTom);
+                                log.error(msg);
                                 // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
+                                ressursStillingLoadStatus.addError(navident, msg);
                             } else {
                                 log.debug("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher en fremtidig orgtilknytning i state\n  {}\n Sjekker denne for gyldig til dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                                 OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
@@ -255,7 +266,9 @@ public class RessursStillingProcessor {
                     }
                 } else if (matcherIdOgPeriode.size() > 1) {
                     // Vi har flere orgtilknytninger i state som har samme dato periode og agressoId som stillingPeriode.
-                    log.warn("Navident {} har fremtidig stillingPeriode i DVH\n  {}\n som matcher enhetId og periode for flere fremtidige orgtilknytninger i state\n  {}\nDette kan ikke behandles", navident, stillingPeriode, matcherIdOgPeriode);
+                    String msg ="Navident %s har fremtidig stillingPeriode i DVH\n  %s\n som matcher enhetId og periode for flere fremtidige orgtilknytninger i state\n  %s\nDette kan ikke behandles".formatted(navident, stillingPeriode, matcherIdOgPeriode);
+                    log.warn(msg);
+                    ressursStillingLoadStatus.addError(navident, msg);
                     // Har ingen behandling av denne stillingPerioden, men vi sier at orgtilknytningene er 'behandlet' (så de ikke slettes)
                 } else {
                     // Vi har en presis match på stillingPeriode og Orgtilknytning state

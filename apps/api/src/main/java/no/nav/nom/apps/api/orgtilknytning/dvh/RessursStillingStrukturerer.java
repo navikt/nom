@@ -27,11 +27,13 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 @Slf4j
 public class RessursStillingStrukturerer {
     private final IOrgenhetService orgenhetService;
+    private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final Environment environment;
     private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = -1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
 
-    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, Environment environment) {
+    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus, Environment environment) {
         this.orgenhetService = orgenhetService;
+        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.environment = environment;
     }
 
@@ -94,7 +96,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     // Her er det overlapp i datoer på samme stillingAgressoId, stillingOrgenhetNavn og stillingRessursAgressoId
                     // Dette håndterer vi ikke per nå
-                    log.debug("NAvident {} har overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", navident, stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
+                    log.debug("Navident {} har overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", navident, stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
                 }
             }
             // Siste RessursStilling er slått sammen
@@ -136,7 +138,9 @@ public class RessursStillingStrukturerer {
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
                         log.debug("StillingPeriode for navident {} er ikke presis nok på historisk stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", navident, stillingPeriode);
                     } else {
-                        log.warn("StillingPeriode for navident {} er ikke presis nok på aktiv/fremtidig stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  {}", navident, stillingPeriode);
+                        String msg = "StillingPeriode for navident %s er ikke presis nok på aktiv/fremtidig stilling/ressurs sin agressoId til å kunne finne NOM enhet denne tilhører. Den vil ikke behandles:\n  %s".formatted(navident, stillingPeriode);
+                        ressursStillingLoadStatus.addError(navident, msg);
+                        log.warn(msg);
                     }
                 }
 
@@ -145,7 +149,9 @@ public class RessursStillingStrukturerer {
                     if (isHistoricPeriod(stillingPeriode)) { // Ikke så farlig
                         log.debug("Klarer ikke finne NOM orgenhet for historisk stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}", navident, stillingPeriode);
                     } else {
-                        log.warn("Klarer ikke finne NOM orgenhet for aktiv/fremtidig stillingPeriode/agressoId for navident {}. Den vil ikke behandles:\n\t{}", navident, stillingPeriode);
+                        String msg = "Klarer ikke finne NOM orgenhet for aktiv/fremtidig stillingPeriode/agressoId for navident %s. Den vil ikke behandles:\n\t%s".formatted(navident, stillingPeriode);
+                        ressursStillingLoadStatus.addError(navident, msg);
+                        log.warn(msg);
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
@@ -184,7 +190,9 @@ public class RessursStillingStrukturerer {
                             if (nextGyldigFom.get().isAfter(oe.getGyldigTom().orElse(NO_END_DATE).minusDays(1))) {
                                 // Har truffet snag med match på flere enheter som har overlapp i periode
                                 // Vi må baile ut - Kan ikke matche på flere enheter. Orgenheter må korrigeres
-                                log.error("Har funnet matchende orgenheter\n{} med overlappende perioder for stillingperiode for navident {} \n{}.\nDette kan ikke behandles.", navident, nomEnheterString, stillingPeriode);
+                                String msg = "Har funnet matchende orgenheter\n%s med overlappende perioder for stillingperiode for navident %s \n%s.\nDette kan ikke behandles.".formatted(navident, nomEnheterString, stillingPeriode);
+                                ressursStillingLoadStatus.addError(navident, msg);
+                                log.error(msg);
                             } else {
                                 nyeStillingPerioder.add(new StillingPeriode(
                                     stillingPeriode.stilling(),

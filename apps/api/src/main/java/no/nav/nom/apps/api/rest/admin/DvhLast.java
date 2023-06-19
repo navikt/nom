@@ -9,11 +9,13 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoadStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Admin for å manuelt trigge dvh Last")
@@ -26,11 +28,16 @@ public class DvhLast {
     private final DvhDataLoader dvhDataLoader;
     private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
+    private final RessursStillingLoadStatus ressursStillingLoadStatus;
 
-    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver) {
+
+    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver,
+                   RessursStillingLoadStatus ressursStillingLoadStatus
+    ) {
         this.dvhRestConsumer = dvhRestConsumer;
         this.dvhDataLoader = dvhDataLoader;
         this.orgEnhetTypeAndNivaaResolver = orgEnhetTypeAndNivaaResolver;
+        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
     }
 
     @Operation(
@@ -92,6 +99,18 @@ public class DvhLast {
     public void resolveOrgEnhetsTyper() {
         triggerKoblingerOgLederLast();
         triggerOrgEnhetsTypeLast();
+    }
+
+    @Operation(
+        description = "Få status på siste Last av orgtilknytninger",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/orgtilknytningerLastStatus")
+    public String orgtilknytningerLastStatus(@RequestParam(required = false) String navident) {
+        return ressursStillingLoadStatus.report(navident);
     }
 
     @Async

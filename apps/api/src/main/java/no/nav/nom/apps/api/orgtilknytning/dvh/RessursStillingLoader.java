@@ -7,7 +7,6 @@ import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +28,7 @@ public class RessursStillingLoader {
     private final TokenRepository tokenRepository;
     private final RessursStillingStrukturerer ressursStillingStrukturerer;
     private final RessursStillingProcessor ressursStillingProcessor;
+    private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final RestTemplate restTemplate;
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
@@ -37,12 +37,13 @@ public class RessursStillingLoader {
     public RessursStillingLoader(TokenRepository tokenRepository,
                                  RessursStillingStrukturerer ressursStillingStrukturerer,
                                  RessursStillingProcessor ressursStillingProcessor,
-                                 RestTemplate restTemplate, AppProperties appProperties,
+                                 RessursStillingLoadStatus ressursStillingLoadStatus, RestTemplate restTemplate, AppProperties appProperties,
                                  @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
                                  Unleash unleash) {
         this.tokenRepository = tokenRepository;
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
+        this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.restTemplate = restTemplate;
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
@@ -51,13 +52,15 @@ public class RessursStillingLoader {
 
     public void loadAndProcess() {
         if (unleash.isEnabled(UNLEASH_LAST_NY_ORGTILKNYTNING)) {
+            ressursStillingLoadStatus.startNewLoad();
+
             List<DvhRessursStilling> ressursStillinger = load();
 
             Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.StrukturerStilingPerioderPerNavident(ressursStillinger);
 
             ressursStillingProcessor.process(stillingPerioderPerNavident);
 
-            // TODO: Etter last - vent litt - les state og sjekk sanity?
+            ressursStillingLoadStatus.endLoad();
         }
     }
 

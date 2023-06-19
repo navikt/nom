@@ -42,6 +42,8 @@ class RessursStillingProcessorTestUtilityMetoder {
     OrgenhetService orgenhetService;
     @Mock
     IRessursService ressursService;
+    @Mock
+    RessursStillingLoadStatus ressursStillingLoadStatus;
     RessursStillingProcessor ressursStillingProcessor;
 
     @Captor
@@ -58,7 +60,7 @@ class RessursStillingProcessorTestUtilityMetoder {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursService);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursService);
     }
 
     @Test
