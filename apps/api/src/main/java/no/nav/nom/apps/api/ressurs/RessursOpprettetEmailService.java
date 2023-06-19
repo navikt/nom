@@ -50,6 +50,8 @@ public class RessursOpprettetEmailService {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
+        log.info("Sender epost for å varsle om ressurs opprettelse {}, {}", opprettetRessurs, recipientList);
+
         if(opprettetRessurs.isPresent() && !recipientList.isEmpty()){
             composeEmail(opprettetRessurs.get(), recipientList);
         } else {
