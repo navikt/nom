@@ -5,6 +5,7 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
+import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -51,18 +52,34 @@ class KafkaRessursListenerTest {
     public void basicMessageUnit4AllOk() throws Exception{
         String personident = "04129980932";
 
-        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2"));
+        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2", null));
 
         verify(unit4Client, times(1))
                 .createRessurs(
-                    argThat((Unit4RessursDto dto) -> dto.getPersonalInformation().getNationalIdentityNo().equals(personident))
-                );
+                    argThat((Unit4RessursDto dto) -> dto.getPersonalInformation().getNationalIdentityNo().equals(personident)
+                        && dto.getRelatedValues().stream().filter(r -> r.getRelationId().equals("C8")).allMatch(r -> r.getRelatedValue().equals("FLON"))
+
+                ));
+    }
+
+    @Test
+    public void shouldSetMidlertidigAnsettelsesForm() throws Exception{
+        String personident = "04129980932";
+
+        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2", AnsettelsesType.MIDLERTIDIG));
+
+        verify(unit4Client, times(1))
+            .createRessurs(
+                argThat((Unit4RessursDto dto) -> dto.getRelatedValues()
+                    .stream().filter(r -> r.getRelationId().equals("C8")).allMatch(r -> r.getRelatedValue().equals("MIDL"))
+
+                ));
     }
 
     @Test
     public void basicMessageUnit4AllOk_NOT_CALLED() {
         String personident = "04129980932";
-        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "NOT_OK"));
+        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "NOT_OK", null));
 
         verifyNoInteractions(unit4Client);
     }
@@ -75,7 +92,7 @@ class KafkaRessursListenerTest {
                 .when(unit4Client)
                 .createRessurs(any());
 
-        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2"));
+        kafkaUtils.send("key1", createOpprettRessursEvent(personident, "dev-gcp:org:nom-ui2", null));
 
         assertTrue(output.getOut().contains("Ressurs finnes i Unit4."));
     }
@@ -86,11 +103,11 @@ class KafkaRessursListenerTest {
                 .when(unit4Client)
                 .createRessurs(any());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2")));
+        Exception exception = assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null)));
         assertTrue(output.getOut().contains("Bailer ut"));
     }
 
-    private RessursEvent createOpprettRessursEvent(String personident, String initiatedFrom){
+    private RessursEvent createOpprettRessursEvent(String personident, String initiatedFrom, AnsettelsesType ansettelsesType){
         return new RessursOpprettetEventV1(
                 "fid",
                 new RessursOpprettetEventV1.RessursOpprettetEventData(
@@ -117,7 +134,8 @@ class KafkaRessursListenerTest {
                         )),
                         Optional.of(LocalDate.now()),
                         Optional.of(LocalDate.now()),
-                        Optional.of("0101001")
+                        Optional.of("0101001"),
+                        Optional.ofNullable(ansettelsesType)
                 )
         );
     }

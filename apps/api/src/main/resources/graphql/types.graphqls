@@ -115,6 +115,11 @@ enum Sektor {
     EKSTERN
 }
 
+enum AnsettelsesType {
+    FAST,
+    MIDLERTIDIG
+}
+
 enum NomNivaa {
     LINJEENHET
     DRIFTSENHET

@@ -165,7 +165,8 @@ public class RessursResolver {
                 Optional.ofNullable(request.getOrgEnhetId())
                     .flatMap(orgenhetService::getById)
                     .map(IOrgenhet::getAgressoId)
-                    .orElse(null) // TODO: Validate not null in RessursCommandService
+                    .orElse(null), // TODO: Validate not null in RessursCommandService
+            request.getAnsettelsesType()
         );
 
         return ressursCommadService.createRessursSync(opprettRessursCommand);

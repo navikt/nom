@@ -1,6 +1,7 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -29,7 +30,8 @@ public class RessursOpprettetEventV1 extends RessursEvent {
             Optional<FolkeregistrertNavn> folkeregistrertNavn,
             Optional<LocalDate> foedselsdato,
             Optional<LocalDate> startdato,
-            Optional<String> orgEnhet
+            Optional<String> orgEnhet,
+            Optional<AnsettelsesType> ansettelsesType
     ) implements Data {
         public record FolkeregistrertNavn(
                 String fornavn,

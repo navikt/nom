@@ -10,6 +10,7 @@ input OpprettRessursRequest {
     visningsmellomnavn: String
     visningsetternavn: String!
     sektor: Sektor!
+    ansettelsesType: AnsettelsesType!
     orgEnhetId: String
     startDato: Date
 }

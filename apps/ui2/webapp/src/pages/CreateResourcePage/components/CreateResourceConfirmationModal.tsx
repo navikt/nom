@@ -8,7 +8,10 @@ import type { OrgEnhet } from "~/api/generated/graphql_generated";
 import { DATE_FORMATS } from "~/utils";
 
 import type { FormValues } from "./CreateResourceForm";
-import { SektorNameMapping } from "./CreateResourceForm";
+import {
+  AnsettelsesTypeNameMapping,
+  SektorNameMapping,
+} from "./CreateResourceForm";
 
 export function CreateResourceConfirmationModal({
   formValues,
@@ -29,6 +32,7 @@ export function CreateResourceConfirmationModal({
     visningsetternavn,
     visningsmellomnavn,
     sektor,
+    ansettelsesType,
     startDato,
     orgEnhetId,
   } = formValues;
@@ -77,6 +81,10 @@ export function CreateResourceConfirmationModal({
             <b>{formattedName}</b>
             <span>Sektor:</span>
             <b>{sektor && SektorNameMapping[sektor]}</b>
+            <span>Ansettelsestype:</span>
+            <b>
+              {ansettelsesType && AnsettelsesTypeNameMapping[ansettelsesType]}
+            </b>
             <span>Org enhet:</span>
             <b>{selectOrgEnhet?.navn}</b>
             <span>Første arbeidsdag:</span>

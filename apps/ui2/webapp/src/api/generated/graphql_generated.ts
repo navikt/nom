@@ -6,19 +6,26 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string;
-  String: string;
-  Boolean: boolean;
-  Int: number;
-  Float: number;
-  Date: any;
-  DateTime: any;
-  JSON: any;
+  ID: { input: string | number; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+  Date: { input: any; output: any; }
+  DateTime: { input: any; output: any; }
+  JSON: { input: any; output: any; }
 };
+
+export enum AnsettelsesType {
+  Fast = 'FAST',
+  Midlertidig = 'MIDLERTIDIG'
+}
 
 export type FolkeregisterPerson = {
   __typename?: 'FolkeregisterPerson';
@@ -33,16 +40,16 @@ export enum GyldigTomSelection {
 
 export type Kode = {
   __typename?: 'Kode';
-  gyldigFom?: Maybe<Scalars['Date']>;
-  gyldigTom?: Maybe<Scalars['Date']>;
-  kode: Scalars['String'];
-  navn: Scalars['String'];
+  gyldigFom?: Maybe<Scalars['Date']['output']>;
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
+  kode: Scalars['String']['output'];
+  navn: Scalars['String']['output'];
 };
 
 export type LederOrgEnhet = {
   __typename?: 'LederOrgEnhet';
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
   orgEnhet: OrgEnhet;
   /** @deprecated organisasjonsenhet er erstattet med orgEnhet */
   organisasjonsenhet: OrgEnhet;
@@ -60,9 +67,9 @@ export type MutationOpprettRessursArgs = {
 
 export type Navn = {
   __typename?: 'Navn';
-  etternavn: Scalars['String'];
-  fornavn: Scalars['String'];
-  mellomnavn?: Maybe<Scalars['String']>;
+  etternavn: Scalars['String']['output'];
+  fornavn: Scalars['String']['output'];
+  mellomnavn?: Maybe<Scalars['String']['output']>;
 };
 
 export enum NomNivaa {
@@ -73,40 +80,41 @@ export enum NomNivaa {
 
 /**  Requests */
 export type OpprettRessursRequest = {
-  orgEnhetId?: InputMaybe<Scalars['String']>;
-  personident: Scalars['String'];
+  ansettelsesType: AnsettelsesType;
+  orgEnhetId?: InputMaybe<Scalars['String']['input']>;
+  personident: Scalars['String']['input'];
   sektor: Sektor;
-  startDato?: InputMaybe<Scalars['Date']>;
-  visningsetternavn: Scalars['String'];
-  visningsfornavn: Scalars['String'];
-  visningsmellomnavn?: InputMaybe<Scalars['String']>;
+  startDato?: InputMaybe<Scalars['Date']['input']>;
+  visningsetternavn: Scalars['String']['input'];
+  visningsfornavn: Scalars['String']['input'];
+  visningsmellomnavn?: InputMaybe<Scalars['String']['input']>;
 };
 
 /**  Responses */
 export type OpprettRessursResponse = {
   __typename?: 'OpprettRessursResponse';
-  navident: Scalars['String'];
-  personident: Scalars['String'];
+  navident: Scalars['String']['output'];
+  personident: Scalars['String']['output'];
   sektor: Sektor;
-  visningsetternavn: Scalars['String'];
-  visningsfornavn: Scalars['String'];
+  visningsetternavn: Scalars['String']['output'];
+  visningsfornavn: Scalars['String']['output'];
 };
 
 export type OrgEnhet = {
   __typename?: 'OrgEnhet';
-  agressoId: Scalars['ID'];
-  agressoOrgenhetType?: Maybe<Scalars['String']>;
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
-  id: Scalars['ID'];
+  agressoId: Scalars['ID']['output'];
+  agressoOrgenhetType?: Maybe<Scalars['String']['output']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
+  id: Scalars['ID']['output'];
   koblinger: Array<OrgEnhetsKobling>;
   leder: Array<OrgEnhetsLeder>;
-  navn: Scalars['String'];
+  navn: Scalars['String']['output'];
   nomNivaa?: Maybe<NomNivaa>;
   /** @deprecated orgEnhetsKategori er erstattet med nomNivaa */
   orgEnhetsKategori?: Maybe<NomNivaa>;
   orgEnhetsType?: Maybe<OrgEnhetsType>;
-  orgNiv: Scalars['String'];
+  orgNiv: Scalars['String']['output'];
   organiseringer: Array<Organisering>;
   type?: Maybe<Kode>;
 };
@@ -119,19 +127,19 @@ export type OrgEnhetOrganiseringerArgs = {
 export type OrgEnhetResult = {
   __typename?: 'OrgEnhetResult';
   code: ResultCode;
-  id: Scalars['String'];
-  nomId: Scalars['String'];
+  id: Scalars['String']['output'];
+  nomId: Scalars['String']['output'];
   orgEnhet?: Maybe<OrgEnhet>;
-  orgNiv?: Maybe<Scalars['String']>;
+  orgNiv?: Maybe<Scalars['String']['output']>;
   /** @deprecated organisasjonsenhet er erstattet med orgEnhet */
   organisasjonsenhet?: Maybe<OrgEnhet>;
 };
 
 export type OrgEnhetSearch = {
-  agressoId?: InputMaybe<Scalars['String']>;
-  id?: InputMaybe<Scalars['String']>;
-  navn?: InputMaybe<Scalars['String']>;
-  orgNiv?: InputMaybe<Scalars['String']>;
+  agressoId?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  navn?: InputMaybe<Scalars['String']['input']>;
+  orgNiv?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OrgEnhetSearchFilter = {
@@ -141,16 +149,16 @@ export type OrgEnhetSearchFilter = {
 };
 
 export type OrgEnheterSearch = {
-  agressoIder?: InputMaybe<Array<Scalars['String']>>;
-  ider?: InputMaybe<Array<Scalars['String']>>;
+  agressoIder?: InputMaybe<Array<Scalars['String']['input']>>;
+  ider?: InputMaybe<Array<Scalars['String']['input']>>;
   nomNivaa?: InputMaybe<Array<NomNivaa>>;
-  orgNiv?: InputMaybe<Scalars['String']>;
+  orgNiv?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type OrgEnhetsKobling = {
   __typename?: 'OrgEnhetsKobling';
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
   ressurs: Ressurs;
 };
 
@@ -166,8 +174,8 @@ export enum OrgEnhetsType {
 
 export type Organisering = {
   __typename?: 'Organisering';
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
   orgEnhet: OrgEnhet;
   /** @deprecated organisasjonsenhet er erstattet med orgEnhet */
   organisasjonsenhet: OrgEnhet;
@@ -184,17 +192,17 @@ export type PersonResult = {
   __typename?: 'PersonResult';
   folkeregisterPerson?: Maybe<FolkeregisterPerson>;
   /** @deprecated navIdent er erstattet med navident */
-  navIdent?: Maybe<Scalars['String']>;
-  navident?: Maybe<Scalars['String']>;
+  navIdent?: Maybe<Scalars['String']['output']>;
+  navident?: Maybe<Scalars['String']['output']>;
   /** @deprecated person er erstattet med folkeregisterPerson */
   person?: Maybe<FolkeregisterPerson>;
   /** @deprecated personIdent er erstattet med personident */
-  personIdent: Scalars['String'];
-  personident: Scalars['String'];
+  personIdent: Scalars['String']['output'];
+  personident: Scalars['String']['output'];
 };
 
 export type PersonSearch = {
-  personident?: InputMaybe<Scalars['String']>;
+  personident?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Query = {
@@ -252,62 +260,62 @@ export type QueryRessurserArgs = {
 export type QuerySearchArgs = {
   orgEnhetFilter?: InputMaybe<OrgEnhetSearchFilter>;
   ressursFilter?: InputMaybe<RessursSearchFilter>;
-  term: Scalars['String'];
+  term: Scalars['String']['input'];
 };
 
 
 export type QuerySearchOrgEnhetArgs = {
   filter?: InputMaybe<OrgEnhetSearchFilter>;
-  term: Scalars['String'];
+  term: Scalars['String']['input'];
 };
 
 
 export type QuerySearchRessursArgs = {
   filter?: InputMaybe<RessursSearchFilter>;
-  term: Scalars['String'];
+  term: Scalars['String']['input'];
 };
 
 export type Ressurs = {
   __typename?: 'Ressurs';
-  epost?: Maybe<Scalars['String']>;
-  etternavn?: Maybe<Scalars['String']>;
+  epost?: Maybe<Scalars['String']['output']>;
+  etternavn?: Maybe<Scalars['String']['output']>;
   folkeregisterPerson?: Maybe<FolkeregisterPerson>;
-  fornavn?: Maybe<Scalars['String']>;
+  fornavn?: Maybe<Scalars['String']['output']>;
   /** @deprecated koblinger er erstatet med orgTilknytning */
   koblinger: Array<RessursOrgTilknytning>;
   lederFor: Array<LederOrgEnhet>;
   ledere: Array<RessursLeder>;
   /** @deprecated navIdent er erstattet med navident */
-  navIdent: Scalars['String'];
-  navident: Scalars['String'];
+  navIdent: Scalars['String']['output'];
+  navident: Scalars['String']['output'];
   orgTilknytning: Array<RessursOrgTilknytning>;
   /** @deprecated person er erstatet med folkeregisterPerson */
   person?: Maybe<FolkeregisterPerson>;
   /** @deprecated personIdent er erstattet med personident */
-  personIdent: Scalars['String'];
-  personident: Scalars['String'];
+  personIdent: Scalars['String']['output'];
+  personident: Scalars['String']['output'];
   /** @deprecated ressurstype er erstatet med sektor */
   ressurstype: Array<Sektor>;
   sektor: Array<Sektor>;
   /** @deprecated Dårlig datakvalitet, kontakt #nom for mer informasjon før bruk */
-  sluttdato?: Maybe<Scalars['Date']>;
+  sluttdato?: Maybe<Scalars['Date']['output']>;
   telefon: Array<Telefon>;
   /** @deprecated visningsNavn er erstattet med visningsnavn */
-  visningsNavn?: Maybe<Scalars['String']>;
-  visningsnavn?: Maybe<Scalars['String']>;
+  visningsNavn?: Maybe<Scalars['String']['output']>;
+  visningsnavn?: Maybe<Scalars['String']['output']>;
 };
 
 export type RessursLeder = {
   __typename?: 'RessursLeder';
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
   ressurs: Ressurs;
 };
 
 export type RessursOrgTilknytning = {
   __typename?: 'RessursOrgTilknytning';
-  gyldigFom: Scalars['Date'];
-  gyldigTom?: Maybe<Scalars['Date']>;
+  gyldigFom: Scalars['Date']['output'];
+  gyldigTom?: Maybe<Scalars['Date']['output']>;
   orgEnhet: OrgEnhet;
   /** @deprecated organisasjonsenhet er erstattet med orgEnhet */
   organisasjonsenhet: OrgEnhet;
@@ -316,13 +324,13 @@ export type RessursOrgTilknytning = {
 export type RessursResult = {
   __typename?: 'RessursResult';
   code: ResultCode;
-  id: Scalars['String'];
+  id: Scalars['String']['output'];
   ressurs?: Maybe<Ressurs>;
 };
 
 export type RessursSearch = {
-  navident?: InputMaybe<Scalars['String']>;
-  personident?: InputMaybe<Scalars['String']>;
+  navident?: InputMaybe<Scalars['String']['input']>;
+  personident?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type RessursSearchFilter = {
@@ -332,8 +340,8 @@ export type RessursSearchFilter = {
 };
 
 export type RessurserSearch = {
-  navidenter?: InputMaybe<Array<Scalars['String']>>;
-  personidenter?: InputMaybe<Array<Scalars['String']>>;
+  navidenter?: InputMaybe<Array<Scalars['String']['input']>>;
+  personidenter?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export enum ResultCode {
@@ -381,8 +389,8 @@ export enum StatusSelection {
 
 export type Telefon = {
   __typename?: 'Telefon';
-  beskrivelse?: Maybe<Scalars['String']>;
-  nummer: Scalars['String'];
+  beskrivelse?: Maybe<Scalars['String']['output']>;
+  nummer: Scalars['String']['output'];
   type: TelefonType;
 };
 
@@ -405,7 +413,7 @@ export type HentAlleRessurserQueryVariables = Exact<{ [key: string]: never; }>;
 export type HentAlleRessurserQuery = { __typename?: 'Query', ressurser: Array<{ __typename?: 'RessursResult', ressurs?: { __typename?: 'Ressurs', navident: string } | null }> };
 
 export type HentRessursMedNavidentQueryVariables = Exact<{
-  navident?: InputMaybe<Scalars['String']>;
+  navident?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -417,14 +425,14 @@ export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: 
 export type HentAlleOrganisasjonsenheterQuery = { __typename?: 'Query', organisasjonsenheter: Array<{ __typename?: 'OrgEnhetResult', id: string, code: ResultCode, organisasjonsenhet?: { __typename?: 'OrgEnhet', navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, personident: string } }> } | null }> };
 
 export type HentPersonQueryVariables = Exact<{
-  personident: Scalars['String'];
+  personident: Scalars['String']['input'];
 }>;
 
 
 export type HentPersonQuery = { __typename?: 'Query', person?: { __typename?: 'PersonResult', navident?: string | null, personident: string, person?: { __typename?: 'FolkeregisterPerson', navn: { __typename?: 'Navn', fornavn: string, mellomnavn?: string | null, etternavn: string } } | null } | null };
 
 export type SearchRessursQueryVariables = Exact<{
-  term: Scalars['String'];
+  term: Scalars['String']['input'];
 }>;
 
 
@@ -441,28 +449,28 @@ export type RessursWithLederAndKoblingFragment = { __typename?: 'Ressurs', navid
 export type OrgenhetStandaloneWithLederFragment = { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> };
 
 export type HentHierarkiQueryVariables = Exact<{
-  id: Scalars['String'];
+  id: Scalars['String']['input'];
 }>;
 
 
 export type HentHierarkiQuery = { __typename?: 'Query', enhet?: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, type?: { __typename?: 'Kode', kode: string } | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, ressursKoblinger?: { __typename?: 'OrgEnhet', koblinger: Array<{ __typename?: 'OrgEnhetsKobling', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, enhetsKoblinger?: { __typename?: 'OrgEnhet', underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }> } | null };
 
 export type HentLederFornavidentQueryVariables = Exact<{
-  navident?: InputMaybe<Scalars['String']>;
+  navident?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type HentLederFornavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }> } | null };
 
 export type HentRessursQueryVariables = Exact<{
-  navident?: InputMaybe<Scalars['String']>;
+  navident?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
 export type HentRessursQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', sektor: Array<Sektor>, navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } | null };
 
 export type SearchOrgenheterQueryVariables = Exact<{
-  term: Scalars['String'];
+  term: Scalars['String']['input'];
   filter?: InputMaybe<OrgEnhetSearchFilter>;
 }>;
 
@@ -537,24 +545,21 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 /** Mapping of union types */
-export type ResolversUnionTypes = {
+export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
   SearchResult: ( OrgEnhet ) | ( Ressurs );
 };
 
-/** Mapping of union parent types */
-export type ResolversUnionParentTypes = {
-  SearchResult: ( OrgEnhet ) | ( Ressurs );
-};
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  Date: ResolverTypeWrapper<Scalars['Date']>;
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
+  AnsettelsesType: AnsettelsesType;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Date: ResolverTypeWrapper<Scalars['Date']['output']>;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   FolkeregisterPerson: ResolverTypeWrapper<FolkeregisterPerson>;
   GyldigTomSelection: GyldigTomSelection;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
-  JSON: ResolverTypeWrapper<Scalars['JSON']>;
+  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Kode: ResolverTypeWrapper<Kode>;
   LederOrgEnhet: ResolverTypeWrapper<LederOrgEnhet>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -585,23 +590,23 @@ export type ResolversTypes = {
   ResultCode: ResultCode;
   ResultLimit: ResultLimit;
   Retning: Retning;
-  SearchResult: ResolverTypeWrapper<ResolversUnionTypes['SearchResult']>;
+  SearchResult: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['SearchResult']>;
   Sektor: Sektor;
   SektorSelection: SektorSelection;
   StatusSelection: StatusSelection;
-  String: ResolverTypeWrapper<Scalars['String']>;
+  String: ResolverTypeWrapper<Scalars['String']['output']>;
   Telefon: ResolverTypeWrapper<Telefon>;
   TelefonType: TelefonType;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Boolean: Scalars['Boolean'];
-  Date: Scalars['Date'];
-  DateTime: Scalars['DateTime'];
+  Boolean: Scalars['Boolean']['output'];
+  Date: Scalars['Date']['output'];
+  DateTime: Scalars['DateTime']['output'];
   FolkeregisterPerson: FolkeregisterPerson;
-  ID: Scalars['ID'];
-  JSON: Scalars['JSON'];
+  ID: Scalars['ID']['output'];
+  JSON: Scalars['JSON']['output'];
   Kode: Kode;
   LederOrgEnhet: LederOrgEnhet;
   Mutation: {};
@@ -626,8 +631,8 @@ export type ResolversParentTypes = {
   RessursSearch: RessursSearch;
   RessursSearchFilter: RessursSearchFilter;
   RessurserSearch: RessurserSearch;
-  SearchResult: ResolversUnionParentTypes['SearchResult'];
-  String: Scalars['String'];
+  SearchResult: ResolversUnionTypes<ResolversParentTypes>['SearchResult'];
+  String: Scalars['String']['output'];
   Telefon: Telefon;
 };
 

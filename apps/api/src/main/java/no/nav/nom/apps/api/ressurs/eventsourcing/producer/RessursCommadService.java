@@ -102,21 +102,22 @@ public class RessursCommadService {
                 opprettRessursCommand.personident(),
                 opprettRessursCommand.sektor(),
                 opprettRessursCommand.visningsnavn()
-            ),
-            opprettRessursCommand.inputMetadata(),
-            new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                Optional.ofNullable(opprettRessursCommand.navident()),
-                opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
-                opprettRessursCommand.pdlPerson()
-                    .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
-                        pdlPerson.getFornavn(),
-                        pdlPerson.getMellomnavn(),
-                        pdlPerson.getEtternavn()
-                    )),
-                opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
-                Optional.ofNullable(opprettRessursCommand.startdato()),
-                Optional.ofNullable(opprettRessursCommand.orgEnhetId())
-            )
+                ),
+                opprettRessursCommand.inputMetadata(),
+                new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+                        Optional.ofNullable(opprettRessursCommand.navident()),
+                        opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
+                        opprettRessursCommand.pdlPerson()
+                                .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
+                                        pdlPerson.getFornavn(),
+                                        pdlPerson.getMellomnavn(),
+                                        pdlPerson.getEtternavn()
+                                )),
+                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
+                        Optional.ofNullable(opprettRessursCommand.startdato()),
+                        Optional.ofNullable(opprettRessursCommand.orgEnhetId()),
+                        Optional.ofNullable(opprettRessursCommand.ansettelsesType())
+                )
         ));
 
         ressursOpprettetEmailService.notifyByEmail(opprettRessursCommand.navident());

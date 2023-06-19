@@ -21,6 +21,7 @@ import type {
   OrgEnhet,
 } from "~/api/generated/graphql_generated";
 import {
+  AnsettelsesType,
   GyldigTomSelection,
   OrgnivSelection,
   ResultLimit,
@@ -118,6 +119,11 @@ export const SektorNameMapping = {
   [Sektor.NavStatlig]: "Statlig",
 };
 
+export const AnsettelsesTypeNameMapping = {
+  [AnsettelsesType.Fast]: "Fast",
+  [AnsettelsesType.Midlertidig]: "Midlertidig",
+};
+
 function CreateResourceFormInner({
   personResult,
   personident,
@@ -135,6 +141,7 @@ function CreateResourceFormInner({
       visningsmellomnavn: capitalizeName(personResult?.navn.mellomnavn ?? ""),
       visningsetternavn: capitalizeName(personResult?.navn.etternavn ?? ""),
       sektor: Sektor.NavStatlig,
+      ansettelsesType: AnsettelsesType.Fast,
       orgEnhetId: undefined,
       startDato: undefined,
     },
@@ -161,8 +168,12 @@ function CreateResourceFormInner({
   const [opprettRessursMutation, { loading, error }] =
     useOpprettRessursMutation({
       onCompleted: (data) => {
+        // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
+        const ansettelsesType = watch("ansettelsesType");
         navigate(
-          `/ressurs/create/${data.opprettRessurs?.navident ?? ""}/receipt`,
+          `/ressurs/create/${
+            data.opprettRessurs?.navident ?? ""
+          }/receipt?ansettelsesType${ansettelsesType}`,
           {
             replace: true,
           }
@@ -235,6 +246,19 @@ function CreateResourceFormInner({
           </Radio>
         </RadioGroup>
 
+        <RadioGroup
+          legend="Ansettelsestype"
+          size="medium"
+          {...register("ansettelsesType")}
+        >
+          <Radio checked value={AnsettelsesType.Fast}>
+            {AnsettelsesTypeNameMapping[AnsettelsesType.Fast]}
+          </Radio>
+          <Radio value={AnsettelsesType.Midlertidig}>
+            {AnsettelsesTypeNameMapping[AnsettelsesType.Midlertidig]}
+          </Radio>
+        </RadioGroup>
+
         <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
         {selectedOrgEnhet ? (
           <span>
@@ -288,6 +312,10 @@ const validationSchema = yup.object({
     .required("Obligatorisk"),
   orgEnhetId: yup.string().required("Obligatorisk"),
   startDato: yup.string().required("Obligatorisk"),
+  ansettelsesType: yup
+    .mixed<AnsettelsesType>()
+    .oneOf(Object.values(AnsettelsesType))
+    .required("Obligatorisk"),
 });
 
 export type FormValues = yup.InferType<typeof validationSchema>;

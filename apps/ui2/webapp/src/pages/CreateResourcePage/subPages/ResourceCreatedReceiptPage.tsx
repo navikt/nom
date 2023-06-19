@@ -10,9 +10,13 @@ import {
 } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { useParams } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 import type { Ressurs } from "~/api/generated/graphql_generated";
-import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+import {
+  AnsettelsesType,
+  useHentRessursMedNavidentQuery,
+} from "~/api/generated/graphql_generated";
 import { ReceiptRessurs } from "~/pages/ResourcePage/RessursCards/ReceiptRessurs";
 
 import { isInDevelopment as isInDevelopment } from "../../../utils";
@@ -104,6 +108,11 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
 
 function Unit4Link() {
   const { navident } = useParams();
+  const [searchParameters] = useSearchParams();
+  const ansettelsesType = searchParameters.get(
+    "ansettelsesType"
+  ) as AnsettelsesType;
+
   const navidentWithoutFirstLetter = navident?.slice(1);
   const unit4BaseUrl = isInDevelopment()
     ? "https://d26isvw00022.test.local"
@@ -115,7 +124,9 @@ function Unit4Link() {
       css={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=F`}
+      href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
+        ansettelsesType === AnsettelsesType.Fast ? "F" : "M"
+      }`}
       icon={<ExternalLinkIcon aria-hidden />}
       iconPosition="right"
       rel="noopener noreferrer"

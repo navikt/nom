@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.nom.unit4.input.NomRessursDTO;
 import no.nav.nom.apps.nom.unit4.unit4.Utils;
+import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn;
@@ -21,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,7 +72,7 @@ public class Unit4RessursDto {
             birthDateTemp = LocalDate.parse("1995-04-12").atStartOfDay();
         }
         birthDate = birthDateTemp;
-        dateFrom = LocalDate.now().atStartOfDay();;
+        dateFrom = LocalDate.now().atStartOfDay();
         name = firstName + " " + surName;
         nameInformation = NameInformation.builder()
                 .aliasName(aliasName)
@@ -92,6 +92,14 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                 .relationId("M0")
                 .relatedValue("5224300")
+                .dateFrom(dateFrom)
+                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                .build()
+        );
+        relatedValues.add(
+            RelatedValue.builder()
+                .relationId("C8")
+                .relatedValue("FLON")
                 .dateFrom(dateFrom)
                 .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                 .build()
@@ -149,6 +157,7 @@ public class Unit4RessursDto {
                 .build();
         personId = ressursNr;
         relatedValues = getRelatedValuesDefault(fellesKoblingValue);
+
         relatedValues.add(
                 additionalData.orgEnhet()
                         .map((orgenhet) -> RelatedValue.builder()
@@ -160,6 +169,20 @@ public class Unit4RessursDto {
                         )
                         .orElseThrow(() -> new NoSuchElementException("Agresso unit id is missing from event"))
         );
+
+        relatedValues.add(
+            // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
+            RelatedValue.builder()
+                .relationId("C8")   // C8: Begrep=GRUPPE, Beskrivelse=Gruppe
+                .relatedValue(additionalData.ansettelsesType()
+                    .map(ansettelsesType -> ansettelsesType == AnsettelsesType.MIDLERTIDIG ? "MIDL" : "FLON")
+                    .orElse("FLON")
+                ) // FLON: 5000 - Oppg. Faste stillinger, ordinær
+                .dateFrom(dateFrom)
+                .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
+                .build()
+        );
+
         if (leverEkstraAvgRelasjon) {
             log.info("Ressurs opprettes med MNAO - EKTRAAGA relasjon (ekstra arbeidsgiveravgift 2023)");
             relatedValues.add(
@@ -199,14 +222,6 @@ public class Unit4RessursDto {
                 RelatedValue.builder()
                         .relationId("20")   // 20: Begrep=PRODUKT, Beskrivelse=Produkt
                         .relatedValue("000000") // 000000: Uspesifisert
-                        .dateFrom(dateFrom)
-                        .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
-                        .build(),
-
-                // Varierer basert på INTERN/EKSTERN/MIDLERTIDIG
-                RelatedValue.builder()
-                        .relationId("C8")   // C8: Begrep=GRUPPE, Beskrivelse=Gruppe
-                        .relatedValue("FLON") // FLON: 5000 - Oppg. Faste stillinger, ordinær
                         .dateFrom(dateFrom)
                         .dateTo(AGRESSO_TIMESTAMP_NULL_VALUE)
                         .build(),

@@ -129,7 +129,8 @@ public class NavidentController {
                             new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
                     ),
                     null,
-                    null
+                    null,
+                null
             );
 
             return ResponseEntity.ok(toNavidentResponse(ressursCommadService.createRessursSync(opprettRessursCommand)));

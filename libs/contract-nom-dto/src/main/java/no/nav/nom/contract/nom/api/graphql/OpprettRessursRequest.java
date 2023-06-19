@@ -2,6 +2,7 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import lombok.Builder;
 import lombok.Data;
+import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
@@ -17,5 +18,5 @@ public class OpprettRessursRequest {
     private Sektor sektor;
     private String orgEnhetId;
     private LocalDate startDato;
-    
+    private AnsettelsesType ansettelsesType;
 }
