@@ -59,10 +59,11 @@ jobs:
           build_secrets: |
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +74,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/api/api-dev-gcp.yaml
           TIMEOUT: 20m
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}
 
   deploy-qa:
     name: Deploy to NAIS prod-gcp QA
@@ -87,7 +88,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/api/api-qa.yaml
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -102,4 +103,4 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/api/api-prod-gcp.yaml
           TIMEOUT: 20m
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}

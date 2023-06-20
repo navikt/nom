@@ -57,6 +57,8 @@ jobs:
           build_secrets: | 
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
@@ -70,7 +72,7 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/unit4/unit4.yaml
           VARS: .nais/apps/unit4/unit4-dev-gcp.yaml
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
@@ -85,4 +87,4 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/unit4/unit4.yaml
           VARS: .nais/apps/unit4/unit4-prod-gcp.yaml
-          IMAGE: ${{ steps.docker-push.outputs.image }}
+          VAR: image=${{needs.build-app-docker.outputs.image}}
