@@ -60,7 +60,7 @@ public class RemedyEnhetMapperService {
                         nomId
                     ));
             } else {
-                logger.warn("Kunne ikke finne remedyEnhet for nomId {} ", nomId);
+                logger.debug("Kunne ikke finne remedyEnhet for nomId {} ", nomId);
             }
         }
 
@@ -107,7 +107,7 @@ public class RemedyEnhetMapperService {
                             nomId.get()
                         ));
                 } else {
-                    logger.warn("Kunne ikke fine orgEnhet nomId for remedyEnhetId {} med agressoId {} og orgenhetnivå {}",
+                    logger.debug("Kunne ikke fine orgEnhet nomId for remedyEnhetId {} med agressoId {} og orgenhetnivå {}",
                         remedyEnhet.get().remedyEnhetId(), remedyEnhet.get().agressoId(), remedyEnhet.get().orgNivaa()
                     );
                 }

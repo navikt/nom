@@ -2,16 +2,15 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -32,16 +31,13 @@ public class RessursCommadService {
     private final Logger log = LoggerFactory.getLogger(RessursCommadService.class);
     private final RessursEventProducer eventProducer;
     private final RessursStateListener ressursStateListener;
-    private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     public RessursCommadService(
         RessursEventProducer eventProducer,
-        RessursStateListener ressursStateListener,
-        RessursOpprettetEmailService ressursOpprettetEmailService
+        RessursStateListener ressursStateListener
     ) {
         this.eventProducer = eventProducer;
         this.ressursStateListener = ressursStateListener;
-        this.ressursOpprettetEmailService = ressursOpprettetEmailService;
     }
 
     public ListenableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
@@ -96,7 +92,7 @@ public class RessursCommadService {
 
     private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
 
-        var future = eventProducer.sendMessage(new RessursOpprettetEventV1(
+        return eventProducer.sendMessage(new RessursOpprettetEventV1(
             fid,
             new RessursOpprettetEventV1.RessursOpprettetEventData(
                 opprettRessursCommand.personident(),
@@ -119,10 +115,6 @@ public class RessursCommadService {
                         Optional.ofNullable(opprettRessursCommand.ansettelsesType())
                 )
         ));
-
-        ressursOpprettetEmailService.notifyByEmail(opprettRessursCommand.navident());
-
-        return future;
     }
 
 }
