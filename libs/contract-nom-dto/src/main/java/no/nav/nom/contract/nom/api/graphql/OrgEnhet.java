@@ -24,4 +24,5 @@ public class OrgEnhet {
     NomNivaa nomNivaa;
 
     OrgEnhetsType orgEnhetsType;
+    String remedyEnhetId;
 }

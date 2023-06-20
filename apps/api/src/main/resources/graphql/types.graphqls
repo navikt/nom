@@ -13,6 +13,7 @@ type OrgEnhet {
     nomNivaa: NomNivaa
     type: Kode
     orgEnhetsType: OrgEnhetsType
+    remedyEnhetId: String
 }
 
 type Organisering {

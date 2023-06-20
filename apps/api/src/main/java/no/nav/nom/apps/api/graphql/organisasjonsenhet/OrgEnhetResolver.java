@@ -19,18 +19,23 @@ import static java.util.stream.Collectors.toList;
 public class OrgEnhetResolver {
 
     private final IOrgenhetService orgenhetService;
+    private final OrgEnhetMapper orgEnhetMapper;
 
-    OrgEnhetResolver(IOrgenhetService orgenhetService) {
+    OrgEnhetResolver(
+        IOrgenhetService orgenhetService,
+        OrgEnhetMapper orgEnhetMapper
+    ) {
         this.orgenhetService = orgenhetService;
+        this.orgEnhetMapper = orgEnhetMapper;
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch search) {
         if( search.getId() != null){
-            return orgenhetService.getById(search.getId()).map(OrgEnhetResolver::convertToOrgEnhet);
+            return orgenhetService.getById(search.getId()).map(orgEnhetMapper::convertToOrgEnhet);
         }
         if (search.getAgressoId() != null && search.getOrgNiv() != null) {
             return orgenhetService.getEnhetByAgressoIdNivaAndName(search.getAgressoId(), search.getOrgNiv(), search.getNavn())
-                    .map(OrgEnhetResolver::convertToOrgEnhet);
+                    .map(orgEnhetMapper::convertToOrgEnhet);
         }
         return Optional.empty();
     }
@@ -46,30 +51,15 @@ public class OrgEnhetResolver {
 
         final var mapResult = orgenhetService.getByIdBulk(ider.stream().toList());
         return mapResult.values().stream()
-            .map(OrgEnhetResolver::convertToOrgEnhet)
+            .map(orgEnhetMapper::convertToOrgEnhet)
             .filter(oe -> nomNivaa.isEmpty() || nomNivaa.contains(oe.getNomNivaa()))
             .map(OrgEnhetResult::new).toList();
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
         return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
-                .map(OrgEnhetResolver::convertToOrgEnhet)
+                .map(orgEnhetMapper::convertToOrgEnhet)
                 .orElseThrow();
-    }
-
-    public static OrgEnhet convertToOrgEnhet(IOrgenhet orgenhet) {
-        return OrgEnhet.builder()
-                .id(orgenhet.getId())
-                .agressoId(orgenhet.getAgressoId())
-                .orgNiv(orgenhet.getOrgNiv())
-                .navn(orgenhet.getNavn())
-                .agressoOrgenhetType(orgenhet.getAgressoOrgenhetType())
-                .gyldigFom(orgenhet.getGyldigFom())
-                .gyldigTom(orgenhet.getGyldigTom().orElse(null))
-                .orgEnhetsKategori(orgenhet.getNomNivaa().orElse(null))
-                .nomNivaa(orgenhet.getNomNivaa().orElse(null))
-                .orgEnhetsType(orgenhet.getOrgEnhetsType().orElse(null))
-                .build();
     }
 
     private List<OrgEnhetResult> orgenheterByAgressoData(OrgEnheterSearch search){
@@ -86,7 +76,7 @@ public class OrgEnhetResolver {
         final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
             .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa().orElse(null)))
             .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
-            .map(OrgEnhetResolver::convertToOrgEnhet)
+            .map(orgEnhetMapper::convertToOrgEnhet)
             .map(OrgEnhetResult::new)
             .collect(toList());
 

@@ -4,6 +4,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetMapper;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
@@ -36,6 +37,8 @@ public class LederResolver {
     private final OrgtilknytningService orgtilknytningStateService;
     private final OrgtilknytningDvhService orgtilknytningDvhService;
 
+    private final OrgEnhetMapper orgEnhetMapper;
+
 
     public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
     private final Unleash unleash;
@@ -43,6 +46,7 @@ public class LederResolver {
     public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService,
                          OrgtilknytningService orgtilknytningStateService,
                          OrgtilknytningDvhService orgtilknytningDvhService,
+                         OrgEnhetMapper orgEnhetMapper,
                          Unleash unleash
     ) {
         this.dvhRepository = dvhRepository;
@@ -50,6 +54,7 @@ public class LederResolver {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.orgtilknytningDvhService = orgtilknytningDvhService;
+        this.orgEnhetMapper = orgEnhetMapper;
         this.unleash = unleash;
     }
 
@@ -61,7 +66,7 @@ public class LederResolver {
     public List<LederOrgEnhet> lederFor(Ressurs ressurs) {
         return dvhRepository.getEnheterByLeder(ressurs.getNavIdent())
                 .stream()
-                .map(OrgEnhetResolver::convertToOrgEnhet)
+                .map(orgEnhetMapper::convertToOrgEnhet)
                 .map(LederOrgEnhet::new)
                 .toList();
     }
