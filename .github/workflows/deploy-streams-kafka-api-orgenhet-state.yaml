@@ -16,8 +16,8 @@ env:
   IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-kafka-api-orgenhet-state:latest
 
 jobs:
-  build-jar-docker:
-    name: build-jar-docker
+  build-app-docker:
+    name: "Build app and push docker image to ghcr"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Build
+      - name: Build java app
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
@@ -44,7 +44,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push Docker container
+      - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -54,7 +54,7 @@ jobs:
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
-    needs: build-jar-docker
+    needs: build-app-docker
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +68,7 @@ jobs:
 
   deploy-prod:
     name: Deploy to NAIS prod-gcp
-    needs: build-jar-docker
+    needs: build-app-docker
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

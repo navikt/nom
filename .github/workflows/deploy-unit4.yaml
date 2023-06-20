@@ -18,7 +18,8 @@ env:
   IMAGE_LATEST: ghcr.io/${{ github.repository }}/nom-unit4:latest
 
 jobs:
-  build_and_push:
+  build-app-docker:
+    name: "Build app and push docker image to ghcr"
     permissions:
       contents: "read"
       id-token: "write"
@@ -37,12 +38,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Build
+      - name: Build java app
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
         run: mvn clean package --projects :unit4 --also-make --batch-mode
-      - name: Build and push Docker container
+      - name: Build and push Docker image
         uses: nais/docker-build-push@v0
         id: docker-push
         with:
@@ -56,17 +57,29 @@ jobs:
           build_secrets: | 
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-      - name: Deploy to NAIS dev-gcp
-        uses: nais/deploy/actions/deploy@v1
+
+  deploy-dev:
+    name: Deploy to NAIS dev-gcp
+    needs: build-app-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/unit4/unit4.yaml
           VARS: .nais/apps/unit4/unit4-dev-gcp.yaml
           IMAGE: ${{ steps.docker-push.outputs.image }}
-      - name: Deploy to NAIS prod-gcp
-        if: github.ref == 'refs/heads/main'
-        uses: nais/deploy/actions/deploy@v1
+
+  deploy-prod:
+    name: Deploy to NAIS prod-gcp
+    if: github.ref == 'refs/heads/main'
+    needs: build-app-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
