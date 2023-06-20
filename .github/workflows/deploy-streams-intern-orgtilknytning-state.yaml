@@ -64,7 +64,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
-          VAR: kafka-pool=nav-dev, image=${{needs.build-app-docker.outputs.image}}
+          VAR: kafka-pool=nav-dev,image=${{needs.build-app-docker.outputs.image}}
           RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml
 
   deploy-prod:
@@ -78,5 +78,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
-          VAR: kafka-pool=nav-prod, image=${{needs.build-app-docker.outputs.image}}
+          VAR: kafka-pool=nav-prod,image=${{needs.build-app-docker.outputs.image}}
           RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml
