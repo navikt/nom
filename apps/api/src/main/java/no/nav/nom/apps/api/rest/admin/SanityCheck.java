@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.admin;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -9,10 +10,12 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +35,20 @@ import java.util.Map;
 @RequestMapping("/api/v1/admin/SanityCheck")
 public class SanityCheck {
     private final Logger log = LoggerFactory.getLogger(SanityCheck.class);
-
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
+    private final OrgtilknytningStateService orgtilknytningStateService;
+    private final Unleash unleash;
+    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
 
-    public SanityCheck(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService) {
+    public SanityCheck(DvhRepository dvhRepository,
+                       IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, Unleash unleash) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
+        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -168,7 +177,6 @@ public class SanityCheck {
         StringBuffer result = new StringBuffer();
 
         List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
-        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
@@ -179,24 +187,49 @@ public class SanityCheck {
         List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
         aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
 
-        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
-        List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
-
         List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
-        List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
-        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
+        List<DvhOrgtilknytning> alleDvhTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+        List<DvhOrgtilknytning> aktiveDvhTilknytninger = aktiveOrgtilknytninger(alleDvhTilknytninger);
+
+        var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+        var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
+
+        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = null;
+        if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+            List<String> navIdenterMedAktiveTilknytninger = aktiveOrgtilknytningState.stream().map(OrgtilknytningState::navident).toList();
+            List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
+
+            List<String> enhetIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getId).toList();
+            ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForEnhetIder(ressurserMedAktiveTilknytninger, aktiveOrgtilknytningState, enhetIderEnheterIkkeAktiveEllerUtenOrganisering);
+
+        } else {
+            List<String> navIdenterMedAktiveTilknytninger = aktiveDvhTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
+            List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
+
+            ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveDvhTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
+        }
 
         ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( r ->
             {
                 result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + " => ");
                 StringBuffer enheter = new StringBuffer();
-                aktiveTilknytninger.stream()
-                    .filter( ot -> ot.getNavIdent().equals(r.navident()))
-                    .forEach( ot ->
-                        enheter.append(ot.getUniqueAgressoId() + ", ")
-                    );
+                if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+                    aktiveOrgtilknytningState.stream()
+                        .filter(ot -> ot.navident().equals(r.navident()))
+                        .forEach(ot -> {
+                                var enhet = orgenhetService.getById(ot.orgEnhetId()).get();
+                                enheter.append(enhet.getId() + " - " + enhet.getNavn() + "[" + enhet.getUniqueAgressoId() + "], ");
+                            }
+                        );
+                } else {
+                    aktiveDvhTilknytninger.stream()
+                        .filter(ot -> ot.getNavIdent().equals(r.navident()))
+                        .forEach(ot ->
+                            enheter.append(ot.getUniqueAgressoId() + ", ")
+                        );
+                }
                 if (enheter.length() == 0) {
                     result.append(" What? - ingen orgenhet i tilknytninger?\n");
                 } else {
@@ -223,18 +256,35 @@ public class SanityCheck {
     @GetMapping(value = "/listTilkoblingerUtoverOgEnhetGyldighetPeriode")
     public String listTilkoblingerUtoverOgEnhetGyldighetPeriode() {
         StringBuffer result = new StringBuffer();
+        if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+            var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+            var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
+            var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
 
-        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
-        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
-        List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
+            aktiveTilknytningerUtoverEnhetPeriode.stream().forEach(t -> {
+                var oe = orgenhetService.getById(t.orgEnhetId()).get();
+                result.append(
+                    t.navident() + ";" +
+                        oe.getUniqueAgressoId() + ";" +
+                        t.orgEnhetId() + ";" +
+                        t.gyldigFom() + ";" +
+                        (t.gyldigTom().isPresent() ? t.gyldigTom().get() : "") + ";" +
+                        oe.getGyldigFom() + ";" +
+                        (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") +
+                        "\n");
+            });
+        } else {
+            List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+            List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
+            List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
 
-        aktiveTilknytningerUtoverEnhetPeriode.stream().forEach( t -> {
-            var oe = orgenhetService.getById(t.getOrgEnhetId()).get();
-            result.append(t.getNavIdent() + ";" + t.getUniqueAgressoId() + ";" + t.getOrgEnhetId() + ";" + t.getGyldigFom() + ";" + (t.getGyldigTom()
-                .isPresent() ? t.getGyldigTom().get() : "") +
-                ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n");
-        });
-
+            aktiveTilknytningerUtoverEnhetPeriode.stream().forEach(t -> {
+                var oe = orgenhetService.getById(t.getOrgEnhetId()).get();
+                result.append(t.getNavIdent() + ";" + t.getUniqueAgressoId() + ";" + t.getOrgEnhetId() + ";" + t.getGyldigFom() + ";" + (t.getGyldigTom()
+                    .isPresent() ? t.getGyldigTom().get() : "") +
+                    ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n");
+            });
+        }
         return result.toString();
     }
 
@@ -327,7 +377,7 @@ public class SanityCheck {
     private String aktiveRessurser() {
         StringBuffer result = new StringBuffer();
         List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
-        List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
@@ -338,34 +388,42 @@ public class SanityCheck {
         List<String> aktiveOrganiseringerUniqueAgressoIder = new ArrayList<>(aktiveOverEnheterUniqueAgressoIder);
         aktiveOrganiseringerUniqueAgressoIder.addAll(aktiveUnderEnheterUniqueAgressoIder);
 
-        List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
-        List<String> navIdenterMedAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
-//        List<String> uniqueAgresssoIderAktiveTilknytninger = aktiveTilknytninger.stream().map(DvhOrgtilknytning::getUniqueAgressoId).toList();
-
-//        List<IOrgenhet> aktiveEnheter = aktiveEnheter(alleEnheter);
-//        List<IOrgenhet> aktiveEnheterMedOrganisering = enheterForAgressoIder(aktiveEnheter, uniqueAgresssoIderAktiveTilknytninger);
-
-//        Map<String, IOrgenhet> uniqueAgressoIderMapAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
-//        List<String> enhetIderAktiveEnheterMedOrganisering = aktiveEnheterMedOrganisering.stream().map(IOrgenhet::getId).toList();
         List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
 
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
+        List<DvhOrgtilknytning> alleDvhTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
+        List<DvhOrgtilknytning> aktiveDvhTilknytninger = aktiveOrgtilknytninger(alleDvhTilknytninger);
+        List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveDvhTilknytninger);
+
+        var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+        var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
+        var aktiveOrgtilknytningerStateUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
+
+        List<String> navIdenterMedAktiveTilknytninger =
+            unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE) ?
+                aktiveOrgtilknytningState.stream().map(OrgtilknytningState::navident).toList() :
+                aktiveDvhTilknytninger.stream().map(DvhOrgtilknytning::getNavIdent).toList();
 
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
         List<RessursState> ressurserUtenAktiveTilknytninger = ressurserIkkeBlandtNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
-        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
-//        List<RessursState> aktiveRessurserMedKoblingTilEnhetUtenOverEnhet = ressursKoblingForEnheter(aktiveRessurser, aktiveTilknytninger, aktiveEnheterUtenAktivOverEnhet);
 
-        List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
+        List<String> enhetIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getId).toList();
+
+        List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering =
+            unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE) ?
+                ressursKoblingForEnhetIder(ressurserMedAktiveTilknytninger, aktiveOrgtilknytningState, enhetIderEnheterIkkeAktiveEllerUtenOrganisering) :
+                ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveDvhTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
+
+        int aktiveTilknytningerSize = unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE) ? aktiveOrgtilknytningState.size() : aktiveDvhTilknytninger.size();
+        int aktiveTilknytningerUtoverEnhetPeriodeSize = unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE) ? aktiveOrgtilknytningerStateUtoverEnhetPeriode.size() : aktiveTilknytningerUtoverEnhetPeriode.size();
 
         result.append("Totalt antall ressurser: %s\n".formatted(alleRessurser.size()));
-        result.append("   Aktive orgtilknytninger: %s\n".formatted(aktiveTilknytninger.size()));
+        result.append("   Aktive orgtilknytninger: %s\n".formatted(aktiveTilknytningerSize));
         result.append("   Ressurser med aktive orgtilknytninger: %s\n".formatted(ressurserMedAktiveTilknytninger.size()));
         result.append("   Ressurser uten aktive orgtilknytninger: %s\n".formatted(ressurserUtenAktiveTilknytninger.size()));
         result.append("   Ressurser med aktive orgtilknytninger for enhet om er inaktiv eller uten organisering: %s\n".formatted(ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.size()));
-        result.append("   Ressurser med tilknytninger i periode utover enhetens gyldighet: %s\n".formatted(aktiveTilknytningerUtoverEnhetPeriode.size()));
-//        result.append("   Aktive med orgtilknytning til enhet uten overenhet: %s\n".formatted(aktiveRessurserMedKoblingTilEnhetUtenOverEnhet.size()));
+        result.append("   Ressurser med tilknytninger i periode utover enhetens gyldighet: %s\n".formatted(aktiveTilknytningerUtoverEnhetPeriodeSize));
 
         log.info("Total resultat:\n{}", result);
         return result.toString();
@@ -407,6 +465,19 @@ public class SanityCheck {
         ).toList();
     }
 
+    private List<OrgtilknytningState> orgtilknytningerUtoverEnhetPeriode(List<OrgtilknytningState> orgtilknytninger) {
+        return orgtilknytninger.stream()
+            .filter( t -> {
+                var orgEnhet = orgenhetService.getById(t.orgEnhetId());
+                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigFom())) {
+                    return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
+                }
+                if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigFom().isAfter(t.gyldigTom().get())) {
+                    return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
+                }
+                return false;
+            } ).toList();
+    }
 
     private List<DvhOrgtilknytning> tilknytningerUtoverEnhetPeriode(List<DvhOrgtilknytning> aktiveTilknytninger) {
         return aktiveTilknytninger.stream()
@@ -473,6 +544,13 @@ public class SanityCheck {
         ).toList();
     }
 
+    private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
+        return orgtilknytninger.stream().filter( ot ->
+            ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
+                (!ot.gyldigTom().isPresent() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+        ).toList();
+    }
+
     private List<RessursState> ressurserForKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
         return ressurser.stream().filter( r -> orgtilknytninger.stream().anyMatch(ot -> r.navident().equals(ot.getNavIdent()))).toList();
     }
@@ -482,6 +560,12 @@ public class SanityCheck {
             orgtilknytninger.stream().filter( e -> uniqueAgressoIder.contains(e.getUniqueAgressoId())).toList();
 
         return ressurser.stream().filter( r -> orgtilknytningerForAngitteUniqueAgressoIder.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
+    }
+
+    private List<RessursState> ressursKoblingForEnhetIder(List<RessursState> ressurser, List<OrgtilknytningState> orgtilknytninger, List<String> enhetIder) {
+        List<OrgtilknytningState> orgtilknytningerForAngitteEnheter =
+            orgtilknytninger.stream().filter( ot -> enhetIder.contains(ot.orgEnhetId())).toList();
+        return ressurser.stream().filter( r -> orgtilknytningerForAngitteEnheter.stream().anyMatch( ot -> ot.navident().equals(r.navident()))).toList();
     }
 
     private List<RessursState> ressurserUtenKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {

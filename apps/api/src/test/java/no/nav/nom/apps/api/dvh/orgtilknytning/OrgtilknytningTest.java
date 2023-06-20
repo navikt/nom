@@ -131,9 +131,10 @@ public class OrgtilknytningTest extends DvhTestBase {
         ressursStateRepository.putEventAggregate(mockedRessurs);
 
         stubStillingFromString(stillingInitDvhPayload);
-
         loadFromDvh();
 
+        // Test på gammel orgtilknytning håndtering - tilsvarende er for ny orgtilknytning i egen testklasse.
+        // Denne kan fjernes på cleanup
         var ressurs = dvhRepository.getKoblinger().stream().filter( k -> k.getNavIdent().equals("L133198") && k.getAgressoId().equals("8435000")).findFirst();
         assertTrue(ressurs.get().getOrgenhetNavn().equals("Utviklingsseksjonen"));
     }
