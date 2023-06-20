@@ -1,5 +1,8 @@
 package no.nav.nom.apps.api.remedy;
 
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,15 +22,18 @@ public class RemedyEnhetMapperService {
 
     final private Resource resourceFile;
     final private OrgenhetService orgenhetService;
+    final private OrgEnhetOverordnetResolver overordnetResolver;
     private List<RemedyEnhet> remedyEnhetList;
 
 
     public RemedyEnhetMapperService(
         @Value("classpath:remedy/data.csv") Resource resourceFile,
-        @Autowired OrgenhetService orgenhetService
+        @Autowired OrgenhetService orgenhetService,
+        @Autowired OrgEnhetOverordnetResolver overordnetResolver
     ) {
         this.resourceFile = resourceFile;
         this.orgenhetService = orgenhetService;
+        this.overordnetResolver = overordnetResolver;
 
         init();
     }
@@ -80,7 +86,9 @@ public class RemedyEnhetMapperService {
             if (remedyEnhet.isPresent()) {
                 return remedyEnhet;
             } else {
-                currentOptionalOrgEnhet = orgEnhet.getOverordnetOrgEnhetFid().flatMap(o -> orgenhetService.getByFid(o));
+                //TODO: replace to this when OverordnetOrgEnhetFid property is in state
+                //currentOptionalOrgEnhet = orgEnhet.getOverordnetOrgEnhetFid().flatMap(o -> orgenhetService.getByFid(o));
+                currentOptionalOrgEnhet = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhet::new);
             }
         }
 
@@ -96,7 +104,7 @@ public class RemedyEnhetMapperService {
             } else {
                 var nomId = orgenhetService
                     .getEnhetByAgressoIdAndOrgniv(remedyEnhet.get().agressoId(), remedyEnhet.get().orgNivaa())
-                    .map(i -> i.getId());
+                    .map(IOrgenhet::getId);
 
                 if (nomId.isPresent()) {
                     return Optional.of(

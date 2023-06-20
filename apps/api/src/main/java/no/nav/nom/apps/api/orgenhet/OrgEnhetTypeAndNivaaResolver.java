@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreNomNivaa;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -22,22 +21,21 @@ import java.util.Optional;
 public class OrgEnhetTypeAndNivaaResolver {
 
     private final Logger logger = LoggerFactory.getLogger(OrgEnhetTypeAndNivaaResolver.class);
-
-    private final DvhRepository dvhRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
+    private final OrgEnhetOverordnetResolver overordnetResolver;
 
     //Unntakstilfelle, orgenheter som mappes til DIR men skal ikke være det. TODO: fiks
     private final List<String> excludeNonDirAgressoId;
 
     public OrgEnhetTypeAndNivaaResolver(
-        DvhRepository dvhRepository,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        OrgEnhetCommandService orgEnhetCommandService
+        OrgEnhetCommandService orgEnhetCommandService,
+        OrgEnhetOverordnetResolver overordnetResolver
     ) {
-        this.dvhRepository = dvhRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
+        this.overordnetResolver = overordnetResolver;
 
         excludeNonDirAgressoId = List.of("7");
     }
@@ -61,7 +59,7 @@ public class OrgEnhetTypeAndNivaaResolver {
                 var children = wrapperList.stream().filter(c -> c.isUnderordnetTo(wrapper.orgEnhetState)).toList();
                 var dirCount = children.stream().filter(c -> OrgEnhetsType.DIR.equals(c.orgEnhetsType)).count();
                 var isAlreadyDirInState = wrapper.orgEnhetState.orgEnhetsType().map(type -> type.equals(OrgEnhetsType.DIR)).orElse(false);
-                var isExcluded = wrapper.orgEnhetState.agressoId().map(agressoId -> excludeNonDirAgressoId.contains(agressoId)).orElse(false);
+                var isExcluded = wrapper.orgEnhetState.agressoId().map(excludeNonDirAgressoId::contains).orElse(false);
 
                 // hvis antallet på underordnede er over 50%
                 if ((float) dirCount / children.size() >= 0.5 && !isExcluded) {
@@ -80,10 +78,7 @@ public class OrgEnhetTypeAndNivaaResolver {
             });
 
         //Etter typer er satt, gå gjennom igjen og sett nom nivå
-        wrapperList
-            .forEach(wrapper ->  {
-                resolveNomNivaa(wrapper);
-            });
+        wrapperList.forEach(this::resolveNomNivaa);
 
         logger.info("Done resolving orgenhet type and nom nivaa");
     }
@@ -132,7 +127,7 @@ public class OrgEnhetTypeAndNivaaResolver {
     }
 
     private OrgEnhetStateWrapper mapFrom(OrgEnhetState orgEnhetState) {
-        var overordent = findOverordnetOrgEnhet(orgEnhetState);
+        var overordent = overordnetResolver.findOverordnetOrgEnhet(orgEnhetState);
         var wrapper = new OrgEnhetStateWrapper(orgEnhetState);
         wrapper.overordnetOrgEnhetState = overordent.orElse(null);
         wrapper.orgNivaa = orgEnhetState.agressoOrgNivaa().orElse(null);
@@ -159,32 +154,4 @@ public class OrgEnhetTypeAndNivaaResolver {
 
         return wrapper;
     }
-
-    private Optional<OrgEnhetState> findOverordnetOrgEnhet(OrgEnhetState orgEnhetState) {
-        final var agressoId = orgEnhetState.agressoId();
-        final var orgNiv = orgEnhetState.agressoOrgNivaa();
-        final var navn = orgEnhetState.navn();
-
-        if (agressoId.isPresent() && orgNiv.isPresent() && !navn.isBlank()) {
-            var overordnet = dvhRepository.getOrganiseringer(agressoId.get(), orgNiv.get(), navn)
-                .stream()
-                .filter(o ->
-                    o.getAgressoIdUnder().equals(agressoId.get())
-                        && o.getOrgNivUnder().equals(orgNiv.get())
-                        && o.getNavnUnder().equals(navn))
-                .findFirst();
-
-            var uniqueId = overordnet.map(o ->
-                String.join("-", o.getAgressoIdOver(), o.getNavnOver(), o.getOrgNivOver())
-            );
-
-            if (uniqueId.isPresent()) {
-                return orgEnhetStateRepository.findNewestUniqueAgressoId(uniqueId.get());
-            }
-        }
-
-        logger.debug("Kunne ikke finne overordnet for orgenhet {}", orgEnhetState.id());
-        return Optional.empty();
-    }
-
 }
