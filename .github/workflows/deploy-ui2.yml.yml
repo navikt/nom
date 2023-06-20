@@ -11,16 +11,16 @@ on:
       - '.nais/apps/ui2/**'
   workflow_dispatch:
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/nom-ui2:${{ github.sha }}
-
 defaults:
   run:
     working-directory: apps
 
 jobs:
   build-app-docker:
-    name: "Build app and push docker image to ghcr"
+    name: "Build app and push docker image to GAR"
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,23 +46,22 @@ jobs:
         working-directory: apps/ui2/webapp
         run: cp -r dist/ ../frackend/public
 
-      - name: Login to GitHub Docker Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          context: apps/ui2/frackend
-          push: true
-          tags: ${{ env.IMAGE }}
+          team: nom
+          image_suffix: nom-ui2
+          docker_context: apps/ui2/frackend
+          dockerfile: apps/ui2/frackend/Dockerfile
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
 
   deploy-dev:
     name: Deploy dev-gcp
     needs: build-app-docker
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -71,6 +70,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: .nais/apps/ui2/ui2-dev.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}}
 
   deploy-prod:
     name: Deploy prod-gcp
@@ -84,3 +84,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: .nais/apps/ui2/ui2-prod.yaml
+          VAR: image=${{needs.build-app-docker.outputs.image}}

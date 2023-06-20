@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/deploy-docs.yaml'
+  workflow_dispatch:
 
 jobs:
   build-publish:

@@ -15,13 +15,9 @@ on:
       - 'pom.xml'
   workflow_dispatch:
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/api:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/api:latest
-
 jobs:
   build-app-docker:
-    name: "Build app and push docker image to ghcr"
+    name: "Build app and push docker image to GAR"
     permissions:
       contents: "read"
       id-token: "write"
@@ -50,7 +46,7 @@ jobs:
         id: docker-push
         with:
           team: nom
-          tag: ${{ env.IMAGE }}
+          image_suffix: nom-api
           push_image: true
           dockerfile: Dockerfile
           docker_context: .

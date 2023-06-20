@@ -10,14 +10,14 @@ on:
       - 'libs/contract-nom-dto/**'
       - '.nais/streams/intern-orgtilknytning-state.yaml'
       - '.github/*/deploy-streams-intern-orgtilknytning-state.yaml'
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/streams-intern-orgtilknytning-state:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/streams-intern-orgtilknytning-state:latest
+  workflow_dispatch:
 
 jobs:
   build-app-docker:
-    name: "Build app and push docker image to ghcr"
+    name: "Build app and push docker image to GAR"
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,32 +38,32 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
         run: mvn clean package --projects :orgtilknytning-state --also-make --batch-mode
-      - name: Docker login
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE }},${{ env.IMAGE_LATEST }}
-          build-args: JAR_PATH=apps/streams/internal/orgtilknytning-state/target/app.jar
+          team: nom
+          image_suffix: nom-intern-orgtilknytning-state
+          push_image: true
+          dockerfile: Dockerfile
+          docker_context: .
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
     needs: build-app-docker
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.1.0
       - uses: nais/deploy/actions/deploy@v1
+
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: dev-gcp
-          VAR: kafka-pool=nav-dev
+          VAR: kafka-pool=nav-dev, image=${{needs.build-app-docker.outputs.image}}
           RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml
 
   deploy-prod:
@@ -77,5 +77,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
           CLUSTER: prod-gcp
-          VAR: kafka-pool=nav-prod
+          VAR: kafka-pool=nav-prod, image=${{needs.build-app-docker.outputs.image}}
           RESOURCE: .nais/streams/intern-orgtilknytning-state.yaml

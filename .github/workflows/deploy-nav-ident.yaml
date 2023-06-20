@@ -12,14 +12,11 @@ on:
       - '.github/*/deploy-nav-ident.yaml'
       - 'apps/pom.xml'
       - 'pom.xml'
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/nav-ident:${{ github.sha }}
-  IMAGE_LATEST: ghcr.io/${{ github.repository }}/nav-ident:latest
+  workflow_dispatch:
 
 jobs:
   build-app-docker:
-    name: "Build app and push docker image to ghcr"
+    name: "Build app and push docker image to GAR"
     permissions:
       contents: "read"
       id-token: "write"
@@ -48,7 +45,7 @@ jobs:
         id: docker-push
         with:
           team: nom
-          tag: ${{ env.IMAGE }}
+          image_suffix: nav-ident
           push_image: true
           dockerfile: Dockerfile
           docker_context: .
