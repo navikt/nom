@@ -60,7 +60,6 @@ jobs:
 
   deploy-dev:
     name: Deploy to NAIS dev-gcp
-    uses: nais/deploy/actions/deploy@v1
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:
