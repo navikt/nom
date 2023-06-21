@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,23 +33,38 @@ public class CompareOldAndNewOrgtilknytningStates {
     private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff = new HashMap<>();
     private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne = new HashMap<>();
 
+    private boolean isDone = false;
+    private boolean isStarted = false;
+
     public CompareOldAndNewOrgtilknytningStates(OrgtilknytningDvhService orgtilknytningDvhService, OrgtilknytningStateService orgtilknytningStateService, RessursStateRepository ressursStateRepository) {
         this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.ressursStateRepository = ressursStateRepository;
     }
 
+    @Async
     public void start() {
+        if (isStarted) return;
+        log.info("Started sammenligning på gml vs ny orgtilknytning");
+        isDone = false;
+        isStarted = true;
         ressursStateRepository.getAll().forEach(this::compareRessurs);
+        isDone = true;
+        isStarted = false;
+        log.info("Ferdig med sammenligning på gml vs ny orgtilknytning");
     }
 
     public String OppsummertRapport() {
+        if (!isDone) return "Ikke ferdig generert resultat. Generering kjører: " + isStarted;
+
         StringBuffer strBuf = new StringBuffer();
         lagOppsummertRapport(strBuf);
         return strBuf.toString();
     }
 
     public String detaljertRapport(boolean inkluderEksterne) {
+        if (!isDone) return "Ikke ferdig generert resultat. Generering kjører: " + isStarted;
+
         StringBuffer strBuf = new StringBuffer();
         lagOppsummertRapport(strBuf);
         ressursStateRepository.getAll().forEach( ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne));

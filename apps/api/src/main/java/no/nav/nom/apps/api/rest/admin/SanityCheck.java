@@ -328,7 +328,22 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Ifm med gammel og ny orgtilknytningstate - sammenling og rapporter",
+        description = "Ifm med gammel og ny orgtilknytningstate - Start sammenling",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/startSammenligNyOgGammelnOrgtilknytningState")
+    public void startSammenligNyOgGammelnOrgtilknytningState() {
+        compareOldAndNewOrgtilknytningStates.start();
+    }
+
+
+    @Operation(
+        description = "Ifm med gammel og ny orgtilknytningstate - Hent resultat fra sammenling",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -338,7 +353,6 @@ public class SanityCheck {
     )
     @GetMapping(value = "/sammenligNyOgGammelnOrgtilknytningState")
     public String sammenligNyOgGammelnOrgtilknytningState(@RequestParam(defaultValue = "false") boolean kunOppsummering, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
-        compareOldAndNewOrgtilknytningStates.start();
         return kunOppsummering ? compareOldAndNewOrgtilknytningStates.OppsummertRapport() : compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne);
     }
 
