@@ -123,6 +123,9 @@ spec:
         - application: melosys
           namespace: teammelosys
           cluster: prod-fss
+        - application: kabal-innstillinger
+          namespace: klage
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
