@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgtilknytning.CompareOldAndNewOrgtilknytningStates;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -39,15 +41,19 @@ public class SanityCheck {
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
+    private final CompareOldAndNewOrgtilknytningStates compareOldAndNewOrgtilknytningStates;
     private final Unleash unleash;
     public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
 
     public SanityCheck(DvhRepository dvhRepository,
-                       IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, Unleash unleash) {
+                       IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService,
+                       CompareOldAndNewOrgtilknytningStates compareOldAndNewOrgtilknytningStates,
+                       Unleash unleash) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
+        this.compareOldAndNewOrgtilknytningStates = compareOldAndNewOrgtilknytningStates;
         this.unleash = unleash;
     }
 
@@ -319,6 +325,21 @@ public class SanityCheck {
         });
 
         return result.toString();
+    }
+
+    @Operation(
+        description = "Ifm med gammel og ny orgtilknytningstate - sammenling og rapporter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/sammenligNyOgGammelnOrgtilknytningState")
+    public String sammenligNyOgGammelnOrgtilknytningState(@RequestParam(defaultValue = "false") boolean kunOppsummering, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
+        compareOldAndNewOrgtilknytningStates.start();
+        return kunOppsummering ? compareOldAndNewOrgtilknytningStates.OppsummertRapport() : compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne);
     }
 
     private String sjekkOrgEnhetStartSluttDato() {
