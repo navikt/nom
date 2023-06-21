@@ -72,47 +72,47 @@ public class CompareOldAndNewOrgtilknytningStates {
     }
 
     private void lagOppsummertRapport(StringBuffer resultat) {
-        resultat.append("Antall differanse orgtilknytninger gamle vs nye: %5s".formatted(diffAntallOT.values().stream().reduce(0, (acc, pair) -> acc + Math.abs(pair.diff()), Integer::sum)));
-        resultat.append("                                  uten eksterne: %5s".formatted(diffAntallOT_ExcludeEksterne.values().stream().reduce(0, (acc, pair) -> acc + Math.abs(pair.diff()), Integer::sum)));
+        resultat.append("Antall differanse orgtilknytninger gamle vs nye: %5s\n".formatted(diffAntallOT.values().stream().reduce(0, (acc, pair) -> acc + Math.abs(pair.diff()), Integer::sum)));
+        resultat.append("                                  uten eksterne: %5s\n".formatted(diffAntallOT_ExcludeEksterne.values().stream().reduce(0, (acc, pair) -> acc + Math.abs(pair.diff()), Integer::sum)));
         resultat.append("\n");
-        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye: %5s".formatted(gamleOTerIkkeFunnetBlandtNye.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                                  uten eksterne: %5s".formatted(gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                          se bort fra dato diff: %5s".formatted(gamleOTerFunnetBlandtNye_DatoDiff.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                                  uten eksterne: %5s".formatted(gamleOTerFunnetBlandtNye_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye: %5s\n".formatted(gamleOTerIkkeFunnetBlandtNye.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                                  uten eksterne: %5s\n".formatted(gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                          se bort fra dato diff: %5s\n".formatted(gamleOTerFunnetBlandtNye_DatoDiff.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                                  uten eksterne: %5s\n".formatted(gamleOTerFunnetBlandtNye_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
         resultat.append("\n");
-        resultat.append("Antall nye orgtilknytninger ikke funnet i gamle: %5s".formatted(nyeOTerIkkeFunnetBlandtGamle.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                                  uten eksterne: %5s".formatted(nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                          se bort fra dato diff: %5s".formatted(nyeOTerFunnetBlandtGamle_DatoDiff.values().stream().mapToLong(Collection::size).sum()));
-        resultat.append("                                  uten eksterne: %5s".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("Antall nye orgtilknytninger ikke funnet i gamle: %5s\n".formatted(nyeOTerIkkeFunnetBlandtGamle.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                                  uten eksterne: %5s\n".formatted(nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                          se bort fra dato diff: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                                  uten eksterne: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
     }
 
     private void detaljerPerNavident(RessursState ressursState, StringBuffer resultat, boolean inkluderEksterne) {
         if (!inkluderEksterne && ressursState.sektor() == Sektor.EKSTERN) return;
 
         String navident = ressursState.navident();
-        resultat.append("Detaljer for %s:".formatted(navident));
+        resultat.append("Detaljer for %s:\n".formatted(navident));
 
-        resultat.append("    Gamle orgtilknytninger:");
+        resultat.append("    Gamle orgtilknytninger:\n");
         orgtilknytningDvhService.getKoblingerByNavIdentOld(navident).stream().forEach( gml -> resultat.append("        %s".formatted(gml)));
 
-        resultat.append("    Nye orgtilknytninger:");
+        resultat.append("    Nye orgtilknytninger:\n");
         orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident).stream().forEach( nye -> resultat.append("        %s".formatted(nye)));
 
         List<Orgtilknytning> kunGamle = inkluderEksterne ? gamleOTerIkkeFunnetBlandtNye.get(navident) : gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.get(navident);
-        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye: %5s".formatted(kunGamle.size()));
-        kunGamle.forEach( gml -> resultat.append("        %s".formatted(gml)) );
+        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye: %5s\n".formatted(kunGamle.size()));
+        kunGamle.forEach( gml -> resultat.append("        %s\n".formatted(gml)) );
 
         List<Orgtilknytning> kunGamleUtenDatoDiff = inkluderEksterne ? gamleOTerFunnetBlandtNye_DatoDiff.get(navident) : gamleOTerFunnetBlandtNye_DatoDiff_ExcludeEksterne.get(navident);
-        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s".formatted(kunGamleUtenDatoDiff.size()));
-        kunGamleUtenDatoDiff.forEach( gml -> resultat.append("        %s".formatted(gml)) );
+        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s\n".formatted(kunGamleUtenDatoDiff.size()));
+        kunGamleUtenDatoDiff.forEach( gml -> resultat.append("        %s\n".formatted(gml)) );
 
         List<OrgtilknytningState> kunNye = inkluderEksterne ? nyeOTerIkkeFunnetBlandtGamle.get(navident) : nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.get(navident);
-        resultat.append("Antall nye orgtilknytninger ikke funnet i nye: %5s".formatted(kunNye.size()));
-        kunNye.forEach( ny -> resultat.append("        %s".formatted(ny)) );
+        resultat.append("Antall nye orgtilknytninger ikke funnet i nye: %5s\n".formatted(kunNye.size()));
+        kunNye.forEach( ny -> resultat.append("        %s\n".formatted(ny)) );
 
         List<OrgtilknytningState> kunNyeUtenDatoDiff = inkluderEksterne ? nyeOTerFunnetBlandtGamle_DatoDiff.get(navident) : nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident);
-        resultat.append("Antall nye orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s".formatted(kunNyeUtenDatoDiff.size()));
-        kunNyeUtenDatoDiff.forEach( ny -> resultat.append("        %s".formatted(ny)) );
+        resultat.append("Antall nye orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s\n".formatted(kunNyeUtenDatoDiff.size()));
+        kunNyeUtenDatoDiff.forEach( ny -> resultat.append("        %s\n".formatted(ny)) );
     }
 
     private void compareRessurs(RessursState ressursState) {
