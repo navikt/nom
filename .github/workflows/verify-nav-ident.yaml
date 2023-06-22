@@ -1,0 +1,18 @@
+name: 'verify: nav-ident'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/nav-ident/**'
+      - 'libs/utils-common/**'
+      - '.github/*/verify-nav-ident.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: nav-ident

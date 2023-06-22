@@ -1,0 +1,18 @@
+name: 'verify: nom-unit4'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/unit4/**'
+      - 'libs/contract-nom-dto/**'
+      - '.github/workflows/deploy-unit4.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: unit4

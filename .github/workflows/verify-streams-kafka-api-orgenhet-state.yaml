@@ -1,0 +1,20 @@
+name: 'verify: nom-kafka-api-orgenhet-state'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/streams/kafka-api/api-orgenhet-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.github/*/verify-streams-kafka-api-orgenhet-state.yaml'
+      - 'apps/streams/kafka-api/pom.xml'
+      - 'apps/streams/pom.xml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: api-orgenhet-state

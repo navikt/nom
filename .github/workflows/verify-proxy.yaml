@@ -1,0 +1,18 @@
+name: 'verify: proxy'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/proxy/**'
+      - '.github/workflows/verify-proxy.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: proxy
