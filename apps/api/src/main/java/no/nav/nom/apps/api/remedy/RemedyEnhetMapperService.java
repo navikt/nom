@@ -87,8 +87,8 @@ public class RemedyEnhetMapperService {
                 return remedyEnhet;
             } else {
                 //TODO: replace to this when OverordnetOrgEnhetFid property is in state
-                currentOptionalOrgEnhet = orgEnhet.getOverordnetOrgEnhetFid().flatMap(o -> orgenhetService.getByFid(o));
-                //currentOptionalOrgEnhet = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhet::new);
+                //currentOptionalOrgEnhet = orgEnhet.getOverordnetOrgEnhetFid().flatMap(o -> orgenhetService.getByFid(o));
+                currentOptionalOrgEnhet = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhet::new);
             }
         }
 
