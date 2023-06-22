@@ -328,22 +328,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Ifm med gammel og ny orgtilknytningstate - Start sammenling",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success")
-        }
-    )
-    @GetMapping(value = "/startSammenligNyOgGammelnOrgtilknytningState")
-    public void startSammenligNyOgGammelnOrgtilknytningState() {
-        compareOldAndNewOrgtilknytningStates.start();
-    }
-
-
-    @Operation(
-        description = "Ifm med gammel og ny orgtilknytningstate - Hent resultat fra sammenling",
+        description = "Ifm med gammel og ny orgtilknytningstate - sammenlign",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -352,8 +337,16 @@ public class SanityCheck {
         }
     )
     @GetMapping(value = "/sammenligNyOgGammelnOrgtilknytningState")
-    public String sammenligNyOgGammelnOrgtilknytningState(@RequestParam(defaultValue = "false") boolean kunOppsummering, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
-        return kunOppsummering ? compareOldAndNewOrgtilknytningStates.OppsummertRapport() : compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne);
+    public String sammenligNyOgGammelnOrgtilknytningState(@RequestParam(defaultValue = "false") boolean kunOppsummering,
+                                                          @RequestParam(defaultValue = "false") boolean inkluderEksterne,
+                                                          @RequestParam(defaultValue = "false") boolean fulleDetaljer,
+                                                          @RequestParam(defaultValue = "true") boolean ekskluderDatoDiff,
+                                                          @RequestParam(defaultValue = "0") int skipAntPerRapport,
+                                                          @RequestParam(defaultValue = "0") int antPerRapport) {
+
+        compareOldAndNewOrgtilknytningStates.start();
+        return kunOppsummering ? compareOldAndNewOrgtilknytningStates.OppsummertRapport() :
+            compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne, skipAntPerRapport, antPerRapport, fulleDetaljer, ekskluderDatoDiff );
     }
 
     private String sjekkOrgEnhetStartSluttDato() {

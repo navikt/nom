@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,7 +46,10 @@ public class CompareOldAndNewOrgtilknytningStates {
     @Async
     public void start() {
         if (isStarted) return;
-        log.info("Started sammenligning på gml vs ny orgtilknytning");
+        log.info("Started sammenligning på gml vs ny orgtilknytning for {} ressurser og {}/{} gamle/nye orgtilknytninger",
+            ressursStateRepository.getAll().size(),
+            orgtilknytningDvhService.getAllKoblingerOld().size(),
+            orgtilknytningStateService.getAllOrgtilknytninger().size());
         isDone = false;
         isStarted = true;
         ressursStateRepository.getAll().forEach(this::compareRessurs);
@@ -62,12 +66,22 @@ public class CompareOldAndNewOrgtilknytningStates {
         return strBuf.toString();
     }
 
-    public String detaljertRapport(boolean inkluderEksterne) {
+    public String detaljertRapport(boolean inkluderEksterne, int skip, int take, boolean fulleDetaljer, boolean ekskluderDatoDiff) {
         if (!isDone) return "Ikke ferdig generert resultat. Generering kjører: " + isStarted;
 
         StringBuffer strBuf = new StringBuffer();
         lagOppsummertRapport(strBuf);
-        ressursStateRepository.getAll().forEach( ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne));
+        if ( take == 0) {
+            ressursStateRepository.getAll()
+                .stream()
+                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff));
+        } else {
+            ressursStateRepository.getAll()
+                .stream()
+                .skip(skip)
+                .limit(take)
+                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff));
+        }
         return strBuf.toString();
     }
 
@@ -86,33 +100,62 @@ public class CompareOldAndNewOrgtilknytningStates {
         resultat.append("                                  uten eksterne: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
     }
 
-    private void detaljerPerNavident(RessursState ressursState, StringBuffer resultat, boolean inkluderEksterne) {
+    private void detaljerPerNavident(RessursState ressursState, StringBuffer totalresultat, boolean inkluderEksterne, boolean fulleDetaljer, boolean ekskluderDatoDiff ) {
         if (!inkluderEksterne && ressursState.sektor() == Sektor.EKSTERN) return;
 
+        boolean harOutput = false;
+
+        StringBuffer resultat = new StringBuffer();
+
         String navident = ressursState.navident();
-        resultat.append("Detaljer for %s:\n".formatted(navident));
+        resultat.append("\nDetaljer for %s [sluttet:%s]:\n".formatted(navident, ressursState.sluttdato().isPresent() ?  ressursState.sluttdato().get() : ""));
 
-        resultat.append("    Gamle orgtilknytninger:\n");
-        orgtilknytningDvhService.getKoblingerByNavIdentOld(navident).stream().forEach( gml -> resultat.append("        %s".formatted(gml)));
+        if (!ekskluderDatoDiff) {
+            List<Orgtilknytning> kunGamle = inkluderEksterne ?
+                gamleOTerIkkeFunnetBlandtNye.get(navident) :
+                gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.get(navident);
+            resultat.append("    Antall gamle orgtilknytninger ikke funnet i nye: %5s\n".formatted(kunGamle.size()));
+            kunGamle.forEach(gml -> resultat.append("        %s\n".formatted(orgtilknytningToString(gml))));
 
-        resultat.append("    Nye orgtilknytninger:\n");
-        orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident).stream().forEach( nye -> resultat.append("        %s".formatted(nye)));
-
-        List<Orgtilknytning> kunGamle = inkluderEksterne ? gamleOTerIkkeFunnetBlandtNye.get(navident) : gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.get(navident);
-        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye: %5s\n".formatted(kunGamle.size()));
-        kunGamle.forEach( gml -> resultat.append("        %s\n".formatted(gml)) );
+            harOutput = harOutput || kunGamle.size() > 0;
+        }
 
         List<Orgtilknytning> kunGamleUtenDatoDiff = inkluderEksterne ? gamleOTerFunnetBlandtNye_DatoDiff.get(navident) : gamleOTerFunnetBlandtNye_DatoDiff_ExcludeEksterne.get(navident);
-        resultat.append("Antall gamle orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s\n".formatted(kunGamleUtenDatoDiff.size()));
-        kunGamleUtenDatoDiff.forEach( gml -> resultat.append("        %s\n".formatted(gml)) );
+        resultat.append("    Antall gamle orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s\n".formatted(kunGamleUtenDatoDiff.size()));
+        kunGamleUtenDatoDiff.forEach( gml -> resultat.append("        %s\n".formatted(orgtilknytningToString(gml))) );
+        harOutput = harOutput || kunGamleUtenDatoDiff.size() > 0;
 
-        List<OrgtilknytningState> kunNye = inkluderEksterne ? nyeOTerIkkeFunnetBlandtGamle.get(navident) : nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.get(navident);
-        resultat.append("Antall nye orgtilknytninger ikke funnet i nye: %5s\n".formatted(kunNye.size()));
-        kunNye.forEach( ny -> resultat.append("        %s\n".formatted(ny)) );
+        if (!ekskluderDatoDiff) {
+            List<OrgtilknytningState> kunNye = inkluderEksterne ?
+                nyeOTerIkkeFunnetBlandtGamle.get(navident) :
+                nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.get(navident);
+            resultat.append("    Antall nye orgtilknytninger ikke funnet i gamle: %5s\n".formatted(kunNye.size()));
+            kunNye.forEach(ny -> resultat.append("        %s\n".formatted(orgtilknytningToString(ny))));
 
+            harOutput = harOutput || kunNye.size() > 0;
+
+        }
         List<OrgtilknytningState> kunNyeUtenDatoDiff = inkluderEksterne ? nyeOTerFunnetBlandtGamle_DatoDiff.get(navident) : nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident);
-        resultat.append("Antall nye orgtilknytninger ikke funnet i nye sett bort fra dato diff: %5s\n".formatted(kunNyeUtenDatoDiff.size()));
-        kunNyeUtenDatoDiff.forEach( ny -> resultat.append("        %s\n".formatted(ny)) );
+        resultat.append("    Antall nye orgtilknytninger ikke funnet i gamle sett bort fra dato diff: %5s\n".formatted(kunNyeUtenDatoDiff.size()));
+        kunNyeUtenDatoDiff.forEach( ny -> resultat.append("        %s\n".formatted(orgtilknytningToString(ny))) );
+
+        harOutput = harOutput || kunNyeUtenDatoDiff.size() > 0;
+
+        if (harOutput || fulleDetaljer) {
+            resultat.append("    Alle gamle orgtilknytninger:\n");
+            orgtilknytningDvhService.getKoblingerByNavIdentOld(navident)
+                .stream()
+                .forEach(gml -> resultat.append("        %s\n".formatted(orgtilknytningToString(gml))));
+
+            resultat.append("    Alle nye orgtilknytninger:\n");
+            orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident)
+                .stream()
+                .forEach(nye -> resultat.append("        %s\n".formatted(orgtilknytningToString(nye))));
+
+            harOutput = true;
+        }
+
+        if (harOutput) totalresultat.append(resultat);
     }
 
     private void compareRessurs(RessursState ressursState) {
@@ -138,7 +181,7 @@ public class CompareOldAndNewOrgtilknytningStates {
                 if (ressursState.sektor() != Sektor.EKSTERN) {
                     gamleOTerIkkeFunnetBlandtNye_ExcludeEksterne.get(navident).add(gammel);
                 }
-                if (gammelOTFinnesINyeOTer_ikkeSjekkDato(gammel, nyeOTer)) {
+                if (! gammelOTFinnesINyeOTer_ikkeSjekkDato(gammel, nyeOTer)) {
                     gamleOTerFunnetBlandtNye_DatoDiff.get(navident).add(gammel);
                     if (ressursState.sektor() != Sektor.EKSTERN) {
                         gamleOTerFunnetBlandtNye_DatoDiff_ExcludeEksterne.get(navident).add(gammel);
@@ -161,7 +204,7 @@ public class CompareOldAndNewOrgtilknytningStates {
                 if (ressursState.sektor() != Sektor.EKSTERN) {
                     nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.get(navident).add(ny);
                 }
-                if (nyOTFinnesIGamleOTer_ikkeSjekkDato(ny, gamleOTer)) {
+                if (! nyOTFinnesIGamleOTer_ikkeSjekkDato(ny, gamleOTer)) {
                     nyeOTerFunnetBlandtGamle_DatoDiff.get(navident).add(ny);
                     if (ressursState.sektor() != Sektor.EKSTERN) {
                         nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident).add(ny);
@@ -211,6 +254,16 @@ public class CompareOldAndNewOrgtilknytningStates {
                 diffAntallOT_ExcludeEksterne.put(ressursState.navident(), gammelVsNyeAntall);
             }
         }
+    }
+
+    private String orgtilknytningToString(OrgtilknytningState ot) {
+        return ot.orgEnhetId() + " [ " + ot.gyldigFom().format(DateTimeFormatter.ISO_DATE) + " - " +
+            (ot.gyldigTom().isPresent() ? ot.gyldigTom().get().format(DateTimeFormatter.ISO_DATE) : " ") + " ]";
+    }
+
+    private String orgtilknytningToString(Orgtilknytning ot) {
+        return ot.getOrgEnhetId() + " [ " + ot.getGyldigFom().format(DateTimeFormatter.ISO_DATE) + " - " +
+            (ot.getGyldigTom().isPresent() ? ot.getGyldigTom().get().format(DateTimeFormatter.ISO_DATE) : " ") + " ]";
     }
 
     record Pair(int x, int y) {
