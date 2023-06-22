@@ -173,8 +173,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
     void scenario21() {
-        orgEnhetStateRepository.clear();
-
         final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId4").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavn4").build();
         final var mockEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavn").build();
         final var mockEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
@@ -192,9 +190,6 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         //TODO:
         final var response = postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
-
-        System.out.println("**************");
-        System.out.println(enhetResponse.toPrettyString());
 
         final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
             .collect(

@@ -101,15 +101,15 @@ public class RemedyEnhetMapperServiceTest {
     @Test
     public void should_map_to_remedyenhetid_in_parent_from_nomid(){
         var orgenhetState1 = createOrgEnhet("NOMID1", "202700", "ORGNIV3", null);
-//        when(orgenhetService.getByFid(eq(orgenhetState1.fid())))
-//            .thenReturn(Optional.of(new OrgEnhet(orgenhetState1)));
+        when(orgenhetService.getByFid(eq(orgenhetState1.fid())))
+            .thenReturn(Optional.of(new OrgEnhet(orgenhetState1)));
 
         var orgenhetState2 = createOrgEnhet("NOMID2", "2027000", "ORGNIV4", orgenhetState1.fid());
         when(orgenhetService.getById(eq(orgenhetState2.id())))
             .thenReturn(Optional.of(new OrgEnhet(orgenhetState2)));
 
-        when(overordnetResolver.findOverordnetOrgEnhet(eq(orgenhetState2.fid())))
-            .thenReturn(Optional.of(orgenhetState1));
+//        when(overordnetResolver.findOverordnetOrgEnhet(eq(orgenhetState2.fid())))
+//            .thenReturn(Optional.of(orgenhetState1));
 
         var result = remedyEnhetMapperService.findByNomId(orgenhetState2.id());
         assertTrue(result.isPresent());
