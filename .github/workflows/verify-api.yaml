@@ -1,0 +1,18 @@
+name: 'verify: api'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/api/**'
+      - 'libs/utils-common/**'
+      - '.github/*/verify-api.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: api

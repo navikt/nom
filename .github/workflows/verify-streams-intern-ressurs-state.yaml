@@ -1,0 +1,21 @@
+name: 'verify: nom-intern-ressurs-state'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'dev/*'
+    paths:
+      - 'apps/streams/internal/ressurs-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.github/*/verify-streams-intern-ressurs-state.yaml'
+      - 'apps/streams/internal/pom.xml'
+      - 'apps/streams/pom.xml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: ressurs-state
