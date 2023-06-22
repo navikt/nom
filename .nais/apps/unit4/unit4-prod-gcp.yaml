@@ -1,23 +1,65 @@
-ingresses:
-  - https://nom-unit4.intern.nav.no
-kafka-pool: nav-prod
-env:
-  - name: SPRING_PROFILES_ACTIVE
-    value: prod
-  - name: UNIT4_BASEURL
-    value: https://agresso.adeo.no
-  - name: UNIT4_EMPLOYEES_PATH
-    value: '/agressowebapi/v1/employees'
-  - name: LOGGING_CONFIG
-    value: 'classpath:logback-nais.xml'
-  - name: NOM_PROXY_BASEURL
-    value: https://nom-proxy.prod-fss-pub.nais.io
-  - name: NOM_PROXY_CLIENT_ID
-    value: prod-fss.nom.nom-proxy
-inbound-rules:
-  - application: org-token-tool
-    namespace: org
-    cluster: prod-gcp
-outbound-external:
-  - host: unleash.nais.io
-  - host: nom-proxy.prod-fss-pub.nais.io
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: nom-unit4
+  namespace: org
+  labels:
+    team: org
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - https://nom-unit4.intern.nav.no
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      memory: 512Mi
+  liveness:
+    path: internal/health/liveness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: internal/health/readiness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+  kafka:
+    pool: nav-prod
+  envFrom:
+    - secret: nom-unit4-api-credentials
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: UNIT4_BASEURL
+      value: https://agresso.adeo.no
+    - name: UNIT4_EMPLOYEES_PATH
+      value: '/agressowebapi/v1/employees'
+    - name: LOGGING_CONFIG
+      value: 'classpath:logback-nais.xml'
+    - name: NOM_PROXY_BASEURL
+      value: https://nom-proxy.prod-fss-pub.nais.io
+    - name: NOM_PROXY_CLIENT_ID
+      value: prod-fss.nom.nom-proxy
+  secureLogs:
+    enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: org-token-tool
+          namespace: org
+          cluster: prod-gcp
+    outbound:
+      external:
+        - host: unleash.nais.io
+        - host: nom-proxy.prod-fss-pub.nais.io

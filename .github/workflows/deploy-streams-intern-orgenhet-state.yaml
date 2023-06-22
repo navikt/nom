@@ -13,69 +13,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-app-docker:
-    name: "Build app and push docker image to GAR"
-    permissions:
-      contents: "read"
-      id-token: "write"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.1.0
-      - name: Cache Dependencies
-        uses: actions/cache@v3.0.11
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-      - name: JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Build java app
-        env:
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :orgenhet-state --also-make --batch-mode
-      - name: Build and push Docker image
-        uses: nais/docker-build-push@v0
-        id: docker-push
-        with:
-          team: nom
-          image_suffix: nom-intern-orgenhet-state
-          push_image: true
-          dockerfile: Dockerfile
-          docker_context: .
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          build_args: JAR_PATH=apps/streams/internal/orgenhet-state/target/app.jar
-    outputs:
-      image: ${{ steps.docker-push.outputs.image }}
-
-  deploy-dev:
-    name: Deploy to NAIS dev-gcp
-    needs: build-app-docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3.1.0
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
-          CLUSTER: dev-gcp
-          VAR: kafka-pool=nav-dev,image=${{needs.build-app-docker.outputs.image}}
-          RESOURCE: .nais/streams/intern-orgenhet-state.yaml
-
-  deploy-prod:
-    name: Deploy to NAIS prod-gcp
-    needs: build-app-docker
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3.1.0
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
-          CLUSTER: prod-gcp
-          VAR: kafka-pool=nav-prod,image=${{needs.build-app-docker.outputs.image}}
-          RESOURCE: .nais/streams/intern-orgenhet-state.yaml
+  deploy-spring-app:
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: orgenhet-state
+      jar-path: apps/streams/internal/orgenhet-state/target/app.jar
+      image-suffix: nom-intern-orgenhet-state
+      nais-config-file-path-dev: .nais/streams/intern-orgenhet-state.yaml
+      nais-config-file-path-prod: .nais/streams/intern-orgenhet-state.yaml
+      additional-nais-vars-dev: ',kafka-pool=nav-dev'
+      additional-nais-vars-prod: ',kafka-pool=nav-prod'
+    secrets:
+      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
