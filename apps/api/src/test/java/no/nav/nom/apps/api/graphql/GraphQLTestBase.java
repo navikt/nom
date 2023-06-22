@@ -30,9 +30,6 @@ public abstract class GraphQLTestBase extends TestBase {
     HttpGraphQlTester graphQlTester;
 
     @Autowired
-    private DvhRepository dvhRepository;
-
-    @Autowired
     protected SecurityTestUtils securityTestUtils;
 
     @Autowired
