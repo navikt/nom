@@ -115,8 +115,8 @@ function Unit4Link() {
 
   const navidentWithoutFirstLetter = navident?.slice(1);
   const unit4BaseUrl = isInDevelopment()
-    ? "https://d26isvw00022.test.local"
-    : "https://agresso.adeo.no";
+    ? "https://agresso.test.local/agrt01"
+    : "https://agresso.adeo.no/agresso";
 
   return (
     <Button
@@ -124,7 +124,7 @@ function Unit4Link() {
       css={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/agresso/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
+      href={`${unit4BaseUrl}/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
         ansettelsesType === AnsettelsesType.Fast ? "F" : "M"
       }`}
       icon={<ExternalLinkIcon aria-hidden />}
