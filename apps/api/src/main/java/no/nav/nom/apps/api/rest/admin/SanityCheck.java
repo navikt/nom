@@ -356,10 +356,11 @@ public class SanityCheck {
                                                           @RequestParam(defaultValue = "false") boolean inkluderEksterne,
                                                           @RequestParam(defaultValue = "false") boolean fulleDetaljer,
                                                           @RequestParam(defaultValue = "true") boolean ekskluderDatoDiff,
+                                                          @RequestParam(defaultValue = "true") boolean kunAktiveNye,
                                                           @RequestParam(defaultValue = "0") int skipAntPerRapport,
                                                           @RequestParam(defaultValue = "0") int antPerRapport) {
         return kunOppsummering ? compareOldAndNewOrgtilknytningStates.OppsummertRapport() :
-            compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne, skipAntPerRapport, antPerRapport, fulleDetaljer, ekskluderDatoDiff );
+            compareOldAndNewOrgtilknytningStates.detaljertRapport(inkluderEksterne, skipAntPerRapport, antPerRapport, fulleDetaljer, ekskluderDatoDiff, kunAktiveNye);
     }
 
     private String sjekkOrgEnhetStartSluttDato() {

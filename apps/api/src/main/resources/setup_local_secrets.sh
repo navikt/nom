@@ -1,6 +1,6 @@
 #!/bin/sh
-#CTX=prod-gcp
 CTX=dev-gcp
+#CTX=prod-gcp
 NS=nom
 SECRET_NAME=`kubectl get secrets --sort-by='{metadata.creationTimestamp}' --context=${CTX} --namespace=${NS}|grep ^azure-nom-api|grep -v token|tail -1|cut -d ' ' -f1`
 SECRET=`kubectl get secret $SECRET_NAME -o json --context=${CTX} --namespace=${NS}`

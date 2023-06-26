@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Korrig
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
@@ -173,8 +174,8 @@ public class RessursStillingProcessorTest {
     public void test_003() {
         String navident = "A000001";
 
-        LocalDate startDate = LocalDate.of(2023, 1, 5);
-        LocalDate endDate = LocalDate.of(2023, 12, 31);
+        LocalDate startDate = LocalDate.now().minusYears(1);
+        LocalDate endDate = LocalDate.now().plusMonths(2);
 
         List<StillingPeriode> stillingPerioder = List.of(
             new StillingPeriode(
@@ -212,6 +213,51 @@ public class RessursStillingProcessorTest {
             .erDagligOppfolging(true);
     }
 
+    @Test
+    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt med ressursens sluttDato hvis orgtilknyting er open ended")
+    public void test_004() {
+        String navident = "A000001";
+
+        LocalDate startDate = LocalDate.now().minusYears(1);
+        LocalDate ressursSluttDato = LocalDate.now().plusMonths(2);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            new StillingPeriode(
+                new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                    Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
+                    "ENHET_1",                  // DVH stillingens enhets navn
+                    Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
+                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                startDate,                      // Gyldig Fom for den strukturerte stillingen
+                MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
+                orgenhetService.getByFid("FID_1").get()
+            )
+        );
+
+        // Ingen ekststerende orgtilknytninger
+        when(orgtilknytningStateService.getAllOrgtilknytninger()).thenReturn(Collections.emptyList());
+        when(ressursService.findByNavident(any())).thenReturn(
+            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato)))
+        );
+
+        ressursStillingProcessor.process(navident, stillingPerioder);
+
+        String fid =
+            assertOrgtilknytning(CMD.OPPRETTET)
+                .forNavident(navident)
+                .tilEnhet("a001bc")
+                .gyldigFom(startDate)
+                .getFid();
+
+        assertOrgtilknytning(CMD.AVVIKLET).gyldigTom(ressursSluttDato);
+
+        assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
+            .forFid(fid)
+            .forNavident(navident)
+            .tilEnhet("a001bc")
+            .erDagligOppfolging(true);
+    }
+
     private void settOppStandardEnheter() {
         final Optional<LocalDate> EMPTY_DATE = Optional.empty();
         orgEnhetStateRepository.clear();
@@ -229,8 +275,6 @@ public class RessursStillingProcessorTest {
         return new OrgEnhetState(fid, id, navn, gyldigFom, gyldigTom, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of(agressoId), Optional.of("ORGENHET"), Optional.empty());
     }
-
-
 
     // Test UTILITY:
 

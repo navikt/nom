@@ -93,8 +93,26 @@ public class RessursStillingProcessor {
 
         // Hent orgtilknytninger fra State
         var orgtilknytninger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident);
-        stillingPerioder.forEach( stillingPeriode -> {
-            if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH
+        stillingPerioder.forEach( midlStillingPeriode -> {
+
+            // Ikke behandle stillingperioder som starter etter Ressurs sluttdato.
+            // Og bruk Ressurs sluttdato som maks på stillingsperioden sin datoTOM
+            StillingPeriode nyStillingPeriode = null;
+            if (ressurs != null && ressurs.sluttdato().isPresent()) {
+                var ressursSluttdato = ressurs.sluttdato().get();
+                if (midlStillingPeriode.gyldigFom().isBefore(ressursSluttdato)) {
+                    if (midlStillingPeriode.gyldigTom().isAfter(ressursSluttdato)) {
+                        nyStillingPeriode = new StillingPeriode(midlStillingPeriode.stilling(), midlStillingPeriode.gyldigFom(), ressursSluttdato, midlStillingPeriode.orgenhet());
+                        log.info("For navident {} setter vi stillingsperioden\n\t{}\nsin sluttdato til ressursens sluttdato {}.\nNy stillingsPeriode: \n\t{}", navident, midlStillingPeriode, ressursSluttdato, nyStillingPeriode);
+                    }
+                } else {
+                    log.info("For navident {} så behandler vi ikke stillingsperioden\n{}\n siden denne kommmer etter ressursens sluttdato {}", navident, midlStillingPeriode, ressursSluttdato);
+                    return; // Ikke behandle denne stillingperioden. Den starter etter ressurs sin sluttdato
+                }
+            }
+            final var stillingPeriode = nyStillingPeriode != null ? nyStillingPeriode : midlStillingPeriode;
+
+            if (isHistoricPeriod(stillingPeriode)) {  // Historisk stillingPeriode fra DVH - vi lager ingen historiske tilkoblinger. Vi bare evt. avslutter.
                 if (orgtilknytninger.size() == 0) {
                     log.debug("Navident {} har historisk stillingPeriode fra DVH ({}) men NOM har ingen orgtilknytninger for ident {}", navident, stillingPeriode, navident);
                 } else {

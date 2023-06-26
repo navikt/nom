@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -9,12 +10,12 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 @Slf4j
@@ -33,6 +34,8 @@ public class CompareOldAndNewOrgtilknytningStates {
     private final HashMap<String, List<OrgtilknytningState>> nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne = new HashMap<>();
     private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff = new HashMap<>();
     private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne = new HashMap<>();
+    private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterneOgHistoriske = new HashMap<>();
+    private final HashMap<String, List<OrgtilknytningState>> nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive = new HashMap<>();
 
     private boolean isDone = false;
     private boolean isStarted = false;
@@ -66,7 +69,7 @@ public class CompareOldAndNewOrgtilknytningStates {
         return strBuf.toString();
     }
 
-    public String detaljertRapport(boolean inkluderEksterne, int skip, int take, boolean fulleDetaljer, boolean ekskluderDatoDiff) {
+    public String detaljertRapport(boolean inkluderEksterne, int skip, int take, boolean fulleDetaljer, boolean ekskluderDatoDiff, boolean kunAktiveNye) {
         if (!isDone) return "Ikke ferdig generert resultat. Generering kjører: " + isStarted;
 
         StringBuffer strBuf = new StringBuffer();
@@ -74,13 +77,13 @@ public class CompareOldAndNewOrgtilknytningStates {
         if ( take == 0) {
             ressursStateRepository.getAll()
                 .stream()
-                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff));
+                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff, kunAktiveNye));
         } else {
             ressursStateRepository.getAll()
                 .stream()
                 .skip(skip)
                 .limit(take)
-                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff));
+                .forEach(ressursState -> detaljerPerNavident(ressursState, strBuf, inkluderEksterne, fulleDetaljer, ekskluderDatoDiff, kunAktiveNye));
         }
         return strBuf.toString();
     }
@@ -98,9 +101,11 @@ public class CompareOldAndNewOrgtilknytningStates {
         resultat.append("                                  uten eksterne: %5s\n".formatted(nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
         resultat.append("                          se bort fra dato diff: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff.values().stream().mapToLong(Collection::size).sum()));
         resultat.append("                                  uten eksterne: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                              som er historiske: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterneOgHistoriske.values().stream().mapToLong(Collection::size).sum()));
+        resultat.append("                               som er de aktive: %5s\n".formatted(nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive.values().stream().mapToLong(Collection::size).sum()));
     }
 
-    private void detaljerPerNavident(RessursState ressursState, StringBuffer totalresultat, boolean inkluderEksterne, boolean fulleDetaljer, boolean ekskluderDatoDiff ) {
+    private void detaljerPerNavident(RessursState ressursState, StringBuffer totalresultat, boolean inkluderEksterne, boolean fulleDetaljer, boolean ekskluderDatoDiff, boolean kunAktiveNye) {
         if (!inkluderEksterne && ressursState.sektor() == Sektor.EKSTERN) return;
 
         boolean harOutput = false;
@@ -135,7 +140,13 @@ public class CompareOldAndNewOrgtilknytningStates {
             harOutput = harOutput || kunNye.size() > 0;
 
         }
-        List<OrgtilknytningState> kunNyeUtenDatoDiff = inkluderEksterne ? nyeOTerFunnetBlandtGamle_DatoDiff.get(navident) : nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident);
+        List<OrgtilknytningState> kunNyeUtenDatoDiff =
+            inkluderEksterne ?
+                nyeOTerFunnetBlandtGamle_DatoDiff.get(navident) :
+                (kunAktiveNye ?
+                    nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive.get(navident) :
+                    nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident)
+                );
         resultat.append("    Antall nye orgtilknytninger ikke funnet i gamle sett bort fra dato diff: %5s\n".formatted(kunNyeUtenDatoDiff.size()));
         kunNyeUtenDatoDiff.forEach( ny -> resultat.append("        %s\n".formatted(orgtilknytningToString(ny))) );
 
@@ -196,6 +207,8 @@ public class CompareOldAndNewOrgtilknytningStates {
         nyeOTerIkkeFunnetBlandtGamle_ExcludeEksterne.put(navident, new ArrayList<>());
         nyeOTerFunnetBlandtGamle_DatoDiff.put(navident, new ArrayList<>());
         nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.put(navident, new ArrayList<>());
+        nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterneOgHistoriske.put(navident, new ArrayList<>());
+        nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive.put(navident, new ArrayList<>());
 
         nyeOTer.stream()
             .filter( ny -> !nyOTFinnesIGamleOTer(ny, gamleOTer))
@@ -208,6 +221,14 @@ public class CompareOldAndNewOrgtilknytningStates {
                     nyeOTerFunnetBlandtGamle_DatoDiff.get(navident).add(ny);
                     if (ressursState.sektor() != Sektor.EKSTERN) {
                         nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne.get(navident).add(ny);
+
+                        if (PeriodeUtil.isHistoricPeriod(ny)) {
+                            nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterneOgHistoriske.get(navident).add(ny);
+                        }
+
+                        if (PeriodeUtil.isCurrentPeriode(ny)) {
+                            nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive.get(navident).add(ny);
+                        }
                     }
                 }
             });

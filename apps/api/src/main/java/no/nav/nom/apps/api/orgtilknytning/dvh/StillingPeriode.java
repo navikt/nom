@@ -9,7 +9,7 @@ import java.util.Optional;
 record StillingPeriode(
     StillingAgressoOrgIdOgNavn stilling,
     LocalDate gyldigFom,
-    LocalDate gyldigTom,
+    LocalDate gyldigTom,  // Aldri null. Open ended er 2099-12-31
     IOrgenhet orgenhet
 ) {
     public StillingPeriode(StillingPeriode copy, IOrgenhet orgenhet) {
