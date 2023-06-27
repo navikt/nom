@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Value
 public class OrgEnhetsKobling {
     Ressurs ressurs;
+    boolean erDagligOppfolging;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 }

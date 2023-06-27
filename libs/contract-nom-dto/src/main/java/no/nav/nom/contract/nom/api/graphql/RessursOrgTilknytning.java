@@ -10,6 +10,7 @@ import java.time.LocalDate;
 public class RessursOrgTilknytning {
     OrgEnhet organisasjonsenhet;
     OrgEnhet orgEnhet;
+    boolean erDagligOppfolging;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
 }

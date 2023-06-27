@@ -12,11 +12,13 @@ import java.time.LocalDate;
 public class RessursLeder {
 
     Ressurs ressurs;
+    boolean erDagligOppfolging;
     private LocalDate gyldigFom;
     private LocalDate gyldigTom;
 
-    public RessursLeder(Ressurs ressurs) {
+    public RessursLeder(Ressurs ressurs, boolean erDagligOppfolging) {
         this.ressurs = ressurs;
+        this.erDagligOppfolging = erDagligOppfolging;
         this.gyldigFom = LocalDate.now();
         this.gyldigTom = null;
     }

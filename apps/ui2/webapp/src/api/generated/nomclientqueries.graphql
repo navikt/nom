@@ -21,6 +21,7 @@ query HentRessursMedNavident($navident: String) {
       type
     }
     ledere {
+      erDagligOppfolging
       ressurs {
         navident
         visningsnavn
@@ -41,6 +42,7 @@ query HentRessursMedNavident($navident: String) {
         }
     }
     orgTilknytning {
+      erDagligOppfolging
       orgEnhet {
         navn
         id

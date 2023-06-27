@@ -116,6 +116,7 @@ export type OrgEnhet = {
   orgEnhetsType?: Maybe<OrgEnhetsType>;
   orgNiv: Scalars['String']['output'];
   organiseringer: Array<Organisering>;
+  remedyEnhetId?: Maybe<Scalars['String']['output']>;
   type?: Maybe<Kode>;
 };
 
@@ -307,6 +308,7 @@ export type Ressurs = {
 
 export type RessursLeder = {
   __typename?: 'RessursLeder';
+  erDagligOppfolging?: Maybe<Scalars['Boolean']['output']>;
   gyldigFom: Scalars['Date']['output'];
   gyldigTom?: Maybe<Scalars['Date']['output']>;
   ressurs: Ressurs;
@@ -314,6 +316,7 @@ export type RessursLeder = {
 
 export type RessursOrgTilknytning = {
   __typename?: 'RessursOrgTilknytning';
+  erDagligOppfolging?: Maybe<Scalars['Boolean']['output']>;
   gyldigFom: Scalars['Date']['output'];
   gyldigTom?: Maybe<Scalars['Date']['output']>;
   orgEnhet: OrgEnhet;
@@ -417,7 +420,7 @@ export type HentRessursMedNavidentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, lederFor: Array<{ __typename?: 'LederOrgEnhet', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', erDagligOppfolging?: boolean | null, ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, lederFor: Array<{ __typename?: 'LederOrgEnhet', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', erDagligOppfolging?: boolean | null, orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -703,6 +706,7 @@ export type OrgEnhetResolvers<ContextType = any, ParentType extends ResolversPar
   orgEnhetsType?: Resolver<Maybe<ResolversTypes['OrgEnhetsType']>, ParentType, ContextType>;
   orgNiv?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   organiseringer?: Resolver<Array<ResolversTypes['Organisering']>, ParentType, ContextType, Partial<OrgEnhetOrganiseringerArgs>>;
+  remedyEnhetId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<Maybe<ResolversTypes['Kode']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -785,6 +789,7 @@ export type RessursResolvers<ContextType = any, ParentType extends ResolversPare
 };
 
 export type RessursLederResolvers<ContextType = any, ParentType extends ResolversParentTypes['RessursLeder'] = ResolversParentTypes['RessursLeder']> = {
+  erDagligOppfolging?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   gyldigFom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   gyldigTom?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   ressurs?: Resolver<ResolversTypes['Ressurs'], ParentType, ContextType>;
@@ -792,6 +797,7 @@ export type RessursLederResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type RessursOrgTilknytningResolvers<ContextType = any, ParentType extends ResolversParentTypes['RessursOrgTilknytning'] = ResolversParentTypes['RessursOrgTilknytning']> = {
+  erDagligOppfolging?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   gyldigFom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   gyldigTom?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   orgEnhet?: Resolver<ResolversTypes['OrgEnhet'], ParentType, ContextType>;
@@ -994,6 +1000,7 @@ export const HentRessursMedNavidentDocument = gql`
       type
     }
     ledere {
+      erDagligOppfolging
       ressurs {
         navident
         visningsnavn
@@ -1014,6 +1021,7 @@ export const HentRessursMedNavidentDocument = gql`
       }
     }
     orgTilknytning {
+      erDagligOppfolging
       orgEnhet {
         navn
         id

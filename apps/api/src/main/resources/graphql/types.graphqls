@@ -57,6 +57,7 @@ type Navn {
 }
 
 type RessursLeder {
+    erDagligOppfolging: Boolean
     ressurs: Ressurs!
     gyldigFom: Date!
     gyldigTom: Date
@@ -82,6 +83,7 @@ type OrgEnhetsKobling {
 type RessursOrgTilknytning {
     organisasjonsenhet: OrgEnhet! @deprecated(reason: "organisasjonsenhet er erstattet med orgEnhet")
     orgEnhet: OrgEnhet!
+    erDagligOppfolging: Boolean
     gyldigFom: Date!
     gyldigTom: Date
 }

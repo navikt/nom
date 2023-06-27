@@ -51,6 +51,7 @@ public class OrgEnhetKoblingResolver {
     private OrgEnhetsKobling tilOrgEnhetsKobling(OrgtilknytningState orgtilknytning) {
         return OrgEnhetsKobling.builder()
             .ressurs(MappingUtils.toRessurs(ressursService.findByNavident(orgtilknytning.navident()).get()))
+            .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
             .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
             .build();

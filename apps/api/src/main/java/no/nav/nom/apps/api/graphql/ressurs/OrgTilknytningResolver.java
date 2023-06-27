@@ -73,6 +73,7 @@ public class OrgTilknytningResolver {
         return RessursOrgTilknytning.builder()
             .organisasjonsenhet(orgEnhetGqlResponse)
             .orgEnhet(orgEnhetGqlResponse)
+            .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
             .gyldigTom(orgtilknytning.gyldigTom().orElse(null))
             .build();

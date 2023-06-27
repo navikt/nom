@@ -5,7 +5,6 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetMapper;
-import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
@@ -14,9 +13,11 @@ import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.libs.utils.common.util.DateUtil;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -77,9 +78,24 @@ public class LederResolver {
 
     public List<RessursLeder> ledere(String navIdent) {
         if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
-            return orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+            var aktiveKoblinger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
                 .stream()
-                .filter(dto -> DateUtil.isNow(dto.gyldigFom(), dto.gyldigTom().orElse(null)))
+                .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom().orElse(null))).collect(Collectors.toList());
+
+            // If there are no active koblinger, we find which date the earlist kobling will start, and select all koblinger starting that day.
+            var dateForNextKobling = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+                .stream()
+                .map(OrgtilknytningState::gyldigFom)
+                .filter(gyldigFom -> gyldigFom.isAfter(LocalDate.now()))
+                .min(LocalDate::compareTo);
+
+
+            var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+                .stream()
+                .filter(kobling -> kobling.gyldigFom().isEqual(dateForNextKobling.orElse(LocalDate.MIN)))
+                .toList();
+
+            return koblinger.stream()
                 .flatMap(kobling -> {
                     String orgenhetId = kobling.orgEnhetId();
                     IOrgenhet orgenhet = orgenhetService.getById(orgenhetId).get();
@@ -87,11 +103,11 @@ public class LederResolver {
 
                     if (ledere.isEmpty()) {
                         // Om ressurs er leder for sin enhet henter vi leder fra nivå over
-                        return lederForRecursive(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn(), navIdent).stream();
+                        ledere = lederForRecursive(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn(), navIdent);
                     }
-                    return ledere.stream();
+
+                    return ledere.stream().map(leder -> new RessursLeder(leder, kobling.erDagligOppfolging()));
                 })
-                .map(RessursLeder::new)
                 .collect(Collectors.toList());
         } else {
             return orgtilknytningDvhService.getKoblingerByNavIdentOld(navIdent)
@@ -110,7 +126,7 @@ public class LederResolver {
                     }
                     return ledere.stream();
                 })
-                .map(RessursLeder::new)
+                .map(leder -> new RessursLeder(leder, false))
                 .collect(Collectors.toList());
         }
     }

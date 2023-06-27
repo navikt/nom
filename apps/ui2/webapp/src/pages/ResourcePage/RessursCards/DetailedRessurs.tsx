@@ -5,7 +5,7 @@ import {
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
-import { ExpansionCard, Heading, Label, Link } from "@navikt/ds-react";
+import { ExpansionCard, Heading, Label, Link, Tag } from "@navikt/ds-react";
 import axios from "axios";
 import React from "react";
 import { useQuery } from "react-query";
@@ -122,7 +122,20 @@ function OrganisationHierarchyTree({
       `}
     >
       <ExpansionCard.Header>
-        <ExpansionCard.Title>{orgHierarki.enhet?.navn}</ExpansionCard.Title>
+        <ExpansionCard.Title>
+          <span>{orgHierarki.enhet?.navn}</span>
+          {orgTilknytning.erDagligOppfolging ? (
+            <Tag
+              css={css`
+                margin-left: 1rem;
+              `}
+              size="xsmall"
+              variant="info"
+            >
+              Daglig oppfølging
+            </Tag>
+          ) : undefined}
+        </ExpansionCard.Title>
         <ExpansionCard.Description>
           Leder:{" "}
           <Link
@@ -177,6 +190,8 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
+  const dagligLeder = ressurs.ledere.find((leder) => leder.erDagligOppfolging);
+
   return (
     <div
       css={css`
@@ -232,6 +247,17 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               .map(({ nummer }) => formatTlf(nummer))
               .join(", ")}
           />
+          {dagligLeder ? (
+            <>
+              <span>Leder:</span>
+              <Link
+                as={ReactRouterLink}
+                to={`/ressurs/${dagligLeder.ressurs.navident}`}
+              >
+                <Label as="span">{dagligLeder.ressurs.visningsnavn}</Label>
+              </Link>
+            </>
+          ) : undefined}
         </div>
       </div>
       <UserImage
