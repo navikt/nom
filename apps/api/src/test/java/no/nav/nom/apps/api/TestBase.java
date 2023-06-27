@@ -6,7 +6,6 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMockUtils;
-import no.nav.nom.apps.api.graphql.search.SearchResolver;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
@@ -18,7 +17,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -85,6 +83,7 @@ public abstract class TestBase {
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
+        orgEnhetStateRepository.clear();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
         dvhOrgtilknytningMockUtils.createEmptyResponse();

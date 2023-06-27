@@ -117,9 +117,7 @@ public class DvhRepository {
     }
 
     public void clearRepository() {
-        if (organiseringer != null) {
-            organiseringer.clear();
-        }
+        organiseringer = Collections.emptyList();
         koblinger = Collections.emptyList();
         this.updateListeners();
     }
