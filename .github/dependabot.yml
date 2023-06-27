@@ -25,13 +25,13 @@ updates:
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
   - package-ecosystem: npm
     directory: "/apps/ui2/frackend"
     schedule:
       interval: daily
       time: "04:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
   - package-ecosystem: docker
     directory: "/apps/ui2/frackend"
     schedule:
