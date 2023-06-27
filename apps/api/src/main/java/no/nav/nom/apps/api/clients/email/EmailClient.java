@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.email;
+package no.nav.nom.apps.api.clients.email;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common.exception;
+package no.nav.nom.apps.api.clients.ad;
 
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.contract.ad.AdRessurser;

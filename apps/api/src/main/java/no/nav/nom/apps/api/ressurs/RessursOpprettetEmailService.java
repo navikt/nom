@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.ressurs;
 
-import no.nav.nom.apps.api.email.EmailClient;
-import no.nav.nom.apps.api.email.EmailMessage;
+import no.nav.nom.apps.api.clients.email.EmailClient;
+import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;

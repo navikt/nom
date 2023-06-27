@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.email;
+package no.nav.nom.apps.api.clients.email;
 
 import java.util.List;
 

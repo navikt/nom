@@ -6,19 +6,13 @@ import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.security.TokenRepository;
+import no.nav.nom.apps.api.clients.ad.ADResponseException;
+import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
-import no.nav.nom.apps.api.graphql.common.exception.ADResponseException;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.ad.AdRessurs.AdStatus;
-import no.nav.nom.contract.ad.AdRessurser;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -35,15 +29,10 @@ import static java.util.stream.Collectors.toSet;
 public class ActiveDirectoryRessursBatchLoader {
 
     private final static int MAX_BATCH_SIZE = 100;
+    private final AdClient adClient;
 
-    private final TokenRepository tokenRepository;
-    private final AppProperties.Proxy proxyProperties;
-    private final RestTemplate restTemplate;
-
-    public ActiveDirectoryRessursBatchLoader(TokenRepository tokenRepository, AppProperties appProperties, RestTemplate restTemplate) {
-        this.tokenRepository = tokenRepository;
-        this.proxyProperties = appProperties.proxy();
-        this.restTemplate = restTemplate;
+    public ActiveDirectoryRessursBatchLoader(AdClient adClient) {
+        this.adClient = adClient;
     }
 
     public <T> Map<Ressurs, DataFetcherResult<T>> load(List<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
@@ -58,22 +47,10 @@ public class ActiveDirectoryRessursBatchLoader {
 
     @SneakyThrows
     public <T> Map<String, DataFetcherResult<T>> getAdRessurser(Set<String> navIdenter, Function<AdRessurs, T> propertyResolver) {
-        final var headers = new HttpHeaders();
-        final var token = tokenRepository.getSystemAadToken(proxyProperties.aadClientId());
-        headers.setBearerAuth(token.serialize());
-
         try {
-            var result = restTemplate.exchange(
-                    proxyProperties.baseUrl() + "/proxy/ad",
-                    HttpMethod.POST,
-                    new HttpEntity<>(navIdenter, headers),
-                    AdRessurser.class
-            );
+            var result = adClient.getAdRessurser(navIdenter);
 
-            if (result.getStatusCode().is2xxSuccessful() && result.getBody() != null) {
-                return result.getBody().getRessurser().stream().collect(toMap(AdRessurs::getNavIdent, o -> convert(o, propertyResolver)));
-            }
-            throw new ADResponseException("Error in proxy query to AD code=" + result.getStatusCode(), result, ErrorCode.SERVER_ERROR);
+            return result.getRessurser().stream().collect(toMap(AdRessurs::getNavIdent, o -> convert(o, propertyResolver)));
 
         } catch (Exception exception) {
             log.error("Feil i oppslag mot AD i proxy", exception);
