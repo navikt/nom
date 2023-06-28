@@ -160,6 +160,7 @@ function CreateResourceFormInner({
   const selectedOrgEnhet = orgEnheter.find(
     (orgEnhet) => orgEnhet.id === watch("orgEnhetId")
   );
+
   const startDatePicker = useDatepicker({
     onDateChange: (date) =>
       setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
@@ -270,10 +271,21 @@ function CreateResourceFormInner({
 
         <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
         {selectedOrgEnhet ? (
-          <span>
-            Leder for org.enhet:{" "}
-            {selectedOrgEnhet.leder[0]?.ressurs.visningsnavn}
-          </span>
+          <div
+            css={css`
+              display: flex;
+              justify-content: space-between;
+            `}
+          >
+            <span>
+              Leder: <b>{selectedOrgEnhet.leder[0]?.ressurs.visningsnavn}</b>
+            </span>
+            {selectedOrgEnhet.remedyEnhetId && (
+              <span>
+                Enhetsnummer: <b>{selectedOrgEnhet.remedyEnhetId}</b>
+              </span>
+            )}
+          </div>
         ) : undefined}
 
         <DatePicker {...startDatePicker.datepickerProps}>

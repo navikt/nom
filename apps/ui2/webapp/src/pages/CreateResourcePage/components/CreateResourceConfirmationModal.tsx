@@ -41,6 +41,7 @@ export function CreateResourceConfirmationModal({
     .filter((navn) => !!navn)
     .join(" ");
   const selectOrgEnhet = orgEnheter.find(({ id }) => id === orgEnhetId);
+  const lederNavn = selectOrgEnhet?.leder[0]?.ressurs.visningsnavn;
 
   return (
     <>
@@ -87,6 +88,10 @@ export function CreateResourceConfirmationModal({
             </b>
             <span>Org enhet:</span>
             <b>{selectOrgEnhet?.navn}</b>
+            <span>Leder:</span>
+            <b>{lederNavn}</b>
+            <span>Enhetsnummer:</span>
+            <b>{selectOrgEnhet?.remedyEnhetId}</b>
             <span>Første arbeidsdag:</span>
             <b>{startDato && format(new Date(startDato), DATE_FORMATS.no)}</b>
           </div>

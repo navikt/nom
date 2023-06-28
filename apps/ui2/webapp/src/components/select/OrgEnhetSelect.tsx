@@ -111,9 +111,7 @@ function OptionWithIds(properties: OptionProps<Option, false>) {
         `}
       >
         <span>{properties.data.label}</span>
-        <Label size="small">
-          {properties.data.value} ({properties.data.id})
-        </Label>
+        <Label size="small">{properties.data.value}</Label>
       </div>
     </components.Option>
   );

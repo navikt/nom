@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -32,6 +33,7 @@ public class GraphQLOrgEnhetController {
     private final OrgEnhetKoblingResolver koblingResolver;
     private final OrganiseringResolver organiseringResolver;
     private final LederResolver lederResolver;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final GraphQLFieldConsumptionCounter counter;
 
     public GraphQLOrgEnhetController(
@@ -39,12 +41,14 @@ public class GraphQLOrgEnhetController {
             OrgEnhetKoblingResolver koblingResolver,
             OrganiseringResolver organiseringResolver,
             @Qualifier("OrgEnhetsLeder") LederResolver lederResolver,
+            RemedyEnhetIdResolver remedyEnhetIdResolver,
             GraphQLFieldConsumptionCounter counter
     ) {
         this.orgEnhetResolver = orgEnhetResolver;
         this.koblingResolver = koblingResolver;
         this.organiseringResolver = organiseringResolver;
         this.lederResolver = lederResolver;
+        this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.counter = counter;
     }
 
@@ -80,6 +84,11 @@ public class GraphQLOrgEnhetController {
     @SchemaMapping(typeName = "OrgEnhet", field = "leder")
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
         return lederResolver.leder(orgEnhet);
+    }
+
+    @SchemaMapping(typeName = "OrgEnhet", field = "remedyEnhetId")
+    public String remedyEnhetId(OrgEnhet orgEnhet) {
+        return remedyEnhetIdResolver.remedyEnhetId(orgEnhet);
     }
 
     @SchemaMapping(typeName = "OrgEnhet", field = "koblinger")

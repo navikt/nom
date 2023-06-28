@@ -54,9 +54,24 @@ export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
           />
           {valgtEnhet.navn}
         </Heading>
-        <span>
-          Leder: <OrgenhetLederLink enhet={valgtEnhet} />
-        </span>
+        <div
+          css={css`
+            display: flex;
+            gap: 2rem;
+          `}
+        >
+          <span>
+            Leder: <OrgenhetLederLink enhet={valgtEnhet} />
+          </span>
+          <span>
+            ID: <b>{valgtEnhet.id}</b>
+          </span>
+          {valgtEnhet.remedyEnhetId && (
+            <span>
+              Enhetsnummer: <b>{valgtEnhet.remedyEnhetId}</b>
+            </span>
+          )}
+        </div>
       </div>
       <UserImage
         navident={valgtEnhet.leder[0]?.ressurs.navident}

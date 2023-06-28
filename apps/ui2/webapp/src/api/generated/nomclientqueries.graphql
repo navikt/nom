@@ -156,6 +156,7 @@ fragment OrgenhetStandaloneWithLeder on OrgEnhet {
 query HentHierarki($id: String!) {
   enhet: orgEnhet(where: { id: $id }) {
     id
+    remedyEnhetId
     navn
     gyldigFom
     gyldigTom
@@ -274,6 +275,7 @@ query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
     searchOrgEnhet(term: $term, filter: $filter) {
         id,
         navn
+        remedyEnhetId
         leder {
             ressurs {
                 visningsnavn

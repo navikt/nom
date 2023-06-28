@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
+import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
@@ -19,23 +20,20 @@ import static java.util.stream.Collectors.toList;
 public class OrgEnhetResolver {
 
     private final IOrgenhetService orgenhetService;
-    private final OrgEnhetMapper orgEnhetMapper;
 
     OrgEnhetResolver(
-        IOrgenhetService orgenhetService,
-        OrgEnhetMapper orgEnhetMapper
+        IOrgenhetService orgenhetService
     ) {
         this.orgenhetService = orgenhetService;
-        this.orgEnhetMapper = orgEnhetMapper;
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch search) {
         if( search.getId() != null){
-            return orgenhetService.getById(search.getId()).map(orgEnhetMapper::convertToOrgEnhet);
+            return orgenhetService.getById(search.getId()).map(MappingUtils::toOrgEnhet);
         }
         if (search.getAgressoId() != null && search.getOrgNiv() != null) {
             return orgenhetService.getEnhetByAgressoIdNivaAndName(search.getAgressoId(), search.getOrgNiv(), search.getNavn())
-                    .map(orgEnhetMapper::convertToOrgEnhet);
+                    .map(MappingUtils::toOrgEnhet);
         }
         return Optional.empty();
     }
@@ -51,14 +49,14 @@ public class OrgEnhetResolver {
 
         final var mapResult = orgenhetService.getByIdBulk(ider.stream().toList());
         return mapResult.values().stream()
-            .map(orgEnhetMapper::convertToOrgEnhet)
+            .map(MappingUtils::toOrgEnhet)
             .filter(oe -> nomNivaa.isEmpty() || nomNivaa.contains(oe.getNomNivaa()))
             .map(OrgEnhetResult::new).toList();
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
         return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
-                .map(orgEnhetMapper::convertToOrgEnhet)
+                .map(MappingUtils::toOrgEnhet)
                 .orElseThrow();
     }
 
@@ -76,7 +74,7 @@ public class OrgEnhetResolver {
         final var orgEnhetResults = result.filter(e -> orgNiv == null || orgNiv.equals(e.getOrgNiv()))
             .filter(e -> orgenhetkategori.isEmpty() || orgenhetkategori.contains(e.getNomNivaa().orElse(null)))
             .peek(iOrgenhet -> agressoIder.remove(iOrgenhet.getAgressoId()))
-            .map(orgEnhetMapper::convertToOrgEnhet)
+            .map(MappingUtils::toOrgEnhet)
             .map(OrgEnhetResult::new)
             .collect(toList());
 
