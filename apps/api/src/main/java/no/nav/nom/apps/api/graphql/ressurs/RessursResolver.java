@@ -16,7 +16,6 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.pdl.PdlConsumer;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.apps.api.ressurs.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
@@ -49,22 +48,19 @@ public class RessursResolver {
     private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
     private final OrgenhetService orgenhetService;
-    private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     RessursResolver(
             NIKConsumer nikConsumer,
             PdlConsumer pdlConsumer,
             IRessursService ressursService,
             RessursCommadService ressursCommadService,
-            OrgenhetService orgenhetService,
-            RessursOpprettetEmailService ressursOpprettetEmailService
+            OrgenhetService orgenhetService
     ) {
         this.nikConsumer = nikConsumer;
         this.pdlConsumer = pdlConsumer;
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
         this.orgenhetService = orgenhetService;
-        this.ressursOpprettetEmailService = ressursOpprettetEmailService;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
