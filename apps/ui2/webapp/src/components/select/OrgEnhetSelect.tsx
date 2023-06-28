@@ -90,11 +90,12 @@ function OrgEnhetSelect({
 const search =
   (options: { value: string; label: string; id: string }[]) =>
   async (searchTerm: string) => {
+    const newSearchTerm = searchTerm.toLowerCase().replace("nav", "");
     const filterFunction = createFilter();
 
     // For some reason the filterFunction requires a data property on every option.
     return options.filter((option) =>
-      filterFunction({ ...option, data: {} }, searchTerm)
+      filterFunction({ ...option, data: {} }, newSearchTerm)
     );
   };
 
