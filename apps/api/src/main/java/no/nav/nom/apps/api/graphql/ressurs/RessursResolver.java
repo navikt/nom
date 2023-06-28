@@ -173,12 +173,7 @@ public class RessursResolver {
             request.getAnsettelsesType()
         );
 
-        var response = ressursCommadService.createRessursSync(opprettRessursCommand);
-
-        //TODO: ORG-1247 Add logging here
-        ressursOpprettetEmailService.notifyByEmail(response);
-
-        return response;
+        return ressursCommadService.createRessursSync(opprettRessursCommand);
     }
 
 
