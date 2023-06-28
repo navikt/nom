@@ -7,6 +7,7 @@ import {
 } from "@navikt/aksel-icons";
 import { ExpansionCard, Heading, Label, Link, Tag } from "@navikt/ds-react";
 import axios from "axios";
+import uniqBy from "lodash/uniqBy";
 import React from "react";
 import { useQuery } from "react-query";
 import { Link as ReactRouterLink } from "react-router-dom";
@@ -161,6 +162,16 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
     return <></>;
   }
 
+  /*
+   Leder høyt oppe i hierarkiet er ofte leder i flere "like" orgEnheter.
+   Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
+   Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
+  */
+  const uniqLederFor = uniqBy(
+    ressurs.lederFor,
+    ({ orgEnhet }) => orgEnhet.navn
+  );
+
   return (
     <>
       <Divider />
@@ -175,7 +186,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           gap: 0.5rem;
         `}
       >
-        {ressurs.lederFor.map(({ orgEnhet }) => (
+        {uniqLederFor.map(({ orgEnhet }) => (
           <Link
             as={ReactRouterLink}
             key={orgEnhet.id}
