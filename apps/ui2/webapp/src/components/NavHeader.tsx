@@ -12,14 +12,14 @@ import { SearchBar } from "./select/Searchbar";
 
 export const headerHeight = "6rem";
 
-const outerDiv = css({
-  display: "grid",
-  gridTemplateColumns: "1fr",
-  minHeight: headerHeight,
-  width: "100%",
-  justifyContent: "center",
-  alignContent: "center",
-});
+const outerDiv = css`
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: ${headerHeight};
+  width: 100%;
+  justify-content: center;
+  align-content: center;
+`;
 
 const innerDiv = css(
   css`
@@ -38,17 +38,7 @@ const innerDiv = css(
   mediaQueryContentWidth
 );
 
-const userText = css({
-  fontFamily: "Source Sans Pro",
-  fontStyle: "normal",
-  fontWeight: "700",
-  fontSize: "16px",
-  lineHeight: "30px",
-  color: "var(--nom-interaction-primary)",
-  marginRight: "1rem",
-});
-
-const NavHeader = () => {
+export const NavHeader = () => {
   const session = useGetSession();
   const hasWrite = useHasWriteAccess();
 
@@ -70,22 +60,32 @@ const NavHeader = () => {
         <span
           css={css`
             display: flex;
-            align-items: center;
+            gap: 1rem;
           `}
         >
-          <PersonFillIcon
+          <span
             css={css`
-              color: var(--a-lightblue-800);
-              width: 32px;
-              height: 32px;
+              display: flex;
+              align-items: center;
             `}
-          />
-          <span css={userText}>{session.data?.navident}</span>
+          >
+            <PersonFillIcon
+              css={css`
+                color: var(--a-lightblue-800);
+                width: 32px;
+                height: 32px;
+              `}
+            />
+            <Link
+              as={ReactRouterLink}
+              to={`/ressurs/${session.data?.navident}`}
+            >
+              {session.data?.navident}
+            </Link>
+          </span>
           {hasWrite && <BurgerMenu />}
         </span>
       </div>
     </div>
   );
 };
-
-export default NavHeader;

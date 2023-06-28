@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import { Footer, footerHeight } from "~/components/Footer";
-import NavHeader, { headerHeight } from "~/components/NavHeader";
+import { headerHeight, NavHeader } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { isInDevelopment } from "~/utils";
 
