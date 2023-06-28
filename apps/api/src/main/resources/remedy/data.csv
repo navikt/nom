@@ -330,7 +330,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 2519000;4119;AGRESSOORGENHET;Kontaktsenter Troms og Finnmark;Opp til ORGNIV3;251900;va130k;JA;251900;ORGNIV3;va130k;
 2521000;4121;AGRESSOORGENHET;Kontaktsenter Nordland Mo adm;Opp til ORGNIV3;252100;ty313a;JA;252100;ORGNIV3;ty313a;
 522100;4151;ORGNIV3;Styring og utvikling;Opp til ORGNIV2;52;ka700c;JA;52;ORGNIV2;ka700c;
-420000;4200;ORGNIV3;Styringsenhet Klageinstans;Opp til ORGNIV2;42;ke488u;JA;42;ORGNIV2;ke488u;
+420000;4200;ORGNIV3;Styringsenhet Klageinstans;Opp til ORGNIV2;72;ne545g;JA;72;ORGNIV2;ne545g;
 4221000;4250;AGRESSOORGENHET;Klageinstans Sør;Opp til ORGNIV3;722100;ka589p;JA;722100;ORGNIV3;ka589p;Byttet ut til helt annen enhet da gamle Klageinstanser er nedlagt. Brukt trygdeident-kobling til å avdekke.
 4430000;4400;AGRESSOORGENHET;Arbeid og Ytelser Styringsenhet;Opp til ORGNIV2;44;ve910k;JA;44;ORGNIV2;ve910k;
 4430100;4401;AGRESSOORGENHET;Arbeid og Ytelser Sarpsborg;Opp til ORGNIV3;443010;be901f;JA;443010;ORGNIV3;be901f;

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs;
 
+import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.clients.email.EmailClient;
 import no.nav.nom.apps.api.clients.email.EmailMessage;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,50 +23,57 @@ public class RessursOpprettetEmailService {
     private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);
 
     private final EmailClient emailClient;
+    private final AdClient adClient;
     private final no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService orgtilknytningService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
-    private final RessursStateRepository ressursStateRepository;
+    private final RessursStateRepository ressursService;
 
     public RessursOpprettetEmailService(
         EmailClient emailClient,
+        AdClient adClient,
         no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService orgtilknytningService,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        RessursStateRepository ressursStateRepository
+        RessursStateRepository ressursService
     ) {
         this.emailClient = emailClient;
+        this.adClient = adClient;
         this.orgtilknytningService = orgtilknytningService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
-        this.ressursStateRepository = ressursStateRepository;
+        this.ressursService = ressursService;
     }
 
-    public void notifyByEmail(String opprettetRessursNavident) {
+    public void notifyByEmail(RessursState opprettetRessurs) {
 
-        var opprettetRessurs = ressursStateRepository.findByNavident(opprettetRessursNavident);
-        var recipientList = orgtilknytningService.getOrgtilknytningerByNavIdent(opprettetRessursNavident)
+        if (opprettetRessurs == null) {
+            log.debug("Epostvarsling om ressursopprettelse feilet. opprettetRessurs parameter er null");
+            return;
+        }
+
+        var recipientNavidentList = orgtilknytningService.getOrgtilknytningerByNavIdent(opprettetRessurs.navident())
             .stream()
-            .map(kobling -> orgEnhetStateRepository
-                .findById(kobling.orgEnhetId())
+            .map(kobling -> orgEnhetStateRepository.findById(kobling.orgEnhetId())
                 .flatMap(OrgEnhetState::lederFid)
-                .flatMap(fid -> ressursStateRepository.findByFid(UUID.fromString(fid)))
+                .flatMap(fid -> ressursService.findByFid(UUID.fromString(fid)))
+                .map(ressursState -> ressursState.navident())
                 .orElse(null))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
 
-        log.info("Sender epost for å varsle om ressurs opprettelse {}, {}", opprettetRessurs, recipientList);
-
-        if(opprettetRessurs.isPresent() && !recipientList.isEmpty()){
-            composeEmail(opprettetRessurs.get(), recipientList);
-        } else {
-            log.warn("Kunne ikke varsle via epost om ressursopprettelse av {}", opprettetRessursNavident);
+        if (recipientNavidentList.isEmpty()) {
+            log.debug("Epostvarsling feilet. Fant ikke leder for opprettet ressurs {}", opprettetRessurs.navident());
         }
+
+        log.info("Sender epostvarsling om opprettelse av ressurs{} til {}", opprettetRessurs.navident(), recipientNavidentList);
+        composeEmail(opprettetRessurs, recipientNavidentList);
     }
 
-    private void composeEmail(RessursState opprettetRessurs, List<RessursState> recipients) {
-        var emailList = recipients.stream().map(ressurs -> ressurs.navident() + "@nav.no").toList();
+    private void composeEmail(RessursState opprettetRessurs, Set<String> recipientNavidents) {
 
-        String subject = String.format("Ressurs opprettet %s %s",
-            opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident());
-        String content = "Test " + emailList;
+        var adRessurser = adClient.getAdRessurser(recipientNavidents);
+        var recipientList = adRessurser.getRessurser().stream().map(adRessurs -> adRessurs.getEmail()).collect(Collectors.toList());
+
+        String subject = String.format("Ressurs opprettet %s %s", opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident());
+        String content = "Test " + recipientList;
 
         EmailMessage message = new EmailMessage(subject, content, List.of("eziz.annagurban@nav.no"));
         emailClient.sendEmail(message);
