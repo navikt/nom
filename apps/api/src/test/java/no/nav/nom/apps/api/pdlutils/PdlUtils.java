@@ -42,8 +42,10 @@ public class PdlUtils {
     }
 
     private void mockPdlResponse(String response) {
-        stubFor(post("/graphql").withHeader("Tema", equalTo(appProperties.pdl().tema()))
-                        .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
+        stubFor(post("/graphql")
+            .withHeader("Tema", equalTo(appProperties.pdl().tema()))
+            .withHeader("behandlingsnummer", equalTo(appProperties.pdl().behandlingsnummer()))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
     }
 
     public void addPersonToPdlResponse(boolean mellomnavn, String... personIdenter) {
