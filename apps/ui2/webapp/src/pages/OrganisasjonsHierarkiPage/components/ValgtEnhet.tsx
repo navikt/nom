@@ -46,7 +46,7 @@ export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
       <div>
         <Heading level={"2"} size="large">
           <img
-            alt={"Enhet"}
+            alt=""
             css={css`
               margin-right: 1rem;
             `}
@@ -56,11 +56,18 @@ export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
         </Heading>
         <div
           css={css`
-            display: flex;
-            gap: 2rem;
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: var(--a-spacing-2);
+            margin-top: var(--a-spacing-2);
           `}
         >
-          <span>
+          <span
+            css={css`
+              grid-column: span 2;
+              font-size: var(--a-font-size-xlarge);
+            `}
+          >
             Leder: <OrgenhetLederLink enhet={valgtEnhet} />
           </span>
           <span>
