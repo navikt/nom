@@ -11,6 +11,7 @@ app:
     eventSourceIdleTimeout: 10000 # Millis før idle event - brukes for å trigge når lesing av eventsource køen er ferdig.
   pdl:
     tema: GEN
+    behandlingsnummer: B348
     baseUrl: ${PDL_BASE_URL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
     timeoutInMillis: 2500
