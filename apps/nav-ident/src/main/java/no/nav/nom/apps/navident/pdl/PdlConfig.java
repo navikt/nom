@@ -20,6 +20,7 @@ import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 public class PdlConfig {
 
     String tema;
+    String behandlingsnummer;
     String aadClientId;
     String baseUrl;
     int timeoutInMillis;
@@ -32,6 +33,7 @@ public class PdlConfig {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HEADER_CONSUMER_ID_KEY, appName)
                 .defaultHeader("Tema", tema)
+                .defaultHeader("behandlingsnummer", behandlingsnummer)
                 .build();
     }
 

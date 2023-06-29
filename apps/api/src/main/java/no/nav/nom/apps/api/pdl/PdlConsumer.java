@@ -53,6 +53,7 @@ public class PdlConsumer {
                 .headers(headers -> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.add("Tema", pdlProperties.tema());
+                    headers.add("behandlingsnummer", pdlProperties.behandlingsnummer());
                 })
                 .webClient(builder -> builder.filter(PersonBatchLoader.setBearerAuthWith(tokenRepository, pdlProperties.aadClientId())))
                 .build();

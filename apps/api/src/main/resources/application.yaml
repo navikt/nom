@@ -21,6 +21,7 @@ app:
     aadClientId: api://${NIK_CLIENT_ID}/.default
   pdl:
     tema: GEN
+    behandlingsnummer: B348
     baseUrl: ${PDL_BASEURL}
     aadClientId: api://${PDL_CLIENT_ID}/.default
   dvh-load:

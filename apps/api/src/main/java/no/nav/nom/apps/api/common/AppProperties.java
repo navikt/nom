@@ -24,6 +24,7 @@ public record AppProperties(
 
     public record Pdl(
             String tema,
+            String behandlingsnummer,
             String aadClientId,
             String baseUrl
     ) {}
