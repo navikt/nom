@@ -1,9 +1,10 @@
 package no.nav.nom.apps.api.rest.person;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.SecurityTestUtils;
 import no.nav.nom.apps.api.rest.RestTestBase;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,13 +59,24 @@ public class PersonTest extends RestTestBase {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim().claim("azp", "invalid")));
 
+        var path = "/api/v1/person/getPerson";
+
         val response = testRestTemplate.exchange(
-                "/api/v1/person/getPerson",
+                path,
                 HttpMethod.POST,
                 new HttpEntity<>(new PdlPersonRequest(personident), headers),
-                String.class
+                JsonNode.class
         );
         Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
+
+        var responseBody = response.getBody();
+
+        Assertions.assertNotNull(responseBody);
+        Assertions.assertEquals(responseBody.size(), 4);
+        Assertions.assertEquals(responseBody.get("error").asText(), "Forbidden");
+        Assertions.assertEquals(responseBody.get("path").asText(), path);
+        Assertions.assertTrue(responseBody.has("status"));
+        Assertions.assertTrue(responseBody.has("timestamp"));
+
     }
 }

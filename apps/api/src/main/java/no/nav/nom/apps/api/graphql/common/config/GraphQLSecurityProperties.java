@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.graphql.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.StringUtils;
@@ -13,7 +12,6 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 
-@ConstructorBinding
 @ConfigurationProperties("app.graphql.auth")
 public record GraphQLSecurityProperties(
         @DefaultValue Map<String, ScopedAccess> clients,

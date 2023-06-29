@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -464,11 +463,11 @@ public class OrgEnhetTest extends TestBase {
         assertEquals(LocalDate.parse("2021-06-01"), outputEnhet1.get().getGyldigFom());
         assertFalse(outputEnhet1.get().getGyldigTom().isPresent());
 
-        val historicFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findFirst().get().getFid();
+        val historicFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findFirst().orElseThrow().getFid();
 
         var historicOutputEnhet = orgenhetService.getByFid(historicFid);
         assertTrue(historicOutputEnhet.isPresent());
-        assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom().get());
+        assertEquals(LocalDate.parse("2020-12-31"), historicOutputEnhet.get().getGyldigTom().orElseThrow());
 
         dvhOrgenhetMockUtils.createEmptyResponse();
         mockedEnhet1.setORGENHET_TIL_PERIODE(202102);
@@ -493,11 +492,11 @@ public class OrgEnhetTest extends TestBase {
             mockedEnhet1.getORGENHET_NAVN()
         );
 
-        var historicStateFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet2.get().getFid())).findFirst().get().getFid();
+        var historicStateFid = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet2.orElseThrow().getFid())).findFirst().orElseThrow().getFid();
 
         historicOutputEnhet = orgenhetService.getByFid(historicStateFid);
         assertTrue(historicOutputEnhet.isPresent());
-        assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom().get());
+        assertEquals(LocalDate.parse("2021-02-28"), historicOutputEnhet.get().getGyldigTom().orElseThrow());
     }
 
     @Test
@@ -607,7 +606,7 @@ public class OrgEnhetTest extends TestBase {
         val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1After.get().getFid())).findAny();
         assertTrue(outputEnhet3.isPresent());
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
-        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
+        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().orElseThrow());
     }
 
     @Test
@@ -679,14 +678,14 @@ public class OrgEnhetTest extends TestBase {
         val outputEnhet3 = allEnheter.stream().filter(e -> !e.getFid().equals(outputEnhet1.get().getFid())).findAny();
         assertTrue(outputEnhet3.isPresent());
         assertEquals(LocalDate.parse("2020-08-01"), outputEnhet3.get().getGyldigFom());
-        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().get());
+        assertEquals(LocalDate.parse("2020-11-30"), outputEnhet3.get().getGyldigTom().orElseThrow());
     }
 
     @Test
     @SneakyThrows
     @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato")
     void scenario35() {
-        LocalDate stillingMaxTil = LocalDate.of(2022,07,26);
+        LocalDate stillingMaxTil = LocalDate.of(2022,7,26);
         val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId")
             .ORGENHET_NAVN("testNavn")
@@ -715,7 +714,7 @@ public class OrgEnhetTest extends TestBase {
     @SneakyThrows
     @DisplayName("Parkert enhet: Persistert enhet har ikke gyldigTOM, ny last så har enheten StillingMaks gyldig til dato. Dvh har dette som to splittede enheter")
     void scenario36() {
-        LocalDate stillingMaxTil = LocalDate.of(2022,07,26);
+        LocalDate stillingMaxTil = LocalDate.of(2022,7,26);
         val mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId")
             .ORGENHET_NAVN("testNavn")

@@ -4,7 +4,6 @@ import lombok.val;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.clients.admin.RecordsToDelete;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -33,7 +32,7 @@ public class KafkaUtils {
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
     @SpyBean
     private final RessursStateListener ressursStateListener;
-    private KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
+    private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
 
     @Autowired
     public KafkaUtils(
@@ -65,10 +64,6 @@ public class KafkaUtils {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void sendBulk(Map<String, RessursState> data) {
-        data.forEach(this::send);
     }
 
     public void clearKafka() {

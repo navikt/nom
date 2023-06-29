@@ -9,12 +9,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.CompareOldAndNewOrgtilknytningStates;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -132,8 +132,15 @@ public class SanityCheck {
         List<String> aktiveUnderEnheterUniqueAgressoIder = uniqueAgressoIdForUnderEnhet(aktiveOrganiseringer);
         List<IOrgenhet> aktiveEnheterUtenAktivOverEnhet = enheterIkkeBlandtAgressoIder(aktiveEnheter, aktiveUnderEnheterUniqueAgressoIder);
 
-        aktiveEnheterUtenAktivOverEnhet.stream().forEach( oe ->
-            result.append(oe.getId() +";" + oe.getUniqueAgressoId() + ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n")
+        aktiveEnheterUtenAktivOverEnhet.forEach(oe ->
+            result.append(oe.getId())
+                .append(";")
+                .append(oe.getUniqueAgressoId())
+                .append(";")
+                .append(oe.getGyldigFom())
+                .append(";")
+                .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                .append("\n")
         );
 
         return result.toString();
@@ -217,35 +224,40 @@ public class SanityCheck {
             ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForUniqueAgressoIder(ressurserMedAktiveTilknytninger, aktiveDvhTilknytninger, uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering);
         }
 
-        ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( r ->
+        ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.forEach(r ->
             {
-                result.append(r.navident() + " [" + r.fid() + "]  - " + r.sektor() + " => ");
+                result.append(r.navident()).append(" [").append(r.fid()).append("]  - ").append(r.sektor()).append(" => ");
                 StringBuffer enheter = new StringBuffer();
                 if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
                     aktiveOrgtilknytningState.stream()
                         .filter(ot -> ot.navident().equals(r.navident()))
                         .forEach(ot -> {
                                 var enhet = orgenhetService.getById(ot.orgEnhetId()).get();
-                                enheter.append(enhet.getId() + " - " + enhet.getNavn() + "[" + enhet.getUniqueAgressoId() + "], ");
+                                enheter.append(enhet.getId())
+                                    .append(" - ")
+                                    .append(enhet.getNavn())
+                                    .append("[")
+                                    .append(enhet.getUniqueAgressoId())
+                                    .append("], ");
                             }
                         );
                 } else {
                     aktiveDvhTilknytninger.stream()
                         .filter(ot -> ot.getNavIdent().equals(r.navident()))
                         .forEach(ot ->
-                            enheter.append(ot.getUniqueAgressoId() + ", ")
+                            enheter.append(ot.getUniqueAgressoId()).append(", ")
                         );
                 }
                 if (enheter.length() == 0) {
                     result.append(" What? - ingen orgenhet i tilknytninger?\n");
                 } else {
-                    result.append(enheter.substring(0, enheter.length() - 2) + "\n");
+                    result.append(enheter.substring(0, enheter.length() - 2)).append("\n");
                 }
             }
         );
 
         result.append("\n");
-        uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.stream().forEach( s -> result.append(s + "\n"));
+        uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.forEach(s -> result.append(s).append("\n"));
 
         return result.toString();
     }
@@ -267,28 +279,45 @@ public class SanityCheck {
             var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
             var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
 
-            aktiveTilknytningerUtoverEnhetPeriode.stream().forEach(t -> {
+            aktiveTilknytningerUtoverEnhetPeriode.forEach(t -> {
                 var oe = orgenhetService.getById(t.orgEnhetId()).get();
-                result.append(
-                    t.navident() + ";" +
-                        oe.getUniqueAgressoId() + ";" +
-                        t.orgEnhetId() + ";" +
-                        t.gyldigFom() + ";" +
-                        (t.gyldigTom().isPresent() ? t.gyldigTom().get() : "") + ";" +
-                        oe.getGyldigFom() + ";" +
-                        (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") +
-                        "\n");
+                result.append(t.navident())
+                    .append(";")
+                    .append(oe.getUniqueAgressoId())
+                    .append(";")
+                    .append(t.orgEnhetId())
+                    .append(";")
+                    .append(t.gyldigFom())
+                    .append(";")
+                    .append(t.gyldigTom().isPresent() ? t.gyldigTom().get() : "")
+                    .append(";")
+                    .append(oe.getGyldigFom())
+                    .append(";")
+                    .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                    .append("\n");
             });
         } else {
             List<DvhOrgtilknytning> alleTilknytninger = dvhRepository.getKoblinger().stream().map(DvhOrgtilknytning.class::cast).toList();
             List<DvhOrgtilknytning> aktiveTilknytninger = aktiveOrgtilknytninger(alleTilknytninger);
             List<DvhOrgtilknytning> aktiveTilknytningerUtoverEnhetPeriode = tilknytningerUtoverEnhetPeriode(aktiveTilknytninger);
 
-            aktiveTilknytningerUtoverEnhetPeriode.stream().forEach(t -> {
+            aktiveTilknytningerUtoverEnhetPeriode.forEach(t -> {
                 var oe = orgenhetService.getById(t.getOrgEnhetId()).get();
-                result.append(t.getNavIdent() + ";" + t.getUniqueAgressoId() + ";" + t.getOrgEnhetId() + ";" + t.getGyldigFom() + ";" + (t.getGyldigTom()
-                    .isPresent() ? t.getGyldigTom().get() : "") +
-                    ";" + oe.getGyldigFom() + ";" + (oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "") + "\n");
+                result.append(t.getNavIdent())
+                    .append(";")
+                    .append(t.getUniqueAgressoId())
+                    .append(";")
+                    .append(t.getOrgEnhetId())
+                    .append(";")
+                    .append(t.getGyldigFom())
+                    .append(";")
+                    .append(t.getGyldigTom()
+                        .isPresent() ? t.getGyldigTom().get() : "")
+                    .append(";")
+                    .append(oe.getGyldigFom())
+                    .append(";")
+                    .append(oe.getGyldigTom().isPresent() ? oe.getGyldigTom().get() : "")
+                    .append("\n");
             });
         }
         return result.toString();
@@ -371,7 +400,7 @@ public class SanityCheck {
         result.append("Totalt antall enheter: %s\n".formatted(alleEnheter.size()));
         result.append("   Med startdato: %s\n".formatted(enheterMedStartdato(alleEnheter).size()));
         result.append("   Med sluttdato: %s\n".formatted(enheterMedSluttdato(alleEnheter).size()));
-        result.append("   Med sluttdato før startdato: %s\n\n".formatted(enheterMedSluttdatoFørStartdato(enheterMedSluttdato(alleEnheter)).size()));
+        result.append("   Med sluttdato før startdato: %s\n\n".formatted(enheterMedSluttdatoFoerStartdato(enheterMedSluttdato(alleEnheter)).size()));
         log.info("Resultat so far:\n{}", result);
         return result.toString();
     }
@@ -479,7 +508,7 @@ public class SanityCheck {
         return enheter.stream().filter( oe -> oe.getGyldigTom().isPresent()).toList();
     }
 
-    private List<IOrgenhet> enheterMedSluttdatoFørStartdato(List<IOrgenhet> enheter) {
+    private List<IOrgenhet> enheterMedSluttdatoFoerStartdato(List<IOrgenhet> enheter) {
         return enheter.stream().filter( oe -> oe.getGyldigTom().get().isBefore(oe.getGyldigFom())).toList();
     }
 
@@ -611,7 +640,7 @@ public class SanityCheck {
     }
 
     private List<RessursState> ressurserUtenKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
-        return ressurser.stream().filter( r -> !orgtilknytninger.stream().anyMatch( ot -> ot.getNavIdent().equals(r.navident()))).toList();
+        return ressurser.stream().filter( r -> orgtilknytninger.stream().noneMatch(ot -> ot.getNavIdent().equals(r.navident()))).toList();
     }
 
     private List<RessursState> ressurserForNavIdenter(List<RessursState> ressurser, List<String> navIdenter) {

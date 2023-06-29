@@ -86,11 +86,13 @@
             <groupId>com.thomaskasene.wiremock</groupId>
             <artifactId>wiremock-junit-extension</artifactId>
             <version>${wiremock-extension.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
             <version>${wiremock.version}</version>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>commons-fileupload</groupId>

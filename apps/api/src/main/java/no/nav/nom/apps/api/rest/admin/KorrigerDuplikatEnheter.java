@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.admin;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,28 +49,26 @@ public class KorrigerDuplikatEnheter {
         Map<String, List<IOrgenhet>> aktiveEnheterDuplikatAvSammeUniqueAgressoId = duplikatPaaSammeUniqueAgresssoId(aktiveEnheter);
         ObjectMapper mapper = new ObjectMapper();
         StringBuffer str = new StringBuffer();
-        aktiveEnheterDuplikatAvSammeUniqueAgressoId.forEach( (faktiskId, duplikater) -> {
-            duplikater.forEach( duplikat -> {
-                ObjectNode node = mapper.createObjectNode();
-                node.put("Duplikate of", faktiskId);
-                node.put("For", duplikat.getAgressoId() + "-" + duplikat.getNavn() + "-" + duplikat.getOrgNiv());
-                node.put("With period", duplikat.getGyldigFom().toString() + " - " + (duplikat.getGyldigTom().isPresent() ? duplikat.getGyldigTom().get() :  " "));
-                AvvikleOrgEnhet avvikleOrgEnhet =
-                    new AvvikleOrgEnhet(
-                        duplikat.getGyldigFom(),
-                        new InputMetadata(
-                            "Swagger",
-                            "Korriger duplikate aktive org enheter",
-                            node,
-                            new Origination("nom-api", "nom-api")
-                        )
-                    );
-                String eventStr =  "AvikleEvent for fid=%s, id=%s, date=%s og inputmeta=%s".formatted(duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
-                str.append(eventStr + "\n");
-                log.info(eventStr);
-                if (performUpdate) orgEnhetCommandService.avikleOrgEnhet(duplikat.getFid(), avvikleOrgEnhet);
-            });
-        });
+        aktiveEnheterDuplikatAvSammeUniqueAgressoId.forEach( (faktiskId, duplikater) -> duplikater.forEach(duplikat -> {
+            ObjectNode node = mapper.createObjectNode();
+            node.put("Duplikate of", faktiskId);
+            node.put("For", duplikat.getAgressoId() + "-" + duplikat.getNavn() + "-" + duplikat.getOrgNiv());
+            node.put("With period", duplikat.getGyldigFom().toString() + " - " + (duplikat.getGyldigTom().isPresent() ? duplikat.getGyldigTom().get() :  " "));
+            AvvikleOrgEnhet avvikleOrgEnhet =
+                new AvvikleOrgEnhet(
+                    duplikat.getGyldigFom(),
+                    new InputMetadata(
+                        "Swagger",
+                        "Korriger duplikate aktive org enheter",
+                        node,
+                        new Origination("nom-api", "nom-api")
+                    )
+                );
+            String eventStr =  "AvikleEvent for fid=%s, id=%s, date=%s og inputmeta=%s".formatted(duplikat.getFid(), duplikat.getId(), avvikleOrgEnhet.gyldigTom(), avvikleOrgEnhet.inputMetadata());
+            str.append(eventStr).append("\n");
+            log.info(eventStr);
+            if (performUpdate) orgEnhetCommandService.avikleOrgEnhet(duplikat.getFid(), avvikleOrgEnhet);
+        }));
         return str.toString();
     }
 
@@ -79,7 +76,7 @@ public class KorrigerDuplikatEnheter {
         // FOM er før eller lik dagens dat, samt at TOM er null eller fremtidig
         return enheter.stream().filter( oe ->
             oe.getGyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
-                (!oe.getGyldigTom().isPresent() || oe.getGyldigTom().get().isAfter(LocalDate.now()))
+                (oe.getGyldigTom().isEmpty() || oe.getGyldigTom().get().isAfter(LocalDate.now()))
         ).toList();
     }
 

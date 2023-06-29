@@ -3,9 +3,7 @@ package no.nav.nom.apps.api.common.security;
 
 import com.nimbusds.jose.jwk.JWK;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@ConstructorBinding
 @ConfigurationProperties("authentication")
 public record AuthenticationProperties(
         Aad aad

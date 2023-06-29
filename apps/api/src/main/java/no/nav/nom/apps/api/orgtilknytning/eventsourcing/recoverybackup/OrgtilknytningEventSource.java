@@ -7,13 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Data
 @Entity
@@ -21,15 +19,12 @@ import javax.persistence.Table;
 @Table(name = "T_ORGTILKNYTNING_EVENTSOURCE")
 @AllArgsConstructor
 @NoArgsConstructor
-@TypeDefs({
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
 public class OrgtilknytningEventSource {
     @Id
     @Column(name = "EVENT_KEY", nullable = false, updatable = false)
     private String eventKey;
 
-    @Type(type = "jsonb")
+    @Type(JsonBinaryType.class)
     @Column(name = "PAYLOAD", nullable = false, updatable = false)
     private JsonNode payload;
 }

@@ -1,0 +1,17 @@
+management:
+  metrics.tags.app: ${app.name}
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints.web:
+    base-path: /internal
+    exposure.include: prometheus,health,heapdump,scheduledtasks,threaddump
+
+app.security.resource-server:
+  accepted-audience: ${AZURE_APP_CLIENT_ID:}, api://${AZURE_APP_CLIENT_ID:}
+
+unleash:
+  endpoint:
+    url: https://unleash.nais.io/api

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.util.concurrent.ListenableFuture;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -51,7 +51,7 @@ public class RessursEventSourceRecovery {
         this.taskExecutor = taskExecutor;
     }
 
-    private ListenableFuture<SendResult<String, RessursEvent>> sendMessage(String eventKey, RessursEvent event) {
+    private CompletableFuture<SendResult<String, RessursEvent>> sendMessage(String eventKey, RessursEvent event) {
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
     }
 

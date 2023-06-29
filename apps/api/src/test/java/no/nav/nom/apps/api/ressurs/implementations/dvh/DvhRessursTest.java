@@ -6,7 +6,9 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Tester basic parsing av Json objekter fra DVH")
 class DvhRessursTest {
@@ -39,7 +41,7 @@ class DvhRessursTest {
         JsonNode node = mapper.readTree(json);
 
         DvhRessurs dvhRessurs = new DvhRessurs(node);
-        assertTrue(!dvhRessurs.hasPermisjon());
+        assertFalse(dvhRessurs.hasPermisjon());
         assertNotNull(dvhRessurs.getSluttdato());
     }
 }

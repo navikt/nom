@@ -11,9 +11,9 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
@@ -54,7 +54,6 @@ public class DvhRestConsumer {
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
-    private final Environment environment;
     private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
     private final RessursStillingLoader ressursStillingLoader;
@@ -233,14 +232,6 @@ public class DvhRestConsumer {
 
     private boolean determineEnhetActive(JsonNode e) {
         return e.get("ORGNODE_STATUS").asText().equals("N");
-    }
-
-    private boolean validateEnhet(JsonNode e) {
-        final var validate = e.hasNonNull("ORGNODE_KODE") && e.hasNonNull("ORGNODE_NAVN") && e.hasNonNull("ORGNODE_NIVA");
-        if (!validate) {
-            log.info("Ugyldig enhet fra dvh, ORGNODE_KODE: {}, ORGNODE_NAVN: {}", getAsText(e, "ORGNODE_KODE"), getAsText(e, "ORGNODE_NAVN"));
-        }
-        return validate;
     }
 
     private boolean validateOrganisering(JsonNode e) {

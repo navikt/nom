@@ -1,0 +1,43 @@
+app.kafka:
+  group-id-prefix: ${app.name}-${nais.namespace}
+
+spring.kafka:
+  client-id: ${app.name}
+  bootstrap-servers: ${KAFKA_BROKERS}
+  properties:
+    security.protocol: SSL
+    ssl:
+      keystore:
+        type: PKCS12
+        location: ${KAFKA_KEYSTORE_PATH}
+        password: ${KAFKA_CREDSTORE_PASSWORD}
+      truststore:
+        location: ${KAFKA_TRUSTSTORE_PATH}
+        password: ${KAFKA_CREDSTORE_PASSWORD}
+      endpoint.identification.algorithm:
+  listener:
+    concurrency: 1
+    poll-timeout: 1000
+    ack-mode: batch
+    type: batch
+  producer:
+    acks: all
+    retries: 2147483647
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      max.block.ms: 15000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+  consumer:
+    properties:
+      isolation.level: read_committed
+      specific.avro.reader: true
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    max-poll-records: 100
+    auto-offset-reset: none
+    enable-auto-commit: false
+
+spring.jmx.enabled: true
+server.tomcat.mbeanregistry.enabled: true

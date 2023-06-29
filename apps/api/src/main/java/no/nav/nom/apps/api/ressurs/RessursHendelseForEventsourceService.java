@@ -17,12 +17,12 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +37,7 @@ public class RessursHendelseForEventsourceService {
         log.info("Ressurser to process " + dvhRessurs.size());
         log.info("Sender meldinger ut på kafka");
         log.info("State repository size " + ressursStateRepository.getAll().size());
-        Map<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
+        Map<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettetRessuser = new ConcurrentHashMap<>();
 
         dvhRessurs.forEach(ressurs -> {
             val ressursByPersonident = ressursStateRepository.findByPersonident(ressurs.getPersonIdent());
@@ -63,7 +63,7 @@ public class RessursHendelseForEventsourceService {
                 .forEach(entry -> ressursSluttet(entry.getValue().getFid(), entry.getKey()));
     }
 
-    public Map.Entry<DvhRessurs, ListenableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
+    public Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
         return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
                 ressurs.getPersonIdent(),
                 ressurs.getNavIdent(),

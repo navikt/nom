@@ -1,9 +1,7 @@
 package no.nav.nom.apps.api.common;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@ConstructorBinding
 @ConfigurationProperties("app")
 public record AppProperties(
         Proxy proxy,

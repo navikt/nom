@@ -21,6 +21,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -159,9 +160,9 @@ public class RemedyController {
         }
     }
 
-    private RessursDTO createErrorResponse(HttpStatus status, String feilmelding) {
+    private RessursDTO createErrorResponse(HttpStatusCode httpStatusCode, String feilmelding) {
         return RessursDTO.builder()
-            .status(status.toString())
+            .status(String.valueOf(httpStatusCode.value()))
             .feilmelding(feilmelding)
             .build();
     }

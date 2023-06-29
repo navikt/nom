@@ -28,7 +28,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
@@ -192,10 +192,10 @@ public class RessursResolver {
                 .orElse(null);
     }
 
-    private ErrorCode resolveError(HttpStatus httpStatus) {
-        return switch (httpStatus) {
-            case OK, CREATED -> null;
-            case NOT_FOUND -> ErrorCode.NOT_FOUND;
+    private ErrorCode resolveError(HttpStatusCode httpStatusCode) {
+        return switch (httpStatusCode.value()) {
+            case 200, 201 -> null;
+            case 404 -> ErrorCode.NOT_FOUND;
             default -> ErrorCode.SERVER_ERROR;//.construct(env, errorMsg != null ? errorMsg : "Ukjent feil");
         };
     }

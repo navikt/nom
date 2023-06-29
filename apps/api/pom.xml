@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.0</version>
         <relativePath/>
     </parent>
 
@@ -26,7 +26,7 @@
         <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
         <postgresql.version>42.5.4</postgresql.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
-        <hypersistence-utils-hibernate-55.version>3.5.0</hypersistence-utils-hibernate-55.version>
+        <hypersistence-utils-hibernate-62.version>3.5.0</hypersistence-utils-hibernate-62.version>
         <graphql-extended-scalars.version>20.2</graphql-extended-scalars.version>
         <unleash.version>7.1.0</unleash.version>
         <apache.common.csv.version>1.10.0</apache.common.csv.version>
@@ -34,6 +34,9 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <testcontainers.version>1.17.6</testcontainers.version>
         <opencsv.version>5.7.1</opencsv.version>
+        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
+        <wiremock.version>2.35.0</wiremock.version>
+
     </properties>
 
 
@@ -107,10 +110,9 @@
         <dependency>
             <!-- previously named com.vladmihalcea:hibernate-types-55 -->
             <!-- now https://github.com/vladmihalcea/hypersistence-utils -->
-            <!-- TODO: Migrate to hypersistence-utils-hibernate-60 when upgrading to spring boot 3.0 -->
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>${hypersistence-utils-hibernate-55.version}</version>
+            <artifactId>hypersistence-utils-hibernate-62</artifactId>
+            <version>${hypersistence-utils-hibernate-62.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
@@ -138,8 +140,8 @@
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>utils-common-v2</artifactId>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
@@ -190,19 +192,25 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.thomaskasene.wiremock</groupId>
+            <artifactId>wiremock-junit-extension</artifactId>
+            <version>${wiremock-extension.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -19,6 +19,7 @@
         <module>utils-common</module>
         <module>utils-test</module>
         <module>lucene-wrapper</module>
+        <module>utils-common-v2</module>
     </modules>
 
 

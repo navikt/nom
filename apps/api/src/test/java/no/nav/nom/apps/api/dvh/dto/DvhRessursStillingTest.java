@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Tester basic parsing av Json objekter fra DVH")
 class DvhRessursStillingTest {
@@ -63,9 +63,9 @@ class DvhRessursStillingTest {
                 .ressursOrgenhetNiv(Optional.of("ORGENHET"))
                 .ressursRemedyEnhetId(Optional.of("0491"))
                 .stillingRessursAgressoId(Optional.of("0499000"))
-                .ressursAgressoDatoFom(LocalDate.of(2006,04,18))
+                .ressursAgressoDatoFom(LocalDate.of(2006,4,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
-                .ressursDvhDatoFom(LocalDate.of(2006,04,04))
+                .ressursDvhDatoFom(LocalDate.of(2006,4,4))
                 .ressursDvhDatoTom(LocalDate.of(2099,12,31))
                 .build();
         assertEquals(expected, actual);
@@ -118,9 +118,9 @@ class DvhRessursStillingTest {
                 .ressursOrgenhetNiv(Optional.of("Mangler"))
                 .ressursRemedyEnhetId(Optional.empty())
                 .stillingRessursAgressoId(Optional.of("0499000"))
-                .ressursAgressoDatoFom(LocalDate.of(2006,04,18))
+                .ressursAgressoDatoFom(LocalDate.of(2006,4,18))
                 .ressursAgressoDatoTom(LocalDate.of(2099,12,31))
-                .ressursDvhDatoFom(LocalDate.of(2006,04,04))
+                .ressursDvhDatoFom(LocalDate.of(2006,4,4))
                 .ressursDvhDatoTom(LocalDate.of(2099,12,31))
                 .build();
         assertEquals(expected, actual);

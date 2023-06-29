@@ -8,7 +8,8 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OrgtilknytningEventProducer {
@@ -27,7 +28,7 @@ public class OrgtilknytningEventProducer {
         this.objectMapper = objectMapper;
     }
 
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> sendMessage(OrgtilknytningEvent event) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> sendMessage(OrgtilknytningEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
         saveToDB(event, eventKey);
         return orgtilknytningEventProducerTemplate.sendDefault(eventKey, event);

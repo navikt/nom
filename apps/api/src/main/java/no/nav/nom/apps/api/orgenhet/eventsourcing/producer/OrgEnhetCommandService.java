@@ -17,9 +17,9 @@ import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -38,7 +38,7 @@ public class OrgEnhetCommandService {
         return fid;
     }
 
-    private ListenableFuture<SendResult<String, OrgEnhetEvent>> opprettOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
+    private CompletableFuture<SendResult<String, OrgEnhetEvent>> opprettOrgEnhet(String fid, OpprettOrgEnhet opprettOrgEnhet) {
         return eventProducer.sendMessage(getOpprettEvent(fid, opprettOrgEnhet));
     }
 
@@ -74,7 +74,7 @@ public class OrgEnhetCommandService {
         );
     }
 
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> avikleOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> avikleOrgEnhet(String fid, AvvikleOrgEnhet avvikleOrgEnhet) {
         return eventProducer.sendMessage(new OrgEnhetAvvikletEventV1(
                 fid,
                 new OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData(
@@ -85,7 +85,7 @@ public class OrgEnhetCommandService {
     }
 
     // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> korrigerOrgEnhet(String fid, KorrigerOrgEnhet korrigerOrgEnhet) {
         OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData additionalAgressoData = null;
         if (korrigerOrgEnhet.inputMetadata().inputInterfaceMethodName().equals("Datavarehus")) {
             var input = objectMapper.valueToTree(korrigerOrgEnhet.inputMetadata().inputInterfaceMethodArguments());
@@ -114,7 +114,7 @@ public class OrgEnhetCommandService {
                 ));
     }
 
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> endreOrgEnhetsType(String fid, EndreOrgEnhetsType endreOrgEnhetsType) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> endreOrgEnhetsType(String fid, EndreOrgEnhetsType endreOrgEnhetsType) {
         return eventProducer.sendMessage(new OrgEnhetTypeEndretEventV1(
             fid,
             new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(
@@ -124,7 +124,7 @@ public class OrgEnhetCommandService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, OrgEnhetEvent>> endreNomNivaa(String fid, EndreNomNivaa endreNomNivaa) {
+    public CompletableFuture<SendResult<String, OrgEnhetEvent>> endreNomNivaa(String fid, EndreNomNivaa endreNomNivaa) {
         return eventProducer.sendMessage(new NomNivaaEndretEventV1(
             fid,
             new NomNivaaEndretEventV1.NomNivaaEndretEventData(

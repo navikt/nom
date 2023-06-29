@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
-import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +35,11 @@ public class DvhService {
         val cachedEnheter = orgenhetService.getAllEnheter().stream()
                 .filter( e -> !e.getGyldigFom().isAfter(LocalDate.now())) // Ikke lag orgtilknytning til enhet som er gyldig kun i fremtiden
                 .filter( e -> e.getGyldigTom().isEmpty() || e.getGyldigTom().get().isAfter(LocalDate.now())) // Og ikke enheter som er avsluttet i fortiden
-                .collect(Collectors.groupingBy(e -> e.getAgressoId() + "" + e.getOrgNiv())).values().stream()
+                .collect(Collectors.groupingBy(e -> e.getAgressoId() + e.getOrgNiv())).values().stream()
                 .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toMap(e -> e.getAgressoId() + "" + e.getOrgNiv(), Function.identity()));
+                .collect(Collectors.toMap(e -> e.getAgressoId() + e.getOrgNiv(), Function.identity()));
 
         final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
         final var orgenhetMissing = new LinkedList<Orgtilknytning>();
@@ -48,7 +48,7 @@ public class DvhService {
         dvhRepository.saveKoblinger(
             koblinger.stream()
                 .filter(k -> {
-                    final var organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + "" + k.getOrgNiv());
+                    final var organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + k.getOrgNiv());
                     final var ressurs = ressursService.findByNavident(k.getNavIdent());
                     if (organisasjonsenhet == null && ressurs.isEmpty()) {
                         orgenhetAndRessursMissing.add(k);
@@ -117,10 +117,7 @@ public class DvhService {
                             } else if (ressurs.isEmpty()) {
                                 ressursMissing.add(l);
                             }
-                            if (enhet != null && ressurs.isPresent()) {
-                                return true;
-                            }
-                            return false;
+                            return enhet != null && ressurs.isPresent();
                         })
                         .toList()
         );

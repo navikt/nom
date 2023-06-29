@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.rest.remedy;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.api.SecurityTestUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.nik.NIKConsumer;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
@@ -12,7 +13,6 @@ import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -138,7 +138,7 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
 
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/opprettRessurs/",
+            "/api/v1/remedy/opprettRessurs",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             RessursDTO.class
@@ -181,7 +181,7 @@ public class RemedyControllerTest extends RestTestBase {
         headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
 
         val response = testRestTemplate.exchange(
-            "/api/v1/remedy/opprettRessurs/",
+            "/api/v1/remedy/opprettRessurs",
             HttpMethod.POST,
             new HttpEntity<>(request, headers),
             RessursDTO.class

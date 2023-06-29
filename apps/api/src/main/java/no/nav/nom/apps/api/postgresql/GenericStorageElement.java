@@ -7,18 +7,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import org.hibernate.annotations.JdbcTypeCode;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Converter;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
@@ -29,13 +31,10 @@ import java.util.UUID;
 @Table(name = "T_GENERIC_STORAGE")
 @AllArgsConstructor
 @NoArgsConstructor
-@TypeDefs({
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
 public class GenericStorageElement {
 
     @Id
-    @Type(type = "pg-uuid")
+    @JdbcTypeCode(SqlTypes.UUID)
     @Column(name = "ID", nullable = false, updatable = false)
     private UUID id;
 
@@ -44,7 +43,7 @@ public class GenericStorageElement {
     @Column(name = "DATA_TYPE", nullable = false, updatable = false)
     private DataType dataType;
 
-    @Type(type = "jsonb")
+    @Type(JsonBinaryType.class)
     @Column(name = "DOCUMENT", nullable = false, updatable = false)
     private JsonNode document;
 

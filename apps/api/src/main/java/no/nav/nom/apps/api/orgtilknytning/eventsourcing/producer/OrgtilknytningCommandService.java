@@ -15,7 +15,8 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -33,7 +34,7 @@ public class OrgtilknytningCommandService {
         return fid;
     }
 
-    private ListenableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgtilknytning(String fid, OpprettOrgtilknytning opprettOrgtilknytning) {
+    private CompletableFuture<SendResult<String, OrgtilknytningEvent>> opprettOrgtilknytning(String fid, OpprettOrgtilknytning opprettOrgtilknytning) {
         return eventProducer.sendMessage(new OrgtilknytningOpprettetEventV1(
             fid,
             new OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData(
@@ -46,7 +47,7 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(String fid, EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(String fid, EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret) {
         return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
             fid,
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
@@ -61,7 +62,7 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> avvikleOrgtilknytning(String fid, AvvikleOrgtilknytning avvikleOrgtilknytning) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> avvikleOrgtilknytning(String fid, AvvikleOrgtilknytning avvikleOrgtilknytning) {
         return eventProducer.sendMessage(new OrgtilknytningAvsluttetEventV1(
             fid,
             new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
@@ -75,7 +76,7 @@ public class OrgtilknytningCommandService {
     }
 
     // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> korrigerOrgtilknytningDato(String fid, KorrigerOrgtilknytningDato korrigerOrgtilknytningDato) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> korrigerOrgtilknytningDato(String fid, KorrigerOrgtilknytningDato korrigerOrgtilknytningDato) {
         return eventProducer.sendMessage(new OrgtilknytningDatoEndretEventV1(
             fid,
             new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
@@ -89,7 +90,7 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, OrgtilknytningEvent>> fjernOrgtilknytning(String fid, FjernOrgtilknytning fjernOrgtilknytning) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> fjernOrgtilknytning(String fid, FjernOrgtilknytning fjernOrgtilknytning) {
         return eventProducer.sendMessage(new OrgtilknytningFjernetEventV1(
             fid,
             new OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData(

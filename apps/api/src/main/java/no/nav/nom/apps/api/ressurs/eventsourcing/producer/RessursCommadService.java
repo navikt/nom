@@ -18,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -40,7 +40,7 @@ public class RessursCommadService {
         this.ressursStateListener = ressursStateListener;
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
+    public CompletableFuture<SendResult<String, RessursEvent>> createRessursEvent(OpprettRessursCommand opprettRessursCommand) {
         // TODO validate command
         return createRessurs(PrefixedUlidCreator.createRessursUlid(), opprettRessursCommand);
     }
@@ -59,7 +59,7 @@ public class RessursCommadService {
         }
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opphorRessursCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opphorRessursCommand, InputMetadata inputMetadata) {
         // TODO validate command
         return eventProducer.sendMessage(new RessursSluttetEventV1(
                 opphorRessursCommand.fid(),
@@ -68,7 +68,7 @@ public class RessursCommadService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(OppdaterPersonaliaCommand oppdaterPersonaliaCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(OppdaterPersonaliaCommand oppdaterPersonaliaCommand, InputMetadata inputMetadata) {
         // TODO validate command
         return eventProducer.sendMessage(new RessursPersonaliaOppdatertV1(
                 oppdaterPersonaliaCommand.fid(),
@@ -79,7 +79,7 @@ public class RessursCommadService {
         ));
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> oppdaterSektorEvent(OppdaterSektorCommand oppdaterSektorCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterSektorEvent(OppdaterSektorCommand oppdaterSektorCommand, InputMetadata inputMetadata) {
         return eventProducer.sendMessage(new RessursSektorOppdatertV1(
             oppdaterSektorCommand.fid(),
             new RessursSektorOppdatertV1.SektorOppdatertEventData(
@@ -90,7 +90,7 @@ public class RessursCommadService {
     }
 
 
-    private ListenableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
+    private CompletableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
 
         return eventProducer.sendMessage(new RessursOpprettetEventV1(
             fid,

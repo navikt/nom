@@ -8,7 +8,8 @@ import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class RessursEventProducer {
@@ -27,7 +28,7 @@ public class RessursEventProducer {
         this.objectMapper = objectMapper;
     }
 
-    public ListenableFuture<SendResult<String, RessursEvent>> sendMessage(RessursEvent event) {
+    public CompletableFuture<SendResult<String, RessursEvent>> sendMessage(RessursEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
         saveToDB(event, eventKey);
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
