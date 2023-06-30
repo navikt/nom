@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,9 +52,10 @@ public class OmadaUttrekk {
     public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
     private final Unleash unleash;
 
-    public OmadaUttrekk(IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService,
-                        OrgtilknytningStateService orgtilknytningStateService,
-                        DvhRepository dvhRepository, Unleash unleash
+    public OmadaUttrekk(
+        IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService,
+        OrgtilknytningStateService orgtilknytningStateService,
+        DvhRepository dvhRepository, Unleash unleash
     ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
@@ -67,16 +69,18 @@ public class OmadaUttrekk {
         description = "Returnerer csv med alle ressurser",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
     @GetMapping(value = "/ressurs", produces = "text/csv")
     public @ResponseBody byte[] exportRessurs() throws IOException {
         StringWriter writer = new StringWriter();
 
         final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato");
 
-        try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             ressursService.getAll().forEach(ressurs -> {
                 try {
                     printer.printRecord(
@@ -104,24 +108,34 @@ public class OmadaUttrekk {
         description = "Returnerer csv med alle orgtilknytninger for ressurser",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
     @GetMapping(value = "/orgtilknytning", produces = "text/csv")
-    public @ResponseBody byte[] exportOrgtilknytning() throws IOException {
+    public @ResponseBody byte[] exportOrgtilknytning(
+        @RequestParam(required = false, defaultValue = "false") boolean includeDagligOppfolging
+    ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
+        var useEventSourceState = includeDagligOppfolging || unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE);
 
-        try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
+        final var cSVFormat = useEventSourceState ?
+            getCSVFormat("navident", "org_enhet_id", "erDagligOppfolging", "gyldig_fom", "gyldig_tom")
+            : getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
+
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+            if (useEventSourceState) {
                 orgtilknytningStateService.getAllOrgtilknytninger().forEach(kobling -> {
                     try {
                         printer.printRecord(
                             kobling.navident(),
                             kobling.orgEnhetId(),
+                            kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
-                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse(""));
+                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
+                        );
 
                         writer.close();
                     } catch (IOException e) {
@@ -159,16 +173,18 @@ public class OmadaUttrekk {
         description = "Returnerer csv med alle telefonnumre for ressurser",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
     @GetMapping(value = "/telefon", produces = "text/csv")
     public @ResponseBody byte[] exportTelefon() throws IOException {
         StringWriter writer = new StringWriter();
 
         final var cSVFormat = getCSVFormat("navident", "nummer", "type", "beskrivelse");
 
-        try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             dvhRepository.getNavidentTelefonNrMap().forEach(telefon -> {
                 try {
                     printer.printRecord(
@@ -193,16 +209,29 @@ public class OmadaUttrekk {
         description = "Returnerer csv med alle orgenheter, og deres leder og organisering",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Success")
-    })
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
     @GetMapping(value = "/orgenhet", produces = "text/csv")
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("org_enhet_id", "agresso_id", "agresso_org_niv", "agresso_orgenhet_type", "navn", "gyldig_fom", "gyldig_tom", "leder_navident", "org_enhets_kategori", "org_enhet_over");
+        final var cSVFormat = getCSVFormat(
+            "org_enhet_id",
+            "agresso_id",
+            "agresso_org_niv",
+            "agresso_orgenhet_type",
+            "navn",
+            "gyldig_fom",
+            "gyldig_tom",
+            "leder_navident",
+            "org_enhets_kategori",
+            "org_enhet_over"
+        );
 
-        try(CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgenhetService.getAllEnheter().forEach(orgenhet -> {
                 try {
                     printer.printRecord(
@@ -214,19 +243,24 @@ public class OmadaUttrekk {
                         orgenhet.getGyldigFom().format(dateTimeFormatter),
                         orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
                         dvhRepository.getLedere().stream()
-                                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv().equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                                    .findAny()
-                                    .map(DvhLeder::getNavIdent)
-                                    .orElse(""),
+                            .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                                .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+                            .findAny()
+                            .map(DvhLeder::getNavIdent)
+                            .orElse(""),
                         orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
                         dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
                             .filter(organisering ->
-                                    organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
+                                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
                                     organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
                                     organisering.getNavnUnder().equals(orgenhet.getNavn())
                             )
                             .findAny()
-                            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getAgressoIdOver(), organisering.getOrgNivOver(), organisering.getNavnOver()).map(IOrgenhet::getId).orElse(null))
+                            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
+                                organisering.getAgressoIdOver(),
+                                organisering.getOrgNivOver(),
+                                organisering.getNavnOver()
+                            ).map(IOrgenhet::getId).orElse(null))
                             .orElse("")
                     );
 
