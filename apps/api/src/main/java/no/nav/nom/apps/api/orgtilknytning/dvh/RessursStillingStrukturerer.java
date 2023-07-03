@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -28,12 +29,18 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 public class RessursStillingStrukturerer {
     private final IOrgenhetService orgenhetService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
+    private final IRessursService ressursService;
     private final Environment environment;
+
+    // TODO: Fjern dette etter utvikling
     private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = -1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
 
-    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus, Environment environment) {
+    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
+                                       IRessursService ressursService,
+                                       Environment environment) {
         this.orgenhetService = orgenhetService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
+        this.ressursService = ressursService;
         this.environment = environment;
     }
 
@@ -68,6 +75,8 @@ public class RessursStillingStrukturerer {
         var grupperteStillinger = ressursStillinger.stream().collect(groupingBy( rs -> new StillingPeriode.StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn(), rs.getRessursAgressoId(), rs.getRessursOrgenhetNiv())));
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
+        LocalDate ressursSluttdato = ressursService.findByNavident(navident).get().sluttdato().orElse(null);
+
         // Sorter og slå sammen sammenhengende perioder
         grupperteStillinger.forEach( (stillingAgressoOrgIdOgNavn, grupperteRessursStillinger)  -> {
             log.debug("Slår sammen for {}", stillingAgressoOrgIdOgNavn);
@@ -83,6 +92,23 @@ public class RessursStillingStrukturerer {
                 var rs = sorted.get(i);
                 var start = rs.getStillingDatoFom();
                 var end =  rs.getStillingDatoTom();
+
+                if (ressursSluttdato != null && periodStart.isAfter(ressursSluttdato.minusDays(1))) {
+                    log.debug("""
+                              DVH ressursStilling for Navident {} starter ({}) på eller etter ressursens sluttdato {}.
+                               Ikke behandle flere ressursStillinger for denne navidenten.
+                              """, navident, rs.getStillingDatoFom(), ressursSluttdato);
+
+                    break; // Ikke bruk de som starter på eller etter Ressursens sluttdato
+                }
+                if (ressursSluttdato != null && end.isAfter(ressursSluttdato)) {
+                    log.debug("""
+                              DVH ressursStilling for Navident {} har sluttdato ({}) etter ressursens sluttdato {}.
+                               Avslutter stillingen på ressursens sluttdato.
+                              """, navident, rs.getStillingDatoFom(), ressursSluttdato);
+                    end = ressursSluttdato;
+                }
+
                 if(start.isEqual(previousEnd.plusDays(1))) {
                     //Stillings raden er  med fortsettelse på forrige stilling - slå sammen
                     previousEnd = end;
@@ -99,10 +125,12 @@ public class RessursStillingStrukturerer {
                     log.debug("Navident {} har overlapp i stillingsdatoer for '{}' -> forrige periode [{} - {}] og denne stillingen [{} - {}]", navident, stillingAgressoOrgIdOgNavn, periodStart, previousEnd, start, end);
                 }
             }
-            // Siste RessursStilling er slått sammen
-            perioderGruppert.add(
-                new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
-            );
+            if (ressursSluttdato == null || periodStart.isBefore(ressursSluttdato)) {
+                // Siste RessursStilling er slått sammen
+                perioderGruppert.add(
+                    new StillingPeriode(stillingAgressoOrgIdOgNavn, periodStart, previousEnd, null)
+                );
+            }
         });
         if (log.isDebugEnabled()) {
             log.debug("DVH Periodene er nå gruppert:\n{}",

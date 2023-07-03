@@ -5,9 +5,14 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +36,26 @@ class RessursStillingStrukturererTest extends TestBase {
     @MockBean
     OrgenhetService orgenhetService;
 
+    @MockBean
+    RessursStateRepository ressursService;
+
     private static IOrgenhet dummyEnhet_1;
     private static IOrgenhet dummyEnhet_2;
+    private static String navident_A001001 = "A001001";
+    private static String navident_B002002 = "B002002";
 
     @BeforeAll
     public static void init() {
         dummyEnhet_1 = getNomEnhet("FID_1", "x123yz", "Enhet_1", LocalDate.of(2000, 1, 1), null, "AGRID_1");
         dummyEnhet_2 = getNomEnhet("FID_2", "z321xy", "Enhet_2", LocalDate.of(2000, 1, 1), null, "AGRID_2");
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        when(ressursService.findByNavident(navident_A001001))
+            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident_A001001, Sektor.NAV_STATLIG, null, Optional.empty())));
+        when(ressursService.findByNavident(navident_B002002))
+            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", navident_B002002, Sektor.NAV_STATLIG, null, Optional.empty())));
     }
 
     @NotNull
@@ -62,55 +80,51 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test Gruppering per navident av RessursStillinger")
     public void test_001() {
-        String navid_1 = "A001001";
-        String navid_2 = "B002002";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE),
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE),
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         var result = ressursStillingStrukturerer.grupperPerNavident(ressursStillinger);
         assertEquals(2, result.size());
-        assertEquals(3, result.get(navid_1).size());
-        assertEquals(3, result.get(navid_2).size());
+        assertEquals(3, result.get(navident_A001001).size());
+        assertEquals(3, result.get(navident_B002002).size());
     }
 
     @Test
     @DisplayName("Test Gruppering per navident av RessursStillinger")
     public void test_002() {
-        String navid_1 = "A001001";
-        String navid_2 = "B002002";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_2, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         var result = ressursStillingStrukturerer.grupperPerNavident(ressursStillinger);
         assertEquals(2, result.size());
-        assertEquals(3, result.get(navid_1).size());
-        assertEquals(3, result.get(navid_2).size());
+        assertEquals(3, result.get(navident_A001001).size());
+        assertEquals(3, result.get(navident_B002002).size());
     }
 
     @Test
     @DisplayName("Test strukturer per navident av RessursStillinger")
     public void test_003() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
+
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(MAX_DATE, result.get(0).gyldigTom());
@@ -119,15 +133,14 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test strukturer per navident av RessursStillinger - Splitt på ikke sammenhengende periode")
     public void test_004() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(LocalDate.of(2020, 8, 31), result.get(0).gyldigTom());
@@ -138,15 +151,14 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test strukturer per navident av RessursStillinger - Splitt på ulike enheter")
     public void test_005() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_1, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -159,16 +171,15 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test strukturer per navident av RessursStillinger - Splitt på ulike enheter - Skip overlapp")
     public void test_006() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
-            getTestRessursStilling(navid_1, "AGRID_1", "Enhet_1", LocalDate.of(2020, 3, 1), MAX_DATE),
-            getTestRessursStilling(navid_1, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
-            getTestRessursStilling(navid_1, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", LocalDate.of(2020, 3, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -181,9 +192,8 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test strukturer en dvh stilling hvor agressoId spenner over 2 nom enheter som er splittet på periode")
     public void test_007() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID_1", "SAMME NAVN", LocalDate.of(2020, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_1", "SAMME NAVN", LocalDate.of(2020, 1, 1), MAX_DATE)
         );
 
         List<IOrgenhet> agrid_1_enheter = List.of(
@@ -193,7 +203,7 @@ class RessursStillingStrukturererTest extends TestBase {
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(agrid_1_enheter);
 
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(2, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
@@ -208,13 +218,12 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingens agressoId er upresis (ikke ORGENHET) men ressursens agressoId er")
     public void test_008() {
-        String navid_1 = "A001001";
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2022, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1));
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
@@ -223,17 +232,15 @@ class RessursStillingStrukturererTest extends TestBase {
     @Test
     @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingen periode går ut over periode til kjent Orgenhet")
     public void test_009() {
-        String navid_1 = "A001001";
-
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2018, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2018, 1, 1), MAX_DATE)
         );
 
         IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2020, 1, 1), null, "AGRID_1");
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet));
 
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
@@ -244,10 +251,8 @@ class RessursStillingStrukturererTest extends TestBase {
     @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingen periode feilaktige Orgenheter som er like med overlapp på dato (dette er en feil i orgenhet i såfall)")
     // Dette vil gå igjennom, men blir error melding på enhets feil, og kobling blir gjort mot første treff
     public void test_010() {
-        String navid_1 = "A001001";
-
         List<DvhRessursStilling> ressursStillinger = List.of(
-            getTestRessursStilling(navid_1, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE)
         );
 
         IOrgenhet enhet = getNomEnhet("FID_1", "a123bc", "Enhet_1", LocalDate.of(2018, 1, 1), null, "AGRID_1");
@@ -255,11 +260,34 @@ class RessursStillingStrukturererTest extends TestBase {
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(enhet, enhet2));
 
-        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_1, ressursStillinger);
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navident_A001001, ressursStillinger);
         assertEquals(1, result.size());
         assertEquals("AGRID_1", result.get(0).stilling().ressursAgressoId().orElse("NULL"));
         assertEquals("FID_1", result.get(0).orgenhet().getFid());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom()); // Strukturert stilling skal kun tas med fra enhet start dato
+    }
+
+    @Test
+    @DisplayName("Test strukturer per navident av RessursStillinger hvor DVH stillinger fortsetter etter ressursens sluttdato")
+    public void test_011() {
+        String navid_3 = "C003003";
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navid_3, "AGRID_1", "Enhet_1", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
+            getTestRessursStilling(navid_3, "AGRID_1", "Enhet_1", LocalDate.of(2020, 11, 1), LocalDate.of(2022, 12, 31)),
+            getTestRessursStilling(navid_3, "AGRID_1", "Enhet_1", LocalDate.of(2023, 1, 1), MAX_DATE)
+        );
+
+        LocalDate ressursSluttdato = LocalDate.of(2022, 1, 31);
+
+        when(ressursService.findByNavident(navid_3))
+            .thenReturn(Optional.of(new RessursState("FID_3", "03030354321", navid_3, Sektor.NAV_STATLIG, null, Optional.of(ressursSluttdato))));
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+
+        var result = ressursStillingStrukturerer.strukturerNavidentensRessursStillinger(navid_3, ressursStillinger);
+        assertEquals(1, result.size());
+        assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
+        assertEquals(ressursSluttdato, result.get(0).gyldigTom());
     }
 
     private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {

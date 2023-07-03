@@ -5,8 +5,12 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,6 +35,9 @@ class RessursStillingLoaderTest extends TestBase {
     @MockBean
     OrgenhetService orgenhetService;
 
+    @MockBean
+    RessursStateRepository ressursService;
+
     private static IOrgenhet agr_8620005,agr_8552106,agr_0807001;
 
     @BeforeAll
@@ -38,6 +45,14 @@ class RessursStillingLoaderTest extends TestBase {
         agr_8620005 = new OrgEnhet(new OrgEnhetState("FID_1", "x111yz", "Data og innsikt gruppe 5", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("8620005-ORGENHET-Data og innsikt gruppe 5"), Optional.of("8620005"), Optional.of("ORGENHET"), Optional.empty() ) );
         agr_8552106 = new OrgEnhet(new OrgEnhetState("FID_2", "z222xy", "IT utvikling 6", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("8552106-ORGENHET-IT utvikling 6"), Optional.of("8552106"), Optional.of("ORGENHET"), Optional.empty() ) );
         agr_0807001 = new OrgEnhet(new OrgEnhetState("FID_3", "z999xy", "Notodden lag 1, 2 og 3", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("0807001-ORGENHET-Notodden lag 1, 2 og 3"), Optional.of("0807001"), Optional.of("ORGENHET"), Optional.empty() ) );
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        when(ressursService.findByNavident("G123321"))
+            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", "G123321", Sektor.NAV_STATLIG, null, Optional.empty())));
+        when(ressursService.findByNavident("H554433"))
+            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", "H554433", Sektor.NAV_STATLIG, null, Optional.empty())));
     }
 
     @Test
