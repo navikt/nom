@@ -44,16 +44,14 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
-    properties:
-      security.protocol: SSL
-      ssl:
-        keystore:
-          type: PKCS12
-          location: ${KAFKA_KEYSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
-        truststore:
-          location: ${KAFKA_TRUSTSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
+    security.protocol: SSL
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: ${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: ${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
