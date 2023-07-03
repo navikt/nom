@@ -44,8 +44,8 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
+    security.protocol: SSL
     properties:
-      security.protocol: SSL
       ssl:
         keystore:
           type: PKCS12
