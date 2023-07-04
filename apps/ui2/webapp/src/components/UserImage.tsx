@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import React from "react";
 import { useQuery } from "react-query";
 
-import { person } from "./Images";
+import person from "~/resources/person.svg";
 
 type UserImageProperties = {
   navident?: string;

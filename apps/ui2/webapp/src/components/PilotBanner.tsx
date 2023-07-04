@@ -1,9 +1,11 @@
 import { css } from "@emotion/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@navikt/aksel-icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  InformationSquareFillIcon,
+} from "@navikt/aksel-icons";
 import { BodyShort, Heading } from "@navikt/ds-react";
 import { useState } from "react";
-
-import { InfoIcon } from "./Images";
 
 export const pilotBannerHeight = "50px";
 
@@ -47,7 +49,7 @@ const PilotBanner = () => {
   return (
     <div css={outerDivStyles}>
       <div css={bannerStyles} onClick={() => setIsOpen(!isOpen)}>
-        <img alt="Pilot info" css={iconStyles} src={InfoIcon} />
+        <InformationSquareFillIcon css={iconStyles} />
         <Heading size="small">Løsningen er i pilot</Heading>
         <div css={buttonDivStyles}>
           {isOpen && <ChevronUpIcon fontSize="32px" />}

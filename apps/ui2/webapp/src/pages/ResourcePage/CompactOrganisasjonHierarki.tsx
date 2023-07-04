@@ -9,12 +9,12 @@ import type {
   OrgEnhet,
 } from "~/api/generated/graphql_generated";
 import type { Ressurs } from "~/api/generated/graphql_generated";
-import { building } from "~/components/Images";
 import {
   OverEnheterDivider,
   VerticalEdge,
 } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { getOverEnheterBackToRootRecursively } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
+import building from "~/resources/building.svg";
 
 export function CompactOrganisasjonHierarki({
   orgHierarki,

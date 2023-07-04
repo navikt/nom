@@ -4,8 +4,8 @@ import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
+import buildingFilled from "~/resources/buildingFilled.svg";
 
-import { building2 } from "../../../components/Images";
 import { HorizontalEdge } from "./CardViews";
 
 const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
@@ -50,7 +50,7 @@ export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
             css={css`
               margin-right: 1rem;
             `}
-            src={building2}
+            src={buildingFilled}
           />
           {valgtEnhet.navn}
         </Heading>

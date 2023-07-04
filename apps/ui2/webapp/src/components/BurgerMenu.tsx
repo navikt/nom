@@ -3,7 +3,7 @@ import { MenuHamburgerIcon, PersonPlusFillIcon } from "@navikt/aksel-icons";
 import { Button, Dropdown } from "@navikt/ds-react";
 import { useNavigate } from "react-router";
 
-import { hierarchy2 } from "./Images";
+import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ export function BurgerMenu() {
             <span>Opprett ressurs</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item onClick={() => navigate("org")}>
-            <img alt="hierarki" src={hierarchy2} />
+            <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
         </Dropdown.Menu.List>

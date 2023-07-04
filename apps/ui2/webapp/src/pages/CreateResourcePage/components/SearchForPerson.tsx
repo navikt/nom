@@ -4,7 +4,7 @@ import { encode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
 import { Outlet, useNavigate, useParams } from "react-router";
 
-import { opprettRessursIkon } from "../../../components/Images";
+import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 
 export function SearchForPerson() {
   const { personident } = useParams();
@@ -35,7 +35,7 @@ export function SearchForPerson() {
           width: 65px;
           align-self: center;
         `}
-        src={opprettRessursIkon}
+        src={opprettRessursIcon}
       />
       <Heading
         css={css`

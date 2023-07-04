@@ -4,10 +4,10 @@ import { Link } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "react-router-dom";
 
 import { useGetSession, useHasWriteAccess } from "~/api/useGetSession";
+import nomLogoCircle from "~/resources/nomLogoCircle.svg";
 import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
 import { BurgerMenu } from "./BurgerMenu";
-import { nomLogoCircle } from "./Images";
 import { SearchBar } from "./select/Searchbar";
 
 export const headerHeight = "6rem";

@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { ChevronRightIcon } from "@navikt/aksel-icons";
+import { ChevronRightIcon, PersonFillIcon } from "@navikt/aksel-icons";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
@@ -9,8 +9,7 @@ import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import * as Gq from "~/api/generated/graphql_generated";
 import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
-
-import { building, peopleFilledIcon } from "../../../components/Images";
+import building from "~/resources/building.svg";
 
 export function DynamicColumnContainer({
   children,
@@ -129,7 +128,7 @@ export function ResourceLink({
     >
       <UnitContainerLink>
         <VerticalEdge>
-          <img alt={"Person"} src={peopleFilledIcon} />
+          <PersonFillIcon color="white" />
         </VerticalEdge>
         <Heading
           css={css`
