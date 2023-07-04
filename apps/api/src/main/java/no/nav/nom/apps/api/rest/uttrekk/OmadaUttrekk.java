@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
@@ -44,6 +45,7 @@ public class OmadaUttrekk {
 
     private final OrgtilknytningDvhService orgtilknytningDvhService;
     private final OrgtilknytningStateService orgtilknytningStateService;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
 
     private final DvhRepository dvhRepository;
 
@@ -55,12 +57,13 @@ public class OmadaUttrekk {
     public OmadaUttrekk(
         IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService,
         OrgtilknytningStateService orgtilknytningStateService,
-        DvhRepository dvhRepository, Unleash unleash
+        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, Unleash unleash
     ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.orgtilknytningStateService = orgtilknytningStateService;
+        this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
         this.unleash = unleash;
     }
@@ -228,7 +231,8 @@ public class OmadaUttrekk {
             "gyldig_tom",
             "leder_navident",
             "org_enhets_kategori",
-            "org_enhet_over"
+            "org_enhet_over",
+            "remedyEnhetId"
         );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
@@ -261,7 +265,8 @@ public class OmadaUttrekk {
                                 organisering.getOrgNivOver(),
                                 organisering.getNavnOver()
                             ).map(IOrgenhet::getId).orElse(null))
-                            .orElse("")
+                            .orElse(""),
+                        remedyEnhetIdResolver.remedyEnhetId(orgenhet)
                     );
 
                     writer.close();

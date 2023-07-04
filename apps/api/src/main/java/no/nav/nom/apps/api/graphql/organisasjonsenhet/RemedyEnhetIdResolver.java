@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import io.getunleash.Unleash;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
@@ -22,5 +23,9 @@ public class RemedyEnhetIdResolver {
         return unleash.isEnabled(UNLEASH_SHOW_REMEDY_ENHET_ID)
             ? remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null)
             : null;
+    }
+
+    public String remedyEnhetId(IOrgenhet orgenhet) {
+        return remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
     }
 }
