@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
@@ -10,7 +11,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +24,7 @@ public class CompareOldAndNewOrgtilknytningStates {
     private final OrgtilknytningDvhService orgtilknytningDvhService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final RessursStateRepository ressursStateRepository;
+    private final OrgenhetService orgenhetService;
     private final HashMap<String, Pair> diffAntallOT = new HashMap<>();
     private final HashMap<String, Pair> diffAntallOT_ExcludeEksterne = new HashMap<>();
     private final HashMap<String, List<Orgtilknytning>> gamleOTerIkkeFunnetBlandtNye = new HashMap<>();
@@ -40,10 +41,13 @@ public class CompareOldAndNewOrgtilknytningStates {
     private boolean isDone = false;
     private boolean isStarted = false;
 
-    public CompareOldAndNewOrgtilknytningStates(OrgtilknytningDvhService orgtilknytningDvhService, OrgtilknytningStateService orgtilknytningStateService, RessursStateRepository ressursStateRepository) {
+    public CompareOldAndNewOrgtilknytningStates(OrgtilknytningDvhService orgtilknytningDvhService, OrgtilknytningStateService orgtilknytningStateService, RessursStateRepository ressursStateRepository,
+                                                OrgenhetService orgenhetService
+    ) {
         this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.ressursStateRepository = ressursStateRepository;
+        this.orgenhetService = orgenhetService;
     }
 
     @Async
@@ -264,7 +268,14 @@ public class CompareOldAndNewOrgtilknytningStates {
         return nyeOTer.stream()
             .anyMatch( nyOt ->
                 nyOt.orgEnhetId().equals(gammelOT.getOrgEnhetId())
+                || sammeAgressoId(nyOt.orgEnhetId(), gammelOT.getOrgEnhetId())
             );
+    }
+
+    private boolean sammeAgressoId(String nyOtEnhet, String gammelOtEnhet) {
+        String nyAgrId = orgenhetService.getById(nyOtEnhet).get().getAgressoId();
+        String gammelAgrId = orgenhetService.getById(gammelOtEnhet).get().getAgressoId();
+        return nyAgrId.equals(gammelAgrId);
     }
 
     private void sizeDiff(RessursState ressursState, List<Orgtilknytning> gamleOTer, Collection<OrgtilknytningState> nyeOTer) {
