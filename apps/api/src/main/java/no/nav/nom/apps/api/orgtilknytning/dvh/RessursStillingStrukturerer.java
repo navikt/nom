@@ -63,7 +63,7 @@ public class RessursStillingStrukturerer {
             log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
             var stillingerGruppert = strukturerNavidentensRessursStillinger(navident, rsList);
             if (log.isDebugEnabled()) {
-                log.debug("Resultat av gruppering og matching til orgenhet:\n{}", StillingPeriode.stillingperioderToString(stillingerGruppert, true));
+                log.debug("Resultat av gruppering og matching til orgenhet for navident {}:\n{}", navident, StillingPeriode.stillingperioderToString(stillingerGruppert, true));
                 stillingPerioderPerNavident.put(navident, stillingerGruppert);
             }
         });
@@ -79,10 +79,12 @@ public class RessursStillingStrukturerer {
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteStillinger.forEach( (stillingAgressoOrgIdOgNavn, grupperteRessursStillinger)  -> {
-            log.debug("Slår sammen for {}", stillingAgressoOrgIdOgNavn);
+            log.debug("For navident {} - Slår sammen for {}", navident, stillingAgressoOrgIdOgNavn);
             var sorted = grupperteRessursStillinger.stream().sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).toList();
             if (log.isDebugEnabled()) {
-                StringBuffer sb = new StringBuffer("Perioder:");
+                StringBuffer sb = new StringBuffer("Perioder (");
+                sb.append(navident);
+                sb.append("):");
                 sorted.forEach( rs -> sb.append("\n\t%s - %s".formatted(rs.getStillingDatoFom(), rs.getStillingDatoTom())));
                 log.debug(sb.toString());
             }
@@ -133,7 +135,8 @@ public class RessursStillingStrukturerer {
             }
         });
         if (log.isDebugEnabled()) {
-            log.debug("DVH Periodene er nå gruppert:\n{}",
+            log.debug("DVH Periodene for navident {} er nå gruppert:\n{}",
+                navident,
                 StillingPeriode.stillingperioderToString(
                     perioderGruppert.stream()
                         .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
@@ -183,10 +186,10 @@ public class RessursStillingStrukturerer {
                     }
                 } else if (nomEnheter.size() == 1) {
                     // Exact one match
-                    log.debug("StillingPerioden matcher en orgenhet: {}", orgenhetToString(nomEnheter.get(0)));
+                    log.debug("StillingPerioden for navident {} matcher en orgenhet: {}", navident, orgenhetToString(nomEnheter.get(0)));
                     // Må nå sjekke om stillingPerioden går utover enhetens periode. Hvis så, må enhetens periode brukes, og overskytende stillingsperiode må forkastes.
                     if (stillingPeriode.gyldigFom().isBefore(nomEnheter.get(0).getGyldigFom())) {
-                        log.debug("Stillingperioden starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor");
+                        log.debug("Stillingperioden for navident {} starter før kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor", navident);
                         perioderGruppertMedOrgenhet.add(
                             new StillingPeriode(
                                 stillingPeriode.stilling(),
@@ -195,7 +198,7 @@ public class RessursStillingStrukturerer {
                                 nomEnheter.get(0))
                         );
                     } else if (stillingPeriode.gyldigTom().isAfter(nomEnheter.get(0).getGyldigTom().orElse(NO_END_DATE))) {
-                        log.debug("Stillingperioden slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor");
+                        log.debug("Stillingperioden for navident {} slutter etter kjent orgenhets gyldighetsperiode. Må begrense stillingPeriodens gyldighet til å være innenfor", navident);
                         perioderGruppertMedOrgenhet.add(
                             new StillingPeriode(
                                 stillingPeriode.stilling(),
@@ -209,7 +212,7 @@ public class RessursStillingStrukturerer {
                 } else {
                     final var nomEnheterString = orgenheterToString(nomEnheter);
                     // Match på flere orgenheter i NOM. Må splitte stillingPerioden...
-                    log.debug("StillingPerioden {} matcher flere NOM Orgenheter\t{}", stillingPeriode, nomEnheterString);
+                    log.debug("StillingPerioden {} for navident {} matcher flere NOM Orgenheter\t{}", navident, stillingPeriode, nomEnheterString);
                     List<StillingPeriode> nyeStillingPerioder = new ArrayList<>();
                     AtomicReference<LocalDate> nextGyldigFom = new AtomicReference<>(stillingPeriode.gyldigFom());
                     nomEnheter.stream()
@@ -231,7 +234,7 @@ public class RessursStillingStrukturerer {
                                 nextGyldigFom.set(oe.getGyldigTom().orElse(NO_END_DATE).plusDays(1));
                             }
                         });
-                    log.debug("Splittet opp i\n\t{}", nyeStillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n\t")));
+                    log.debug("For navident {} - Splittet opp i\n\t{}", navident, nyeStillingPerioder.stream().map(StillingPeriode::toString).collect(Collectors.joining("\n\t")));
                     perioderGruppertMedOrgenhet.addAll(nyeStillingPerioder);
                 }
             });
