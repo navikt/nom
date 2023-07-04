@@ -70,6 +70,7 @@ public class CompareOldAndNewOrgtilknytningStates {
 
         StringBuffer strBuf = new StringBuffer();
         lagOppsummertRapport(strBuf);
+        isDone = false;
         return strBuf.toString();
     }
 
@@ -251,6 +252,7 @@ public class CompareOldAndNewOrgtilknytningStates {
         return gamleOTer.stream()
             .anyMatch( gammel ->
                 gammel.getOrgEnhetId().equals(nyOT.orgEnhetId())
+                || sammeAgressoId(nyOT.orgEnhetId(), gammel.getOrgEnhetId())
             );
     }
 
