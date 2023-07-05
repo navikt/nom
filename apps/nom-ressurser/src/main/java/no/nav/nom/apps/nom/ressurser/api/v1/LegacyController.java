@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,7 +18,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 /*
 Brukes bare i overgang til sikring av endepunkter i nom-ressurser, skal slettes.
 */
-@Unprotected
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/legacy/ressurs", produces = APPLICATION_JSON_VALUE)

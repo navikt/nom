@@ -6,7 +6,6 @@ import lombok.val;
 import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursRequestDTO;
 import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,6 @@ import java.time.LocalDate;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-@Unprotected
 @Profile("!prod")
 @RestController
 @RequestMapping(value = "/api/v1/ressursdata", produces = APPLICATION_JSON_VALUE)

@@ -38,6 +38,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+
   flyway:
     schemas: public
     table: schema_version
@@ -63,16 +64,12 @@ spring:
         max.block.ms: 15000
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
-
-no:
-  nav:
-    security:
-      jwt:
-        issuer:
-          aad:
-            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
-            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
-            proxy-url:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          audiences: ${AZURE_APP_CLIENT_ID}
 
 ---
 spring:

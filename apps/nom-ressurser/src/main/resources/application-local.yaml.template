@@ -24,6 +24,8 @@ spring:
 
 server.port: 8090
 ELECTOR_PATH: Dummy
+AZURE_APP_TENANT_ID: placeholder
+AZURE_APP_CLIENT_ID: placeholder
 
 management:
   endpoints:
@@ -32,16 +34,3 @@ management:
       base-path: /internal
       exposure:
         include: prometheus
-
-
-no:
-  nav:
-    security:
-      jwt:
-        issuer:
-          aad:
-#            discovery-url: ${AZURE_APP_WELL_KNOWN_URL:http://metadata}
-            discovery-url: http://localhost:${mock-oauth2-server.port}/aad/.well-known/openid-configuration
-            accepted-audience: ${AZURE_APP_CLIENT_ID:aud-localhost}
-            cookie-name: localhost-idtoken
-            proxy-url:

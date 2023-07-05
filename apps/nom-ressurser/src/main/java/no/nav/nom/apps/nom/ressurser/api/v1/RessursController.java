@@ -6,7 +6,6 @@ import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursRequestDTO;
 import no.nav.nom.apps.nom.ressurser.api.v1.dto.RessursResponseDTO;
 import no.nav.nom.apps.nom.ressurser.ressurser.Ressurs;
 import no.nav.nom.apps.nom.ressurser.ressurser.RessursRepository;
-import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,6 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@Protected
 @Slf4j
 @RestController
 @RequestMapping(value = "/api/v1/ressurs", produces = APPLICATION_JSON_VALUE)
