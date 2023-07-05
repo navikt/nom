@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.0</version>
         <relativePath />
     </parent>
 
@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
+            <artifactId>utils-common-v2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
