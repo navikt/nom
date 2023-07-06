@@ -56,8 +56,6 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
-  codec:
-    max-in-memory-size: 10MB
   security:
     oauth2:
       resourceserver:
