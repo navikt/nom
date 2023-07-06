@@ -7,6 +7,7 @@ import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,45 +33,44 @@ public class DvhController {
     private final String PROXY_PATH = "/dvh";
 
     @GetMapping(PROXY_PATH+"/**")
-    public String dvhProxyEndpoint(HttpServletRequest request){
+    public ResponseEntity<String> dvhProxyEndpoint(HttpServletRequest request){
         var target = appProperties.getDvh().getBaseUrl() + request.getRequestURI().replaceFirst("/proxy"+PROXY_PATH, "");
         target = request.getQueryString() == null || request.getQueryString().isEmpty() ? target : target + "?" + request.getQueryString();
         log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+target);
         return restTemplateDvh.exchange(target,
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 
     @GetMapping("/stillinger")
-    public String getStillinger(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> getStillinger(@AuthenticationPrincipal Jwt jwt) {
         return restTemplateDvh.exchange(appProperties.getDvh().getStilling().getUrl(),
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 
     @GetMapping("/ressurser")
-    public String getRessurser(@AuthenticationPrincipal Jwt jwt, @RequestParam(required = false) Integer bucketNum_in) {
+    public ResponseEntity<String> getRessurser(@AuthenticationPrincipal Jwt jwt, @RequestParam(required = false) Integer bucketNum_in) {
         val requestParamStr = (bucketNum_in != null) ?
-                "?bucketNum_in=" + bucketNum_in
-                : "";
-
+            "?bucketNum_in=" + bucketNum_in
+            : "";
         return restTemplateDvh.exchange(appProperties.getDvh().getRessurser().getUrl() + requestParamStr,
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 
     @GetMapping("/enheter")
-    public String getEnheter(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> getEnheter(@AuthenticationPrincipal Jwt jwt) {
         return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrl(),
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 
     @GetMapping("/enheter/v2")
-    public String getEnheterV2(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> getEnheterV2(@AuthenticationPrincipal Jwt jwt) {
         return restTemplateDvh.exchange(appProperties.getDvh().getEnheter().getUrlV2(),
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 
     @GetMapping("/dvhTlf")
-    public String getTlf(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> getTlf(@AuthenticationPrincipal Jwt jwt) {
         return restTemplateDvh.exchange(appProperties.getDvh().getTelDvh().getUrl(),
-                HttpMethod.GET, null, String.class).getBody();
+            HttpMethod.GET, null, String.class);
     }
 }
