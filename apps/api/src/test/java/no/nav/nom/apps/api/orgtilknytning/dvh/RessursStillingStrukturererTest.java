@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -22,6 +22,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -39,8 +41,7 @@ class RessursStillingStrukturererTest extends TestBase {
     @MockBean
     RessursStateRepository ressursService;
 
-    private static IOrgenhet dummyEnhet_1;
-    private static IOrgenhet dummyEnhet_2;
+    private static IOrgenhet dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4;
     private static String navident_A001001 = "A001001";
     private static String navident_B002002 = "B002002";
 
@@ -48,6 +49,8 @@ class RessursStillingStrukturererTest extends TestBase {
     public static void init() {
         dummyEnhet_1 = getNomEnhet("FID_1", "x123yz", "Enhet_1", LocalDate.of(2000, 1, 1), null, "AGRID_1");
         dummyEnhet_2 = getNomEnhet("FID_2", "z321xy", "Enhet_2", LocalDate.of(2000, 1, 1), null, "AGRID_2");
+        dummyEnhet_3 = getNomEnhet("FID_3", "a123bc", "Enhet_3", LocalDate.of(2000, 1, 1), null, "AGRID_3");
+        dummyEnhet_4 = getNomEnhet("FID_4", "a321bc", "Enhet_4", LocalDate.of(2000, 1, 1), null, "AGRID_4");
     }
 
     @BeforeEach
@@ -96,7 +99,7 @@ class RessursStillingStrukturererTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test Gruppering per navident av RessursStillinger")
+    @DisplayName("Test Gruppering per navident av RessursStillinger - annen sortering")
     public void test_002() {
         List<DvhRessursStilling> ressursStillinger = List.of(
             getTestRessursStilling(navident_B002002, "AGRID_2", "Enhet_2", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 10, 31)),
@@ -288,6 +291,160 @@ class RessursStillingStrukturererTest extends TestBase {
         assertEquals(1, result.size());
         assertEquals(LocalDate.of(2020, 1, 1), result.get(0).gyldigFom());
         assertEquals(ressursSluttdato, result.get(0).gyldigTom());
+    }
+
+    @Test
+    @DisplayName("Test splitt på perioder, og angivelse av DagligOppfølging")
+    public void test_012() {
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_?", LocalDate.of(2020, 1, 1), LocalDate.of(2020, 8, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2022, 1, 1), MAX_DATE)
+        );
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        assertEquals(1, result.size());
+
+        var stillingPerioderFor_A001001 = result.get(navident_A001001);
+        assertEquals(2, stillingPerioderFor_A001001.size());
+
+        var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
+        var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
+
+        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020, 8, 31), stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.JA,       stillingPeriode_1.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020, 11, 1), stillingPeriode_2.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.JA,       stillingPeriode_2.dagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("Test splitt på perioder, og angivelse av DagligOppfølging - med overlapp historisk")
+    public void test_013() {
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), LocalDate.of(2022, 8, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2020,11, 1), LocalDate.of(2021,12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2022, 1, 1), MAX_DATE)
+        );
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        assertEquals(1, result.size());
+
+        var stillingPerioderFor_A001001 = result.get(navident_A001001);
+        assertEquals(4, stillingPerioderFor_A001001.size());
+
+        var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
+        var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
+        var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
+        var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
+
+        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020,10,31),  stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.JA,       stillingPeriode_1.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,11, 1),  stillingPeriode_2.gyldigFom());
+        assertEquals(LocalDate.of(2022, 8,31),  stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_2.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,11, 1),  stillingPeriode_3.gyldigFom());
+        assertEquals(LocalDate.of(2022, 8,31),  stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_3.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2022, 9, 1),  stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.JA,       stillingPeriode_4.dagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("Test splitt på perioder, og angivelse av DagligOppfølging - med overlapp på dagens dato. Velg agressoId likhet")
+    public void test_014() {
+        LocalDate endOfThreeMonthsAfterNow = LocalDate.now().plusMonths(3).with(lastDayOfMonth());
+        LocalDate startOfThreeMonthBeforeNow = LocalDate.now().minusMonths(3).with(firstDayOfMonth());
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_2", LocalDate.of(2020, 1, 1), endOfThreeMonthsAfterNow),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", startOfThreeMonthBeforeNow, MAX_DATE)
+        );
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
+        var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        assertEquals(1, result.size());
+
+        var stillingPerioderFor_A001001 = result.get(navident_A001001);
+        assertEquals(4, stillingPerioderFor_A001001.size());
+
+        var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
+        var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
+        var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
+        var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
+
+        assertEquals(LocalDate.of(2020, 1, 1),                 stillingPeriode_1.gyldigFom());
+        assertEquals(startOfThreeMonthBeforeNow.minusDays(1),  stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.JA,                      stillingPeriode_1.dagligOppfolging());
+
+        assertEquals(startOfThreeMonthBeforeNow,    stillingPeriode_2.gyldigFom());
+        assertEquals(endOfThreeMonthsAfterNow,      stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.NEI,          stillingPeriode_2.dagligOppfolging());
+
+        assertEquals(startOfThreeMonthBeforeNow,    stillingPeriode_3.gyldigFom());
+        assertEquals(endOfThreeMonthsAfterNow,      stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.JA ,          stillingPeriode_3.dagligOppfolging());
+
+        assertEquals(endOfThreeMonthsAfterNow.plusDays(1),  stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE,                              stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.JA,                   stillingPeriode_4.dagligOppfolging());
+    }
+
+    @Test
+    @DisplayName("Test splitt på perioder, og angivelse av DagligOppfølging - med full overlapp samme start/slutt")
+    public void test_015() {
+        List<DvhRessursStilling> ressursStillinger = List.of(
+            getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_3", "Enhet_3", "AGRID_1", LocalDate.of(2020,10, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_4", "Enhet_4", "AGRID_1", LocalDate.of(2020,10, 1), MAX_DATE)
+        );
+
+        when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4));
+        var result = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        assertEquals(1, result.size());
+
+        var stillingPerioderFor_A001001 = result.get(navident_A001001);
+        assertEquals(6, stillingPerioderFor_A001001.size());
+
+        var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
+        var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
+        var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
+        var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
+        var stillingPeriode_5 = stillingPerioderFor_A001001.get(4);
+        var stillingPeriode_6 = stillingPerioderFor_A001001.get(5);
+
+        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020, 9,30),  stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_1.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_2.gyldigFom());
+        assertEquals(LocalDate.of(2020, 9,30),  stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_2.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_3.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.JA,       stillingPeriode_3.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.NEI,      stillingPeriode_4.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_5.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_5.gyldigTom());
+        assertEquals(DagligOppfolging.NEI,      stillingPeriode_5.dagligOppfolging());
+
+        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_6.gyldigFom());
+        assertEquals(MAX_DATE,                  stillingPeriode_6.gyldigTom());
+        assertEquals(DagligOppfolging.NEI,      stillingPeriode_6.dagligOppfolging());
     }
 
     private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {

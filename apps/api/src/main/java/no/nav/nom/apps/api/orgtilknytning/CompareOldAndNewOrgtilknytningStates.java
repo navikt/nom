@@ -231,7 +231,7 @@ public class CompareOldAndNewOrgtilknytningStates {
                             nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterneOgHistoriske.get(navident).add(ny);
                         }
 
-                        if (PeriodeUtil.isCurrentPeriode(ny)) {
+                        if (PeriodeUtil.isCurrentPeriod(ny)) {
                             nyeOTerFunnetBlandtGamle_DatoDiff_ExcludeEksterne_KunAktive.get(navident).add(ny);
                         }
                     }

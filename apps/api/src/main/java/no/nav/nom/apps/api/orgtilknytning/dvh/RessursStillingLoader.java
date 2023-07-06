@@ -49,7 +49,7 @@ public class RessursStillingLoader {
 
             List<DvhRessursStilling> ressursStillinger = load();
 
-            Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.StrukturerStilingPerioderPerNavident(ressursStillinger);
+            Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
 
             ressursStillingProcessor.process(stillingPerioderPerNavident);
 

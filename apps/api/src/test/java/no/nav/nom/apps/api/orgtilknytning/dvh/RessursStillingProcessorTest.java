@@ -97,7 +97,8 @@ public class RessursStillingProcessorTest {
                     Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get()
+                orgenhetService.getByFid("FID_1").get(),
+                StillingPeriode.DagligOppfolging.JA
             )
         );
 
@@ -186,7 +187,8 @@ public class RessursStillingProcessorTest {
                     Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
                 startDate,                          // Gyldig Fom for den strukturerte stillingen
                 endDate,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get()
+                orgenhetService.getByFid("FID_1").get(),
+                StillingPeriode.DagligOppfolging.JA
             )
         );
 
@@ -230,7 +232,8 @@ public class RessursStillingProcessorTest {
                     Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get()
+                orgenhetService.getByFid("FID_1").get(),
+                StillingPeriode.DagligOppfolging.JA
             )
         );
 
@@ -257,7 +260,6 @@ public class RessursStillingProcessorTest {
             .tilEnhet("a001bc")
             .erDagligOppfolging(true);
     }
-
     private void settOppStandardEnheter() {
         final Optional<LocalDate> EMPTY_DATE = Optional.empty();
         orgEnhetStateRepository.clear();

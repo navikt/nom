@@ -21,6 +21,9 @@
 <!--    <logger name="org.springframework.graphql" level="trace"/>-->
 <!--    <logger name="org.springframework.boot.autoconfigure.graphql" level="trace"/>-->
 
+    <!-- Kafka loggers -->
+    <logger name="org.apache.kafka" level="WARN"/>
+
     <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>

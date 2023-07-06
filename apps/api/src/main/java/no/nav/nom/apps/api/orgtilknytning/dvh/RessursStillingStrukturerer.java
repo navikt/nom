@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -16,12 +17,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
-import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentPeriode;
+import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isCurrentPeriod;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPeriod;
 
 @Component
@@ -50,7 +53,7 @@ public class RessursStillingStrukturerer {
             .collect(groupingBy(rs -> rs.getNavident().get()));
     }
 
-    public Map<String, List<StillingPeriode>> StrukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
+    public Map<String, List<StillingPeriode>> strukturerStilingPerioderPerNavident(List<DvhRessursStilling> ressursStillinger) {
         Map <String, List<DvhRessursStilling>> ressursStillingerGruppert = grupperPerNavident(ressursStillinger);
         log.debug("Gruppert ressursStilligner på {} navidenter", ressursStillingerGruppert.keySet().size());
 
@@ -60,14 +63,109 @@ public class RessursStillingStrukturerer {
 
             if (harBehandletNok_LOCAL_RUN(stillingPerioderPerNavident, navident)) return; // Har nå behandlet nok navidenter som starter på denne bokstaven. Hop til neste
 
+            if (ressursService.findByNavident(navident).isEmpty()) {
+                log.error("Har ressursStillinger fra DVH for navident {} som ikke finnes i NOM", navident);
+                return;
+            }
             log.debug("Strukturer ressursStillinger for navident {} til orgtilknytninger", navident);
             var stillingerGruppert = strukturerNavidentensRessursStillinger(navident, rsList);
+            var stillingerMedDagligOppfolging = finnKorrekteDagligOppfolginger(navident, stillingerGruppert);
             if (log.isDebugEnabled()) {
-                log.debug("Resultat av gruppering og matching til orgenhet for navident {}:\n{}", navident, StillingPeriode.stillingperioderToString(stillingerGruppert, true));
-                stillingPerioderPerNavident.put(navident, stillingerGruppert);
+                log.debug("Resultat av gruppering og matching til orgenhet for navident {}:\n{}", navident, StillingPeriode.toString(stillingerMedDagligOppfolging, true));
+                stillingPerioderPerNavident.put(navident, stillingerMedDagligOppfolging);
             }
         });
         return stillingPerioderPerNavident;
+    }
+
+    private List<StillingPeriode> finnKorrekteDagligOppfolginger(String navident, List<StillingPeriode> stillingPerioder) {
+
+        var splittedeStillinger = splitStillingPerioderPaOverlapp(navident, stillingPerioder);
+        var sorted = splittedeStillinger.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).toList();
+
+        List<StillingPeriode> medDagligOppfolging = new ArrayList<>();
+
+        sorted.stream().forEachOrdered( stillingPeriode -> {
+            var allInThisInterval = sorted.stream().filter( it ->PeriodeUtil.overlapsInterval(stillingPeriode.gyldigFom(), stillingPeriode.gyldigTom(), it)).toList();
+            boolean harNoenLikAgressoIdPaRessursOgStilling = allInThisInterval.stream().anyMatch(StillingPeriode::harSammeAgressoIdPaStillingOgRessurs);
+            if (allInThisInterval.size() == 1) {
+                // Kun en i perioden, må være DagligOppfolging.JA
+                medDagligOppfolging.add(new StillingPeriode(stillingPeriode, DagligOppfolging.JA));
+            } else {
+                if (PeriodeUtil.isHistoricPeriod(stillingPeriode) || !harNoenLikAgressoIdPaRessursOgStilling) {
+                    // Flere i perioden historisk - Kan ikke avgjøre her
+                    // Eller at ingen har stilling og ressurs har på samme agressoId
+                    // => DagligOppfolging.UKJENT
+                    medDagligOppfolging.add(stillingPeriode);
+                } else {
+                    if (stillingPeriode.harSammeAgressoIdPaStillingOgRessurs()) {
+                        // Current eller fremtidig, hvor stilling og ressurs har samme agressoId => DagligOppfolging.Ja
+                        medDagligOppfolging.add(new StillingPeriode(stillingPeriode, DagligOppfolging.JA));
+                    } else {
+                        // Det er en annen som er dagligOppfølging i denne perioden => DagligOppfolging.NEI
+                        medDagligOppfolging.add(new StillingPeriode(stillingPeriode, DagligOppfolging.NEI));
+                    }
+                }
+            }
+        });
+
+        return medDagligOppfolging;
+    }
+
+    // Splitt alle perioder som overlapper slik at overlapp går på samme start slutt
+    // Eks:
+    // A -> Mai-August
+    // B -> Juli-Desemeber
+    // Blir:
+    // A1 -> Mai-Juni
+    // A2 -> Juli-August
+    // B1 -> Juli-August
+    // B2 -> September-Desember
+    private List<StillingPeriode> splitStillingPerioderPaOverlapp(String navident, List<StillingPeriode> stillingPerioder) {
+        List<LocalDate> splittFraDatoer =
+            stillingPerioder.stream()
+                .map(StillingPeriode::gyldigFom)
+                .distinct()
+                .sorted().toList();
+        List<LocalDate> splittTilDatoer =
+            stillingPerioder.stream()
+                .map(StillingPeriode::gyldigTom)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted().toList();
+
+        log.debug("For navident {} sine stillingPerioder\n{}splitter vi på fra/til-datoene: {} / {}", navident, StillingPeriode.toString(stillingPerioder, true), splittFraDatoer, splittTilDatoer);
+        if (splittFraDatoer.size() <= 1) {
+            return stillingPerioder;
+        } else {
+            List<StillingPeriode> splittedeStillinger = new ArrayList<>();
+            stillingPerioder.stream().sorted(Comparator.comparing(StillingPeriode::gyldigFom)).forEachOrdered( stillingPeriode -> {
+                LocalDate nesteFraDato = stillingPeriode.gyldigFom();
+                LocalDate nesteTilDato = nesteTilDatoEtter(nesteFraDato, stillingPeriode.gyldigTom(), splittFraDatoer, splittTilDatoer);
+                while (!Objects.equals(stillingPeriode.gyldigTom(), nesteTilDato)) {
+                    splittedeStillinger.add(new StillingPeriode(stillingPeriode.stilling(), nesteFraDato, nesteTilDato, stillingPeriode.orgenhet()));
+                    nesteFraDato = nesteTilDato.plusDays(1);
+                    nesteTilDato = nesteTilDatoEtter(nesteFraDato, stillingPeriode.gyldigTom(), splittFraDatoer, splittTilDatoer);
+                }
+                splittedeStillinger.add(new StillingPeriode(stillingPeriode.stilling(), nesteFraDato, nesteTilDato, stillingPeriode.orgenhet()));
+            });
+            return splittedeStillinger;
+        }
+    }
+
+    private LocalDate nesteTilDatoEtter(LocalDate nesteFraDato, LocalDate stillingGyldigTom, List<LocalDate> splittFraDatoer, List<LocalDate> splittTilDatoer) {
+        int nesteFraDatoIdx = splittFraDatoer.indexOf(nesteFraDato) + 1;
+        int nesteTilDatoIdx = splittTilDatoer.indexOf(nesteFraDato) + 1;
+        LocalDate nesteSplittFraDato = nesteFraDatoIdx > 0 && nesteFraDatoIdx < splittFraDatoer.size() ? splittFraDatoer.get(nesteFraDatoIdx) : null;
+        LocalDate nesteSplittTilDato = splittTilDatoer.stream().filter( tilDato -> tilDato.isAfter(nesteFraDato)).findFirst().orElse(NO_END_DATE);
+        return nesteSplittFraDato != null ?
+            first(stillingGyldigTom, nesteSplittFraDato.minusDays(1)) :
+            first(stillingGyldigTom, nesteSplittTilDato);
+    }
+
+    // Null date is consider as latest
+    private LocalDate first(LocalDate d1, LocalDate d2) {
+        return d1 == null ? d2 : (d2 == null ? d1 : (d1.isBefore(d2) ? d1 : d2));
     }
 
     public List<StillingPeriode> strukturerNavidentensRessursStillinger(String navident, List<DvhRessursStilling> ressursStillinger) {
@@ -137,7 +235,7 @@ public class RessursStillingStrukturerer {
         if (log.isDebugEnabled()) {
             log.debug("DVH Periodene for navident {} er nå gruppert:\n{}",
                 navident,
-                StillingPeriode.stillingperioderToString(
+                StillingPeriode.toString(
                     perioderGruppert.stream()
                         .sorted(Comparator.comparing(StillingPeriode::gyldigFom))
                         .toList(),
@@ -158,7 +256,7 @@ public class RessursStillingStrukturerer {
                     // Hvis det er en aktiv periode,
                     // og ressurs agressoId er presis
                     // og hvis denne matcher stilling partial eller tom agressoId (Eg. stilling agressoId er overenhet for ressursens agressoId)
-                        isCurrentPeriode(stillingPeriode)
+                        isCurrentPeriod(stillingPeriode)
                         && stillingPeriode.stilling().ressursAgressoId().orElse("").length() >= 7
                         && stillingPeriode.stilling().ressursAgressoId().get().startsWith(stillingPeriode.stilling().agressoId().orElse(""))
                 ) {
