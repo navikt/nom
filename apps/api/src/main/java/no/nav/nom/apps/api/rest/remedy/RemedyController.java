@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.nik.NIKConsumer;
-import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
+import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -45,14 +47,14 @@ public class RemedyController {
 
 
     private final IRessursService ressursService;
-    private final PdlConsumer pdlConsumer;
-    private final NIKConsumer nikConsumer;
+    private final PdlClient pdlClient;
+    private final NIKClient nikClient;
     private final RessursCommadService ressursCommadService;
 
-    public RemedyController(IRessursService ressursService, PdlConsumer pdlConsumer, NIKConsumer nikConsumer, RessursCommadService ressursCommadService) {
+    public RemedyController(IRessursService ressursService, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService) {
         this.ressursService = ressursService;
-        this.pdlConsumer = pdlConsumer;
-        this.nikConsumer = nikConsumer;
+        this.pdlClient = pdlClient;
+        this.nikClient = nikClient;
         this.ressursCommadService = ressursCommadService;
     }
 
@@ -82,7 +84,7 @@ public class RemedyController {
             return ResponseEntity.ok(response.get());
         } else {
             log.debug("Forsøker å finne ressurs i PDL");
-            return pdlConsumer.hentPerson(personident)
+            return pdlClient.hentPerson(personident)
                 .map(this::mapFrom)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.ok(createErrorResponse(
@@ -115,7 +117,13 @@ public class RemedyController {
 
         String opprettetNavident;
         try {
-            final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
+            final var nikResponse = nikClient.opprettNavident(
+                OpprettNavidentRequest.builder()
+                    .personid(request.getPersonident())
+                    .identPrefix(request.getForbokstav())
+                    .identType(request.getIdentType())
+                    .build()
+            );
 
             if (!nikResponse.getStatusCode().is2xxSuccessful()) {
                 return ResponseEntity.ok(
@@ -133,7 +141,7 @@ public class RemedyController {
             return ResponseEntity.ok(createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
         }
 
-        Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
+        Optional<Person> pdlPerson = pdlClient.hentPerson(request.getPersonident());
 
         try {
             final var opprettRessursCommand = new OpprettRessursCommand(
@@ -169,7 +177,7 @@ public class RemedyController {
 
     private RessursDTO mapFrom(RessursState state) {
         return RessursDTO.builder()
-            .navn(RessursDTO.Navn.builder()
+            .navn(NavnDTO.builder()
                 .fornavn(state.visningsnavn().fornavn())
                 .mellomnavn(state.visningsnavn().mellomnavn().orElse(null))
                 .etternavn(state.visningsnavn().etternavn())
@@ -179,7 +187,7 @@ public class RemedyController {
 
     private RessursDTO mapFrom(Person person) {
         return RessursDTO.builder()
-            .navn(RessursDTO.Navn.builder()
+            .navn(NavnDTO.builder()
                 .fornavn(person.getFornavn())
                 .mellomnavn(person.getMellomnavn())
                 .etternavn(person.getEtternavn())

@@ -21,6 +21,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -28,7 +31,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
@@ -78,6 +86,9 @@ public abstract class TestBase {
     @Autowired
     protected DvhOrgtilknytningMockUtils dvhOrgtilknytningMockUtils;
 
+    @MockBean
+    OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
+
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
@@ -89,6 +100,20 @@ public abstract class TestBase {
         kafkaUtils.clearKafka();
         ressursService.clear();
         dvhRessursUtils.createEmptyResponse();
+    }
+
+    @BeforeEach
+    void mockOAuth2AuthorizedClientManager() {
+        OAuth2AuthorizedClient oAuth2AuthorizedClient = mock(OAuth2AuthorizedClient.class);
+        when(oAuth2AuthorizedClientManager.authorize(any())).thenReturn(oAuth2AuthorizedClient);
+        when(oAuth2AuthorizedClient.getAccessToken()).thenReturn(
+            new OAuth2AccessToken(
+                OAuth2AccessToken.TokenType.BEARER,
+                "tokenValue",
+                Instant.now(),
+                Instant.now().plusSeconds(1000L)
+            )
+        );
     }
 
     protected JWTClaimsSet.Builder validJwtWithAzpClaim() {

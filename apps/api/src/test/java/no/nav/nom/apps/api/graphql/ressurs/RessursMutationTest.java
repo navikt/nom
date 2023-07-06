@@ -15,7 +15,7 @@ public class RessursMutationTest extends RessursTestBase {
     @DisplayName("Opprett ressurs")
     void scenario11() {
         final var personIdent = "12345678901";
-        pdlUtils.mockSinglePersonResponse(personIdent);
+        pdlUtils.mockSinglePersonResponse();
 
         var response = postForResource("ressurs/opprettRessurs.graphql", Map.of("personIdent", personIdent));
         //assertThat(response.path("opprettRessurs.nomId").entity(String.class).get()).isNotNull();

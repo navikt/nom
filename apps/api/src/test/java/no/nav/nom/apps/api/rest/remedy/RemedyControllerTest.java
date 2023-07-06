@@ -5,33 +5,28 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.SecurityTestUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.nik.NIKConsumer;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 public class RemedyControllerTest extends RestTestBase {
@@ -39,25 +34,23 @@ public class RemedyControllerTest extends RestTestBase {
     @Autowired
     private SecurityTestUtils securityTestUtils;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-
     @MockBean
-    private NIKConsumer nikConsumer;
+    private NIKClient nikClient;
 
     @MockBean
     private RessursCommadService ressursCommadService;
 
-    private void createRessursState(String personident, String fornavn, String mellomnavn, String etternavn) {
+
+    private void createRessursState(String personident, NavnDTO navn) {
         RessursState ressursState = new RessursState(
             PrefixedUlidCreator.createRessursUlid(),
             personident,
             "testNavIdent",
             Sektor.NAV_STATLIG,
             new Visningsnavn(
-                fornavn,
-                Optional.of(mellomnavn),
-                etternavn
+                navn.getFornavn(),
+                Optional.of(navn.getMellomnavn()),
+                navn.getEtternavn()
             ),
             Optional.of(LocalDate.now().plusDays(10))
         );
@@ -68,86 +61,80 @@ public class RemedyControllerTest extends RestTestBase {
     @SneakyThrows
     void skal_hente_ressurs_fra_nom() {
         String personident = "testPersonIdent";
-        String fornavn = "testFornavn";
-        String mellomnavn = "testMellomnavn";
-        String etternavn = "testEtternavn";
-        createRessursState(personident, fornavn, mellomnavn, etternavn);
-
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+        NavnDTO navn = NavnDTO.builder()
+            .fornavn("testFornavn")
+            .mellomnavn("testMellomnavn")
+            .etternavn("testEtternavn")
+            .build();
+        createRessursState(personident, navn);
 
         FinnRessursRequest request = new FinnRessursRequest();
         request.setPersonident(personident);
 
-        val response = testRestTemplate.exchange(
-            "/api/v1/remedy/finnRessurs",
-            HttpMethod.POST,
-            new HttpEntity<>(request, headers),
-            RessursDTO.class
-        );
-        assertNotNull(response.getBody());
-
-        Assertions.assertEquals(fornavn, response.getBody().getNavn().getFornavn());
-        Assertions.assertEquals(mellomnavn, response.getBody().getNavn().getMellomnavn());
-        Assertions.assertEquals(etternavn, response.getBody().getNavn().getEtternavn());
+        webTestClient.post()
+            .uri("/api/v1/remedy/finnRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(RessursDTO.builder().navn(navn).build());
     }
 
     @Test
     @SneakyThrows
     void skal_hente_ressurs_fra_pdl() {
         String personident = "12345678910";
-        val expectedNavn = pdlUtils.mockSinglePersonResponse(personident);
-
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+        val expectedNavn = pdlUtils.mockSinglePersonResponse();
 
         FinnRessursRequest request = new FinnRessursRequest();
         request.setPersonident(personident);
 
-        val response = testRestTemplate.exchange(
-            "/api/v1/remedy/finnRessurs",
-            HttpMethod.POST,
-            new HttpEntity<>(request, headers),
-            RessursDTO.class
-        );
-        assertNotNull(response.getBody());
-
-        Assertions.assertEquals(expectedNavn.getFornavn(), response.getBody().getNavn().getFornavn());
-        Assertions.assertEquals(expectedNavn.getMellomnavn(), response.getBody().getNavn().getMellomnavn());
-        Assertions.assertEquals(expectedNavn.getEtternavn(), response.getBody().getNavn().getEtternavn());
+        webTestClient.post()
+            .uri("/api/v1/remedy/finnRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(RessursDTO.builder().navn(expectedNavn).build());
     }
 
     @Test
     @SneakyThrows
     void skal_hente_ressurs_fra_nom_ved_opprettelse_dersom_allerede_eksisterer() {
         String personident = "testPersonIdent";
-        String fornavn = "testFornavn";
-        String mellomnavn = "testMellomnavn";
-        String etternavn = "testEtternavn";
-        createRessursState(personident, fornavn, mellomnavn, etternavn);
+
+        NavnDTO navn = NavnDTO.builder()
+            .fornavn("testFornavn")
+            .mellomnavn("testMellomnavn")
+            .etternavn("testEtternavn")
+            .build();
+
+        createRessursState(personident, navn);
 
         OpprettRessursRequest request = new OpprettRessursRequest();
         request.setPersonident(personident);
         request.setEtternavn("X");
         request.setFornavn("Y");
 
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
-
-        val response = testRestTemplate.exchange(
-            "/api/v1/remedy/opprettRessurs",
-            HttpMethod.POST,
-            new HttpEntity<>(request, headers),
-            RessursDTO.class
-        );
-        assertNotNull(response.getBody());
-
-        Assertions.assertEquals(fornavn, response.getBody().getNavn().getFornavn());
-        Assertions.assertEquals(mellomnavn, response.getBody().getNavn().getMellomnavn());
-        Assertions.assertEquals(etternavn, response.getBody().getNavn().getEtternavn());
+        webTestClient.post()
+            .uri("/api/v1/remedy/opprettRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(RessursDTO.builder().navn(navn).build());
     }
 
     @Test
@@ -155,9 +142,13 @@ public class RemedyControllerTest extends RestTestBase {
     void skal_opprette_ressurs() {
         String personident = "12345678910";
         String navident = "x123456";
-        val navn = pdlUtils.mockSinglePersonResponse(personident);
+        val navn = pdlUtils.mockSinglePersonResponse();
 
-        when(nikConsumer.opprettNavident(eq(personident), isNull(), isNull(), eq(false)))
+        when(nikClient.opprettNavident(
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .build())
+        ))
             .thenReturn(ResponseEntity.ok(
                 OpprettNavidentResponse.builder()
                     .navident(navident)
@@ -176,22 +167,23 @@ public class RemedyControllerTest extends RestTestBase {
         request.setFornavn(navn.getEtternavn());
         request.setSektor(Sektor.EKSTERN.name());
 
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+        webTestClient.post()
+            .uri("/api/v1/remedy/opprettRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(RessursDTO.builder()
+                .navn(navn).build()
+            );
 
-        val response = testRestTemplate.exchange(
-            "/api/v1/remedy/opprettRessurs",
-            HttpMethod.POST,
-            new HttpEntity<>(request, headers),
-            RessursDTO.class
+        Mockito.verify(nikClient).opprettNavident(
+            eq(OpprettNavidentRequest.builder().personid(personident).build())
         );
-        assertNotNull(response.getBody());
-
-        Assertions.assertEquals(navn.getFornavn(), response.getBody().getNavn().getFornavn());
-        Assertions.assertEquals(navn.getEtternavn(), response.getBody().getNavn().getEtternavn());
-
-        Mockito.verify(nikConsumer).opprettNavident(eq(personident), isNull(), isNull(), eq(false));
     }
 
     private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {

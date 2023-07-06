@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.pdl.Kjonn;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -43,13 +44,13 @@ public class PdlUtils {
 
     private void mockPdlResponse(String response) {
         stubFor(post("/graphql")
-            .withHeader("Tema", equalTo(appProperties.pdl().tema()))
+            .withHeader("Tema", equalTo(appProperties.clients().pdl().tema()))
             .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
     }
 
     public void addPersonToPdlResponse(boolean mellomnavn, String... personIdenter) {
         List.of(personIdenter).forEach(p -> {
-            val navn = NavnDto.builder()
+            val navn = NavnDTO.builder()
                     .fornavn("fornavn" + pdlEntryByIdent.size())
                     .mellomnavn(mellomnavn ? "mellomnavn" + pdlEntryByIdent.size() : null)
                     .etternavn("etternavn" + pdlEntryByIdent.size())
@@ -63,10 +64,9 @@ public class PdlUtils {
     }
 
     @SneakyThrows
-    public NavnDto mockSinglePersonResponse(String personIdent) {
-        val resultBuilder = new StringBuilder();
+    public NavnDTO mockSinglePersonResponse() {
 
-        val navn = NavnDto.builder().fornavn("fornavn").mellomnavn("mellomnavn").etternavn("etternavn").build();
+        val navn = NavnDTO.builder().fornavn("fornavn").mellomnavn("mellomnavn").etternavn("etternavn").build();
 
         val kjoenn = KjonnDTO.builder().kjoenn(Kjonn.UKJENT).build();
 
@@ -96,11 +96,12 @@ public class PdlUtils {
 
     @SneakyThrows
     private String buildResponse() {
-        val resultBuilder = new StringBuilder();
-        resultBuilder.append("{\"data\": {\"hentPersonBolk\": ");
-        resultBuilder.append(objectMapper.writeValueAsString(pdlEntryByIdent.values()));
-
-        return resultBuilder.append("}}").toString();
+        return objectMapper.writeValueAsString(
+            objectMapper.createObjectNode()
+                .putPOJO("data", objectMapper.createObjectNode()
+                    .putPOJO("hentPersonBolk", pdlEntryByIdent.values())
+                )
+        );
     }
 
     public void reset() {

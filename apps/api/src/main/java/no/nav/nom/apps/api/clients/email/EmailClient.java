@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.clients.email;
 
+import no.nav.nom.apps.api.common.AppProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Component;
@@ -19,33 +19,29 @@ public class EmailClient {
     public static final Logger logger = LogManager.getLogger(EmailClient.class);
 
     private final WebClient webClient;
-    private final Boolean enabled;
-
-    @Value("${app.email.max-attempts}")
-    private Integer maxAttempts;
-
-    @Value("${app.email.backoff-duration-millis}")
-    private Integer backoffDurationMillis;
+    private final AppProperties.Email emailClientProperties;
 
     public EmailClient(
-        @Value("${app.email.url}") String baseUrl,
-        @Value("${app.email.enabled}") Boolean enabled,
-        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
+        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+        AppProperties appProperties
     ) {
+        this.emailClientProperties = appProperties.clients().email();
         ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);
         oAuth2Filter.setDefaultClientRegistrationId("email");
 
-        this.enabled = enabled;
-        this.webClient = WebClient.builder().filter(oAuth2Filter).baseUrl(baseUrl).build();
+        this.webClient = WebClient.builder()
+            .filter(oAuth2Filter)
+            .baseUrl(emailClientProperties.baseUrl())
+            .build();
     }
 
     public Mono<Void> sendEmail(EmailMessage emailMessage) {
-        if (enabled) {
+        if (emailClientProperties.isEnabled()) {
             return webClient.post()
                 .body(Mono.just(emailMessage), EmailMessage.class)
                 .retrieve()
                 .bodyToMono(Void.class)
-                .retryWhen(defaultRetry(maxAttempts, backoffDurationMillis))
+                .retryWhen(defaultRetry(emailClientProperties.maxAttempts(), emailClientProperties.backoffDurationMillis()))
                 .doOnError(WebClientResponseException.class, (WebClientResponseException webClientResponseException) -> {
                     String errorMsg = String.format(
                         "POST %s resulted in status %s with body %s",

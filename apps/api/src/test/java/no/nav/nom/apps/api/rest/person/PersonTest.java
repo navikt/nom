@@ -9,11 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 public class PersonTest extends RestTestBase {
@@ -21,31 +16,26 @@ public class PersonTest extends RestTestBase {
     @Autowired
     private SecurityTestUtils securityTestUtils;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
-
     @Test
     @SneakyThrows
     @DisplayName("Kan hente fulle navn fra PDL for person som er ressurs")
     void scenario1() {
         String personident = "12345678910";
-        val expectedNavn = pdlUtils.mockSinglePersonResponse(personident);
+        val expectedNavn = pdlUtils.mockSinglePersonResponse();
 
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
-
-        val response = testRestTemplate.exchange(
-                "/api/v1/person/getPerson",
-                HttpMethod.POST,
-                new HttpEntity<>(new PdlPersonRequest(personident), headers),
-                PdlPersonDTO.class
-        );
-        Assertions.assertNotNull(response.getBody());
-
-        Assertions.assertEquals(expectedNavn.getFornavn(), response.getBody().getNavn().getFornavn());
-        Assertions.assertEquals(expectedNavn.getMellomnavn(), response.getBody().getNavn().getMellomnavn());
-        Assertions.assertEquals(expectedNavn.getEtternavn(), response.getBody().getNavn().getEtternavn());
+        webTestClient.post()
+            .uri("/api/v1/person/getPerson")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+            })
+            .bodyValue(new PdlPersonRequest(personident))
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(PdlPersonDTO.class)
+            .isEqualTo(PdlPersonDTO.builder().navn(expectedNavn)
+                .build()
+            );
     }
 
 
@@ -53,23 +43,19 @@ public class PersonTest extends RestTestBase {
     @SneakyThrows
     @DisplayName("Ingen tilgang med ugyldig AZP")
     void scenario2() {
-        String personident = "12345678910";
-
-        val headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim().claim("azp", "invalid")));
-
         var path = "/api/v1/person/getPerson";
 
-        val response = testRestTemplate.exchange(
-                path,
-                HttpMethod.POST,
-                new HttpEntity<>(new PdlPersonRequest(personident), headers),
-                JsonNode.class
-        );
-        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-
-        var responseBody = response.getBody();
+        var responseBody = webTestClient.post()
+            .uri(path)
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim().claim("azp", "invalid")));
+            })
+            .bodyValue(new PdlPersonRequest("12345678910"))
+            .exchange()
+            .expectStatus().isForbidden()
+            .expectBody(JsonNode.class)
+            .returnResult().getResponseBody();
 
         Assertions.assertNotNull(responseBody);
         Assertions.assertEquals(responseBody.size(), 4);

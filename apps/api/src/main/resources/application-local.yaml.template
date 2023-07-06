@@ -3,10 +3,10 @@ AZURE_APP_CLIENT_ID: 'placeholder'
 AZURE_APP_JWK: 'placeholder'
 
 NOM_PROXY_BASEURL: https://nom-proxy.dev-fss-pub.nais.io
-NOM_PROXY_CLIENT_ID: dev-fss.nom.nom-proxy
+NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 
 PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
-PDL_CLIENT_ID: dev-fss.pdl.pdl-api
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 app:
   graphql:

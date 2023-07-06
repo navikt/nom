@@ -8,8 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.nik.NIKConsumer;
-import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
+import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
@@ -47,19 +48,19 @@ public class NavidentController {
     public static final String BASE_URL = "/api/v1/navident";
     private final RessursCommadService ressursCommadService;
     private final IRessursService ressursService;
-    private final NIKConsumer nikConsumer;
-    private final PdlConsumer pdlConsumer;
+    private final NIKClient nikClient;
+    private final PdlClient pdlClient;
 
     public NavidentController(
             RessursCommadService ressursCommadService,
             IRessursService ressursService,
-            NIKConsumer nikConsumer,
-            PdlConsumer pdlConsumer
+            NIKClient nikClient,
+            PdlClient pdlClient
     ) {
         this.ressursCommadService = ressursCommadService;
         this.ressursService = ressursService;
-        this.nikConsumer = nikConsumer;
-        this.pdlConsumer = pdlConsumer;
+        this.nikClient = nikClient;
+        this.pdlClient = pdlClient;
     }
 
 
@@ -95,7 +96,13 @@ public class NavidentController {
 
         String opprettetNavident;
         try {
-            final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getForbokstav(), request.getIdentType(), false);
+            final var nikResponse = nikClient.opprettNavident(
+                OpprettNavidentRequest.builder()
+                    .personid(request.getPersonident())
+                    .identPrefix(request.getForbokstav())
+                    .identType(request.getIdentType())
+                    .build()
+            );
 
             if (!nikResponse.getStatusCode().is2xxSuccessful()) {
                 return ResponseEntity.ok(
@@ -113,7 +120,7 @@ public class NavidentController {
             return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
         }
 
-        Optional<Person> pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
+        Optional<Person> pdlPerson = pdlClient.hentPerson(request.getPersonident());
 
         try {
             final var opprettRessursCommand = new OpprettRessursCommand(

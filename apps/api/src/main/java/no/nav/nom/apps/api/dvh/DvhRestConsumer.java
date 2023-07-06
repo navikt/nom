@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -19,14 +19,8 @@ import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,10 +37,9 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
-    private final TokenRepository tokenRepository;
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
-    private final RestTemplate restTemplate;
+    private final NomProxyClient nomProxyClient;
     private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
@@ -62,6 +55,7 @@ public class DvhRestConsumer {
     public boolean initloadComplete() {
         return initialLoadComplete.get();
     }
+
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
@@ -151,7 +145,7 @@ public class DvhRestConsumer {
     }
 
     private void loadKoblingerFromDvh() {
-        val jsonStillinger = dvhExchange(appProperties.proxy().orgtilknytningPath());
+        val jsonStillinger = dvhExchange(appProperties.clients().nomProxy().orgtilknytningPath());
         List<DvhOrgtilknytning> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
                 .filter(this::validateKobling)
                 .map(DvhOrgtilknytning::new)
@@ -224,10 +218,12 @@ public class DvhRestConsumer {
     }
 
     private JsonNode dvhExchange(String urlPath) {
-        val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
+        return nomProxyClient.getWebClient().get()
+            .uri(urlPath)
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
 
-        return restTemplate.exchange(appProperties.proxy().baseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
     }
 
     private boolean determineEnhetActive(JsonNode e) {

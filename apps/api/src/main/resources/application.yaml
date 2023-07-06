@@ -1,4 +1,5 @@
 app:
+  name: ${NAIS_APP_NAME:nom-api}
   kafka:
     ressurs:
       stateTopic: org.nom.intern-ressurs-state
@@ -9,29 +10,27 @@ app:
     orgtilknytning:
       state-topic: org.nom.intern-orgtilknytning-state
       eventsource-topic: org.nom.orgtilknytning-eventsource
-  name: ${NAIS_APP_NAME:nom-api}
-  proxy:
-    baseUrl: ${NOM_PROXY_BASEURL}
-    enhetPath: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
-    orgtilknytningPath: /proxy/dvh/json/Hr/NOM2/stilling2nom
-    ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
-    aadClientId: api://${NOM_PROXY_CLIENT_ID}/.default
-  nik:
-    baseUrl: ${NIK_BASEURL}
-    aadClientId: api://${NIK_CLIENT_ID}/.default
-  pdl:
-    tema: GEN
-    behandlingsnummer: B348
-    baseUrl: ${PDL_BASEURL}
-    aadClientId: api://${PDL_CLIENT_ID}/.default
+  clients:
+    nom-proxy:
+      base-url: ${NOM_PROXY_BASEURL}
+      enhet-path: /proxy/dvh/json/Hr/NOM3/NOM_HRORG_ORGENHET
+      orgtilknytning-path: /proxy/dvh/json/Hr/NOM2/stilling2nom
+      ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
+    nik:
+      base-url: ${NIK_BASEURL}
+      aad-scope: ${NIK_API_SCOPE}
+    pdl:
+      tema: GEN
+      behandlingsnummer: B348
+      base-url: ${PDL_BASEURL}
+    email:
+      url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
+      is-enabled: true
+      max-attempts: 3
+      backoff-duration-millis: 2000
   dvh-load:
     cron-ressurs-og-orgenhet: "0 0 6 * * *"
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
-  email:
-    url: https://graph.microsoft.com/v1.0/users/ikke.svar.nom@nav.no/sendMail
-    enabled: true
-    max-attempts: 3
-    backoff-duration-millis: 2000
 
 authentication:
   aad:
@@ -57,6 +56,8 @@ spring:
     hikari:
       minimum-idle: 1
       maximum-pool-size: 5
+  codec:
+    max-in-memory-size: 10MB
   security:
     oauth2:
       resourceserver:
@@ -72,6 +73,27 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - https://graph.microsoft.com/.default
+          nom-proxy:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_PROXY_API_SCOPE}
+          nik:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NIK_API_SCOPE}
+          pdl:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${PDL_API_SCOPE}
         provider:
           azure:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
@@ -181,13 +203,13 @@ app:
 #    cron-ressurs-og-orgenhet: "0 */5 * * * *"
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
-NIK_CLIENT_ID: "dev-gcp.org.nav-ident"
+NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
 
 PDL_BASEURL: "https://pdl-api.dev-fss-pub.nais.io"
-PDL_CLIENT_ID: "dev-fss.pdl.pdl-api"
+PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
 NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
-NOM_PROXY_CLIENT_ID: "dev-fss.nom.nom-proxy"
+NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
 
@@ -220,13 +242,13 @@ app:
 #    cron-ressurs-og-orgenhet: "0 */15 * * * *"
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
-NIK_CLIENT_ID: "prod-gcp.org.nav-ident"
+NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
 
 PDL_BASEURL: "https://pdl-api.prod-fss-pub.nais.io"
-PDL_CLIENT_ID: "prod-fss.pdl.pdl-api"
+PDL_API_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
 NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
-NOM_PROXY_CLIENT_ID: "prod-fss.nom.nom-proxy"
+NOM_PROXY_API_SCOPE: api://prod-fss.nom.nom-proxy/.default
 
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
 

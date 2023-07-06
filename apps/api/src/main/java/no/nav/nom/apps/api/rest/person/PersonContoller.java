@@ -6,8 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/person")
 public class PersonContoller {
 
-    private final PdlConsumer pdlConsumer;
+    private final PdlClient pdlClient;
 
-    public PersonContoller(PdlConsumer pdlConsumer) {
-        this.pdlConsumer = pdlConsumer;
+    public PersonContoller(PdlClient pdlClient) {
+        this.pdlClient = pdlClient;
     }
 
     @PostMapping("/getPerson")
@@ -36,7 +37,7 @@ public class PersonContoller {
     })
     @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
-        return ResponseEntity.ok(pdlConsumer.hentPerson(request.getPersonident())
+        return ResponseEntity.ok(pdlClient.hentPerson(request.getPersonident())
                                          .map(this::convert)
                                          .orElse(null));
     }
@@ -44,11 +45,11 @@ public class PersonContoller {
 
     private PdlPersonDTO convert(Person person) {
         return PdlPersonDTO.builder()
-                .navn(PdlPersonDTO.Navn.builder()
-                              .fornavn(person.getFornavn())
-                              .mellomnavn(person.getMellomnavn())
-                              .etternavn(person.getEtternavn())
-                              .build())
-                .build();
+            .navn(NavnDTO.builder()
+                .fornavn(person.getFornavn())
+                .mellomnavn(person.getMellomnavn())
+                .etternavn(person.getEtternavn())
+                .build())
+            .build();
     }
 }

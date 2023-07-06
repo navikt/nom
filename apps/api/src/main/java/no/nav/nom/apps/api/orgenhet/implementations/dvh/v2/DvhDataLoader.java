@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.common.NomProxyRestClient;
-import no.nav.nom.apps.api.common.security.AuthenticationProperties;
-import no.nav.nom.apps.api.common.security.TokenRepository;
-import no.nav.nom.apps.api.hendelse.contract.IHendelseService;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetIdGenerator;
@@ -15,7 +12,6 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEn
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.KorrigerOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.OpprettOrgEnhet;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -38,13 +34,9 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 public class DvhDataLoader {
-    private final TokenRepository tokenRepository;
     private final ObjectMapper objectMapper;
-    private final IHendelseService hendelseService;
-    private final AuthenticationProperties authenticationProperties;
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
-    private final OrgenhetService orgenhetService;
     private final OrgEnhetStateRepository orgEnhetStateService;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetIdGenerator orgEnhetIdGenerator;

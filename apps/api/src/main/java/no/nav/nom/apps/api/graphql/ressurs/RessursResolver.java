@@ -10,11 +10,12 @@ import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.nik.NIKConsumer;
+import no.nav.nom.apps.api.nik.NIKClient;
+import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
-import no.nav.nom.apps.api.pdl.PdlConsumer;
+import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -43,21 +44,21 @@ import java.util.stream.Stream;
 public class RessursResolver {
 
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
-    private final NIKConsumer nikConsumer;
-    private final PdlConsumer pdlConsumer;
+    private final NIKClient nikClient;
+    private final PdlClient pdlClient;
     private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
     private final OrgenhetService orgenhetService;
 
     RessursResolver(
-            NIKConsumer nikConsumer,
-            PdlConsumer pdlConsumer,
+            NIKClient nikClient,
+            PdlClient pdlClient,
             IRessursService ressursService,
             RessursCommadService ressursCommadService,
             OrgenhetService orgenhetService
     ) {
-        this.nikConsumer = nikConsumer;
-        this.pdlConsumer = pdlConsumer;
+        this.nikClient = nikClient;
+        this.pdlClient = pdlClient;
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
         this.orgenhetService = orgenhetService;
@@ -113,7 +114,13 @@ public class RessursResolver {
     }
 
     private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) throws ExecutionException, InterruptedException, TimeoutException {
-        final var nikResponse = nikConsumer.opprettNavident(request.getPersonident(), request.getVisningsetternavn().substring(0, 1), "STANDARD", true);
+        final var nikResponse = nikClient.opprettNavidentOnBehalfOfUser(
+            OpprettNavidentRequest.builder()
+                .personid(request.getPersonident())
+                .identPrefix(request.getVisningsetternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build()
+            );
 
         if (!nikResponse.getStatusCode().is2xxSuccessful()) {
             throw new NIKException(
@@ -133,7 +140,7 @@ public class RessursResolver {
             );
         }
 
-        final var pdlPerson = pdlConsumer.hentPerson(request.getPersonident());
+        final var pdlPerson = pdlClient.hentPerson(request.getPersonident());
 
         if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
             request.setVisningsmellomnavn(null);

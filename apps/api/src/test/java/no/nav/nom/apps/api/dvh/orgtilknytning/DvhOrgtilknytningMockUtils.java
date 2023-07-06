@@ -26,7 +26,7 @@ public class DvhOrgtilknytningMockUtils {
         private final DvhDataLoader dvhDataLoader;
 
         private void mockDvhOrgEnhetResponse(String response) {
-            stubFor(get(appProperties.proxy().orgtilknytningPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
+            stubFor(get(appProperties.clients().nomProxy().orgtilknytningPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
         }
 
         @SneakyThrows

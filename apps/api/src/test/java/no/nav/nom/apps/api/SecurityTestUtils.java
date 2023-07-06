@@ -55,8 +55,12 @@ public class SecurityTestUtils {
         return signedJWT;
     }
 
-    public String createToken(JWTClaimsSet.Builder builder) throws JOSEException {
-        return createSignedJWT(builder).serialize();
+    public String createToken(JWTClaimsSet.Builder builder) {
+        try {
+            return createSignedJWT(builder).serialize();
+        } catch (JOSEException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     @Bean

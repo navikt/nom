@@ -4,9 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("app")
 public record AppProperties(
-        Proxy proxy,
-        Pdl pdl,
-        Nik nik,
+        Clients clients,
         String name
 ) {
 
@@ -14,23 +12,36 @@ public record AppProperties(
         return name.equals("nom-sandbox-api");
     }
 
-    public record Proxy(
+    public record Clients(
+        NomProxy nomProxy,
+        Nik nik,
+        Pdl pdl,
+        Email email
+    ) {}
+
+    public record NomProxy(
             String baseUrl,
             String enhetPath,
             String orgtilknytningPath,
-            String ressursStillingerPath,
-            String aadClientId
+            String ressursStillingerPath
     ) {}
 
     public record Pdl(
             String tema,
             String behandlingsnummer,
-            String aadClientId,
             String baseUrl
     ) {}
 
     public record Nik(
             String baseUrl,
-            String aadClientId
+            String aadScope
+    ) {}
+
+    public record Email(
+        String baseUrl,
+        String aadClientId,
+        Integer maxAttempts,
+        Integer backoffDurationMillis,
+        Boolean isEnabled
     ) {}
 }

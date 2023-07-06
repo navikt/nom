@@ -6,17 +6,11 @@ import org.springframework.http.ResponseEntity;
 
 public class ADResponseException extends RuntimeException {
 
-    private final ResponseEntity<AdRessurser> response;
     private final ErrorCode errorCode;
 
-    public ADResponseException(String message, ResponseEntity<AdRessurser> response, ErrorCode errorCode) {
+    public ADResponseException(String message, ErrorCode errorCode) {
         super(message);
-        this.response = response;
         this.errorCode = errorCode;
-    }
-
-    public ResponseEntity<?> getSource() {
-        return response;
     }
 
     public ErrorCode getErrorCode() {

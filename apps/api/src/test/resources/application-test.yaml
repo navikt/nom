@@ -1,11 +1,15 @@
 app:
-  proxy:
-    baseUrl: http://localhost:${wiremock.server.port}
-  pdl:
-    tema: GEN
-    baseUrl: http://localhost:${wiremock.server.port}
-  nik:
-    baseUrl: http://localhost:${wiremock.server.port}
+  clients:
+    nom-proxy:
+      base-url: http://localhost:${wiremock.server.port}
+    nik:
+      base-url: http://localhost:${wiremock.server.port}
+    pdl:
+      tema: GEN
+      base-url: http://localhost:${wiremock.server.port}
+    email:
+      url: http://localhost:${wiremock.server.port}
+      max-attempts: 1
   graphql:
     auth:
       clients:
@@ -14,9 +18,6 @@ app:
           scopes:
             - QUERY_PERSON
             - MUTATE_RESSURS
-  email:
-    url: http://localhost:${wiremock.server.port}
-    max-attempts: 1
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080

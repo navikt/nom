@@ -4,15 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.security.TokenRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,26 +21,23 @@ import java.util.stream.StreamSupport;
 @Service
 public class RessursStillingLoader {
     public static final String UNLEASH_LAST_NY_ORGTILKNYTNING = "nom.orgtilknytning.last";
-    private final TokenRepository tokenRepository;
     private final RessursStillingStrukturerer ressursStillingStrukturerer;
     private final RessursStillingProcessor ressursStillingProcessor;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
-    private final RestTemplate restTemplate;
+    private final NomProxyClient nomProxyClient;
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
     private final Unleash unleash;
 
-    public RessursStillingLoader(TokenRepository tokenRepository,
-                                 RessursStillingStrukturerer ressursStillingStrukturerer,
+    public RessursStillingLoader(RessursStillingStrukturerer ressursStillingStrukturerer,
                                  RessursStillingProcessor ressursStillingProcessor,
-                                 RessursStillingLoadStatus ressursStillingLoadStatus, RestTemplate restTemplate, AppProperties appProperties,
+                                 RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
                                  @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
                                  Unleash unleash) {
-        this.tokenRepository = tokenRepository;
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
-        this.restTemplate = restTemplate;
+        this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
         this.unleash = unleash;
@@ -65,9 +58,9 @@ public class RessursStillingLoader {
     }
 
     protected List<DvhRessursStilling> load() {
-        log.info("Laster ressursStillinger fra {}", appProperties.proxy().ressursStillingerPath());
+        log.info("Laster ressursStillinger fra {}", appProperties.clients().nomProxy().ressursStillingerPath());
         LocalDateTime start = LocalDateTime.now();
-        val jsonRessursStillinger = dvhExchange(appProperties.proxy().ressursStillingerPath());
+        val jsonRessursStillinger = dvhExchange(appProperties.clients().nomProxy().ressursStillingerPath());
         val listField = jsonRessursStillinger.fields().next();
         log.debug("Lastet ressursStillinger: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
         List<DvhRessursStilling> ressursStillinger = StreamSupport.stream(jsonRessursStillinger.get(ressursStillingerResponseNode).spliterator(), true)
@@ -80,10 +73,11 @@ public class RessursStillingLoader {
 
     // Shameless duplication from DvhRestConsumer
     private JsonNode dvhExchange(String urlPath) {
-        val headers = new HttpHeaders();
-        headers.setBearerAuth(tokenRepository.getSystemAadToken(appProperties.proxy().aadClientId()).serialize());
-
-        return restTemplate.exchange(appProperties.proxy().baseUrl() + urlPath, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class).getBody();
+        return nomProxyClient.getWebClient().get()
+            .uri(urlPath)
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
     }
 
     private String durationAsH24(LocalDateTime start) {

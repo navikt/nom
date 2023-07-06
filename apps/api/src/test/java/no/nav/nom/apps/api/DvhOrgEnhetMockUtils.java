@@ -30,7 +30,7 @@ public class DvhOrgEnhetMockUtils {
     private final DvhDataLoader dvhDataLoader;
 
     private void mockDvhOrgEnhetResponse(String response) {
-        stubFor(get(appProperties.proxy().enhetPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
+        stubFor(get(appProperties.clients().nomProxy().enhetPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));
     }
 
     @SneakyThrows
