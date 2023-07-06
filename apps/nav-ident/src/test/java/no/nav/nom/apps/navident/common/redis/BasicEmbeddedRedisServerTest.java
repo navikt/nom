@@ -9,7 +9,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//@Import(TestRedisConfiguration.class)
+@Import(TestRedisConfiguration.class)
 class BasicEmbeddedRedisServerTest extends SpringBootTestBase {
     @Autowired RedisCacheManager cacheManager;
 

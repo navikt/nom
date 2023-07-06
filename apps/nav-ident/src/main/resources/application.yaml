@@ -70,16 +70,16 @@ spring:
       properties:
         spring.json.trusted.packages: "no.nav.nom.apps.navident.eventsource, no.nav.nom.apps.navident.rnrservices"
 
-  redis:
-    host: ${REDIS_HOST}
-    port: 6379
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
 
 management:
   metrics:

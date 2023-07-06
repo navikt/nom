@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.1</version>
         <relativePath/>
     </parent>
 
@@ -27,6 +27,9 @@
         <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
         <gcp.libraries-bom.version>26.18.0</gcp.libraries-bom.version>
+
+        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
+        <wiremock.version>2.35.0</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -134,7 +137,7 @@
 
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
+            <artifactId>utils-common-v2</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -158,29 +161,29 @@
         </dependency>
 
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.thomaskasene.wiremock</groupId>
+            <artifactId>wiremock-junit-extension</artifactId>
+            <version>${wiremock-extension.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>it.ozimov</groupId>
-            <artifactId>embedded-redis</artifactId>
-            <version>0.7.3</version>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

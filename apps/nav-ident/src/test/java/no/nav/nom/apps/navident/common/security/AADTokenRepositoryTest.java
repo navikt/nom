@@ -2,8 +2,8 @@ package no.nav.nom.apps.navident.common.security;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import no.nav.nom.apps.navident.SecurityTestUtils;
 import no.nav.nom.apps.navident.SpringBootTestBase;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -27,13 +27,9 @@ class AADTokenRepositoryTest extends SpringBootTestBase {
         String obo = aadTokenRepository.getOnbehalfofTokenFor(null, "test");
         assertNull(obo);
 
-        assertThrows(ParseException.class, () -> {
-            aadTokenRepository.getOnbehalfofTokenFor("", "test");
-        });
+        assertThrows(ParseException.class, () -> aadTokenRepository.getOnbehalfofTokenFor("", "test"));
 
-        assertThrows(ParseException.class, () -> {
-            aadTokenRepository.getOnbehalfofTokenFor("rubbish", "test");
-        });
+        assertThrows(ParseException.class, () -> aadTokenRepository.getOnbehalfofTokenFor("rubbish", "test"));
     }
 
     @Test

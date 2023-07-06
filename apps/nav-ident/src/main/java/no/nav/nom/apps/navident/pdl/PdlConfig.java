@@ -5,7 +5,6 @@ import lombok.Getter;
 import no.nav.nom.apps.navident.common.ResourceReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.nom.libs.utils.common.mdc.MdcConfig.HEADER_CONSUMER_ID_KEY;
 
 @Getter
-@ConstructorBinding
 @AllArgsConstructor
 @ConfigurationProperties("app.pdl")
 public class PdlConfig {

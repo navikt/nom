@@ -4,15 +4,17 @@ import no.nav.nom.apps.navident.common.SwaggerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration(proxyBeanMethods = false)
+@EnableMethodSecurity
 public class SpringSecurityConfiguration {
 
     @Bean
@@ -23,8 +25,8 @@ public class SpringSecurityConfiguration {
         er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
          */
         return (web) -> {
-            web.ignoring().mvcMatchers("/internal/**");
-            web.ignoring().mvcMatchers(SwaggerConfig.SWAGGER_API_URLS);
+            web.ignoring().requestMatchers("/internal/**");
+            web.ignoring().requestMatchers(SwaggerConfig.SWAGGER_API_URLS);
         };
     }
 
@@ -32,10 +34,14 @@ public class SpringSecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
-            .authorizeRequests(requests -> requests.mvcMatchers(SwaggerConfig.SWAGGER_API_URLS).permitAll())
-            .authorizeRequests(requests -> requests.anyRequest().authenticated())
-            .exceptionHandling(handler -> handler.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-            .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(SwaggerConfig.SWAGGER_API_URLS).permitAll()
+                // https://github.com/spring-projects/spring-boot/issues/33934
+                .requestMatchers("/errors").permitAll()
+                .anyRequest().fullyAuthenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            .exceptionHandling(handler -> handler.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
         return http.build();
     }
 
