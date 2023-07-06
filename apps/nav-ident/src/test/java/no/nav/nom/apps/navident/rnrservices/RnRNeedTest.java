@@ -2,12 +2,8 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
-import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.eventsource.EventSourceProducerTest;
-import no.nav.nom.apps.navident.eventsource.EventSourceService;
-import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
@@ -18,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
@@ -26,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -51,18 +45,12 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
     @Autowired private Map<String, Navident> navidenter;
 
     @Autowired    private NeedProducer needProducer;
-    @Value("${test.rnr-topic}")    private String topic;
     @Autowired    private RnRTestListener rnrTestListener;
     @Autowired    private RnRTestNeedProducer rnrTestNeedProducer;
     @Autowired private DomainTestData domainTestData;
 
     @MockBean private PdlService pdlService;
-    @MockBean private IdentService identService;
-    @MockBean private EventSourceService eventSourceService;
-    @MockBean private EventSourceProducerTest eventSourceProducer;
-
     @MockBean private NavidRepository navidRepository;
-    @MockBean private SourceEventRepository sourceEventRepository;
 
     @BeforeEach
     public void emptyNeedsRead() {
@@ -81,7 +69,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
-        List<Need> needs = rnrTestListener.needsRead.stream().filter(n -> n.visited == 0).collect(Collectors.toList());
+        List<Need> needs = rnrTestListener.needsRead.stream().filter(n -> n.visited == 0).toList();
         assertEquals(1, needs.size());
         assertEquals(id, needs.get(0).personid);
         assertEquals('A', needs.get(0).idPrefix);
@@ -160,7 +148,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(KNYTNING_FINNES_1_PersonId)
-                .pdlPersonider(Arrays.asList(KNYTNING_FINNES_1_PersonId))
+                .pdlPersonider(Collections.singletonList(KNYTNING_FINNES_1_PersonId))
                 .idGeneratorVisited(true)
                 .responsProdusentVisited(true)
                 .build();
@@ -227,7 +215,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(id)
-                .pdlPersonider(Arrays.asList(id))
+                .pdlPersonider(List.of(id))
                 .idGeneratorVisited(true)
                 .responsProdusentVisited(true)
                 .build();
@@ -249,7 +237,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .identType(IdentType.STANDARD)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId)
-                .pdlPersonider(Arrays.asList(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId))
+                .pdlPersonider(Collections.singletonList(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId))
                 .responsProdusentVisited(true)
                 .build();
 
@@ -298,7 +286,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .responsProdusentVisited(true)
                 .build();
 
-        Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(Arrays.asList());
+        Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(List.of());
 
         String uuid = rnrTestNeedProducer.publish(need);
 
@@ -341,7 +329,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .responsProdusentVisited(true)
                 .build();
 
-        Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(Arrays.asList(KNYTNING_FINNES_1_PersonId));
+        Mockito.when(pdlService.getKnownPersonider(KNYTNING_FINNES_1_PersonId)).thenReturn(Collections.singletonList(KNYTNING_FINNES_1_PersonId));
 
         String uuid = rnrTestNeedProducer.publish(need);
 
@@ -521,7 +509,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .identType(IdentType.STANDARD)
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
-                .pdlPersonider(Arrays.asList("02019912345"))
+                .pdlPersonider(List.of("02019912345"))
                 .pdlGjeldendePersonid("02019912345")
                 .idGeneratorVisited(true)
                 .generertId("C000001")
@@ -574,7 +562,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
                 .personOppslagVisited(true)
                 .pdlOppslagVisited(true)
                 .pdlGjeldendePersonid(KNYTNING_FINNES_1_PersonId)
-                .pdlPersonider(Arrays.asList(KNYTNING_FINNES_1_PersonId))
+                .pdlPersonider(Collections.singletonList(KNYTNING_FINNES_1_PersonId))
                 .eksisterendeId(KNYTNING_FINNES_1_NavId)
                 .build();
 

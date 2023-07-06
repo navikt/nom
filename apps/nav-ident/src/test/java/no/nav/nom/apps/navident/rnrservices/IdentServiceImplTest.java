@@ -4,37 +4,34 @@ import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.domain.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
-import no.nav.nom.apps.navident.eventsource.EventSourceService;
-import no.nav.nom.apps.navident.eventsource.SourceEvent;
-import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import no.nav.nom.apps.navident.rnrservices.util.DomainTestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_1_PersonId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_NavId;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_1;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
+import static no.nav.nom.apps.navident.rnrservices.util.DomainTestData.KNYTNING_FINNES_IKKE_1_PersonId;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 class IdentServiceImplTest extends EmbeddedKafkaTestBase {
 
-    @Value("${test.rnr-topic}")  private String topic;
-
-    @MockBean private SourceEventRepository sourceEventRepository;
     @MockBean private PdlService pdlService;
     @MockBean private NavidGenerator navidGenerator;
-    @MockBean private EventSourceService eventSourceService;
-    @MockBean private KafkaTemplate<String, SourceEvent> producer;
     @Autowired private DomainTestData domainTestData;
 
     @Autowired private Map<String, Navident> navidenter;
@@ -48,7 +45,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
     public void bestillIdent_knytningFinnesIkke() {
         String personid = KNYTNING_FINNES_IKKE_1_PersonId;
         char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.singletonList(personid));
         when(navidGenerator.generate(prefix)).thenReturn("A100001");
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
@@ -62,7 +59,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
     public void bestillIdent_knytningFinnes() {
         String personid = KNYTNING_FINNES_1_PersonId;
         char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.singletonList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
@@ -75,7 +72,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
     public void bestillIdent_knytningFinnes_FlerePersonideer_1() {
         String personid = KNYTNING_FINNES_FLERE_ID_3_PersonId_1;
         char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.singletonList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
@@ -88,7 +85,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
     public void bestillIdent_knytningFinnes_FlerePersonideer_2() {
         String personid = KNYTNING_FINNES_FLERE_ID_3_PersonId_2;
         char prefix = 'A';
-        when(pdlService.getKnownPersonider(personid)).thenReturn(Arrays.asList(personid));
+        when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.singletonList(personid));
 
         Respons respons = identService.bestillIdent(personid, IdentType.STANDARD, prefix);
         assertNotNull(respons);
