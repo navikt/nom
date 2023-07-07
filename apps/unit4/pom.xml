@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.1</version>
         <relativePath/>
     </parent>
 
@@ -26,6 +26,9 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+
+        <wiremock.version>2.35.0</wiremock.version>
+        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
 
         <unleash.version>7.1.0</unleash.version>
     </properties>
@@ -73,7 +76,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
+            <artifactId>utils-common-v2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -112,11 +115,16 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.thomaskasene.wiremock</groupId>
+            <artifactId>wiremock-junit-extension</artifactId>
+            <version>${wiremock-extension.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
