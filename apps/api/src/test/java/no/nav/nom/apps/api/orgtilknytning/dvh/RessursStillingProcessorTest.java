@@ -139,7 +139,8 @@ public class RessursStillingProcessorTest {
                     Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
                 start,                          // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
-                orgenhetService.getByFid("FID_1").get()
+                orgenhetService.getByFid("FID_1").get(),
+                StillingPeriode.DagligOppfolging.JA
             )
         );
 
