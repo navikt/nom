@@ -32,9 +32,9 @@ import static java.util.stream.Collectors.toMap;
 public class DvhRepository {
 
     private final IOrgenhetService orgenhetService;
-    private List<DvhLeder> ledere;
-    private List<DvhOrganisering> organiseringer;
-    private List<Orgtilknytning> koblinger;
+    private List<DvhLeder> ledere = Collections.emptyList();
+    private List<DvhOrganisering> organiseringer = Collections.emptyList();
+    private List<Orgtilknytning> koblinger = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrMap;
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();

@@ -134,7 +134,6 @@ public class RessursStillingProcessor {
                     var matcherAgressoId = sammePeriode.stream().filter(ot -> orgtilknytningEnhetMatcherAgressoId(stillingPeriode, ot)).toList();
                     if (matcherAgressoId.size() == 1) {
                         // Historikken stemmer - Sjekk dagligOppfølging og move on
-                        // TODO: DOL
                         behandledeOrgtilknytningerFids.add(matcherAgressoId.stream().findFirst().get().fid());
                     } else if (matcherAgressoId.size() > 0) {
                         String msg ="Navident %s har historisk stillingPeriode fra DVH (%s) matcher flere orgtilknytninger %s".formatted(navident, stillingPeriode, matcherAgressoId);
@@ -147,8 +146,6 @@ public class RessursStillingProcessor {
                         if (sammePeriode.size() > 0) {
                             // Vi finner minst en orgtilknytning for samme historisk periode
                             // Da tar vi State historikken for god fisk.
-                            // TODO: DOL - Og hva med flere...
-
                             behandledeOrgtilknytningerFids.addAll(sammePeriode.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                         } else {
                             // Nå derimot kan det hende vi må avslutte en aktiv orgtilknytning, eller endre gyldigTOM
@@ -172,7 +169,6 @@ public class RessursStillingProcessor {
                                     stillingPeriode,
                                     StillingPeriode.toString(stillingPerioder)
                                 );
-                                // TODO: DOL
                                 behandledeOrgtilknytningerFids.addAll(matcherStartDatoOgAgressoId.stream().map(OrgtilknytningState::fid).collect(Collectors.toSet()));
                             }
                         }
@@ -327,7 +323,7 @@ public class RessursStillingProcessor {
         loggOppsummering(navident, stillingPerioder, orgtilknytninger);
 
         // Sjekk om det finnes en current stillingPeriode hvor stilling og ressurs har samme enhet
-        if (validAgrIdStillingVsRessurs(navident, stillingPerioder)) {
+        if (!validAgrIdStillingVsRessurs(stillingPerioder)) {
             if (log.isDebugEnabled()) {
                 log.debug(
                     "Navident {} har ingen gjeldende stilling med samme agressoId som ressursen:\n{}",
@@ -339,11 +335,13 @@ public class RessursStillingProcessor {
         }
     }
 
-    private boolean validAgrIdStillingVsRessurs(String navident, List<StillingPeriode> stillingPerioder) {
-        return !stillingPerioder.stream().anyMatch(PeriodeUtil::isCurrentPeriod) || // Ok hvis ingen current
-             stillingPerioder.stream()
-            .filter(PeriodeUtil::isCurrentPeriod)
-            .anyMatch(StillingPeriode::harSammeAgressoIdPaStillingOgRessurs);
+    private boolean validAgrIdStillingVsRessurs(List<StillingPeriode> stillingPerioder) {
+        if (stillingPerioder.stream().anyMatch(PeriodeUtil::isCurrentPeriod)) {
+            return stillingPerioder.stream()
+                .filter(PeriodeUtil::isCurrentPeriod)
+                .anyMatch(StillingPeriode::harSammeAgressoIdPaStillingOgRessurs);
+        }
+        return true;
     }
 
     private List<OrgtilknytningState> fjernDuplikater(List<OrgtilknytningState> matcherAgressoId) {

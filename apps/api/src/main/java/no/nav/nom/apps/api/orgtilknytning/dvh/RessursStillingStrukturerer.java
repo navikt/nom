@@ -35,9 +35,6 @@ public class RessursStillingStrukturerer {
     private final IRessursService ressursService;
     private final Environment environment;
 
-    // TODO: Fjern dette etter utvikling
-    private static int NUM_TO_PROCESS_PER_NAVIDENT_LETTER = -1; // mindre enn 1 tar med alle - Brukes kun for testing under lokal utvikling
-
     public RessursStillingStrukturerer(IOrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
                                        IRessursService ressursService,
                                        Environment environment) {
@@ -60,9 +57,6 @@ public class RessursStillingStrukturerer {
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = new HashMap<>();
 
         ressursStillingerGruppert.forEach((navident, rsList) -> {
-
-            if (harBehandletNok_LOCAL_RUN(stillingPerioderPerNavident, navident)) return; // Har nå behandlet nok navidenter som starter på denne bokstaven. Hop til neste
-
             if (ressursService.findByNavident(navident).isEmpty()) {
                 log.error("Har ressursStillinger fra DVH for navident {} som ikke finnes i NOM", navident);
                 return;
@@ -363,12 +357,6 @@ public class RessursStillingStrukturerer {
             )
             .filter( oe -> !oe.getGyldigFom().equals(oe.getGyldigTom().orElse(null))) // Ekskluder enheter hvor fra-til dato er lik
             .toList();
-    }
-
-    private boolean harBehandletNok_LOCAL_RUN(Map<String, List<StillingPeriode>> stillingPerioderPerNavident, String navident) {
-        return isLocalEnvRun() &&
-            NUM_TO_PROCESS_PER_NAVIDENT_LETTER > 0 &&
-            stillingPerioderPerNavident.keySet().stream().filter(k -> k.charAt(0) == navident.charAt(0)).count() >= NUM_TO_PROCESS_PER_NAVIDENT_LETTER;
     }
 
     private String orgenheterToString(List<IOrgenhet> orgenheter) {
