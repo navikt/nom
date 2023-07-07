@@ -16,6 +16,6 @@ public class NavidRepositoryImpl implements NavidRepository {
     public Long getNextval() {
         val query = entityManager.createNativeQuery("SELECT nextval('NAVIDENT_SEQ')");
 
-        return ((BigInteger)query.getSingleResult()).longValue();
+        return (Long) query.getSingleResult();
     }
 }
