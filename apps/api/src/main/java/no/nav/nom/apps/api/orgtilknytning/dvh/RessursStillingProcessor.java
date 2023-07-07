@@ -183,7 +183,6 @@ public class RessursStillingProcessor {
                 var matcherAgressoId = aktiveOrgtilknytninger.filter(ot -> orgtilknytningEnhetMatcherAgressoId(stillingPeriode, ot)).toList();
 
                 // Aktiv periode kan sjekkes for primær tilkynting
-//                boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
                 boolean erDagligOppfolging = stillingPeriode.dagligOppfolging() == JA;
 
                 if (matcherAgressoId.size() > 1) {
@@ -234,7 +233,7 @@ public class RessursStillingProcessor {
                 var matcherAgressoId = aktiveOrgtilknytninger.filter(ot -> orgtilknytningEnhetMatcherAgressoId(stillingPeriode, ot)).toList();
 
                 // Fremtidig periode kan sjekkes for primær tilkynting
-                boolean erDagligOppfolging = erStillingPeriodenDagligOppfolging(stillingPeriode);
+                boolean erDagligOppfolging = stillingPeriode.dagligOppfolging() == JA;
 
                 // Finn så i matcherAgressoId om det er match på fra-til dato.
                 var matcherIdOgPeriode = matcherAgressoId.stream().filter( ot -> isMatchingPeriod(ot, stillingPeriode)).toList();
