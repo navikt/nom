@@ -11,7 +11,7 @@ type OrgEnhet {
     koblinger: [OrgEnhetsKobling!]!
     orgEnhetsKategori: NomNivaa  @deprecated(reason: "orgEnhetsKategori er erstattet med nomNivaa")
     nomNivaa: NomNivaa
-    type: Kode
+    type: Kode   @deprecated(reason: "Ubrukt felt")
     orgEnhetsType: OrgEnhetsType
     remedyEnhetId: String
 }
