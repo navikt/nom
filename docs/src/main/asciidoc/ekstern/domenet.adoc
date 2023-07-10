@@ -58,7 +58,7 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 |remedyEnhetId| Nei        |Angir hvilket enhetsnummer en ressurs i denne orgEnheten vanligvis vil bli tildelt i tilgangsløsningene. Alle orgEnheter nederst i orgHierarkiet vil ha verdi i dette feltet, og mange orgEnheter oppover i hierarkiet også. De øverste orgEnhetene vil ikke ha verdi her. Verdi i dette feltet utledes av NOM sin mapping mellom NOMs orgEnheter og remedyEnheter    |1783 | NOM
 |nomNivaa  |Nei    |Enkelte orgenheter kan klassifiseres som et ARBEIDSOMRÅDE (også kalt ENHET), DRIFTSENHET eller LINJEENHET. Dette feltet er satt for de orgEnhetene som kan klassifiseres som et av disse tre verdiene.     |DRIFTSENHET    |NOM
 |organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter. Alle aktive orgEnheter vil ha minst 1 organisering. Avviklede orgEnheter vil fjernes fra orghierarkiet, og således vil organiseringer være tom, og den egenskapen kan benyttes for å avdekke avviklede orgEnheter.       |Se Organiseringer-objektet         | Unit4 via DVH
-|leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se OrgEnhetsleder-objektet         | Unit4 via DVH
+|leder          |Ja         |Ressursen som er leder for orgEnheten. Alle aktive orgEnheter skal ha feltet satt.                     |Se OrgEnhetsleder-objektet         | Unit4 via DVH
 |orgEnhetstype  |Nei        |Typen orgEnhet. Per juni 2023 er feltet kun populert for orgEnheter i direktoratet, og disse har da orgEnhetstype=DIR. Det er planlagt at alle orgEnheter skal få verdi her iløpet av 2023.                 |DIR, Familie- og pensjonsytelser, eller NAV-kontor |NOM 
 |koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. Merk at per i dag er praksisen å plassere ansatte i nederste orgEnheter (løvnodene) i orghierarkiet, og derfor vil koblinger være tom for alle orgEnheter bortsett fra løvnodene.  |Se OrgEnhetsKobling | Unit4 via DVH
 |===
@@ -72,7 +72,7 @@ _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denn
 |===
 
 *Beskrivelse:* +
-OrgEnhetskobling er knytningen mellom en orgEnhet og en ressurs. En orgEnhet kan flere orgEnhetskoblinger samtidig, men ikke flere for samme ressurs på et gitt tidspunkt. 
+OrgEnhetskobling er knytningen mellom en orgEnhet og en ressurs. En orgEnhet kan flere orgEnhetskoblinger samtidig, men ikke flere for samme ressurs på et gitt tidspunkt. Merk også at det kun er orgEnheter nederst i orghierarkiet (løvnoder) som har ressurser knyttet til seg per juni 2023. 
 
 *Eksempler:* +
 OrgEnhet _NAV Halden Stab_ har en orgEnhetskobling til ansatt Ola i perioden 01.01.2020 - 31.03.2022
@@ -81,8 +81,8 @@ OrgEnhet _NAV Halden Stab_ har en orgEnhetskobling til ansatt Ola i perioden 01.
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                |Eksempel                             |Kilde
 |ressurs        |Ja         |Ressursen orgEnheten er koblet til                         |Se Ressurs-objekt                    |Unit4 via DVH
-|gyldigFom      |Ja         |Datoen koblingen er gyldig fra og med. Per jan 2023 viser denne oftest en nyere dato enn da ressursen ble koblet til den gitte orgEnheten. Dette skyldes at Unit4, og dernest DVH, stykker opp periodene vesentlig mer enn det NOM vil presentere.                      |2009-01-22                           |Unit4 via DVH
-|gyldigTom      |Nei        |Siste dag koblingen er gyldig.  NULL hvis ikke satt.       |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
+|gyldigFom      |Ja         |Datoen koblingen er gyldig fra og med. Per jan 2023 viser denne oftest en nyere dato enn da ressursen ble koblet til den gitte orgEnheten. Dette skyldes at Unit4, og dernest DVH, stykker opp periodene vesentlig mer enn det NOM vil presentere. Verdi kan også være frem i tid                     |2009-01-22                           |Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag ressursen er tilknyttet orgEnheten. NULL hvis ikke satt. Verdi kan være frem i tid      |2020-02-14, NULL hvis ikke satt.     |Unit4 via DVH
 |===
 
 
@@ -93,7 +93,7 @@ OrgEnhet _NAV Halden Stab_ har en orgEnhetskobling til ansatt Ola i perioden 01.
 |===
 
 *Beskrivelse:* +
-Knytning mellom en orgEnhet og en ressurs hvor ressursen er orgEnhetens leder. 
+Knytning mellom en orgEnhet og en ressurs hvor ressursen er orgEnhetens leder. Alle aktive orgEnheter skal ha leder.
 
 *Fremtidig:* : I dag støttes ikke historikk over ledere på en orgEnhet. På sikt skal objektet utvides med periode, slik at man kan se historiske ledere, dog slik at en orgEnhet har maks én leder på et gitt tidspunkt.
 
