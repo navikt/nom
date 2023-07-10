@@ -17,7 +17,7 @@ En orgEnhet kan ha flere underenheter, men en orgEnhet kan bare ha én overenhet
 |Felt           |Påkrevd    |Beskrivelse                                                          |Eksempel                               |Kilde
 |retning        |Ja         |Angir om det pekes på en overliggende eller underliggende orgEnhet   |"over"/"under"                         |Unit4 via DVH
 |orgEnhet       |Ja         |OrgEnhet over eller under avhengig av retning                        |Se OrgEnhet                            |Unit4 via DVH
-|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med. I dag vises kun dummyverdi (dagens dato).  |2009-01-22            |Dummy
+|gyldigFom      |Ja         |Dagen organiseringen er gyldig fra og med. I dag vises kun dummyverdi (dato for siste innlasting, ofte dagens dato eller gårsdagen).  |2009-01-22            |Dummy
 |gyldigTom      |Nei        |Dagen organiseringen er gyldig til og med. I dag vises kun dummyverdi NULL            |2020-02-14, NULL hvis ikke satt.       |Dummy
 |===
 
