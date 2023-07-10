@@ -40,27 +40,33 @@ Oppgavekøer, arbeidsbenker og virtuelle enheter er ikke orgEnheter selv om enke
 *Eksempler:* +
 _NAV Halden Stab_ er en orgEnhet og har overliggende orgEnhet _NAV Halden_. Denne har igjen flere underliggende orgEnheter.
 
+*Merk:* +
+
+* Begrepet _orgenhet_ brukes også i Unit4/Agresso, men angir da kun løvnoden (nederste node) i organisasjonshierarkiet siden man der sier at de organisasjonsenhetene som er løvnoder er på organisasjonsnivå = ORGENHET. I NOM er alle noder i organisasjonshierarkiet egne orgEnheter, ikke bare løvnodene. 
+* I NAV har begrepet orgenhet/organisasjonsenhet/enhet ulik betydning avhengig av hvilken kontekst man er i. I mange fagsystemer, oppgaveruting og i NAV-IT representerer begrepet ofte en 4-sifret enhet. I NAVs kopi av Enhetsregisteret i Brønnøysund representerer begrepet de offisielle organisasjonsenhetene som NAV har registrert der. I NOM representerer begrepet alle organisasjonsenheter som er etablert gjennom forhandlinger i Medbestemmelsesapparatet, og ligner veldig på de organisasjonsenhetene som finnes i Unit4/Agresso. Merk at det er en viss overlapp mellom de ulike definisjonene av organisasjonsenhet, men det f.eks. finnes 4-sifferenheter som ikke finnes som orgEnhet i NOM og vice versa. 
+
 [%header,cols="15%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                         |Eksempel          |Kilde
 |id             |Ja         |NOMs unike ID for en orgEnhet. Formatet er <XX999X>. Id-en er en syntetisk nøkkel, og altså ikke meningsbærende.                      |pa649a          |NOM
 |navn           |Ja         |Navnet på en orgEnheten                                     |NAV Halden Stab          | Unit4 via DVH
 |gyldigFom      |Ja         |Virkningsdato for når orgEnheten er/var virksom fra. Kan også være frem i tid. For orgEnheter over nederste nivå vil gyldigFom alltid være første innlastingsdato i DVH.    |2009-01-22          | Unit4 via DVH
-|gyldigTom      |Nei        |Siste dag orgEnheten var (eller skal være) virksom. Kan være frem i tid. For orgEnheter over nederste nivå vil gyldigTom alltid være NULL, også for de som er avviklet.           |2020-02-14, NULL hvis ikke satt.         | Unit4 via DVH
-|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
+|gyldigTom      |Nei        |Siste dag orgEnheten var (eller skal være) virksom. Kan være frem i tid. For orgEnheter over nederste nivå vil gyldigTom alltid være NULL, også for de som er avviklet. Per nå kan derfor ikke gyldigTom benyttes for å sile ut avviklede orgEnheter høyere opp i hierarkiet, se også beskrivelse av feltet organiseringer.          |2020-02-14, NULL hvis ikke satt.         | Unit4 via DVH
 |agressoId      |Ja         |Id fra lønnssystemet Unit4-Agresso. Merk at denne id-en ikke er unik. Det forekommer at flere historiske orgEnheter har gjenbrukt agressoId. Konsumenter av NOM oppfordres sterkt til å ikke brukke agressoId, men heller bruke NOMs id for enheten som er unik. | 1001360         | Unit4 via DVH
+|orgNiv         |Ja         |Nivå i organisasjonshierarkiet i lønnsystemet Unit4-Agresso. Ønsker ikke at konsumenter skal bygge logikk på dette feltet da NOM vil gå bort fra orgnivå på sikt.         | ORGNIV2          | Unit4 via DVH
 |agressoOrgenhetType | Ja   |Enhetstype slik det er definert i Unit4. Alle enheter i direktoratet er f.eks. DIR, et NAV-kontor er LOKAL | LOKAL/DIR... | Unit4 via DVH
-|orgEnhetskategori  |Nei    |Enkelte orgenheter kan klassifiseres som et ARBEIDSOMRÅDE (også kalt ENHET), DRIFTSENHET eller LINJEENHET. Dette feltet er satt for de orgEnhetene som kan klassifiseres som et av disse tre verdiene. Per januar 2023 er ikke feltet populert.    |DRIFTSENHET    |NOM
-|organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter.        |Se Organiseringer-objektet         | Unit4 via DVH
+|remedyEnhetId| Nei        |Angir hvilket enhetsnummer en ressurs i denne orgEnheten vanligvis vil bli tildelt i tilgangsløsningene. Alle orgEnheter nederst i orgHierarkiet vil ha verdi i dette feltet, og mange orgEnheter oppover i hierarkiet også. De øverste orgEnhetene vil ikke ha verdi her. Verdi i dette feltet utledes av NOM sin mapping mellom NOMs orgEnheter og remedyEnheter    |1783 | NOM
+|nomNivaa  |Nei    |Enkelte orgenheter kan klassifiseres som et ARBEIDSOMRÅDE (også kalt ENHET), DRIFTSENHET eller LINJEENHET. Dette feltet er satt for de orgEnhetene som kan klassifiseres som et av disse tre verdiene.     |DRIFTSENHET    |NOM
+|organiseringer |Ja         |Liste over overliggende orgEnhet og eventuelle underliggende orgEnheter. Alle aktive orgEnheter vil ha minst 1 organisering. Avviklede orgEnheter vil fjernes fra orghierarkiet, og således vil organiseringer være tom, og den egenskapen kan benyttes for å avdekke avviklede orgEnheter.       |Se Organiseringer-objektet         | Unit4 via DVH
 |leder          |Ja         |Ressursen som er leder for orgEnheten.                                       |Se OrgEnhetsleder-objektet         | Unit4 via DVH
-|orgEnhetstype  |Nei        |Typen orgEnhet. Per januar 2023 er ikke feltet populert.                  |Familie- og pensjonsytelser, eller NAV-kontor |NOM 
-|koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. |Se OrgEnhetskobling | Unit4 via DVH
+|orgEnhetstype  |Nei        |Typen orgEnhet. Per juni 2023 er feltet kun populert for orgEnheter i direktoratet, og disse har da orgEnhetstype=DIR. Det er planlagt at alle orgEnheter skal få verdi her iløpet av 2023.                 |DIR, Familie- og pensjonsytelser, eller NAV-kontor |NOM 
+|koblinger      |Ja         |Liste over alle ressurser knyttet til orgEnheten. Både ressurser som er ansatt ved orgEnheten, og utlånt til orgEnheten. Merk at per i dag er praksisen å plassere ansatte i nederste orgEnheter (løvnodene) i orghierarkiet, og derfor vil koblinger være tom for alle orgEnheter bortsett fra løvnodene.  |Se OrgEnhetsKobling | Unit4 via DVH
 |===
 
 
 
 
-== OrgEnhetskobling
+== OrgEnhetsKobling
 [cols="3"]
 |===
 |===
