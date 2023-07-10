@@ -209,16 +209,37 @@ public class RessursStillingProcessor {
                         endreOrgtilknytningDagligOppfolging(fid, navident, true, stillingPeriode, StillingPeriode.toString(stillingPerioder));
                     }
                 } else {
-                    log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher en aktiv orgtilknytning i state\n  {}\n Sjekker denne for dato endringer og evt. endring av primær", navident, stillingPeriode, matcherAgressoId);
                     OrgtilknytningState orgtilknytning = matcherAgressoId.get(0);
-                    if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
-                        endreOrgtilknytningGyldigTOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
-                    }
-                    if (!orgtilknytning.gyldigFom().equals(stillingPeriode.gyldigFom())) {
-                        endreOrgtilknytningGyldigFOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+
+                    if (!orgtilknytning.orgEnhetId().equals(stillingPeriode.orgenhet().getId())) {
+                        log.debug("Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher en aktiv orgtilknytning i state\n  {}\n  på agressoId, men ikke på enhetsId",  navident, stillingPeriode, matcherAgressoId);
+                        // Behandle denne som ny tilkobling - og la evt. opprydding fjerne eller endre datoer på den gamle
+                        String fid = lagNyOrgtilknytning(navident, stillingPeriode.orgenhet().getId(), stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                        if (stillingPeriode.gyldigTom().isBefore(NO_END_DATE)) {
+                            settOrgtilknytningSluttDato(fid, navident, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                        }
+                    } else {
+                        log.debug(
+                            "Navident {} har aktiv stillingPeriode i DVH\n  {}\n som matcher en aktiv orgtilknytning i state\n  {}\n Sjekker denne for dato endringer og evt. endring av primær",
+                            navident,
+                            stillingPeriode,
+                            matcherAgressoId
+                        );
+                        if (!orgtilknytning.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())) {
+                            endreOrgtilknytningGyldigTOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                        }
+                        if (!orgtilknytning.gyldigFom().equals(stillingPeriode.gyldigFom())) {
+                            endreOrgtilknytningGyldigFOM(orgtilknytning, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                        }
                     }
                     if (erDagligOppfolging != orgtilknytning.erDagligOppfolging() && stillingPeriode.dagligOppfolging() != UKJENT) {
-                        endreOrgtilknytningDagligOppfolging(orgtilknytning.fid(), navident, erDagligOppfolging, stillingPeriode, StillingPeriode.toString(stillingPerioder));
+                        endreOrgtilknytningDagligOppfolging(
+                            orgtilknytning.fid(),
+                            navident,
+                            erDagligOppfolging,
+                            stillingPeriode,
+                            StillingPeriode.toString(stillingPerioder)
+                        );
                     }
                 }
 
