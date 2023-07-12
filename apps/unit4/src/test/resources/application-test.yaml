@@ -1,8 +1,3 @@
-NAIS_APP_NAME: nom-unit4
-AZURE_APP_CLIENT_ID: 'dummy'
-AZURE_APP_TENANT_ID: 'dummy'
-AZURE_APP_JWK: 'dummy'
-
 app:
   kafka:
     listener:
@@ -29,7 +24,12 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       auto-offset-reset: earliest
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:${wiremock.server.port}/aad
+          audiences: test
 
 logging:
   level:

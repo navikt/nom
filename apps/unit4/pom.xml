@@ -111,11 +111,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.thomaskasene.wiremock</groupId>
             <artifactId>wiremock-junit-extension</artifactId>
             <version>${wiremock-extension.version}</version>
