@@ -238,7 +238,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 174500;1742;ORGNIV3;Indre Namdal;Beholdt;;;JA;174500;ORGNIV3;leggInn;
 175100;1751;ORGNIV3;Nærøy;Beholdt;;;JA;175100;ORGNIV3;leggInn;
 178300;1783;ORGNIV3;Værnes;Beholdt;;;JA;178300;ORGNIV3;leggInn;
-1899000;1800;AGRESSOORGENHET;Arbeidslivssenter Nordland;TODO, se kommentar;;;JA;1899000;ORGENHET;leggInn;Rart. Vanligvis pleier xx00 å peke til fylkesleddet. I NORG peker 1800 til NAV Nordland, men i mappingen her peker det på NAV Nordland Arbeidslivssenter og det er snodig. Se 1891
+1899000;1800;AGRESSOORGENHET;Arbeidslivssenter Nordland;TODO, se kommentar;;;JA;18;ORGNIV2;my910v;12.07.2023: Endret til å mappe til Nordland (my910v)
 180400;1804;ORGNIV3;Bodø;Beholdt;;;JA;180400;ORGNIV3;leggInn;
 180500;1805;ORGNIV3;Narvik;Beholdt;;;JA;180500;ORGNIV3;leggInn;
 181300;1813;ORGNIV3;Sør-Helgeland;Beholdt;;;JA;181300;ORGNIV3;leggInn;
@@ -263,7 +263,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 186800;1868;ORGNIV3;Øksnes;Beholdt;;;JA;186800;ORGNIV3;leggInn;
 187000;1870;ORGNIV3;Sortland;Beholdt;;;JA;187000;ORGNIV3;leggInn;
 187100;1871;ORGNIV3;Andøy;Beholdt;;;JA;187100;ORGNIV3;leggInn;
-189100;1891;ORGNIV3;Nordland Fylkesleddet;TODO, se kommentar;;;JA;189100;ORGNIV3;leggInn;1891 i NORG er Arbeidslivssenter Nordland, som virker mer riktig. Antagelig skal 1800 og 1891 bytte plass her da de mapper til feil agressoEnhet virker det som.
+189100;1891;ORGNIV3;Nordland Fylkesleddet;TODO, se kommentar;;;JA;189900;ORGNIV3;sy663b;12.07.2023: Endret til å mappe til Nordland Arbeidslivssenter (sy663b)
 189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;189610;ORGNIV3;leggInn;
 1980100;1900;AGRESSOORGENHET;Troms og Finnmark Regionkontor;Opp til ORGNIV2;R19;vy324v;JA;R19;ORGNIV2;vy324v;
 190200;1902;ORGNIV3;Tromsø;Beholdt;;;JA;190200;ORGNIV3;leggInn;
