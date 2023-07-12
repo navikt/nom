@@ -126,15 +126,15 @@ Omfatter:
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
 |Felt           |Påkrevd    |Beskrivelse                                                                            |Eksempel |Kilde
-|navIdent       |Ja         |Intern identifikator som tildeles alle ressurser i NAV                                 |Z123456  |Remedy via DVH
+|navIdent       |Ja         |Intern identifikator som tildeles alle ressurser i NAV. Format <X999999>. Unikt for alle ressurser. Tallsekvensen 999999 er i seg selv også unik. Praksis er også at en person får tildelt samme NAV-ident selv om vedkommende f.eks. har vært i NAV for ti år siden, så ute, men så kommer tilbake.            |Z123456  |Remedy via DVH 
 |personIdent    |Ja         |11-sifret fødselsnummer eller DNR for ressurser med innslag i Folkeregisteret. For ressurser uten fnr/dnr vil det her finnes id-er på ulike format - dette gjelder f.eks. for utenlandske konsulenter på korttidsoppdrag, roboter mv.                     |1234567890 |Remedy via DVH
 |sektor    |Ja         |Kodeverk som angir om ressursen er _statlig_ eller _kommunalt_ ansatt i NAV, eller _ekstern_. |NAV_STATLIG, NAV_KOMMUNAL eller EKSTERN |Remedy via DVH
-|folkeregisterPerson |Nei        |Inneholder folkeregisterrert navn for ressursen                                        | |Folkereg. via PDL
+|folkeregisterPerson |Nei        |Inneholder folkeregisterrert navn for ressursen. Folkeregisteret opererer med for-, mellom- og etternavn. I NAV benyttes ikke folkeregistrert navn, men visningsnavn som kun inneholder fornavn og etternavn.                                         | |Folkereg. via PDL
 |epost          |Nei        |Personlig NAV-epostadresse                                                             | |Exchange via AD
 |visningsNavn   |Nei        |Navnet ressursen bruker i NAV. Formatert <Fornavn Etternavn> Ofte er antall mellomnavn redusert eller fjernet. Kan avvike noe fra folkeregistrert navn | |Remedy via AD
-|fornavn        |Nei        |Fornavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
+|fornavn        |Nei        |Fornavn for ressursen. Dersom man ønsker å ha med folkeregistrert mellomnavn blir den en del av fornavn her. Fra visningsnavnet, kan avvike fra folkeregisterert navn.       | |
 |etternavn      |Nei        |Etternavn for ressursen. Fra visningsnavnet, kan avvike fra folkeregisterert navn.     | |
-|sluttDato      |Ja         |Ressursens sluttdato.
+|sluttDato      |Ja         |Ressursens sluttdato. Pga. dårlig datakvalitet er feltet satt til deprecated i API-et inntil videre. 
 
 _Statlig ansatt_: sluttDato i Unit4 brukes hvis satt, ellers brukes Remedy sluttdato
 
@@ -147,9 +147,9 @@ _Ekstern_: Sluttdato i Remedy benyttes
 Ved permisjonsflagg i Remedy på statlig ansatte, kommunalt ansatte og eksterne brukes samme logikk som over, men hvis sluttDato da ikke er satt så tillates NULL. Dette betyr at ressursen ikke har sluttdato. For annenStat settes sluttdato til datoen permisjonsflagget settes i Remedy, selv om ressursen er aktiv.
                                                           | |Remedy og Unit4 via DVH
 |telefon        |Ja         |Liste av telefonnumre på ressursen. Kan inneholde både private og NAV-utdelte personlige telefonnumre. |Se Telefon-objekt |Telenor og Remedy via DVH
-|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere. | |Unit4 via DVH
+|ledere         |Ja         |Liste av ledere for ressursen. Normalt kun én leder, men for ressurser som er ansatt i en orgEnhet og jobber i en annen kan det være flere.- Per juni 2023 kun populert for statlige og kommunalt ansatte ressurser. Planlagt å få inn leder for eksterne i løpet av 2023. | |Unit4 via DVH
 |lederFor       |Ja         |Liste over orgEnheter akuell ressurs er leder for. Kan ha 0, 1 eller flere forekomster.   | |Unit4 via DVH
-|orgTilknytning      |Ja         |Ressursens orgtilknytning til orgEnheter. Alle aktive ressurser må ha en knytning til en orgEnhet, med unntak av eksterne som per i dag ikke har denne knytningen. Hvis en ressurs er ansatt i en orgEnhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. OrgEnheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. | Se eget objekt RessursOrgTilknytning |Unit4 via DVH
+|orgTilknytning      |Ja         |Ressursens orgtilknytning til orgEnheter. Alle aktive ressurser må ha en knytning til en orgEnhet, med unntak av eksterne som per i dag ikke har denne knytningen (planlagt innført i 2023). Hvis en ressurs er ansatt i en orgEnhet og jobber i et annet kan vedkommende ha flere samtidige koblinger. OrgEnheter man har vært ansatt i eller jobbet ved tidligere listes også her med angivelse av periode. Merk at historiske orgTilknytninger ikke er komplett, og går kun noen få år tilbake. | Se eget objekt RessursOrgTilknytning |Unit4 via DVH
 |===
 
 
