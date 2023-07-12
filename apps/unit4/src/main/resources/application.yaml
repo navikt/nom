@@ -84,6 +84,10 @@ unleash:
   endpoint:
     url: https://unleash.nais.io/api
 
+springdoc:
+  swagger-ui:
+    path: /api
+
 ---
 # DEV
 spring:

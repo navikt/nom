@@ -24,7 +24,8 @@
         <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
-        <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.1.0</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
 
         <wiremock.version>2.35.0</wiremock.version>
@@ -86,13 +87,13 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc-openapi.version}</version>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-security</artifactId>
-            <version>${springdoc-openapi.version}</version>
+            <version>${springdoc-openapi-security.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getunleash</groupId>

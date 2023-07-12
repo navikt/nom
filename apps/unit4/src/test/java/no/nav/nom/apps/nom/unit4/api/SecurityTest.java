@@ -32,8 +32,7 @@ class SecurityTest {
 
     private static final String ADMIN_API_PATH = "/api/v1/admin/ressurs/";
     public static final String RESSURS_API_PATH = "/api/ressurs";
-
-    public static final String SWAGGER_REDIRECT_API_PATH = "/api";
+    public static final String SWAGGER_API_PATH = "/api";
     public static final String ACTUATOR_ENDPOINT_PATH = "/internal/health/liveness";
     public static final String ID_MOCKED_USER = "123456";
 
@@ -115,17 +114,17 @@ class SecurityTest {
             .expectStatus().isUnauthorized();
     }
 
-/*    @Test
+    @Test
     @DisplayName("Kan nå Swagger API uten token")
     void should_access_swagger_api_without_token() {
         webTestClient.get()
-            .uri(SWAGGER_REDIRECT_API_PATH)
+            .uri(SWAGGER_API_PATH)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
             })
             .exchange()
-            .expectStatus().isOk();
-    }*/
+            .expectStatus().is3xxRedirection();
+    }
 
     @Test
     @DisplayName("Kan nå actuator endpoint uten token")
