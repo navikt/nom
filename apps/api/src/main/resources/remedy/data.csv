@@ -264,7 +264,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 187000;1870;ORGNIV3;Sortland;Beholdt;;;JA;187000;ORGNIV3;leggInn;
 187100;1871;ORGNIV3;Andøy;Beholdt;;;JA;187100;ORGNIV3;leggInn;
 189100;1891;ORGNIV3;Nordland Fylkesleddet;TODO, se kommentar;;;JA;189900;ORGNIV3;sy663b;12.07.2023: Endret til å mappe til Nordland Arbeidslivssenter (sy663b)
-189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;189610;ORGNIV3;leggInn;
+189610;1893;ORGNIV3;Nordland Arbeidsrådgivning;Beholdt;;;JA;1896100;ORGENHET;fa392x;12.07.2023: Mapping endret til fa392x, tidligere gikk det til utgått enhet. 
 1980100;1900;AGRESSOORGENHET;Troms og Finnmark Regionkontor;Opp til ORGNIV2;R19;vy324v;JA;R19;ORGNIV2;vy324v;
 190200;1902;ORGNIV3;Tromsø;Beholdt;;;JA;190200;ORGNIV3;leggInn;
 190300;1903;ORGNIV3;NAV Sør-Troms;Beholdt;;;JA;190300;ORGNIV3;leggInn;
