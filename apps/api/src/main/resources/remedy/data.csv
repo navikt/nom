@@ -30,7 +30,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 023800;0238;ORGNIV3;Nannestad;Beholdt;;;JA;023800;ORGNIV3;leggInn;
 0287000;0287;AGRESSOORGENHET;Øst-Viken Tiltak;Opp til ORGNIV4;028700;;JA;028700;ORGNIV4;leggInn;Ser det er flere enheter på orgEnhetsnivå under 028700 som ikke har egne remedyEnheter. Stikkprøve på en ansatt i en annen enhet under 028700 viser at de også har brukt 0287 som remedyEnhet. Derfor flyttet agressoId et hakk opp.
 0299000;0291;AGRESSOORGENHET;Øst-Viken Arbeidslivssenter;Opp til ORGNIV4;029900;;JA;029900;ORGNIV4;leggInn;Tilsvarende som rad 31. Også sjekket en ansatt på parallell enhet
-029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV3;leggInn;Merk at det finnes enhet på denne agressoId både i niv3 og niv4, og det er niv4 som er den aktive nå…
+029610;0296;ORGNIV3;Øst-Viken Arbeid og helse;Beholdt;;;JA;029610;ORGNIV3;ky791b;12.07.2023: Mappet til ky791b (ORGNIV4), men mulig den skal til ba443d (ORGNIV3). Tester med dette, og ser hvilke avvik vi da får.
 039000;0300;ORGNIV3;Oslo;Opp til ORGNIV2;03;;JA;03;ORGNIV2;leggInn;Testet på leder av NAV Oslo, som er på orgNiv2, men de har også en orgEnhet på orgNiv3, som er denne. Og lederen for den, og leder for en underliggende har alle XXX0300 som trygdeident, så riktig
 031200;0312;ORGNIV3;Frogner;Beholdt;;;JA;031200;ORGNIV3;leggInn;
 031300;0313;ORGNIV3;St. Hanshaugen;Beholdt;;;JA;031300;ORGNIV3;leggInn;
