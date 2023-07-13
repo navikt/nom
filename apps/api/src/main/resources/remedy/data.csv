@@ -304,17 +304,17 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 8102000;2811;AGRESSOORGENHET;Internrevisjon;Opp til ORGNIV2;812;vu140n;JA;812;ORGNIV2;vu140n;Flere orgEnheter i bunn, men alle deler 2811 ved oppslag på trygdeident, så flytter til øverste Internrev.node
 820300;2820;ORGNIV3;HR-avdelingen;Opp til ORGNIV2;821;ra316y;JA;821;ORGNIV2;ra316y;Burde vært mappet til ORGNIV2
 820200;2821;ORGNIV3;Økonomi- og styringsavdelingen;Opp til ORGNIV2;8202;ke338b;JA;8202;ORGNIV2;ke338b;
-8554;2822;ORGNIV25;IT design arkitektur og agile coaching;TODO, ITAVD;;;Avklar, ITAVD;8554;;leggInn;Snakk med Bjørnar og A. Palerud
+8554;2822;ORGNIV25;IT design arkitektur og agile coaching;TODO, ITAVD;;;Avklar, ITAVD;855420;ORGNIV3;vu223a;13.07.23: Lagt inn mapping til vu223a.
 8105000;2823;AGRESSOORGENHET;Kommunikasjonsavdelingen;Opp til ORGNIV2;815;bu613r;JA;815;ORGNIV2;bu613r;
 8106000;2826;AGRESSOORGENHET;Kunnskapsavdelingen;Opp til ORGNIV2;816;pa885p;JA;816;ORGNIV2;pa885p;
 8320000;2830;AGRESSOORGENHET;Ytelsesavdelingen;Opp til ORGNIV2;830;su430w;JA;830;ORGNIV2;su430w;
 8430000;2840;AGRESSOORGENHET;Arbeids- og tjenesteavdelingen;Opp til ORGNIV2;840;ja556h;JA;840;ORGNIV2;ja556h;
-855310;2910;ORGNIV3;IT forretningsplattformer og standardprodukter;TODO, ITAVD;;;Avklar, ITAVD;855310;;leggInn;Snakk med Bjørnar og A. Palerud
+855310;2910;ORGNIV3;IT forretningsplattformer og standardprodukter;TODO, ITAVD;;;Avklar, ITAVD;8553;ORGNIV25;pe167m;13.07.23: Lagt inn mapping til pe167m.
 855220;2920;ORGNIV3;Data;TODO, ITAVD;;;Avklar, ITAVD;855220;;leggInn;Snakk med Bjørnar og A. Palerud
-855330;2930;ORGNIV3;Funksjonell brukerstøtte;TODO, ITAVD;;;Avklar, ITAVD;855330;;leggInn;Snakk med Bjørnar og A. Palerud
+855330;2930;ORGNIV3;Funksjonell brukerstøtte;TODO, ITAVD;;;Avklar, ITAVD;855330;ORGNIV3;ta911v;13.07.23: Lagt inn mapping til ta911v.
 854100;2940;ORGNIV3;IT virksomhetsstyring;TODO, ITAVD;;;Avklar, ITAVD;8541;ORGNIV25;pe876j;13.07.23: Lagt inn mapping til pe876j.
 5224000;2960;AGRESSOORGENHET;Felles;Opp til ORGNIV2;53;gy118b;JA;53;ORGNIV2;gy118b;
-855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;855110;;leggInn;Snakk med Bjørnar og A. Palerud
+855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;8551;ORGNIV25;ne808e;13.07.23: Lagt inn mapping til ne808e.
 855210;2990;ORGNIV3;IT utvikling 1;TODO, ITAVD;;;Avklar, ITAVD;855210;;leggInn;Snakk med Bjørnar og A. Palerud
 2530000;4100;AGRESSOORGENHET;Kontaktsenter Styringsenhet Ledelse;Opp til ORGNIV2;25;ba923j;JA;25;ORGNIV2;ba923j;
 2501000;4101;AGRESSOORGENHET;NAV Kontaktsenter Øst-Viken;Opp til ORGNIV3;250100;my611u;JA;250100;ORGNIV3;my611u;
