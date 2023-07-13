@@ -17,7 +17,8 @@ import org.springframework.test.context.ActiveProfiles;
 import javax.sql.DataSource;
 import java.util.UUID;
 
-import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CALL_ID_KEY;
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.MDC_CONSUMER_ID_KEY;
 
 @ActiveProfiles({"test"})
 @WireMockStubs(RsaStub.class)
