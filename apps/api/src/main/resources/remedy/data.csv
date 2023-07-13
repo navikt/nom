@@ -129,7 +129,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 101400;1014;ORGNIV3;Midt-Agder;Beholdt;;;JA;101400;ORGNIV3;leggInn;
 103700;1037;ORGNIV3;Lister;Beholdt;;;JA;103700;ORGNIV3;leggInn;
 1087000;1087;AGRESSOORGENHET;Agder Tiltak;Beholdt;;dy786g;JA;1087000;ORGENHET;dy786g;
-1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;bu966s;JA;1099000;ORGENHET;bu966s;
+1099000;1091;AGRESSOORGENHET;Agder Arbeidslivssenter;Beholdt;;bu966s;JA;109900;ORGNIV3;fy255z;13.07.2023: Flyttet mapping fra bu966s til overliggende fy255z.
 1096100;1096;AGRESSOORGENHET;Agder Spesialtjenester;Beholdt;;;JA;1096100;ORGENHET;leggInn;
 119100;1100;ORGNIV3;Rogaland Fylkeskontor;Opp til ORGNIV2;11;hy244v;JA;11;ORGNIV2;hy244v;
 110100;1101;ORGNIV3;Dalane;Beholdt;;;JA;110100;ORGNIV3;leggInn;
@@ -403,7 +403,6 @@ RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;leggInn;"
 ;4291;;Klageinstans Oslo/Akershus;Manglet i uttrekket;721030;sa137m;JA;721030;ORGNIV3;sa137m;
 ;4294;;Klageinstans Vest;Manglet i uttrekket;721140;tu974w;JA;721140;ORGNIV3;tu974w;
 ;4293;;Klageinstans Øst;Manglet i uttrekket;721070;pe947d;JA;721070;ORGNIV3;pe947d;
-;0896;;Vestfold og Telemark Arbeid og helse, avd. Helse;TODO - manglet i uttrekket;0899002;dy270x;JA;0899002;ORGENHET;dy270x;Alle ansatte på 0896 i HRRES_RESSURS var på 0899002, så mappet til den.
 ;2980;;;TODO, ITAVD;;;Avklar, ITAVD;0;;leggInn;Snakk med Bjørnar og A. Palerud
 ;0293;;NAV Dokumentsenter Øst-Viken;Hentet fra Norg-uttrekk;029300;re831r;JA;029300;ORGNIV4;re831r;Bør nok inn i mappingen. Det finnes folk på 0293 i DVH. Skal antagelig mappes til 029300, men må også ryddes litt under da 0293010 også burde ligge under 029300, men har fått feil parent. Sendt til ØT for opprydding, avventer.
 ;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
