@@ -86,7 +86,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 053600;0536;ORGNIV3;Søndre Land;Beholdt;;;JA;053600;ORGNIV3;leggInn;
 053800;0538;ORGNIV3;Nordre Land;Beholdt;;;JA;053800;ORGNIV3;leggInn;
 054250;0542;ORGNIV3;Valdres;Beholdt;;;JA;054250;ORGNIV3;leggInn;
-0587000;0587;AGRESSOORGENHET;Innlandet Tiltak;Beholdt, MEN;;;JA;0587000;ORGENHET;leggInn;MERK: her er det to orgEnheter med samme navn, på samme nivå, under samme parent… Avdekket i U4 at det egentlig er to enheter på ulik nivå hvor den ene er parent til den andre. Renate kontakter ØT for å rette.
+0587000;0587;AGRESSOORGENHET;Innlandet Tiltak;;;;JA;058700;ORGNIV4;ry301g;13.07.23: Flyttet mapping fra jy896y til overliggende, ry301g, slik at alle underliggende skal arve remedyEnhet
 068010;0600;ORGNIV3;Vest-Viken Region;Opp til ORGNIV2;R06;;JA;R06;ORGNIV2;leggInn;Testet på leder i underliggende enhet som ikke har egen remedyEnhet. Vedkommendes trygdeident er på XXX0600
 060200;0602;ORGNIV3;Drammen;Beholdt;;;JA;060200;ORGNIV3;leggInn;
 060400;0604;ORGNIV3;Kongsberg;Beholdt;;;JA;060400;ORGNIV3;leggInn;
@@ -97,7 +97,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 062400;0624;ORGNIV3;Øvre Eiker;Beholdt;;;JA;062400;ORGNIV3;leggInn;
 062600;0626;ORGNIV3;Lier;Beholdt;;;JA;062600;ORGNIV3;leggInn;
 063200;0632;ORGNIV3;Numedal;Beholdt;;;JA;063200;ORGNIV3;leggInn;
-0687000;0687;AGRESSOORGENHET;Vest-Viken Forvaltningstjenester Leder;FEIL, se kommentar;;;JA;0687000;ORGENHET;leggInn;To orgenheter på niv 4 har ansatte/leder som har 0687 i trygdeident. Både Vest-Viken Forvaltningstjeneste og Vest-Viken Forvaltningstjeneste leder. Antatt at det er slik at leder skal ligge under den andre, og dermed bør 0687 mappe til den over, altså by896h.
+0687000;0687;AGRESSOORGENHET;Vest-Viken Forvaltningstjenester Leder;;;;JA;068700;ORGNIV4;by896h;13.07.23: Flyttet mapping fra na946b til overliggende, by896h, slik at alle underliggende skal arve remedyEnhet
 0699200;0691;AGRESSOORGENHET;Vest-Viken Arbeidslivssenter avdeling 1;Opp til ORGNIV4;069900;;JA;069900;ORGNIV4;leggInn;
 0696100;0696;AGRESSOORGENHET;Vest-Viken Arbeidsrådgivning;Beholdt;;;JA;0696100;ORGENHET;leggInn;
 070100;0701;ORGNIV3;Horten;Beholdt;;;JA;070100;ORGNIV3;leggInn;
