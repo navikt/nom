@@ -1,5 +1,7 @@
 package no.nav.nom.apps.proxy.api;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;

@@ -2,8 +2,8 @@ package no.nav.nom.apps.proxy.common;
 
 import io.micrometer.core.instrument.Tag;
 import lombok.val;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,6 +45,8 @@ public class CommonConfig {
         return restTemplate;
     }
 
+
+    // TODO RestTemplate is now instrumented automatically by Spring, so this can be removed. But need to analyze possible impact on dashboards and alerts
     @Bean
     RestTemplateExchangeTagsProvider restTemplateExchangeTagsProvider() {
         return (urlTemplate, request, response) -> {
