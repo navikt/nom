@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -261,6 +262,48 @@ public class RessursStillingProcessorTest {
             .tilEnhet("a001bc")
             .erDagligOppfolging(true);
     }
+
+    @Test
+    @DisplayName("Sjekk at FjernOrgtilknytning CMD blir kalt på duplikat tilknytning når det har vært navnebytte på enhetsnavn")
+    public void test_005() {
+        String navident = "A000001";
+
+        LocalDate startDate = LocalDate.of(2023, 1, 1);
+
+        List<StillingPeriode> stillingPerioder = List.of(
+            new StillingPeriode(
+                new StillingPeriode.StillingAgressoOrgIdOgNavn(
+                    Optional.of("AGRID_3"),     // DVH stillingens enhets agressoId
+                    "ENHET_3_NYTT_NAVN",        // DVH stillingens enhets navn
+                    Optional.of("AGRID_3"),     // DVH ressursens enhets agressoId
+                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                startDate,                      // Gyldig Fom for den strukturerte stillingen
+                MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
+                orgenhetService.getByFid("FID_4").get(),
+                StillingPeriode.DagligOppfolging.JA
+            )
+        );
+
+        // To eksisterende orgtilknytninger
+        OrgtilknytningState eksisterendeGammelEnhet = new OrgtilknytningState("OT_FID_1", navident, "a003bc", true, startDate, Optional.empty());
+        OrgtilknytningState eksisterendeNyEnhet = new OrgtilknytningState("OT_FID_2", navident, "a004bc", false, startDate, Optional.empty());
+
+        when(orgtilknytningStateService.getOrgtilknytningerByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
+        when(ressursService.findByNavident(any())).thenReturn(
+            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty()))
+        );
+        ressursStillingProcessor.process(navident, stillingPerioder);
+
+        String fid = assertOrgtilknytning(CMD.FJERNET).getFid();
+        assertEquals(fid, "OT_FID_1");
+
+        assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
+            .forFid("OT_FID_2")
+            .forNavident(navident)
+            .tilEnhet("a004bc")
+            .erDagligOppfolging(true);
+    }
+
     private void settOppStandardEnheter() {
         final Optional<LocalDate> EMPTY_DATE = Optional.empty();
         orgEnhetStateRepository.clear();

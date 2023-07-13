@@ -191,6 +191,20 @@ public class RessursStillingProcessor {
                     log.error(msg);
                     ressursStillingLoadStatus.addError(navident, msg);
                     matcherAgressoId = fjernDuplikater(matcherAgressoId);
+                    if (matcherAgressoId.size() > 1) {
+                        // Er kanskje ren bytte av enhet på dato - ta vekk den som ikke matcher orgenhet id, men som har samme datoperiode
+                        // Vil etter det ikke inngå i behandledeOrgtilknytningerFids - og skal da følgelig fjernes
+                        var fjerne = matcherAgressoId.stream().filter( ot ->
+                                !ot.orgEnhetId().equals(stillingPeriode.orgenhet().getId()) &&
+                                ot.gyldigFom().equals(stillingPeriode.gyldigFom()) &&
+                                ot.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())
+                            ).toList();
+                        log.debug("For navident {} fant vi følgende orgtilknytnng(er)\n {}\nsom er duplikat på aktiv periode, men for annen enhet enn DVH stillingPeriode\n {}\n. Denne/disse vil fjernes",
+                            navident,
+                            fjerne,
+                            stillingPeriode);
+                        matcherAgressoId.removeAll(fjerne);
+                    }
                 }
                 if (matcherAgressoId.size() > 1) {
                     String msg = "Selv etter forsøk på å fjerne duplikat tilknytninger så har Navident %s har stillingPeriode i DVH\n  %s\n som matcher flere aktive orgtilknytninger i state\n  %s"
@@ -375,9 +389,9 @@ public class RessursStillingProcessor {
                 && (ot.gyldigTom().isPresent() ? ot.gyldigTom().get().equals(toKeep.gyldigTom().orElse(null)) : toKeep.gyldigTom().isEmpty())) {
                     // Plain duplicate - remove
                     fjernOrgtilknytning(ot);
+                    log.info("Fjerner duplikat orgtilknytning for Navident {}: {}", ot.navident(), ot);
             } else {
                 // There is a difference? Cannot remove possible overlapping dates, but not equal?
-                log.info("Fjerner duplikat orgtilknytning for Navident {}: {}", ot.navident(), ot);
                 statesToKeep.add(ot);
             }
         });
