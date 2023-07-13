@@ -68,7 +68,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 043000;0430;ORGNIV3;Stor-Elvdal;Beholdt;;;JA;043000;ORGNIV3;leggInn;
 043400;0434;ORGNIV3;Engerdal;Beholdt;;;JA;043400;ORGNIV3;leggInn;
 043750;0437;ORGNIV3;Nord-Østerdal;Beholdt;;;JA;043750;ORGNIV3;leggInn;
-0499000;0491;AGRESSOORGENHET;Innlandet Arbeidslivssenter;Beholdt, MEN;;;JA;0499000;ORGENHET;leggInn;MERK: her er det to orgEnheter med samme navn, på samme nivå, under samme parent… Avdekket i U4 at det egentlig er to enheter på ulik nivå hvor den ene er parent til den andre. Renate kontakter ØT for å rette.
+0499000;0491;AGRESSOORGENHET;Innlandet Arbeidslivssenter;Beholdt, MEN;;;JA;049900;ORGNIV4;hy125g;13.07.23: Flyttet mapping fra vy408t til overliggende, hy125g, slik at begge underliggende skal arve remedyEnhet
 049210;0492;ORGNIV3;;Endret;0492100;ga822h;JA;0492100;ORGNIV3;ga822h;Fant ikke i NOM. Fant i NORG. Har ingen organiseringer i NORG. Er en ROL-enhet i NORG. Utfra navn i NORG fant jeg enheten 0492100 i på nivå ORGENHET i NOM. Sjekket opp trygdeident til en ansatt her og det treffer på 0492
 0496000;0496;AGRESSOORGENHET;Innlandet Arbeidspsykologisk og pedagogisk rådgivning;Beholdt;;;JA;0496000;ORGENHET;leggInn;
 050150;0501;ORGNIV3;Lillehammer-Gausdal;Beholdt;;;JA;050150;ORGNIV3;leggInn;
