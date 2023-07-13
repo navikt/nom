@@ -312,7 +312,7 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 855310;2910;ORGNIV3;IT forretningsplattformer og standardprodukter;TODO, ITAVD;;;Avklar, ITAVD;855310;;leggInn;Snakk med Bjørnar og A. Palerud
 855220;2920;ORGNIV3;Data;TODO, ITAVD;;;Avklar, ITAVD;855220;;leggInn;Snakk med Bjørnar og A. Palerud
 855330;2930;ORGNIV3;Funksjonell brukerstøtte;TODO, ITAVD;;;Avklar, ITAVD;855330;;leggInn;Snakk med Bjørnar og A. Palerud
-854100;2940;ORGNIV3;IT virksomhetsstyring;TODO, ITAVD;;;Avklar, ITAVD;854100;;leggInn;Snakk med Bjørnar og A. Palerud
+854100;2940;ORGNIV3;IT virksomhetsstyring;TODO, ITAVD;;;Avklar, ITAVD;8541;ORGNIV25;pe876j;13.07.23: Lagt inn mapping til pe876j.
 5224000;2960;AGRESSOORGENHET;Felles;Opp til ORGNIV2;53;gy118b;JA;53;ORGNIV2;gy118b;
 855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;855110;;leggInn;Snakk med Bjørnar og A. Palerud
 855210;2990;ORGNIV3;IT utvikling 1;TODO, ITAVD;;;Avklar, ITAVD;855210;;leggInn;Snakk med Bjørnar og A. Palerud
