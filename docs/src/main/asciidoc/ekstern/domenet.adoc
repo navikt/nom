@@ -119,8 +119,8 @@ Alle personer som er tilknyttet NAV som ressurs, enten direkte eller gjennom und
 
 Omfatter:
 
-* Interne ressurser: Statlig ansatte i NAV, lærlinger og personer på tiltak i NAV, kommunalt ansatte i NAV.
-* Eksterne ressurser: Konsulenter, tolker mm.
+* Interne ressurser: Statlig ansatte i NAV, lærlinger i NAV og kommunalt ansatte i NAV.
+* Eksterne ressurser: Konsulenter, personer på tiltak i NAV, tolker mm.
 
 [%header,cols="5%,5%,40%,20%,10%"]
 |===
