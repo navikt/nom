@@ -1,6 +1,5 @@
 = Domenet
 
-
 == Organisering
 [cols="3"]
 |===
@@ -113,7 +112,7 @@ Knytning mellom en orgEnhet og en ressurs hvor ressursen er orgEnhetens leder. A
 |===
 
 *Beskrivelse:* +
-Person som utfører oppgaver på vegne av NAV.
+Person som utfører oppgaver på vegne av NAV. Omfatter også roboter og andre ikke-mennesker som har fått tildelt en NAV-ident. 
 
 *Eksempler:* +
 Alle personer som er tilknyttet NAV som ressurs, enten direkte eller gjennom underleverandører.
