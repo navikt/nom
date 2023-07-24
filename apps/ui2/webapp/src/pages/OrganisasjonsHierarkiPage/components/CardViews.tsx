@@ -33,7 +33,7 @@ export function DynamicColumnContainer({
             @media (width >= 60rem) {
               grid-template-columns: 1fr 1fr;
             }
-          `
+          `,
       )}
     >
       {children}

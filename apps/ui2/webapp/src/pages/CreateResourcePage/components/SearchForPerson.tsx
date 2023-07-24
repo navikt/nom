@@ -47,7 +47,7 @@ export function SearchForPerson() {
       </Heading>
       <form
         onSubmit={handleSubmit((values) =>
-          navigate(`/ressurs/create/${encode(values.personident ?? "")}`)
+          navigate(`/ressurs/create/${encode(values.personident ?? "")}`),
         )}
       >
         <Controller

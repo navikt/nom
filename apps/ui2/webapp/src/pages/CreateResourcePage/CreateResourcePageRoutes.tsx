@@ -36,7 +36,7 @@ export function CreateResourcePageRoutes() {
 
 function Wrapper() {
   const isAtReceiptPage = !!useMatch(
-    "ressurs/create/:navidentInBase64/receipt"
+    "ressurs/create/:navidentInBase64/receipt",
   );
   return (
     <>
@@ -128,7 +128,7 @@ function FilledCircle({
           : css`
               background: var(--a-white);
               color: var(--a-lightblue-800);
-            `
+            `,
       )}
     >
       {children}

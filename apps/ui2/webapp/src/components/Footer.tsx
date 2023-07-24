@@ -40,7 +40,7 @@ export function Footer() {
               height: 24px;
             }
           `,
-          mediaQueryContentWidth
+          mediaQueryContentWidth,
         )}
       >
         <Link
@@ -99,7 +99,7 @@ export function Footer() {
 export const SlackIcon = forwardRef(
   (
     { ...properties }: SVGProps<SVGSVGElement>,
-    reference: Ref<SVGSVGElement>
+    reference: Ref<SVGSVGElement>,
   ) => {
     return (
       <svg
@@ -147,5 +147,5 @@ export const SlackIcon = forwardRef(
         />
       </svg>
     );
-  }
+  },
 );

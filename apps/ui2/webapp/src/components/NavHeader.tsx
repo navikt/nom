@@ -35,7 +35,7 @@ const innerDiv = css(
       padding: 1rem 0;
     }
   `,
-  mediaQueryContentWidth
+  mediaQueryContentWidth,
 );
 
 export const NavHeader = () => {

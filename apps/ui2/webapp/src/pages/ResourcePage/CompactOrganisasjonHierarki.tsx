@@ -24,7 +24,7 @@ export function CompactOrganisasjonHierarki({
   ressurs: Ressurs;
 }) {
   const firstOverEnhet = (orgHierarki.enhetsKoblinger?.overenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet
+    ({ organisasjonsenhet }) => organisasjonsenhet,
   )[0];
 
   const overEnheter = firstOverEnhet

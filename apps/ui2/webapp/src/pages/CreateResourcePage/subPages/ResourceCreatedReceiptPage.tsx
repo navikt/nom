@@ -110,7 +110,7 @@ function Unit4Link() {
   const { navident } = useParams();
   const [searchParameters] = useSearchParams();
   const ansettelsesType = searchParameters.get(
-    "ansettelsesType"
+    "ansettelsesType",
   ) as AnsettelsesType;
 
   const navidentWithoutFirstLetter = navident?.slice(1);

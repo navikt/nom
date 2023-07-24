@@ -15,5 +15,5 @@ createRoot(document.querySelector("#root") as HTMLElement).render(
         <Main />
       </ApolloProvider>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );

@@ -156,7 +156,7 @@ async function navidentSearch(navident: string): Promise<SearchResultRaw[]> {
   });
 
   return result.data.data.searchRessurs?.filter(
-    (ressurs: Ressurs) => ressurs.navident === navident
+    (ressurs: Ressurs) => ressurs.navident === navident,
   );
 }
 

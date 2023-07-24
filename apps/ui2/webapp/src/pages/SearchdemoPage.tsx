@@ -120,7 +120,7 @@ function SearchdemoPage() {
             : tx.data.search;
           setSearchState("Antall treff: " + searchHits.length);
           setTxt(searchHits);
-        })
+        }),
       );
     }
   }, [searchString, orgenhetOnly]);

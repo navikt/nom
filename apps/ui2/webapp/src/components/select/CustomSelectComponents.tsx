@@ -74,7 +74,7 @@ const commonSelectOverwriteStyles = {
 export function AsyncSearch<
   Option,
   IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>
+  Group extends GroupBase<Option> = GroupBase<Option>,
 >(properties: AsyncProps<Option, IsMulti, Group>) {
   return (
     <AsyncSelect
@@ -100,7 +100,7 @@ export function AsyncSearch<
 function CustomMenuList<
   Option,
   IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>
+  Group extends GroupBase<Option> = GroupBase<Option>,
 >(properties: MenuListProps<Option, IsMulti, Group>) {
   const { children } = properties;
   const filteredChildren = Array.isArray(children)
@@ -143,7 +143,7 @@ export function SelectLayoutWrapper({
 export function BasicSelect<
   Option,
   IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>
+  Group extends GroupBase<Option> = GroupBase<Option>,
 >(properties: Props<Option, IsMulti, Group>) {
   return (
     <Select

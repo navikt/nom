@@ -18,7 +18,7 @@ export function isNotDuplicate<T>(
   it: T,
   index: number,
   arrayContext: T[],
-  extractKey: (it: T) => string
+  extractKey: (it: T) => string,
 ): boolean {
   const seen = arrayContext
     .slice(0, index)
@@ -28,7 +28,7 @@ export function isNotDuplicate<T>(
     // eslint-disable-next-line no-console
     console.warn(
       { arrCtx: arrayContext, dupKey: extractKey(it), idx: index },
-      "Duplicate removed: Key was seen more than once -> "
+      "Duplicate removed: Key was seen more than once -> ",
     );
   }
   return !wasDuplicate;

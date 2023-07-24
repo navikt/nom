@@ -158,7 +158,7 @@ function CreateResourceFormInner({
   } = methods;
 
   const selectedOrgEnhet = orgEnheter.find(
-    (orgEnhet) => orgEnhet.id === watch("orgEnhetId")
+    (orgEnhet) => orgEnhet.id === watch("orgEnhetId"),
   );
 
   const startDatePicker = useDatepicker({
@@ -178,7 +178,7 @@ function CreateResourceFormInner({
           }/receipt?ansettelsesType=${ansettelsesType}`,
           {
             replace: true,
-          }
+          },
         );
       },
     });
@@ -305,7 +305,7 @@ function CreateResourceFormInner({
                 variables: {
                   request: validValues,
                 },
-              })
+              }),
             )}
             orgEnheter={orgEnheter}
           />

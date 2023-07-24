@@ -169,7 +169,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   */
   const uniqLederFor = uniqBy(
     ressurs.lederFor,
-    ({ orgEnhet }) => orgEnhet.navn
+    ({ orgEnhet }) => orgEnhet.navn,
   );
 
   return (
@@ -301,7 +301,7 @@ function RessursInformationDetail({
 
 function TeamCatSection({ navident }: { navident: string }) {
   const { data } = useQuery(["memberships", navident], () =>
-    axios.get(`/teamcat/member/membership/${navident}`)
+    axios.get(`/teamcat/member/membership/${navident}`),
   );
   const memberships = data?.data;
   if (!memberships) {

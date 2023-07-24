@@ -22,10 +22,10 @@ import {
 import { ValgtEnhet } from "./components/ValgtEnhet";
 
 function sortUnderenheterForHierarchyFrontPage(
-  orgHierarchy: HentHierarkiQueryHookResult["data"]
+  orgHierarchy: HentHierarkiQueryHookResult["data"],
 ) {
   const underEnheter = (orgHierarchy?.enhetsKoblinger?.underenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet
+    ({ organisasjonsenhet }) => organisasjonsenhet,
   );
 
   const sortedUnderEnheter = sortBy(underEnheter, "navn");
@@ -36,14 +36,14 @@ function sortUnderenheterForHierarchyFrontPage(
 
   const [direktoratet, linjene] = partition(
     sortedUnderEnheter,
-    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet"
+    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet",
   );
 
   return [...direktoratet, ...linjene];
 }
 
 export function getOverEnheterBackToRootRecursively(
-  orgEnhet: OrgEnhet
+  orgEnhet: OrgEnhet,
 ): OrgEnhet[] {
   if (!orgEnhet || !orgEnhet.organiseringer) {
     return [];
@@ -70,7 +70,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
   const valgtEnhet = properties.data?.enhet;
 
   const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
-    ({ ressurs }) => ressurs
+    ({ ressurs }) => ressurs,
   );
 
   return (
@@ -113,7 +113,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
         >
           {sortBy(
             uniqBy(ressurser, (ressurs) => ressurs.navident),
-            "visningsnavn"
+            "visningsnavn",
           ).map((ressurs, index) => (
             <ResourceLink
               autoFocus={index === 0}

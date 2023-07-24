@@ -12,25 +12,28 @@ const graphiqlSource: Record<string, string> = {
 
 const extractPath = (url: string) => url.slice("https://unpkg.com".length);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let vendorStorage: Record<string, any> = {};
 
 async function initVendorStorage() {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fetches: Record<string, any> = {};
     for (const s of Object.keys(graphiqlSource)) {
       fetches[s] = fetch(graphiqlSource[s]);
     }
     await Promise.allSettled(Object.values(fetches));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bodies: Record<string, any> = {};
     for (const s of Object.keys(fetches)) {
       try {
         // eslint-disable-next-line unicorn/no-await-expression-member
         bodies[s] = (await fetches[s]).text();
-      } catch (e) {
+      } catch (error) {
         console.error(
-          { err: e, graphqlsrc: s, graphqlsrcUrl: graphiqlSource[s] },
-          "Error during vendoring of graphiql"
+          { err: error, graphqlsrc: s, graphqlsrcUrl: graphiqlSource[s] },
+          "Error during vendoring of graphiql",
         );
       }
     }
@@ -64,20 +67,20 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
         }
     </style>
     <script crossorigin src="/vendor${extractPath(
-      graphiqlSource.reactdev
+      graphiqlSource.reactdev,
     )}"></script>
     <script crossorigin src="/vendor${extractPath(
-      graphiqlSource.reactdomdev
+      graphiqlSource.reactdomdev,
     )}"></script>
     <link rel="stylesheet" href="/vendor${extractPath(
-      graphiqlSource.graphiqlcss
+      graphiqlSource.graphiqlcss,
     )}"/><title></title>
 </head>
 
 <body>
 <div id="graphiql">Loading...</div>
 <script src="/vendor${extractPath(
-  graphiqlSource.graphiqljs
+  graphiqlSource.graphiqljs,
 )}" type="application/javascript"></script>
 <script>
     const params = new URLSearchParams(window.location.search);
@@ -111,7 +114,7 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
 export function setupGqlPlaygroundProxy(app: Express) {
   app.get("/nom-gql-playground", (request, response) => {
     response.send(
-      "<h1>Playground is replaced</h1><p style='font-size: 200%'>Use <a href='/nom-gql-graphiql'>graphiql</a> instead</</p>"
+      "<h1>Playground is replaced</h1><p style='font-size: 200%'>Use <a href='/nom-gql-graphiql'>graphiql</a> instead</</p>",
     );
   });
 
