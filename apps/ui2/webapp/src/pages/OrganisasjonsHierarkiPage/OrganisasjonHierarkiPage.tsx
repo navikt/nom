@@ -28,14 +28,15 @@ function sortUnderenheterForHierarchyFrontPage(
     ({ organisasjonsenhet }) => organisasjonsenhet,
   );
 
-  const sortedUnderEnheter = sortBy(underEnheter, "navn");
+  const collator = new Intl.Collator("no", { sensitivity: "base" });
+  underEnheter.sort((a, b) => collator.compare(a.navn, b.navn));
 
   if (orgHierarchy?.enhet?.navn !== "NAV") {
-    return sortedUnderEnheter;
+    return underEnheter;
   }
 
   const [direktoratet, linjene] = partition(
-    sortedUnderEnheter,
+    underEnheter,
     (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet",
   );
 
