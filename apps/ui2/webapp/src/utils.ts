@@ -1,4 +1,4 @@
-import { formatISO } from "date-fns";
+import { format, formatISO } from "date-fns";
 
 export const sortItems = (a: string, b: string) => {
   if (a.localeCompare(b, "no") < 0) {
@@ -75,4 +75,8 @@ export const DATE_FORMATS = {
 
 export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
+}
+
+export function formatDisplayDate(date: string) {
+  return format(new Date(date), DATE_FORMATS.no);
 }
