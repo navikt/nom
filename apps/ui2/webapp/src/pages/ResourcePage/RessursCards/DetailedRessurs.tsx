@@ -241,7 +241,7 @@ function OrganisationHierarchyTree({
           >
             {orgHierarkiLeder?.visningsnavn}
           </Link>
-          {erDagligOppfolging ? (
+          {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
                 margin-left: 1rem;
