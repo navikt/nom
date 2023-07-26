@@ -137,6 +137,8 @@ function ExpiredOrgTilknytninger({
     showAll ? orgTilknytninger.length : 3,
   );
 
+  const shouldDisplayShowAllButton = orgTilknytninger.length > 3 && !showAll;
+
   return (
     <>
       <Heading level="2" size="xsmall">
@@ -164,7 +166,7 @@ function ExpiredOrgTilknytninger({
           </span>
         </div>
       ))}
-      {!showAll && (
+      {shouldDisplayShowAllButton && (
         <Button
           onClick={() => setShowAll(true)}
           size="small"
