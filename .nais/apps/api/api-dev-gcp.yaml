@@ -154,6 +154,9 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: dev-gcp
+        - application: sokos-mikrofrontend-api
+          namespace: okonomi
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
