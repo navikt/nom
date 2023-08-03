@@ -216,6 +216,7 @@ function OrganisationHierarchyTree({
           visibility: hidden;
         }
       `}
+      size="small"
     >
       <ExpansionCard.Header>
         <ExpansionCard.Title>
@@ -234,13 +235,7 @@ function OrganisationHierarchyTree({
           )}
         </ExpansionCard.Title>
         <ExpansionCard.Description>
-          Leder:{" "}
-          <Link
-            as={ReactRouterLink}
-            to={`/ressurs/${orgHierarkiLeder?.navident}`}
-          >
-            {orgHierarkiLeder?.visningsnavn}
-          </Link>
+          Leder: {orgHierarkiLeder?.visningsnavn}
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
