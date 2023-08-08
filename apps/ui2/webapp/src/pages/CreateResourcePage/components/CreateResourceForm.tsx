@@ -237,8 +237,8 @@ function CreateResourceFormInner({
           render={({ field }) => (
             <RadioGroup legend="Sektor" size="medium" {...field}>
               <Alert size="medium" variant="info">
-                For øyeblikket kan du kun bruke NOM til å opprette faste,
-                statlige ansatte.
+                For øyeblikket kan du kun bruke NOM til å opprette statlige
+                ansatte med fast eller midlertidig ansettelsesforhold.
               </Alert>
               <Radio checked value={Sektor.NavStatlig}>
                 {SektorNameMapping[Sektor.NavStatlig]}
