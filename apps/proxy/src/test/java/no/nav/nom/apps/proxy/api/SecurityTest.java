@@ -18,15 +18,15 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class SecurityTest extends ApiTestBase {
 
-    private static final String stillingerURL = "/proxy/stillinger";
-    private static final String ressurserURL = "/proxy/ressurser";
-    private static final String enheterURL = "/proxy/enheter";
-    private static final String enheterV2URL = "/proxy/enheter/v2";
+    private static final String stillingerURL = "/proxy/dvh/json/Hr/NOM2/stilling2nom";
+    private static final String ressurserURL = "/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1";
+    private static final String enheterURL = "/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1";
+    private static final String enheterV2URL = "/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2";
 
     private static final List<String> allUrls = List.of(stillingerURL, ressurserURL, enheterURL, enheterV2URL);
 
@@ -45,7 +45,7 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
+        assertThat(result.getStatusCode()).as("URL: %s", url) .isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class SecurityTest extends ApiTestBase {
     @SneakyThrows
     public void scenario21Helper(String url) {
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, null, String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(signedJWT.serialize());
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -159,6 +159,6 @@ public class SecurityTest extends ApiTestBase {
         headers.setBearerAuth(token);
 
         val result = restTemplate.exchange(URI.create(url), HttpMethod.GET, new HttpEntity<>("body", headers), String.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

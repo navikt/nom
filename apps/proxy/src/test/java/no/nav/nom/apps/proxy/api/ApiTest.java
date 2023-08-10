@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class ApiTest extends ApiTestBase {
-    private static final String DVH_URL = "/proxy/enheter";
+    private static final String DVH_ENHETER_URL = "/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI_v1";
 
     @Test
     @DisplayName("Tester dvh kall")
@@ -29,7 +29,7 @@ public class ApiTest extends ApiTestBase {
         val headers = new HttpHeaders();
         headers.setBearerAuth(token);
 
-        val result = restTemplate.exchange(URI.create(DVH_URL), HttpMethod.GET, new HttpEntity<>(null, headers), JsonNode.class);
+        val result = restTemplate.exchange(URI.create(DVH_ENHETER_URL), HttpMethod.GET, new HttpEntity<>(null, headers), JsonNode.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
 
     }
@@ -48,7 +48,7 @@ public class ApiTest extends ApiTestBase {
     }
 
     @Test
-    @DisplayName("Tester generelt proxy kall")
+    @DisplayName("Tester generelt DVH proxy kall")
     public void scenario32() throws Exception{
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);
@@ -61,7 +61,7 @@ public class ApiTest extends ApiTestBase {
     }
 
     @Test
-    @DisplayName("Tester generelt proxy kall med query parametre")
+    @DisplayName("Tester generelt DVH proxy kall med query parametre")
     public void scenario33() throws Exception{
         val claims = securityTestUtils.validJwtClaims();
         val token = securityTestUtils.createToken(claims);

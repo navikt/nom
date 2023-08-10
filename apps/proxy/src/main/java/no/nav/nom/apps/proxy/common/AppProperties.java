@@ -14,6 +14,7 @@ public class AppProperties {
     private final Dvh dvh;
     private final Tel tel;
     private final Unit4 unit4;
+    private final int webClientMaxBytesInMemorySize;
 
     @Value
     public static class Tel {
