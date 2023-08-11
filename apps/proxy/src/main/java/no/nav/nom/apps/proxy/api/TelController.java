@@ -14,8 +14,8 @@ public class TelController {
 
     private final WebClient webClient;
 
-    public TelController(AppProperties appProperties) {
-        this.webClient = WebClient.builder()
+    public TelController(AppProperties appProperties, WebClient.Builder webClientBuilder) {
+        this.webClient = webClientBuilder
             .baseUrl(appProperties.getTel().getUrl())
             .filter(ExchangeFilterFunctions
                 .basicAuthentication(appProperties.getTel().getTelUsername(), appProperties.getTel().getTelPassword()))

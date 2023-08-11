@@ -27,9 +27,9 @@ public class DvhController {
 
     private final String PROXY_PATH = "/dvh";
 
-    public DvhController(AppProperties appProperties) {
+    public DvhController(AppProperties appProperties, WebClient.Builder webClientBuilder) {
         this.appProperties = appProperties;
-        this.webClient = WebClient.builder()
+        this.webClient = webClientBuilder
             .baseUrl(appProperties.getDvh().getBaseUrl())
             .exchangeStrategies(useLageInMemorySize())
             .filter(ExchangeFilterFunctions.basicAuthentication(appProperties.getDvh().getTdvUsername(), appProperties.getDvh().getTdvPassword()))

@@ -39,10 +39,10 @@ public class Unit4Controller {
 
     private final WebClient webClient;
 
-    public Unit4Controller(RestTemplate restTemplate, AppProperties appProperties) {
+    public Unit4Controller(RestTemplate restTemplate, AppProperties appProperties, WebClient.Builder webClientBuilder) {
         this.restTemplate = restTemplate;
         this.appProperties = appProperties;
-        this.webClient = WebClient.builder()
+        this.webClient = webClientBuilder
             .baseUrl(appProperties.getUnit4().getBaseUrl())
             .filter(ExchangeFilterFunctions
                 .basicAuthentication(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password()))
