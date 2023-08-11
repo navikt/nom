@@ -1,39 +1,32 @@
 package no.nav.nom.apps.proxy.api;
 
-import lombok.RequiredArgsConstructor;
 import no.nav.nom.apps.proxy.common.AppProperties;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import java.nio.charset.Charset;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @RestController
 @RequestMapping("/proxy")
-@RequiredArgsConstructor
 public class TelController {
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    private final AppProperties appProperties;
+    public TelController(AppProperties appProperties) {
+        this.webClient = WebClient.builder()
+            .baseUrl(appProperties.getTel().getUrl())
+            .filter(ExchangeFilterFunctions
+                .basicAuthentication(appProperties.getTel().getTelUsername(), appProperties.getTel().getTelPassword()))
+            .build();
+    }
 
     @GetMapping("/tel")
-    public ResponseEntity<String> getTelv1(@AuthenticationPrincipal Jwt jwt) {
-        var request = RequestEntity
-                .get(appProperties.getTel().getUrl())
-                .header("Authorization", "Basic " + HttpHeaders.encodeBasicAuth(
-                        appProperties.getTel().getTelUsername(),
-                        appProperties.getTel().getTelPassword(),
-                        Charset.defaultCharset()
-                ))
-                .build();
-
-        return restTemplate.exchange(request, String.class);
+    public ResponseEntity<String> getTelv1() {
+        return webClient.get()
+            .retrieve()
+            .toEntity(String.class)
+            .block();
     }
 }

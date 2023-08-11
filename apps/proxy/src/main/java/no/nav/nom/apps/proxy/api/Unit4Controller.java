@@ -1,11 +1,9 @@
 package no.nav.nom.apps.proxy.api;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
@@ -30,12 +32,22 @@ import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
 @Slf4j
 @RestController
 @RequestMapping(value = "/proxy/unit4", produces = MediaType.APPLICATION_JSON_VALUE)
-@RequiredArgsConstructor
 public class Unit4Controller {
-    //public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
     private final RestTemplate restTemplate;
 
     private final AppProperties appProperties;
+
+    private final WebClient webClient;
+
+    public Unit4Controller(RestTemplate restTemplate, AppProperties appProperties) {
+        this.restTemplate = restTemplate;
+        this.appProperties = appProperties;
+        this.webClient = WebClient.builder()
+            .baseUrl(appProperties.getUnit4().getBaseUrl())
+            .filter(ExchangeFilterFunctions
+                .basicAuthentication(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password()))
+            .build();
+    }
 
     @PostMapping("/ressurs")
     public ResponseEntity<String> postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
@@ -116,23 +128,28 @@ public class Unit4Controller {
         log.info("Mottatt /proxy/unit4/{personId} ressurs GET request");
         log.debug(SECURE_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
 
+        try {
+            String response = webClient.get()
+                .uri(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
-        var request = RequestEntity
-            .get(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
-            .headers(h -> {
-                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password());
-                    h.setContentType(MediaType.APPLICATION_JSON);
-                }
-            ).build();
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.exchange(request, String.class);
-        } catch (RestClientResponseException restClientResponseException){
-            log.error("Error in Unit4 get ressurs/{personId} request", restClientResponseException);
-            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
-                .body(restClientResponseException.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (WebClientResponseException ex) {
+            log.error("Error in Unit4 get ressurs/{personId} request:", ex);
+
+            String body = ex.getResponseBodyAsString();
+            HttpStatusCode status = ex.getStatusCode();
+            HttpHeaders headers = ex.getHeaders();
+
+            return ResponseEntity.status(status)
+                .headers(headers)
+                .body(body);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Internal server error: " + ex.getMessage());
         }
-        return response;
     }
 
     @GetMapping("/**")
@@ -151,7 +168,6 @@ public class Unit4Controller {
 
         return restTemplate.exchange(proxiedRequest, String.class);
     }
-
 
 }
 
