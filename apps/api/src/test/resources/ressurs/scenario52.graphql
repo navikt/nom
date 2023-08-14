@@ -1,0 +1,8 @@
+query {
+    ressurs(where: {navident: null, telefonNummer: "4712345678"}) {
+        navident
+        telefon {
+            nummer
+        }
+    }
+}

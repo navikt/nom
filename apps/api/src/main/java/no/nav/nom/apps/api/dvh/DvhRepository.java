@@ -127,6 +127,12 @@ public class DvhRepository {
         return lst.toList();
     }
 
+    public Optional<DvhTelefon> getTelefonByNummer(String telefonNummer) {
+        // Phone numbers in DVH includes country code. If the requested phone-number does not include a country code we assume 47.
+        var formattedNumber = telefonNummer.length() == 8 ? "47".concat(telefonNummer) : telefonNummer;
+        return navidentTelefonNrMap.stream().filter(it -> it.getNummer().equals(formattedNumber)).findFirst();
+    }
+
     public void addUpdateListener(Supplier<Boolean> callback) {
         this.listeners.add(callback);
     }

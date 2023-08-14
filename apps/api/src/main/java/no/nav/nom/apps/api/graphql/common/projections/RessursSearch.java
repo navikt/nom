@@ -16,6 +16,8 @@ public interface RessursSearch extends PersonSearch {
 
     String getNavident();
 
+    String getTelefonNummer();
+
 
     default boolean isNavidentPresent() {
         return getNavIdent() != null || getNavident() != null;
