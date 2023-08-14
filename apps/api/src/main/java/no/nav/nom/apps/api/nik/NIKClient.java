@@ -12,8 +12,11 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class NIKClient {
-    private final WebClient webClient;
-    private final WebClient onBehalfOfWebclient;
+    private final WebClient clientCredentialsAuthorizedWebClient;
+    private final WebClient.Builder webClientBuilder;
+
+    private final OnBehalfOfTokenRepository onBehalfOfTokenRepository;
+    private final String nikScope;
 
     public NIKClient(OnBehalfOfTokenRepository onBehalfOfTokenRepository, OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties) {
 
@@ -27,32 +30,33 @@ public class NIKClient {
                 headers.add("Nav-Call-Id", appProperties.name());
             });
 
-        this.webClient = baseWebClientBuilder
+        this.clientCredentialsAuthorizedWebClient = baseWebClientBuilder
             .filter(oAuth2Filter)
             .build();
 
-        this.onBehalfOfWebclient = baseWebClientBuilder
-            .filter((clientRequest, nextFilter) -> {
-                clientRequest.headers().add(
-                    "Authorization",
-                    String.format("Bearer %s", onBehalfOfTokenRepository.getOnbehalfofTokenFor(appProperties.clients().nik().aadScope()))
-                );
-                return nextFilter.exchange(clientRequest);
-            })
-            .build();
+        this.webClientBuilder = baseWebClientBuilder;
+
+        this.nikScope = appProperties.clients().nik().aadScope();
+        this.onBehalfOfTokenRepository = onBehalfOfTokenRepository;
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavident(OpprettNavidentRequest opprettNavidentRequest) {
 
-        return opprettNavidentWithSuppliedWebClient(webClient, opprettNavidentRequest);
+        return opprettNavidentWithSuppliedWebClient(clientCredentialsAuthorizedWebClient, opprettNavidentRequest);
     }
 
     public ResponseEntity<OpprettNavidentResponse> opprettNavidentOnBehalfOfUser(OpprettNavidentRequest opprettNavidentRequest) {
+        String onBehalfOfToken = onBehalfOfTokenRepository.getOnbehalfofTokenFor(nikScope);
 
-        return opprettNavidentWithSuppliedWebClient(onBehalfOfWebclient, opprettNavidentRequest);
+        var onBehalfOfAuthorizedWebClient = webClientBuilder
+            .defaultHeaders(httpHeaders -> httpHeaders.setBearerAuth(onBehalfOfToken))
+            .build();
+
+        return opprettNavidentWithSuppliedWebClient(onBehalfOfAuthorizedWebClient, opprettNavidentRequest);
     }
 
     private ResponseEntity<OpprettNavidentResponse> opprettNavidentWithSuppliedWebClient(WebClient suppliedWebClient, OpprettNavidentRequest opprettNavidentRequest) {
+
         return suppliedWebClient.post()
             .uri("/navident")
             .bodyValue(opprettNavidentRequest)
