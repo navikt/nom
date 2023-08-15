@@ -124,7 +124,7 @@ function Unit4Link() {
       css={css`
         width: max-content;
       `}
-      href={`${unit4BaseUrl}/Default.aspx?&accessId=002820&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
+      href={`${unit4BaseUrl}/Default.aspx?&accessId=003316&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
         ansettelsesType === AnsettelsesType.Fast ? "F" : "M"
       }`}
       icon={<ExternalLinkIcon aria-hidden />}
