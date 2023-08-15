@@ -63,4 +63,13 @@ public class SecurityTestUtils {
     public RSAKey rsaKey() {
         return RSA_KEY;
     }
+
+    public String getValidToken() {
+        var claims = validJwtClaims();
+        try {
+            return createToken(claims);
+        } catch (JOSEException e) {
+            throw new RuntimeException("Unable to create token: " + e.getMessage(), e);
+        }
+    }
 }
