@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Map;
@@ -87,7 +87,9 @@ public class E2ENavIdent {
     @Value("${NOM_API_AZURE_APP_CLIENT_ID}") private String nomApiClientId;
     @Value("${NOM_API_AZURE_APP_JWK}") private String nomApiJwk;
 
-    RestTemplate restTemplate = new RestTemplate();
+    WebClient webClient = WebClient.builder()
+        .baseUrl("http://localhost:%s".formatted(port))
+        .build();
 
     @Autowired AADServiceTokenProvider_ForTests aadServiceTokenProvider_forTests;
 
@@ -324,7 +326,20 @@ public class E2ENavIdent {
         log.debug("Url: %s".formatted(url));
         log.debug("Request: %s".formatted(request));
 
-        ResponseEntity<NavidentResponseDTO> result = restTemplate.postForEntity(url, request, NavidentResponseDTO.class);
+        ResponseEntity<NavidentResponseDTO> result = webClient.post()
+            .uri("/navident")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.set(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
+                httpHeaders.set(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));
+                httpHeaders.set(HEADER_X_REQUEST_ID_KEY, MDC.get(MDC_CALL_ID_KEY));
+                httpHeaders.setBearerAuth(testJWT);
+                }
+            )
+            .bodyValue(reqDTO)
+            .retrieve()
+            .toEntity(NavidentResponseDTO.class)
+            .block();
 
         log.debug("Response: %s".formatted(result));
         return result;

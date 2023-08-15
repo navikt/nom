@@ -7,19 +7,15 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.security.AuthenticationProperties;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Date;
@@ -27,13 +23,17 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-@AllArgsConstructor
 public class AADServiceTokenProvider_ForTests {
     private static final String AAD_GRANT_TYPE = "client_credentials";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
 
-    private final RestTemplate restTemplate;
     private final AuthenticationProperties authenticationProperties;
+    private final WebClient webClient;
+
+    public AADServiceTokenProvider_ForTests(AuthenticationProperties authenticationProperties) {
+        this.authenticationProperties = authenticationProperties;
+        this.webClient = WebClient.builder().baseUrl(authenticationProperties.getAad().getIssuerBaseUrl()).build();
+    }
 
     @SneakyThrows
     public synchronized SignedJWT getAadToken(String clientId, String jwk) {
@@ -47,7 +47,14 @@ public class AADServiceTokenProvider_ForTests {
         aadBodyMap.add("client_assertion", generateClientAssertionToken(clientId, jwk));
         aadBodyMap.add("grant_type", AAD_GRANT_TYPE);
 
-        val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+        val result = webClient.post()
+            .uri("/oauth2/v2.0/token")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .bodyValue(aadBodyMap)
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
+
         val token = SignedJWT.parse(result.get("access_token").asText());
 
         return token;
