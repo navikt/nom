@@ -26,9 +26,11 @@ public class SearchResolver {
     private final OrgenhetService orgenhetService;
     private final LuceneService luceneService;
 
-    public SearchResolver(IRessursService ressursService,
-                          OrgenhetService orgenhetService,
-                          LuceneService luceneService, Unleash unleash) {
+    public SearchResolver(
+        IRessursService ressursService,
+        OrgenhetService orgenhetService,
+        LuceneService luceneService, Unleash unleash
+    ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.luceneService = luceneService;
@@ -41,9 +43,9 @@ public class SearchResolver {
             )
             .sorted(Comparator.comparing(SearchResult::score).reversed())
             .map(result -> {
-                if(result.entityClass().equals(LuceneOrgEnhet.class)){
+                if (result.entityClass().equals(LuceneOrgEnhet.class)) {
                     return MappingUtils.toOrgEnhet(orgenhetService.getById(result.id()).orElseThrow());
-                } else if(result.entityClass().equals(LuceneRessurs.class)){
+                } else if (result.entityClass().equals(LuceneRessurs.class)) {
                     return MappingUtils.toRessurs(ressursService.findByNavident(result.id()).orElseThrow());
                 } else {
                     throw new RuntimeException("Unknown entity class: " + result.entityClass());
@@ -66,10 +68,11 @@ public class SearchResolver {
     public List<OrgEnhet> searchOrgenhet(String term, OrgEnhetSearchFilter filter) {
         try {
             return luceneService.searchOrgenhet(term, filter.toLuceneFilter(), filter.getLimit().getValue()).stream()
-                    .map(result -> orgenhetService.getById(result.id()))
-                    .map(Optional::get)
-                    .map(MappingUtils::toOrgEnhet)
-                    .toList();
+                .map(result -> orgenhetService.getById(result.id()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(MappingUtils::toOrgEnhet)
+                .toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

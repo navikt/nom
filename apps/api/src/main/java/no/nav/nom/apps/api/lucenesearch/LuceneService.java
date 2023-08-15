@@ -117,7 +117,7 @@ public class LuceneService {
         wrappedLucene.upsertEntities(
             orgenhetService.getAllEnheter().stream()
                 .map(orgenhet -> new LuceneOrgEnhet(
-                        orgenhet.getFid().toString(),
+                        orgenhet.getFid(),
                         orgenhet.getNavn(),
                         orgenhet.getNomNivaa().toString(),
                         orgenhet.getOrgNiv(),
