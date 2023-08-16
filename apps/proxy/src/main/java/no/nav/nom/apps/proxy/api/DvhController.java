@@ -31,13 +31,13 @@ public class DvhController {
         this.appProperties = appProperties;
         this.webClient = webClientBuilder
             .baseUrl(appProperties.getDvh().getBaseUrl())
-            .exchangeStrategies(useLageInMemorySize())
+            .exchangeStrategies(useLargeInMemorySize())
             .filter(ExchangeFilterFunctions.basicAuthentication(appProperties.getDvh().getTdvUsername(), appProperties.getDvh().getTdvPassword()))
             .build();
         this.uriBuilderFactory = new DefaultUriBuilderFactory(appProperties.getDvh().getBaseUrl());
     }
 
-    private ExchangeStrategies useLageInMemorySize() {
+    private ExchangeStrategies useLargeInMemorySize() {
         return ExchangeStrategies.builder()
             .codecs(configurer -> configurer.defaultCodecs()
                 .maxInMemorySize(appProperties.getWebClientMaxBytesInMemorySize()))
