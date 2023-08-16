@@ -2,15 +2,14 @@ package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
+import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,8 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navident")
     public void scenario12() {
-        var r1 = new RessursState.Builder(1).navident("testNavIdent").personident("testPersonIdent1").build();
-        var r2 = new RessursState.Builder(2).navident("testAnnenNav").personident("testPersonIdent2").build();
+        var r1 = new RessursStateBuilder(1).navident("testNavIdent").personident("testPersonIdent1").build();
+        var r2 = new RessursStateBuilder(2).navident("testAnnenNav").personident("testPersonIdent2").build();
 
         List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
 
@@ -70,8 +69,8 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        var e1 = new OrgEnhetState.Builder(1).navn("testid").build();
-        var e2 = new OrgEnhetState.Builder(2).navn("testid2").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testid").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").build();
         List.of(e1, e2).forEach(this::createOrgenhetHendelseEventSource);
 
         luceneService.addInvalidatedEntitiesToIndex();
@@ -91,7 +90,7 @@ public class SearchTest extends GraphQLTestBase {
     public void scenario3() {
 
         var mocknavn = "testenhet";
-        var e1 = new OrgEnhetState.Builder(1).navn(mocknavn).build();
+        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).build();
         createOrgenhetHendelseEventSource(e1);
         luceneService.addInvalidatedEntitiesToIndex();
 
@@ -106,9 +105,9 @@ public class SearchTest extends GraphQLTestBase {
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
 
-        var r1 = new RessursState.Builder(1).build();
-        var r2 = new RessursState.Builder(2).visningsnavn("test1", "etternavn").build();
-        var e1 = new OrgEnhetState.Builder(1).navn("testenhet").build();
+        var r1 = new RessursStateBuilder(1).build();
+        var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").build();
 
         List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
         List.of(e1).forEach(this::createOrgenhetHendelseEventSource);
@@ -151,8 +150,8 @@ public class SearchTest extends GraphQLTestBase {
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
-        createOrgenhetHendelseEventSource(new OrgEnhetState.Builder(1).navn("NAV City").build());
-        createOrgenhetHendelseEventSource(new OrgEnhetState.Builder(2).navn("Not-to-find").build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").build());
 
         luceneService.addInvalidatedEntitiesToIndex();
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
@@ -192,8 +191,8 @@ public class SearchTest extends GraphQLTestBase {
 
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
-        createOrgenhetHendelseEventSource(new OrgEnhetState.Builder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
-        createOrgenhetHendelseEventSource(new OrgEnhetState.Builder(4).navn("test 4").build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").build());
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
@@ -224,11 +223,11 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk etter orgenhet orgniv filter")
     public void scenario71_orgniv() {
-        var r1 = new RessursState.Builder(1).visningsnavn("fornavn", "etternavn").build();
+        var r1 = new RessursStateBuilder(1).visningsnavn("fornavn", "etternavn").build();
 
-        var e1 = new OrgEnhetState.Builder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).build();
-        var e2 = new OrgEnhetState.Builder(2).navn("fornavnet").build();
-        var e3 = new OrgEnhetState.Builder(3).navn("fornavn").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").build();
+        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").build();
 
         List.of(e1, e2, e3).forEach(this::createOrgenhetHendelseEventSource);
         List.of(r1).forEach(this::createRessursHendelseEventSource);
