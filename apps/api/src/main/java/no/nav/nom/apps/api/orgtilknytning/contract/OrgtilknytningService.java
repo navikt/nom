@@ -20,17 +20,4 @@ public interface OrgtilknytningService {
     List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id);
 
     <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);
-
-
-    Collection<Orgtilknytning> getAllKoblingerOld();
-
-    List<Orgtilknytning> getKoblingerByNavIdentOld(String navIdent);
-
-    default Map<String, List<Orgtilknytning>> getKoblingerByNavidenterOld(Set<String> navidenter) {
-        // Use a NOOP-transformer to preserve original use.
-        return getKoblingerByNavidenterOld(navidenter, Function.identity());
-    }
-
-    <T> Map<String, List<T>> getKoblingerByNavidenterOld(Set<String> navidenter, Function<Orgtilknytning, T> transformer);
-
 }

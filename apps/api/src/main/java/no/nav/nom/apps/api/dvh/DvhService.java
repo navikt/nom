@@ -3,24 +3,18 @@ package no.nav.nom.apps.api.dvh;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.api.common.DateUtils;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 @Slf4j
 @Service
@@ -30,68 +24,6 @@ public class DvhService {
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
-
-    public void saveOrgtilknytning(List<DvhOrgtilknytning> koblinger) {
-        val cachedEnheter = orgenhetService.getAllEnheter().stream()
-                .filter( e -> !e.getGyldigFom().isAfter(LocalDate.now())) // Ikke lag orgtilknytning til enhet som er gyldig kun i fremtiden
-                .filter( e -> e.getGyldigTom().isEmpty() || e.getGyldigTom().get().isAfter(LocalDate.now())) // Og ikke enheter som er avsluttet i fortiden
-                .collect(Collectors.groupingBy(e -> e.getAgressoId() + e.getOrgNiv())).values().stream()
-                .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(e -> e.getAgressoId() + e.getOrgNiv(), Function.identity()));
-
-        final var orgenhetAndRessursMissing = new LinkedList<Orgtilknytning>();
-        final var orgenhetMissing = new LinkedList<Orgtilknytning>();
-        final var ressursMissing = new LinkedList<Orgtilknytning>();
-
-        dvhRepository.saveKoblinger(
-            koblinger.stream()
-                .filter(k -> {
-                    final var organisasjonsenhet = cachedEnheter.get(k.getAgressoId() + k.getOrgNiv());
-                    final var ressurs = ressursService.findByNavident(k.getNavIdent());
-                    if (organisasjonsenhet == null && ressurs.isEmpty()) {
-                        orgenhetAndRessursMissing.add(k);
-                    } else if (organisasjonsenhet == null) {
-                        orgenhetMissing.add(k);
-                    } else if (ressurs.isEmpty()) {
-                        ressursMissing.add(k);
-                    } else {
-                        k.setOrgenhetNavn(organisasjonsenhet.getNavn());
-                        k.setOrgEnhetId(organisasjonsenhet.getId());
-                        return true;
-                    }
-                    return false;
-                })
-                .collect(Collectors.groupingBy(orgTilknytning -> orgTilknytning.getNavIdent() + orgTilknytning.getOrgEnhetId()))
-                .values().stream()
-                .peek(orgTilknytninger -> {
-                    for (int i = orgTilknytninger.size() - 1; i >= 0; i--) {
-                        final var lastOrgtilknytning = orgTilknytninger.get(i);
-                        for (int j = 0; j < i; j++) {
-                            final var orgtilknytningCompare = orgTilknytninger.get(j);
-                            boolean shouldMerge = DateUtils.isPeriodsOverlapping(
-                                orgtilknytningCompare.getGyldigFom(),
-                                orgtilknytningCompare.getGyldigTom(),
-                                lastOrgtilknytning.getGyldigFom(),
-                                lastOrgtilknytning.getGyldigTom()
-                            );
-                            if (shouldMerge) {
-                                if(orgtilknytningCompare.getGyldigFom().isAfter(lastOrgtilknytning.getGyldigFom()))
-                                    orgtilknytningCompare.setGyldigFom(lastOrgtilknytning.getGyldigFom());
-                                orgTilknytninger.remove(lastOrgtilknytning);
-                            }
-                        }
-                    }
-                })
-                .flatMap(List::stream)
-                .collect(toUnmodifiableList())
-        );
-
-        log.info(orgenhetAndRessursMissing.size() + " koblinger hvor orgEnhet og ressurs mangler");
-        log.info(orgenhetMissing.size() + " koblinger hvor orgEnhet mangler");
-        log.info(ressursMissing.size() + " hvor ressurs mangler");
-    }
 
     public void saveLedere(List<DvhLeder> ledere) {
         val cachedEnheter = orgenhetService.getAllEnheter().stream()

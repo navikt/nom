@@ -5,7 +5,6 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
-import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMockUtils;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
@@ -83,9 +82,6 @@ public abstract class TestBase {
     @Autowired
     protected RessursStateRepository ressursStateRepository;
 
-    @Autowired
-    protected DvhOrgtilknytningMockUtils dvhOrgtilknytningMockUtils;
-
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
@@ -95,7 +91,6 @@ public abstract class TestBase {
         orgEnhetStateRepository.clear();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
-        dvhOrgtilknytningMockUtils.createEmptyResponse();
         pdlUtils.reset();
         kafkaUtils.clearKafka();
         ressursService.clear();

@@ -8,7 +8,6 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMock;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.Sektor;
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
@@ -131,15 +129,8 @@ class RessursTest extends RessursTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
-        dvhOrgtilknytningMockUtils.addToResponse(
-            new DvhOrgtilknytningMock(
-                ressursState.navident(),
-                enhet.getORGENHET_KODE(),
-                LocalDate.parse("2020-01-01"),
-                LocalDate.parse("2099-12-31")
-            )
-        );
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario42.graphql");
 
@@ -330,16 +321,7 @@ class RessursTest extends RessursTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhOrgtilknytningMockUtils.addToResponse(
-            new DvhOrgtilknytningMock(
-                ressursState2.navident(),
-                mockedEnhet.getORGENHET_KODE(),
-                LocalDate.parse("2020-01-01"),
-                LocalDate.parse("2099-12-31")
-            )
-        );
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario7.graphql");
 
@@ -361,23 +343,16 @@ class RessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+//        dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(lederenErPaDenneEnheten, 2, String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))));
 
-        dvhOrgtilknytningMockUtils.addToResponse(
-            new DvhOrgtilknytningMock(
-                ressursState4.navident(),
-                ressursLederForDenneEnheten.getORGENHET_KODE(),
-                LocalDate.parse("2020-01-01"),
-                LocalDate.parse("2099-12-31")
-            )
-        );
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario71.graphql");
 

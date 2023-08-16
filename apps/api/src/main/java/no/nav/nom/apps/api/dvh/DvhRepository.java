@@ -9,7 +9,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -34,17 +33,12 @@ public class DvhRepository {
     private final IOrgenhetService orgenhetService;
     private List<DvhLeder> ledere = Collections.emptyList();
     private List<DvhOrganisering> organiseringer = Collections.emptyList();
-    private List<Orgtilknytning> koblinger = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrMap;
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 
     public List<DvhOrganisering> getOrganiseringer(String agressoId, String orgNiv, String navn) {
         return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
-    }
-
-    public List<Orgtilknytning> getKoblingerByAgressoId(String agressoId, String orgNiv) {
-        return koblinger.stream().filter(x -> x.getAgressoId().equals(agressoId) && x.getOrgNiv().equals(orgNiv)).toList();
     }
 
     public List<DvhLeder> getLederByAgressoIdAndNiv(String agressoId, String orgNiv) {
@@ -98,19 +92,6 @@ public class DvhRepository {
         this.updateListeners();
     }
 
-    public void saveKoblinger(List<Orgtilknytning> koblinger) {
-        // Ny last av koblinger
-        log.info("{} antall koblinger byttes ut med {}", this.koblinger == null ? 0 :this.koblinger.size(), koblinger.size());
-        if (koblinger.size() == 0) {
-            log.warn("0 koblinger lastet fra DVH? Ikke bytt ut");
-            return;
-        }
-
-        this.koblinger = koblinger;
-        this.updateListeners();
-    }
-
-
     public void saveTlf(List<DvhTelefon> tlfList) {
         this.navidentTelefonNrMap = tlfList;
         this.updateListeners();
@@ -118,7 +99,6 @@ public class DvhRepository {
 
     public void clearRepository() {
         organiseringer = Collections.emptyList();
-        koblinger = Collections.emptyList();
         this.updateListeners();
     }
 

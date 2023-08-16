@@ -1,12 +1,10 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
-import static no.nav.nom.libs.utils.common.util.StreamUtils.distinctByKey;
 
 @Component
 public class LederResolver {
@@ -35,23 +32,13 @@ public class LederResolver {
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningStateService;
-    private final OrgtilknytningDvhService orgtilknytningDvhService;
-
-
-    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
-    private final Unleash unleash;
 
     public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService,
-                         OrgtilknytningService orgtilknytningStateService,
-                         OrgtilknytningDvhService orgtilknytningDvhService,
-                         Unleash unleash
-    ) {
+                         OrgtilknytningService orgtilknytningStateService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
-        this.orgtilknytningDvhService = orgtilknytningDvhService;
-        this.unleash = unleash;
     }
 
     public <T> Map<Ressurs, List<T>> load(Collection<Ressurs> ressurser, Function<Ressurs, List<T>> loader) {
@@ -72,58 +59,37 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        if (unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE)) {
-            var aktiveKoblinger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
-                .stream()
-                .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom().orElse(null))).collect(Collectors.toList());
+        var aktiveKoblinger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+            .stream()
+            .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom().orElse(null))).collect(Collectors.toList());
 
-            // If there are no active koblinger, we find which date the earlist kobling will start, and select all koblinger starting that day.
-            var dateForNextKobling = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
-                .stream()
-                .map(OrgtilknytningState::gyldigFom)
-                .filter(gyldigFom -> gyldigFom.isAfter(LocalDate.now()))
-                .min(LocalDate::compareTo);
+        // If there are no active koblinger, we find which date the earlist kobling will start, and select all koblinger starting that day.
+        var dateForNextKobling = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+            .stream()
+            .map(OrgtilknytningState::gyldigFom)
+            .filter(gyldigFom -> gyldigFom.isAfter(LocalDate.now()))
+            .min(LocalDate::compareTo);
 
 
-            var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
-                .stream()
-                .filter(kobling -> kobling.gyldigFom().isEqual(dateForNextKobling.orElse(LocalDate.MIN)))
-                .toList();
+        var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+            .stream()
+            .filter(kobling -> kobling.gyldigFom().isEqual(dateForNextKobling.orElse(LocalDate.MIN)))
+            .toList();
 
-            return koblinger.stream()
-                .flatMap(kobling -> {
-                    String orgenhetId = kobling.orgEnhetId();
-                    IOrgenhet orgenhet = orgenhetService.getById(orgenhetId).get();
-                    var ledere = lederFor(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), navIdent);
+        return koblinger.stream()
+            .flatMap(kobling -> {
+                String orgenhetId = kobling.orgEnhetId();
+                IOrgenhet orgenhet = orgenhetService.getById(orgenhetId).get();
+                var ledere = lederFor(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), navIdent);
 
-                    if (ledere.isEmpty()) {
-                        // Om ressurs er leder for sin enhet henter vi leder fra nivå over
-                        ledere = lederForRecursive(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn(), navIdent);
-                    }
+                if (ledere.isEmpty()) {
+                    // Om ressurs er leder for sin enhet henter vi leder fra nivå over
+                    ledere = lederForRecursive(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn(), navIdent);
+                }
 
-                    return ledere.stream().map(leder -> new RessursLeder(leder, kobling.erDagligOppfolging()));
-                })
-                .collect(Collectors.toList());
-        } else {
-            return orgtilknytningDvhService.getKoblingerByNavIdentOld(navIdent)
-                .stream()
-                .filter(dto -> DateUtil.isNow(dto.getGyldigFom(), dto.getGyldigTom().orElse(null)))
-                .filter(distinctByKey(k -> k.getAgressoId() + k.getOrgNiv()))
-                .flatMap(kobling -> {
-                    String agressoId = kobling.getAgressoId();
-                    String orgNiv = kobling.getOrgNiv();
-                    String orgenhetNavn = kobling.getOrgenhetNavn();
-                    var ledere = lederFor(agressoId, orgNiv, navIdent);
-
-                    if (ledere.isEmpty()) {
-                        // Om ressurs er leder for sin enhet henter vi leder fra nivå over
-                        return lederForRecursive(agressoId, orgNiv, orgenhetNavn, navIdent).stream();
-                    }
-                    return ledere.stream();
-                })
-                .map(leder -> new RessursLeder(leder, false))
-                .collect(Collectors.toList());
-        }
+                return ledere.stream().map(leder -> new RessursLeder(leder, kobling.erDagligOppfolging()));
+            })
+            .collect(Collectors.toList());
     }
 
     private List<Ressurs> lederForRecursive(String agressoId, String orgNiv, String orgenhetNavn, String excludeNavIdent) {
@@ -154,5 +120,4 @@ public class LederResolver {
                 .map(MappingUtils::toRessurs)
                 .collect(Collectors.toList());
     }
-
 }

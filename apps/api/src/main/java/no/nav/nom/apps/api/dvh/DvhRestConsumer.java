@@ -6,13 +6,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
-import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
-import no.nav.nom.apps.api.orgtilknytning.DvhOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
@@ -21,9 +19,9 @@ import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -33,14 +31,12 @@ import java.util.stream.StreamSupport;
 @Component
 @RequiredArgsConstructor
 public class DvhRestConsumer {
-
     public static final String CACHE = "cache-source-dvh";
     // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
-    private final AppProperties appProperties;
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
@@ -50,7 +46,6 @@ public class DvhRestConsumer {
     private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
 
     private final RessursStillingLoader ressursStillingLoader;
-
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -95,8 +90,9 @@ public class DvhRestConsumer {
 
     public void loadKoblingerLedereOgTlfFromDvh() {
         try {
-            log.info("Laster koblinger fra dvh");
-            loadKoblingerFromDvh();
+            log.info("Laster Orgtilnytninger fra dvh");
+            loadOrgtilknytningerFromDvh();
+            log.info("Laster ledere og Organisering fra dvh");
             loadLedereAndOrganiseringerFromDvh();
 
             if (!initialLoadComplete.get()) {
@@ -144,19 +140,7 @@ public class DvhRestConsumer {
         ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
     }
 
-    private void loadKoblingerFromDvh() {
-        val jsonStillinger = dvhExchange(appProperties.clients().nomProxy().orgtilknytningPath());
-        List<DvhOrgtilknytning> koblinger = StreamSupport.stream(jsonStillinger.get("stilling2nomResult").spliterator(), false)
-                .filter(this::validateKobling)
-                .map(DvhOrgtilknytning::new)
-                .collect(Collectors.toList());
-
-        log.info("Antall koblinger lastet {}", koblinger.size());
-
-        dvhService.saveOrgtilknytning(koblinger);
-
-        // Ny håndtering for orgtilknytninger og persistering
-        // Men ikke på startup
+    private void loadOrgtilknytningerFromDvh() {
         if (initialLoadComplete.get() && leaderElection.isLeader()) {
             lastOrgtilknytningerTilEvtsrc();
         }
@@ -247,19 +231,6 @@ public class DvhRestConsumer {
         return validate;
     }
 
-    private boolean validateKobling(JsonNode e) {
-        final var validate = e.hasNonNull("NAV_ID") && e.hasNonNull("FRA_DATO") && e.hasNonNull("ORGENHET");
-        if (!validate) {
-            log.debug(
-                    "Ugyldig kobling fra dvh, NAV_ID: {}, ORGENHET: {}, FRA_DATO: {}",
-                    getAsText(e, "NAV_ID"),
-                    getAsText(e, "ORGENHET"),
-                    getAsText(e, "FRA_DATO")
-            );
-        }
-        return validate;
-    }
-
     private String getAsText(JsonNode e, String field) {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
@@ -268,5 +239,4 @@ public class DvhRestConsumer {
     private void resolveOrgEnhetsTypes(){
         orgEnhetTypeAndNivaaResolver.resolve();
     }
-
 }

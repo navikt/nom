@@ -12,7 +12,6 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningDvhService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -37,36 +36,25 @@ import java.time.format.DateTimeFormatter;
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
-
     private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
-
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final IRessursService ressursService;
     private final IOrgenhetService orgenhetService;
-
-    private final OrgtilknytningDvhService orgtilknytningDvhService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
-
     private final DvhRepository dvhRepository;
-
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public static final String UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE = "nom.orgtilknytning.bruk_evtsrc_state";
-    private final Unleash unleash;
-
     public OmadaUttrekk(
-        IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningDvhService orgtilknytningDvhService,
+        IRessursService ressursService, IOrgenhetService orgenhetService,
         OrgtilknytningStateService orgtilknytningStateService,
-        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, Unleash unleash
+        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
     ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;
-        this.orgtilknytningDvhService = orgtilknytningDvhService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -123,44 +111,19 @@ public class OmadaUttrekk {
     ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        var useEventSourceState = includeDagligOppfolging || unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE);
-
-        final var cSVFormat = useEventSourceState ?
-            getCSVFormat("navident", "org_enhet_id", "erDagligOppfolging", "gyldig_fom", "gyldig_tom")
-            : getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
+        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            if (useEventSourceState) {
-                orgtilknytningStateService.getAllOrgtilknytninger()
-                    .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
-                    .forEach(kobling -> {
-                        try {
-                            printer.printRecord(
-                                kobling.navident(),
-                                kobling.orgEnhetId(),
-                                kobling.erDagligOppfolging(),
-                                kobling.gyldigFom().format(dateTimeFormatter),
-                                kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
-                            );
-
-                            writer.close();
-                        } catch (IOException e) {
-                            log.error("Error writing to CSV", e);
-                            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                        }
-
-                });
-
-            } else {
-                orgtilknytningDvhService.getAllKoblingerOld().forEach(kobling -> {
+            orgtilknytningStateService.getAllOrgtilknytninger()
+                .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
+                .forEach(kobling -> {
                     try {
                         printer.printRecord(
-                            kobling.getNavIdent(),
-                            orgenhetService.getEnhetByAgressoIdNivaAndName(kobling.getAgressoId(), kobling.getOrgNiv(), kobling.getOrgenhetNavn())
-                                .map(IOrgenhet::getId)
-                                .orElseThrow(),
-                            kobling.getGyldigFom().format(dateTimeFormatter),
-                            kobling.getGyldigTom().map(dateTimeFormatter::format).orElse("")
+                            kobling.navident(),
+                            kobling.orgEnhetId(),
+                            kobling.erDagligOppfolging(),
+                            kobling.gyldigFom().format(dateTimeFormatter),
+                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
                         );
 
                         writer.close();
@@ -168,8 +131,8 @@ public class OmadaUttrekk {
                         log.error("Error writing to CSV", e);
                         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
                     }
-                });
-            }
+
+            });
 
             return IOUtils.toByteArray(IOUtils.toInputStream(writer.toString(), "UTF-8"));
         }

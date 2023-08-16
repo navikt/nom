@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMock;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -327,16 +325,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhOrgtilknytningMockUtils.addToResponse(
-            new DvhOrgtilknytningMock(
-                ressurs.navident(),
-                mockEnhet.getORGENHET_KODE(),
-                LocalDate.parse("2020-01-01"),
-                LocalDate.parse("2099-12-31")
-            )
-        );
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
 
@@ -388,16 +377,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhOrgtilknytningMockUtils.addToResponse(
-            new DvhOrgtilknytningMock(
-                ressurs.navident(),
-                mockEnhet.getORGENHET_KODE(),
-                LocalDate.parse("2020-01-01"),
-                LocalDate.parse("2099-12-31")
-            )
-        );
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
