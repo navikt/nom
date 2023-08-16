@@ -1,0 +1,75 @@
+package no.nav.nom.apps;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static no.nav.nom.apps.RsaStub.RSA_KEY;
+
+@Component
+public class SecurityTestUtils {
+
+    private final Environment env;
+
+    public SecurityTestUtils(Environment env) {
+        this.env = env;
+    }
+
+    public JWTClaimsSet.Builder validJwtClaims() {
+        return validJwtClaims("testSubject", "test");
+    }
+
+    public JWTClaimsSet.Builder validJwtClaims(String subject, String audience) {
+        return validJwtClaims(subject, subject, audience); // sub==oid -> Systemtoken , sub!=oid -> Usertoken
+    }
+
+    public JWTClaimsSet.Builder validJwtClaims(String subject, String oid, String audience) {
+        final var wiremockPort = env.getRequiredProperty("wiremock.server.port");
+
+        return new JWTClaimsSet.Builder()
+            .subject(subject)
+            .audience(audience)
+            .claim("oid", oid)
+            .jwtID(UUID.randomUUID().toString())
+            .issueTime(new Date())
+            .issuer(format("http://localhost:%s/aad", wiremockPort))
+            .expirationTime(Date.from(Instant.now().plusSeconds(60 * 60)));
+    }
+
+    public SignedJWT createSignedJWT(JWTClaimsSet.Builder builder) throws JOSEException {
+        final var signer = new RSASSASigner(RSA_KEY);
+        final var signedJWT = new SignedJWT(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID(RSA_KEY.getKeyID()).build(), builder.build());
+        signedJWT.sign(signer);
+        return signedJWT;
+    }
+
+    public String createToken(JWTClaimsSet.Builder builder) throws JOSEException {
+        return createSignedJWT(builder).serialize();
+    }
+
+    @Bean
+    public RSAKey rsaKey() {
+        return RSA_KEY;
+    }
+
+    public String getValidToken() {
+        var claims = validJwtClaims();
+        try {
+            return createToken(claims);
+        } catch (JOSEException e) {
+            throw new RuntimeException("Unable to create token: " + e.getMessage(), e);
+        }
+    }
+}
