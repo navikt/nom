@@ -138,6 +138,9 @@ spec:
     - team: org
       application: nom-intern-orgtilknytning-state
       access: read
+    - team: org
+      application: nom-kafka-api-ressurs-state
+      access: read
     - team: nom
       application: nom-api
       access: readwrite
