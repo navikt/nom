@@ -33,7 +33,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 
 @DisplayName("GraphQL.Search")
-@Disabled
 public class SearchTest extends GraphQLTestBase {
 
     @Autowired
