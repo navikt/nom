@@ -189,9 +189,10 @@ public class RemedyControllerTest extends RestTestBase {
     private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {
         final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
         final var subject = jwtClaimsBuilder.getClaims().get("sub");
-        securityTestUtils.validJwtClaims().claim("azp", subject);
+        jwtClaimsBuilder.claim("azp", subject);
+        jwtClaimsBuilder.claim("azp_name", subject);
 
-        return securityTestUtils.validJwtClaims().claim("azp_name", subject);
+        return jwtClaimsBuilder;
     }
 
 }
