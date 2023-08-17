@@ -21,14 +21,14 @@ spec:
             severity: critical
     - name: nom-unit4_high_failrate
       rules:
-        - alert: høy feilrate i logger
+        - alert: NOM-UNIT4 høy feilrate i logger
           expr: (100 * sum by (app, namespace) (rate(log_messages_errors{app="nom-unit4",namespace="org"}[3m])) / sum by (app, namespace) (rate(log_messages_total{app="nom-unit4",namespace="org"}[3m]))) > 10
           for: 3m
           annotations:
             action: "Sjekk loggene til app {{ $labels.app }}, for å se hvorfor det er så mye feil"
           labels:
             namespace: org
-            severity: critical
+            severity: warning
     - name: nom-unit4_error_last_5min
       rules:
         - alert: Error log på nom-unit4 de siste 5 min
