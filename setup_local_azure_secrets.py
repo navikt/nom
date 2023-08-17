@@ -3,6 +3,7 @@ import json
 import yaml
 import base64
 from dataclasses import dataclass
+import argparse
 
 
 @dataclass
@@ -104,18 +105,36 @@ def setup_node_backend_secrets(app_info: AppInfo):
         print(f"Successfully written new secrets to {env_file_path}")
 
 
-# Påse at man bruker secrets fra dev
-run_command("kubectl config use-context dev-gcp")
+def setup_secrets(apps_filter: list, env: str):
 
-spring_apps = [
-    AppInfo("api", "nom-api", "nom"),
-    AppInfo("nav-ident", "nav-ident", "org"),
-    AppInfo("unit4", "nom-unit4", "org")
-]
+    run_command(f"kubectl config use-context {env}-gcp")
 
-node_apps = [
-    AppInfo("ui2/frackend", "nom-ui2", "org")
-]
+    spring_apps = [
+        AppInfo("api", "nom-api", "nom"),
+        AppInfo("nav-ident", "nav-ident", "org"),
+        AppInfo("unit4", "nom-unit4", "org")
+    ]
 
-[setup_spring_app_secrets(app_info) for app_info in spring_apps]
-[setup_node_backend_secrets(app_info) for app_info in node_apps]
+    node_apps = [
+        AppInfo("ui2/frackend", "nom-ui2", "org")
+    ]
+
+    if apps_filter:
+        spring_apps = [app for app in spring_apps if app.kubernetes_name in apps_filter]
+        node_apps = [app for app in node_apps if app.kubernetes_name in apps_filter]
+
+    [setup_spring_app_secrets(app_info) for app_info in spring_apps]
+    [setup_node_backend_secrets(app_info) for app_info in node_apps]
+
+
+if __name__ == "__main__":
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("--env", type=str, required=False, default="dev", choices=["dev", "prod"])
+    argument_parser.add_argument("--apps", type=str, required=False)
+    arguments = argument_parser.parse_args()
+
+    app_filter = []
+    if arguments.apps:
+        app_filter = arguments.apps.split(",")
+
+    setup_secrets(app_filter, arguments.env)
