@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import graphql.GraphQLError;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
@@ -49,23 +51,32 @@ public class RessursResolver {
     private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
     private final OrgenhetService orgenhetService;
+    private final DvhRepository dvhRepository;
 
     RessursResolver(
             NIKClient nikClient,
             PdlClient pdlClient,
             IRessursService ressursService,
             RessursCommadService ressursCommadService,
-            OrgenhetService orgenhetService
+            OrgenhetService orgenhetService,
+            DvhRepository dvhRepository
     ) {
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
         this.orgenhetService = orgenhetService;
+        this.dvhRepository = dvhRepository;
     }
 
     public Optional<Ressurs> ressurs(RessursSearch search) {
         Optional<RessursState> ident = Optional.empty();
+
+        if (search.getTelefonNummer() != null) {
+            ident = dvhRepository.getTelefonByNummer(search.getTelefonNummer())
+                .map(DvhTelefon::getNavIdent)
+                .flatMap(ressursService::findByNavident);
+        }
         if (search.isNavidentPresent()) {
             ident = search.resolveIdent().flatMap(ressursService::findByNavident);
         } else if (search.isPersonidentPresent()) {

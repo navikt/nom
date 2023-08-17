@@ -117,6 +117,7 @@ export type OrgEnhet = {
   orgNiv: Scalars['String']['output'];
   organiseringer: Array<Organisering>;
   remedyEnhetId?: Maybe<Scalars['String']['output']>;
+  /** @deprecated Ubrukt felt */
   type?: Maybe<Kode>;
 };
 
@@ -420,7 +421,7 @@ export type HentRessursMedNavidentQueryVariables = Exact<{
 }>;
 
 
-export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', erDagligOppfolging?: boolean | null, ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, lederFor: Array<{ __typename?: 'LederOrgEnhet', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', erDagligOppfolging?: boolean | null, orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
+export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', erDagligOppfolging?: boolean | null, ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, lederFor: Array<{ __typename?: 'LederOrgEnhet', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', gyldigFom: any, gyldigTom?: any | null, erDagligOppfolging?: boolean | null, orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null } }> } }> } | null };
 
 export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1021,6 +1022,8 @@ export const HentRessursMedNavidentDocument = gql`
       }
     }
     orgTilknytning {
+      gyldigFom
+      gyldigTom
       erDagligOppfolging
       orgEnhet {
         navn

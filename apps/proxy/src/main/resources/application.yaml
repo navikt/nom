@@ -26,6 +26,7 @@ app:
     baseUrl: ${UNIT4_BASE_URL}
     employeesPath: ${UNIT4_EMPLOYEES_PATH}
     apiPath: ${UNIT4_API_PATH}
+  webClientMaxBytesInMemorySize: 260_000_000
 
 authentication:
   sts:

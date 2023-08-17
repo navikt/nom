@@ -2,22 +2,16 @@ package no.nav.nom.apps.navident.eventsource;
 
 import lombok.val;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
-import no.nav.nom.apps.navident.common.redis.TestRedisConfiguration;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.rnrservices.Need;
 import no.nav.nom.apps.navident.rnrservices.Respons;
-import no.nav.nom.apps.navident.rnrservices.util.RnRTestListener;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
@@ -27,8 +21,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@Import(TestRedisConfiguration.class)
-@Component
 public class EventSourceProducerTest extends EmbeddedKafkaTestBase {
 
     @Autowired

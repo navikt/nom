@@ -1,4 +1,4 @@
-import { formatISO } from "date-fns";
+import { format, formatISO } from "date-fns";
 
 export const sortItems = (a: string, b: string) => {
   if (a.localeCompare(b, "no") < 0) {
@@ -18,7 +18,7 @@ export function isNotDuplicate<T>(
   it: T,
   index: number,
   arrayContext: T[],
-  extractKey: (it: T) => string
+  extractKey: (it: T) => string,
 ): boolean {
   const seen = arrayContext
     .slice(0, index)
@@ -28,7 +28,7 @@ export function isNotDuplicate<T>(
     // eslint-disable-next-line no-console
     console.warn(
       { arrCtx: arrayContext, dupKey: extractKey(it), idx: index },
-      "Duplicate removed: Key was seen more than once -> "
+      "Duplicate removed: Key was seen more than once -> ",
     );
   }
   return !wasDuplicate;
@@ -75,4 +75,8 @@ export const DATE_FORMATS = {
 
 export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
+}
+
+export function formatDisplayDate(date: string) {
+  return format(new Date(date), DATE_FORMATS.no);
 }

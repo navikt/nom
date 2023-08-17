@@ -7,19 +7,16 @@ import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Date;
@@ -32,12 +29,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * Shameless copy from no.nav.nom.apps.api.common.security.TokenRepository
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class AADTokenRepository {
 
     private final AuthenticationProperties authenticationProperties;
-    private final RestTemplate restTemplate;
+
+    private final WebClient aadWebClient;
+
     private final Map<String, SignedJWT> cachedAadTokensByUserAndScope = new ConcurrentHashMap<>(2);
     private final Map<String, SignedJWT> cachedAadTokensByScope = new ConcurrentHashMap<>(2);
 
@@ -45,6 +43,11 @@ public class AADTokenRepository {
     private static final String AAD_GRANT_TYPE = "client_credentials";
     private static final String AAD_TOKEN_USE = "on_behalf_of";
     private static final String AAD_CLIENT_ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+
+    public AADTokenRepository(AuthenticationProperties authenticationProperties, WebClient aadWebClient) {
+        this.authenticationProperties = authenticationProperties;
+        this.aadWebClient = aadWebClient;
+    }
 
     @SneakyThrows
     public String getOboOrClientCredToken(String scope) {
@@ -109,7 +112,14 @@ public class AADTokenRepository {
         aadBodyMap.add("grant_type", AAD_GRANT_TYPE_OBO);
         aadBodyMap.add("requested_token_use", AAD_TOKEN_USE);
 
-        val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+        val result = aadWebClient.post()
+            .uri("/oauth2/v2.0/token")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .bodyValue(aadBodyMap)
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
+
         val token = SignedJWT.parse(result.get("access_token").asText());
 
         cachedAadTokensByUserAndScope.put(cacheKey, token);
@@ -128,7 +138,14 @@ public class AADTokenRepository {
         aadBodyMap.add("client_assertion", generateClientAssertionToken());
         aadBodyMap.add("grant_type", AAD_GRANT_TYPE);
 
-        val result = restTemplate.exchange(authenticationProperties.getAad().getIssuerBaseUrl() + "/oauth2/v2.0/token", HttpMethod.POST, new HttpEntity<>(aadBodyMap, aadHeaders), JsonNode.class).getBody();
+        val result = aadWebClient.post()
+            .uri("/oauth2/v2.0/token")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .bodyValue(aadBodyMap)
+            .retrieve()
+            .bodyToMono(JsonNode.class)
+            .block();
+
         val token = SignedJWT.parse(result.get("access_token").asText());
 
         cachedAadTokensByScope.put(scope, token);

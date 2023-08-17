@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
-
 import { AsyncSearch } from "./CustomSelectComponents";
 
 const RESOURCE_SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
@@ -130,9 +128,12 @@ async function performSearch(searchString: string): Promise<SearchResultRaw[]> {
   return result.data.data.search;
 }
 
-async function navidentSearch(navident: string): Promise<SearchResultRaw[]> {
-  const searchQuery = `query searchRessurs($searchString: String!) {
-        searchRessurs(term: $searchString) {
+async function queryForRessurs(
+  navident: string | null,
+  telefonNummer: string | null,
+): Promise<SearchResultRaw[]> {
+  const ressursQuery = `query ressurs($navident: String, $telefonNummer: String) {
+        ressurs(where: {navident: $navident, telefonNummer: $telefonNummer}) {
         __typename
         ... on Ressurs {
           navident
@@ -148,25 +149,32 @@ async function navidentSearch(navident: string): Promise<SearchResultRaw[]> {
     }`;
 
   const result = await axios.post("/nom-api/graphql", {
-    operationName: "searchRessurs",
-    query: searchQuery,
+    operationName: "ressurs",
+    query: ressursQuery,
     variables: {
-      searchString: navident,
+      navident,
+      telefonNummer,
     },
   });
 
-  return result.data.data.searchRessurs?.filter(
-    (ressurs: Ressurs) => ressurs.navident === navident
-  );
+  return [result.data.data.ressurs];
 }
 
 async function createOptions(inputValue: string): Promise<SearchOption[]> {
   // Får bedre resultat av en eller annen grunn når man tar termene i single-quotes
   const wrappedInputValue = "'" + inputValue + "'";
-  const inputValueIsNavident = inputValue.match(/^[A-Za-z]\d{6}$/) !== null;
-  const searchResults = inputValueIsNavident
-    ? await navidentSearch(inputValue.toUpperCase())
-    : await performSearch(wrappedInputValue);
+
+  const navident = /^[A-Za-z]\d{6}$/.test(inputValue)
+    ? inputValue.toUpperCase()
+    : null;
+  const telefonNummer = /^\d{8,}$/.test(inputValue.replaceAll(/\s/g, ""))
+    ? inputValue.replaceAll(/\s/g, "")
+    : null;
+
+  const searchResults =
+    navident || telefonNummer
+      ? await queryForRessurs(navident, telefonNummer)
+      : await performSearch(wrappedInputValue);
 
   return searchResults.map((r) => {
     switch (r.__typename) {

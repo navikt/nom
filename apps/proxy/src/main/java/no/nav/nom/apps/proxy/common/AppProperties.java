@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 @Getter
-@ConstructorBinding
 @AllArgsConstructor
 @ConfigurationProperties("app")
 public class AppProperties {
@@ -16,6 +14,7 @@ public class AppProperties {
     private final Dvh dvh;
     private final Tel tel;
     private final Unit4 unit4;
+    private final int webClientMaxBytesInMemorySize;
 
     @Value
     public static class Tel {

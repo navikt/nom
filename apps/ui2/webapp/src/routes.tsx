@@ -41,8 +41,8 @@ export const router = createBrowserRouter(
       <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
         <Route element={<NotfoundPage />} path="*" />
       </Route>
-    </Route>
-  )
+    </Route>,
+  ),
 );
 
 function App() {

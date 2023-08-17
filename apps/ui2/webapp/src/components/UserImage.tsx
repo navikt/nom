@@ -50,7 +50,7 @@ export const getPhotoQuery = {
 
 async function fetchPhoto(navident: string) {
   const response = await fetch(
-    new Request(`/teamcat/resource/${navident}/photo`)
+    new Request(`/teamcat/resource/${navident}/photo`),
   );
   if (response.status !== 200) {
     throw new Error("Failed to load image");

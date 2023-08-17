@@ -10,7 +10,7 @@
 
 NOM-teamets interne dokumentasjon: link:https://navikt.github.io/nom/index-intern.html[her].
 
-Sist oppdatert 28.02.2023
+Sist oppdatert 20.07.2023
 
 include::visjon.adoc[leveloffset=1]
 include::domenet.adoc[leveloffset=1]

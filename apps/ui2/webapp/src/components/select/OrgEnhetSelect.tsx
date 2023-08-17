@@ -95,7 +95,7 @@ const search =
 
     // For some reason the filterFunction requires a data property on every option.
     return options.filter((option) =>
-      filterFunction({ ...option, data: {} }, newSearchTerm)
+      filterFunction({ ...option, data: {} }, newSearchTerm),
     );
   };
 

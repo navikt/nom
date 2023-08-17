@@ -42,6 +42,8 @@ query HentRessursMedNavident($navident: String) {
         }
     }
     orgTilknytning {
+      gyldigFom
+      gyldigTom
       erDagligOppfolging
       orgEnhet {
         navn

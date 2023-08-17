@@ -14,11 +14,11 @@ public class PeriodeUtil {
         return stillingPeriode.gyldigFom().isAfter(LocalDate.now());
     }
 
-    public static boolean isCurrentPeriode(StillingPeriode stillingPeriode) {
+    public static boolean isCurrentPeriod(StillingPeriode stillingPeriode) {
         return isCurrentOrFuturePeriod(stillingPeriode) && stillingPeriode.gyldigFom().isBefore(tomorrow());
     }
 
-    public static boolean isCurrentPeriode(OrgtilknytningState orgtilknytning) {
+    public static boolean isCurrentPeriod(OrgtilknytningState orgtilknytning) {
         return isCurrentOrFuturePeriod(orgtilknytning) && orgtilknytning.gyldigFom().isBefore(tomorrow());
     }
 
@@ -40,4 +40,17 @@ public class PeriodeUtil {
     public static LocalDate yesterday() { return LocalDate.now().minusDays(1); }
 
     public static LocalDate tomorrow() { return LocalDate.now().plusDays(1); }
+
+    public static boolean overlapsInterval(LocalDate start, LocalDate end, StillingPeriode stillingPeriode) {
+        return stillingPeriode.gyldigFom().isBefore(dayAfter(end)) &&
+            (stillingPeriode.gyldigTom() == null || stillingPeriode.gyldigTom().isAfter(dayBefore(start)));
+    }
+
+    private static LocalDate dayAfter(LocalDate localDate) {
+        return localDate.plusDays(1);
+    }
+
+    private static LocalDate dayBefore(LocalDate localDate) {
+        return localDate.minusDays(1);
+    }
 }

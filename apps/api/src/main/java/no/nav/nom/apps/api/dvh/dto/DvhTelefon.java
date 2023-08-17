@@ -13,6 +13,8 @@ public class DvhTelefon {
     DvhTelefonType type;
     String beskrivelse;
 
+    public DvhTelefon() {}
+
     public DvhTelefon(JsonNode node) {
         this.navIdent = node.get("navident").asText();
         this.nummer = node.get("msisdn").asText();

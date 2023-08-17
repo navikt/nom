@@ -118,6 +118,10 @@ PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
 REDIS_HOST: nav-ident-redis.org.svc.cluster.local
 
+logging:
+  level:
+    no.nav.nom.apps.navident: DEBUG
+
 ---
 spring:
   config:

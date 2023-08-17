@@ -86,3 +86,4 @@ apps/ui/**/build/
 **/application-local.yaml
 **/application-e2e-local.yaml
 /apps/api/src/main/java/no/nav/nom/apps/api/dvh/CleanUp.java
+/venv/

@@ -1,12 +1,14 @@
 package no.nav.nom.apps.api;
 
-import lombok.val;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.jetbrains.annotations.NotNull;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,24 +31,37 @@ import java.util.stream.Collectors;
 public class KafkaUtils {
 
     private final String ressursStateTopic;
+
+    private final String orgenhetStateTopic;
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
     @SpyBean
     private final RessursStateListener ressursStateListener;
+
+    @SpyBean
+    private final OrgEnhetStateListener orgEnhetStateListener;
     private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
+    private final KafkaTemplate<String, OrgEnhetState> orgEnhetStateKafkaTemplate;
 
     @Autowired
     public KafkaUtils(
             EmbeddedKafkaBroker embeddedKafkaBroker,
             RessursStateListener ressursStateListener,
-            @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic
+            OrgEnhetStateListener orgEnhetStateListener,
+            @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
+            @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
+
         this.ressursStateListener = ressursStateListener;
         this.ressursStateTopic = ressursStateTopic;
-        ressursStateKafkaTemplate = ressursStateKafkaTemplate();
+        this.ressursStateKafkaTemplate = ressursStateKafkaTemplate();
+
+        this.orgEnhetStateListener = orgEnhetStateListener;
+        this.orgenhetStateTopic = orgEnhetStateTopic;
+        this.orgEnhetStateKafkaTemplate = orgEnhetStateKafkaTemplate();
     }
 
-    public synchronized void send(String key, RessursState ressursState) {
+    public synchronized void sendRessurs(String key, RessursState ressursState) {
         CountDownLatch latch = new CountDownLatch(1);
 
         Mockito.doAnswer(invocation -> {
@@ -66,6 +81,27 @@ public class KafkaUtils {
         }
     }
 
+    public synchronized void sendOrgenhet(String key, OrgEnhetState orgEnhetState) {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Mockito.doAnswer(invocation -> {
+            invocation.callRealMethod();
+            latch.countDown();
+            return null;
+        }).when(this.orgEnhetStateListener).onMessage(Mockito.any(), Mockito.any());
+
+
+        this.orgEnhetStateKafkaTemplate.sendDefault(key, orgEnhetState);
+        try {
+            if (!latch.await(900, TimeUnit.SECONDS)) {
+                throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public void clearKafka() {
         embeddedKafkaBroker.doWithAdmin(adminClient -> {
             try {
@@ -83,12 +119,23 @@ public class KafkaUtils {
     }
 
     private KafkaTemplate<String, RessursState> ressursStateKafkaTemplate() {
+        var out = this.<RessursState>defaultKafkaTemplate();
+        out.setDefaultTopic(ressursStateTopic);
+        return out;
+    }
+
+    private KafkaTemplate<String, OrgEnhetState> orgEnhetStateKafkaTemplate() {
+        var out = this.<OrgEnhetState>defaultKafkaTemplate();
+        out.setDefaultTopic(orgenhetStateTopic);
+        return out;
+    }
+
+    @NotNull
+    private <T> KafkaTemplate<String, T> defaultKafkaTemplate() {
         Map<String, Object> producerProperties = KafkaTestUtils.producerProps(embeddedKafkaBroker);
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        ProducerFactory<String, RessursState> producerFactory = new DefaultKafkaProducerFactory<>(producerProperties);
-        val kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        kafkaTemplate.setDefaultTopic(ressursStateTopic);
-        return kafkaTemplate;
+        ProducerFactory<String, T> producerFactory = new DefaultKafkaProducerFactory<>(producerProperties);
+        return new KafkaTemplate<>(producerFactory);
     }
 }

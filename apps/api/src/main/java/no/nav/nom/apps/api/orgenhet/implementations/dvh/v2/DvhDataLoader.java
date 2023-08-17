@@ -105,6 +105,8 @@ public class DvhDataLoader {
         val fidMarkedForEndDate = new HashMap<String, LocalDate>();
         val fidChangedStartDate = new HashMap<String, LocalDate>();
 
+        log.info("Orgenhet v2 last fra dvh. Parsed antall enheter:{}", parsedEnheter.size());
+
         parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
             .forEach(parsedEnhet -> {
                 val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());

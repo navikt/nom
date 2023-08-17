@@ -40,7 +40,7 @@ export function Footer() {
               height: 24px;
             }
           `,
-          mediaQueryContentWidth
+          mediaQueryContentWidth,
         )}
       >
         <Link
@@ -64,11 +64,11 @@ export function Footer() {
           #nom
         </Link>
         <Link
-          href="https://navno.sharepoint.com/sites/intranett-organisasjon/SitePages/Brukerveiledning-for-pilotbrukere.aspx"
+          href="https://uustatus.no/nb/erklaringer/publisert/ed146ebd-3afa-428e-95e1-e7dc21f56119"
           rel="noopener noreferrer"
           target="_blank"
         >
-          Brukerveiledning
+          Tilgjengelighetserklæring
         </Link>
         <Link
           css={css`
@@ -84,13 +84,6 @@ export function Footer() {
           <EnvelopeClosedFillIcon />
           Spørsmål eller tilbakemeldinger?
         </Link>
-        <Link
-          href="https://uustatus.no/nb/erklaringer/publisert/ed146ebd-3afa-428e-95e1-e7dc21f56119"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Tilgjengelighetserklæring
-        </Link>
       </div>
     </div>
   );
@@ -99,7 +92,7 @@ export function Footer() {
 export const SlackIcon = forwardRef(
   (
     { ...properties }: SVGProps<SVGSVGElement>,
-    reference: Ref<SVGSVGElement>
+    reference: Ref<SVGSVGElement>,
   ) => {
     return (
       <svg
@@ -147,5 +140,5 @@ export const SlackIcon = forwardRef(
         />
       </svg>
     );
-  }
+  },
 );

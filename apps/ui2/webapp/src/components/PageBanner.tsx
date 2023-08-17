@@ -21,7 +21,7 @@ export function PageBanner({ text }: { text: string }) {
             align-self: center;
             margin: auto;
             width: 1100px;
-          `
+          `,
         )}
         level="1"
         size="large"

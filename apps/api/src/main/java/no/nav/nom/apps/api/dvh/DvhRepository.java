@@ -32,9 +32,9 @@ import static java.util.stream.Collectors.toMap;
 public class DvhRepository {
 
     private final IOrgenhetService orgenhetService;
-    private List<DvhLeder> ledere;
-    private List<DvhOrganisering> organiseringer;
-    private List<Orgtilknytning> koblinger;
+    private List<DvhLeder> ledere = Collections.emptyList();
+    private List<DvhOrganisering> organiseringer = Collections.emptyList();
+    private List<Orgtilknytning> koblinger = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrMap;
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
@@ -125,6 +125,12 @@ public class DvhRepository {
     public List<DvhTelefon> getTelefonNrListByNavIdent(String navIdent) {
         val lst = this.navidentTelefonNrMap.stream().filter(it -> it.getNavIdent().equals(navIdent));
         return lst.toList();
+    }
+
+    public Optional<DvhTelefon> getTelefonByNummer(String telefonNummer) {
+        // Phone numbers in DVH includes country code. If the requested phone-number does not include a country code we assume 47.
+        var formattedNumber = telefonNummer.length() == 8 ? "47".concat(telefonNummer) : telefonNummer;
+        return navidentTelefonNrMap.stream().filter(it -> it.getNummer().equals(formattedNumber)).findFirst();
     }
 
     public void addUpdateListener(Supplier<Boolean> callback) {

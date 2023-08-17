@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.1.2</version>
         <relativePath/>
     </parent>
 
@@ -25,6 +25,8 @@
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <wiremock.version>2.35.0</wiremock.version>
+        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
     </properties>
 
     <dependencies>
@@ -60,12 +62,6 @@
             <artifactId>spring-boot-starter-data-ldap</artifactId>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
@@ -79,7 +75,7 @@
 
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common</artifactId>
+            <artifactId>utils-common-v2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -101,9 +97,15 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.nom</groupId>
-            <artifactId>utils-test</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.thomaskasene.wiremock</groupId>
+            <artifactId>wiremock-junit-extension</artifactId>
+            <version>${wiremock-extension.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

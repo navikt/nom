@@ -47,6 +47,7 @@ input OrgEnheterSearch {
 input RessursSearch {
     navIdent: String    @deprecated(reason: "navIdent er erstattet med navident")
     navident: String
+    telefonNummer: String
     personIdent: String     @deprecated(reason: "personIdent er erstattet med personident")
     personident: String
 }

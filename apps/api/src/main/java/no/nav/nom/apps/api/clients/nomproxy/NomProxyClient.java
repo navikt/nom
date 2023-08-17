@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class NomProxyClient {
 
+    private static final int MAX_IN_MEMORY_MB = 300;
     private final WebClient webClient;
 
     public NomProxyClient(OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager, AppProperties appProperties) {
@@ -18,7 +19,7 @@ public class NomProxyClient {
         oAuth2Filter.setDefaultClientRegistrationId("nom-proxy");
         this.webClient = WebClient.builder()
             .exchangeStrategies(
-                ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(30000000)).build()
+                ExchangeStrategies.builder().codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(MAX_IN_MEMORY_MB * 1024 * 1024)).build()
             )
             .filter(oAuth2Filter)
             .baseUrl(appProperties.clients().nomProxy().baseUrl())

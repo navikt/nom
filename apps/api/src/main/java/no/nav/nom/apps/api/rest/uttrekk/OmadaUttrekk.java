@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 @RequestMapping("/api/v1/uttrekk/omada")
 public class OmadaUttrekk {
 
+    private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
 
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final IRessursService ressursService;
@@ -130,21 +131,23 @@ public class OmadaUttrekk {
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             if (useEventSourceState) {
-                orgtilknytningStateService.getAllOrgtilknytninger().forEach(kobling -> {
-                    try {
-                        printer.printRecord(
-                            kobling.navident(),
-                            kobling.orgEnhetId(),
-                            kobling.erDagligOppfolging(),
-                            kobling.gyldigFom().format(dateTimeFormatter),
-                            kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
-                        );
+                orgtilknytningStateService.getAllOrgtilknytninger()
+                    .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
+                    .forEach(kobling -> {
+                        try {
+                            printer.printRecord(
+                                kobling.navident(),
+                                kobling.orgEnhetId(),
+                                kobling.erDagligOppfolging(),
+                                kobling.gyldigFom().format(dateTimeFormatter),
+                                kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
+                            );
 
-                        writer.close();
-                    } catch (IOException e) {
-                        log.error("Error writing to CSV", e);
-                        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
-                    }
+                            writer.close();
+                        } catch (IOException e) {
+                            log.error("Error writing to CSV", e);
+                            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Kunne ikke generere uttrekk");
+                        }
 
                 });
 
@@ -236,7 +239,9 @@ public class OmadaUttrekk {
         );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            orgenhetService.getAllEnheter().forEach(orgenhet -> {
+            orgenhetService.getAllEnheter()
+                .stream().filter( oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
+                .forEach(orgenhet -> {
                 try {
                     printer.printRecord(
                         orgenhet.getId(),

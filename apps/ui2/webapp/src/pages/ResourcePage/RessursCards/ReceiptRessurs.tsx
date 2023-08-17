@@ -10,7 +10,7 @@ import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/Car
 
 export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
   const orgEnhet = ressurs.orgTilknytning.find(
-    (kobling) => kobling.erDagligOppfolging
+    (kobling) => kobling.erDagligOppfolging,
   )?.orgEnhet;
   const leder = orgEnhet?.leder[0]?.ressurs;
 

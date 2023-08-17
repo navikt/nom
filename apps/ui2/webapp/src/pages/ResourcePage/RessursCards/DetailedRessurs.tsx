@@ -5,10 +5,20 @@ import {
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
-import { ExpansionCard, Heading, Label, Link, Tag } from "@navikt/ds-react";
+import {
+  Button,
+  ExpansionCard,
+  Heading,
+  HelpText,
+  Label,
+  Link,
+  Tag,
+} from "@navikt/ds-react";
 import axios from "axios";
+import { isAfter, isBefore } from "date-fns";
+import partition from "lodash/partition";
 import uniqBy from "lodash/uniqBy";
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "react-query";
 import { Link as ReactRouterLink } from "react-router-dom";
 
@@ -21,7 +31,7 @@ import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/components/CreateResourceForm";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
-import { formatTlf, isInDevelopment } from "~/utils";
+import { formatDisplayDate, formatTlf, isInDevelopment } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   return (
@@ -59,14 +69,24 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function Divider() {
+function Divider({ size = "large" }: { size?: "large" | "small" }) {
   return (
     <div
-      css={css`
-        height: 1px;
-        margin: var(--a-spacing-8) 0;
-        background-color: var(--a-gray-400);
-      `}
+      css={[
+        css`
+          height: 1px;
+          margin: var(--a-spacing-8) 0;
+          background-color: var(--a-gray-400);
+        `,
+        size === "large" &&
+          css`
+            margin: var(--a-spacing-8) 0;
+          `,
+        size === "small" &&
+          css`
+            margin: var(--a-spacing-6) 0;
+          `,
+      ]}
     />
   );
 }
@@ -76,6 +96,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
     return <></>;
   }
 
+  const [expiredOrgTilknytninger, activeOrgtilknytninger] = partition(
+    ressurs.orgTilknytning,
+    (orgtilknytning) =>
+      orgtilknytning.gyldigTom &&
+      isBefore(new Date(orgtilknytning.gyldigTom), new Date()),
+  );
+
   return (
     <>
       <Divider />
@@ -83,13 +110,71 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
         <Buldings3Icon />
         Organisatorisk tilhørighet
       </Heading>
-      {ressurs.orgTilknytning.map((orgTilknytning) => (
+      {activeOrgtilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
           key={orgTilknytning.orgEnhet.id}
           orgTilknytning={orgTilknytning}
           ressurs={ressurs}
         />
       ))}
+      <ExpiredOrgTilknytninger orgTilknytninger={expiredOrgTilknytninger} />
+    </>
+  );
+}
+
+function ExpiredOrgTilknytninger({
+  orgTilknytninger,
+}: {
+  orgTilknytninger: RessursOrgTilknytning[];
+}) {
+  const [showAll, setShowAll] = useState(false);
+  if (orgTilknytninger.length === 0) {
+    return <></>;
+  }
+
+  const tilknyttingerToShow = orgTilknytninger.slice(
+    0,
+    showAll ? orgTilknytninger.length : 3,
+  );
+
+  const shouldDisplayShowAllButton = orgTilknytninger.length > 3 && !showAll;
+
+  return (
+    <>
+      <Heading level="2" size="xsmall">
+        Avsluttede org.tilknytninger
+      </Heading>
+      {tilknyttingerToShow.map((orgTilknytning) => (
+        <div
+          css={css`
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid var(--a-border-default);
+            border-radius: var(--a-border-radius-large);
+          `}
+          key={orgTilknytning.orgEnhet.id}
+        >
+          <Heading level="3" size="medium">
+            {orgTilknytning.orgEnhet.navn}
+          </Heading>
+          <span>
+            {formatDisplayDate(orgTilknytning.gyldigFom)} -{" "}
+            {formatDisplayDate(orgTilknytning.gyldigTom)}
+          </span>
+        </div>
+      ))}
+      {shouldDisplayShowAllButton && (
+        <Button
+          onClick={() => setShowAll(true)}
+          size="small"
+          variant="tertiary"
+        >
+          Vis alle avsluttede org.tilknytninger
+        </Button>
+      )}
     </>
   );
 }
@@ -115,17 +200,43 @@ function OrganisationHierarchyTree({
 
   const orgHierarkiLeder = orgHierarki.enhet?.leder[0]?.ressurs;
 
+  const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
+
+  const startsInTheFuture =
+    gyldigFom && isAfter(new Date(gyldigFom), new Date());
+
   return (
     <ExpansionCard
       aria-label="organisasjons-hierarki"
       css={css`
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
+
+        &.navds-expansioncard--open #title-start-date {
+          color: blue;
+          visibility: hidden;
+        }
       `}
+      size="small"
     >
       <ExpansionCard.Header>
         <ExpansionCard.Title>
           <span>{orgHierarki.enhet?.navn}</span>
-          {orgTilknytning.erDagligOppfolging ? (
+          {startsInTheFuture && (
+            <span
+              css={css`
+                font-size: var(--a-font-size-large);
+                font-weight: var(--a-font-weight-regular);
+                margin-left: var(--a-spacing-4);
+              `}
+              id="title-start-date"
+            >
+              Starter {formatDisplayDate(gyldigFom)}
+            </span>
+          )}
+        </ExpansionCard.Title>
+        <ExpansionCard.Description>
+          Leder: {orgHierarkiLeder?.visningsnavn}
+          {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
                 margin-left: 1rem;
@@ -136,18 +247,13 @@ function OrganisationHierarchyTree({
               Daglig oppfølging
             </Tag>
           ) : undefined}
-        </ExpansionCard.Title>
-        <ExpansionCard.Description>
-          Leder:{" "}
-          <Link
-            as={ReactRouterLink}
-            to={`/ressurs/${orgHierarkiLeder?.navident}`}
-          >
-            {orgHierarkiLeder?.visningsnavn}
-          </Link>
         </ExpansionCard.Description>
       </ExpansionCard.Header>
       <ExpansionCard.Content>
+        {gyldigFom && <span>Startdato: {formatDisplayDate(gyldigFom)}</span>}
+        <br />
+        {gyldigTom && <span>Sluttdato: {formatDisplayDate(gyldigTom)}</span>}
+        <Divider size="small" />
         <CompactOrganisasjonHierarki
           orgHierarki={orgHierarki}
           ressurs={ressurs}
@@ -169,7 +275,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   */
   const uniqLederFor = uniqBy(
     ressurs.lederFor,
-    ({ orgEnhet }) => orgEnhet.navn
+    ({ orgEnhet }) => orgEnhet.navn,
   );
 
   return (
@@ -261,12 +367,30 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           {dagligLeder ? (
             <>
               <span>Leder:</span>
-              <Link
-                as={ReactRouterLink}
-                to={`/ressurs/${dagligLeder.ressurs.navident}`}
+              <div
+                css={css`
+                  display: flex;
+                  gap: 0.5rem;
+                `}
               >
-                <Label as="span">{dagligLeder.ressurs.visningsnavn}</Label>
-              </Link>
+                <Link
+                  as={ReactRouterLink}
+                  to={`/ressurs/${dagligLeder.ressurs.navident}`}
+                >
+                  <Label as="span">{dagligLeder.ressurs.visningsnavn}</Label>
+                </Link>
+                {dagligLeder && (
+                  <>
+                    <span>-</span>
+                    <span>Daglig oppfølging</span>
+                    <HelpText title="Hva er daglig leder">
+                      Denne lederen har det daglige ansvaret for
+                      sykefraværsoppfølging, godkjenning i MinWinTid, og har
+                      tilgang til den ansatte i Læringsportalen
+                    </HelpText>
+                  </>
+                )}
+              </div>
             </>
           ) : undefined}
         </div>
@@ -301,7 +425,7 @@ function RessursInformationDetail({
 
 function TeamCatSection({ navident }: { navident: string }) {
   const { data } = useQuery(["memberships", navident], () =>
-    axios.get(`/teamcat/member/membership/${navident}`)
+    axios.get(`/teamcat/member/membership/${navident}`),
   );
   const memberships = data?.data;
   if (!memberships) {

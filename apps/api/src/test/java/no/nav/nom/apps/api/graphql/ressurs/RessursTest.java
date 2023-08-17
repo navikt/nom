@@ -5,7 +5,9 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.RsaStub;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.dvh.orgtilknytning.DvhOrgtilknytningMock;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
@@ -45,6 +48,9 @@ class RessursTest extends RessursTestBase {
 
     @Autowired
     private OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    private DvhRepository dvhRepository;
 
     @Test
     @DisplayName("Leser inn med graphql navIdent parameter")
@@ -401,5 +407,45 @@ class RessursTest extends RessursTestBase {
             assertEquals(1, errors.size());
             assertTrue(errors.get(0).getMessage().contains("Forbidden"));
         });
+    }
+
+    @Test
+    @DisplayName("Kan slå opp ressurs ved eksakt telefonnummer")
+    void scenario52() {
+        RessursState ressursState = createRessursHendelseEventSource("1");
+
+        String telefonNummer = "4712345678";
+        DvhTelefon mockDvhTelefon = new DvhTelefon();
+        mockDvhTelefon.setNummer(telefonNummer);
+        mockDvhTelefon.setNavIdent(ressursState.navident());
+        mockDvhTelefon.setType(DvhTelefon.DvhTelefonType.TJENESTETELEFON);
+
+        dvhRepository.saveTlf(List.of(mockDvhTelefon));
+
+        final var response = postForResource("ressurs/scenario52.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
+        assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
+    }
+
+    @Test
+    @DisplayName("Kan slå opp ressurs ved telefonnummer uten landskode")
+    void scenario53() {
+        RessursState ressursState = createRessursHendelseEventSource("1");
+
+        String telefonNummer = "4712345678";
+        DvhTelefon mockDvhTelefon = new DvhTelefon();
+        mockDvhTelefon.setNummer(telefonNummer);
+        mockDvhTelefon.setNavIdent(ressursState.navident());
+        mockDvhTelefon.setType(DvhTelefon.DvhTelefonType.TJENESTETELEFON);
+
+        dvhRepository.saveTlf(List.of(mockDvhTelefon));
+
+        final var response = postForResource("ressurs/scenario53.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(JsonNode.class).get();
+        assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
+        assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
     }
 }

@@ -365,7 +365,7 @@ public class SanityCheck {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/startSammenligNyOgGammelnOrgtilknytningState")
+    @GetMapping(value = "/startSammenligNyOgGammelOrgtilknytningState")
     public void startSammenligNyOgGammelnOrgtilknytningState() {
         compareOldAndNewOrgtilknytningStates.start();
     }
@@ -380,7 +380,7 @@ public class SanityCheck {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @GetMapping(value = "/sammenligNyOgGammelnOrgtilknytningState")
+    @GetMapping(value = "/sammenligNyOgGammelOrgtilknytningState")
     public String sammenligNyOgGammelnOrgtilknytningState(@RequestParam(defaultValue = "false") boolean kunOppsummering,
                                                           @RequestParam(defaultValue = "false") boolean inkluderEksterne,
                                                           @RequestParam(defaultValue = "false") boolean fulleDetaljer,

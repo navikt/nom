@@ -2,19 +2,22 @@ package no.nav.nom.apps.api.graphql.search;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
+import no.nav.nom.apps.api.common.OrgEnhetStateBuilder;
+import no.nav.nom.apps.api.common.RessursStateBuilder;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.graphql.GraphQLTestBase;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -26,9 +29,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 
 @DisplayName("GraphQL.Search")
-@Disabled
 public class SearchTest extends GraphQLTestBase {
 
     @Autowired
@@ -45,8 +48,10 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navident")
     public void scenario12() {
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        var r1 = new RessursStateBuilder(1).navident("testNavIdent").personident("testPersonIdent1").build();
+        var r2 = new RessursStateBuilder(2).navident("testAnnenNav").personident("testPersonIdent2").build();
+
+        List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
@@ -55,56 +60,61 @@ public class SearchTest extends GraphQLTestBase {
         final var response = postForResource("search/scenario1.graphql");
         final var searchResults = response.path("search").entityList(Ressurs.class).get();
 
-        assertThat(searchResults, hasSize(2));
+        assertThat(searchResults, hasSize(1));
 
         final var navidenter = searchResults.stream().map(Ressurs::getNavIdent).collect(Collectors.toList());
-        assertThat(navidenter, hasItems("testNavIdent1", "testNavIdent2"));
+        assertThat(navidenter, hasItems(r1.navident()));
     }
 
     @Test
     @DisplayName("Søk på agressoId")
     public void scenario2() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testid").build();
-        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testid2").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testid").build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("testid2").build();
+        List.of(e1, e2).forEach(this::createOrgenhetHendelseEventSource);
 
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        luceneService.addInvalidatedEntitiesToIndex();
 
         final var response = postForResource("search/scenario2.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var agressoIds = searchResults.stream().map(OrgEnhet::getAgressoId).collect(Collectors.toList());
 
         assertThat(searchResults.size(), greaterThan(1));
-        assertThat(agressoIds, hasItem(mockedEnhet.getORGENHET_KODE()));
-        assertThat(agressoIds, hasItem(mockedEnhet2.getORGENHET_KODE()));
+        assertThat(agressoIds, hasItem(e1.agressoId().get()));
+        assertThat(agressoIds, hasItem(e2.agressoId().get()));
 
     }
 
     @Test
     @DisplayName("Søk på enhetsnavn")
     public void scenario3() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        var mocknavn = "testenhet";
+        var e1 = new OrgEnhetStateBuilder(1).navn(mocknavn).build();
+        createOrgenhetHendelseEventSource(e1);
+        luceneService.addInvalidatedEntitiesToIndex();
 
         final var response = postForResource("search/scenario3.graphql");
         final var searchResults = response.path("search").entityList(OrgEnhet.class).get();
         final var enhetsnavn = searchResults.stream().map(OrgEnhet::getNavn).collect(Collectors.toList());
 
-        assertThat(enhetsnavn, hasItem(mockedEnhet.getORGENHET_NAVN()));
+        assertThat(enhetsnavn, hasItem(mocknavn));
     }
 
     @Test
     @DisplayName("Søk på term som resulterer i både enheter og ressurser")
     public void scenario4() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        var r1 = new RessursStateBuilder(1).build();
+        var r2 = new RessursStateBuilder(2).visningsnavn("test1", "etternavn").build();
+        var e1 = new OrgEnhetStateBuilder(1).navn("testenhet").build();
+
+        List.of(r1,r2).forEach(this::createRessursHendelseEventSource);
+        List.of(e1).forEach(this::createOrgenhetHendelseEventSource);
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        luceneService.addInvalidatedEntitiesToIndex();
 
         final var response = postForResource("search/scenario4.graphql");
         final var searchResults = response.path("search").entity(JsonNode.class).get();
@@ -121,9 +131,6 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter ressurs via lucene-wrapper")
     public void scenario51() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("testnavn").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
-
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
@@ -140,17 +147,13 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk på navn etter orgenhet via lucene-wrapper")
     public void scenario61() {
-        final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("NAV City").build();
-        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("Not-to-find").build();
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet, mockedEnhet2);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
-
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
 
-        luceneService.addInvalidatedEntitiesToIndex();
-        luceneService.refreshOrgenhet();
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(1).navn("NAV City").build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(2).navn("Not-to-find").build());
 
+        luceneService.addInvalidatedEntitiesToIndex();
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
         final var response = postForResource("search/scenario6.graphql");
@@ -185,37 +188,32 @@ public class SearchTest extends GraphQLTestBase {
     @DisplayName("Søk etter orgenhet")
     public void scenario71() {
         var passedDate = LocalDate.now().minusMonths(1L);
-        final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
-        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn").build();
-        final var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavnet")
-            .STILLING_MAKS_GYLDIG_TIL_DATO(passedDate)
-            .ORGENHET_TIL_PERIODE(Integer.parseInt(passedDate.getYear() + "" + passedDate.getMonthValue())).build();
 
         createRessursHendelseEventSource("1");
         createRessursHendelseEventSource("2");
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(3).navn("test 3").gyldigTom(Optional.of(passedDate)).build());
+        createOrgenhetHendelseEventSource(new OrgEnhetStateBuilder(4).navn("test 4").build());
 
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet3, mockedEnhet1, mockedEnhet2);
         dvhRestConsumer.loadRessurserOgOrgEnheter();
         luceneService.addInvalidatedEntitiesToIndex();
-        luceneService.refreshOrgenhet();
 
         pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
 
         final var allResponse = postForResource(
             "search/scenario7.graphql",
             Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "ALLE"),
-                "term", "forn"
+                "term", "test"
             )
         );
         final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
 
-        assertThat(all.toString(), containsString("test"));
         assertThat(all.size(), equalTo(2));
+        assertThat(all.toString(), containsString("test"));
 
         final var onlyActiveResponse = postForResource(
             "search/scenario7.graphql",
             Map.of("filter", Map.of("orgnivSelection", "ALLE", "gyldigTomSelection", "IKKE_PASSERT"),
-                "term", "forn"
+                "term", "test"
             )
         );
         final var onlyActive = onlyActiveResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
@@ -225,20 +223,16 @@ public class SearchTest extends GraphQLTestBase {
     @Test
     @DisplayName("Søk etter orgenhet orgniv filter")
     public void scenario71_orgniv() {
-        final var mockedEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavn").build();
-        final var mockedEnhet2 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("fornavnet").build();
-        final var mockedEnhet3 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_NAVN("etternavn")
-            .ORGNODE_NIV("ORGNIV2").build();
+        var r1 = new RessursStateBuilder(1).visningsnavn("fornavn", "etternavn").build();
 
-        createRessursHendelseEventSource("1");
-        createRessursHendelseEventSource("2");
+        var e1 = new OrgEnhetStateBuilder(1).navn("fornavnene").agressoOrgNivaa(Optional.of("ORGNIV2")).build();
+        var e2 = new OrgEnhetStateBuilder(2).navn("fornavnet").build();
+        var e3 = new OrgEnhetStateBuilder(3).navn("fornavn").build();
 
-        dvhOrgenhetMockUtils.addToResponse(mockedEnhet3, mockedEnhet1, mockedEnhet2);
-        dvhRestConsumer.loadRessurserOgOrgEnheter();
+        List.of(e1, e2, e3).forEach(this::createOrgenhetHendelseEventSource);
+        List.of(r1).forEach(this::createRessursHendelseEventSource);
+
         luceneService.addInvalidatedEntitiesToIndex();
-        luceneService.refreshOrgenhet();
-        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent1", "testPersonIdent2");
-
 
         final var allResponse = postForResource(
             "search/scenario7.graphql",
@@ -248,7 +242,8 @@ public class SearchTest extends GraphQLTestBase {
         );
         final var all = allResponse.path("searchOrgEnhet").entity(JsonNode.class).get();
 
-        assertThat(all.toString(), containsString("test"));
+        assertThat(all.toString(), containsString("fornavnet"));
+        assertThat(all.toString(), not(containsString("fornavnene")));
         assertThat(all.size(), equalTo(2));
     }
 

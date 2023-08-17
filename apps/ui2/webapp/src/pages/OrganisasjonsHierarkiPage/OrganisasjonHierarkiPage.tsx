@@ -22,28 +22,29 @@ import {
 import { ValgtEnhet } from "./components/ValgtEnhet";
 
 function sortUnderenheterForHierarchyFrontPage(
-  orgHierarchy: HentHierarkiQueryHookResult["data"]
+  orgHierarchy: HentHierarkiQueryHookResult["data"],
 ) {
   const underEnheter = (orgHierarchy?.enhetsKoblinger?.underenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet
+    ({ organisasjonsenhet }) => organisasjonsenhet,
   );
 
-  const sortedUnderEnheter = sortBy(underEnheter, "navn");
+  const collator = new Intl.Collator("no", { sensitivity: "base" });
+  underEnheter.sort((a, b) => collator.compare(a.navn, b.navn));
 
   if (orgHierarchy?.enhet?.navn !== "NAV") {
-    return sortedUnderEnheter;
+    return underEnheter;
   }
 
   const [direktoratet, linjene] = partition(
-    sortedUnderEnheter,
-    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet"
+    underEnheter,
+    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet",
   );
 
   return [...direktoratet, ...linjene];
 }
 
 export function getOverEnheterBackToRootRecursively(
-  orgEnhet: OrgEnhet
+  orgEnhet: OrgEnhet,
 ): OrgEnhet[] {
   if (!orgEnhet || !orgEnhet.organiseringer) {
     return [];
@@ -70,7 +71,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
   const valgtEnhet = properties.data?.enhet;
 
   const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
-    ({ ressurs }) => ressurs
+    ({ ressurs }) => ressurs,
   );
 
   return (
@@ -113,7 +114,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
         >
           {sortBy(
             uniqBy(ressurser, (ressurs) => ressurs.navident),
-            "visningsnavn"
+            "visningsnavn",
           ).map((ressurs, index) => (
             <ResourceLink
               autoFocus={index === 0}

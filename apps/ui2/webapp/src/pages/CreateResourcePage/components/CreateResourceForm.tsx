@@ -158,7 +158,7 @@ function CreateResourceFormInner({
   } = methods;
 
   const selectedOrgEnhet = orgEnheter.find(
-    (orgEnhet) => orgEnhet.id === watch("orgEnhetId")
+    (orgEnhet) => orgEnhet.id === watch("orgEnhetId"),
   );
 
   const startDatePicker = useDatepicker({
@@ -178,7 +178,7 @@ function CreateResourceFormInner({
           }/receipt?ansettelsesType=${ansettelsesType}`,
           {
             replace: true,
-          }
+          },
         );
       },
     });
@@ -237,9 +237,8 @@ function CreateResourceFormInner({
           render={({ field }) => (
             <RadioGroup legend="Sektor" size="medium" {...field}>
               <Alert size="medium" variant="info">
-                For øyeblikket kan du kun bruke NOM til å opprette faste,
-                statlige ansatte. Midlertidige statlige ansatte må du opprette
-                ved hjelp av ordinær prosess i Unit4.
+                For øyeblikket kan du kun bruke NOM til å opprette statlige
+                ansatte med fast eller midlertidig ansettelsesforhold.
               </Alert>
               <Radio checked value={Sektor.NavStatlig}>
                 {SektorNameMapping[Sektor.NavStatlig]}
@@ -305,7 +304,7 @@ function CreateResourceFormInner({
                 variables: {
                   request: validValues,
                 },
-              })
+              }),
             )}
             orgEnheter={orgEnheter}
           />
