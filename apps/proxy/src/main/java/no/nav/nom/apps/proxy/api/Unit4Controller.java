@@ -59,6 +59,7 @@ public class Unit4Controller {
             return webClient
                 .post()
                 .uri(unit4EmployeesUrl)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(body), String.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
