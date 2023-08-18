@@ -1,0 +1,242 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/proxy/unit4/ressurs/123456"
+  },
+  "response": {
+    "status": 200,
+    "transformers": [
+      "response-template"
+    ],
+    "jsonBody": {
+      "dateFrom" : "2023-01-23T00:00:00.000",
+      "name" : "Moskus, Perfekt",
+      "status" : "N",
+      "birthDate" : "1981-01-04T00:00:00.000",
+      "dateTo" : "2099-12-31T00:00:00.000",
+      "additionalInformation" : {
+        "graduationYear" : 0,
+        "hasOvertime" : true,
+        "isHourlyPaid" : false,
+        "message" : "",
+        "payYear" : 0,
+        "piecework" : false,
+        "probationPeriod" : "1900-01-01T00:00:00.000",
+        "relatedPersonId" : "875314",
+        "retirementAge" : 0,
+        "roomNo" : "",
+        "startDate" : "1900-01-01T00:00:00.000",
+        "terminationReason" : ""
+      },
+      "companyId" : "HR",
+      "customInformation" : {
+        "customCategoryField1" : "",
+        "customCategoryField2" : "",
+        "customCategoryField3" : "",
+        "customCategoryField4" : "",
+        "customCode1" : "",
+        "customCode2" : "",
+        "customCode3" : "",
+        "customCode4" : "",
+        "customCode5" : "",
+        "customCode6" : "",
+        "customCode7" : "",
+        "customCode8" : "",
+        "customDate1" : "1900-01-01T00:00:00.000",
+        "customDate2" : "1900-01-01T00:00:00.000",
+        "customDate3" : "1900-01-01T00:00:00.000",
+        "customFlag1" : false,
+        "customFlag2" : false
+      },
+      "languageCode" : "NO",
+      "lastUpdated" : {
+        "updatedAt" : "2023-01-18T11:17:46.000",
+        "updatedBy" : "API"
+      },
+      "nameInformation" : {
+        "aliasName" : "M875314",
+        "customNameField1" : "",
+        "customNameField2" : "",
+        "customNameField3" : "",
+        "customNameField4" : "",
+        "customNamePart" : "",
+        "firstName" : "Perfekt",
+        "surname" : "Moskus",
+        "title" : ""
+      },
+      "partTimePct" : 100.0,
+      "paymentInformation" : {
+        "bankAccount" : "00000000019",
+        "bankClearingCode" : "",
+        "contractId" : "",
+        "currencyCode" : "NOK",
+        "iban" : "",
+        "otherAccount" : "",
+        "payMethod" : "AM",
+        "postalAccount" : "00000000019",
+        "supplierGroupId" : "01",
+        "supplierId" : "875314",
+        "swift" : ""
+      },
+      "payrollInformation" : {
+        "batchId" : 0,
+        "customTaxCode" : "",
+        "notes" : "",
+        "payPeriod" : 0,
+        "payStatus" : "N",
+        "taxBasis" : "",
+        "taxCode" : ""
+      },
+      "personalInformation" : {
+        "citizenship" : "",
+        "gender" : "M",
+        "maritialStatus" : "",
+        "nationalIdentityNo" : "04418108342"
+      },
+      "personId" : "875314",
+      "personnelType" : "F",
+      "employments" : [ ],
+      "contactPoints" : [ {
+        "address" : {
+          "countryCode" : "NO",
+          "place" : "",
+          "postcode" : "",
+          "province" : "",
+          "streetAddress" : ""
+        },
+        "additionalContactInfo" : {
+          "contactPerson" : "",
+          "contactPosition" : "",
+          "eMail" : "",
+          "eMailCc" : "",
+          "gtin" : "",
+          "url" : ""
+        },
+        "contactPointType" : "1",
+        "lastUpdated" : {
+          "updatedAt" : "2023-01-18T11:08:28.000",
+          "updatedBy" : "API"
+        },
+        "phoneNumbers" : {
+          "telephone1" : "",
+          "telephone2" : "",
+          "telephone3" : "",
+          "telephone4" : "",
+          "telephone5" : "",
+          "telephone6" : "",
+          "telephone7" : ""
+        },
+        "sortOrder" : 0
+      } ],
+      "customFieldGroups" : { },
+      "relatedValues" : [ {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "USPESIFISERT",
+        "percentage" : 100.0,
+        "relationGroup" : "KONTERING",
+        "relationId" : "20",
+        "relationName" : "PRODUKT",
+        "relatedValue" : "000000"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "5000 - Oppg. Faste stillinger, ordinær",
+        "percentage" : 100.0,
+        "relationGroup" : "KONTERING",
+        "relationId" : "C8",
+        "relationName" : "GRUPPE",
+        "relatedValue" : "FLON"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Uspesifisert",
+        "percentage" : 100.0,
+        "relationGroup" : "KONTERING",
+        "relationId" : "B1",
+        "relationName" : "OPPGAVE",
+        "relatedValue" : "000000"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Statsforvaltning og helseforetak",
+        "percentage" : 100.0,
+        "relationGroup" : "",
+        "relationId" : "MQ",
+        "relationName" : "AGASTAT",
+        "relatedValue" : "BB"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Oslo, Fyrstikkalléen 1",
+        "percentage" : 100.0,
+        "relationGroup" : "KONTERING",
+        "relationId" : "23",
+        "relationName" : "FELLES",
+        "relatedValue" : "L03034"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "St.Hanshaugen Markedsteam Oslo",
+        "percentage" : 100.0,
+        "relationGroup" : "",
+        "relationId" : "M0",
+        "relationName" : "ORGENHET",
+        "relatedValue" : "0313005"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Pensjonstrekk SPK 2%",
+        "percentage" : 100.0,
+        "relationGroup" : "PENSJON",
+        "relationId" : "Y7",
+        "relationName" : "PENSJON",
+        "relatedValue" : "SPK"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "St.Hanshaugen Markedsteam Oslo",
+        "percentage" : 100.0,
+        "relationGroup" : "",
+        "relationId" : "RO",
+        "relationName" : "OFYLKE",
+        "relatedValue" : "03"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Fast ansatte(F)",
+        "percentage" : 0.0,
+        "relationGroup" : "",
+        "relationId" : "C2",
+        "relationName" : "RESSTYPE",
+        "relatedValue" : "F"
+      }, {
+        "dateFrom" : "2023-01-18T00:00:00.000",
+        "status" : "N",
+        "dateTo" : "2099-12-31T00:00:00.000",
+        "description" : "Generert av NOM",
+        "percentage" : 100.0,
+        "relationGroup" : "STATISTIKK",
+        "relationId" : "NOM",
+        "relationName" : "AUTO_GEN_NOM",
+        "relatedValue" : "1"
+      } ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
+
+
+
+
