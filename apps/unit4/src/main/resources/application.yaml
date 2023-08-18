@@ -16,7 +16,7 @@ app:
 
 authentication:
   aad:
-    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    issuer-base-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
     client-id: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
