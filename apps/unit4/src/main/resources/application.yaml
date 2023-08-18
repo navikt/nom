@@ -16,7 +16,7 @@ app:
 
 authentication:
   aad:
-    issuer-base-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
+    issuerBaseUrl: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}
     client-id: ${AZURE_APP_CLIENT_ID}
     jwk: ${AZURE_APP_JWK}
 
@@ -53,14 +53,12 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-
 
 server:
   shutdown: graceful
