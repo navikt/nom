@@ -126,7 +126,7 @@ public class OmadaUttrekk {
         var useEventSourceState = includeDagligOppfolging || unleash.isEnabled(UNLEASH_ORGTILKNYTNING_BRUK_EVTSRC_STATE);
 
         final var cSVFormat = useEventSourceState ?
-            getCSVFormat("navident", "org_enhet_id", "erDagligOppfolging", "gyldig_fom", "gyldig_tom")
+            getCSVFormat("navident", "org_enhet_id", "fid", "erDagligOppfolging", "gyldig_fom", "gyldig_tom")
             : getCSVFormat("navident", "org_enhet_id", "gyldig_fom", "gyldig_tom");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
@@ -138,6 +138,7 @@ public class OmadaUttrekk {
                             printer.printRecord(
                                 kobling.navident(),
                                 kobling.orgEnhetId(),
+                                kobling.fid(),
                                 kobling.erDagligOppfolging(),
                                 kobling.gyldigFom().format(dateTimeFormatter),
                                 kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
