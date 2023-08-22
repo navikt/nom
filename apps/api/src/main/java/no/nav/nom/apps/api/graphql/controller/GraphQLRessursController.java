@@ -13,8 +13,6 @@ import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
 import no.nav.nom.apps.api.graphql.ressurs.TelefonResolver;
 import no.nav.nom.contract.nom.api.graphql.FolkeregisterPerson;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
-import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
-import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
@@ -23,11 +21,8 @@ import no.nav.nom.contract.nom.api.graphql.Telefon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.BatchMapping;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
@@ -90,19 +85,6 @@ public class GraphQLRessursController {
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search);
-    }
-
-    @PreAuthorize(
-            """
-            @securityUtil.checkAuth(authentication) &&
-            hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)
-            """
-    )
-    @MutationMapping("opprettRessurs")
-    public DataFetcherResult<OpprettRessursResponse> opprettRessurs(
-            @Argument("request") OpprettRessursRequest request, DataFetchingEnvironment environment, @AuthenticationPrincipal JwtAuthenticationToken token
-    ) {
-        return ressursResolver.opprettRessurs(request, environment, token);
     }
 
     @Deprecated

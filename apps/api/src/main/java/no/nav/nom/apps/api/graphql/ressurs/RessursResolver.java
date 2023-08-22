@@ -1,71 +1,38 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import graphql.GraphQLError;
-import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.graphql.common.ErrorCode;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.nik.NIKClient;
-import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
-import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
-import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.contract.nom.api.graphql.OpprettRessursRequest;
-import no.nav.nom.contract.nom.api.graphql.OpprettRessursResponse;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 @Component
 public class RessursResolver {
 
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
-    private final NIKClient nikClient;
-    private final PdlClient pdlClient;
     private final IRessursService ressursService;
-    private final RessursCommadService ressursCommadService;
-    private final OrgenhetService orgenhetService;
     private final DvhRepository dvhRepository;
 
     RessursResolver(
-            NIKClient nikClient,
-            PdlClient pdlClient,
             IRessursService ressursService,
-            RessursCommadService ressursCommadService,
-            OrgenhetService orgenhetService,
             DvhRepository dvhRepository
     ) {
-        this.nikClient = nikClient;
-        this.pdlClient = pdlClient;
         this.ressursService = ressursService;
-        this.ressursCommadService = ressursCommadService;
-        this.orgenhetService = orgenhetService;
         this.dvhRepository = dvhRepository;
     }
 
@@ -101,122 +68,6 @@ public class RessursResolver {
                 .toList();
     }
 
-
-    public DataFetcherResult<OpprettRessursResponse> opprettRessurs(OpprettRessursRequest request, DataFetchingEnvironment env, JwtAuthenticationToken token) {
-        final var response = DataFetcherResult.<OpprettRessursResponse>newResult();
-
-        var ressurs = ressursService.findByPersonident(request.getPersonident());
-        if (ressurs.isPresent()) {
-            return response.data(toResponse(ressurs)).build();
-        }
-
-        try {
-            final var createRessursResponse = createRessurs(request, token);
-
-            return response.data(toResponse(createRessursResponse)).build();
-
-        } catch (IllegalArgumentException | NoSuchElementException exc) {
-            log.warn(exc.getMessage(), exc);
-            throw new OpprettRessursException(exc.getMessage(), exc, ErrorCode.BAD_REQUEST);
-        } catch (Exception exc) {
-            log.error("Intern feil ved opprettelse av ny ressurs", exc);
-            throw new OpprettRessursException("Intern feil", exc, ErrorCode.SERVER_ERROR);
-        }
-    }
-
-    private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) throws ExecutionException, InterruptedException, TimeoutException {
-        final var nikResponse = nikClient.opprettNavidentOnBehalfOfUser(
-            OpprettNavidentRequest.builder()
-                .personid(request.getPersonident())
-                .identPrefix(request.getVisningsetternavn().substring(0, 1))
-                .identType("STANDARD")
-                .build()
-            );
-
-        if (!nikResponse.getStatusCode().is2xxSuccessful()) {
-            throw new NIKException(
-                    Optional.ofNullable(nikResponse.getBody())
-                            .map(OpprettNavidentResponse::getFeilmelding)
-                            .orElse("NIK connection error"),
-                    nikResponse,
-                    resolveError(nikResponse.getStatusCode())
-            );
-        }
-
-        if (nikResponse.getBody() != null && nikResponse.getBody().getFeilmelding() != null) {
-            throw new NIKException(
-                    nikResponse.getBody().getFeilmelding(),
-                    nikResponse,
-                    resolveError(nikResponse.getStatusCode())
-            );
-        }
-
-        final var pdlPerson = pdlClient.hentPerson(request.getPersonident());
-
-        if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
-            request.setVisningsmellomnavn(null);
-        }
-
-        log.debug("createRessurs for {} - {}", nikResponse.getBody().getNavident(), request.getVisningsetternavn());
-
-
-        final var opprettRessursCommand = new OpprettRessursCommand(
-                request.getPersonident(),
-                nikResponse.getBody().getNavident(),
-                pdlPerson,
-                request.getSektor(),
-                new Visningsnavn(
-                        request.getVisningsfornavn(),
-                        Optional.ofNullable(request.getVisningsmellomnavn()),
-                        request.getVisningsetternavn()
-                ),
-                new InputMetadata(
-                        "GraphQL",
-                        "opprettRessurs",
-                        request,
-                        new Origination(
-                                SecurityUtil.getUserFromToken(token).orElseThrow(),
-                                SecurityUtil.getSystemFromToken(token).orElseThrow()
-                        )
-                ),
-                request.getStartDato(),
-                Optional.ofNullable(request.getOrgEnhetId())
-                    .flatMap(orgenhetService::getById)
-                    .map(IOrgenhet::getAgressoId)
-                    .orElse(null), // TODO: Validate not null in RessursCommandService
-            request.getAnsettelsesType()
-        );
-
-        return ressursCommadService.createRessursSync(opprettRessursCommand);
-    }
-
-
-    private OpprettRessursResponse toResponse(RessursState ressurs) {
-        return toResponse(Optional.ofNullable(ressurs));
-    }
-
-    private OpprettRessursResponse toResponse(Optional<RessursState> ressurs) {
-        return ressurs.map(
-                        res -> OpprettRessursResponse.builder()
-                                .personident(res.personident())
-                                .navident(res.navident())
-                                .visningsfornavn(
-                                        res.visningsnavn().mellomnavn().map(m -> res.visningsnavn().fornavn() + " " + m).orElse(res.visningsnavn().fornavn())
-                                )
-                                .visningsetternavn(res.visningsnavn().etternavn())
-                                .sektor(res.sektor())
-                                .build()
-                )
-                .orElse(null);
-    }
-
-    private ErrorCode resolveError(HttpStatusCode httpStatusCode) {
-        return switch (httpStatusCode.value()) {
-            case 200, 201 -> null;
-            case 404 -> ErrorCode.NOT_FOUND;
-            default -> ErrorCode.SERVER_ERROR;//.construct(env, errorMsg != null ? errorMsg : "Ukjent feil");
-        };
-    }
 
     public static GraphQLError handleNIKException(Throwable throwable, DataFetchingEnvironment env) {
         if (throwable instanceof NIKException exc) {
