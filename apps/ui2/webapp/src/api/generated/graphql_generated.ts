@@ -335,6 +335,7 @@ export type RessursResult = {
 export type RessursSearch = {
   navident?: InputMaybe<Scalars['String']['input']>;
   personident?: InputMaybe<Scalars['String']['input']>;
+  telefonNummer?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type RessursSearchFilter = {
@@ -403,13 +404,6 @@ export enum TelefonType {
   NavTjenesteTelefon = 'NAV_TJENESTE_TELEFON',
   PrivatTelefon = 'PRIVAT_TELEFON'
 }
-
-export type OpprettRessursMutationVariables = Exact<{
-  request: OpprettRessursRequest;
-}>;
-
-
-export type OpprettRessursMutation = { __typename?: 'Mutation', opprettRessurs?: { __typename?: 'OpprettRessursResponse', navident: string, personident: string, visningsfornavn: string, visningsetternavn: string, sektor: Sektor } | null };
 
 export type HentAlleRessurserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -912,43 +906,6 @@ export const OrgenhetStandaloneWithLederFragmentDoc = gql`
   }
 }
     ${RessursStandaloneFragmentDoc}`;
-export const OpprettRessursDocument = gql`
-    mutation opprettRessurs($request: OpprettRessursRequest!) {
-  opprettRessurs(request: $request) {
-    navident
-    personident
-    visningsfornavn
-    visningsetternavn
-    sektor
-  }
-}
-    `;
-export type OpprettRessursMutationFn = Apollo.MutationFunction<OpprettRessursMutation, OpprettRessursMutationVariables>;
-
-/**
- * __useOpprettRessursMutation__
- *
- * To run a mutation, you first call `useOpprettRessursMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useOpprettRessursMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [opprettRessursMutation, { data, loading, error }] = useOpprettRessursMutation({
- *   variables: {
- *      request: // value for 'request'
- *   },
- * });
- */
-export function useOpprettRessursMutation(baseOptions?: Apollo.MutationHookOptions<OpprettRessursMutation, OpprettRessursMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<OpprettRessursMutation, OpprettRessursMutationVariables>(OpprettRessursDocument, options);
-      }
-export type OpprettRessursMutationHookResult = ReturnType<typeof useOpprettRessursMutation>;
-export type OpprettRessursMutationResult = Apollo.MutationResult<OpprettRessursMutation>;
-export type OpprettRessursMutationOptions = Apollo.BaseMutationOptions<OpprettRessursMutation, OpprettRessursMutationVariables>;
 export const HentAlleRessurserDocument = gql`
     query HentAlleRessurser {
   ressurser(where: {}) {

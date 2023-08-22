@@ -11,8 +11,8 @@
 - `.graphqlconfig`
   - Used by the IntelliJ graphql plugin to set up autocompletion of queries and mutations.
   - To enable or update the autocompletion schema, open `.graphqlconfig` in IntelliJ, and "run" from within the editor. This will create another file `graphql.schema.json`, and then autocompletion should work.
-- `nomclientqueries.graphql` and `nomclientmutations.graphql`
-  - Queries and mutations in these files are transformed into typescript equivalents when running `npx graphql-codegen`
+- `nomclientmutations.graphql`
+  - Queries in this file are transformed into typescript equivalents when running `npx graphql-codegen`
   - Autocompletion is available if `.graphqlconfig` is set up correctly.
 - `codegen.yaml`
   - Defines how the GQL schema is read and transformed into typescript types when running `npx graphql-codegen`
