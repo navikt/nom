@@ -28,7 +28,7 @@
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
         <hypersistence-utils-hibernate-62.version>3.5.1</hypersistence-utils-hibernate-62.version>
         <graphql-extended-scalars.version>20.2</graphql-extended-scalars.version>
-        <unleash.version>7.1.0</unleash.version>
+        <unleash.version>8.3.0</unleash.version>
         <apache.common.csv.version>1.10.0</apache.common.csv.version>
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->

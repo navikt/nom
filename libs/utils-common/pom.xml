@@ -13,7 +13,7 @@
     <name>NOM :: Libs :: Utils Common</name>
 
     <properties>
-        <unleash.version>7.1.0</unleash.version>
+        <unleash.version>8.3.0</unleash.version>
         <wiremock.version>2.35.0</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
 
