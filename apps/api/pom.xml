@@ -33,7 +33,7 @@
 
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <testcontainers.version>1.17.6</testcontainers.version>
-        <opencsv.version>5.7.1</opencsv.version>
+        <opencsv.version>5.8</opencsv.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <wiremock.version>2.35.0</wiremock.version>
 
