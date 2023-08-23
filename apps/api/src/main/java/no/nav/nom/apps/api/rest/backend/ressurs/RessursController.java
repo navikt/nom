@@ -97,7 +97,7 @@ public class RessursController {
             ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.getOrgEnhetId());
         } catch (RessursOpprettetEmailException exception) {
             //TODO: consider handling exception if email sending is important
-            log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet.");
+            log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(createRessursResponse));
