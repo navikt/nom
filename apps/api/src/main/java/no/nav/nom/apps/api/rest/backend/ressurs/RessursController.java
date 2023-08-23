@@ -14,6 +14,8 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
+import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -50,19 +52,22 @@ public class RessursController {
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
     private final OrgenhetService orgenhetService;
+    private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     public RessursController(
         IRessursService ressursService,
         RessursCommadService ressursCommadService,
         NIKClient nikClient,
         PdlClient pdlClient,
-        OrgenhetService orgenhetService
+        OrgenhetService orgenhetService,
+        RessursOpprettetEmailService ressursOpprettetEmailService
     ) {
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
         this.orgenhetService = orgenhetService;
+        this.ressursOpprettetEmailService = ressursOpprettetEmailService;
     }
 
     @PostMapping
@@ -87,6 +92,13 @@ public class RessursController {
         }
 
         final var createRessursResponse = createRessurs(request, token);
+
+        try {
+            ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.getOrgEnhetId());
+        } catch (RessursOpprettetEmailException exception) {
+            //TODO: consider handling exception if email sending is important
+            log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet.");
+        }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(createRessursResponse));
     }
