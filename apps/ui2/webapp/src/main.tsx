@@ -1,26 +1,10 @@
-import "@navikt/ds-css";
-import "./designSystemOverrides.css";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-import { Loader } from "@navikt/ds-react";
-import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { RouterProvider } from "react-router-dom";
+import { App } from "./App";
 
-import { useGetSession } from "./api/useGetSession";
-import { router } from "./routes";
-
-const queryClient = new QueryClient();
-
-export function Main() {
-  const sessionQuery = useGetSession();
-
-  if (sessionQuery.isLoading) {
-    return <Loader />;
-  }
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
+createRoot(document.querySelector("#root") as HTMLElement).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

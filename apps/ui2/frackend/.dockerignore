@@ -4,6 +4,7 @@
 # except
 !.env
 !src/
+!dev-server
 !tsconfig.json
 !package*.json
 !public/

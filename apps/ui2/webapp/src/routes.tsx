@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import React from "react";
-import { Navigate, Outlet, Route } from "react-router";
+import React, { useEffect } from "react";
+import { Navigate, Outlet, Route, useNavigate } from "react-router";
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -31,7 +31,7 @@ const rootOrgEnhet = isInDevelopment() ? "sa312u" : "py437s";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<App />} path="/">
+    <Route element={<MainContent />} path="/">
       <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/" />
       <Route element={<ResourcePage />} path="/ressurs/:id" />
       <Route element={<CreateResourcePageRoutes />} path="/ressurs/create/*" />
@@ -41,11 +41,15 @@ export const router = createBrowserRouter(
       <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
         <Route element={<NotfoundPage />} path="*" />
       </Route>
+      <Route
+        element={<RedirectIfDevelopmentServerEnabled />}
+        path="toggle-devserver"
+      />
     </Route>,
   ),
 );
 
-function App() {
+function MainContent() {
   return (
     <>
       <ScrollRestoration />
@@ -59,4 +63,23 @@ function App() {
       <Footer />
     </>
   );
+}
+
+/**
+ * This redirection "should" have been done in the frackend.
+ * However, when requesting index.html Express does some kind of caching (304) responses,
+ * that does not account for our cookie that determines which index.html file is server.
+ */
+function RedirectIfDevelopmentServerEnabled() {
+  const { pathname } = new URL(window.location.href);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (pathname === "/toggle-devserver") {
+      navigate("/", { replace: true });
+    }
+  }, [pathname]);
+
+  return <></>;
 }
