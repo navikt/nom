@@ -5,6 +5,7 @@ metadata:
   namespace: org
   labels:
     team: org
+    app: nav-ident
 spec:
   groups:
     - name: nav-ident_replica_unavailable
@@ -14,13 +15,8 @@ spec:
           for: 3m
           annotations:
             consequence: (re)Deployment av pod ser ut til å feile
-            action: "\
-        \ `kubectl describe pod \{{ $labels.container }} -n {{ $labels.namespace }}`\
-        \ for events, og \
-        \ `kubectl logs \{{ $labels.pod }} -n {{ $labels.namespace }}`\
-        \ for logger\n\
-        \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
-            summary: "{{ $labels.app }} er nede"
+            action: "`kubectl logs -l app={{ $labels.app }} -n {{ $labels.namespace }}`"
+            summary: "{{ $labels.app }} er kanskje nede"
           labels:
             namespace: org
             severity: warning
