@@ -27,12 +27,12 @@ public class KafkaConfig {
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, SourceEvent>>
             kafkaListenerContainerFactory(ConsumerFactory<String, SourceEvent> consumerFactory,
                                           @Value("${app.kafka.eventSourceIdleTimeout}") Long idleTimeout) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, SourceEvent>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, SourceEvent>();
+        factory.setConsumerFactory(consumerFactory);
 
-        concurrentKafkaListenerContainerFactory.getContainerProperties().setIdleEventInterval(idleTimeout);
+        factory.getContainerProperties().setIdleEventInterval(idleTimeout);
 
-        return concurrentKafkaListenerContainerFactory;
+        return factory;
     }
 
     @Bean
@@ -55,10 +55,10 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Need>> needKafkaListenerContainerFactory(ConsumerFactory<String, Need> consumerFactory) {
-        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, Need>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, Need>();
+        factory.setConsumerFactory(consumerFactory);
 
-        return concurrentKafkaListenerContainerFactory;
+        return factory;
     }
 
     @Bean

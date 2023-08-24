@@ -25,11 +25,11 @@ spec:
     min: 2
     max: 3
     cpuThresholdPercentage: 50
-#  startup:
-#    path: internal/health/startupState
-#    initialDelay: 30
-#    periodSeconds: 15
-#    failureThreshold: 5
+  startup:
+    path: internal/health/startupState
+    initialDelay: 60
+    periodSeconds: 15
+    failureThreshold: 20
   liveness:
     path: internal/health/liveness
     initialDelay: 60

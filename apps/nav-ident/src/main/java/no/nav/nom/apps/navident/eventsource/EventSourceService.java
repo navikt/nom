@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.domain.Navident;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -12,7 +13,9 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 @Configuration
 @RequiredArgsConstructor
@@ -21,7 +24,6 @@ public class EventSourceService {
 
     @Value("${app.kafka.eventSourceListenerName}") public final String listenerId;
     private final Map<String, Navident> navidenter;
-
     private boolean hasReadToEndOnStartup = false;
 
     @KafkaListener(
@@ -29,6 +31,10 @@ public class EventSourceService {
             topics = "${app.kafka.topic.eventsource.name}"
     )
     public void listen(SourceEvent event, @Header(KafkaHeaders.OFFSET) long currentOffset) {
+        processEvent(event, currentOffset);
+    }
+
+    private void processEvent(SourceEvent event, long currentOffset) {
         log.debug("Got SourceEvent on offset %d: %s".formatted(currentOffset, event.maskedToString()));
 
         try {
@@ -48,11 +54,17 @@ public class EventSourceService {
         return hasReadToEndOnStartup;
     }
 
+    private Map<String, String> eksisterendePersonider = new HashMap<>(); // Convenient lookup map for duplikat personid sjekk mot ulik navid
+
     private void handleCreateEvent(SourceEvent event) {
         String navid =  event.payload.navident;
         String personid = event.payload.personid;
-        if ( navidenter.values().stream().anyMatch( id -> id.is(personid) && navid != id.getNavident() ) ) {
-            throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes allerede på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
+        if (eksisterendePersonider.containsKey(personid)) {
+            if (!navid.equals(eksisterendePersonider.get(personid))) {
+                throw new IllegalSourceEventException("Personid id i OPPRETT event for navident %s finnes allerede på annen navident. Kan ikke behandle OPPRETT SourceEvent", navid);
+            } else {
+                log.debug("Ren duplikat for NavIdent - behandler ikke denne"); // Har dessverre mange slike duplikater.
+            }
         }
 
         Navident ident = null;
@@ -75,6 +87,7 @@ public class EventSourceService {
                     .allePersonider(Arrays.asList(event.payload.personid))
                     .build();
         }
+        eksisterendePersonider.put(personid, navid);
 
         navidenter.put(navid, ident);
         log.debug(ident.maskedToString());
@@ -85,6 +98,8 @@ public class EventSourceService {
         if (!navidenter.containsKey(navident)) {
             throw new IllegalSourceEventException("Finner ingen NavIdent %s. Kan ikke behandle DELETE SourceEvent", navident);
         }
+        eksisterendePersonider.remove(event.payload.personid);
+
         navidenter.remove(navident);
         log.debug("Fjernet navident {} fra domain", navident);
     }
@@ -95,7 +110,7 @@ public class EventSourceService {
 
         log.debug("Idle event received for listener {}. Waiting for listener {}", event.getListenerId(), listenerId);
         if (event.getListenerId().startsWith(listenerId)) {
-            log.info("All SourceEvents has now been read on startup");
+            log.info("All SourceEvents has now been read on startup. Number of navIdents: {}", navidenter.size());
             hasReadToEndOnStartup = true;
         }
     }
