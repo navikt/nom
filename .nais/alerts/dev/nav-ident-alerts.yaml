@@ -15,8 +15,10 @@ spec:
           for: 3m
           annotations:
             consequence: (re)Deployment av pod ser ut til å feile
-            action: "`kubectl logs -l app={{ $labels.app }} -n {{ $labels.namespace }}`"
-            summary: "{{ $labels.app }} er kanskje nede"
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events, \
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger\n\
+        \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
+            summary: "{{ $labels.deployment }} har deployment replicas som er utilgjengelige"
           labels:
             namespace: org
             severity: warning
@@ -27,11 +29,10 @@ spec:
           for: 3m
           annotations:
             consequence: Application is unavailable
-            action: "`kubectl describe pod {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace\
-        \ }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{\
-        \ $labels.kubernetes_namespace }}` for logger\n\
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events, \
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger\n\
         \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
-            summary: "{{ $labels.app }} er nede"
+            summary: "{{ $labels.deployment }} er nede"
           labels:
             namespace: org
             severity: critical
