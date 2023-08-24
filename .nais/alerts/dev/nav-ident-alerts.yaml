@@ -7,14 +7,31 @@ metadata:
     team: org
 spec:
   groups:
-    - name: nav-ident_down
+    - name: nav-ident_replica_unavailable
       rules:
-        - alert: NAV-IDENT pod nede
+        - alert: NAV-IDENT replica unavailable
           expr: 'kube_deployment_status_replicas_unavailable{deployment="nav-ident"} > 0'
           for: 3m
           annotations:
+            consequence: (re)Deployment av pod ser ut til å feile
+            action: "\
+        \ `kubectl describe pod {{ $labels.container }} -n {{ $labels.namespace }}`\
+        \ for events, og \
+        \ `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}`\
+        \ for logger\n\
+        \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
+            summary: "{{ $labels.app }} er nede"
+          labels:
+            namespace: org
+            severity: warning
+    - name: nav-ident_down
+      rules:
+        - alert: NAV-IDENT nede - Ingen available replica
+          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} > 0'
+          for: 3m
+          annotations:
             consequence: Application is unavailable
-            action: "kubectl describe pod {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace\
+            action: "`kubectl describe pod {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace\
         \ }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{\
         \ $labels.kubernetes_namespace }}` for logger\n\
         \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
