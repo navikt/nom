@@ -25,7 +25,7 @@
 
         <springdoc.version>2.1.0</springdoc.version>
         <postgresql.version>42.5.4</postgresql.version>
-        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <hypersistence-utils-hibernate-62.version>3.5.1</hypersistence-utils-hibernate-62.version>
         <graphql-extended-scalars.version>20.2</graphql-extended-scalars.version>
         <unleash.version>8.3.0</unleash.version>
