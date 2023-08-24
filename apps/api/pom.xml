@@ -23,7 +23,7 @@
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
 
-        <springdoc.version>2.1.0</springdoc.version>
+        <springdoc.version>2.2.0</springdoc.version>
         <postgresql.version>42.5.4</postgresql.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <hypersistence-utils-hibernate-62.version>3.5.1</hypersistence-utils-hibernate-62.version>
