@@ -137,7 +137,7 @@
 
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common-v2</artifactId>
+            <artifactId>utils-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 

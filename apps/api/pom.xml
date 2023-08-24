@@ -34,6 +34,7 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <testcontainers.version>1.17.6</testcontainers.version>
         <opencsv.version>5.8</opencsv.version>
+        <commons-fileupload.version>1.5</commons-fileupload.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <wiremock.version>2.35.0</wiremock.version>
 
@@ -141,7 +142,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
-            <artifactId>utils-common-v2</artifactId>
+            <artifactId>utils-common</artifactId>
             <version>1.1.0</version>
         </dependency>
         <dependency>
@@ -169,6 +170,12 @@
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>${opencsv.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload.version}</version>
         </dependency>
 
         <dependency>

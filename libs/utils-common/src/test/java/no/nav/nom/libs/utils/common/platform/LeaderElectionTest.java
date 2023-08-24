@@ -44,7 +44,7 @@ public class LeaderElectionTest {
             "name", InetAddress.getLocalHost().getHostName(),
             "last_update", OffsetDateTime.now().toString()
         );
-        electionStub.setElectionResult(mapper.valueToTree(body));
+        electionStub.setElectionResult(mapper.writeValueAsString(body));
 
         assertTrue(leaderElection.isLeader());
     }
@@ -55,7 +55,7 @@ public class LeaderElectionTest {
             "name", "obviously_not_the_leader",
             "last_update", OffsetDateTime.now().toString()
         );
-        electionStub.setElectionResult(mapper.valueToTree(body));
+        electionStub.setElectionResult(mapper.writeValueAsString(body));
 
         assertFalse(leaderElection.isLeader());
     }
