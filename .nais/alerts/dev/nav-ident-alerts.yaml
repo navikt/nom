@@ -5,18 +5,17 @@ metadata:
   namespace: org
   labels:
     team: org
-    app: nav-ident
 spec:
   groups:
     - name: nav-ident_replica_unavailable
       rules:
-        - alert: NAV-IDENT replica unavailable
+        - alert: NAV-IDENT replica(s) unavailable over tid
           expr: 'kube_deployment_status_replicas_unavailable{deployment="nav-ident"} > 0'
-          for: 3m
+          for: 6m # Merk litt treg deploy på nav-ident (+2min)
           annotations:
             consequence: (re)Deployment av pod ser ut til å feile
-            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events, \
-        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger\n\
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events,\n\
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger.\n\
         \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
             summary: "{{ $labels.deployment }} har deployment replicas som er utilgjengelige"
           labels:
@@ -29,8 +28,8 @@ spec:
           for: 3m
           annotations:
             consequence: Application is unavailable
-            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events, \
-        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger\n\
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events,\n\
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger.\n\
         \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
             summary: "{{ $labels.deployment }} er nede"
           labels:
