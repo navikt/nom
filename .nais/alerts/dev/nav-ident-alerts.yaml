@@ -15,9 +15,9 @@ spec:
           annotations:
             consequence: (re)Deployment av pod ser ut til å feile
             action: "\
-        \ `kubectl describe pod {{ $labels.container }} -n {{ $labels.namespace }}`\
+        \ `kubectl describe pod \{{ $labels.container }} -n {{ $labels.namespace }}`\
         \ for events, og \
-        \ `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}`\
+        \ `kubectl logs \{{ $labels.pod }} -n {{ $labels.namespace }}`\
         \ for logger\n\
         \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/k6roX"
             summary: "{{ $labels.app }} er nede"
@@ -27,7 +27,7 @@ spec:
     - name: nav-ident_down
       rules:
         - alert: NAV-IDENT nede - Ingen available replica
-          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} > 0'
+          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} == 0'
           for: 3m
           annotations:
             consequence: Application is unavailable

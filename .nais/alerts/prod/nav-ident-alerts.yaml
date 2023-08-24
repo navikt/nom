@@ -25,7 +25,7 @@ spec:
     - name: nav-ident_down
       rules:
         - alert: NAV-IDENT nede - Ingen available replica
-          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} > 0'
+          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} == 0'
           for: 3m
           annotations:
             consequence: Application is unavailable
