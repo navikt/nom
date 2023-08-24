@@ -3,7 +3,7 @@ package no.nav.nom.apps.nom.unit4.unit4;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.SneakyThrows;
-import no.nav.nom.apps.nom.unit4.RsaStub;
+import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

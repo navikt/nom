@@ -28,8 +28,6 @@
         <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
         <gcp.libraries-bom.version>26.22.0</gcp.libraries-bom.version>
 
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
-        <wiremock.version>2.35.0</wiremock.version>
     </properties>
 
     <dependencyManagement>
@@ -173,16 +171,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.thomaskasene.wiremock</groupId>
-            <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>${wiremock.version}</version>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>utils-test</artifactId>
+            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
 

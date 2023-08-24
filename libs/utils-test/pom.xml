@@ -3,20 +3,22 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>libs</artifactId>
-        <groupId>no.nav.nom</groupId>
-        <version>1.1.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.2</version>
+        <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>no.nav.nom</groupId>
     <artifactId>utils-test</artifactId>
+    <version>1.1.0</version>
     <name>NOM :: Utils :: Test</name>
 
     <properties>
         <nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
         <wiremock.version>2.35.0</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
-        <commons-fileupload.version>1.5</commons-fileupload.version>
     </properties>
 
     <dependencies>
@@ -46,13 +48,8 @@
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>${wiremock.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-fileupload</groupId>
-            <artifactId>commons-fileupload</artifactId>
-            <version>${commons-fileupload.version}</version>
         </dependency>
     </dependencies>
 

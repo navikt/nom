@@ -1,8 +1,8 @@
 package no.nav.nom.apps.dvh;
 
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import no.nav.nom.apps.RsaStub;
 import no.nav.nom.apps.proxy.common.AppProperties;
+import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

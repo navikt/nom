@@ -1,9 +1,9 @@
 package no.nav.nom.apps.proxy.api;
 
 import com.nimbusds.jose.jwk.RSAKey;
-import no.nav.nom.apps.SecurityTestUtils;
 import no.nav.nom.apps.dvh.TestBase;
 import no.nav.nom.apps.proxy.common.AppProperties;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.reactive.server.WebTestClient;
 

@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.graphql;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import no.nav.nom.apps.api.SecurityTestUtils;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;

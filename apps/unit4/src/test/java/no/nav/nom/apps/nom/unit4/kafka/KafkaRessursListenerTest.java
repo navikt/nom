@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import no.nav.nom.apps.nom.unit4.RsaStub;
+import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.apps.nom.unit4.kafka.utils.KafkaUtils;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
