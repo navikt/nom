@@ -23,8 +23,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+          cache: maven
       - name: Run tests
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean test --projects :${{ inputs.maven-project }} --also-make --batch-mode
+        run: mvn verify --projects :${{ inputs.maven-project }} --also-make --batch-mode
