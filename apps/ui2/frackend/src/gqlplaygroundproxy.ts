@@ -112,13 +112,16 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
 `;
 
 export function setupGqlPlaygroundProxy(app: Express) {
+  // TODO: delete after some time has passed and using "/playground" is standard.
   app.get("/nom-gql-playground", (request, response) => {
-    response.send(
-      "<h1>Playground is replaced</h1><p style='font-size: 200%'>Use <a href='/nom-gql-graphiql'>graphiql</a> instead</</p>",
-    );
+    return response.redirect("/playground");
   });
 
   app.get("/nom-gql-graphiql", (request, response) => {
+    return response.redirect("/playground");
+  });
+
+  app.get("/playground", (request, response) => {
     if (!vendorStorage) {
       response.status(404).send("graphiql currently unavailable");
       return;

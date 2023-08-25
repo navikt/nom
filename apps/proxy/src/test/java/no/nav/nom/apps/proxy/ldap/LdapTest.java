@@ -1,17 +1,13 @@
 package no.nav.nom.apps.proxy.ldap;
 
-import lombok.val;
 import no.nav.nom.apps.proxy.api.ApiTestBase;
 import no.nav.nom.contract.ad.AdRessurs.AdStatus;
 import no.nav.nom.contract.ad.AdRessurser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.util.List;
 
 import static no.nav.nom.libs.utils.common.util.StreamUtils.find;
@@ -25,29 +21,32 @@ public class LdapTest extends ApiTestBase {
     OnpremAdConsumer consumer;
 
     @Test
-    void getAdRessurs() throws Exception {
-        val claims = securityTestUtils.validJwtClaims();
-        val token = securityTestUtils.createToken(claims);
+    void getAdRessurs() {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
+        webTestClient
+            .post()
+            .uri(AD_URL)
+            .body(Mono.just(List.of("A123456", "A123457", "A123458")), List.class)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.getValidToken()))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(AdRessurser.class)
+            .consumeWith(result -> {
+                assertThat(result.getResponseBody()).isNotNull();
+                assertThat(result.getResponseBody().getRessurser()).hasSize(3);
 
-        val result = restTemplate.exchange(URI.create(AD_URL), HttpMethod.POST,
-                new HttpEntity<>(List.of("A123456", "A123457", "A123458"), headers), AdRessurser.class);
+                var john = find(result.getResponseBody().getRessurser(), r -> r.getNavIdent().equals("A123456"));
+                assertThat(john.getEmail()).isEqualTo("john.doe@adeo.no");
+                assertThat(john.getDisplayName()).isEqualTo("John Doe");
+                assertThat(john.getStatus()).isEqualTo(AdStatus.OK);
 
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().getRessurser()).hasSize(3);
+                var jane = find(result.getResponseBody().getRessurser(), r -> r.getNavIdent().equals("A123457"));
+                assertThat(jane.getEmail()).isEqualTo("jane.doe@adeo.no");
+                assertThat(jane.getStatus()).isEqualTo(AdStatus.OK);
 
-        var john = find(result.getBody().getRessurser(), r -> r.getNavIdent().equals("A123456"));
-        assertThat(john.getEmail()).isEqualTo("john.doe@adeo.no");
-        assertThat(john.getDisplayName()).isEqualTo("John Doe");
-        assertThat(john.getStatus()).isEqualTo(AdStatus.OK);
-        var jane = find(result.getBody().getRessurser(), r -> r.getNavIdent().equals("A123457"));
-        assertThat(jane.getEmail()).isEqualTo("jane.doe@adeo.no");
-        assertThat(jane.getStatus()).isEqualTo(AdStatus.OK);
-
-        var notFound = find(result.getBody().getRessurser(), r -> r.getNavIdent().equals("A123458"));
-        assertThat(notFound.getStatus()).isEqualTo(AdStatus.IKKE_FUNNET);
+                var notFound = find(result.getResponseBody().getRessurser(), r -> r.getNavIdent().equals("A123458"));
+                assertThat(notFound.getStatus()).isEqualTo(AdStatus.IKKE_FUNNET);
+            });
     }
 }

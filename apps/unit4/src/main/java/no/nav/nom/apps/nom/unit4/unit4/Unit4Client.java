@@ -11,6 +11,7 @@ import no.nav.nom.apps.nom.unit4.TokenRepository;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4PatchRequest;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -54,22 +55,22 @@ public class Unit4Client {
                     .bodyToMono(JsonNode.class)
                     .block();
 
-            log.debug(SECURE_LOGS, "Response fra find unit4 ressurs:\n{}", response.toPrettyString());
+            log.debug(SECURE_LOGS, "Response fra find unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
-            HttpStatus httpStatus = wce.getStatusCode();
+            HttpStatusCode httpStatusCode = wce.getStatusCode();
             log.error("Error finding unit4 ressurs", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
-            if (httpStatus == HttpStatus.NOT_FOUND || httpStatus == HttpStatus.GONE) {
+            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE) {
                 throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4.");
-            } else if (httpStatus.is4xxClientError()) {
-                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is5xxServerError()) {
-                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            } else if (httpStatusCode.is4xxClientError()) {
+                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is5xxServerError()) {
+                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
             } else {
-                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
+                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatusCode.toString()));
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 findRessurs request error", wce);
@@ -97,23 +98,23 @@ public class Unit4Client {
                     .getBody();
 
 
-            log.debug(SECURE_LOGS, "Response fra create unit4 ressurs:\n{}", response.toPrettyString());
+            log.debug(SECURE_LOGS, "Response fra create unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
-            HttpStatus httpStatus = wce.getStatusCode();
+            HttpStatusCode httpStatusCode = wce.getStatusCode();
             log.error(SECURE_LOGS, "Error posting to Unit4[{}], dumping dto({}): {} ", appProperties.proxy().baseUrl() + RESSURS_ENDPOINT, unit4RessursDto.getClass().getSimpleName(), body, wce);
             log.debug("Error creating unit4 ressurs", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
-            if (httpStatus == HttpStatus.CONFLICT) {
+            if (httpStatusCode == HttpStatus.CONFLICT) {
                 throw new Unit4ConflictException("Ressurs finnes i Unit4. (HttpStatus.CONFLICT)");
-            } else if (httpStatus.is4xxClientError()) {
-                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is5xxServerError()) {
-                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            } else if (httpStatusCode.is4xxClientError()) {
+                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is5xxServerError()) {
+                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
             } else {
-                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
+                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatusCode.toString()));
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 createRessurs request error", wce);
@@ -142,22 +143,22 @@ public class Unit4Client {
                     .block()
                     .getBody() ;
 
-            log.debug(SECURE_LOGS, "Response fra patch unit4 ressurs:\n{}", response.toPrettyString());
+            log.debug(SECURE_LOGS, "Response fra patch unit4 ressurs:\n{}", response != null ? response.toPrettyString() : "n/a");
             return response;
         } catch (WebClientResponseException wce) {
-            HttpStatus httpStatus = wce.getStatusCode();
+            HttpStatusCode httpStatusCode = wce.getStatusCode();
             log.error(SECURE_LOGS, "Error patching to Unit4[{}], dumping dto({}): {} ", url, unit4PatchRequest.getClass().getSimpleName(), body, wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
-            if (httpStatus == HttpStatus.NOT_FOUND || httpStatus == HttpStatus.GONE){
-                throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4. HttpsStatus: $s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is4xxClientError()) {
-                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is5xxServerError()) {
-                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE){
+                throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4. HttpsStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is4xxClientError()) {
+                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is5xxServerError()) {
+                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
             } else {
-                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
+                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatusCode.toString()));
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 patchRessurs request error", wce);
@@ -183,19 +184,19 @@ public class Unit4Client {
                 .block();
 
         } catch (WebClientResponseException wce) {
-            HttpStatus httpStatus = wce.getStatusCode();
+            HttpStatusCode httpStatusCode = wce.getStatusCode();
             log.error(SECURE_LOGS, "Error in delete Ressurs to Unit4[{}]", wce);
 
             logIfErrorMessageInBody(wce.getResponseBodyAsString(StandardCharsets.UTF_8));
 
-            if (httpStatus == HttpStatus.NOT_FOUND || httpStatus == HttpStatus.GONE){
-                throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4. HttpsStatus: $s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is4xxClientError()) {
-                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatus.toString()));
-            } else if (httpStatus.is5xxServerError()) {
-                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatus.toString()));
+            if (httpStatusCode == HttpStatus.NOT_FOUND || httpStatusCode == HttpStatus.GONE){
+                throw new Unit4NotFoundException("Ressurs finnes ikke i Unit4. HttpsStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is4xxClientError()) {
+                throw new Unit4RequestException("Unit4 melder klient feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
+            } else if (httpStatusCode.is5xxServerError()) {
+                throw new Unit4ServerException("Unit4 melder server feil. HttpStatus: %s".formatted(httpStatusCode.toString()));
             } else {
-                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatus.toString()));
+                throw new Unit4UnknownException("Ukjent feil fra Unit4. HttpStatus: %s".formatted(httpStatusCode.toString()));
             }
         } catch (WebClientException wce) {
             log.warn("Unit4 deleteRessurs request error", wce);

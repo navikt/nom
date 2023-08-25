@@ -60,7 +60,7 @@ public class UnleashAutoconfigurationTest {
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
         .withConfiguration(AutoConfigurations.of(UnleashAutoconfiguration.class))
         .withPropertyValues("app.name=unleash-test-app")
-        .withInitializer(new ConditionEvaluationReportLoggingListener(LogLevel.INFO));
+        .withInitializer(ConditionEvaluationReportLoggingListener.forLogLevel(LogLevel.INFO));
 
     @Test
     void test_no_beans_present_if_unleash_not_on_classpath() {

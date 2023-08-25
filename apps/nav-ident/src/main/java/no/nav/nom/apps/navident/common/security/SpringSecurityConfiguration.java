@@ -7,28 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration(proxyBeanMethods = false)
 @EnableMethodSecurity
 public class SpringSecurityConfiguration {
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        /*
-        Skru av Spring Security for alt under internal.
-        Begrunnelse for å bruke dette i stede for å ta http.mvcMatchers("/internal/**").permitAll()
-        er at dersom credentials har utgått, så vil de trigge en reauth selv på endepunkter som er ignorert.
-         */
-        return (web) -> {
-            web.ignoring().requestMatchers("/internal/**");
-            web.ignoring().requestMatchers(SwaggerConfig.SWAGGER_API_URLS);
-        };
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,6 +23,7 @@ public class SpringSecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(SwaggerConfig.SWAGGER_API_URLS).permitAll()
+                .requestMatchers("/internal/**").permitAll()
                 // https://github.com/spring-projects/spring-boot/issues/33934
                 .requestMatchers("/errors").permitAll()
                 .anyRequest().fullyAuthenticated()
@@ -45,4 +33,10 @@ public class SpringSecurityConfiguration {
         return http.build();
     }
 
+    @Bean
+    public WebClient aadWebClient(AuthenticationProperties authenticationProperties) {
+        return WebClient.builder()
+            .baseUrl(authenticationProperties.getAad().getIssuerBaseUrl())
+            .build();
+    }
 }

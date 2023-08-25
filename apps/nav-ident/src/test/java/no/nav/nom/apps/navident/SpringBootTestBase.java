@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident;
 import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.redis.TestRedisConfiguration;
+import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.utils.common.mdc.RestMdcAutoconfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -42,7 +42,7 @@ public class KafkaRessursListener {
     }
 
     @KafkaListener(topics = "${app.ressurs.topic}")
-    public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String uuid) {
+    public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_KEY) String uuid) {
         log.info("Unit4 ressurs listener mottok melding for ressurs {} på meldings-key: {}", record.getFid(), uuid);
         if(record instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
             if(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedFrom().contains("nom-ui")) {

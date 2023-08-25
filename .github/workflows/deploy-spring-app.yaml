@@ -67,6 +67,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+          cache: maven
       - name: Build java app
         env:
           GITHUB_USERNAME: x-access-token

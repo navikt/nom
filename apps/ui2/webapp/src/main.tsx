@@ -1,34 +1,10 @@
-import "@navikt/ds-css";
-import "./designSystemOverrides.css";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-import { Loader, Modal } from "@navikt/ds-react";
-import React from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { RouterProvider } from "react-router-dom";
+import { App } from "./App";
 
-import { useGetSession } from "./api/useGetSession";
-import { router } from "./routes";
-
-const queryClient = new QueryClient();
-
-export function Main() {
-  /**
-   * Must set where a modal is mounted for screen readers to work properly: https://aksel.nav.no/designsystem/komponenter/modal
-   * Not sure if setting it at the root like this is sufficient, or if it should be part of every modal's useEffects()
-   */
-  if (Modal.setAppElement) {
-    Modal.setAppElement(document.querySelector("#root"));
-  }
-
-  const sessionQuery = useGetSession();
-
-  if (sessionQuery.isLoading) {
-    return <Loader />;
-  }
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
+createRoot(document.querySelector("#root") as HTMLElement).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

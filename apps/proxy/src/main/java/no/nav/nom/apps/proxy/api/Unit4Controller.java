@@ -1,14 +1,11 @@
 package no.nav.nom.apps.proxy.api;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.proxy.common.AppProperties;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,11 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilderFactory;
+import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import java.net.URI;
 
 import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
 
@@ -29,129 +30,151 @@ import static no.nav.nom.apps.proxy.common.CommonConfig.SECURE_LOGS;
 @Slf4j
 @RestController
 @RequestMapping(value = "/proxy/unit4", produces = MediaType.APPLICATION_JSON_VALUE)
-@RequiredArgsConstructor
 public class Unit4Controller {
-    //public static final String API_EMPLOYEES_PATH = "/agrt01-web-api/v1/employees";
-    private final RestTemplate restTemplate;
 
     private final AppProperties appProperties;
 
+    private final String unit4EmployeesUrl;
+
+    private final WebClient webClient;
+
+    private final UriBuilderFactory uriBuilderFactory;
+
+    public Unit4Controller(AppProperties appProperties, WebClient.Builder webClientBuilder) {
+        this.appProperties = appProperties;
+        this.webClient = webClientBuilder
+            .filter(ExchangeFilterFunctions
+                .basicAuthentication(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password()))
+            .build();
+        this.uriBuilderFactory = new DefaultUriBuilderFactory(appProperties.getUnit4().getBaseUrl());
+        this.unit4EmployeesUrl = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath();
+    }
+
     @PostMapping("/ressurs")
-    public ResponseEntity<String> postRessurs(@AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
+    public ResponseEntity<String> postRessurs(@RequestBody String body) {
         log.info("Mottatt /proxy/unit4/ressurs POST request");
         log.debug(SECURE_LOGS, "POST /proxy/unit4/ressurs payload: {}", body);
 
-        var request = RequestEntity
-                .post(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath())
-                .headers(h -> {
-                            h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
-                            h.setContentType(MediaType.APPLICATION_JSON);
-                        }
-                )
-                .body(body);
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.exchange(request, String.class);
-        } catch (RestClientResponseException restClientResponseException){
-            log.error("Error in Unit4 post request", restClientResponseException);
-            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
-                    .body(restClientResponseException.getMessage());
+        try {
+            return webClient
+                .post()
+                .uri(unit4EmployeesUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(body), String.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
+
+        } catch (WebClientResponseException ex) {
+            log.error("Error in Unit4 POST request:", ex);
+
+            return getErrorResponseEntity(ex);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Internal server error: " + ex.getMessage());
         }
-        return response;
     }
 
     @PatchMapping("/ressurs/{personId}")
-    public ResponseEntity<String> patchRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt, @RequestBody String body) {
-        String url = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId;
+    public ResponseEntity<String> patchRessurs(@PathVariable String personId, @RequestBody String body) {
+        String url = unit4EmployeesUrl + "/" + personId;
         log.info("Mottatt /proxy/unit4/ressurs PATCH request -> {}", url);
         log.debug(SECURE_LOGS, "PATCH /proxy/unit4/ressurs/{} payload: {}", personId, body);
 
-        var request = RequestEntity
-                .patch(url)
-                .headers(h -> {
-                            h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
-                            //Content-type i request må være application/json-patch+json
-                            h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
-                            h.setAccept(List.of(MediaType.APPLICATION_JSON));
-                })
-                .body(body);
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.exchange(request, String.class);
-        } catch (RestClientResponseException restClientResponseException){
-            log.error("Error in Unit4 patch request", restClientResponseException);
-            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
-                    .body(restClientResponseException.getMessage());
+        try {
+            return webClient
+                .patch()
+                .uri(url)
+                .contentType(MediaType.valueOf("application/json-patch+json"))  //Content-type i request må være application/json-patch+json
+                .body(Mono.just(body), String.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
+
+        } catch (WebClientResponseException ex) {
+            log.error("Error in Unit4 PATCH request:", ex);
+
+            return getErrorResponseEntity(ex);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Internal server error: " + ex.getMessage());
         }
-        return response;
     }
 
     @DeleteMapping("/ressurs/{personId}")
-    public ResponseEntity<String> deleteRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> deleteRessurs(@PathVariable String personId) {
         log.info("Mottatt /proxy/unit4/ressurs DELETE request");
         log.debug(SECURE_LOGS, "DELETE /proxy/unit4/ressurs/{}", personId);
 
+        try {
+            return webClient
+                .delete()
+                .uri(unit4EmployeesUrl + "/" + personId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
 
-        var request = RequestEntity
-            .delete(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
-            .headers(h -> {
-                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password());
-                    h.setContentType(MediaType.APPLICATION_JSON);
-                }
-            ).build();
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.exchange(request, String.class);
-        } catch (RestClientResponseException restClientResponseException){
-            log.error("Error in Unit4 delete request", restClientResponseException);
-            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
-                .body(restClientResponseException.getMessage());
+        } catch (WebClientResponseException ex) {
+            log.error("Error in Unit4 DELETE request:", ex);
+
+            return getErrorResponseEntity(ex);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Internal server error: " + ex.getMessage());
         }
-        return response;
     }
 
     @GetMapping("/ressurs/{personId}")
-    public ResponseEntity<String> getRessurs(@PathVariable String personId, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<String> getRessurs(@PathVariable String personId) {
         log.info("Mottatt /proxy/unit4/{personId} ressurs GET request");
         log.debug(SECURE_LOGS, "GET /proxy/unit4/ressurs/{}", personId);
 
+        try {
+            String response = webClient.get()
+                .uri(unit4EmployeesUrl + "/" + personId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
-        var request = RequestEntity
-            .get(appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getEmployeesPath() + "/" + personId)
-            .headers(h -> {
-                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(), appProperties.getUnit4().getUnit4Password());
-                    h.setContentType(MediaType.APPLICATION_JSON);
-                }
-            ).build();
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.exchange(request, String.class);
-        } catch (RestClientResponseException restClientResponseException){
-            log.error("Error in Unit4 get ressurs/{personId} request", restClientResponseException);
-            response = ResponseEntity.status(restClientResponseException.getRawStatusCode())
-                .body(restClientResponseException.getMessage());
+            return ResponseEntity.ok(response);
+        } catch (WebClientResponseException ex) {
+            log.error("Error in Unit4 GET ressurs/{personId} request:", ex);
+
+            return getErrorResponseEntity(ex);
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Internal server error: " + ex.getMessage());
         }
-        return response;
     }
 
     @GetMapping("/**")
-    public ResponseEntity<String> unit4GetProxy(HttpServletRequest request){
-        var target = appProperties.getUnit4().getBaseUrl() + appProperties.getUnit4().getApiPath() + request.getRequestURI().replaceFirst("/proxy/unit4", "");
-        target = request.getQueryString() == null || request.getQueryString().isEmpty() ? target : target + "?" + request.getQueryString();
-        log.info("Mottatt forespørsel med path: "+request.getRequestURI()+", ruter til: "+target);
+    public ResponseEntity<String> unit4GetProxy(HttpServletRequest request) {
+        String targetPath = appProperties.getUnit4().getApiPath() + request.getRequestURI().replaceFirst("/proxy/unit4", "");
 
-        var proxiedRequest = RequestEntity
-                .get(target)
-                .headers(h -> {
-                    h.setBasicAuth(appProperties.getUnit4().getUnit4Username(),appProperties.getUnit4().getUnit4Password());
-                    h.add(HttpHeaders.CONTENT_TYPE, "application/json-patch+json");
-                })
-                .build();
+        URI uri = uriBuilderFactory
+            .uriString(targetPath)
+            .query(request.getQueryString())
+            .build();
 
-        return restTemplate.exchange(proxiedRequest, String.class);
+        log.info("Mottatt GET-forespørsel med path: " + request.getRequestURI() + ", ruter til: " + uri);
+
+        return webClient
+            .get()
+            .uri(uri)
+            .retrieve()
+            .toEntity(String.class)
+            .block();
     }
 
+    private static ResponseEntity<String> getErrorResponseEntity(WebClientResponseException ex) {
+        String errorBody = ex.getResponseBodyAsString();
+        HttpStatusCode status = ex.getStatusCode();
+        HttpHeaders headers = ex.getHeaders();
 
+        return ResponseEntity.status(status)
+            .headers(headers)
+            .body(errorBody);
+    }
 }
 
 

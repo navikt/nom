@@ -7,15 +7,31 @@ metadata:
     team: org
 spec:
   groups:
-    - name: nav-iden_down
+    - name: nav-ident_replica_unavailable
       rules:
-        - alert: NAV-IDENT pod nede
+        - alert: NAV-IDENT replica(s) unavailable over tid
           expr: 'kube_deployment_status_replicas_unavailable{deployment="nav-ident"} > 0'
+          for: 6m # Merk litt treg deploy på nav-ident (+2min)
+          annotations:
+            consequence: (re)Deployment av pod ser ut til å feile
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events,\n\
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger.\n\
+        \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/2YlI4"
+            summary: "{{ $labels.deployment }} har deployment replicas som er utilgjengelige"
+          labels:
+            namespace: org
+            severity: warning
+    - name: nav-ident_down
+      rules:
+        - alert: NAV-IDENT nede - Ingen available replica
+          expr: 'kube_deployment_status_replicas_available{deployment="nav-ident"} == 0'
           for: 3m
           annotations:
             consequence: Application is unavailable
-            action: "`kubectl describe pod {{ $labels.pod }}` for events, og `kubectl logs {{ $labels.pod }} -c {{ $labels.app }}` for logger"
-            summary: "{{ $labels.app }} er nede"
+            action: "`kubectl describe pod -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for events,\n\
+        \ og `kubectl logs -l app={{ $labels.deployment }} -n {{ $labels.namespace }}` for logger.\n\
+        \ Og/eller sjekke på Kibana: https://logs.adeo.no/app/r/s/2YlI4"
+            summary: "{{ $labels.deployment }} er nede"
           labels:
             namespace: org
             severity: critical
@@ -25,7 +41,7 @@ spec:
           expr: (100 * sum by (app, namespace) (rate(log_messages_errors{app="nav-ident",namespace="org"}[3m])) / sum by (app, namespace) (rate(log_messages_total{app="nav-ident",namespace="org"}[3m]))) > 10
           for: 3m
           annotations:
-            action: "Sjekk loggene til app {{ $labels.app }}, for å se hvorfor det er så mye feil"
+            action: "Sjekk loggene til app {{ $labels.app }}, for å se hvorfor det er så mye feil. https://logs.adeo.no/app/r/s/2YlI4"
           labels:
             namespace: org
             severity: warning

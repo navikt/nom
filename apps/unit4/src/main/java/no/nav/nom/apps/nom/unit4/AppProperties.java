@@ -1,11 +1,9 @@
 package no.nav.nom.apps.nom.unit4;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 import java.time.Duration;
 
-@ConstructorBinding
 @ConfigurationProperties("app")
 public record AppProperties(
         Unit4 unit4,

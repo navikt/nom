@@ -45,15 +45,13 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS}
     security.protocol: SSL
-    properties:
-      ssl:
-        keystore:
-          type: PKCS12
-          location: ${KAFKA_KEYSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
-        truststore:
-          location: ${KAFKA_TRUSTSTORE_PATH}
-          password: ${KAFKA_CREDSTORE_PASSWORD}
+    ssl:
+      key-store-type: PKCS12
+      key-store-location: file:${KAFKA_KEYSTORE_PATH}
+      key-store-password: ${KAFKA_CREDSTORE_PASSWORD}
+      trust-store-type: JKS
+      trust-store-location: file:${KAFKA_TRUSTSTORE_PATH}
+      trust-store-password: ${KAFKA_CREDSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -117,6 +115,10 @@ app:
 PDL_CLIENT_ID: dev-fss.pdl.pdl-api
 PDL_BASE_URL: https://pdl-api.dev-fss-pub.nais.io
 REDIS_HOST: nav-ident-redis.org.svc.cluster.local
+
+logging:
+  level:
+    no.nav.nom.apps.navident: DEBUG
 
 ---
 spring:

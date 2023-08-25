@@ -1,5 +1,5 @@
 KAFKA_BROKERS: localhost:39092
-KAFKA_STREAMS_APPLICATION_ID: ressurs-state-v2
+KAFKA_STREAMS_APPLICATION_ID: api-ressurs-state-v2
 spring:
   kafka:
     security:

@@ -7,10 +7,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public record RessursState(
-        String fid,
-        String personident,
-        String navident,
-        Sektor sektor,
-        Visningsnavn visningsnavn,
-        Optional<LocalDate> sluttdato
-) { }
+    String fid,
+    String personident,
+    String navident,
+    Sektor sektor,
+    Visningsnavn visningsnavn,
+    Optional<LocalDate> sluttdato
+) {}

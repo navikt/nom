@@ -1,9 +1,9 @@
 package no.nav.nom.libs.utils.common.platform;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -14,29 +14,36 @@ public class LeaderElection {
 
     public static final String ELECTOR_PATH_NAME = "ELECTOR_PATH";
 
-    private final RestTemplate restTemplate;
     private final Environment environment;
+    private final WebClient webClient;
 
-    private final String electorPath;
 
-    public LeaderElection(RestTemplateBuilder restTemplateBuilder, Environment environment) {
-        this.restTemplate = restTemplateBuilder.build();
+    public LeaderElection(Environment environment) {
+        this.webClient = WebClient.builder()
+            .baseUrl("http://" + environment.getRequiredProperty(ELECTOR_PATH_NAME))
+            .build();
         this.environment = environment;
-        this.electorPath = "http://" + environment.getRequiredProperty(ELECTOR_PATH_NAME);
     }
 
     public boolean isLeader() {
         if (isLocal()) {
             return true;
         }
+        return webClient.get()
+            .retrieve()
+            .bodyToMono(ElectionResult.class)
+            .publishOn(Schedulers.boundedElastic())
+            .map(electionResult -> {
+                try {
+                    return electionResult.isHostLeader(InetAddress.getLocalHost().getHostName());
+                } catch (Exception e) {
+                    log.error("Leader Election: error getting leaderName/hostName information", e);
+                    return false;
+                }
+            })
+            .blockOptional().orElseThrow();
 
-        try {
-            ElectionResult election = restTemplate.getForObject(electorPath, ElectionResult.class);
-            return election.isHostLeader(InetAddress.getLocalHost().getHostName());
-        } catch (Exception e) {
-            log.error("Leader Election: error getting leaderName/hostName information", e);
-            return false;
-        }
+
     }
 
     private boolean isLocal() {

@@ -20,6 +20,7 @@ class KafkaConfig {
         final var objectSerde = new JsonSerde<>(Object.class, objectMapper);
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(com.fasterxml.jackson.databind.node.ObjectNode.class.getPackageName());
         return objectSerde;
     }
 

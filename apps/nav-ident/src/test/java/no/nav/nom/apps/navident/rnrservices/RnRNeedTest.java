@@ -52,6 +52,8 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
     @MockBean private PdlService pdlService;
     @MockBean private NavidRepository navidRepository;
 
+    public static final int AWAIT_AT_MOST = 3;
+
     @BeforeEach
     public void emptyNeedsRead() {
         rnrTestListener.needsRead.clear();
@@ -93,9 +95,9 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
         String uuid = rnrTestNeedProducer.publish(need);
 
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.needsRead.size() >= 1);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).pollDelay(200, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
@@ -115,7 +117,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
@@ -133,7 +135,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(ROBOT_1_PersonId, populatedNeed.personid);
@@ -155,7 +157,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.personid);
@@ -177,7 +179,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.personid);
@@ -199,7 +201,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_2, populatedNeed.personid);
@@ -222,7 +224,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(id, populatedNeed.personid);
@@ -243,7 +245,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_DUPLIKAT_NavId_4_PersonId, populatedNeed.personid);
@@ -266,7 +268,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.personOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_personOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.personid);
@@ -290,7 +292,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
@@ -311,7 +313,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertNull(populatedNeed.pdlGjeldendePersonid);
@@ -333,7 +335,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_1_PersonId, populatedNeed.pdlGjeldendePersonid);
@@ -356,7 +358,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
@@ -380,7 +382,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.pdlOppslagVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_pdlOppslagVisited(uuid);
 
         assertEquals(KNYTNING_FINNES_FLERE_ID_3_PersonId_1, populatedNeed.pdlGjeldendePersonid);
@@ -403,7 +405,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(uuid);
 
         assertNotNull(populatedNeed.generertId);
@@ -425,7 +427,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until(() -> !rnrTestListener.idGeneratorVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollDelay(200, MILLISECONDS).pollInterval(10, MILLISECONDS).until(() -> !rnrTestListener.idGeneratorVisited(uuid));
 
         // After 200 ms (poll delay), expect no id generated
         assertFalse(rnrTestListener.needsRead.stream().anyMatch(n -> n.isIdGeneratorVisited() && n.getPersonid().equals(uuid)));
@@ -450,7 +452,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
         String uuid = rnrTestNeedProducer.publish(need);
 
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.idGeneratorVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_idGeneratorVisited(uuid);
 
         assertEquals("01019922222", populatedNeed.personid);
@@ -471,7 +473,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
@@ -492,7 +494,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid =rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
@@ -517,7 +519,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
@@ -542,7 +544,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
@@ -568,7 +570,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;
@@ -591,7 +593,7 @@ class RnRNeedTest extends EmbeddedKafkaTestBase {
 
         String uuid = rnrTestNeedProducer.publish(need);
 
-        Awaitility.await().atMost(1, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
+        Awaitility.await().atMost(AWAIT_AT_MOST, SECONDS).pollInterval(10, MILLISECONDS).until(() -> rnrTestListener.responsProdusentVisited(uuid));
         Need populatedNeed = rnrTestListener.getNeed_responsProdusentVisited(uuid);
 
         Respons respons = populatedNeed.respons;

@@ -65,10 +65,12 @@ export function CreateResourceConfirmationModal({
         onClose={() => setShowModal(false)}
         open={showModal}
       >
-        <Modal.Content>
+        <Modal.Header>
           <Heading level="1" size="medium" spacing>
             Opprett ressurs
           </Heading>
+        </Modal.Header>
+        <Modal.Body>
           <div
             css={css`
               margin: var(--a-spacing-7) 0;
@@ -122,7 +124,7 @@ export function CreateResourceConfirmationModal({
               Avbryt
             </Button>
           </div>
-        </Modal.Content>
+        </Modal.Body>
       </Modal>
     </>
   );

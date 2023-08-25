@@ -11,13 +11,18 @@ import {
   TextField,
   useDatepicker,
 } from "@navikt/ds-react";
+import type { AxiosError, AxiosResponse } from "axios";
+import axios from "axios";
 import { decode } from "js-base64";
 import { Controller, FormProvider, useForm } from "react-hook-form";
+import { useMutation } from "react-query";
 import { Navigate, useNavigate, useParams } from "react-router";
 import * as yup from "yup";
 
 import type {
   FolkeregisterPerson,
+  OpprettRessursRequest,
+  OpprettRessursResponse,
   OrgEnhet,
 } from "~/api/generated/graphql_generated";
 import {
@@ -27,7 +32,6 @@ import {
   ResultLimit,
   Sektor,
   useHentPersonQuery,
-  useOpprettRessursMutation,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
@@ -167,21 +171,28 @@ function CreateResourceFormInner({
     defaultSelected: undefined,
   });
 
-  const [opprettRessursMutation, { loading, error }] =
-    useOpprettRessursMutation({
-      onCompleted: (data) => {
+  const opprettRessursMutation = useMutation<
+    AxiosResponse<OpprettRessursResponse>,
+    AxiosError<Error>,
+    OpprettRessursRequest
+  >(
+    (opprettRessursRequest) =>
+      axios.post("/nom-api/backend/ressurs", opprettRessursRequest),
+    {
+      onSuccess: (opprettRessursResponse) => {
         // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
         const ansettelsesType = watch("ansettelsesType");
         navigate(
           `/ressurs/create/${
-            data.opprettRessurs?.navident ?? ""
+            opprettRessursResponse.data.navident ?? ""
           }/receipt?ansettelsesType=${ansettelsesType}`,
           {
             replace: true,
           },
         );
       },
-    });
+    },
+  );
 
   return (
     <FormProvider {...methods}>
@@ -298,13 +309,9 @@ function CreateResourceFormInner({
         <div css={rowStyles}>
           <CreateResourceConfirmationModal
             formValues={watch()}
-            loading={loading}
+            loading={opprettRessursMutation.isLoading}
             onConfirm={handleSubmit((validValues) =>
-              opprettRessursMutation({
-                variables: {
-                  request: validValues,
-                },
-              }),
+              opprettRessursMutation.mutate(validValues),
             )}
             orgEnheter={orgEnheter}
           />
@@ -315,7 +322,9 @@ function CreateResourceFormInner({
             Avbryt
           </Button>
         </div>
-        {error ? <Alert variant="error">{error.message}</Alert> : undefined}
+        {opprettRessursMutation.isError ? (
+          <Alert variant="error">{opprettRessursMutation.error.message}</Alert>
+        ) : undefined}
       </form>
     </FormProvider>
   );

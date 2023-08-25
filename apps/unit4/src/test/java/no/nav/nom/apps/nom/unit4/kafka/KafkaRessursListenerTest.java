@@ -1,5 +1,7 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
+import com.thomaskasene.wiremock.junit.WireMockStubs;
+import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.apps.nom.unit4.kafka.utils.KafkaUtils;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
@@ -38,6 +40,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@WireMockStubs(RsaStub.class)
 @EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
 @ExtendWith(OutputCaptureExtension.class)
 class KafkaRessursListenerTest {
@@ -103,7 +106,7 @@ class KafkaRessursListenerTest {
                 .when(unit4Client)
                 .createRessurs(any());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null)));
+        assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null)));
         assertTrue(output.getOut().contains("Bailer ut"));
     }
 

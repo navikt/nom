@@ -12,7 +12,10 @@ import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.test.RsaStub;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,8 +44,8 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @WireMockStubs(RsaStub.class)
 @SpringBootTest(
-        classes = TestConfig.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    classes = TestConfig.class,
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1"}, controlledShutdown = true)
@@ -137,16 +141,16 @@ public abstract class TestBase {
 
     protected RessursState createRessursHendelseEventSource(String suffix) {
         final var ressursState = new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "testPersonIdent" + suffix,
-                "testNavIdent" + suffix,
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn" + suffix,
-                        Optional.of("mellomnavn" + suffix),
-                        "etternavn" + suffix
-                ),
-                null
+            PrefixedUlidCreator.createRessursUlid(),
+            "testPersonIdent" + suffix,
+            "testNavIdent" + suffix,
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn" + suffix,
+                Optional.of("mellomnavn" + suffix),
+                "etternavn" + suffix
+            ),
+            null
         );
 
         createRessursHendelseEventSource(ressursState);
@@ -154,7 +158,35 @@ public abstract class TestBase {
         return ressursState;
     }
 
-    protected void createRessursHendelseEventSource(RessursState ressursState) {
-        kafkaUtils.send(ressursState.fid(), ressursState);
+    protected OrgEnhetState createOrgenhetHendelseEventSource(String suffix) {
+        final var orgEnhetState = new OrgEnhetState(
+            PrefixedUlidCreator.createOrgEnhetUlid(),
+            "testOrgenhetId" + suffix,
+            "testOrgenhetNavn" + suffix,
+            LocalDate.now(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("0000000".substring(0, 7 - suffix.length()) + suffix),
+            Optional.of("ORGENHET"),
+            Optional.empty()
+        );
+
+        createOrgenhetHendelseEventSource(orgEnhetState);
+
+        return orgEnhetState;
     }
+
+    protected void createRessursHendelseEventSource(RessursState ressursState) {
+        kafkaUtils.sendRessurs(ressursState.fid(), ressursState);
+    }
+
+    protected void createOrgenhetHendelseEventSource(OrgEnhetState orgEnhetState) {
+        kafkaUtils.sendOrgenhet(orgEnhetState.fid(), orgEnhetState);
+    }
+
+
 }

@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.rest.remedy;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.nom.apps.api.SecurityTestUtils;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
@@ -15,6 +14,7 @@ import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,9 +189,10 @@ public class RemedyControllerTest extends RestTestBase {
     private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {
         final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
         final var subject = jwtClaimsBuilder.getClaims().get("sub");
-        securityTestUtils.validJwtClaims().claim("azp", subject);
+        jwtClaimsBuilder.claim("azp", subject);
+        jwtClaimsBuilder.claim("azp_name", subject);
 
-        return securityTestUtils.validJwtClaims().claim("azp_name", subject);
+        return jwtClaimsBuilder;
     }
 
 }

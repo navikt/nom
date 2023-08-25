@@ -40,6 +40,12 @@
 
     <logger name="no.nav.nom" level="INFO" />
 
+    <!-- Quiet down kafka logging -->
+    <logger name="org.apache.kafka" level="warn" />
+    <logger name="org.apache.zookeeper" level="warn" />
+    <logger name="kafka" level="warn" />
+    <logger name="state.change.logger" level="warn" />
+
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
         <appender-ref ref="SECURE_LOGS"/>

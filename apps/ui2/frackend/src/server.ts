@@ -2,10 +2,9 @@ import express from "express";
 
 import { setupActuators } from "./actuators.js";
 import { setupNomApiProxy, setupTeamcatApiProxy } from "./apiProxy.js";
-import setupStaticRoutes from "./frontendRoute.js";
+import { setupStaticRoutes } from "./frontendRoute.js";
 import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
 import { setupSession } from "./session.js";
-import setupUiDevelopmentEndpoint from "./uiDev.js";
 
 // Create Express Server
 const app = express();
@@ -20,7 +19,6 @@ setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
 
 setupGqlPlaygroundProxy(app);
-setupUiDevelopmentEndpoint(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);

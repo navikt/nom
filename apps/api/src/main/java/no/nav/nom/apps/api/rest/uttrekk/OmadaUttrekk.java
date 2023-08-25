@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -111,7 +110,7 @@ public class OmadaUttrekk {
     ) throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
+        final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "fid", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgtilknytningStateService.getAllOrgtilknytninger()
@@ -121,6 +120,7 @@ public class OmadaUttrekk {
                         printer.printRecord(
                             kobling.navident(),
                             kobling.orgEnhetId(),
+                            kobling.fid(),
                             kobling.erDagligOppfolging(),
                             kobling.gyldigFom().format(dateTimeFormatter),
                             kobling.gyldigTom().map(dateTimeFormatter::format).orElse("")
