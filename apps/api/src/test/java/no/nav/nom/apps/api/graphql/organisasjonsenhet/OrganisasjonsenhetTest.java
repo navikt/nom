@@ -10,11 +10,13 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -325,6 +327,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
+        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressurs.navident(), "ID_1", true, LocalDate.of(2020, 1, 1), Optional.empty()));
+
 //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
@@ -353,9 +357,8 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 42, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
+//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario42.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();

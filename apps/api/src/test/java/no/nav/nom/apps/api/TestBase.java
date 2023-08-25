@@ -6,6 +6,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -82,6 +83,9 @@ public abstract class TestBase {
 
     @Autowired
     protected OrgEnhetStateRepository orgEnhetStateRepository;
+
+    @Autowired
+    protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @Autowired
     protected RessursStateRepository ressursStateRepository;

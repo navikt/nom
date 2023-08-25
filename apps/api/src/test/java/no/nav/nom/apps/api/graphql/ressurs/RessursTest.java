@@ -9,11 +9,13 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import org.hamcrest.MatcherAssert;
@@ -43,9 +45,6 @@ class RessursTest extends RessursTestBase {
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
-
-    @Autowired
-    private OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
     private DvhRepository dvhRepository;
@@ -129,6 +128,7 @@ class RessursTest extends RessursTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
+        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState.navident(), "ID_1", true, LocalDate.now(), Optional.empty()));
 
 //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
@@ -142,9 +142,9 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Kobling er tom liste om kobling for person ikke finnes")
     void scenario22() {
-        createRessursHendelseEventSource("2");
+        createRessursHendelseEventSource("3");
 
-        final var response = postForResource("ressurs/scenario42.graphql");
+        final var response = postForResource("ressurs/scenario22.graphql");
 
         final var ressurs = response.path("ressurs").entity(JsonNode.class).get();
         assertTrue(ressurs.get("koblinger").isEmpty());
@@ -320,8 +320,9 @@ class RessursTest extends RessursTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
+        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty()));
 
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario7.graphql");
 
@@ -350,9 +351,10 @@ class RessursTest extends RessursTestBase {
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(lederenErPaDenneEnheten, 2, String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))));
 
+        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty()));
 
 
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario71.graphql");
 
