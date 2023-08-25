@@ -23,7 +23,7 @@ spec:
   leaderElection: false
   replicas:
     min: 2
-    max: 3
+    max: 2
     cpuThresholdPercentage: 50
   startup:
     path: internal/health/startupState
