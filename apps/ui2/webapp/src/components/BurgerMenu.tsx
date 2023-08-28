@@ -3,10 +3,12 @@ import { MenuHamburgerIcon, PersonPlusFillIcon } from "@navikt/aksel-icons";
 import { Button, Dropdown } from "@navikt/ds-react";
 import { useNavigate } from "react-router";
 
+import { useHasAdminAccess } from "~/api/useGetSession";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
   const navigate = useNavigate();
+  const hasAdminAccess = useHasAdminAccess();
   return (
     <Dropdown>
       <Button
@@ -36,6 +38,11 @@ export function BurgerMenu() {
             <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
+          {hasAdminAccess && (
+            <Dropdown.Menu.List.Item onClick={() => navigate("admin")}>
+              <span>Admin</span>
+            </Dropdown.Menu.List.Item>
+          )}
         </Dropdown.Menu.List>
       </Dropdown.Menu>
     </Dropdown>
