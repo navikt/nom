@@ -56,7 +56,7 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
-        while (!ressursStateListener.initloadComplete() && !orgtilknytningStateListener.initloadComplete() && !orgEnhetStateListener.initloadComplete()) {
+        while ( ! (ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete() && orgEnhetStateListener.initloadComplete())) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
