@@ -8,6 +8,9 @@ NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 PDL_BASEURL: https://pdl-api.dev-fss-pub.nais.io
 PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
 
+NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
+NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
+
 app:
   graphql:
     auth:

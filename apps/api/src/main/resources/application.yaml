@@ -39,7 +39,7 @@ authentication:
     jwk: ${AZURE_APP_JWK}
   groups:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
-    nomAdmid: ${NOM_ADMIN_GROUPID:nomAdminGroup}
+    nomAdmin: ${NOM_ADMIN_GROUPID:nomAdminGroup}
 
 server:
   shutdown: graceful
