@@ -249,11 +249,11 @@ export function AdminPage() {
         </Table.Body>
       </Table>
       <Pagination
-        count={Math.ceil(orgEnheter.length / rowsPerPage)}
+        count={Math.ceil(filteredOrgEnheter.length / rowsPerPage)}
         css={css`
           padding: 2rem;
         `}
-        hidden={orgEnheter.length <= rowsPerPage}
+        hidden={filteredOrgEnheter.length <= rowsPerPage}
         onPageChange={setPage}
         page={page}
       />
