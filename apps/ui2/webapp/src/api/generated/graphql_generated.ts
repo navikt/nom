@@ -55,16 +55,6 @@ export type LederOrgEnhet = {
   organisasjonsenhet: OrgEnhet;
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  opprettRessurs?: Maybe<OpprettRessursResponse>;
-};
-
-
-export type MutationOpprettRessursArgs = {
-  request: OpprettRessursRequest;
-};
-
 export type Navn = {
   __typename?: 'Navn';
   etternavn: Scalars['String']['output'];
@@ -77,28 +67,6 @@ export enum NomNivaa {
   Driftsenhet = 'DRIFTSENHET',
   Linjeenhet = 'LINJEENHET'
 }
-
-/**  Requests */
-export type OpprettRessursRequest = {
-  ansettelsesType: AnsettelsesType;
-  orgEnhetId?: InputMaybe<Scalars['String']['input']>;
-  personident: Scalars['String']['input'];
-  sektor: Sektor;
-  startDato?: InputMaybe<Scalars['Date']['input']>;
-  visningsetternavn: Scalars['String']['input'];
-  visningsfornavn: Scalars['String']['input'];
-  visningsmellomnavn?: InputMaybe<Scalars['String']['input']>;
-};
-
-/**  Responses */
-export type OpprettRessursResponse = {
-  __typename?: 'OpprettRessursResponse';
-  navident: Scalars['String']['output'];
-  personident: Scalars['String']['output'];
-  sektor: Sektor;
-  visningsetternavn: Scalars['String']['output'];
-  visningsfornavn: Scalars['String']['output'];
-};
 
 export type OrgEnhet = {
   __typename?: 'OrgEnhet';
@@ -170,8 +138,20 @@ export type OrgEnhetsLeder = {
 };
 
 export enum OrgEnhetsType {
+  Arbeidslivssenter = 'ARBEIDSLIVSSENTER',
+  Arbeidsraadgivning = 'ARBEIDSRAADGIVNING',
   Dir = 'DIR',
-  Etat = 'ETAT'
+  Direktorat = 'DIREKTORAT',
+  Fylke = 'FYLKE',
+  HjelpemidlerOgTilrettelegging = 'HJELPEMIDLER_OG_TILRETTELEGGING',
+  Klageinstans = 'KLAGEINSTANS',
+  KontrollKontrollenhet = 'KONTROLL_KONTROLLENHET',
+  NavArbeidOgYtelser = 'NAV_ARBEID_OG_YTELSER',
+  NavFamilieOgPensjonsytelser = 'NAV_FAMILIE_OG_PENSJONSYTELSER',
+  NavKontaktsenter = 'NAV_KONTAKTSENTER',
+  NavKontor = 'NAV_KONTOR',
+  NavOkonomitjeneste = 'NAV_OKONOMITJENESTE',
+  Tiltak = 'TILTAK'
 }
 
 export type Organisering = {
@@ -475,6 +455,13 @@ export type SearchOrgenheterQueryVariables = Exact<{
 
 export type SearchOrgenheterQuery = { __typename?: 'Query', searchOrgEnhet: Array<{ __typename?: 'OrgEnhet', id: string, navn: string, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', visningsnavn?: string | null } }> }> };
 
+export type OrgEnhetAdminFragment = { __typename?: 'OrgEnhet', id: string, agressoId: string, orgNiv: string, agressoOrgenhetType?: string | null, navn: string, gyldigFom: any, gyldigTom?: any | null, nomNivaa?: NomNivaa | null, orgEnhetsType?: OrgEnhetsType | null, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string } }> };
+
+export type GetAllOrgenheterAdminQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllOrgenheterAdminQuery = { __typename?: 'Query', orgEnheter: Array<{ __typename?: 'OrgEnhetResult', nomId: string, orgEnhet?: { __typename?: 'OrgEnhet', id: string, agressoId: string, orgNiv: string, agressoOrgenhetType?: string | null, navn: string, gyldigFom: any, gyldigTom?: any | null, nomNivaa?: NomNivaa | null, orgEnhetsType?: OrgEnhetsType | null, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string } }> } | null }> };
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -560,11 +547,8 @@ export type ResolversTypes = {
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Kode: ResolverTypeWrapper<Kode>;
   LederOrgEnhet: ResolverTypeWrapper<LederOrgEnhet>;
-  Mutation: ResolverTypeWrapper<{}>;
   Navn: ResolverTypeWrapper<Navn>;
   NomNivaa: NomNivaa;
-  OpprettRessursRequest: OpprettRessursRequest;
-  OpprettRessursResponse: ResolverTypeWrapper<OpprettRessursResponse>;
   OrgEnhet: ResolverTypeWrapper<OrgEnhet>;
   OrgEnhetResult: ResolverTypeWrapper<OrgEnhetResult>;
   OrgEnhetSearch: OrgEnhetSearch;
@@ -607,10 +591,7 @@ export type ResolversParentTypes = {
   JSON: Scalars['JSON']['output'];
   Kode: Kode;
   LederOrgEnhet: LederOrgEnhet;
-  Mutation: {};
   Navn: Navn;
-  OpprettRessursRequest: OpprettRessursRequest;
-  OpprettRessursResponse: OpprettRessursResponse;
   OrgEnhet: OrgEnhet;
   OrgEnhetResult: OrgEnhetResult;
   OrgEnhetSearch: OrgEnhetSearch;
@@ -667,23 +648,10 @@ export type LederOrgEnhetResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  opprettRessurs?: Resolver<Maybe<ResolversTypes['OpprettRessursResponse']>, ParentType, ContextType, RequireFields<MutationOpprettRessursArgs, 'request'>>;
-};
-
 export type NavnResolvers<ContextType = any, ParentType extends ResolversParentTypes['Navn'] = ResolversParentTypes['Navn']> = {
   etternavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   fornavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   mellomnavn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type OpprettRessursResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['OpprettRessursResponse'] = ResolversParentTypes['OpprettRessursResponse']> = {
-  navident?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  personident?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  sektor?: Resolver<ResolversTypes['Sektor'], ParentType, ContextType>;
-  visningsetternavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  visningsfornavn?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -825,9 +793,7 @@ export type Resolvers<ContextType = any> = {
   JSON?: GraphQLScalarType;
   Kode?: KodeResolvers<ContextType>;
   LederOrgEnhet?: LederOrgEnhetResolvers<ContextType>;
-  Mutation?: MutationResolvers<ContextType>;
   Navn?: NavnResolvers<ContextType>;
-  OpprettRessursResponse?: OpprettRessursResponseResolvers<ContextType>;
   OrgEnhet?: OrgEnhetResolvers<ContextType>;
   OrgEnhetResult?: OrgEnhetResultResolvers<ContextType>;
   OrgEnhetsKobling?: OrgEnhetsKoblingResolvers<ContextType>;
@@ -906,6 +872,25 @@ export const OrgenhetStandaloneWithLederFragmentDoc = gql`
   }
 }
     ${RessursStandaloneFragmentDoc}`;
+export const OrgEnhetAdminFragmentDoc = gql`
+    fragment OrgEnhetAdmin on OrgEnhet {
+  id
+  agressoId
+  orgNiv
+  agressoOrgenhetType
+  navn
+  gyldigFom
+  gyldigTom
+  nomNivaa
+  orgEnhetsType
+  remedyEnhetId
+  leder {
+    ressurs {
+      navident
+    }
+  }
+}
+    `;
 export const HentAlleRessurserDocument = gql`
     query HentAlleRessurser {
   ressurser(where: {}) {
@@ -1393,3 +1378,40 @@ export function useSearchOrgenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type SearchOrgenheterQueryHookResult = ReturnType<typeof useSearchOrgenheterQuery>;
 export type SearchOrgenheterLazyQueryHookResult = ReturnType<typeof useSearchOrgenheterLazyQuery>;
 export type SearchOrgenheterQueryResult = Apollo.QueryResult<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>;
+export const GetAllOrgenheterAdminDocument = gql`
+    query GetAllOrgenheterAdmin {
+  orgEnheter(where: {}) {
+    nomId
+    orgEnhet {
+      ...OrgEnhetAdmin
+    }
+  }
+}
+    ${OrgEnhetAdminFragmentDoc}`;
+
+/**
+ * __useGetAllOrgenheterAdminQuery__
+ *
+ * To run a query within a React component, call `useGetAllOrgenheterAdminQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAllOrgenheterAdminQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAllOrgenheterAdminQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAllOrgenheterAdminQuery(baseOptions?: Apollo.QueryHookOptions<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
+      }
+export function useGetAllOrgenheterAdminLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
+        }
+export type GetAllOrgenheterAdminQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminQuery>;
+export type GetAllOrgenheterAdminLazyQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminLazyQuery>;
+export type GetAllOrgenheterAdminQueryResult = Apollo.QueryResult<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>;

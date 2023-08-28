@@ -21,8 +21,6 @@ import * as yup from "yup";
 
 import type {
   FolkeregisterPerson,
-  OpprettRessursRequest,
-  OpprettRessursResponse,
   OrgEnhet,
 } from "~/api/generated/graphql_generated";
 import {
@@ -35,6 +33,7 @@ import {
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
+import type { OpprettRessursRequest, OpprettRessursResponse } from "~/types";
 import { capitalizeName, formatDateWithoutTimezone } from "~/utils";
 
 import { CreateResourceConfirmationModal } from "./CreateResourceConfirmationModal";

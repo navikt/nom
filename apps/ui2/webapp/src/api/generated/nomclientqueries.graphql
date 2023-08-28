@@ -285,3 +285,30 @@ query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
         }
     }
 }
+
+fragment OrgEnhetAdmin on OrgEnhet {
+    id
+    agressoId
+    orgNiv
+    agressoOrgenhetType
+    navn
+    gyldigFom
+    gyldigTom
+    nomNivaa
+    orgEnhetsType
+    remedyEnhetId
+    leder {
+        ressurs {
+            navident
+        }
+    }
+}
+
+query GetAllOrgenheterAdmin {
+    orgEnheter(where: {}) {
+        nomId
+        orgEnhet {
+            ...OrgEnhetAdmin
+        }
+    }
+}

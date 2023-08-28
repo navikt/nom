@@ -27,3 +27,8 @@ export function useHasWriteAccess() {
   const session = useGetSession();
   return !!session.data?.roles.includes(UserRole.ROLE_WRITE);
 }
+
+export function useHasAdminAccess() {
+  const session = useGetSession();
+  return !!session.data?.roles.includes(UserRole.ROLE_ADMIN);
+}

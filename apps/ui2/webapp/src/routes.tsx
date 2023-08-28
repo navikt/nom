@@ -1,15 +1,17 @@
 import { css } from "@emotion/react";
-import React, { useEffect } from "react";
-import { Navigate, Outlet, Route, useNavigate } from "react-router";
+import React from "react";
+import { Navigate, Outlet, Route } from "react-router";
 import {
   createBrowserRouter,
   createRoutesFromElements,
   ScrollRestoration,
 } from "react-router-dom";
 
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { AdminPage } from "~/pages/AdminPage/AdminPage";
 import { isInDevelopment } from "~/utils";
 
 import { CreateResourcePageRoutes } from "./pages/CreateResourcePage/CreateResourcePageRoutes";
@@ -32,22 +34,55 @@ const rootOrgEnhet = isInDevelopment() ? "sa312u" : "py437s";
 export const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<MainContent />} path="/">
-      <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/" />
+      <Route
+        element={<Navigate replace to={"/org/" + rootOrgEnhet} />}
+        path="/"
+      />
       <Route element={<ResourcePage />} path="/ressurs/:id" />
-      <Route element={<CreateResourcePageRoutes />} path="/ressurs/create/*" />
+
+      <Route element={<WriteProtectedRoutes />}>
+        <Route
+          element={<CreateResourcePageRoutes />}
+          path="/ressurs/create/*"
+        />
+      </Route>
+      <Route element={<AdminProtectedRoutes />}>
+        <Route element={<AdminPage />} path={"/admin"} />
+      </Route>
+
       <Route element={<SearchdemoPage />} path={"/searchdemo"} />
 
       <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/org" />
       <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
         <Route element={<NotfoundPage />} path="*" />
       </Route>
-      <Route
-        element={<RedirectIfDevelopmentServerEnabled />}
-        path="toggle-devserver"
-      />
+      {/*This redirection "should" have been done in the frackend.*/}
+      {/*However, when requesting index.html Express does some kind of caching (304) responses,*/}
+      {/*that does not account for our cookie that determines which index.html file is server.*/}
+      <Route element={<Navigate replace to="/" />} path="toggle-devserver" />
     </Route>,
   ),
 );
+
+function AdminProtectedRoutes() {
+  const hasAdminAccess = useHasAdminAccess();
+
+  if (!hasAdminAccess) {
+    return <Navigate replace to="/" />;
+  }
+
+  return <Outlet />;
+}
+
+function WriteProtectedRoutes() {
+  const hasWriteAccess = useHasWriteAccess();
+
+  if (!hasWriteAccess) {
+    return <Navigate replace to="/" />;
+  }
+
+  return <Outlet />;
+}
 
 function MainContent() {
   return (
@@ -63,23 +98,4 @@ function MainContent() {
       <Footer />
     </>
   );
-}
-
-/**
- * This redirection "should" have been done in the frackend.
- * However, when requesting index.html Express does some kind of caching (304) responses,
- * that does not account for our cookie that determines which index.html file is server.
- */
-function RedirectIfDevelopmentServerEnabled() {
-  const { pathname } = new URL(window.location.href);
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (pathname === "/toggle-devserver") {
-      navigate("/", { replace: true });
-    }
-  }, [pathname]);
-
-  return <></>;
 }
