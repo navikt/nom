@@ -1,11 +1,13 @@
 package no.nav.nom.contract.nom.state;
 
+import lombok.Builder;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
+@Builder(toBuilder = true)
 public record OrgEnhetState (
     String fid,
     String id,  // Ikke kryptisk uid, ment for menneskelig daglig bruk

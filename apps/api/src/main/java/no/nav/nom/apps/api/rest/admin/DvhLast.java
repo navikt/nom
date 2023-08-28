@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeAndNivaaResolver;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoadStatus;
 import org.slf4j.Logger;
@@ -26,17 +26,20 @@ public class DvhLast {
 
     private final DvhRestConsumer dvhRestConsumer;
     private final DvhDataLoader dvhDataLoader;
-    private final OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver;
+    private final OrgEnhetTypeHandler orgEnhetTypeHandler;
 
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
 
 
-    public DvhLast(DvhRestConsumer dvhRestConsumer, DvhDataLoader dvhDataLoader, OrgEnhetTypeAndNivaaResolver orgEnhetTypeAndNivaaResolver,
-                   RessursStillingLoadStatus ressursStillingLoadStatus
+    public DvhLast(
+        DvhRestConsumer dvhRestConsumer,
+        DvhDataLoader dvhDataLoader,
+        OrgEnhetTypeHandler orgEnhetTypeHandler,
+        RessursStillingLoadStatus ressursStillingLoadStatus
     ) {
         this.dvhRestConsumer = dvhRestConsumer;
         this.dvhDataLoader = dvhDataLoader;
-        this.orgEnhetTypeAndNivaaResolver = orgEnhetTypeAndNivaaResolver;
+        this.orgEnhetTypeHandler = orgEnhetTypeHandler;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
     }
 
@@ -135,6 +138,6 @@ public class DvhLast {
 
     @Async
     public void triggerOrgEnhetsTypeLast(){
-        orgEnhetTypeAndNivaaResolver.resolve();
+        orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
     }
 }

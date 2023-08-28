@@ -125,6 +125,12 @@ public abstract class TestBase {
         return securityTestUtils.validJwtClaims().claim("azp", subject);
     }
 
+    protected JWTClaimsSet.Builder validJwtWithAzpClaim(String subject, String audience) {
+        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims(subject, audience);
+        final var subjectClaim = jwtClaimsBuilder.getClaims().get("sub");
+        return securityTestUtils.validJwtClaims().claim("azp", subjectClaim);
+    }
+
     /**
      * Loads a given resource from the test classpath using ResourceLoader
      *

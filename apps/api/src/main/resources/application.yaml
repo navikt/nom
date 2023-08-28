@@ -39,6 +39,7 @@ authentication:
     jwk: ${AZURE_APP_JWK}
   groups:
     nomWrite: ${NOM_WRITE_GROUPID:nomWriteGroup}
+    nomAdmid: ${NOM_ADMIN_GROUPID:nomAdminGroup}
 
 server:
   shutdown: graceful
@@ -192,6 +193,9 @@ app:
         nom-write:
           group-id: "${NOM_WRITE_GROUPID}"
           scopes: ["MUTATE_RESSURS"]
+        nom-admin:
+          group-id: "${NOM_ADMIN_GROUPID}"
+          scopes: ["ADMIN"]
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
@@ -210,6 +214,7 @@ NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
 NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
+NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
 
 --- # This is the same as having an application-prod.yaml file
 spring:
@@ -234,6 +239,9 @@ app:
         write:
           group-id: "${NOM_WRITE_GROUPID}"
           scopes: ["MUTATE_RESSURS"]
+        nom-admin:
+          group-id: "${NOM_ADMIN_GROUPID}"
+          scopes: ["ADMIN"]
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i prod)
 #  dvh-load:
@@ -249,4 +257,5 @@ NOM_PROXY_BASEURL: "https://nom-proxy.prod-fss-pub.nais.io"
 NOM_PROXY_API_SCOPE: api://prod-fss.nom.nom-proxy/.default
 
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
+NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
 

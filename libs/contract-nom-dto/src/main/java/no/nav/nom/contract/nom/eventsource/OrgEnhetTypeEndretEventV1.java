@@ -16,6 +16,10 @@ public class OrgEnhetTypeEndretEventV1 extends OrgEnhetEvent {
         this(fid, data, Metadata.from(inputMetadata));
     }
 
+    public OrgEnhetTypeEndretEventData getData() {
+        return (OrgEnhetTypeEndretEventData) super.getData();
+    }
+
     public record OrgEnhetTypeEndretEventData(
         Optional<OrgEnhetsType> orgEnhetsType
     ) implements Data {}

@@ -6,7 +6,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public enum GraphQLAccessScope {
     QUERY_PERSON(AZPAuthoritiesConverter.AUTH_QUERY_PERSON),
-    MUTATE_RESSURS(AZPAuthoritiesConverter.AUTH_MUTATE_RESSURS);
+    MUTATE_RESSURS(AZPAuthoritiesConverter.AUTH_MUTATE_RESSURS),
+    ADMIN("ADMIN");
 
     private final String scope;
 

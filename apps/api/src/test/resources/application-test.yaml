@@ -18,6 +18,14 @@ app:
           scopes:
             - QUERY_PERSON
             - MUTATE_RESSURS
+        no-admin:
+          client-id: noAdmin
+          scopes:
+            - QUERY_PERSON
+        admin:
+          client-id: admin
+          scopes:
+            - ADMIN
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080

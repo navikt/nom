@@ -31,6 +31,9 @@ app:
         nom-write:
           group-id: "${NOM_WRITE_GROUPID}"
           scopes: [ "MUTATE_RESSURS" ]
+        nom-admin:
+          group-id: "${NOM_ADMIN_GROUPID}"
+          scopes: ["ADMIN"]
 
 # DB. Bruk cloud-proxy mot miljø, eller kjør postgres lokalt
 
