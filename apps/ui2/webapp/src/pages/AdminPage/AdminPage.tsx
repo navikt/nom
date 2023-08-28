@@ -18,7 +18,7 @@ import { isBefore } from "date-fns";
 // eslint-disable-next-line lodash/import-scope,you-dont-need-lodash-underscore/is-string,you-dont-need-lodash-underscore/uniq
 import { isString, uniq } from "lodash";
 import sortBy from "lodash/sortBy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
 import { useSearchParams } from "react-router-dom";
 
@@ -50,6 +50,10 @@ export function AdminPage() {
   });
 
   const rowsPerPage = 50;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter]);
 
   const handleSort = (sortKey: string | undefined) => {
     if (sortKey) {
