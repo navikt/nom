@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
@@ -40,6 +41,7 @@ public class DvhRestConsumer {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
+    private final OrgEnhetStateListener orgEnhetStateListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhDataLoader dvhDataLoader;
@@ -54,7 +56,7 @@ public class DvhRestConsumer {
 
     @Scheduled(fixedDelay = LOAD_INTERVAL)
     public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
-        while (!ressursStateListener.initloadComplete() && !orgtilknytningStateListener.initloadComplete()) {
+        while (!ressursStateListener.initloadComplete() && !orgtilknytningStateListener.initloadComplete() && !orgEnhetStateListener.initloadComplete()) {
             try {
                 Thread.sleep(5_000);
             } catch (Exception ignored) {
@@ -90,8 +92,6 @@ public class DvhRestConsumer {
 
     public void loadKoblingerLedereOgTlfFromDvh() {
         try {
-            log.info("Laster Orgtilnytninger fra dvh");
-            loadOrgtilknytningerFromDvh();
             log.info("Laster ledere og Organisering fra dvh");
             loadLedereAndOrganiseringerFromDvh();
 
@@ -103,6 +103,9 @@ public class DvhRestConsumer {
             // manglende tlf er ikke kritisk nok til å stoppe applikasjonen fra å være "ready"
             log.info("Laster tlf fra dvh");
             loadTlfFromDvh();
+
+            log.info("Laster Orgtilnytninger fra dvh");
+            loadOrgtilknytningerFromDvh();
         } catch (Exception e) {
             log.error("Failure loading data from DVH", e);
         }
@@ -235,5 +238,4 @@ public class DvhRestConsumer {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
     }
-
 }
