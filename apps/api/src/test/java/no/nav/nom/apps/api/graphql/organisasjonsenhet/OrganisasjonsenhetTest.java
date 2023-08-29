@@ -53,7 +53,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var evAgg = dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE())));
         orgEnhetStateRepository.putEventAggregate(evAgg);
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var outputEnhet = postForResource("organisasjonsenhet/scenario1.graphql")
             .path("organisasjonsenhet")
@@ -82,7 +82,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var outputEnhet = postForResource("organisasjonsenhet/scenario12.graphql")
             .path("organisasjonsenheter")
@@ -110,7 +110,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var outputEnhet = postForResource("organisasjonsenhet/scenario113.graphql")
             .path("organisasjonsenheter")
@@ -133,7 +133,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var outputEnhet = postForResource("organisasjonsenhet/scenario114.graphql")
             .path("organisasjonsenheter")
@@ -174,7 +174,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet4, 4, String.valueOf(mockedEnhet4.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet4.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet5, 5, String.valueOf(mockedEnhet5.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet5.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario2.graphql");
         assertEquals(5, response.path("organisasjonsenheter").entityList(OrgEnhetResult.class).get().size());
@@ -195,7 +195,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet3, 3, String.valueOf(mockEnhet3.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet3.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario3.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -226,7 +226,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet1, 1, String.valueOf(mockEnhet1.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet1.getORGENHET_TIL_PERIODE()))));
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet2, 2, String.valueOf(mockEnhet2.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet2.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario33.graphql");
         final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -255,7 +255,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario4.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -276,7 +276,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario32.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -300,7 +300,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();

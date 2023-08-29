@@ -33,7 +33,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DvhDataLoader {
+public class DvhOrgenhetsLast {
     private final ObjectMapper objectMapper;
     private final ValidationService validationService;
     private final NomProxyRestClient nomProxyRestClient;
@@ -46,109 +46,110 @@ public class DvhDataLoader {
     2. ØT puncher feil og oppretter ny stilling på enheten etter den er avsluttet.
     3. Man kan gjenoppstarte enheten HVIS det opprettes ny rad i agresso innenfor 1mnd av den gamle
      */
-    public void load() {
+    public void lastOrgenhetsDataFraDvhTilEvtsrc() {
         log.info("Laster orgenhet v2 fra dvh");
-        val response = nomProxyRestClient.getEnheterResponse();
+        try {
+            val response = nomProxyRestClient.getEnheterResponse();
 
-        val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
+            val validations = Arrays.stream(ValidationType.values()).collect(Collectors.toMap(Function.identity(), a -> new LinkedList<DvhOrgenhetV2>()));
 
-        val parsedEnheter = StreamSupport.stream(response.spliterator(), false) // 8496 enheter
-                .map(DvhOrgenhetV2::new)
-                // Validation: Orgenhetstatus should only be P and N
-                .filter(e -> {
-                    if (!e.getOrgenhetStatus().equals("P") && !e.getOrgenhetStatus().equals("N")) {
-                        validations.get(ValidationType.ORGENHET_STATUS).add(e);
-                        return false;
-                    }
-                    return true;
-                })
-                // Validation: Enhet is invalid if its parked and never had stillinger.
-                .filter(e -> {
-                    if (e.getOrgNiv().equals("ORGENHET")) {
-                        if (e.getOrgenhetStatus().equals("P")) {
-                            if (e.getStillingMaksDato() == null) {
-                                validations.get(ValidationType.PARKED_WITHOUT_STILLINGER).add(e);
-                                return false;
-                            }
-                        }
-                    }
-                    return true;
-                }).filter(e -> {
-                    if (e.getOrgNiv().equals("ORGENHET")) {
-                        if (e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX))) {
-                            validations.get(ValidationType.PARKED_INVALID_PERIOD).add(e);
+            val parsedEnheter = StreamSupport.stream(response.spliterator(), false) // 8496 enheter
+                    .map(DvhOrgenhetV2::new)
+                    // Validation: Orgenhetstatus should only be P and N
+                    .filter(e -> {
+                        if (!e.getOrgenhetStatus().equals("P") && !e.getOrgenhetStatus().equals("N")) {
+                            validations.get(ValidationType.ORGENHET_STATUS).add(e);
                             return false;
                         }
-                    }
-                    return true;
-                })
-                // Grupperer enheter på kombinasjonen agressoId + navn + agresso orgnivå
-                .collect(Collectors.groupingBy(DvhOrgenhetV2::getUniqueAgressoId)).entrySet().stream()
-                // Slår sammen enheter der gyldighetsperiodene er skilt med 1 mnd eller mindre
-                .peek(entry -> {
-                    val list = entry.getValue();
-                    if (list.size() > 1) {
-                        for (int i = list.size() - 1; i >= 0; i--) {
-                            val enhetLast = list.get(i);
-                            for (int j = 0; j < i; j++) {
-                                val enhetCompare = list.get(j);
-                                boolean shouldMerge = withinOneMonth(enhetLast, enhetCompare) || isOverlapping(enhetLast, enhetCompare);
-                                if (shouldMerge) {
-                                    enhetCompare.merge(enhetLast, objectMapper);
-                                    list.remove(enhetLast);
+                        return true;
+                    })
+                    // Validation: Enhet is invalid if its parked and never had stillinger.
+                    .filter(e -> {
+                        if (e.getOrgNiv().equals("ORGENHET")) {
+                            if (e.getOrgenhetStatus().equals("P")) {
+                                if (e.getStillingMaksDato() == null) {
+                                    validations.get(ValidationType.PARKED_WITHOUT_STILLINGER).add(e);
+                                    return false;
                                 }
                             }
                         }
+                        return true;
+                    }).filter(e -> {
+                        if (e.getOrgNiv().equals("ORGENHET")) {
+                            if (e.getOrgenhetStatus().equals("P") && e.getGyldigFom().isAfter(e.getGyldigTom().orElse(LocalDate.MAX))) {
+                                validations.get(ValidationType.PARKED_INVALID_PERIOD).add(e);
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    // Grupperer enheter på kombinasjonen agressoId + navn + agresso orgnivå
+                    .collect(Collectors.groupingBy(DvhOrgenhetV2::getUniqueAgressoId)).entrySet().stream()
+                    // Slår sammen enheter der gyldighetsperiodene er skilt med 1 mnd eller mindre
+                    .peek(entry -> {
+                        val list = entry.getValue();
+                        if (list.size() > 1) {
+                            for (int i = list.size() - 1; i >= 0; i--) {
+                                val enhetLast = list.get(i);
+                                for (int j = 0; j < i; j++) {
+                                    val enhetCompare = list.get(j);
+                                    boolean shouldMerge = withinOneMonth(enhetLast, enhetCompare) || isOverlapping(enhetLast, enhetCompare);
+                                    if (shouldMerge) {
+                                        enhetCompare.merge(enhetLast, objectMapper);
+                                        list.remove(enhetLast);
+                                    }
+                                }
+                            }
+                        }
+                    }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            val fidMarkedForEndDate = new HashMap<String, LocalDate>();
+            val fidChangedStartDate = new HashMap<String, LocalDate>();
+
+            log.info("Orgenhet v2 last fra dvh. Parsed antall enheter:{}", parsedEnheter.size());
+
+            parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
+                .forEach(parsedEnhet -> {
+                    val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
+                    val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
+                            .filter(p ->
+                                    isOverlapping(parsedEnhet,
+                                            fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
+                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
+                                    || withinOneMonth(parsedEnhet,
+                                            fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
+                                            fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
+                                    )
+                            .toList();
+
+                    if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
+                        stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
+                            // Parsed DVH enhet found in state
+                            if (parsedEnhet.getGyldigTom().isPresent() && orgEnhetState.gyldigTom().isEmpty()) {
+                                avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
+                                // Need to keep track of Eventual gyldigTom in case there are more parsed enheter for same uniqueAgressoId to process
+                                fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom().get());
+                            }
+                            // Ved overlapp skal orgEnhetState korrigeres med fra-til dato settes likt DvhEnhet fra-til - Hvis disse er forskjellig
+                            // TODO: EndreLeder og EndrePlassering
+
+                            korrigerOrgEnhetHvisEndringer(parsedEnhet, orgEnhetState);
+                            // Need to keep track of Eventual changed gyldigFom in case there are more parsed enheter for same uniqueAgressoId to process
+                            if (!parsedEnhet.getGyldigFom().equals(orgEnhetState.gyldigFom())) {
+                                fidChangedStartDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigFom());
+                            }
+                        }, () -> {
+                            // Parsed DVH enhet NOT found in state
+                            String fid = opprettOrgEnhet(parsedEnhet);
+                            if (parsedEnhet.getGyldigTom().isPresent()) {
+                                avvikleOrgEnhet(fid, parsedEnhet);
+                            }
+                        });
+                    } else {
+                        log.error("Manual correction needed, enhet merge error with fids {} for parsed DVH enhet [{}]",
+                                stateEnheterMatchingDvhParsedEnhet.stream().map(OrgEnhetState::fid).toList(), parsedEnhet.getUniqueAgressoId());
                     }
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        val fidMarkedForEndDate = new HashMap<String, LocalDate>();
-        val fidChangedStartDate = new HashMap<String, LocalDate>();
-
-        log.info("Orgenhet v2 last fra dvh. Parsed antall enheter:{}", parsedEnheter.size());
-
-        parsedEnheter.forEach((key, value) -> value.stream().sorted(Comparator.comparing(IOrgenhet::getGyldigFom).reversed())
-            .forEach(parsedEnhet -> {
-                val stateEnheterPerUniqueAgressoId = orgEnhetStateService.findAllByUniqueAgressoId(parsedEnhet.getUniqueAgressoId());
-                val stateEnheterMatchingDvhParsedEnhet = stateEnheterPerUniqueAgressoId.stream()
-                        .filter(p ->
-                                isOverlapping(parsedEnhet,
-                                        fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
-                                        fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
-                                || withinOneMonth(parsedEnhet,
-                                        fidChangedStartDate.containsKey(p.fid()) ? fidChangedStartDate.get(p.fid()) : p.gyldigFom(),
-                                        fidMarkedForEndDate.containsKey(p.fid()) ? fidMarkedForEndDate.get(p.fid()) : p.gyldigTom().orElse(null))
-                                )
-                        .toList();
-
-                if (stateEnheterMatchingDvhParsedEnhet.size() < 2) {
-                    stateEnheterMatchingDvhParsedEnhet.stream().findAny().ifPresentOrElse( orgEnhetState -> {
-                        // Parsed DVH enhet found in state
-                        if (parsedEnhet.getGyldigTom().isPresent() && orgEnhetState.gyldigTom().isEmpty()) {
-                            avvikleOrgEnhet(orgEnhetState.fid(), parsedEnhet);
-                            // Need to keep track of Eventual gyldigTom in case there are more parsed enheter for same uniqueAgressoId to process
-                            fidMarkedForEndDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigTom().get());
-                        }
-                        // Ved overlapp skal orgEnhetState korrigeres med fra-til dato settes likt DvhEnhet fra-til - Hvis disse er forskjellig
-                        // TODO: EndreLeder og EndrePlassering
-
-                        korrigerOrgEnhetHvisEndringer(parsedEnhet, orgEnhetState);
-                        // Need to keep track of Eventual changed gyldigFom in case there are more parsed enheter for same uniqueAgressoId to process
-                        if (!parsedEnhet.getGyldigFom().equals(orgEnhetState.gyldigFom())) {
-                            fidChangedStartDate.put(orgEnhetState.fid(), parsedEnhet.getGyldigFom());
-                        }
-                    }, () -> {
-                        // Parsed DVH enhet NOT found in state
-                        String fid = opprettOrgEnhet(parsedEnhet);
-                        if (parsedEnhet.getGyldigTom().isPresent()) {
-                            avvikleOrgEnhet(fid, parsedEnhet);
-                        }
-                    });
-                } else {
-                    log.error("Manual correction needed, enhet merge error with fids {} for parsed DVH enhet [{}]",
-                            stateEnheterMatchingDvhParsedEnhet.stream().map(OrgEnhetState::fid).toList(), parsedEnhet.getUniqueAgressoId());
-                }
-            })
+                })
         );
 
         validationService.saveValidations(
@@ -192,8 +193,10 @@ public class DvhDataLoader {
                         });
                 }
             );
-
-        log.info("Ferdig med orgenhet last");
+            log.info("Ferdig med orgenhet last");
+        } catch (Exception e) {
+            log.error("Failure loading data from DVH", e);
+        }
     }
 
     public boolean isOverlapping(IOrgenhet orgenhetV2One, IOrgenhet orgenhetV2Two) {

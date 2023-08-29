@@ -295,7 +295,7 @@ class RessursTest extends RessursTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("ressurs/scenario6.graphql");
 
@@ -322,7 +322,7 @@ class RessursTest extends RessursTestBase {
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
         orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty()));
 
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("ressurs/scenario7.graphql");
 
@@ -344,8 +344,6 @@ class RessursTest extends RessursTestBase {
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
-//        dvhRestConsumer.loadRessurserOgOrgEnheter();
-
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
@@ -353,8 +351,7 @@ class RessursTest extends RessursTestBase {
 
         orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty()));
 
-
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var response = postForResource("ressurs/scenario71.graphql");
 
@@ -377,7 +374,7 @@ class RessursTest extends RessursTestBase {
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
         final var res = postForResourceWithoutAzp("ressurs/scenario51.graphql");
         res.errors().satisfy(errors -> {

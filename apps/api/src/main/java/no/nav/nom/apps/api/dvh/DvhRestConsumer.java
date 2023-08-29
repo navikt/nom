@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
@@ -21,6 +21,8 @@ import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +35,6 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
-    // increase while db is slow
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
@@ -44,7 +45,7 @@ public class DvhRestConsumer {
     private final OrgEnhetStateListener orgEnhetStateListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
-    private final DvhDataLoader dvhDataLoader;
+    private final DvhOrgenhetsLast dvhOrgenhetsLast;
     private final OrgEnhetTypeHandler orgEnhetTypeHandler;
 
     private final RessursStillingLoader ressursStillingLoader;
@@ -54,97 +55,109 @@ public class DvhRestConsumer {
     }
 
 
-    @Scheduled(fixedDelay = LOAD_INTERVAL)
-    public void scheduledLoadKoblingerLedereOgTlfFromDvh() {
-        while ( ! (ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete() && orgEnhetStateListener.initloadComplete())) {
+    @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
+    public void scheduledOppdateringFraDvh() {
+        log.info("Starter schedulert oppdatering fra DVH");
+        LocalDateTime start = LocalDateTime.now();
+
+        while ( !isInitialStateReady() ) { // Wait on startup until state topics are read
             try {
                 Thread.sleep(5_000);
+                log.debug("InitialState er ikke klar enda");
             } catch (Exception ignored) {
+                log.error("Waiting for initialState last feilet", ignored);
             }
         }
-        loadKoblingerLedereOgTlfFromDvh();
 
-        //TODO: Foreløpig settes den bak loadKoblinger siden den er avhengig at koblinger er til stede.
+        log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
+
+        loadLedereAndOrganiseringerFromDvh();
+        loadTlfFromDvh();
         orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
+
+
+        if (!initialLoadComplete.get()) { // Pod kan markeres som klar etter oppstart
+            initialLoadComplete.set(true);
+            log.info("Initial oppdatering fra DVH er klar. After {}", durationAsH24(start));
+        }
+
+        if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
+            updateOrgtilknytningerStateFromDvh();
+
+            loadRessurserFromDvh();
+
+            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
+        }
+
+        log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
 
-    @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
-    public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
-        while (!ressursStateListener.initloadComplete()) {
-            try {
-                Thread.sleep(5_000);
-            } catch (Exception ignored) {
-            }
-        }
-        loadRessurserOgOrgEnheter();
-    }
+
+//
+//    @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
+//    public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
+//        while (!isInitialStateReady()) {
+//            try {
+//                Thread.sleep(5_000);
+//            } catch (Exception ignored) {
+//            }
+//        }
+//        loadRessurserOgOrgEnheter();
+//    }
 
     public void loadRessurserOgOrgEnheter() {
         if (leaderElection.isLeader()) {
-            log.info("Laster ressurser fra dvh");
             loadRessurserFromDvh();
 
-            log.info("Laster orgenheter fra dvh");
-            dvhDataLoader.load();
+            dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
         }
     }
 
 
-    public void loadKoblingerLedereOgTlfFromDvh() {
-        try {
-            log.info("Laster ledere og Organisering fra dvh");
-            loadLedereAndOrganiseringerFromDvh();
-
-            if (!initialLoadComplete.get()) {
-                initialLoadComplete.set(true);
-                log.info("Dvh load complete");
-            }
-
-            // manglende tlf er ikke kritisk nok til å stoppe applikasjonen fra å være "ready"
-            log.info("Laster tlf fra dvh");
-            loadTlfFromDvh();
-
-            log.info("Laster Orgtilnytninger fra dvh");
-            loadOrgtilknytningerFromDvh();
-        } catch (Exception e) {
-            log.error("Failure loading data from DVH", e);
-        }
-    }
+//    public void loadKoblingerLedereOgTlfFromDvh() {
+//        loadLedereAndOrganiseringerFromDvh();
+//    }
 
     @SneakyThrows
     public void loadRessurserFromDvh() {
-        var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1");
+        log.info("Laster ressurser fra dvh");
+        try {
+            var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1");
 
-        val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
-                .map(DvhRessurs::new)
-                .distinct()
-                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
-                .values()
-                .stream()
-                .peek(l -> {
-                    if (l.size() > 1) {
-                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
+            val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
+                    .map(DvhRessurs::new)
+                    .distinct()
+                    .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
+                    .values()
+                    .stream()
+                    .peek(l -> {
                         if (l.size() > 1) {
-                            val personIdent = l.get(0).getPersonIdent();
-                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
-                            log.warn("Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
-                            l.clear();
+                            l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
+                            if (l.size() > 1) {
+                                val personIdent = l.get(0).getPersonIdent();
+                                val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
+                                log.warn("Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
+                                l.clear();
+                            }
                         }
-                    }
-                })
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
-                .values()
-                .stream()
-                .filter(l -> l.size() == 1)
-                .flatMap(Collection::stream)
-                .toList();
+                    })
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
+                    .values()
+                    .stream()
+                    .filter(l -> l.size() == 1)
+                    .flatMap(Collection::stream)
+                    .toList();
 
-        ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
+            ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
+        } catch(Exception e) {
+            log.error("Feilet i last av ressurser fra dvh", e);
+        }
     }
 
-    private void loadOrgtilknytningerFromDvh() {
+    private void updateOrgtilknytningerStateFromDvh() {
         if (initialLoadComplete.get() && leaderElection.isLeader()) {
+            log.info("Oppdater Orgtilnytninger state fra dvh");
             lastOrgtilknytningerTilEvtsrc();
         }
     }
@@ -157,14 +170,19 @@ public class DvhRestConsumer {
         }
     }
 
-    private void loadTlfFromDvh() {
-        val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
-        val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
-                .filter(this::validateTlf)
-                .map(DvhTelefon::new)
-                .collect(Collectors.toList());
-        log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
-        dvhRepository.saveTlf(tlfRader);
+    public void loadTlfFromDvh() {
+        log.info("Laster tlf fra dvh");
+        try {
+            val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
+            val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
+                    .filter(this::validateTlf)
+                    .map(DvhTelefon::new)
+                    .collect(Collectors.toList());
+            log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
+            dvhRepository.saveTlf(tlfRader);
+        } catch (Exception e) {
+            log.error("Failure loading tlf data from DVH", e);
+        }
     }
 
     private boolean validateTlf(JsonNode jsonNode) {
@@ -174,26 +192,31 @@ public class DvhRestConsumer {
         return isSecretNumber && (userRef1.asText().startsWith("PT-") || userRef1.asText().startsWith("PK-"));
     }
 
-    private void loadLedereAndOrganiseringerFromDvh() {
-        val jsonOrgenheter = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2");
-        val ledere = new LinkedList<DvhLeder>();
-        val organiseringer = new LinkedList<DvhOrganisering>();
+    public void loadLedereAndOrganiseringerFromDvh() {
+        log.info("Laster ledere og Organisering fra dvh");
+        try {
+            val jsonOrgenheter = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2");
+            val ledere = new LinkedList<DvhLeder>();
+            val organiseringer = new LinkedList<DvhOrganisering>();
 
-        StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
-                .filter(this::determineEnhetActive)
-                .filter(this::determineEnhetNotIgnored)
-                .forEach(e -> {
-                    if (validateOrganisering(e)) {
-                        organiseringer.add(new DvhOrganisering(e));
-                    }
+            StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
+                    .filter(this::determineEnhetActive)
+                    .filter(this::determineEnhetNotIgnored)
+                    .forEach(e -> {
+                        if (validateOrganisering(e)) {
+                            organiseringer.add(new DvhOrganisering(e));
+                        }
 
-                    if (validateLeder(e)) {
-                        ledere.add(new DvhLeder(e));
-                    }
-                });
+                        if (validateLeder(e)) {
+                            ledere.add(new DvhLeder(e));
+                        }
+                    });
 
-        dvhService.saveLedere(ledere);
-        dvhRepository.saveOrganiseringer(organiseringer);
+            dvhService.saveLedere(ledere);
+            dvhRepository.saveOrganiseringer(organiseringer);
+        } catch (Exception e) {
+            log.error("Failure loading ledere og Organisering data from DVH", e);
+        }
     }
 
     private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
@@ -237,5 +260,14 @@ public class DvhRestConsumer {
     private String getAsText(JsonNode e, String field) {
         JsonNode jsonNode = e.get(field);
         return jsonNode == null ? "<null>" : jsonNode.asText();
+    }
+
+    private boolean isInitialStateReady() {
+        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete() && orgEnhetStateListener.initloadComplete();
+    }
+
+    private String durationAsH24(LocalDateTime start) {
+        Duration duration = Duration.between(start, LocalDateTime.now());
+        return  "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 }

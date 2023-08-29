@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class DvhOrgEnhetMockUtils {
     private final List<DvhOrgEnhetMock> response = new LinkedList<>();
     private final AppProperties appProperties;
     private final ObjectMapper objectMapper;
-    private final DvhDataLoader dvhDataLoader;
+    private final DvhOrgenhetsLast dvhOrgenhetsLast;
 
     private void mockDvhOrgEnhetResponse(String response) {
         stubFor(get(appProperties.clients().nomProxy().enhetPath()).willReturn(aResponse().withHeader("Content-Type", "application/json").withBody(response)));

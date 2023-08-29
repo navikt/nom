@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
-import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhDataLoader;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoadStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class DvhLast {
     private final Logger log = LoggerFactory.getLogger(DvhLast.class);
 
     private final DvhRestConsumer dvhRestConsumer;
-    private final DvhDataLoader dvhDataLoader;
+    private final DvhOrgenhetsLast dvhOrgenhetsLast;
     private final OrgEnhetTypeHandler orgEnhetTypeHandler;
 
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
@@ -33,12 +33,12 @@ public class DvhLast {
 
     public DvhLast(
         DvhRestConsumer dvhRestConsumer,
-        DvhDataLoader dvhDataLoader,
+        DvhOrgenhetsLast dvhOrgenhetsLast,
         OrgEnhetTypeHandler orgEnhetTypeHandler,
         RessursStillingLoadStatus ressursStillingLoadStatus
     ) {
         this.dvhRestConsumer = dvhRestConsumer;
-        this.dvhDataLoader = dvhDataLoader;
+        this.dvhOrgenhetsLast = dvhOrgenhetsLast;
         this.orgEnhetTypeHandler = orgEnhetTypeHandler;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
     }
@@ -123,12 +123,12 @@ public class DvhLast {
 
     @Async
     public void triggeOrgEnhetsLast() {
-        dvhDataLoader.load();
+        dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
     }
 
     @Async
     public void triggerKoblingerOgLederLast() {
-        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
     }
 
     @Async
