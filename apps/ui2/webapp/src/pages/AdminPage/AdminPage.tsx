@@ -306,6 +306,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
         size="small"
         value={orgEnhet?.orgEnhetsType ?? ""}
       >
+        {orgEnhet.orgEnhetsType ? undefined : <option value=""></option>}
         {Object.values(OrgEnhetsType).map((orgEnhetsType) => (
           <option key={orgEnhetsType} value={orgEnhetsType}>
             {orgEnhetsType}
