@@ -78,7 +78,7 @@ public class DvhRestConsumer {
 
         if (!initialLoadComplete.get()) { // Pod kan markeres som klar etter oppstart
             initialLoadComplete.set(true);
-            log.info("Initial oppdatering fra DVH er klar. After {}", durationAsH24(start));
+            log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
@@ -92,19 +92,6 @@ public class DvhRestConsumer {
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
     }
 
-
-//
-//    @Scheduled(cron = "${app.dvh-load.cron-ressurs-og-orgenhet}")
-//    public void scheduledLoadRessurserOgOrgEnheterFromDvh() {
-//        while (!isInitialStateReady()) {
-//            try {
-//                Thread.sleep(5_000);
-//            } catch (Exception ignored) {
-//            }
-//        }
-//        loadRessurserOgOrgEnheter();
-//    }
-
     public void loadRessurserOgOrgEnheter() {
         if (leaderElection.isLeader()) {
             loadRessurserFromDvh();
@@ -112,11 +99,6 @@ public class DvhRestConsumer {
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
         }
     }
-
-
-//    public void loadKoblingerLedereOgTlfFromDvh() {
-//        loadLedereAndOrganiseringerFromDvh();
-//    }
 
     @SneakyThrows
     public void loadRessurserFromDvh() {

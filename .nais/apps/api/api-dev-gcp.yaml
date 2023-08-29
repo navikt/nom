@@ -104,9 +104,6 @@ spec:
         - application: jfr-arena-q2
           namespace: isa
           cluster: dev-fss
-        - application: henvendelse-migrering
-          namespace: oppgavehandtering
-          cluster: dev-fss
         - application: oppgavestyring-backend
           namespace: oppgavehandtering
           cluster: dev-gcp
@@ -144,6 +141,9 @@ spec:
           namespace: org
           cluster: dev-gcp
         - application: oh-ressurs-behandler
+          namespace: oppgavehandtering
+          cluster: dev-gcp
+        - application: oppgavebehandling-api
           namespace: oppgavehandtering
           cluster: dev-gcp
         - application: melosys
