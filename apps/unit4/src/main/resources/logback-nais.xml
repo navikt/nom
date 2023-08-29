@@ -10,6 +10,14 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
             <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <exclude>java\.util\.concurrent\..*</exclude>
+                <exclude>org\.apache\.catalina\..*</exclude>
+                <exclude>org\.apache\.coyote\..*</exclude>
+                <exclude>org\.apache\.tomcat\..*</exclude>
+                <exclude>org\.springframework\.aop\..*</exclude>
+                <exclude>org\.springframework\.security\.web\.ObservationFilterChainDecorator</exclude>
+            </throwableConverter>
         </encoder>
     </appender>
 
@@ -35,6 +43,14 @@
             <!-- Add MDC-keys always as it removes the pattern if the MDC does not contain a value for the key -->
             <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
             <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <exclude>java\.util\.concurrent\..*</exclude>
+                <exclude>org\.apache\.catalina\..*</exclude>
+                <exclude>org\.apache\.coyote\..*</exclude>
+                <exclude>org\.apache\.tomcat\..*</exclude>
+                <exclude>org\.springframework\.aop\..*</exclude>
+                <exclude>org\.springframework\.security\.web\.ObservationFilterChainDecorator</exclude>
+            </throwableConverter>
         </encoder>
     </appender>
 
