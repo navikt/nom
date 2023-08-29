@@ -84,7 +84,7 @@ public class NavidentController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success")
     })
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request, @NonNull JwtAuthenticationToken token) {
         final var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
 

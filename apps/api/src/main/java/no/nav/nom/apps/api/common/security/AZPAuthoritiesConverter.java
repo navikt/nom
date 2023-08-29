@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.common.security;
 
-import no.nav.nom.apps.api.graphql.common.config.GraphQLSecurityProperties;
-import no.nav.nom.apps.api.graphql.common.config.GraphQLSecurityProperties.MappableAccessScopes;
+import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties.MappableAccessScopes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
@@ -23,16 +22,14 @@ import static java.util.Collections.emptySet;
 @Component
 public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
-    public static final String AUTH_QUERY_PERSON = "QUERY_PERSON";
-    public static final String AUTH_MUTATE_RESSURS = "MUTATE_RESSURS";
     private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);
     private final static Set<String> AZP_CLAIM_NAMES = Set.of("azp", "azp_name");
     private final static String GROUPS_CLAIM_NAME = "groups";
     private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();
-    private final GraphQLSecurityProperties securityProperties;
+    private final AppGrantedAuthoritiesProperties securityProperties;
     private final Map<String, Set<GrantedAuthority>> authoritiesMap = new HashMap<>();
 
-    public AZPAuthoritiesConverter(GraphQLSecurityProperties securityProperties) {
+    public AZPAuthoritiesConverter(AppGrantedAuthoritiesProperties securityProperties) {
         this.securityProperties = securityProperties;
 
         securityProperties.clients().forEach(this::calculateScopes);
@@ -42,13 +39,13 @@ public final class AZPAuthoritiesConverter implements Converter<Jwt, Collection<
     private void calculateScopes(String configuration, MappableAccessScopes mappableAccessScopes) {
         final var authorities = mappableAccessScopes.authorities();
 
-        mappableAccessScopes.identifiers().forEach(identifier -> {
+        mappableAccessScopes.identifiers().forEach(identifier ->
             authoritiesMap.merge(identifier, authorities, (oldAuth, newAuth) -> {
                 oldAuth.addAll(newAuth);
                 log.debug("Current authorities associated with identifier \"{}\" is {}", identifier, oldAuth);
                 return oldAuth;
-            });
-        });
+            })
+        );
 
         log.info(
                 "Adding authorities {} from configuration \"{}\" with identifier(s) = {}",

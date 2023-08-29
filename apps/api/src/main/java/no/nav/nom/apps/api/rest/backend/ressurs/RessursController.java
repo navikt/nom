@@ -80,7 +80,7 @@ public class RessursController {
         @ApiResponse(responseCode = "201", description = "Created"),
     })
     @PreAuthorize(
-        "hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_MUTATE_RESSURS)"
+        "hasAuthority('MUTATE_RESSURS')"
     )
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
         @RequestBody OpprettRessursRequest request,

@@ -1,17 +1,16 @@
-package no.nav.nom.apps.api.graphql.common.config;
+package no.nav.nom.apps.api.common.security;
 
-import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-public enum GraphQLAccessScope {
-    QUERY_PERSON(AZPAuthoritiesConverter.AUTH_QUERY_PERSON),
-    MUTATE_RESSURS(AZPAuthoritiesConverter.AUTH_MUTATE_RESSURS),
+public enum NomApiAccessScope {
+    QUERY_PERSON("QUERY_PERSON"),
+    MUTATE_RESSURS("MUTATE_RESSURS"),
     ADMIN("ADMIN");
 
     private final String scope;
 
-    GraphQLAccessScope(String scope) {
+    NomApiAccessScope(String scope) {
         this.scope = scope;
     }
 

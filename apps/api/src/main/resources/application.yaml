@@ -168,34 +168,33 @@ management:
 app:
   email:
     enabled: false
-  graphql:
-    auth:
-      clients:
-        nom-ui2:
-          client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
-          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
-        nom-ui2-srvuser:
-          client-id: "9735c586-f3eb-4630-9b80-4088c21a8959"
-          scopes: ["QUERY_PERSON"]
-        ida:
-          client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
-          scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
-        dolly:
-          client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
-          scopes: ["MUTATE_RESSURS"]
-        remedy:
-          client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
-          scopes: ["QUERY_PERSON"]
-        fullmaktsregister-web:
-          client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
-          scopes: ["QUERY_PERSON"]
-      groups:
-        nom-write:
-          group-id: "${NOM_WRITE_GROUPID}"
-          scopes: ["MUTATE_RESSURS"]
-        nom-admin:
-          group-id: "${NOM_ADMIN_GROUPID}"
-          scopes: ["ADMIN"]
+  granted-authorities:
+    clients:
+      nom-ui2:
+        client-id: "af2f9386-07cf-4fb9-8612-c4724335a43c"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      nom-ui2-srvuser:
+        client-id: "9735c586-f3eb-4630-9b80-4088c21a8959"
+        scopes: ["QUERY_PERSON"]
+      ida:
+        client-id: "744e4092-4215-4e02-87df-a61aaf1b95b5"
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      dolly:
+        client-id: "b54ec20c-ab8a-4e3f-bc34-aa452ddf0f3b"
+        scopes: ["MUTATE_RESSURS"]
+      remedy:
+        client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
+        scopes: ["QUERY_PERSON"]
+      fullmaktsregister-web:
+        client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
+        scopes: ["QUERY_PERSON"]
+    groups:
+      nom-write:
+        group-id: "${NOM_WRITE_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN"]
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
@@ -226,22 +225,21 @@ spring:
       enabled: false # Disable graphiql in production
 
 app:
-  graphql:
-    auth:
-      clients:
-        nom-ui2:
-          client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
-          scopes: ["QUERY_PERSON"]
-        remedy:
-          client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
-          scopes: ["QUERY_PERSON"]
-      groups:
-        write:
-          group-id: "${NOM_WRITE_GROUPID}"
-          scopes: ["MUTATE_RESSURS"]
-        nom-admin:
-          group-id: "${NOM_ADMIN_GROUPID}"
-          scopes: ["ADMIN"]
+  granted-authorities:
+    clients:
+      nom-ui2:
+        client-id: "78847351-6ee0-43cc-9c17-b92bc1eb076d"
+        scopes: ["QUERY_PERSON"]
+      remedy:
+        client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
+        scopes: ["QUERY_PERSON"]
+    groups:
+      write:
+        group-id: "${NOM_WRITE_GROUPID}"
+        scopes: ["MUTATE_RESSURS"]
+      nom-admin:
+        group-id: "${NOM_ADMIN_GROUPID}"
+        scopes: ["ADMIN"]
 
 # Default er kl 06:00. Bruke den under for å kjøre ofte (i prod)
 #  dvh-load:

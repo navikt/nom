@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.common;
 
 import graphql.schema.DataFetchingFieldSelectionSet;
-import no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter;
+import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -65,7 +65,7 @@ public class SecurityUtil {
                 authentication,
                 fieldSelectionSet,
                 new String[]{"**/personIdent", "**/personident"},
-                new String[]{AZPAuthoritiesConverter.AUTH_QUERY_PERSON}
+                new String[]{NomApiAccessScope.QUERY_PERSON.getScope()}
         );
     }
 

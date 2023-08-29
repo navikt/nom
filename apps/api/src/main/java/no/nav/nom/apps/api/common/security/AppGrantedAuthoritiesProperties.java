@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.graphql.common.config;
+package no.nav.nom.apps.api.common.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -12,8 +12,8 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toSet;
 
-@ConfigurationProperties("app.graphql.auth")
-public record GraphQLSecurityProperties(
+@ConfigurationProperties("app.granted-authorities")
+public record AppGrantedAuthoritiesProperties(
         @DefaultValue Map<String, ScopedAccess> clients,
         @DefaultValue Map<String, GroupAccess> groups
 ) {
@@ -28,12 +28,12 @@ public record GraphQLSecurityProperties(
     public record ScopedAccess(
             String clientId,
             String clientAlias,
-            Set<GraphQLAccessScope> scopes
+            Set<NomApiAccessScope> scopes
     ) implements MappableAccessScopes {
         public ScopedAccess(
                 @DefaultValue("") String clientId,
                 @DefaultValue("") String clientAlias,
-                Set<GraphQLAccessScope> scopes
+                Set<NomApiAccessScope> scopes
         ) {
             if (!StringUtils.hasText(clientId) && !StringUtils.hasText(clientAlias)) {
                 throw new IllegalArgumentException("One of client-id or client-alias must be set!");
@@ -61,7 +61,7 @@ public record GraphQLSecurityProperties(
 
     public record GroupAccess(
             String groupId,
-            @DefaultValue Set<GraphQLAccessScope> scopes
+            @DefaultValue Set<NomApiAccessScope> scopes
     ) implements MappableAccessScopes {
         @Override
         public Set<String> identifiers() {
@@ -73,10 +73,10 @@ public record GraphQLSecurityProperties(
         // identifier vil være AAD group-id, eller AD application client-id/client-name
         Set<String> identifiers();
 
-        Set<GraphQLAccessScope> scopes();
+        Set<NomApiAccessScope> scopes();
 
         default Set<GrantedAuthority> authorities() {
-            return scopes().stream().map(GraphQLAccessScope::asGrantedAuthority).collect(toSet());
+            return scopes().stream().map(NomApiAccessScope::asGrantedAuthority).collect(toSet());
         }
     }
 }

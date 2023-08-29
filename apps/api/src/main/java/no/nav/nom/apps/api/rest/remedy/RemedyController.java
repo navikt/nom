@@ -66,7 +66,7 @@ public class RemedyController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success"),
     })
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<RessursDTO> finnRessurs(@RequestBody FinnRessursRequest request) {
 
         var personident = request.getPersonident();
@@ -104,7 +104,7 @@ public class RemedyController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success")
     })
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<RessursDTO> opprettRessurs(@RequestBody OpprettRessursRequest request, @NonNull JwtAuthenticationToken token) {
 
         final var funnetRessurs = ressursService.findByPersonident(request.getPersonident());

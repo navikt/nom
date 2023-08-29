@@ -10,22 +10,22 @@ app:
     email:
       url: http://localhost:${wiremock.server.port}
       max-attempts: 1
-  graphql:
-    auth:
-      clients:
-        test:
-          client-id: testSubject
-          scopes:
-            - QUERY_PERSON
-            - MUTATE_RESSURS
-        no-admin:
-          client-id: noAdmin
-          scopes:
-            - QUERY_PERSON
-        admin:
-          client-id: admin
-          scopes:
-            - ADMIN
+
+  granted-authorities:
+    clients:
+      test:
+        client-id: testSubject
+        scopes:
+          - QUERY_PERSON
+          - MUTATE_RESSURS
+      no-admin:
+        client-id: noAdmin
+        scopes:
+          - QUERY_PERSON
+      admin:
+        client-id: admin
+        scopes:
+          - ADMIN
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}
 ELECTOR_PATH: localhost:8080

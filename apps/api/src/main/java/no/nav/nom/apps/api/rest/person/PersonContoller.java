@@ -35,7 +35,7 @@ public class PersonContoller {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success")
     })
-    @PreAuthorize("hasAuthority(T(no.nav.nom.apps.api.common.security.AZPAuthoritiesConverter).AUTH_QUERY_PERSON)")
+    @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
         return ResponseEntity.ok(pdlClient.hentPerson(request.getPersonident())
                                          .map(this::convert)
