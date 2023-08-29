@@ -26,7 +26,7 @@
         <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
         <springdoc-openapi-starter-webmvc-ui.version>2.2.0</springdoc-openapi-starter-webmvc-ui.version>
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
-        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
 
         <unleash.version>8.3.0</unleash.version>
     </properties>
