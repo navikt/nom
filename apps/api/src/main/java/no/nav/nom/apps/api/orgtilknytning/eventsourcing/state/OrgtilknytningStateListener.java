@@ -62,15 +62,15 @@ public class OrgtilknytningStateListener {
     }
 
     public boolean initloadComplete() {
-        if (!initialLoadComplete.get()) {
-            try {
-                if (!consumerGroupRegistedForTopic(stateTopic)) {
-                    initialLoadComplete.set(true);
-                }
-            } catch (Exception exception) {
-                log.error("Exception when trying to fetch consumer group from topic", exception);
-            }
-        }
+//        if (!initialLoadComplete.get()) {
+//            try {
+//                if (!consumerGroupRegistedForTopic(stateTopic)) {
+//                    initialLoadComplete.set(true);
+//                }
+//            } catch (Exception exception) {
+//                log.error("Exception when trying to fetch consumer group from topic", exception);
+//            }
+//        }
         return initialLoadComplete.get();
     }
 
