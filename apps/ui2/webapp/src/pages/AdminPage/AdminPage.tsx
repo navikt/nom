@@ -212,6 +212,9 @@ export function AdminPage() {
             </Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Gyldig fra</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Gyldig til</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="agressoId" sortable>
+              agressoId
+            </Table.ColumnHeader>
             <Table.ColumnHeader scope="col" sortKey="orgNiv" sortable>
               Orgniv
             </Table.ColumnHeader>
@@ -220,9 +223,6 @@ export function AdminPage() {
             </Table.ColumnHeader>
             <Table.ColumnHeader scope="col" sortKey="nomNivaa" sortable>
               nomNivaa
-            </Table.ColumnHeader>
-            <Table.ColumnHeader scope="col" sortKey="agressoId" sortable>
-              agressoId
             </Table.ColumnHeader>
             <Table.ColumnHeader
               scope="col"
@@ -242,10 +242,10 @@ export function AdminPage() {
                 <Table.DataCell>{orgEnhet?.navn}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.gyldigFom}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.gyldigTom}</Table.DataCell>
+                <Table.DataCell>{orgEnhet?.agressoId}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.orgNiv}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.remedyEnhetId}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.nomNivaa}</Table.DataCell>
-                <Table.DataCell>{orgEnhet?.agressoId}</Table.DataCell>
                 <Table.DataCell>{orgEnhet?.agressoOrgenhetType}</Table.DataCell>
               </Table.Row>
             );
