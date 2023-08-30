@@ -8,13 +8,17 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.SecurityTestUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +34,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class RemedyControllerTest extends RestTestBase {
-
     @Autowired
     private SecurityTestUtils securityTestUtils;
 
@@ -40,8 +43,10 @@ public class RemedyControllerTest extends RestTestBase {
     @MockBean
     private RessursCommadService ressursCommadService;
 
+    @MockBean
+    protected RessursStateRepository ressursService;
 
-    private void createRessursState(String personident, NavnDTO navn) {
+    private Optional<RessursState> createRessursState(String personident, NavnDTO navn) {
         RessursState ressursState = new RessursState(
             PrefixedUlidCreator.createRessursUlid(),
             personident,
@@ -54,7 +59,7 @@ public class RemedyControllerTest extends RestTestBase {
             ),
             Optional.of(LocalDate.now().plusDays(10))
         );
-        createRessursHendelseEventSource(ressursState);
+        return  Optional.of(ressursState);
     }
 
     @Test
@@ -66,7 +71,8 @@ public class RemedyControllerTest extends RestTestBase {
             .mellomnavn("testMellomnavn")
             .etternavn("testEtternavn")
             .build();
-        createRessursState(personident, navn);
+
+        when(ressursService.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
 
         FinnRessursRequest request = new FinnRessursRequest();
         request.setPersonident(personident);
@@ -117,7 +123,7 @@ public class RemedyControllerTest extends RestTestBase {
             .etternavn("testEtternavn")
             .build();
 
-        createRessursState(personident, navn);
+        when(ressursService.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
 
         OpprettRessursRequest request = new OpprettRessursRequest();
         request.setPersonident(personident);
@@ -183,6 +189,82 @@ public class RemedyControllerTest extends RestTestBase {
 
         Mockito.verify(nikClient).opprettNavident(
             eq(OpprettNavidentRequest.builder().personid(personident).build())
+        );
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Opprett ressurs som har hatt navident tidligere men som har byttet f.nr")
+    void test_100() {
+        String gml_personident = "12345678910";
+        String ny_personident = "98765432100";
+        String navident = "x123456";
+        String eksisterendeFid = "FID_1";
+
+        val navn = pdlUtils.mockSinglePersonResponse();
+
+        when(nikClient.opprettNavident(
+            eq(OpprettNavidentRequest.builder()
+                .personid(ny_personident)
+                .build())
+        ))
+            .thenReturn(ResponseEntity.ok(
+                OpprettNavidentResponse.builder()
+                    .navident(navident)
+                    .build()));
+
+        when(unleash.isEnabled(RemedyController.UNLEASH_HANDLE_PERSONIDENT_CHANGE)).thenReturn(true);
+
+        when(ressursService.findByPersonident(ny_personident)).thenReturn(Optional.empty()); // Nom har ikke ressurs på ny personident
+        when(ressursService.findByNavident(navident)).thenReturn(Optional.of(new RessursState(  // Men har eksisterende ressurs for navidenten returnert av nik
+            eksisterendeFid, gml_personident, navident, Sektor.NAV_STATLIG,
+            new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
+            Optional.empty()
+        )));
+
+        when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
+            .thenReturn(new RessursState("fid", gml_personident, navident,
+                Sektor.NAV_STATLIG,
+                new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                Optional.empty()
+            ));
+
+        OpprettRessursRequest request = new OpprettRessursRequest();
+        request.setPersonident(ny_personident);
+        request.setFornavn(navn.getFornavn());
+        request.setMellomnavn(navn.getMellomnavn());
+        request.setEtternavn(navn.getEtternavn());
+        request.setSektor(Sektor.NAV_STATLIG.name());
+
+        webTestClient.post()
+            .uri("/api/v1/remedy/opprettRessurs")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(RessursDTO.class)
+            .isEqualTo(RessursDTO.builder()
+                .navn(navn).build()
+            );
+
+        Mockito.verify(nikClient).opprettNavident(
+            eq(OpprettNavidentRequest.builder().personid(ny_personident).build())
+        );
+
+        var expectedOppdaterPersonidentCommand = new OppdaterPersonidentCommand(eksisterendeFid, ny_personident);
+        var expectedOppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(
+            eksisterendeFid,
+            new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn())
+        );
+
+        Mockito.verify(ressursCommadService).oppdaterPersonidentCommand(
+            eq(expectedOppdaterPersonidentCommand), any()
+        );
+        Mockito.verify(ressursCommadService).oppdaterPersonaliaEvent(
+            eq(expectedOppdaterPersonaliaCommand), any()
         );
     }
 

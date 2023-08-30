@@ -10,7 +10,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
 import no.nav.nom.apps.api.ressurs.IRessursService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -86,9 +85,6 @@ public abstract class TestBase {
 
     @Autowired
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
-
-    @Autowired
-    protected RessursStateRepository ressursStateRepository;
 
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;

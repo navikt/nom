@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -11,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -91,7 +93,6 @@ public class RessursCommadService {
 
 
     private CompletableFuture<SendResult<String, RessursEvent>> createRessurs(String fid, OpprettRessursCommand opprettRessursCommand) {
-
         return eventProducer.sendMessage(new RessursOpprettetEventV1(
             fid,
             new RessursOpprettetEventV1.RessursOpprettetEventData(
@@ -117,4 +118,13 @@ public class RessursCommadService {
         ));
     }
 
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonidentCommand(OppdaterPersonidentCommand oppdaterPersonidentCommand, InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursPersonidentOppdatertV1(
+            oppdaterPersonidentCommand.fid(),
+            new RessursPersonidentOppdatertV1.PersonidentOppdatertEventData(
+                oppdaterPersonidentCommand.personident()
+            ),
+            inputMetadata
+        ));
+    }
 }
