@@ -33,10 +33,10 @@ spec:
     timeout: 4
     failureThreshold: 5
   startup:
-    path: internal/health/readiness
-    initialDelay: 60
-    failureThreshold: 30
-    periodSeconds: 20
+    path: internal/health/startupState
+    initialDelay: 15
+    periodSeconds: 10
+    failureThreshold: 18 # 18*10sec = 3min
   resources:
     requests:
       cpu: 300m
