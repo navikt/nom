@@ -29,7 +29,6 @@ app:
       max-attempts: 3
       backoff-duration-millis: 2000
   dvh-load:
-    cron-ressurs-og-orgenhet: "0 0 6 * * *"
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
 
 authentication:
@@ -198,11 +197,6 @@ app:
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
-# Default er kl 06:00. Bruke den under for å kjøre ofte (i dev)
-#  dvh-load:
-#    cron-ressurs-og-orgenhet: "0 0 * * * *"
-#    cron-ressurs-og-orgenhet: "0 */5 * * * *"
-
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default
 
@@ -240,10 +234,6 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN"]
-
-# Default er kl 06:00. Bruke den under for å kjøre ofte (i prod)
-#  dvh-load:
-#    cron-ressurs-og-orgenhet: "0 */15 * * * *"
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default
