@@ -158,6 +158,9 @@ spec:
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: dev-gcp
+        - application: toi-veileder
+          namespace: toi
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
