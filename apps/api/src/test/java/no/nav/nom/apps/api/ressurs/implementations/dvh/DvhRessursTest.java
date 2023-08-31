@@ -19,6 +19,7 @@ class DvhRessursTest {
     @SneakyThrows
     @DisplayName("Standard ekstern aktiv/permisjon DVH objekt")
     public void testStdDvhObjekt() {
+        //language=json
         String json = """
             {
               "NAV_IDENT": "L123456",
@@ -35,7 +36,7 @@ class DvhRessursTest {
               "ANSATT_RESSURS_KODE": "E",
               "REMEDY_PERMISJON": "JA",
               "REMEDY_AKTIV": "JA",
-              "BUCKET_NUM": 23
+              "IDENT_TYPE": "STANDARD"
             }
         """;
         JsonNode node = mapper.readTree(json);

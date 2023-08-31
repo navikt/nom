@@ -64,7 +64,7 @@ public class TlfFraDvhTest extends DvhTestBase {
 
     private void stubResourcesFromString(String payload) {
         stubFor(
-                get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1").
+                get("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2").
                         willReturn(
                                 aResponse()
                                         .withStatus(200)
@@ -78,7 +78,7 @@ public class TlfFraDvhTest extends DvhTestBase {
     private static final String resourceInitDvhPayload = // language=json
             """
             {
-                  "NOM_ANSATTE_BUCKETS_v1Result": [
+                  "NOM_ANSATTE_BUCKETS_v2Response": [
                     {
                       "NAV_IDENT": "A123123",
                       "FNR": "12345678901",
@@ -93,7 +93,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                       "ANSATT_TYPE": "NAV Statlig",
                       "ANSATT_RESSURS_KODE": "F",
                       "REMEDY_PERMISJON": "NEI",
-                      "BUCKET_NUM": 16
+                      "IDENT_TYPE": "STANDARD"
                     },
                     {
                       "NAV_IDENT": "A321321",
@@ -109,7 +109,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                       "ANSATT_TYPE": "NAV Statlig",
                       "ANSATT_RESSURS_KODE": "F",
                       "REMEDY_PERMISJON": "NEI",
-                      "BUCKET_NUM": 2
+                      "IDENT_TYPE": "STANDARD"
                     },
                     {
                       "NAV_IDENT": "A321320",
@@ -125,7 +125,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                       "ANSATT_TYPE": "NAV Statlig",
                       "ANSATT_RESSURS_KODE": null,
                       "REMEDY_PERMISJON": "NEI",
-                      "BUCKET_NUM": 13
+                      "IDENT_TYPE": "STANDARD"
                     },
                     {
                       "NAV_IDENT": "A440022",
@@ -141,7 +141,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                       "ANSATT_TYPE": "NAV Kommunalt",
                       "ANSATT_RESSURS_KODE": "N",
                       "REMEDY_PERMISJON": "JA",
-                      "BUCKET_NUM": 6
+                      "IDENT_TYPE": "STANDARD"
                     },
                     {
                       "NAV_IDENT": "A503020",
@@ -157,7 +157,7 @@ public class TlfFraDvhTest extends DvhTestBase {
                       "ANSATT_TYPE": "NAV Kommunalt",
                       "ANSATT_RESSURS_KODE": "N",
                       "REMEDY_PERMISJON": "JA",
-                      "BUCKET_NUM": 3
+                      "IDENT_TYPE": "STANDARD"
                     }
                   ]
                 }
