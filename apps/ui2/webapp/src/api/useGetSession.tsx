@@ -16,7 +16,7 @@ enum UserRole {
 export function useGetSession() {
   return useQuery({
     queryKey: ["SESSION"],
-    queryFn: () => axios.get<SessionInterface>("/nom-api/api/v1/sessioninfo"),
+    queryFn: () => axios.get<SessionInterface>("/nom-api/app/sessioninfo"),
     cacheTime: 60 * 60 * 1000,
     staleTime: 60 * 60 * 1000,
     select: (response) => response.data,

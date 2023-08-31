@@ -269,7 +269,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [searchParameters] = useSearchParams();
   const updateOrgEnhetsTypeMutation = useMutation(
     (newOrgEnhetsType: OrgEnhetsType) =>
-      axios.post("/nom-api/api/v1/orgenhet/orgEnhetsType", {
+      axios.post("/nom-api/app/orgenhet/orgEnhetsType", {
         nomId: orgEnhet.id,
         orgEnhetsType: newOrgEnhetsType,
       }),

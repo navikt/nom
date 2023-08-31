@@ -176,7 +176,7 @@ function CreateResourceFormInner({
     OpprettRessursRequest
   >(
     (opprettRessursRequest) =>
-      axios.post("/nom-api/backend/ressurs", opprettRessursRequest),
+      axios.post("/nom-api/app/ressurs", opprettRessursRequest),
     {
       onSuccess: (opprettRessursResponse) => {
         // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
