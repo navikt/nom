@@ -204,6 +204,11 @@
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
+            <artifactId>contract-nom-dto</artifactId>
+            <version>1.1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

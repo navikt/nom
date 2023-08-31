@@ -9,7 +9,7 @@ import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.navident.common.LogConfig;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventPayload;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.EventType;

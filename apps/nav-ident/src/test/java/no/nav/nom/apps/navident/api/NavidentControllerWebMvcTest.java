@@ -5,7 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.rnrservices.Respons;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.utils.common.mdc.RestMdcInterceptor;

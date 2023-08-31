@@ -6,7 +6,7 @@ import no.nav.nom.apps.navident.NavIdent;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
 import no.nav.nom.apps.navident.api.dto.NavidentResponseDTO;
 import no.nav.nom.apps.navident.common.redis.TestRedisConfiguration;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventType;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;

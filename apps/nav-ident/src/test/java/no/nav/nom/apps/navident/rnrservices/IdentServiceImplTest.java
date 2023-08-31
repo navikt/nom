@@ -2,7 +2,7 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
 import no.nav.nom.apps.navident.IdentService;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.idgenerator.NavidGenerator;
 import no.nav.nom.apps.navident.pdl.PdlService;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 

@@ -5,7 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

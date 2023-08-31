@@ -3,7 +3,7 @@ package no.nav.nom.apps.navident.eventsource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

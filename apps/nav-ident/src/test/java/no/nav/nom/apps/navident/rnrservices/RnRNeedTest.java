@@ -2,7 +2,7 @@ package no.nav.nom.apps.navident.rnrservices;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.EmbeddedKafkaTestBase;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.idgenerator.NavidRepository;
 import no.nav.nom.apps.navident.pdl.PdlService;

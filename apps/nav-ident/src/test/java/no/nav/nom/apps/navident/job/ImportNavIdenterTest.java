@@ -2,7 +2,7 @@ package no.nav.nom.apps.navident.job;
 
 import lombok.SneakyThrows;
 import no.nav.nom.apps.navident.SpringBootTestBase;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.eventsource.EventSourceService;
 import no.nav.nom.apps.navident.eventsource.SourceEvent;
 import no.nav.nom.apps.navident.eventsource.SourceEventRepository;
