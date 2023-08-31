@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 
 public class OrgEnhetControllerTest extends RestTestBase {
 
+    public static final String ORGENHETSTYPE_URL = "/app/orgenhet/orgEnhetsType";
     @MockBean
     OrgEnhetCommandService orgEnhetCommandService;
 
@@ -46,7 +47,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
 
         webTestClient.post()
-            .uri("/api/v1/orgenhet/orgEnhetsType")
+            .uri(ORGENHETSTYPE_URL)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
                 validJwtWithAzpClaim("admin", "admin")))
             )
@@ -73,7 +74,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
         orgEnhetStateRepository.putEventAggregate(existingOrgEnhet);
 
         webTestClient.post()
-            .uri("/api/v1/orgenhet/orgEnhetsType")
+            .uri(ORGENHETSTYPE_URL)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
                 validJwtWithAzpClaim("admin", "admin")))
             )
@@ -91,7 +92,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     public void should_return_404_when_org_enhet_not_found() {
 
         webTestClient.post()
-            .uri("/api/v1/orgenhet/orgEnhetsType")
+            .uri(ORGENHETSTYPE_URL)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
                 validJwtWithAzpClaim("admin", "admin"))
             ))
@@ -108,7 +109,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
     public void should_return_403_for_users_without_access() {
 
         webTestClient.post()
-            .uri("/api/v1/orgenhet/orgEnhetsType")
+            .uri(ORGENHETSTYPE_URL)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
                 validJwtWithAzpClaim("noAdmin", "no-admin"))
             ))
