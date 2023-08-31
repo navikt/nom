@@ -20,7 +20,6 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Service
 public class RessursStillingLoader {
-    public static final String UNLEASH_LAST_NY_ORGTILKNYTNING = "nom.orgtilknytning.last";
     private final RessursStillingStrukturerer ressursStillingStrukturerer;
     private final RessursStillingProcessor ressursStillingProcessor;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
@@ -44,17 +43,15 @@ public class RessursStillingLoader {
     }
 
     public void loadAndProcess() {
-        if (unleash.isEnabled(UNLEASH_LAST_NY_ORGTILKNYTNING)) {
-            ressursStillingLoadStatus.startNewLoad();
+        ressursStillingLoadStatus.startNewLoad();
 
-            List<DvhRessursStilling> ressursStillinger = load();
+        List<DvhRessursStilling> ressursStillinger = load();
 
-            Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
+        Map <String, List<StillingPeriode>> stillingPerioderPerNavident = ressursStillingStrukturerer.strukturerStilingPerioderPerNavident(ressursStillinger);
 
-            ressursStillingProcessor.process(stillingPerioderPerNavident);
+        ressursStillingProcessor.process(stillingPerioderPerNavident);
 
-            ressursStillingLoadStatus.endLoad();
-        }
+        ressursStillingLoadStatus.endLoad();
     }
 
     protected List<DvhRessursStilling> load() {

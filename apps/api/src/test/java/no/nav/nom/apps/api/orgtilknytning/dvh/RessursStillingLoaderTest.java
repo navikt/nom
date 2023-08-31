@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader.UNLEASH_LAST_NY_ORGTILKNYTNING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -75,7 +74,6 @@ class RessursStillingLoaderTest extends TestBase {
     @DisplayName("Test last og prossesering av Resssurs stillinger fra Dvh json")
     public void testloadAndProcess() {
         /* Se last innhold nederst i denne filen */
-        Mockito.when(unleash.isEnabled(UNLEASH_LAST_NY_ORGTILKNYTNING)).thenReturn(true);
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(agr_8620005, agr_8552106, agr_0807001));
 
         ressursStillingLoader.loadAndProcess();
