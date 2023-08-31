@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Admin for å manuelt trigge dvh Last")
 @RestController
-@RequestMapping("/api/v1/admin/dvhLast")
+@RequestMapping("/api/admin/dvhLast")
 public class DvhLast {
     private final Logger log = LoggerFactory.getLogger(DvhLast.class);
 

@@ -13,13 +13,19 @@ public class SwaggerConfig {
 
     public static final String BEARER_TOKEN = "BearerAuth";
 
-    public static final String API_V1_NAME = "External API v1";
-    public static final String BACKEND_NAME = "Backend";
+    // Sort order er på groupid
+    public static final String API_V1_ID = "1 - External API v1";
+    public static final String API_V1_DISPLAY_NAME = "External API v1";
+    public static final String BACKEND_ID = "2 - Backend";
+    public static final String BACKEND_DISPLAY_NAME = "Backend";
+    public static final String INTERN_ADMIN_ID = "3 - Intern admin";
+    public static final String INTERN_ADMIN_DISPLAY_NAME = "Intern admin";
 
     @Bean
     public GroupedOpenApi v1Api() {
         return GroupedOpenApi.builder()
-            .group(API_V1_NAME)
+            .group(API_V1_ID)
+            .displayName(API_V1_DISPLAY_NAME)
             .pathsToMatch("/api/v1/**")
             .build();
     }
@@ -27,8 +33,18 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi apiBackend() {
         return GroupedOpenApi.builder()
-            .group(BACKEND_NAME)
+            .group(BACKEND_ID)
+            .displayName(BACKEND_DISPLAY_NAME)
             .pathsToMatch("/backend/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi apiInternAdmin() {
+        return GroupedOpenApi.builder()
+            .group(INTERN_ADMIN_ID)
+            .displayName(INTERN_ADMIN_DISPLAY_NAME)
+            .pathsToMatch("/api/admin/**")
             .build();
     }
 

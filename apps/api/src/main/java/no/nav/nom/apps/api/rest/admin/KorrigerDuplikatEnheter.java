@@ -27,7 +27,7 @@ import java.util.Map;
 @Slf4j
 @Tag(name = "Admin for korrigere duplikate enheter")
 @RestController
-@RequestMapping("/api/v1/admin/korrigerreduplikatenheter")
+@RequestMapping("/api/admin/korrigerreduplikatenheter")
 public class KorrigerDuplikatEnheter {
 
     private final IOrgenhetService orgenhetService;

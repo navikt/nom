@@ -31,7 +31,7 @@ import java.util.Map;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
-@RequestMapping("/api/v1/admin/SanityCheck")
+@RequestMapping("/api/admin/SanityCheck")
 public class SanityCheck {
     private final Logger log = LoggerFactory.getLogger(SanityCheck.class);
     private final DvhRepository dvhRepository;
