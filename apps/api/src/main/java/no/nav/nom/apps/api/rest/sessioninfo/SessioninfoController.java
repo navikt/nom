@@ -31,7 +31,7 @@ public class SessioninfoController {
     @Operation(
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @GetMapping(value={"/api/v1/sessioninfo", "/app/sessioninfo"})
+    @GetMapping(value={"/app/sessioninfo"})
     public SessionInfoResponse sessioninfo(@AuthenticationPrincipal Jwt principal) {
         var userRoles = principal.getClaimAsStringList("groups").stream()
             .map(group -> claimToRoleMap.getOrDefault(group, null))

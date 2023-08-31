@@ -25,7 +25,7 @@ import java.util.Optional;
 @Slf4j
 @Tag(name = "OrgEnhet")
 @RestController
-@RequestMapping(value={"/api/v1/orgenhet", "/app/orgenhet"})
+@RequestMapping(value={"/app/orgenhet"})
 public class OrgEnhetController {
 
     private final OrgEnhetCommandService orgEnhetCommandService;

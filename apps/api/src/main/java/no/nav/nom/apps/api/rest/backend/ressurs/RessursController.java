@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
 
 @Tag(name = "Ressurs")
 @RestController
-@RequestMapping(value={"/backend/ressurs", "/app/ressurs"})
+@RequestMapping(value={"/app/ressurs"})
 public class RessursController {
 
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);

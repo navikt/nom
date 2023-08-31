@@ -35,7 +35,7 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
             .group(BACKEND_ID)
             .displayName(BACKEND_DISPLAY_NAME)
-            .pathsToMatch("/backend/**", "/app/**")
+            .pathsToMatch("/app/**")
             .build();
     }
 

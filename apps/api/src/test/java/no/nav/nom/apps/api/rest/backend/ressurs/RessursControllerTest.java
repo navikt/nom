@@ -86,7 +86,7 @@ public class RessursControllerTest extends RestTestBase {
         );
 
         webTestClient.post()
-            .uri("/backend/ressurs")
+            .uri("/app/ressurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
