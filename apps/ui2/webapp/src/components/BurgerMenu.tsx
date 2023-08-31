@@ -32,7 +32,7 @@ export function BurgerMenu() {
         <Dropdown.Menu.List>
           <Dropdown.Menu.List.Item onClick={() => navigate("ressurs/create")}>
             <PersonPlusFillIcon color="black" fontSize="24px" />
-            <span>Opprett ressurs</span>
+            <span>Opprett medarbeider</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item onClick={() => navigate("org")}>
             <img alt="hierarki" src={hierarchyFilled} />

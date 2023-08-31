@@ -55,7 +55,7 @@ export function CreateResourceConfirmationModal({
         }}
         type="button"
       >
-        Opprett ressurs
+        Opprett medarbeider
       </Button>
       <Modal
         css={css`
@@ -67,7 +67,7 @@ export function CreateResourceConfirmationModal({
       >
         <Modal.Header>
           <Heading level="1" size="medium" spacing>
-            Opprett ressurs
+            Opprett medarbeider
           </Heading>
         </Modal.Header>
         <Modal.Body>
@@ -118,7 +118,7 @@ export function CreateResourceConfirmationModal({
                 setShowModal(false);
               }}
             >
-              Opprett ressurs
+              Opprett medarbeider
             </Button>
             <Button onClick={() => setShowModal(false)} variant="secondary">
               Avbryt

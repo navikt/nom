@@ -134,7 +134,7 @@ function SearchdemoPage() {
       `}
     >
       <span>
-        <span>Søk etter ressurser og enheter her: </span>
+        <span>Søk etter medarbeidere og enheter her: </span>
         <input
           onChange={(changeevent) => setDirtyString(changeevent.target.value)}
           ref={inputReference}

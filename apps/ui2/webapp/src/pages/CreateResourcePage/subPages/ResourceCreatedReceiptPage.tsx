@@ -90,7 +90,7 @@ function InnerResourceCreatedPage({ ressurs }: { ressurs: Ressurs }) {
             `}
           />
           <span>
-            Opprettelse av ressurs er vellykket! NAV-ident{" "}
+            Opprettelse av medarbeider er vellykket! NAV-ident{" "}
             <b>{ressurs.navident}</b> er opprettet for {ressurs.visningsnavn}.
           </span>
           <CircleWithNumber>2</CircleWithNumber>

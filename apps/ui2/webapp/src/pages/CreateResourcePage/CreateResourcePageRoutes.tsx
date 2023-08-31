@@ -40,7 +40,7 @@ function Wrapper() {
   );
   return (
     <>
-      <PageBanner text="Opprett ressurs" />
+      <PageBanner text="Opprett medarbeider" />
       <ContentWrapper>
         <>
           <div

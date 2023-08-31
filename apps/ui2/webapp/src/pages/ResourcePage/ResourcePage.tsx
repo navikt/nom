@@ -29,12 +29,12 @@ export const ResourcePage = () => {
         <>
           {state?.alreadyExists ? (
             <Alert variant="info">
-              Ressurs finnes allerede i NOM. Statlige ressurser må også
+              Medarbeider finnes allerede i NOM. Statlige medarbeidere må også
               etableres i{" "}
               <Link href="https://agresso.adeo.no/agresso/">Unit4</Link>.
               Tilganger tildeles i identrutina i{" "}
               <Link href="https://it-hjelpa.adeo.no/arsys/home">Remedy</Link>{" "}
-              for alle ressurser.
+              for alle medarbeidere.
             </Alert>
           ) : undefined}
           {hasQuit ? (
