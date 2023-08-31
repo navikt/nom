@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -106,6 +107,8 @@ public class DvhRestConsumer {
         try {
             var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2");
 
+            final AtomicInteger robotCount = new AtomicInteger(0);
+
             val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), false)
                     .map(DvhRessurs::new)
                     .distinct()
@@ -124,13 +127,22 @@ public class DvhRestConsumer {
                         }
                     })
                     .flatMap(Collection::stream)
-                    .filter(it -> !it.getIdentType().equalsIgnoreCase("Robot"))
+                    .filter(it -> {
+                        var isRobot = it.getIdentType().equalsIgnoreCase("Robot");
+                        if (!isRobot) {
+                            return true;
+                        }
+                        robotCount.addAndGet(1);
+                        return false;
+                    })
                     .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
                     .values()
                     .stream()
                     .filter(l -> l.size() == 1)
                     .flatMap(Collection::stream)
                     .toList();
+
+            log.info("loadRessurserFromDvh() -> Filtrerte bort {} roboter", robotCount.get());
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
         } catch(Exception e) {
