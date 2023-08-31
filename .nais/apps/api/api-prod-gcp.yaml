@@ -137,7 +137,7 @@ spec:
           cluster: prod-gcp
         - application: toi-veileder
           namespace: toi
-          cluster: dev-gcp
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
