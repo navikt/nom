@@ -15,7 +15,7 @@ import {
   Tag,
 } from "@navikt/ds-react";
 import axios from "axios";
-import { isAfter, isBefore } from "date-fns";
+import { endOfDay, isAfter, isBefore } from "date-fns";
 import partition from "lodash/partition";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
@@ -100,7 +100,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
     ressurs.orgTilknytning,
     (orgtilknytning) =>
       orgtilknytning.gyldigTom &&
-      isBefore(new Date(orgtilknytning.gyldigTom), new Date()),
+      isBefore(endOfDay(new Date(orgtilknytning.gyldigTom)), new Date()),
   );
 
   return (

@@ -71,7 +71,7 @@ export function SearchBar() {
       onChange={(selectedOption) =>
         selectedOption && navigate(selectedOption.url)
       }
-      placeholder="Søk etter medarbeidere eller organisasjonsenheter"
+      placeholder="Søk etter medarbeider eller organisasjonsenheter"
     />
   );
 }
@@ -180,7 +180,7 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
     switch (r.__typename) {
       case "Ressurs": {
         return {
-          tag: "Ressurs",
+          tag: "Medarbeider",
           url: `/ressurs/${r.navident}`,
           label: r.visningsnavn,
           css: css`
