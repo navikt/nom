@@ -104,9 +104,9 @@ public class DvhRestConsumer {
     public void loadRessurserFromDvh() {
         log.info("Laster ressurser fra dvh");
         try {
-            var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1");
+            var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2");
 
-            val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v1Result").spliterator(), false)
+            val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), false)
                     .map(DvhRessurs::new)
                     .distinct()
                     .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
@@ -124,6 +124,7 @@ public class DvhRestConsumer {
                         }
                     })
                     .flatMap(Collection::stream)
+                    .filter(it -> !it.getIdentType().equalsIgnoreCase("Robot"))
                     .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
                     .values()
                     .stream()

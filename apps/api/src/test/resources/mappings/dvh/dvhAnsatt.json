@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1"
+    "url": "/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2"
   },
   "response": {
     "status": 200,
@@ -9,7 +9,7 @@
       "response-template"
     ],
     "jsonBody": {
-      "NOM_ANSATTE_BUCKETS_v1Result": [
+      "NOM_ANSATTE_BUCKETS_v2Response": [
         {
           "NAV_IDENT": "O123456",
           "FNR": "12345678901",
@@ -24,7 +24,7 @@
           "ANSATT_TYPE": "NAV Statlig",
           "ANSATT_RESSURS_KODE": "F",
           "REMEDY_PERMISJON": "NEI",
-          "BUCKET_NUM": 16
+          "IDENT_TYPE": "STANDARD"
         },
         {
           "NAV_IDENT": "O123457",
@@ -40,7 +40,7 @@
           "ANSATT_TYPE": "NAV Statlig",
           "ANSATT_RESSURS_KODE": "F",
           "REMEDY_PERMISJON": "NEI",
-          "BUCKET_NUM": 2
+          "IDENT_TYPE": "STANDARD"
         },
         {
           "NAV_IDENT": "O123458",
@@ -56,7 +56,7 @@
           "ANSATT_TYPE": "NAV Statlig",
           "ANSATT_RESSURS_KODE": null,
           "REMEDY_PERMISJON": "NEI",
-          "BUCKET_NUM": 13
+          "IDENT_TYPE": "STANDARD"
         },
         {
           "NAV_IDENT": "O123459",
@@ -72,7 +72,7 @@
           "ANSATT_TYPE": "NAV Kommunalt",
           "ANSATT_RESSURS_KODE": "N",
           "REMEDY_PERMISJON": "JA",
-          "BUCKET_NUM": 6
+          "IDENT_TYPE": "STANDARD"
         },
         {
           "NAV_IDENT": "testNavIdent",
@@ -88,7 +88,7 @@
           "ANSATT_TYPE": "NAV Kommunalt",
           "ANSATT_RESSURS_KODE": "N",
           "REMEDY_PERMISJON": "JA",
-          "BUCKET_NUM": 6
+          "IDENT_TYPE": "STANDARD"
         }
       ]
     },

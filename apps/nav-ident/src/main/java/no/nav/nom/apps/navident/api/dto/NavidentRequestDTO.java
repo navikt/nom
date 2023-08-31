@@ -3,7 +3,7 @@ package no.nav.nom.apps.navident.api.dto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 
 @Data
 @Builder

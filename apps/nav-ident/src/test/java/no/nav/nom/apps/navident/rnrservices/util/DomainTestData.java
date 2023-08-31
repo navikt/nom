@@ -1,9 +1,9 @@
 package no.nav.nom.apps.navident.rnrservices.util;
 
 import no.nav.nom.apps.navident.domain.*;
+import no.nav.nom.contract.nom.IdentType;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 

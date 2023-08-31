@@ -1,5 +1,5 @@
 {
-  "NOM_ANSATTE_BUCKETS_v1Result": [
+  "NOM_ANSATTE_BUCKETS_v2Response": [
     {
       "NAV_IDENT": "O123457",
       "FNR": "12345678901",
@@ -15,7 +15,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     },
     {
       "NAV_IDENT": "O123456",
@@ -32,7 +32,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     },
     {
       "NAV_IDENT": "B123456",
@@ -48,7 +48,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     },
     {
       "NAV_IDENT": "B123457",
@@ -64,7 +64,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     },
     {
       "NAV_IDENT": "A123457",
@@ -81,7 +81,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     },
     {
       "NAV_IDENT": "A123456",
@@ -98,7 +98,7 @@
       "ANSATT_TYPE": "NAV Statlig",
       "ANSATT_RESSURS_KODE": "F",
       "REMEDY_PERMISJON": "NEI",
-      "BUCKET_NUM": 16
+      "IDENT_TYPE": "STANDARD"
     }
   ]
 }

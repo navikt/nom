@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.pdl.PdlService;
 import org.slf4j.MDC;

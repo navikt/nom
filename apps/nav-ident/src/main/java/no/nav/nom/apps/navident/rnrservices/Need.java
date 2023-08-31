@@ -3,7 +3,7 @@ package no.nav.nom.apps.navident.rnrservices;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.navident.domain.IdentType;
+import no.nav.nom.contract.nom.IdentType;
 
 import java.util.List;
 

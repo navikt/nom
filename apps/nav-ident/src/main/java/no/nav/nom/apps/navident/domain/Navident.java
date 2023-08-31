@@ -2,6 +2,7 @@ package no.nav.nom.apps.navident.domain;
 
 import lombok.Builder;
 import lombok.Data;
+import no.nav.nom.contract.nom.IdentType;
 
 import java.util.ArrayList;
 import java.util.List;

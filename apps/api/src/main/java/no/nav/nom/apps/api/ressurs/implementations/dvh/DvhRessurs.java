@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.IdentType;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public class DvhRessurs {
     LocalDate remedySluttdato;
     LocalDate agressoSluttdato;
     boolean remedyPermisjon;
+    String identType;
 
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
@@ -47,6 +49,7 @@ public class DvhRessurs {
         remedySluttdato = node.hasNonNull("REMEDY_SLUTT_DATO") ? LocalDate.parse(node.get("REMEDY_SLUTT_DATO").asText()) : null;
         agressoSluttdato = node.hasNonNull("AGRESSO_SLUTT_DATO") ? LocalDate.parse(node.get("AGRESSO_SLUTT_DATO").asText()) : null;
         remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
+        identType = node.get("IDENT_TYPE").asText();
     }
 
     public enum RemedyRessursType {
@@ -100,5 +103,15 @@ public class DvhRessurs {
         } else {
             return Sektor.EKSTERN;
         }
+    }
+
+    public static IdentType toIdentType(String identType){
+
+        for(var e : IdentType.values()){
+            if(e.name().equals(identType)){
+                return e;
+            }
+        }
+        throw new IllegalArgumentException(identType + " was not recongized as an enum value of " + IdentType.class.getName());
     }
 }

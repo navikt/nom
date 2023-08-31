@@ -45,10 +45,10 @@ public class DvhRessursUtils {
     }
 
     private StubMapping mockResponse(List<RessursMock> ressursMocks) {
-        var body = objectMapper.createObjectNode().set("NOM_ANSATTE_BUCKETS_v1Result", objectMapper.convertValue(ressursMocks, JsonNode.class));
+        var body = objectMapper.createObjectNode().set("NOM_ANSATTE_BUCKETS_v2Response", objectMapper.convertValue(ressursMocks, JsonNode.class));
 
         return stubFor(
-                get("/proxy/dvh/json/Hr/NOM2/NOM_ANSATTE_BUCKETS_v1")
+                get("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2")
                         .willReturn(
                                 aResponse().withHeader("Content-Type", "application/json")
                                         .withBody(body.toString())
@@ -67,12 +67,13 @@ public class DvhRessursUtils {
             @JsonProperty("REMEDY_PERMISJON") String REMEDY_PERMISJON,
             @JsonProperty("REMEDY_START_DATO") LocalDate REMEDY_START_DATO,
             @JsonProperty("REMEDY_SLUTT_DATO") LocalDate REMEDY_SLUTT_DATO,
-            @JsonProperty("AGRESSO_SLUTT_DATO") LocalDate AGRESSO_SLUTT_DATO
+            @JsonProperty("AGRESSO_SLUTT_DATO") LocalDate AGRESSO_SLUTT_DATO,
+            @JsonProperty("IDENT_TYPE") String IDENT_TYPE
     ) {
         public RessursMock(
                 String NAV_IDENT, String FNR, String FORNAVN, String ETTERNAVN, String ANSATT_TYPE, LocalDate REMEDY_SLUTT_DATO
         ) {
-            this(NAV_IDENT, FNR, FORNAVN, ETTERNAVN, ANSATT_TYPE, "F", "JA", "NEI", LocalDate.now(), REMEDY_SLUTT_DATO, LocalDate.parse("2099-12-31"));
+            this(NAV_IDENT, FNR, FORNAVN, ETTERNAVN, ANSATT_TYPE, "F", "JA", "NEI", LocalDate.now(), REMEDY_SLUTT_DATO, LocalDate.parse("2099-12-31"),"STANDARD");
         }
     }
 }
