@@ -23,6 +23,7 @@ jobs:
       image-suffix: nom-unit4
       nais-config-file-path-dev: .nais/apps/unit4/unit4-dev-gcp.yaml
       nais-config-file-path-prod: .nais/apps/unit4/unit4-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/unit4/unleash-vars.yaml
     secrets:
       NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}

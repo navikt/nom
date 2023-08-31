@@ -24,6 +24,7 @@ jobs:
       image-suffix: nom-api
       nais-config-file-path-dev: .nais/apps/api/api-dev-gcp.yaml
       nais-config-file-path-prod: .nais/apps/api/api-prod-gcp.yaml
+      unleash-vars-file-path: .nais/apps/api/unleash-vars.yaml
       deploy-timeout: 20m
     secrets:
       NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

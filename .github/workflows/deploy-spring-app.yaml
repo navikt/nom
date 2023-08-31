@@ -28,6 +28,10 @@ on:
         type: string
         required: false
         default: prod-gcp
+      unleash-vars-file-path:
+        type: string
+        required: false
+        default: skip
       additional-nais-vars-dev:
         type: string
         required: false
@@ -96,6 +100,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3.1.0
       - uses: nais/deploy/actions/deploy@v1
+        if: ${{ inputs.unleash-vars-file-path != 'skip' }}
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ inputs.dev-cluster }}
+          RESOURCE: .nais/unleash/unleash-token.yaml
+          TIMEOUT: ${{ inputs.deploy-timeout }}
+          VAR: env=development
+          VARS: ${{ inputs.unleash-vars-file-path }}
+      - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.dev-cluster }}
@@ -110,6 +123,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.1.0
+      - uses: nais/deploy/actions/deploy@v1
+        if: ${{ inputs.unleash-vars-file-path != 'skip' }}
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ inputs.prod-cluster }}
+          RESOURCE: .nais/unleash/unleash-token.yaml
+          TIMEOUT: ${{ inputs.deploy-timeout }}
+          VAR: env=production
+          VARS: ${{ inputs.unleash-vars-file-path }}
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

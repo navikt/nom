@@ -22,6 +22,7 @@ jobs:
       image-suffix: nom-ressurser
       nais-config-file-path-dev: .nais/apps/nom-ressurser/nom-ressurser-dev-fss.yaml
       nais-config-file-path-prod: .nais/apps/nom-ressurser/nom-ressurser-prod-fss.yaml
+      unleash-vars-file-path: .nais/apps/nom-ressurser/unleash-vars.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
     secrets:

@@ -22,6 +22,7 @@ jobs:
       image-suffix: proxy
       nais-config-file-path-dev: .nais/apps/proxy/proxy-dev-fss.yaml
       nais-config-file-path-prod: .nais/apps/proxy/proxy-prod-fss.yaml
+      unleash-vars-file-path: .nais/apps/proxy/unleash-vars.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
     secrets:
