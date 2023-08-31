@@ -16,10 +16,10 @@ public class SwaggerConfig {
     // Sort order er på groupid
     public static final String API_V1_ID = "1 - External API v1";
     public static final String API_V1_DISPLAY_NAME = "External API v1";
-    public static final String BACKEND_ID = "2 - Backend";
-    public static final String BACKEND_DISPLAY_NAME = "Backend";
+    public static final String BACKEND_ID = "2 - app";
+    public static final String BACKEND_DISPLAY_NAME = "Internal App api";
     public static final String INTERN_ADMIN_ID = "3 - Intern admin";
-    public static final String INTERN_ADMIN_DISPLAY_NAME = "Intern admin";
+    public static final String INTERN_ADMIN_DISPLAY_NAME = "Internal admin";
 
     @Bean
     public GroupedOpenApi v1Api() {
@@ -35,7 +35,7 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
             .group(BACKEND_ID)
             .displayName(BACKEND_DISPLAY_NAME)
-            .pathsToMatch("/backend/**")
+            .pathsToMatch("/backend/**", "/app/**")
             .build();
     }
 

@@ -31,8 +31,8 @@ public class SessioninfoController {
     @Operation(
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @GetMapping("/api/v1/sessioninfo")
-    public SessionInfoResponse sessioninfoOld(@AuthenticationPrincipal Jwt principal) {
+    @GetMapping(value={"/api/v1/sessioninfo", "/app/sessioninfo"})
+    public SessionInfoResponse sessioninfo(@AuthenticationPrincipal Jwt principal) {
         var userRoles = principal.getClaimAsStringList("groups").stream()
             .map(group -> claimToRoleMap.getOrDefault(group, null))
             .filter(Objects::nonNull)
@@ -42,23 +42,6 @@ public class SessioninfoController {
                 principal.getClaimAsString("NAVident"),
                 principal.getClaimAsString("name"),
                 userRoles
-        );
-    }
-
-    @Operation(
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @GetMapping("/backend/sessioninfo")
-    public SessionInfoResponse sessioninfo(@AuthenticationPrincipal Jwt principal) {
-        var userRoles = principal.getClaimAsStringList("groups").stream()
-            .map(group -> claimToRoleMap.getOrDefault(group, null))
-            .filter(Objects::nonNull)
-            .toList();
-
-        return new SessionInfoResponse(
-            principal.getClaimAsString("NAVident"),
-            principal.getClaimAsString("name"),
-            userRoles
         );
     }
 
