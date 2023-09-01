@@ -80,7 +80,8 @@ management:
 
 unleash:
   endpoint:
-    url: https://unleash.nais.io/api
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}
 
 springdoc:
   swagger-ui:

@@ -4,7 +4,6 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.strategy.Strategy;
 import io.getunleash.util.UnleashConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,7 +16,7 @@ import org.springframework.core.env.Environment;
 @AutoConfiguration
 @ConditionalOnClass(Unleash.class)
 @ConditionalOnProperty(name = "unleash.enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties(UnleashPropeties.class)
+@EnableConfigurationProperties(UnleashProperties.class)
 public class UnleashAutoconfiguration {
 
     final Environment environment;
@@ -40,10 +39,11 @@ public class UnleashAutoconfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public UnleashConfig unleashConfig(UnleashPropeties propeties, AppNameSupplier nameSupplier) {
+    public UnleashConfig unleashConfig(UnleashProperties properties, AppNameSupplier nameSupplier) {
         return UnleashConfig.builder()
             .appName(nameSupplier.name())
-            .unleashAPI(propeties.endpoint().url())
+            .unleashAPI(properties.endpoint().url())
+            .apiKey(properties.apiKey())
             .build();
     }
 

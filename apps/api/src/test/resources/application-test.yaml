@@ -64,3 +64,6 @@ spring:
 # https://www.testcontainers.org/modules/databases/jdbc/
   datasource:
     url: jdbc:tc:postgresql:12:///postgres-api
+
+UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
+UNLEASH_SERVER_API_TOKEN: some-token

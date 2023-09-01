@@ -38,6 +38,7 @@ spec:
     pool: nav-dev
   envFrom:
     - secret: nom-unit4-api-credentials
+    - secret: nom-unit4-unleash-api-token
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
@@ -64,5 +65,5 @@ spec:
           cluster: dev-gcp
     outbound:
       external:
-        - host: unleash.nais.io
+        - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.dev-fss-pub.nais.io

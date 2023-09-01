@@ -2,7 +2,6 @@ package no.nav.nom.libs.utils.common.unleash;
 
 import io.getunleash.strategy.Strategy;
 import org.springframework.core.env.Environment;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
@@ -21,16 +20,15 @@ public class ByUserIdStrategy implements Strategy {
 
     @Override
     public String getName() {
-        return "byUserId";
+        return "userWithId";
     }
 
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
-        return ToggleChecker.isToggleEnabled("user", parameters, this::isUser);
+        return ToggleChecker.isToggleEnabled("userIds", parameters, this::isUser);
     }
 
     private boolean isUser(String userId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return Objects.equals(userId, getUserNavident().orElse("NOBODY"));
     }
 

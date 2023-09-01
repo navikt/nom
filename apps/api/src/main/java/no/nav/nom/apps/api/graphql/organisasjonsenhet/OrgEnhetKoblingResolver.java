@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -16,7 +15,7 @@ public class OrgEnhetKoblingResolver {
     private final OrgtilknytningService orgtilknytningStateService;
     private final IRessursService ressursService;
 
-    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningStateService, IRessursService ressursService, Unleash unleash) {
+    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningStateService, IRessursService ressursService) {
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.ressursService = ressursService;
     }

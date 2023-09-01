@@ -26,20 +26,19 @@ public class RessursStillingLoader {
     private final NomProxyClient nomProxyClient;
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
-    private final Unleash unleash;
 
-    public RessursStillingLoader(RessursStillingStrukturerer ressursStillingStrukturerer,
-                                 RessursStillingProcessor ressursStillingProcessor,
-                                 RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
-                                 @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
-                                 Unleash unleash) {
+    public RessursStillingLoader(
+        RessursStillingStrukturerer ressursStillingStrukturerer,
+        RessursStillingProcessor ressursStillingProcessor,
+        RessursStillingLoadStatus ressursStillingLoadStatus, NomProxyClient nomProxyClient, AppProperties appProperties,
+        @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode
+    ) {
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.ressursStillingProcessor = ressursStillingProcessor;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
-        this.unleash = unleash;
     }
 
     public void loadAndProcess() {

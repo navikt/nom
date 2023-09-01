@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.graphql.search;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
@@ -29,7 +28,7 @@ public class SearchResolver {
     public SearchResolver(
         IRessursService ressursService,
         OrgenhetService orgenhetService,
-        LuceneService luceneService, Unleash unleash
+        LuceneService luceneService
     ) {
         this.ressursService = ressursService;
         this.orgenhetService = orgenhetService;

@@ -41,7 +41,7 @@ public class UnleashAutoconfigurationTest {
         public static String APP_NAME = "test-user-defined-unleashconfig";
 
         @Bean
-        UnleashConfig unleashConfig(UnleashPropeties properties) {
+        UnleashConfig unleashConfig(UnleashProperties properties) {
             return UnleashConfig.builder()
                 .unleashAPI(properties.endpoint().url())
                 .appName(APP_NAME)
@@ -68,7 +68,7 @@ public class UnleashAutoconfigurationTest {
             .withClassLoader(new FilteredClassLoader(Unleash.class))
             .run(
                 context -> {
-                    assertThat(context).doesNotHaveBean(UnleashPropeties.class);
+                    assertThat(context).doesNotHaveBean(UnleashProperties.class);
                     assertThat(context).doesNotHaveBean(UnleashConfig.class);
                     assertThat(context).doesNotHaveBean(StrategySupplier.class);
                     assertThat(context).doesNotHaveBean(Unleash.class);
@@ -82,7 +82,7 @@ public class UnleashAutoconfigurationTest {
             .withPropertyValues("unleash.enabled=false")
             .run(
                 context -> {
-                    assertThat(context).doesNotHaveBean(UnleashPropeties.class);
+                    assertThat(context).doesNotHaveBean(UnleashProperties.class);
                     assertThat(context).doesNotHaveBean(UnleashConfig.class);
                     assertThat(context).doesNotHaveBean(StrategySupplier.class);
                     assertThat(context).doesNotHaveBean(Unleash.class);
@@ -96,7 +96,7 @@ public class UnleashAutoconfigurationTest {
             .withPropertyValues("unleash.endpoint.url=https://example.com")
             .run(
                 context -> {
-                    assertThat(context).hasSingleBean(UnleashPropeties.class);
+                    assertThat(context).hasSingleBean(UnleashProperties.class);
                     assertThat(context).hasSingleBean(UnleashConfig.class);
                     assertThat(context).hasSingleBean(StrategySupplier.class);
                     assertThat(context).hasSingleBean(Unleash.class);
@@ -114,7 +114,7 @@ public class UnleashAutoconfigurationTest {
                     assertThat(context).hasSingleBean(StrategySupplier.class);
                     assertThat(context.getBean(StrategySupplier.class).strategies()).hasSize(0);
 
-                    assertThat(context).hasSingleBean(UnleashPropeties.class);
+                    assertThat(context).hasSingleBean(UnleashProperties.class);
                     assertThat(context).hasSingleBean(UnleashConfig.class);
                     assertThat(context).hasSingleBean(Unleash.class);
                 }
@@ -132,7 +132,7 @@ public class UnleashAutoconfigurationTest {
                     assertThat(context).hasSingleBean(StrategySupplier.class);
                     assertThat(context.getBean(StrategySupplier.class).strategies()).hasSize(2);
 
-                    assertThat(context).hasSingleBean(UnleashPropeties.class);
+                    assertThat(context).hasSingleBean(UnleashProperties.class);
                     assertThat(context).hasSingleBean(UnleashConfig.class);
                     assertThat(context).hasSingleBean(Unleash.class);
                 }
@@ -150,7 +150,7 @@ public class UnleashAutoconfigurationTest {
                     assertThat(context).hasSingleBean(UnleashConfig.class);
                     assertThat(context.getBean(UnleashConfig.class).getAppName()).isEqualTo(UserDefinedUnleashConfig.APP_NAME);
 
-                    assertThat(context).hasSingleBean(UnleashPropeties.class);
+                    assertThat(context).hasSingleBean(UnleashProperties.class);
                     assertThat(context).hasSingleBean(StrategySupplier.class);
                     assertThat(context).hasSingleBean(Unleash.class);
                 }
@@ -168,7 +168,7 @@ public class UnleashAutoconfigurationTest {
                     assertThat(context.getBean(Unleash.class)).isInstanceOf(FakeUnleash.class);
                     assertThat(context.getBean(Unleash.class)).isNotInstanceOf(DefaultUnleash.class);
 
-                    assertThat(context).hasSingleBean(UnleashPropeties.class);
+                    assertThat(context).hasSingleBean(UnleashProperties.class);
                     assertThat(context).hasSingleBean(StrategySupplier.class);
                     assertThat(context).hasSingleBean(UnleashConfig.class);
                 }
@@ -191,7 +191,7 @@ public class UnleashAutoconfigurationTest {
                 context -> {
                     assertThat(context.getStartupFailure()).isNull();
 
-                    assertThat(context).doesNotHaveBean(UnleashPropeties.class);
+                    assertThat(context).doesNotHaveBean(UnleashProperties.class);
                     assertThat(context).doesNotHaveBean(UnleashConfig.class);
                     assertThat(context).doesNotHaveBean(StrategySupplier.class);
                     assertThat(context).doesNotHaveBean(Unleash.class);

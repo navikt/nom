@@ -15,6 +15,7 @@ spec:
       value: "-Xms512m -Xmx2048m"
   envFrom:
     - secret: nom-sluttdato-override-json
+    - secret: nom-api-unleash-api-token
   image: {{image}}
   port: 8080
   ingresses:
@@ -144,7 +145,7 @@ spec:
           namespace: org
           cluster: prod-gcp
       external:
-        - host: unleash.nais.io
+        - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
   gcp:

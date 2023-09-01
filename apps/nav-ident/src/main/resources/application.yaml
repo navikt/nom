@@ -97,10 +97,6 @@ management:
 server:
   shutdown: graceful
 
-unleash:
-  endpoint:
-    url: https://unleash.nais.io/api
-
 ---
 spring:
   config:

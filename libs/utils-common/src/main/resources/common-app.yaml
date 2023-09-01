@@ -13,5 +13,4 @@ app.security.resource-server:
   accepted-audience: ${AZURE_APP_CLIENT_ID:}, api://${AZURE_APP_CLIENT_ID:}
 
 unleash:
-  endpoint:
-    url: https://unleash.nais.io/api
+  url: https://unleash.nais.io/api

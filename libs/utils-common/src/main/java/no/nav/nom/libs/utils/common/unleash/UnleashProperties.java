@@ -5,8 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.net.URI;
 
 @ConfigurationProperties("unleash")
-public record UnleashPropeties(
-    Endpoint endpoint
+public record UnleashProperties(
+    Endpoint endpoint,
+    String apiKey
 ) {
     public record Endpoint(URI url) {}
 }

@@ -91,7 +91,6 @@ spec:
       rules:
         - application: nav-ident-redis
       external:
-        - host: unleash.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
 ---
 
