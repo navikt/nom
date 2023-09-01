@@ -190,10 +190,10 @@ app:
     groups:
       nom-write:
         group-id: "${NOM_WRITE_GROUPID}"
-        scopes: ["MUTATE_RESSURS"]
+        scopes: ["MUTATE_RESSURS", "QUERY_PERSON"]
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
-        scopes: ["ADMIN"]
+        scopes: ["ADMIN", "QUERY_PERSON"]
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
