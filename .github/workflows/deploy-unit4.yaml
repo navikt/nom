@@ -16,6 +16,9 @@ on:
 
 jobs:
   deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
     uses: ./.github/workflows/deploy-spring-app.yaml
     with:
       maven-project: unit4

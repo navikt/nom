@@ -53,9 +53,6 @@ on:
 jobs:
   build-app-docker:
     name: "Build app and push docker image to GAR"
-    permissions:
-      contents: "read"
-      id-token: "write"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
