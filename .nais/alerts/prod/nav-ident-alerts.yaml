@@ -35,13 +35,25 @@ spec:
           labels:
             namespace: org
             severity: critical
-    - name: nav-ident_high_failrate
-      rules:
-        - alert: NAV-IDENT høy feilrate i logger
-          expr: (100 * sum by (app, namespace) (rate(log_messages_errors{app="nav-ident",namespace="org"}[3m])) / sum by (app, namespace) (rate(log_messages_total{app="nav-ident",namespace="org"}[3m]))) > 10
-          for: 3m
-          annotations:
-            action: "Sjekk loggene til app {{ $labels.app }}, for å se hvorfor det er så mye feil. https://logs.adeo.no/app/r/s/2YlI4"
-          labels:
-            namespace: org
-            severity: warning
+    - name: nav-ident_errors_logged
+      rules: NAV-IDENT logger errors
+      expr: sum by (container, pod, namespace) (floor(increase(logback_events_total{app="nav-ident", level="error"} [3m]))) > 0
+      for: 3m
+      annotations:
+        summary: "Det logges på error-nivå i nav-ident"
+        action: "Sjekk loggene i Kibana: https://logs.adeo.no/app/r/s/2YlI4 \n\\
+        eller Kubernetes: `kubectl logs \{{ $labels.pod }} -c \{{ $labels.container }} -n \{{ $labels.namespace }}`"
+      labels:
+        namespace: org
+        severity: error
+    - name: nav-ident_warnings_logged
+      rules: NAV-IDENT logger warnings
+      expr: sum by (container, pod, namespace) (floor(increase(logback_events_total{app="nav-ident", level="warning"} [3m]))) > 0
+      for: 3m
+      annotations:
+        summary: "Det logges på warning-nivå i nav-ident"
+        action: "Sjekk loggene i Kibana: https://logs.adeo.no/app/r/s/2YlI4 \n\\
+        eller Kubernetes: `kubectl logs \{{ $labels.pod }} -c \{{ $labels.container }} -n \{{ $labels.namespace }}`"
+      labels:
+        namespace: org
+        severity: warning
