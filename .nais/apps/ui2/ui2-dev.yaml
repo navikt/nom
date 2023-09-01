@@ -29,6 +29,9 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
       external:
         - host: teamkatalog-api.dev-fss-pub.nais.io
         - host: unpkg.com
