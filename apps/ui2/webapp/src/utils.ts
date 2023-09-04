@@ -1,4 +1,10 @@
-import { format, formatISO } from "date-fns";
+import {
+  format,
+  formatISO,
+  isWithinInterval,
+  maxTime,
+  minTime,
+} from "date-fns";
 
 export const sortItems = (a: string, b: string) => {
   if (a.localeCompare(b, "no") < 0) {
@@ -79,4 +85,17 @@ export function formatDateWithoutTimezone(date: Date) {
 
 export function formatDisplayDate(date: string) {
   return format(new Date(date), DATE_FORMATS.no);
+}
+
+export function isGyldighetsPeriodeActive(
+  gyldigFom: string | undefined,
+  gyldigTom: string | undefined,
+) {
+  const gyldigFomAsDate = gyldigFom ? new Date(gyldigFom) : new Date(minTime);
+  const gyldigTomAsDate = gyldigTom ? new Date(gyldigTom) : new Date(maxTime);
+
+  return isWithinInterval(new Date(), {
+    start: gyldigFomAsDate,
+    end: gyldigTomAsDate,
+  });
 }

@@ -15,7 +15,7 @@ import {
   Tag,
 } from "@navikt/ds-react";
 import axios from "axios";
-import { endOfDay, isAfter, isBefore } from "date-fns";
+import { isAfter } from "date-fns";
 import partition from "lodash/partition";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
@@ -31,7 +31,12 @@ import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/components/CreateResourceForm";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
-import { formatDisplayDate, formatTlf, isInDevelopment } from "~/utils";
+import {
+  formatDisplayDate,
+  formatTlf,
+  isGyldighetsPeriodeActive,
+  isInDevelopment,
+} from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   return (
@@ -96,11 +101,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
     return <></>;
   }
 
-  const [expiredOrgTilknytninger, activeOrgtilknytninger] = partition(
+  const [activeOrgtilknytninger, expiredOrgTilknytninger] = partition(
     ressurs.orgTilknytning,
     (orgtilknytning) =>
-      orgtilknytning.gyldigTom &&
-      isBefore(endOfDay(new Date(orgtilknytning.gyldigTom)), new Date()),
+      isGyldighetsPeriodeActive(
+        orgtilknytning.gyldigFom,
+        orgtilknytning.gyldigTom,
+      ),
   );
 
   return (

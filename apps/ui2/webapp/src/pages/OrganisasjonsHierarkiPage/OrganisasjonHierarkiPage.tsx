@@ -10,6 +10,7 @@ import { useParams } from "react-router";
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import type { HentHierarkiQueryHookResult } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
+import { isGyldighetsPeriodeActive } from "~/utils";
 
 import * as Gq from "../../api/generated/graphql_generated";
 import ContentWrapper from "../../components/ContentWrapper";
@@ -70,9 +71,11 @@ export const OrganisasjonHierarkiPageInner = (properties: {
 
   const valgtEnhet = properties.data?.enhet;
 
-  const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? []).map(
-    ({ ressurs }) => ressurs,
-  );
+  const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? [])
+    .filter((kobling) =>
+      isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
+    )
+    .map(({ ressurs }) => ressurs);
 
   return (
     <div
