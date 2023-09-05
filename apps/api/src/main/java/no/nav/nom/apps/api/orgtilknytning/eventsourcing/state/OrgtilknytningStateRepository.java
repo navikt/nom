@@ -53,7 +53,6 @@ public class OrgtilknytningStateRepository {
 
     public void putEventAggregate(String fid, OrgtilknytningState newOrgtilknytningState) {
         if (newOrgtilknytningState == null) {
-            log.debug("Got Tombestone for orgtilknytning fid {}", fid);
             var eksisterede = orgtilknytningByFid.get(fid);
             if (eksisterede != null) {
                 var navidentOrgtilknytninger = orgtilknytningerByNavident.get(eksisterede.navident());
