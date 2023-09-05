@@ -101,30 +101,25 @@ export function CreateResourceConfirmationModal({
             Du kan ikke endre opplysningene i NOM når ressursen er opprettet.
             Dette må gjøres i Unit4 og Identrutina i Remedy.
           </Alert>
-          <div
-            css={css`
-              margin-top: var(--a-spacing-5);
-              display: flex;
-              gap: var(--a-spacing-4);
-
-              button {
-                flex: 1;
-              }
-            `}
-          >
-            <Button
-              onClick={() => {
-                onConfirm();
-                setShowModal(false);
-              }}
-            >
-              Opprett medarbeider
-            </Button>
-            <Button onClick={() => setShowModal(false)} variant="secondary">
-              Avbryt
-            </Button>
-          </div>
         </Modal.Body>
+        <Modal.Footer>
+          <Button
+            onClick={() => {
+              onConfirm();
+              setShowModal(false);
+            }}
+            type="button"
+          >
+            Opprett medarbeider
+          </Button>
+          <Button
+            onClick={() => setShowModal(false)}
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );
