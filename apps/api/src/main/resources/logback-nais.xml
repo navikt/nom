@@ -33,6 +33,9 @@
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>
 
+    <!-- Spring Application availability logging -->
+    <logger name="org.springframework.boot.availability.ApplicationAvailabilityBean" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
     </root>
