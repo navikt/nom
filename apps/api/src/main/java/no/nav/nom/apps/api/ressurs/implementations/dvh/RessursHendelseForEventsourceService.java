@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs;
+package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +11,6 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStart
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -21,7 +19,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,7 +83,7 @@ public class RessursHendelseForEventsourceService {
         });
     }
 
-    public Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
+    private Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
         return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
             ressurs.getPersonIdent(),
             ressurs.getNavIdent(),
@@ -100,7 +97,7 @@ public class RessursHendelseForEventsourceService {
         )));
     }
 
-    public void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
+    private void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
         ressursState.sluttdato().ifPresentOrElse((s) -> {
             if (!s.equals(dvhRessurs.getSluttdato())) {
                 ressursSluttet(ressursState.fid(), dvhRessurs);
@@ -134,36 +131,36 @@ public class RessursHendelseForEventsourceService {
         }
     }
 
-    public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
+    private void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
-    public void ressursStartet(String fid, DvhRessurs dvhRessurs) {
+    private void ressursStartet(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.endreStartRessursEvent(new OppdaterStartdatoCommand(fid, dvhRessurs.getStartDato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
-    public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
+    private void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
+    private void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.oppdaterSektorEvent(
             new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public void ressursEndretPersonident(String fid, DvhRessurs dvhRessurs) {
+    private void ressursEndretPersonident(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.oppdaterPersonidentCommand(
             new OppdaterPersonidentCommand(fid, dvhRessurs.getPersonIdent()),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public InputMetadata createInputMetadata(Object rawData) {
+    private InputMetadata createInputMetadata(Object rawData) {
         return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
     }
 

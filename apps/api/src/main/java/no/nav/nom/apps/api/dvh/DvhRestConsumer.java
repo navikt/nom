@@ -15,7 +15,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
@@ -67,8 +67,8 @@ public class DvhRestConsumer {
                 Thread.sleep(5_000);
                 log.debug("InitialState er ikke klar enda");
                 log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
-            } catch (Exception ignored) {
-                log.error("Waiting for initialState last feilet", ignored);
+            } catch (Exception logMe) {
+                log.error("Waiting for initialState last feilet", logMe);
             }
         }
 
