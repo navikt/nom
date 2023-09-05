@@ -91,9 +91,6 @@ spec:
         - application: journalforing-frontend
           namespace: isa
           cluster: dev-fss
-        - application: amt-tiltak
-          namespace: amt
-          cluster: dev-gcp
         - application: amt-person-service
           namespace: amt
           cluster: dev-gcp

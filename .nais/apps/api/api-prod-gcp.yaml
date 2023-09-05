@@ -88,9 +88,6 @@ spec:
         - application: sparkel-vilkarsproving
           namespace: tbd
           cluster: prod-fss
-        - application: amt-tiltak
-          namespace: amt
-          cluster: prod-gcp
         - application: amt-person-service
           namespace: amt
           cluster: prod-gcp
