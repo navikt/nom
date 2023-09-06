@@ -80,4 +80,4 @@ spec:
     - name: TEAM_CATALOG_API_URL
       value: https://teamkatalog-api.dev-fss-pub.nais.io
     - name: TEAM_CATALOG_SCOPE
-      value: api://dev-fss.nom.team-catalog-backend/.default
+      value: api://dev-gcp.nom.team-catalog-backend/.default
