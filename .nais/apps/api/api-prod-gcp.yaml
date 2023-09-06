@@ -78,6 +78,7 @@ spec:
           cluster: prod-fss
         - application: team-catalog-backend
           cluster: prod-gcp
+          namespace: org
         - application: veilarbveileder
           namespace: pto
           cluster: prod-fss
