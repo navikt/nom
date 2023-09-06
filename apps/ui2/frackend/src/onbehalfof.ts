@@ -28,18 +28,21 @@ export async function addOnBehalfOfToken(
   next: NextFunction,
   scope: string,
 ) {
-  const currentOboToken = getOboTokenForRequest(request, scope);
-  if (currentOboToken) {
-    if (currentOboToken.expiresAt > Date.now() / 1000 + 10) {
+  try {
+    const currentOboToken = getOboTokenForRequest(request, scope);
+    if (currentOboToken) {
+      if (currentOboToken.expiresAt > Date.now() / 1000 + 10) {
+        return next();
+      }
+      const token = await getRefreshToken(currentOboToken.refreshToken, scope);
+      updateSession(request, scope, token);
       return next();
     }
-    const token = await getRefreshToken(currentOboToken.refreshToken, scope);
-    updateSession(request, scope, token);
+    await getNewToken(request, response, next, scope);
     return next();
+  } catch (error) {
+    return next(error);
   }
-
-  await getNewToken(request, response, next, scope);
-  next();
 }
 
 async function getNewToken(

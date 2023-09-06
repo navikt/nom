@@ -3,6 +3,7 @@ import express from "express";
 
 import { setupActuators } from "./actuators.js";
 import { setupNomApiProxy, setupTeamcatApiProxy } from "./apiProxy.js";
+import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
 
@@ -24,5 +25,7 @@ setupGqlPlaygroundProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);
+
+app.use(errorHandling);
 
 export default app;
