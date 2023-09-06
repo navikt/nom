@@ -34,6 +34,7 @@ public record AppProperties(
     }
 
     public record Ressurs(
-            String topic
+            String topic,
+            String topic_dlt
     ) {}
 }

@@ -17,7 +17,7 @@ public class KafkaUtils {
     @SpyBean
     private KafkaRessursListener kafkaRessursListener;
     @Autowired
-    private KafkaTemplate<String, RessursEvent> ressursKafkaTemplate;
+    private KafkaTemplate<String, RessursEvent> kafkaTemplate;
 
     @Autowired
     private AppProperties appProperties;
@@ -32,7 +32,7 @@ public class KafkaUtils {
             return null;
         }).when(kafkaRessursListener).listener(Mockito.any(), Mockito.any());
 
-        ressursKafkaTemplate.send(appProperties.ressurs().topic(), key, event);
+        kafkaTemplate.send(appProperties.ressurs().topic(), key, event);
         try {
             if (!latch.await(2, TimeUnit.SECONDS)){
                 throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");

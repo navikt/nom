@@ -5,6 +5,7 @@ app:
       block-seconds-on-bail: PT20S
   ressurs:
     topic: org.nom.ressurs-eventsource
+    topic_dlt: org.nom.ressurs-eventsource-dlt
   unit4:
     base-url: ${UNIT4_BASEURL}
     employees-path: ${UNIT4_EMPLOYEES_PATH}
@@ -50,6 +51,15 @@ spring:
         spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
       isolation-level: read_committed
       group-id: ${app.name}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 30
+      properties:
+        max.block.ms: 15000
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
   jackson:
     serialization:
       write-dates-as-timestamps: false

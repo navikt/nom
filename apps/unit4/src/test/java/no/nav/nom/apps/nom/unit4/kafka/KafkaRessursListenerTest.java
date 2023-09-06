@@ -1,11 +1,11 @@
 package no.nav.nom.apps.nom.unit4.kafka;
 
 import com.thomaskasene.wiremock.junit.WireMockStubs;
-import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.apps.nom.unit4.kafka.utils.KafkaUtils;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
+import no.nav.nom.apps.nom.unit4.unit4.Unit4ServerException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
@@ -15,20 +15,24 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.libs.test.RsaStub;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +45,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @ActiveProfiles("test")
 @SpringBootTest
 @WireMockStubs(RsaStub.class)
-@EmbeddedKafka(partitions = 1, topics = {"nom-ressurser"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource"}, controlledShutdown = true)
 @ExtendWith(OutputCaptureExtension.class)
 class KafkaRessursListenerTest {
 
@@ -50,6 +54,9 @@ class KafkaRessursListenerTest {
 
     @MockBean
     Unit4Client unit4Client;
+
+    @MockBean
+    KafkaRessursDltProducer kafkaRessursDltProducer;
 
     @Test
     public void basicMessageUnit4AllOk() throws Exception{
@@ -101,13 +108,31 @@ class KafkaRessursListenerTest {
     }
 
     @Test
-    public void messageUnit4_RequestException(CapturedOutput output) throws Exception{
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void messageUnit4_ServerException(CapturedOutput output) throws Exception{
+        doThrow(new Unit4ServerException(""))
+            .when(unit4Client)
+            .createRessurs(any());
+
+        assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null)));
+        assertTrue(output.getOut().contains("Caused by: no.nav.nom.apps.nom.unit4.kafka.KafkaRessursBlockingException"));
+    }
+
+    @Test
+    public void messageUnit4_RequestException_sends_to_dlt() throws Exception{
         doThrow(new Unit4RequestException(""))
                 .when(unit4Client)
                 .createRessurs(any());
 
-        assertThrows(RuntimeException.class, () -> kafkaUtils.send("key1", createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null)));
-        assertTrue(output.getOut().contains("Bailer ut"));
+        var ressursEvent = createOpprettRessursEvent("04129980932", "dev-gcp:org:nom-ui2", null);
+        kafkaUtils.send("key1", ressursEvent);
+
+        ArgumentCaptor<RessursEvent> arg = ArgumentCaptor.forClass(RessursEvent.class);
+        ArgumentCaptor<String> argUuid = ArgumentCaptor.forClass(String.class);
+        verify(kafkaRessursDltProducer, times(1)).send(arg.capture(), argUuid.capture());
+
+        assertEquals(ressursEvent.getData(), arg.getValue().getData());
+        assertEquals("key1", argUuid.getValue());
     }
 
     private RessursEvent createOpprettRessursEvent(String personident, String initiatedFrom, AnsettelsesType ansettelsesType){
