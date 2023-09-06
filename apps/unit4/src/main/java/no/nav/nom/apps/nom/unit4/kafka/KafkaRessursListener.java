@@ -3,7 +3,6 @@ package no.nav.nom.apps.nom.unit4.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.nom.unit4.AppProperties;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Client;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ConflictException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4Exception;
@@ -19,8 +18,6 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-
 import static no.nav.nom.apps.nom.unit4.AppConfig.SECURE_LOGS;
 
 @Component
@@ -29,16 +26,16 @@ public class KafkaRessursListener {
 
     public static final String UNLEASH_SKRU_AV_EKSTRAAGA_TOGGLE = "nom.unit4.ikke_legg_til_ekstra_arbeidsgiveravgift_relasjon";
     private final Unit4Client unit4Client;
-    private final Duration blockSeconds;
-
     private final Unleash unleash;
     @Value("${app.unit4.felles-kobling-value:000000}")
     private String fellesKoblingValue;
 
-    public KafkaRessursListener(Unit4Client unit4Client, AppProperties appProperties, Unleash unleash) {
+    private final KafkaRessursDltProducer kafkaRessursDltProducer;
+
+    public KafkaRessursListener(Unit4Client unit4Client, Unleash unleash, KafkaRessursDltProducer kafkaRessursDltProducer) {
         this.unit4Client = unit4Client;
-        this.blockSeconds = appProperties.kafka().listener().blockSecondsOnBail();
         this.unleash = unleash;
+        this.kafkaRessursDltProducer = kafkaRessursDltProducer;
     }
 
     @KafkaListener(topics = "${app.ressurs.topic}")
@@ -61,30 +58,20 @@ public class KafkaRessursListener {
                     log.warn("Ressurs finnes i Unit4. Oppdatere i stedet? På meldings-key: {}", uuid);
                 } catch (Unit4ServerException e) {  // Andre Unit4 feil (5xx) ? -> Vent x-sec før behandle på nytt
                     log.warn("Unit 4 server error på meldings-key: {}", uuid, e);
-                    blokkerOgBailUt();
+                    throw new KafkaRessursBlockingException(e);
                 } catch (Unit4RequestException e) { // Klient feil (4xx) -> Logge, og baile ut? Hva med endring i Unit4 som gjør at vi starter å feile. På alt...
-                    log.warn("Unit 4 request error på meldings-key: {}", uuid, e);
-                    blokkerOgBailUt();
+                    log.warn("Unit 4 request error på meldings-key: {}. Sender meldingen til DLT topicen", uuid, e);
+                    kafkaRessursDltProducer.send(record, uuid);
                 } catch (Unit4UnknownException e) { // Andre feil
                     log.warn("Unit 4 Unknown error på meldings-key: {}", uuid, e);
-                    blokkerOgBailUt();
+                    throw new KafkaRessursBlockingException(e);
                 } catch (JsonProcessingException e) {
                     log.error("NomRessursDto kan ikke serialiseres til Json på meldings-key: {}", uuid, e);
                 } catch (Unit4Exception e) {
                     log.warn("Ubehandlet Unit4 Exception! På meldings-key: {}", uuid, e);
-                    blokkerOgBailUt();
+                    throw new KafkaRessursBlockingException(e);
                 }
             }
         }
     }
-
-    private void blokkerOgBailUt() {
-        try {
-            Thread.sleep(blockSeconds.toMillis());
-        } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
-        }
-        throw new RuntimeException("Bailer ut på behandling av melding");
-    }
-
 }
