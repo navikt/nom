@@ -268,7 +268,7 @@ export function AdminPage() {
 function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const [searchParameters] = useSearchParams();
   const updateOrgEnhetsTypeMutation = useMutation(
-    (newOrgEnhetsType: OrgEnhetsType) =>
+    (newOrgEnhetsType: OrgEnhetsType | null) =>
       axios.post("/nom-api/app/orgenhet/orgEnhetsType", {
         nomId: orgEnhet.id,
         orgEnhetsType: newOrgEnhetsType,
@@ -297,16 +297,18 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
       <Select
         hideLabel
         label=""
-        onChange={(event) =>
-          updateOrgEnhetsTypeMutation.mutate(
-            event.target.value as OrgEnhetsType,
-          )
-        }
+        onChange={(event) => {
+          const orgEnhetsType =
+            event.target.value === ""
+              ? null
+              : (event.target.value as OrgEnhetsType);
+          updateOrgEnhetsTypeMutation.mutate(orgEnhetsType);
+        }}
         readOnly={searchParameters.get("allowEdit") !== "true"}
         size="small"
         value={orgEnhet?.orgEnhetsType ?? ""}
       >
-        {orgEnhet.orgEnhetsType ? undefined : <option value=""></option>}
+        <option value=""></option>
         {Object.values(OrgEnhetsType).map((orgEnhetsType) => (
           <option key={orgEnhetsType} value={orgEnhetsType}>
             {orgEnhetsType}
