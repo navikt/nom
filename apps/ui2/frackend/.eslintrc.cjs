@@ -17,6 +17,7 @@ module.exports = {
     },
     plugins: ["react", "prettier", "@typescript-eslint", "simple-import-sort"],
     rules: {
+        eqeqeq: ["error", "always"],
         "prettier/prettier": ["error"],
         "import/prefer-default-export": "off",
         "simple-import-sort/imports": "error",
