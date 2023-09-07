@@ -17,7 +17,7 @@
 
     <properties>
         <unleash.version>8.3.0</unleash.version>
-        <wiremock.version>2.35.0</wiremock.version>
+        <wiremock.version>2.35.1</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
     </properties>
 
