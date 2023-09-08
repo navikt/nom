@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrgEnhetKorrigertEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetOpprettetEventV1;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.apache.kafka.common.serialization.Serdes;
@@ -43,6 +44,8 @@ class EventsrcToState {
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
                             if(event.getAdditionalData() instanceof OrgEnhetOpprettetEventV1.OrgEnhetOpprettetAdditionalAgressoData data){
+                                state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
+                            } else if (event.getAdditionalData() instanceof OrgEnhetKorrigertEventV1.OrgEnhetKorrigertAdditionalAgressoData data){
                                 state.set("additionalData", objectMapper.convertValue(data, ObjectNode.class));
                             }
                             state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
