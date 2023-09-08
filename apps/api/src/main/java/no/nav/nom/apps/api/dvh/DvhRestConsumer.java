@@ -74,7 +74,6 @@ public class DvhRestConsumer {
 
         loadLedereAndOrganiseringerFromDvh();
         loadTlfFromDvh();
-        orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
 
 
         if (!initialLoadComplete.get()) { // Pod kan markeres som klar etter oppstart
@@ -88,6 +87,8 @@ public class DvhRestConsumer {
             loadRessurserFromDvh();
 
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
+
+            orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();
         }
 
         log.info("Ferdig med schedulert oppdatering fra DVH. Tok {}", durationAsH24(start));
