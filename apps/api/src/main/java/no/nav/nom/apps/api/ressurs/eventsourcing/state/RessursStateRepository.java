@@ -19,7 +19,7 @@ public class RessursStateRepository implements IRessursService {
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
 
-    public Optional<RessursState> findByFid(UUID fid) {
+    public Optional<RessursState> findByFid(String fid) {
         return Optional.ofNullable(ressursByFid.get(fid));
     }
 

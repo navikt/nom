@@ -45,10 +45,10 @@ public class RessursOpprettetEmailService {
         var orgEnhet = orgEnhetStateRepository.findById(orgenhetId)
             .orElseThrow(() -> new RessursOpprettetEmailException("Fant ikke orgenhet med gitt id"));
 
-        var lederNavidentOpt = ressursService.findByFid(UUID.fromString(orgEnhet.fid()))
-            .map(RessursState::navident);
+        // lederFid vil alltid være null siden den ikke er persistert enda
+        var maybeLederNavidents = orgEnhet.lederFid().flatMap(ressursService::findByFid).map(RessursState::navident);
 
-        lederNavidentOpt.ifPresentOrElse(
+        maybeLederNavidents.ifPresentOrElse(
             lederNavident -> composeAndSendEmail(opprettetRessurs, Set.of(lederNavident)),
             () -> {throw new RessursOpprettetEmailException("Fant ikke leder for orgenhet");}
         );

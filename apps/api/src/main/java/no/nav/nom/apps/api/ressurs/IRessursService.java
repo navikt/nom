@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public interface IRessursService {
-    Optional<RessursState> findByFid(UUID fid);
+    Optional<RessursState> findByFid(String fid);
 
     Optional<RessursState> findByPersonident(String personident);
 
