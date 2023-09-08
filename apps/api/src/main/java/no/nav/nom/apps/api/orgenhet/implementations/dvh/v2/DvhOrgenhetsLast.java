@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -188,9 +189,7 @@ public class DvhOrgenhetsLast {
                     stateEnheterPerUniqueAgressoId
                         .stream()
                         .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
-                        .forEach(orgEnhetState -> {
-                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now());
-                        });
+                        .forEach(orgEnhetState -> avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, LocalDate.now()));
                 }
             );
             log.info("Ferdig med orgenhet last");
@@ -267,7 +266,9 @@ public class DvhOrgenhetsLast {
         val navnEndret = !orgEnhetState.navn().equals(dvhOrgenhetV2.getNavn());
         val datoFOMEndret = !orgEnhetState.gyldigFom().equals(dvhOrgenhetV2.getGyldigFom());
         val datoTOMEndret = orgEnhetState.gyldigTom().isPresent() && !dvhOrgenhetV2.getGyldigTom().equals(orgEnhetState.gyldigTom());
-        if (navnEndret || datoFOMEndret || datoTOMEndret) {
+        val agressoOrgEnhetTypeEndret = !Objects.equals(orgEnhetState.agressoOrgenhetType().orElse(null), dvhOrgenhetV2.getAgressoOrgenhetType());
+
+        if (navnEndret || datoFOMEndret || datoTOMEndret ||agressoOrgEnhetTypeEndret) {
             val korrigering = new KorrigerOrgEnhet(
                     orgEnhetState.id(),
                     dvhOrgenhetV2.getNavn(),
