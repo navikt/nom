@@ -11,6 +11,7 @@ class AppInfo:
     sub_project_dir_name: str
     kubernetes_name: str
     name_space: str
+    uses_unleash: bool = False
 
 
 def get_secrets_name(application_name, name_space):
@@ -54,7 +55,14 @@ def base64_decode(value, url=False):
 def get_application_secrets(app_info: AppInfo):
     secret_name = get_secrets_name(app_info.kubernetes_name, app_info.name_space)
     secrets = get_secrets(secret_name, app_info.name_space)
-    return json.loads(secrets)["data"]
+
+    secrets_data = json.loads(secrets)["data"]
+
+    if app_info.uses_unleash:
+        unleash_secrets = get_secrets(f"{app_info.kubernetes_name}-unleash-api-token", app_info.name_space)
+        secrets_data.update(json.loads(unleash_secrets)["data"])
+
+    return secrets_data
 
 
 def setup_spring_app_secrets(app_info: AppInfo):
@@ -74,6 +82,14 @@ def setup_spring_app_secrets(app_info: AppInfo):
             "AZURE_APP_JWK": base64_decode(secrets["AZURE_APP_JWK"]),
         }
     )
+
+    if app_info.uses_unleash:
+        properties_object.update(
+            {
+                "UNLEASH_SERVER_API_URL": base64_decode(secrets["UNLEASH_SERVER_API_URL"]),
+                "UNLEASH_SERVER_API_TOKEN": base64_decode(secrets["UNLEASH_SERVER_API_TOKEN"]),
+            }
+        )
 
     with open(local_properties_filepath, "w+") as properties_file:
         properties_file.write(yaml.safe_dump(properties_object))
@@ -110,9 +126,9 @@ def setup_secrets(apps_filter: list, env: str):
     run_command(f"kubectl config use-context {env}-gcp")
 
     spring_apps = [
-        AppInfo("api", "nom-api", "nom"),
+        AppInfo("api", "nom-api", "nom", uses_unleash=True),
         AppInfo("nav-ident", "nav-ident", "org"),
-        AppInfo("unit4", "nom-unit4", "org")
+        AppInfo("unit4", "nom-unit4", "org", uses_unleash=True)
     ]
 
     node_apps = [
