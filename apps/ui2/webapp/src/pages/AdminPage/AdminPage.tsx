@@ -123,7 +123,7 @@ export function AdminPage() {
         css={css`
           display: grid;
           gap: 1rem;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         `}
       >
         <UNSAFE_Combobox
@@ -177,6 +177,15 @@ export function AdminPage() {
             setFilter((filter) => ({
               ...filter,
               remedyEnhetId: event.target.value,
+            }))
+          }
+        />
+        <TextField
+          label="agressoId"
+          onChange={(event) =>
+            setFilter((filter) => ({
+              ...filter,
+              agressoId: event.target.value,
             }))
           }
         />
