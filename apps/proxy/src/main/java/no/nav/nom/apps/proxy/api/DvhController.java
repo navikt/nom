@@ -62,7 +62,7 @@ public class DvhController {
             appName = tokenAtts.getOrDefault("azp_name", tokenAtts.getOrDefault("azp", appName)).toString();
         }
 
-        log.info("Mottatt forespørsel fra [" + appName + "] med path: " + request.getRequestURI() + ", ruter til: " + uri + token.getName());
+        log.info("Mottatt forespørsel fra [" + appName + "] med path: " + request.getRequestURI() + ", ruter til: " + uri);
 
         return webClient.get()
             .uri(uri)
