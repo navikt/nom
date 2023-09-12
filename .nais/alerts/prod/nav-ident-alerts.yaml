@@ -42,7 +42,7 @@ spec:
       annotations:
         summary: "Det logges på error-nivå i nav-ident"
         action: "Sjekk loggene i Kibana: https://logs.adeo.no/app/r/s/2YlI4 \n\\
-        eller Kubernetes: `kubectl logs \{{ $labels.pod }} -c \{{ $labels.container }} -n \{{ $labels.namespace }}`"
+        eller Kubernetes: `kubectl logs {{ $labels.pod }} -c {{ $labels.container }} -n {{ $labels.namespace }}`"
       labels:
         namespace: org
         severity: error
@@ -53,7 +53,7 @@ spec:
       annotations:
         summary: "Det logges på warning-nivå i nav-ident"
         action: "Sjekk loggene i Kibana: https://logs.adeo.no/app/r/s/2YlI4 \n\\
-        eller Kubernetes: `kubectl logs \{{ $labels.pod }} -c \{{ $labels.container }} -n \{{ $labels.namespace }}`"
+        eller Kubernetes: `kubectl logs {{ $labels.pod }} -c {{ $labels.container }} -n {{ $labels.namespace }}`"
       labels:
         namespace: org
         severity: warning
