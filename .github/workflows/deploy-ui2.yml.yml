@@ -27,16 +27,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
+          registry-url: https://npm.pkg.github.com/
+          scope: '@navikt'
 
       - name: Install webapp dependencies
         working-directory: apps/ui2/webapp
         run: npm install
-
-      - name: Add version
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-        working-directory: apps/ui2/webapp
-        run: echo "REACT_APP_GIT_VERSION=${GITHUB_SHA}" >> .env
 
       - name: Build webapp
         working-directory: apps/ui2/webapp
@@ -45,6 +41,16 @@ jobs:
       - name: Copy webapp dist into public directory of frackend
         working-directory: apps/ui2/webapp
         run: cp -r dist/ ../frackend/public
+
+      - name: Install frackend dependencies
+        working-directory: apps/ui2/frackend
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
+
+      - name: Build frackend
+        working-directory: apps/ui2/frackend
+        run: npm run build
 
       - name: Build and push Docker image
         uses: nais/docker-build-push@v0

@@ -1,3 +1,4 @@
+import axios from "axios";
 import type { NextFunction, Request, Response } from "express";
 
 export function errorHandling(
@@ -7,7 +8,9 @@ export function errorHandling(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
-  console.error(error);
+  if (axios.isAxiosError(error)) {
+    console.error(error.response?.data);
+  }
   return response.status(500).json({
     error: "Internal server error",
   });

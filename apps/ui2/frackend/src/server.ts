@@ -6,6 +6,7 @@ import { setupNomApiProxy, setupTeamcatApiProxy } from "./apiProxy.js";
 import { errorHandling } from "./errorHandler.js";
 import { setupStaticRoutes } from "./frontendRoute.js";
 import { setupGqlPlaygroundProxy } from "./gqlplaygroundproxy.js";
+import { verifyJWTToken } from "./tokenValidation.js";
 
 // Create Express Server
 const app = express();
@@ -18,10 +19,11 @@ setupActuators(app);
 app.set("trust proxy", 1);
 app.use(cookieParser());
 
+setupGqlPlaygroundProxy(app);
+
+app.use(verifyJWTToken);
 setupNomApiProxy(app);
 setupTeamcatApiProxy(app);
-
-setupGqlPlaygroundProxy(app);
 
 // Catch all route, må være sist
 setupStaticRoutes(app);
