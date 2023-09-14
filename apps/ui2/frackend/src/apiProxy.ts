@@ -1,4 +1,4 @@
-import { addProxyHandler } from "@navikt/express-obo-token-exchange";
+import { addProxyHandler } from "@navikt/backend-for-frontend-utils";
 import { Express } from "express";
 
 import config from "./config.js";
