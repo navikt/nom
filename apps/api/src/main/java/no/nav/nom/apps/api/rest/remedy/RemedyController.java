@@ -114,7 +114,7 @@ public class RemedyController {
             @ApiResponse(responseCode = "200", description = "Success")
         }
     )
-    @PreAuthorize("hasAuthority('QUERY_PERSON')")
+    @PreAuthorize("hasAuthority('MUTATE_RESSURS')")
     public ResponseEntity<RessursDTO> opprettRessurs(@RequestBody OpprettRessursRequest request, @NonNull JwtAuthenticationToken token) {
         return ResponseEntity.ok(opprettRessurs(request, SecurityUtil.getSystemFromToken(token).orElseThrow()));
     }
