@@ -17,6 +17,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +52,7 @@ public class ManuelleEvtsrcMeldinger {
         }
     )
     @PostMapping(value = "/lagSlettRessursMelding")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> lagSlettRessursMelding(
         @Parameter(description = "FID for ressursen som skal slettes") @RequestParam String fid,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
