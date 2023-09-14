@@ -27,4 +27,6 @@ public interface IRessursService {
     Map<String, RessursState> findByNavidentBulk(List<String> navIdenter);
 
     void clear();
+
+    void remove(String fid);
 }

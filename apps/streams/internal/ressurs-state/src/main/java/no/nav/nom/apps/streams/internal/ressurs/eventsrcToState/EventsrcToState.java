@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.Serdes;
@@ -43,12 +45,19 @@ class EventsrcToState {
                 .aggregate(
                         objectMapper::createObjectNode,
                         (key, event, state) -> {
-                            if(event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data){
-                                if(data.navident().isPresent()){
-                                    state.put("navident", data.navident().get());
+                            if (event instanceof RessursTekniskSlettetEventV1) {
+                                state.put("TOMBSTONE", true);
+                                // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                                // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+                                // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                            } else {
+                                if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
+                                    if (data.navident().isPresent()) {
+                                        state.put("navident", data.navident().get());
+                                    }
                                 }
+                                state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             }
-                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             return state;
                         },
                         Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
@@ -59,6 +68,11 @@ class EventsrcToState {
 
     public RessursState toRessursState(String fid, JsonNode eventStateAggregate){
         try {
+            if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
+                log.info("SlettRessursEvent for fid {} received - create TOMBSTONE in StateTopic", fid);
+                return null;
+            }
+
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
 
             return new RessursState(

@@ -11,6 +11,7 @@ import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -248,6 +249,67 @@ public class EventsrcToStateTest {
             .containsExactly(
                 KeyValue.pair(event.getFid(), expectedOpprettet),
                 KeyValue.pair(event.getFid(), expectedEndret)
+            );
+    }
+
+    @Test
+    @DisplayName("RessursTekniskSlettetEventV1 lager tombstone/null RessursState i output topic")
+    public void test41() {
+        String fid = UUID.randomUUID().toString();
+
+        final RessursOpprettetEventV1.RessursOpprettetEventData eventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
+            "personident",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn",
+                null,
+                "etternavn"
+            )
+        );
+
+        final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+            Optional.of("navident"),
+            null,
+            null,
+            null,
+            Optional.of(LocalDate.now()),
+            Optional.empty(),
+            Optional.empty()
+        );
+
+        final RessursEvent opprettEvent = new RessursOpprettetEventV1(
+            fid,
+            eventData,
+            (Event.Metadata) null,
+            additionalData
+        );
+
+        final RessursState expectedOpprettet = new RessursState(
+            fid,
+            eventData.personident(),
+            additionalData.navident().get(),
+            eventData.sektor(),
+            new Visningsnavn(
+                "fornavn",
+                Optional.empty(),
+                "etternavn"
+            ),
+            Optional.empty()
+        );
+
+        final RessursEvent slettEvent = new RessursTekniskSlettetEventV1(
+            fid,
+            null,
+            (Event.Metadata) null
+        );
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), opprettEvent);
+        inputTopic.pipeInput(UUID.randomUUID().toString(), slettEvent);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(fid, expectedOpprettet),
+                KeyValue.pair(fid, null)
             );
     }
 

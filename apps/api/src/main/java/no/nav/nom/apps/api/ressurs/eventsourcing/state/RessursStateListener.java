@@ -69,7 +69,11 @@ public class RessursStateListener {
     }
 
     private void processMessage(String key, RessursState ressursState) {
-        ressursStateRepository.putEventAggregate(ressursState);
+        if (ressursState == null) {
+            ressursStateRepository.remove(key);
+        } else {
+            ressursStateRepository.putEventAggregate(ressursState);
+        }
         this.luceneService.invalidateRessurs(ressursState.navident());
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);

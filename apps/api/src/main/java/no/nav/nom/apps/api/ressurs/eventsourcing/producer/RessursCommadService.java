@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPerso
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -15,6 +16,7 @@ import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +126,16 @@ public class RessursCommadService {
             new RessursPersonidentOppdatertV1.PersonidentOppdatertEventData(
                 oppdaterPersonidentCommand.personident()
             ),
+            inputMetadata
+        ));
+    }
+
+
+    // Dette er en administrativ kommando - brukes med care :-)
+    public CompletableFuture<SendResult<String, RessursEvent>> slettRessursCommand(SlettRessursCommand slettRessursCommand, InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursTekniskSlettetEventV1(
+            slettRessursCommand.fid(),
+            new RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData(),
             inputMetadata
         ));
     }

@@ -34,8 +34,8 @@ public class KafkaUtils {
 
         kafkaTemplate.send(appProperties.ressurs().topic(), key, event);
         try {
-            if (!latch.await(2, TimeUnit.SECONDS)){
-                throw new RuntimeException("Invocation of kafka onMessage never occoured or never exited");
+            if (!latch.await(4, TimeUnit.SECONDS)){ // økt til 4 sec - av en eller annen grunn fikk jeg plutselig sporadiske timeouts på mvn verify. /Roy
+                throw new RuntimeException("Invocation of kafka onMessage never occurred or never exited");
             }
         } catch (InterruptedException e){
             throw new RuntimeException(e);

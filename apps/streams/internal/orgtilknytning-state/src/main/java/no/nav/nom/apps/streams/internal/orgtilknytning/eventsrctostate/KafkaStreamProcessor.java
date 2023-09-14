@@ -29,52 +29,52 @@ class KafkaStreamProcessor {
     private final static Logger log = LoggerFactory.getLogger(KafkaStreamProcessor.class);
 
     public KafkaStreamProcessor(
-            @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
-            @Value("${app.kafka.stateTopic}") String stateTopic,
-            ObjectMapper objectMapper,
-            JsonSerde<Object> objectSerde,
-            StreamsBuilder streamsBuilder
-    ){
+        @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
+        @Value("${app.kafka.stateTopic}") String stateTopic,
+        ObjectMapper objectMapper,
+        JsonSerde<Object> objectSerde,
+        StreamsBuilder streamsBuilder
+    ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
             .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
             .aggregate(
-                    objectMapper::createObjectNode,
-                    (key, event, state) -> {
-                        if(event instanceof OrgtilknytningFjernetEventV1) {
-                            state.put("TOMBSTONE", true);
-//                           return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
-                            // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
-//                              NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
-                        } else {
-                            state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
-                        }
-                            return state;
-                    },
-                    Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
+                objectMapper::createObjectNode,
+                (key, event, state) -> {
+                    if (event instanceof OrgtilknytningFjernetEventV1) {
+                        state.put("TOMBSTONE", true);
+                        // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                        // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+                        // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                    } else {
+                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                    }
+                    return state;
+                },
+                Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
             )
             .mapValues(this::toOrgtilknytningState)
             .toStream()
-//            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
+            //            .foreach( (k, v) -> log.info("Log aggregate [{} - {}]", k, v));
             .to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(OrgtilknytningState.class)));
     }
 
-    public OrgtilknytningState toOrgtilknytningState(String fid, JsonNode eventStateAggregate){
+    public OrgtilknytningState toOrgtilknytningState(String fid, JsonNode eventStateAggregate) {
         try {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
             return new OrgtilknytningState(
-                    fid,
-                    eventStateAggregate.get("navident").asText(),
-                    eventStateAggregate.get("orgEnhetId").asText(),
-                    Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
-                    LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                    Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null)
+                fid,
+                eventStateAggregate.get("navident").asText(),
+                eventStateAggregate.get("orgEnhetId").asText(),
+                Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
+                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null)
             );
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);
             throw e;
         }
