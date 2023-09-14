@@ -54,8 +54,9 @@ public class RemedyController {
     public static final String UNLEASH_HANDLE_PERSONIDENT_CHANGE = "nom.remedy_opprett_ressurs.handle_personident_change";
     private final Unleash unleash;
 
-    public RemedyController(IRessursService ressursService, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
-                            Unleash unleash
+    public RemedyController(
+        IRessursService ressursService, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
+        Unleash unleash
     ) {
         this.ressursService = ressursService;
         this.pdlClient = pdlClient;
@@ -76,32 +77,31 @@ public class RemedyController {
     )
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<RessursDTO> finnRessurs(@RequestBody FinnRessursRequest request) {
+        return ResponseEntity.ok(finnRessurs(request.getPersonident()));
+    }
 
-        var personident = request.getPersonident();
+    public RessursDTO finnRessurs(String personident) {
         if (personident.isBlank()) {
-            return ResponseEntity.ok(createErrorResponse(
+            return createErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 "Gitt personident er ikke gyldig"
-            ));
+            );
         }
-
         var response = ressursService.findByPersonident(personident)
             .map(this::from);
 
         if (response.isPresent()) {
-            return ResponseEntity.ok(response.get());
+            return response.get();
         } else {
             log.debug("Forsøker å finne ressurs i PDL");
             return pdlClient.hentPerson(personident)
                 .map(this::from)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.ok(createErrorResponse(
+                .orElse(createErrorResponse(
                     HttpStatus.NOT_FOUND,
                     "Kunne ikke finne ressurs med gitt personident"
-                )));
+                ));
         }
     }
-
 
     @PostMapping("/opprettRessurs")
     @Transactional
@@ -116,12 +116,14 @@ public class RemedyController {
     )
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<RessursDTO> opprettRessurs(@RequestBody OpprettRessursRequest request, @NonNull JwtAuthenticationToken token) {
+        return ResponseEntity.ok(opprettRessurs(request, SecurityUtil.getSystemFromToken(token).orElseThrow()));
+    }
+
+    public RessursDTO opprettRessurs(OpprettRessursRequest request, String systemOriginator) {
         var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
-            return funnetRessurs.map(this::from)
-                .map(ResponseEntity::ok)
-                .get();
+            return funnetRessurs.map(this::from).get();
         }
 
         String opprettetNavident;
@@ -135,11 +137,9 @@ public class RemedyController {
             );
 
             if (!nikResponse.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.ok(
-                    createErrorResponse(
-                        nikResponse.getStatusCode(),
-                        nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
-                    )
+                return createErrorResponse(
+                    nikResponse.getStatusCode(),
+                    nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
                 );
             }
 
@@ -147,14 +147,14 @@ public class RemedyController {
 
         } catch (Exception exception) {
             log.warn("Unhandled exception during call to nav-ident: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
+            return createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff");
         }
 
         InputMetadata metadataFromRequest = new InputMetadata(
             "REST",
             "/api/v1/remedy/ressurs",
             request,
-            new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
+            new Origination(request.getSubmitter(), systemOriginator)
         );
 
         if (unleash.isEnabled(UNLEASH_HANDLE_PERSONIDENT_CHANGE)) {
@@ -182,7 +182,15 @@ public class RemedyController {
                         metadataFromRequest
                     );
                 }
-                return ResponseEntity.ok(from(request)); // Returner med requestens ønsket navn - vi forventer at det blir korrekt state
+                return RessursDTO.builder()
+                    .personident(request.getPersonident())
+                    .navident(eksisterendeRessurs.navident())
+                    .navn(NavnDTO.builder()
+                        .fornavn(request.getFornavn())
+                        .mellomnavn(request.getMellomnavn())
+                        .etternavn(request.getEtternavn())
+                        .build())
+                    .build();
             }
         }
 
@@ -201,10 +209,10 @@ public class RemedyController {
                 null
             );
 
-            return ResponseEntity.ok(from(ressursCommadService.createRessursSync(opprettRessursCommand)));
+            return from(ressursCommadService.createRessursSync(opprettRessursCommand));
         } catch (Exception exception) {
             log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
+            return createErrorResponse(INTERNAL_SERVER_ERROR, "Intern feil inntraff");
         }
     }
 
@@ -224,20 +232,12 @@ public class RemedyController {
 
     private RessursDTO from(RessursState state) {
         return RessursDTO.builder()
+            .personident(state.personident())
+            .navident(state.navident())
             .navn(NavnDTO.builder()
                 .fornavn(state.visningsnavn().fornavn())
                 .mellomnavn(state.visningsnavn().mellomnavn().orElse(null))
                 .etternavn(state.visningsnavn().etternavn())
-                .build())
-            .build();
-    }
-
-    private RessursDTO from(OpprettRessursRequest request) {
-        return RessursDTO.builder()
-            .navn(NavnDTO.builder()
-                .fornavn(request.getFornavn())
-                .mellomnavn(request.getMellomnavn())
-                .etternavn(request.getEtternavn())
                 .build())
             .build();
     }

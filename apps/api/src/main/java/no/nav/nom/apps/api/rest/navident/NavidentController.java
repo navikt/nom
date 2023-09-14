@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.navident;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,6 +16,9 @@ import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.rest.remedy.OpprettRessursRequest;
+import no.nav.nom.apps.api.rest.remedy.RemedyController;
+import no.nav.nom.apps.api.rest.remedy.RessursDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -50,17 +54,25 @@ public class NavidentController {
     private final IRessursService ressursService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
+    public static final String UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER = "nom.remedy_redirect_til_remedycontroller";
+    private final Unleash unleash;
+    private final RemedyController remedyController;
+
 
     public NavidentController(
-            RessursCommadService ressursCommadService,
-            IRessursService ressursService,
-            NIKClient nikClient,
-            PdlClient pdlClient
+        RessursCommadService ressursCommadService,
+        IRessursService ressursService,
+        NIKClient nikClient,
+        PdlClient pdlClient,
+        Unleash unleash,
+        RemedyController remedyController
     ) {
         this.ressursCommadService = ressursCommadService;
         this.ressursService = ressursService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
+        this.unleash = unleash;
+        this.remedyController = remedyController;
     }
 
 
@@ -68,30 +80,35 @@ public class NavidentController {
     @ResponseBody
     public ResponseEntity<NavidentResponse> handleAccessDeniedException() {
         return ResponseEntity.ok(
-                NavidentResponse.builder()
-                        .status(String.valueOf(HttpStatus.FORBIDDEN.value()))
-                        .feilmelding("Forbidden")
-                        .build()
+            NavidentResponse.builder()
+                .status(String.valueOf(HttpStatus.FORBIDDEN.value()))
+                .feilmelding("Forbidden")
+                .build()
         );
     }
 
     @PostMapping
     @Transactional
     @Operation(
-            description = "Henter en eksisterende eller oppretter en ny navident",
-            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+        description = "Henter en eksisterende eller oppretter en ny navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Success")
-    })
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Success")})
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request, @NonNull JwtAuthenticationToken token) {
+        if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
+            return ResponseEntity.ok(toNavidentResponse(remedyController.opprettRessurs(
+                convert(request),
+                SecurityUtil.getSystemFromToken(token).orElseThrow()
+            )));
+        }
+
         final var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
             return funnetRessurs.map(this::toNavidentResponse)
-                    .map(ResponseEntity::ok)
-                    .get();
+                .map(ResponseEntity::ok)
+                .get();
         }
 
         String opprettetNavident;
@@ -106,10 +123,10 @@ public class NavidentController {
 
             if (!nikResponse.getStatusCode().is2xxSuccessful()) {
                 return ResponseEntity.ok(
-                        NavidentResponse.medFeilmelding(
-                                nikResponse.getStatusCode(),
-                                nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
-                        )
+                    NavidentResponse.medFeilmelding(
+                        nikResponse.getStatusCode(),
+                        nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
+                    )
                 );
             }
 
@@ -124,19 +141,19 @@ public class NavidentController {
 
         try {
             final var opprettRessursCommand = new OpprettRessursCommand(
-                    request.getPersonident(),
-                    opprettetNavident,
-                    pdlPerson,
-                    Sektor.valueOf(request.getSektor()),
-                    new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
-                    new InputMetadata(
-                            "REST",
-                            "/api/v1/navident",
-                            request,
-                            new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
-                    ),
-                    null,
-                    null,
+                request.getPersonident(),
+                opprettetNavident,
+                pdlPerson,
+                Sektor.valueOf(request.getSektor()),
+                new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
+                new InputMetadata(
+                    "REST",
+                    "/api/v1/navident",
+                    request,
+                    new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
+                ),
+                null,
+                null,
                 null
             );
 
@@ -147,14 +164,38 @@ public class NavidentController {
         }
     }
 
+    private OpprettRessursRequest convert(NavidentRequest request) {
+        return OpprettRessursRequest.builder()
+            .personident(request.getPersonident())
+            .fornavn(request.getFornavn())
+            .mellomnavn(request.getMellomnavn())
+            .etternavn(request.getEtternavn())
+            .forbokstav(request.getForbokstav())
+            .identType(request.getIdentType())
+            .sektor(request.getSektor())
+            .submitter(request.getSubmitter())
+            .build();
+    }
+
     private NavidentResponse toNavidentResponse(RessursState ressurs) {
         return NavidentResponse.builder()
-                .status(Integer.toString(HttpStatus.OK.value()))
-                .personident(ressurs.personident())
-                .navident(ressurs.navident())
-                .fornavn(ressurs.visningsnavn().fornavn())
-                .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
-                .etternavn(ressurs.visningsnavn().etternavn())
-                .build();
+            .status(Integer.toString(HttpStatus.OK.value()))
+            .personident(ressurs.personident())
+            .navident(ressurs.navident())
+            .fornavn(ressurs.visningsnavn().fornavn())
+            .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
+            .etternavn(ressurs.visningsnavn().etternavn())
+            .build();
+    }
+
+    private NavidentResponse toNavidentResponse(RessursDTO ressurs) {
+        return NavidentResponse.builder()
+            .status(Integer.toString(HttpStatus.OK.value()))
+            .personident(ressurs.getPersonident())
+            .navident(ressurs.getNavident())
+            .fornavn(ressurs.getNavn().getFornavn())
+            .mellomnavn(ressurs.getNavn().getMellomnavn())
+            .etternavn(ressurs.getNavn().getEtternavn())
+            .build();
     }
 }

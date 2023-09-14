@@ -77,6 +77,12 @@ public class RemedyControllerTest extends RestTestBase {
         FinnRessursRequest request = new FinnRessursRequest();
         request.setPersonident(personident);
 
+        RessursDTO expected = RessursDTO.builder()
+            .personident(personident)
+            .navident("testNavIdent")
+            .navn(navn)
+            .build();
+
         webTestClient.post()
             .uri("/api/v1/remedy/finnRessurs")
             .headers(httpHeaders -> {
@@ -87,7 +93,7 @@ public class RemedyControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(RessursDTO.class)
-            .isEqualTo(RessursDTO.builder().navn(navn).build());
+            .isEqualTo(expected);
     }
 
     @Test
@@ -125,10 +131,17 @@ public class RemedyControllerTest extends RestTestBase {
 
         when(ressursService.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
 
-        OpprettRessursRequest request = new OpprettRessursRequest();
-        request.setPersonident(personident);
-        request.setEtternavn("X");
-        request.setFornavn("Y");
+        OpprettRessursRequest request = OpprettRessursRequest.builder()
+            .personident(personident)
+            .etternavn("X")
+            .fornavn("Y")
+            .build();
+
+        RessursDTO expected = RessursDTO.builder()
+            .personident(personident)
+            .navident("testNavIdent")
+            .navn(navn)
+            .build();
 
         webTestClient.post()
             .uri("/api/v1/remedy/opprettRessurs")
@@ -140,7 +153,7 @@ public class RemedyControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(RessursDTO.class)
-            .isEqualTo(RessursDTO.builder().navn(navn).build());
+            .isEqualTo(expected);
     }
 
     @Test
@@ -167,11 +180,18 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty()
             ));
 
-        OpprettRessursRequest request = new OpprettRessursRequest();
-        request.setPersonident(personident);
-        request.setEtternavn(navn.getFornavn());
-        request.setFornavn(navn.getEtternavn());
-        request.setSektor(Sektor.EKSTERN.name());
+        OpprettRessursRequest request = OpprettRessursRequest.builder()
+            .personident(personident)
+            .etternavn(navn.getFornavn())
+            .fornavn(navn.getEtternavn())
+            .sektor(Sektor.EKSTERN.name())
+            .build();
+
+        RessursDTO expected = RessursDTO.builder()
+            .personident(personident)
+            .navident(navident)
+            .navn(navn)
+            .build();
 
         webTestClient.post()
             .uri("/api/v1/remedy/opprettRessurs")
@@ -183,9 +203,7 @@ public class RemedyControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(RessursDTO.class)
-            .isEqualTo(RessursDTO.builder()
-                .navn(navn).build()
-            );
+            .isEqualTo(expected);
 
         Mockito.verify(nikClient).opprettNavident(
             eq(OpprettNavidentRequest.builder().personid(personident).build())
@@ -229,12 +247,19 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.empty()
             ));
 
-        OpprettRessursRequest request = new OpprettRessursRequest();
-        request.setPersonident(ny_personident);
-        request.setFornavn(navn.getFornavn());
-        request.setMellomnavn(navn.getMellomnavn());
-        request.setEtternavn(navn.getEtternavn());
-        request.setSektor(Sektor.NAV_STATLIG.name());
+        OpprettRessursRequest request = OpprettRessursRequest.builder()
+            .personident(ny_personident)
+            .fornavn(navn.getFornavn())
+            .mellomnavn(navn.getMellomnavn())
+            .etternavn(navn.getEtternavn())
+            .sektor(Sektor.NAV_STATLIG.name())
+            .build();
+
+        RessursDTO expected = RessursDTO.builder()
+            .personident(ny_personident)
+            .navident(navident)
+            .navn(navn)
+            .build();
 
         webTestClient.post()
             .uri("/api/v1/remedy/opprettRessurs")
@@ -246,9 +271,7 @@ public class RemedyControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(RessursDTO.class)
-            .isEqualTo(RessursDTO.builder()
-                .navn(navn).build()
-            );
+            .isEqualTo(expected);
 
         Mockito.verify(nikClient).opprettNavident(
             eq(OpprettNavidentRequest.builder().personid(ny_personident).build())
