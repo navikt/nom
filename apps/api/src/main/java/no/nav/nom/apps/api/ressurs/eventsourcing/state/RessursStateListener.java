@@ -73,8 +73,8 @@ public class RessursStateListener {
             ressursStateRepository.remove(key);
         } else {
             ressursStateRepository.putEventAggregate(ressursState);
+            this.luceneService.invalidateRessurs(ressursState.navident());
         }
-        this.luceneService.invalidateRessurs(ressursState.navident());
         if (waitingMapByFid.containsKey(key)) {
             waitingMapByFid.remove(key).complete(ressursState);
         }
