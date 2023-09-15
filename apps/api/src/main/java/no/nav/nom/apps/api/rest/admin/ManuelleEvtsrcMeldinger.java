@@ -11,6 +11,7 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -87,10 +88,67 @@ public class ManuelleEvtsrcMeldinger {
         );
 
         return ResponseEntity.ok()
-            .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke slettes da handling ikke er bekreftet".formatted(
+            .body("Ressurs med FID %s er funnet for navident %s og personident %s. Slett event er nå sendt".formatted(
                 fid,
                 ressursState.get().navident(),
                 ressursState.get().personident()
+            ));
+    }
+
+    @Operation(
+        description = "Lag en slett ressurs Eventsrc melding",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Not found")
+        }
+    )
+    @PostMapping(value = "/oppdaterPersonidentForRessurs")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> oppdaterPersonidentForRessurs(
+        @Parameter(description = "FID for ressursen som skal få ny personident") @RequestParam String fid,
+        @Parameter(description = "Ny personident (fnr)") @RequestParam String nyPersonident,
+        @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+        log.debug("oppdaterPersonidentForRessurs : " + token.getName());
+        var ressursState = ressursService.findByFid(fid);
+        if (ressursState.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
+        }
+
+        if (!"CONFIRM".equals(confirm)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
+                    fid,
+                    ressursState.get().navident(),
+                    ressursState.get().personident()
+                ));
+        }
+
+        ressursCommadService.oppdaterPersonidentCommand(
+            new OppdaterPersonidentCommand(fid, nyPersonident),
+            new InputMetadata(
+                "/api/admin/manuelleEvtsrcMeldinger",
+                "oppdaterPersonidentForRessurs",
+                fid,
+                new Origination(
+                    SecurityUtil.getUserFromToken(token).orElseThrow(),
+                    "Admin swagger/rest"
+                )
+            )
+        );
+
+        return ResponseEntity.ok()
+            .body("Ressurs med FID %s er funnet for navident %s og personident %s. Endre personident til %s event er nå sendt".formatted(
+                fid,
+                ressursState.get().navident(),
+                ressursState.get().personident(),
+                nyPersonident
             ));
     }
 }
