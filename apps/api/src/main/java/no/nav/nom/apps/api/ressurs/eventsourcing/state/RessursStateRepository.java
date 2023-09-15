@@ -73,6 +73,9 @@ public class RessursStateRepository implements IRessursService {
 
     public void remove(String fid) {
         RessursState ressursStateToDelete = ressursByFid.get(fid);
+
+        if (ressursStateToDelete == null) return;
+
         ressursByFid.remove(fid);
 
         // Slett ressurs med denne personidenten fra ressursByPersonident, hvis fid er lik
