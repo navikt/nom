@@ -40,7 +40,6 @@ public class StartupStateHealthIndicator implements HealthIndicator {
                     )
                 )
                 .down();
-            logger.debug("Current startup state: {}", status);
         }
         return status.build();
     }
