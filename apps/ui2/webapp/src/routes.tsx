@@ -53,13 +53,12 @@ export const router = createBrowserRouter(
       <Route element={<SearchdemoPage />} path={"/searchdemo"} />
 
       <Route element={<Navigate to={"/org/" + rootOrgEnhet} />} path="/org" />
-      <Route element={<OrganisasjonHierarkiPage />} path="/org/:id">
-        <Route element={<NotfoundPage />} path="*" />
-      </Route>
+      <Route element={<OrganisasjonHierarkiPage />} path="/org/:id"></Route>
       {/*This redirection "should" have been done in the frackend.*/}
       {/*However, when requesting index.html Express does some kind of caching (304) responses,*/}
       {/*that does not account for our cookie that determines which index.html file is server.*/}
       <Route element={<Navigate replace to="/" />} path="toggle-devserver" />
+      <Route element={<NotfoundPage />} path="*" />
     </Route>,
   ),
 );
