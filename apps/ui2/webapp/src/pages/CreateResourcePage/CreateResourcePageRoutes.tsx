@@ -1,13 +1,14 @@
 import { css } from "@emotion/react";
 import { CheckmarkIcon } from "@navikt/aksel-icons";
 import type { ReactNode } from "react";
+import React from "react";
 import { Outlet, Route, Routes, useMatch } from "react-router";
+import { NavLink } from "react-router-dom";
 
 import { useHasWriteAccess } from "~/api/useGetSession";
 import { PageBanner } from "~/components/PageBanner";
 
 import ContentWrapper from "../../components/ContentWrapper";
-import { NotAuthorizedPage } from "../NotAuthorizedPage";
 import CreateResourceForm from "./components/CreateResourceForm";
 import { SearchForPerson } from "./components/SearchForPerson";
 import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
@@ -133,5 +134,15 @@ function FilledCircle({
     >
       {children}
     </div>
+  );
+}
+
+function NotAuthorizedPage() {
+  return (
+    <ContentWrapper>
+      <>
+        403. Ingen tilgang til undersiden. Gå <NavLink to="/">hjem</NavLink>
+      </>
+    </ContentWrapper>
   );
 }

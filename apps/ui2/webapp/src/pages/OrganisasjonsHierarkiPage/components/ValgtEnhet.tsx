@@ -1,9 +1,10 @@
 import { css } from "@emotion/react";
 import { Heading, Link } from "@navikt/ds-react";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
+import { ressursRoute } from "~/reactRouterRoutes";
 import buildingFilled from "~/resources/buildingFilled.svg";
 
 import { HorizontalEdge } from "./CardViews";
@@ -18,9 +19,9 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
   }
 
   return (
-    <Link as={ReactRouterLink} to={`/ressurs/${navident}`}>
-      {visningsnavn ?? "Uten navn"}
-    </Link>
+    <ReactRouterLink params={{ id: navident }} to={ressursRoute.to}>
+      <Link as="span">{visningsnavn ?? "Uten navn"}</Link>
+    </ReactRouterLink>
   );
 };
 

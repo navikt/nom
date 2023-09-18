@@ -1,10 +1,13 @@
 import type { SerializedStyles } from "@emotion/react";
 import { css } from "@emotion/react";
 import { Tag } from "@navikt/ds-react";
+import { useNavigate } from "@tanstack/react-router";
+import type { NavigateOptions } from "@tanstack/router-core";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
+
+import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 
 import { AsyncSearch } from "./CustomSelectComponents";
 
@@ -14,7 +17,7 @@ type SearchOption = {
   value: string;
   label: string;
   tag: string;
-  url: string;
+  navigationOptions: NavigateOptions;
   css: SerializedStyles;
 };
 
@@ -69,7 +72,7 @@ export function SearchBar() {
           : `Fant ingen resultater for "${inputValue}"`
       }
       onChange={(selectedOption) =>
-        selectedOption && navigate(selectedOption.url)
+        selectedOption && navigate(selectedOption.navigationOptions)
       }
       placeholder="Søk etter medarbeider eller organisasjonsenheter"
     />
@@ -181,7 +184,12 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
       case "Ressurs": {
         return {
           tag: "Medarbeider",
-          url: `/ressurs/${r.navident}`,
+          navigationOptions: {
+            to: ressursRoute.to,
+            params: {
+              id: r.navident,
+            },
+          },
           label: r.visningsnavn,
           css: css`
             background: #e0d8e9;
@@ -193,7 +201,12 @@ async function createOptions(inputValue: string): Promise<SearchOption[]> {
       case "OrgEnhet": {
         return {
           tag: "OrgEnhet",
-          url: /org/ + r.id,
+          navigationOptions: {
+            to: orgRoute.to,
+            params: {
+              id: r.id,
+            },
+          },
           label: r.navn,
           css: css`
             background: #ebcbd4;

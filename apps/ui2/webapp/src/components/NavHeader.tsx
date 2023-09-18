@@ -1,9 +1,10 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
 import { Link } from "@navikt/ds-react";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 
 import { useGetSession, useHasWriteAccess } from "~/api/useGetSession";
+import { ressursRoute } from "~/reactRouterRoutes";
 import nomLogoCircle from "~/resources/nomLogoCircle.svg";
 import { mediaQueryContentWidth } from "~/resources/NomStyles";
 
@@ -45,17 +46,9 @@ export const NavHeader = () => {
   return (
     <div css={outerDiv}>
       <div css={innerDiv}>
-        <Link
-          as={ReactRouterLink}
-          css={css`
-            background-color: transparent !important;
-            text-align: center;
-          `}
-          title={"Hjem"}
-          to="/"
-        >
+        <ReactRouterLink title={"Hjem"} to="/">
           <img alt="Forside NOM" src={nomLogoCircle} />
-        </Link>
+        </ReactRouterLink>
         <SearchBar />
         <span
           css={css`
@@ -76,12 +69,13 @@ export const NavHeader = () => {
                 height: 32px;
               `}
             />
-            <Link
-              as={ReactRouterLink}
-              to={`/ressurs/${session.data?.navident}`}
+
+            <ReactRouterLink
+              params={{ id: session.data?.navident ?? "" }}
+              to={ressursRoute.to}
             >
-              {session.data?.navident}
-            </Link>
+              <Link as="span">{session.data?.navident}</Link>
+            </ReactRouterLink>
           </span>
           {hasWrite && <BurgerMenu />}
         </span>

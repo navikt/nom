@@ -1,15 +1,16 @@
 import { css } from "@emotion/react";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
+import { useParams } from "@tanstack/react-router";
 import partition from "lodash/partition";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
 import { Fragment } from "react";
 import React from "react";
-import { useParams } from "react-router";
 
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import type { HentHierarkiQueryHookResult } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
+import { orgRoute } from "~/reactRouterRoutes";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
 import * as Gq from "../../api/generated/graphql_generated";
@@ -132,7 +133,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
 };
 
 function OrganisasjonsHierarkiPageOuter() {
-  const { id } = useParams();
+  const { id } = useParams({ from: orgRoute.id });
 
   const hentHierarkiQuery = Gq.useHentHierarkiQuery({
     variables: {

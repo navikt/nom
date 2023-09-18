@@ -14,13 +14,13 @@ import {
   Link,
   Tag,
 } from "@navikt/ds-react";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 import axios from "axios";
 import { isAfter } from "date-fns";
 import partition from "lodash/partition";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
-import { Link as ReactRouterLink } from "react-router-dom";
 
 import type {
   Ressurs,
@@ -31,6 +31,7 @@ import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/components/CreateResourceForm";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
+import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import {
   formatDisplayDate,
   formatTlf,
@@ -300,13 +301,13 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         {uniqLederFor.map(({ orgEnhet }) => (
-          <Link
-            as={ReactRouterLink}
+          <ReactRouterLink
             key={orgEnhet.id}
-            to={`/org/${orgEnhet.id}`}
+            params={{ id: orgEnhet.id }}
+            to={orgRoute.to}
           >
-            {orgEnhet.navn}
-          </Link>
+            <Link as="span">{orgEnhet.navn}</Link>
+          </ReactRouterLink>
         ))}
       </div>
     </>
@@ -380,12 +381,13 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
                   gap: 0.5rem;
                 `}
               >
-                <Link
-                  as={ReactRouterLink}
-                  to={`/ressurs/${dagligLeder.ressurs.navident}`}
+                <ReactRouterLink
+                  params={{ id: dagligLeder.ressurs.navident }}
+                  to={ressursRoute.to}
                 >
-                  <Label as="span">{dagligLeder.ressurs.visningsnavn}</Label>
-                </Link>
+                  <Link as="span">{dagligLeder.ressurs.visningsnavn}</Link>
+                </ReactRouterLink>
+
                 {dagligLeder && (
                   <>
                     <span>-</span>

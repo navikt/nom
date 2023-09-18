@@ -4,16 +4,15 @@ import "./designSystemOverrides.css";
 import { ApolloProvider } from "@apollo/client";
 import { css } from "@emotion/react";
 import { Alert, Loader } from "@navikt/ds-react";
+import { RouterProvider } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React from "react";
 import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { RouterProvider } from "react-router-dom";
 
 import { apolloClient } from "~/api/apolloclient";
 import { useGetSession } from "~/api/useGetSession";
-
-import { router } from "./routes";
+import { router } from "~/reactRouterRoutes";
 
 const queryClient = new QueryClient();
 

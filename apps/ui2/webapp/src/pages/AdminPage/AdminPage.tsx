@@ -13,6 +13,7 @@ import {
   TextField,
   UNSAFE_Combobox,
 } from "@navikt/ds-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import { isBefore } from "date-fns";
 // eslint-disable-next-line lodash/import-scope,you-dont-need-lodash-underscore/is-string,you-dont-need-lodash-underscore/uniq
@@ -20,7 +21,6 @@ import { isString, uniq } from "lodash";
 import sortBy from "lodash/sortBy";
 import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
-import { useSearchParams } from "react-router-dom";
 
 import { apolloClient } from "~/api/apolloclient";
 import type { OrgEnhet } from "~/api/generated/graphql_generated";
@@ -30,6 +30,7 @@ import {
   useGetAllOrgenheterAdminQuery,
 } from "~/api/generated/graphql_generated";
 import { showToast } from "~/hooks/showToast";
+import { adminRoute } from "~/reactRouterRoutes";
 
 type AdminFilter = {
   id?: string;
@@ -275,7 +276,7 @@ export function AdminPage() {
 }
 
 function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const [searchParameters] = useSearchParams();
+  const { allowEdit } = useSearch({ from: adminRoute.id });
   const updateOrgEnhetsTypeMutation = useMutation(
     (newOrgEnhetsType: OrgEnhetsType | null) =>
       axios.post("/nom-api/app/orgenhet/orgEnhetsType", {
@@ -313,7 +314,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               : (event.target.value as OrgEnhetsType);
           updateOrgEnhetsTypeMutation.mutate(orgEnhetsType);
         }}
-        readOnly={searchParameters.get("allowEdit") !== "true"}
+        readOnly={allowEdit}
         size="small"
         value={orgEnhet?.orgEnhetsType ?? ""}
       >
@@ -329,15 +330,14 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 }
 
 function ToggleEditMode() {
-  const [searchParameters, setSearchParameters] = useSearchParams();
-
-  const allowEdit = searchParameters.get("allowEdit") === "true";
+  const { allowEdit } = useSearch({ from: adminRoute.id });
+  const navigate = useNavigate();
 
   if (allowEdit) {
     return (
       <Button
         icon={<PadlockUnlockedFillIcon aria-hidden />}
-        onClick={() => setSearchParameters({ allowEdit: "false" })}
+        onClick={() => navigate({ search: { allowEdit: false } })}
         variant="secondary"
       />
     );
@@ -346,7 +346,7 @@ function ToggleEditMode() {
   return (
     <Button
       icon={<PadlockLockedFillIcon aria-hidden />}
-      onClick={() => setSearchParameters({ allowEdit: "true" })}
+      onClick={() => navigate({ search: { allowEdit: true } })}
       variant="secondary"
     />
   );

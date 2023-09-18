@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
 import { Heading, Label, Link } from "@navikt/ds-react";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
-import { Link as ReactRouterLink } from "react-router-dom";
 
 import type {
   HentHierarkiQuery,
@@ -14,6 +14,7 @@ import {
   VerticalEdge,
 } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { getOverEnheterBackToRootRecursively } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
+import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 
 export function CompactOrganisasjonHierarki({
@@ -86,18 +87,20 @@ function CompactOrgEnhet({
           flex-direction: column;
         `}
       >
-        <Link as={ReactRouterLink} to={`/org/${orgEnhet.id}`}>
-          <Heading level="3" size="small">
+        <ReactRouterLink params={{ id: orgEnhet.id }} to={orgRoute.to}>
+          <Link as={Heading} level="3" size="small">
             {orgEnhet.navn}
-          </Heading>
-        </Link>
-        <Link
-          as={ReactRouterLink}
-          to={`/ressurs/${orgEnhet.leder[0]?.ressurs.navident}`}
+          </Link>
+        </ReactRouterLink>
+        <ReactRouterLink
+          params={{ id: orgEnhet.leder[0]?.ressurs.navident }}
+          to={ressursRoute.to}
         >
-          Leder:{" "}
-          {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
-        </Link>
+          <Link as="span">
+            Leder:{" "}
+            {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
+          </Link>
+        </ReactRouterLink>
       </div>
     </div>
   );

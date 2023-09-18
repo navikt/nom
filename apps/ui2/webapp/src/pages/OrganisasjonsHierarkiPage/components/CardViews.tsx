@@ -1,14 +1,15 @@
 import { css } from "@emotion/react";
 import { ChevronRightIcon, PersonFillIcon } from "@navikt/aksel-icons";
 import { Heading } from "@navikt/ds-react";
+import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
-import { Link as ReactRouterLink } from "react-router-dom";
 
 import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
 import * as Gq from "~/api/generated/graphql_generated";
 import { Sektor } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
+import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 
 export function DynamicColumnContainer({
@@ -76,8 +77,9 @@ export function OrgEnhetView({
         text-decoration: none;
         color: var(--a-gray-900);
       `}
+      params={{ id: orgEnhet.id }}
       ref={reference}
-      to={`/org/${orgEnhet.id}`}
+      to={orgRoute.to}
     >
       <UnitContainerLink>
         <VerticalEdge>
@@ -123,8 +125,9 @@ export function ResourceLink({
         text-decoration: none;
         color: var(--a-gray-900);
       `}
+      params={{ id: ressurs.navident }}
       ref={reference}
-      to={`/ressurs/${ressurs.navident}`}
+      to={ressursRoute.to}
     >
       <UnitContainerLink>
         <VerticalEdge>

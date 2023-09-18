@@ -1,9 +1,14 @@
 import { css } from "@emotion/react";
 import { MenuHamburgerIcon, PersonPlusFillIcon } from "@navikt/aksel-icons";
 import { Button, Dropdown } from "@navikt/ds-react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { useHasAdminAccess } from "~/api/useGetSession";
+import {
+  adminRoute,
+  createRessursRoute,
+  orgRouteIndex,
+} from "~/reactRouterRoutes";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
 export function BurgerMenu() {
@@ -30,16 +35,24 @@ export function BurgerMenu() {
         `}
       >
         <Dropdown.Menu.List>
-          <Dropdown.Menu.List.Item onClick={() => navigate("ressurs/create")}>
+          <Dropdown.Menu.List.Item
+            onClick={() =>
+              navigate({ to: createRessursRoute.to, params: { step: "1" } })
+            }
+          >
             <PersonPlusFillIcon color="black" fontSize="24px" />
             <span>Opprett medarbeider</span>
           </Dropdown.Menu.List.Item>
-          <Dropdown.Menu.List.Item onClick={() => navigate("org")}>
+          <Dropdown.Menu.List.Item
+            onClick={() => navigate({ to: orgRouteIndex.to })}
+          >
             <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>
           </Dropdown.Menu.List.Item>
           {hasAdminAccess && (
-            <Dropdown.Menu.List.Item onClick={() => navigate("admin")}>
+            <Dropdown.Menu.List.Item
+              onClick={() => navigate({ to: adminRoute.to })}
+            >
               <span>Admin</span>
             </Dropdown.Menu.List.Item>
           )}

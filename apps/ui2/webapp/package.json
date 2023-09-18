@@ -20,6 +20,8 @@
     "@navikt/aksel-icons": "5.0.3",
     "@navikt/ds-css": "5.0.3",
     "@navikt/ds-react": "5.0.3",
+    "@tanstack/react-router": "0.0.1-beta.190",
+    "@tanstack/router-devtools": "0.0.1-beta.190",
     "axios": "1.4.0",
     "date-fns": "2.30.0",
     "js-base64": "3.7.5",
