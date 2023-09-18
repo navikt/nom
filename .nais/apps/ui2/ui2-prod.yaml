@@ -75,4 +75,4 @@ spec:
     - name: TEAM_CATALOG_API_URL
       value: https://teamkatalog-api.intern.nav.no
     - name: TEAM_CATALOG_SCOPE
-      value: api://prod-gcp.nom.team-catalog-backend/.default
+      value: api://prod-gcp.org.team-catalog-backend/.default
