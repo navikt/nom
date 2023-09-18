@@ -3,6 +3,8 @@ package no.nav.nom.apps.api.common;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,9 @@ import javax.net.ssl.SSLException;
 
 @Configuration
 public class AppConfig {
+
+    // Marker for use with logger to ensure that sensitive logs are filtered into the correct log
+    public static final Marker SECURE_LOGS = MarkerFactory.getMarker("SECURE_LOGS");
 
     @Bean
     @Profile("proxy")
