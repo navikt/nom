@@ -73,6 +73,6 @@ spec:
     - name: NOM_API_SCOPE
       value: api://prod-gcp.nom.nom-api/.default
     - name: TEAM_CATALOG_API_URL
-      value: https://teamkatalog-api.intern.nav.no
+      value: http://team-catalog-backend.org.svc.cluster.local
     - name: TEAM_CATALOG_SCOPE
       value: api://prod-gcp.org.team-catalog-backend/.default
