@@ -16,6 +16,7 @@ export default defineConfig({
     },
   },
   server: {
+    origin: "http://localhost:5173",
     proxy: {
       "/nom-api": {
         target: "http://localhost:8080/",
