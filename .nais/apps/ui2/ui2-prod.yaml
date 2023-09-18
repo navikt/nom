@@ -33,7 +33,6 @@ spec:
           namespace: org
           cluster: prod-gcp
       external:
-        - host: teamkatalog-api.prod-fss-pub.nais.io #TODO: delete
         - host: unpkg.com
   ingresses:
     - https://nom-ui2.intern.nav.no

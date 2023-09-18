@@ -75,8 +75,6 @@ spec:
         - application: org-ekstern-proxy
           namespace: org
         - application: team-catalog-backend
-          cluster: dev-fss
-        - application: team-catalog-backend
           cluster: dev-gcp
           namespace: org
         - application: veilarbveileder
