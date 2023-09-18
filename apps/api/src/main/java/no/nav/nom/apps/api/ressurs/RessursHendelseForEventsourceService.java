@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -26,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,38 +44,55 @@ public class RessursHendelseForEventsourceService {
 
         dvhRessurs.forEach(ressurs -> {
             val ressursByPersonident = ressursStateRepository.findByPersonident(ressurs.getPersonIdent());
-
-            ressursByPersonident.ifPresentOrElse((r) -> createEndreHendelse(r, ressurs), () -> {
-                final var taskEvent = opprettRessurs(ressurs);
-                opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
-            });
+            ressursByPersonident.ifPresentOrElse(
+                (r) -> createEndreHendelse(r, ressurs),
+                () -> handterNyPersonident(ressurs, opprettetRessuser)
+            );
         });
 
-
         opprettetRessuser.entrySet().stream().filter(entry -> entry.getKey().getSluttdato() != null).map(entry -> {
-                    try {
-                        final var event = entry.getValue().get(5, TimeUnit.SECONDS).getProducerRecord().value();
+                try {
+                    final var event = entry.getValue().get(5, TimeUnit.SECONDS).getProducerRecord().value();
 
-                        return Map.entry(entry.getKey(), event);
-                    } catch (Exception e) {
-                        log.error("Failed to send Opprett and sluttet event, will retry on next scheduled run", e);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .forEach(entry -> ressursSluttet(entry.getValue().getFid(), entry.getKey()));
+                    return Map.entry(entry.getKey(), event);
+                } catch (Exception e) {
+                    log.error("Failed to send Opprett and sluttet event, will retry on next scheduled run", e);
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .forEach(entry -> ressursSluttet(entry.getValue().getFid(), entry.getKey()));
+    }
+
+    private void handterNyPersonident(DvhRessurs ressurs, Map<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettetRessuser) {
+        // Håndter endre personident hvis det kun er endring av personident.
+        // Altså - hvis det finnes Ressurs med samme navident i state, så anta at dette kun er endring av personident.
+
+        final var ressursByNavident = ressursStateRepository.findByNavident(ressurs.getNavIdent());
+        ressursByNavident.ifPresentOrElse((r) -> {
+            if (!r.personident().equals(ressurs.getPersonIdent())) {
+                log.info(SECURE_LOGS, "Ressurs {} har fått ny personident {}", r.fid(), ressurs.getPersonIdent());
+                ressursEndretPersonident(r.fid(), ressurs);
+                // og denne kan ha andre endringer så sjekk dette i tillegg
+                createEndreHendelse(r, ressurs);
+            }
+        }, () -> {
+            log.info(SECURE_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
+            final var taskEvent = opprettRessurs(ressurs);
+            opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
+        });
     }
 
     public Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
         return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
-                ressurs.getPersonIdent(),
-                ressurs.getNavIdent(),
-                Optional.empty(),
-                DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
-                toVisningsnavn(ressurs),
-                createInputMetadata(ressurs.getRawData()),
-                null,
-                null,
+            ressurs.getPersonIdent(),
+            ressurs.getNavIdent(),
+            Optional.empty(),
+            DvhRessurs.toSektor(ressurs.getRemedyAnsattType()),
+            toVisningsnavn(ressurs),
+            createInputMetadata(ressurs.getRawData()),
+            null,
+            null,
             null
         )));
     }
@@ -90,7 +110,7 @@ public class RessursHendelseForEventsourceService {
 
         final var currentVisningsnavn = toVisningsnavn(dvhRessurs);
 
-        if(!Objects.equals(ressursState.visningsnavn().getFormattedVisningsnavn(), currentVisningsnavn.getFormattedVisningsnavn())) {
+        if (!Objects.equals(ressursState.visningsnavn().getFormattedVisningsnavn(), currentVisningsnavn.getFormattedVisningsnavn())) {
             ressursEndretPersonalia(ressursState.fid(), dvhRessurs);
         }
 
@@ -106,11 +126,24 @@ public class RessursHendelseForEventsourceService {
     }
 
     public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
-        ressursCommadService.oppdaterPersonaliaEvent(new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)), createInputMetadata(dvhRessurs.getRawData()));
+        ressursCommadService.oppdaterPersonaliaEvent(
+            new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)),
+            createInputMetadata(dvhRessurs.getRawData())
+        );
     }
 
     public void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
-        ressursCommadService.oppdaterSektorEvent(new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())), createInputMetadata(dvhRessurs.getRawData()));
+        ressursCommadService.oppdaterSektorEvent(
+            new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())),
+            createInputMetadata(dvhRessurs.getRawData())
+        );
+    }
+
+    public void ressursEndretPersonident(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.oppdaterPersonidentCommand(
+            new OppdaterPersonidentCommand(fid, dvhRessurs.getPersonIdent()),
+            createInputMetadata(dvhRessurs.getRawData())
+        );
     }
 
     public InputMetadata createInputMetadata(Object rawData) {
