@@ -26,8 +26,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Tag(name = "Admin for å kjøre en sanity check på data")
 @RestController
@@ -300,6 +302,40 @@ public class SanityCheck {
                 String duplikatPeriode = duplikat.getGyldigFom().toString() + " - " + (duplikat.getGyldigTom().isPresent() ? duplikat.getGyldigTom().get() :  " ");
                 result.append("      %s (%s) periode [%s]\n".formatted(duplikat.getId(), duplikatUniqueAgressoId, duplikatPeriode));
             });
+        });
+
+        return result.toString();
+    }
+
+    @Operation(
+        description = "Listduplikate ressurser på samme navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/duplikateRessurserPaaNavident")
+    public String duplikateRessurserPaaNavident() {
+        StringBuffer result = new StringBuffer();
+
+        var ressurserByFid = ressursService.getAllByFid();
+        var ressurserByNavident = ressursService.getAll();
+
+        result.append("Ant ressurser ByFid/ByNavident: %s/%s\n".formatted(ressurserByFid.size(), ressurserByNavident.size()));
+
+        Set<String> fidNavidenter = new HashSet<>();
+        ressurserByFid.stream()
+            .filter(n -> !fidNavidenter.add(n.navident()))
+            .toList();
+
+        result.append("Ant duplikater på navident: %s\n".formatted(fidNavidenter.size()));
+        fidNavidenter.forEach(n -> {
+            result.append("   %s\n".formatted(n));
+            ressurserByFid.stream()
+                .filter(r -> r.navident().equals(n))
+                .forEach(r -> result.append("      %s (%s)\n".formatted(r.fid(), r.visningsnavn().toString())));
         });
 
         return result.toString();

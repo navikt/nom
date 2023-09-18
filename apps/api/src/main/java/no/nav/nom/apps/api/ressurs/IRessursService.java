@@ -22,6 +22,8 @@ public interface IRessursService {
 
     Collection<RessursState> getAll();
 
+    Collection<RessursState> getAllByFid();
+
     Map<String, RessursState> findByPersonidentBulk(List<String> personIdenter);
 
     Map<String, RessursState> findByNavidentBulk(List<String> navIdenter);

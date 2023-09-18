@@ -40,6 +40,10 @@ public class RessursStateRepository implements IRessursService {
         return ressursByNavident.values();
     }
 
+    public Collection<RessursState> getAllByFid() {
+        return ressursByFid.values();
+    }
+
     public int count() {
         return ressursByFid.size();
     }
