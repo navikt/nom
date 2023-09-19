@@ -12,5 +12,6 @@ public record RessursState(
     String navident,
     Sektor sektor,
     Visningsnavn visningsnavn,
-    Optional<LocalDate> sluttdato
+    Optional<LocalDate> sluttdato,
+    Optional<LocalDate> startdato
 ) {}

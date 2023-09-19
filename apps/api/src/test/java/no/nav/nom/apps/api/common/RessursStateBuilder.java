@@ -15,6 +15,8 @@ public class RessursStateBuilder {
     private Visningsnavn visningsnavn;
     private Optional<LocalDate> sluttdato;
 
+    private Optional<LocalDate> startdato;
+
     public RessursStateBuilder fid(String fid) {
         this.fid = fid;
         return this;
@@ -52,6 +54,11 @@ public class RessursStateBuilder {
         return this;
     }
 
+    public RessursStateBuilder startdato(Optional<LocalDate> startdato) {
+        this.startdato = startdato;
+        return this;
+    }
+
     public RessursStateBuilder(int suffix) {
         this.fid = "fid" + suffix;
         this.personident = "pid" + suffix;
@@ -63,11 +70,12 @@ public class RessursStateBuilder {
             "etternavn" + suffix
         );
         this.sluttdato = Optional.empty();
+        this.startdato = Optional.empty();
 
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, sluttdato);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, sluttdato, startdato);
     }
 
 }

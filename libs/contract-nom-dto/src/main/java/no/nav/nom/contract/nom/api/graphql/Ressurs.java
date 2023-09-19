@@ -19,6 +19,7 @@ public class Ressurs {
     List<Sektor> ressurstype;
     List<Sektor> sektor;
     LocalDate sluttdato;
+    LocalDate startdato;
     String fornavn;
     String etternavn;
     String visningsNavn;
