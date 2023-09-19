@@ -325,17 +325,23 @@ public class SanityCheck {
 
         result.append("Ant ressurser ByFid/ByNavident: %s/%s\n".formatted(ressurserByFid.size(), ressurserByNavident.size()));
 
+        log.info(result.toString());
+
         Set<String> fidNavidenter = new HashSet<>();
         ressurserByFid.stream()
             .filter(n -> !fidNavidenter.add(n.navident()))
             .toList();
 
         result.append("Ant duplikater på navident: %s\n".formatted(fidNavidenter.size()));
+        log.info(result.toString());
         fidNavidenter.forEach(n -> {
             result.append("   %s\n".formatted(n));
             ressurserByFid.stream()
                 .filter(r -> r.navident().equals(n))
-                .forEach(r -> result.append("      %s (%s)\n".formatted(r.fid(), r.visningsnavn().toString())));
+                .forEach(r -> {
+                    log.info("Duplikat ressurs %s - %s (%s)\n".formatted(n, r.fid(), r.visningsnavn().toString()));
+                    result.append("      %s (%s)\n".formatted(r.fid(), r.visningsnavn().toString()));
+                });
         });
 
         return result.toString();
