@@ -314,7 +314,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
               : (event.target.value as OrgEnhetsType);
           updateOrgEnhetsTypeMutation.mutate(orgEnhetsType);
         }}
-        readOnly={allowEdit}
+        readOnly={!allowEdit}
         size="small"
         value={orgEnhet?.orgEnhetsType ?? ""}
       >
