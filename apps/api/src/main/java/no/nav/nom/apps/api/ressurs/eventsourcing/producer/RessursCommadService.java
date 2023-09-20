@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
@@ -16,6 +17,7 @@ import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
@@ -136,6 +138,14 @@ public class RessursCommadService {
         return eventProducer.sendMessage(new RessursTekniskSlettetEventV1(
             slettRessursCommand.fid(),
             new RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData(),
+            inputMetadata
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, RessursEvent>> endreStartRessursEvent(OppdaterStartdatoCommand oppdaterStartdatoCommand, InputMetadata inputMetadata) {
+        return eventProducer.sendMessage(new RessursStartDatoOppdatertV1(
+            oppdaterStartdatoCommand.fid(),
+            new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato()),
             inputMetadata
         ));
     }

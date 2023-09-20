@@ -7,10 +7,12 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStartdatoCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -19,6 +21,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,6 +111,16 @@ public class RessursHendelseForEventsourceService {
             }
         });
 
+        ressursState.startdato().ifPresentOrElse((s) -> {
+            if(!s.equals(dvhRessurs.getStartDato())) {
+                ressursStartet(ressursState.fid(), dvhRessurs);
+            }
+        }, () -> {
+            if (dvhRessurs.getStartDato() != null) {
+                ressursStartet(ressursState.fid(), dvhRessurs);
+            }
+        });
+
         final var currentVisningsnavn = toVisningsnavn(dvhRessurs);
 
         if (!Objects.equals(ressursState.visningsnavn().getFormattedVisningsnavn(), currentVisningsnavn.getFormattedVisningsnavn())) {
@@ -123,6 +136,10 @@ public class RessursHendelseForEventsourceService {
 
     public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
         ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
+    }
+
+    public void ressursStartet(String fid, DvhRessurs dvhRessurs) {
+        ressursCommadService.endreStartRessursEvent(new OppdaterStartdatoCommand(fid, dvhRessurs.getStartDato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
     public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {

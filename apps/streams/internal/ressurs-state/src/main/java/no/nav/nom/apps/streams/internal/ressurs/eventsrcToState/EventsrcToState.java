@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 class EventsrcToState {
@@ -55,6 +55,9 @@ class EventsrcToState {
                                     if (data.navident().isPresent()) {
                                         state.put("navident", data.navident().get());
                                     }
+                                    if(data.startdato().isPresent()){
+                                        state.put("startdato", data.startdato().get().toString());
+                                    }
                                 }
                                 state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
                             }
@@ -82,14 +85,23 @@ class EventsrcToState {
                     Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
                     new Visningsnavn(
                             visningsnavn.get("fornavn").asText(),
-                            Optional.ofNullable(visningsnavn.hasNonNull("mellomnavn") ? visningsnavn.get("mellomnavn").asText() : null),
+                            Optional.ofNullable(parseNullableFromJson(visningsnavn,"mellomnavn")),
                             visningsnavn.get("etternavn").asText()
                     ),
-                    Optional.ofNullable(eventStateAggregate.hasNonNull("sluttdato") ? LocalDate.parse(eventStateAggregate.get("sluttdato").asText()) : null)
+                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate,"sluttdato", LocalDate::parse)),
+                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate,"startdato", LocalDate::parse))
             );
         } catch (Exception e){
             log.error("Error mapping to RessursState", e);
             throw e;
         }
+    }
+
+    private static <T> T parseNullableFromJson(JsonNode jsonNode, String key, Function<String, T> transform) {
+        return jsonNode.hasNonNull(key) ? transform.apply(jsonNode.get(key).asText()) : null;
+    }
+
+    private static String parseNullableFromJson(JsonNode jsonNode, String key) {
+        return parseNullableFromJson(jsonNode, key, Function.identity());
     }
 }

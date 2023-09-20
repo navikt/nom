@@ -32,7 +32,9 @@ public class DvhRessurs {
     Boolean remedyAktiv;
     JsonNode rawData;
     String ansattRessursKode;
+    LocalDate remedyStartDato;
     LocalDate remedySluttdato;
+    LocalDate agressoStartDato;
     LocalDate agressoSluttdato;
     boolean remedyPermisjon;
     String identType;
@@ -46,10 +48,13 @@ public class DvhRessurs {
         remedyAnsattType = node.get("ANSATT_TYPE").asText();
         this.rawData = node;
         ansattRessursKode = node.get("ANSATT_RESSURS_KODE").asText();
-        remedySluttdato = node.hasNonNull("REMEDY_SLUTT_DATO") ? LocalDate.parse(node.get("REMEDY_SLUTT_DATO").asText()) : null;
-        agressoSluttdato = node.hasNonNull("AGRESSO_SLUTT_DATO") ? LocalDate.parse(node.get("AGRESSO_SLUTT_DATO").asText()) : null;
+        remedyStartDato = parseNullableDateFromJson(node, "START_DATO");
+        remedySluttdato = parseNullableDateFromJson(node, "REMEDY_SLUTT_DATO");
+        agressoStartDato = parseNullableDateFromJson(node, "AGRESSO_START_DATO");
+        agressoSluttdato = parseNullableDateFromJson(node, "AGRESSO_SLUTT_DATO");
         remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
         identType = node.get("IDENT_TYPE").asText();
+
     }
 
     public enum RemedyRessursType {
@@ -75,6 +80,15 @@ public class DvhRessurs {
             return agressoSluttdato != null && !D2099.equals(agressoSluttdato) ? agressoSluttdato : getDateOrNull(remedySluttdato);
         }
         return null;
+    }
+
+    public LocalDate getStartDato() {
+        var isStatlig = Arrays.asList(STATLIG.beskrivelse).contains(this.remedyAnsattType);
+        if(isStatlig && this.agressoStartDato != null){
+            return this.agressoStartDato;
+        }else{
+            return this.remedyStartDato;
+        }
     }
 
     public boolean hasPermisjon() {
@@ -113,5 +127,9 @@ public class DvhRessurs {
             }
         }
         throw new IllegalArgumentException(identType + " was not recongized as an enum value of " + IdentType.class.getName());
+    }
+
+    private static LocalDate parseNullableDateFromJson(JsonNode jsonNode, String s){
+        return jsonNode.hasNonNull(s) ? LocalDate.parse(jsonNode.get(s).asText()) : null;
     }
 }
