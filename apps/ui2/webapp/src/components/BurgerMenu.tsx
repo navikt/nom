@@ -7,7 +7,7 @@ import { useHasAdminAccess } from "~/api/useGetSession";
 import {
   adminRoute,
   createRessursRoute,
-  orgRouteIndex,
+  indexRoute,
 } from "~/reactRouterRoutes";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
 
@@ -44,7 +44,7 @@ export function BurgerMenu() {
             <span>Opprett medarbeider</span>
           </Dropdown.Menu.List.Item>
           <Dropdown.Menu.List.Item
-            onClick={() => navigate({ to: orgRouteIndex.to })}
+            onClick={() => navigate({ to: indexRoute.to })}
           >
             <img alt="hierarki" src={hierarchyFilled} />
             <span>Organisasjonshierarki</span>

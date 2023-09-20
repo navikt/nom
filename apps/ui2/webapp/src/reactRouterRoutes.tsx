@@ -129,14 +129,9 @@ export const createRessursRoute = new Route({
 });
 
 export const orgRoute = new Route({
-  getParentRoute: () => orgRouteIndex,
-  path: "$id",
-  component: OrganisasjonHierarkiPage,
-});
-
-export const orgRouteIndex = new Route({
   getParentRoute: () => rootRoute,
-  path: "org",
+  path: "org/$id",
+  component: OrganisasjonHierarkiPage,
 });
 
 export const adminRoute = new Route({
@@ -167,7 +162,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   ressursRoute,
   createRessursRoute,
-  orgRouteIndex.addChildren([orgRoute]),
+  orgRoute,
   adminRoute,
   notFoundRoute,
 ]);
