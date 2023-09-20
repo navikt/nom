@@ -54,6 +54,7 @@ class EventsrcToState {
                                 if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
                                     if (data.navident().isPresent()) {
                                         state.put("navident", data.navident().get());
+                                        state.put("startdato", data.startdato().toString());
                                     }
                                     if(data.startdato().isPresent()){
                                         state.put("startdato", data.startdato().get().toString());
