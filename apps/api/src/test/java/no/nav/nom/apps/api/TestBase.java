@@ -156,6 +156,7 @@ public abstract class TestBase {
                 Optional.of("mellomnavn" + suffix),
                 "etternavn" + suffix
             ),
+            null,
             null
         );
 

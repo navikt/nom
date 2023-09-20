@@ -163,7 +163,8 @@ class RessursTest extends RessursTestBase {
                         Optional.of("mellomnavn"),
                         "etternavn"
                 ),
-                Optional.of(LocalDate.now().plusDays(10))
+                Optional.of(LocalDate.now().plusDays(10)),
+            Optional.empty()
         );
 
         createRessursHendelseEventSource(ressursState);

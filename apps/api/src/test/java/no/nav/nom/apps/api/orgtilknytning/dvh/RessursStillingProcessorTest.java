@@ -169,7 +169,7 @@ public class RessursStillingProcessorTest {
     }
 
     private void svarAtAlleNavidenterErStatlig(String navident) {
-        when(ressursService.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty())));
+        when(ressursService.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
     }
 
     @Test
@@ -242,7 +242,7 @@ public class RessursStillingProcessorTest {
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningStateService.getAllOrgtilknytninger()).thenReturn(Collections.emptyList());
         when(ressursService.findByNavident(any())).thenReturn(
-            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato)))
+            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato), Optional.empty()))
         );
 
         ressursStillingProcessor.process(navident, stillingPerioder);
@@ -290,7 +290,7 @@ public class RessursStillingProcessorTest {
 
         when(orgtilknytningStateService.getOrgtilknytningerByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
         when(ressursService.findByNavident(any())).thenReturn(
-            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty()))
+            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty(), Optional.empty()))
         );
         ressursStillingProcessor.process(navident, stillingPerioder);
 

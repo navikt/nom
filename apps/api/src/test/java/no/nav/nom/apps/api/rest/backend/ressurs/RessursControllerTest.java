@@ -71,6 +71,7 @@ public class RessursControllerTest extends RestTestBase {
                     navident,
                     Sektor.EKSTERN,
                     new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                    Optional.empty(),
                     Optional.empty()
                 ));
 

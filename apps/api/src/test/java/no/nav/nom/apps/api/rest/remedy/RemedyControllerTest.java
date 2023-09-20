@@ -57,7 +57,8 @@ public class RemedyControllerTest extends RestTestBase {
                 Optional.of(navn.getMellomnavn()),
                 navn.getEtternavn()
             ),
-            Optional.of(LocalDate.now().plusDays(10))
+            Optional.of(LocalDate.now().plusDays(10)),
+            Optional.empty()
         );
         return  Optional.of(ressursState);
     }
@@ -177,7 +178,7 @@ public class RemedyControllerTest extends RestTestBase {
             .thenReturn(new RessursState("fid", personident, navident,
                 Sektor.EKSTERN,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                Optional.empty()
+                Optional.empty(), Optional.empty()
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()
@@ -237,14 +238,14 @@ public class RemedyControllerTest extends RestTestBase {
         when(ressursService.findByNavident(navident)).thenReturn(Optional.of(new RessursState(  // Men har eksisterende ressurs for navidenten returnert av nik
             eksisterendeFid, gml_personident, navident, Sektor.NAV_STATLIG,
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
-            Optional.empty()
+            Optional.empty(), Optional.empty()
         )));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(new RessursState("fid", gml_personident, navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                Optional.empty()
+                Optional.empty(), Optional.empty()
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()

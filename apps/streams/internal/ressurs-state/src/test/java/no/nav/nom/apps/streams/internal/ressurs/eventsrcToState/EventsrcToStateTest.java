@@ -37,6 +37,9 @@ public class EventsrcToStateTest {
     private TestInputTopic<String, RessursEvent> inputTopic;
     private TestOutputTopic<String, RessursState> outputTopic;
 
+    // Fjerne dette og heller ha tids-uavhengige tester?
+    private LocalDate mockToday = LocalDate.of(2023,1,1);
+
     @BeforeEach
     public void setup() {
         setupKafkaTransformer();
@@ -60,7 +63,7 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
+            Optional.of(mockToday),
             Optional.empty(),
             Optional.empty()
         );
@@ -83,7 +86,8 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(mockToday)
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);
@@ -114,7 +118,7 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
+            Optional.of(mockToday),
             Optional.empty(),
             Optional.empty()
         );
@@ -145,7 +149,9 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(mockToday)
+
         );
 
         final RessursState expectedSluttet = new RessursState(
@@ -158,7 +164,9 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.of(sluttetEventData.sluttdato())
+            Optional.of(sluttetEventData.sluttdato()),
+            Optional.of(mockToday)
+
         );
 
 
@@ -191,7 +199,7 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
+            Optional.of(mockToday),
             Optional.empty(),
             Optional.empty()
         );
@@ -228,7 +236,9 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(mockToday)
+
         );
 
         final RessursState expectedEndret = new RessursState(
@@ -237,7 +247,9 @@ public class EventsrcToStateTest {
             additionalData.navident().get(),
             eventData.sektor(),
             personaliaOppdatertEventData.visningsnavn(),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(mockToday)
+
         );
 
 
@@ -272,7 +284,7 @@ public class EventsrcToStateTest {
             null,
             null,
             null,
-            Optional.of(LocalDate.now()),
+            Optional.of(mockToday),
             Optional.empty(),
             Optional.empty()
         );
@@ -294,7 +306,9 @@ public class EventsrcToStateTest {
                 Optional.empty(),
                 "etternavn"
             ),
-            Optional.empty()
+            Optional.empty(),
+            Optional.of(mockToday)
+
         );
 
         final RessursEvent slettEvent = new RessursTekniskSlettetEventV1(

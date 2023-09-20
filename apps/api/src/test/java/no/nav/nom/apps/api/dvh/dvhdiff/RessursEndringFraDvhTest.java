@@ -140,6 +140,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                                 Optional.empty(),
                                 "ENavn 1"
                         ),
+                        Optional.empty(),
                         Optional.empty()
                 )
         );
@@ -194,6 +195,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         Optional.empty(),
                         "ENavn 1"
                 ),
+                Optional.empty(),
                 Optional.empty()
         );
 
@@ -249,6 +251,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         Optional.empty(),
                         "ENavn 1"
                 ),
+                Optional.empty(),
                 Optional.empty()
         );
 
@@ -321,6 +324,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 Optional.empty(),
                 "ENavn 1"
             ),
+            Optional.empty(),
             Optional.empty()
         );
 

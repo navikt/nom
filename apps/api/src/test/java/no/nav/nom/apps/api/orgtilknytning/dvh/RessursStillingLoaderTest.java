@@ -49,9 +49,9 @@ class RessursStillingLoaderTest extends TestBase {
     @BeforeEach
     public void beforeEach() {
         when(ressursService.findByNavident("G123321"))
-            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", "G123321", Sektor.NAV_STATLIG, null, Optional.empty())));
+            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", "G123321", Sektor.NAV_STATLIG, null, Optional.empty(), null)));
         when(ressursService.findByNavident("H554433"))
-            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", "H554433", Sektor.NAV_STATLIG, null, Optional.empty())));
+            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", "H554433", Sektor.NAV_STATLIG, null, Optional.empty(), null)));
     }
 
     @Test
