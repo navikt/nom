@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSource;
 import no.nav.nom.apps.api.ressurs.eventsourcing.recoverybackup.RessursEventSourceRepository;
@@ -18,19 +19,26 @@ public class RessursEventProducer {
     private final RessursEventSourceRepository ressursEventSourceRepository;
     private final ObjectMapper objectMapper;
 
+    private final boolean shouldSaveToDb;
+
     public RessursEventProducer(
             KafkaTemplate<String, RessursEvent> ressursEventProducerTemplate,
             RessursEventSourceRepository ressursEventSourceRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            LocalConfiguration localConfiguration
     ) {
         this.ressursEventProducerTemplate = ressursEventProducerTemplate;
         this.ressursEventSourceRepository = ressursEventSourceRepository;
         this.objectMapper = objectMapper;
+        this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
     public CompletableFuture<SendResult<String, RessursEvent>> sendMessage(RessursEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
-        saveToDB(event, eventKey);
+        if(shouldSaveToDb) {
+            // Lagring til database gjør applikasjonen utrolig treg ved lokalkjøring, så bypass kan være hensiktsmessig når applikasjonen ikke kjører i miljø.
+            saveToDB(event, eventKey);
+        }
         return ressursEventProducerTemplate.sendDefault(eventKey, event);
     }
 

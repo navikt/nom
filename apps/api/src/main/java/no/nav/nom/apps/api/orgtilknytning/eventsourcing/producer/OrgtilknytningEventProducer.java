@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup.OrgtilknytningEventSource;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.recoverybackup.OrgtilknytningEventSourceRepository;
@@ -17,20 +18,26 @@ public class OrgtilknytningEventProducer {
     private final KafkaTemplate<String, OrgtilknytningEvent> orgtilknytningEventProducerTemplate;
     private final OrgtilknytningEventSourceRepository orgtilknytningEventSourceRepository;
     private final ObjectMapper objectMapper;
+    private final boolean shouldSaveToDb;
 
     public OrgtilknytningEventProducer(
             KafkaTemplate<String, OrgtilknytningEvent> orgtilknytningEventProducerTemplate,
             OrgtilknytningEventSourceRepository orgtilknytningEventSourceRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            LocalConfiguration localConfiguration
     ) {
         this.orgtilknytningEventProducerTemplate = orgtilknytningEventProducerTemplate;
         this.orgtilknytningEventSourceRepository = orgtilknytningEventSourceRepository;
         this.objectMapper = objectMapper;
+        this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> sendMessage(OrgtilknytningEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
-        saveToDB(event, eventKey);
+        if(shouldSaveToDb) {
+            // Lagring til database gjør applikasjonen utrolig treg ved lokalkjøring, så bypass kan være hensiktsmessig når applikasjonen ikke kjører i miljø.
+            saveToDB(event, eventKey);
+        }
         return orgtilknytningEventProducerTemplate.sendDefault(eventKey, event);
     }
 

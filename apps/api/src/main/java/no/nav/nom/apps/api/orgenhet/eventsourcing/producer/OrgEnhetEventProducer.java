@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhet.eventsourcing.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.api.common.LocalConfiguration;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSource;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.recoverybackup.OrgEnhetEventSourceRepository;
@@ -17,20 +18,26 @@ public class OrgEnhetEventProducer {
     private final KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate;
     private final OrgEnhetEventSourceRepository orgEnhetEventSourceRepository;
     private final ObjectMapper objectMapper;
+    private final boolean shouldSaveToDb;
 
     public OrgEnhetEventProducer(
             KafkaTemplate<String, OrgEnhetEvent> orgEnhetEventProducerTemplate,
             OrgEnhetEventSourceRepository orgEnhetEventSourceRepository,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            LocalConfiguration localConfiguration
     ) {
         this.orgEnhetEventProducerTemplate = orgEnhetEventProducerTemplate;
         this.orgEnhetEventSourceRepository = orgEnhetEventSourceRepository;
         this.objectMapper = objectMapper;
+        this.shouldSaveToDb = localConfiguration.shouldSaveEventsToDb;
     }
 
     public CompletableFuture<SendResult<String, OrgEnhetEvent>> sendMessage(OrgEnhetEvent event) {
         String eventKey = PrefixedUlidCreator.createEventUlid();
-        saveToDB(event, eventKey);
+        if(shouldSaveToDb) {
+            // Lagring til database gjør applikasjonen utrolig treg ved lokalkjøring, så bypass kan være hensiktsmessig når applikasjonen ikke kjører i miljø.
+            saveToDB(event, eventKey);
+        }
         return orgEnhetEventProducerTemplate.sendDefault(eventKey, event);
     }
 
