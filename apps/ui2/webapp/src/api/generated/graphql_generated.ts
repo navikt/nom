@@ -811,95 +811,95 @@ export type Resolvers<ContextType = any> = {
 
 
 export const RessursStandaloneFragmentDoc = gql`
-    fragment RessursStandalone on Ressurs {
-  navident
-  fornavn
-  etternavn
-  visningsnavn
-  epost
-  sektor
-  telefon {
-    beskrivelse
-    nummer
-    type
+  fragment RessursStandalone on Ressurs {
+    navident
+    fornavn
+    etternavn
+    visningsnavn
+    epost
+    sektor
+    telefon {
+      beskrivelse
+      nummer
+      type
+    }
   }
-}
-    `;
+`;
 export const RessursWithLederFragmentDoc = gql`
-    fragment RessursWithLeder on Ressurs {
-  ...RessursStandalone
-  ledere {
-    ressurs {
-      navident
+  fragment RessursWithLeder on Ressurs {
+    ...RessursStandalone
+    ledere {
+      ressurs {
+        navident
+      }
     }
   }
-}
-    ${RessursStandaloneFragmentDoc}`;
+${RessursStandaloneFragmentDoc}`;
 export const RessursWithKoblingFragmentDoc = gql`
-    fragment RessursWithKobling on Ressurs {
-  ...RessursStandalone
-  koblinger {
-    organisasjonsenhet {
-      id
-      navn
+  fragment RessursWithKobling on Ressurs {
+    ...RessursStandalone
+    koblinger {
+      organisasjonsenhet {
+        id
+        navn
+      }
     }
   }
-}
-    ${RessursStandaloneFragmentDoc}`;
+${RessursStandaloneFragmentDoc}`;
 export const RessursWithLederAndKoblingFragmentDoc = gql`
-    fragment RessursWithLederAndKobling on Ressurs {
-  ...RessursWithLeder
-  ...RessursWithKobling
-}
-    ${RessursWithLederFragmentDoc}
+  fragment RessursWithLederAndKobling on Ressurs {
+    ...RessursWithLeder
+    ...RessursWithKobling
+  }
+  ${RessursWithLederFragmentDoc}
 ${RessursWithKoblingFragmentDoc}`;
 export const OrgenhetStandaloneWithLederFragmentDoc = gql`
-    fragment OrgenhetStandaloneWithLeder on OrgEnhet {
-  id
-  navn
-  gyldigFom
-  gyldigTom
-  leder {
-    ressurs {
-      ...RessursStandalone
-      koblinger {
-        organisasjonsenhet {
-          id
-          navn
+  fragment OrgenhetStandaloneWithLeder on OrgEnhet {
+    id
+    navn
+    gyldigFom
+    gyldigTom
+    leder {
+      ressurs {
+        ...RessursStandalone
+        koblinger {
+          organisasjonsenhet {
+            id
+            navn
+          }
         }
       }
     }
   }
-}
-    ${RessursStandaloneFragmentDoc}`;
+${RessursStandaloneFragmentDoc}`;
 export const OrgEnhetAdminFragmentDoc = gql`
-    fragment OrgEnhetAdmin on OrgEnhet {
-  id
-  agressoId
-  orgNiv
-  agressoOrgenhetType
-  navn
-  gyldigFom
-  gyldigTom
-  nomNivaa
-  orgEnhetsType
-  remedyEnhetId
-  leder {
-    ressurs {
-      navident
+  fragment OrgEnhetAdmin on OrgEnhet {
+    id
+    agressoId
+    orgNiv
+    agressoOrgenhetType
+    navn
+    gyldigFom
+    gyldigTom
+    nomNivaa
+    orgEnhetsType
+    remedyEnhetId
+    leder {
+      ressurs {
+        navident
+      }
     }
   }
-}
-    `;
+`;
 export const HentAlleRessurserDocument = gql`
-    query HentAlleRessurser {
-  ressurser(where: {}) {
-    ressurs {
-      navident
+  query HentAlleRessurser {
+    ressurser(where: {}) {
+      ressurs {
+        navident
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useHentAlleRessurserQuery__
@@ -917,71 +917,71 @@ export const HentAlleRessurserDocument = gql`
  * });
  */
 export function useHentAlleRessurserQuery(baseOptions?: Apollo.QueryHookOptions<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
+}
 export function useHentAlleRessurserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
+}
 export type HentAlleRessurserQueryHookResult = ReturnType<typeof useHentAlleRessurserQuery>;
 export type HentAlleRessurserLazyQueryHookResult = ReturnType<typeof useHentAlleRessurserLazyQuery>;
 export type HentAlleRessurserQueryResult = Apollo.QueryResult<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>;
 export const HentRessursMedNavidentDocument = gql`
-    query HentRessursMedNavident($navident: String) {
-  ressurs(where: {navident: $navident}) {
-    navident
-    fornavn
-    etternavn
-    epost
-    sektor
-    visningsnavn
-    sluttdato
-    telefon {
-      beskrivelse
-      nummer
-      type
-    }
-    ledere {
-      erDagligOppfolging
-      ressurs {
-        navident
-        visningsnavn
-        fornavn
-        etternavn
-        orgTilknytning {
-          orgEnhet {
-            navn
-            id
+  query HentRessursMedNavident($navident: String) {
+    ressurs(where: {navident: $navident}) {
+      navident
+      fornavn
+      etternavn
+      epost
+      sektor
+      visningsnavn
+      sluttdato
+      telefon {
+        beskrivelse
+        nummer
+        type
+      }
+      ledere {
+        erDagligOppfolging
+        ressurs {
+          navident
+          visningsnavn
+          fornavn
+          etternavn
+          orgTilknytning {
+            orgEnhet {
+              navn
+              id
+            }
           }
         }
       }
-    }
-    lederFor {
-      orgEnhet {
-        id
-        navn
+      lederFor {
+        orgEnhet {
+          id
+          navn
+        }
       }
-    }
-    orgTilknytning {
-      gyldigFom
-      gyldigTom
-      erDagligOppfolging
-      orgEnhet {
-        navn
-        id
-        leder {
-          ressurs {
-            navident
-            fornavn
-            etternavn
+      orgTilknytning {
+        gyldigFom
+        gyldigTom
+        erDagligOppfolging
+        orgEnhet {
+          navn
+          id
+          leder {
+            ressurs {
+              navident
+              fornavn
+              etternavn
+            }
           }
         }
       }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useHentRessursMedNavidentQuery__
@@ -1000,33 +1000,33 @@ export const HentRessursMedNavidentDocument = gql`
  * });
  */
 export function useHentRessursMedNavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
+}
 export function useHentRessursMedNavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>(HentRessursMedNavidentDocument, options);
+}
 export type HentRessursMedNavidentQueryHookResult = ReturnType<typeof useHentRessursMedNavidentQuery>;
 export type HentRessursMedNavidentLazyQueryHookResult = ReturnType<typeof useHentRessursMedNavidentLazyQuery>;
 export type HentRessursMedNavidentQueryResult = Apollo.QueryResult<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>;
 export const HentAlleOrganisasjonsenheterDocument = gql`
-    query HentAlleOrganisasjonsenheter {
-  organisasjonsenheter(where: {}) {
-    id
-    organisasjonsenhet {
-      navn
-      leder {
-        ressurs {
-          navident
-          personident
+  query HentAlleOrganisasjonsenheter {
+    organisasjonsenheter(where: {}) {
+      id
+      organisasjonsenhet {
+        navn
+        leder {
+          ressurs {
+            navident
+            personident
+          }
         }
       }
+      code
     }
-    code
   }
-}
-    `;
+`;
 
 /**
  * __useHentAlleOrganisasjonsenheterQuery__
@@ -1044,31 +1044,31 @@ export const HentAlleOrganisasjonsenheterDocument = gql`
  * });
  */
 export function useHentAlleOrganisasjonsenheterQuery(baseOptions?: Apollo.QueryHookOptions<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
+}
 export function useHentAlleOrganisasjonsenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
+}
 export type HentAlleOrganisasjonsenheterQueryHookResult = ReturnType<typeof useHentAlleOrganisasjonsenheterQuery>;
 export type HentAlleOrganisasjonsenheterLazyQueryHookResult = ReturnType<typeof useHentAlleOrganisasjonsenheterLazyQuery>;
 export type HentAlleOrganisasjonsenheterQueryResult = Apollo.QueryResult<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>;
 export const HentPersonDocument = gql`
-    query hentPerson($personident: String!) {
-  person(where: {personident: $personident}) {
-    navident
-    personident
-    person {
-      navn {
-        fornavn
-        mellomnavn
-        etternavn
+  query hentPerson($personident: String!) {
+    person(where: {personident: $personident}) {
+      navident
+      personident
+      person {
+        navn {
+          fornavn
+          mellomnavn
+          etternavn
+        }
       }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useHentPersonQuery__
@@ -1087,26 +1087,26 @@ export const HentPersonDocument = gql`
  * });
  */
 export function useHentPersonQuery(baseOptions: Apollo.QueryHookOptions<HentPersonQuery, HentPersonQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentPersonQuery, HentPersonQueryVariables>(HentPersonDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentPersonQuery, HentPersonQueryVariables>(HentPersonDocument, options);
+}
 export function useHentPersonLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentPersonQuery, HentPersonQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentPersonQuery, HentPersonQueryVariables>(HentPersonDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentPersonQuery, HentPersonQueryVariables>(HentPersonDocument, options);
+}
 export type HentPersonQueryHookResult = ReturnType<typeof useHentPersonQuery>;
 export type HentPersonLazyQueryHookResult = ReturnType<typeof useHentPersonLazyQuery>;
 export type HentPersonQueryResult = Apollo.QueryResult<HentPersonQuery, HentPersonQueryVariables>;
 export const SearchRessursDocument = gql`
-    query searchRessurs($term: String!) {
-  search(term: $term) {
-    ... on Ressurs {
-      navident
-      visningsnavn
+  query searchRessurs($term: String!) {
+    search(term: $term) {
+      ... on Ressurs {
+        navident
+        visningsnavn
+      }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useSearchRessursQuery__
@@ -1125,77 +1125,78 @@ export const SearchRessursDocument = gql`
  * });
  */
 export function useSearchRessursQuery(baseOptions: Apollo.QueryHookOptions<SearchRessursQuery, SearchRessursQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
+}
 export function useSearchRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchRessursQuery, SearchRessursQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
+}
 export type SearchRessursQueryHookResult = ReturnType<typeof useSearchRessursQuery>;
 export type SearchRessursLazyQueryHookResult = ReturnType<typeof useSearchRessursLazyQuery>;
 export type SearchRessursQueryResult = Apollo.QueryResult<SearchRessursQuery, SearchRessursQueryVariables>;
 export const HentHierarkiDocument = gql`
-    query HentHierarki($id: String!) {
-  enhet: orgEnhet(where: {id: $id}) {
-    id
-    remedyEnhetId
-    navn
-    gyldigFom
-    gyldigTom
-    type {
-      kode
-    }
-    leder {
-      ressurs {
-        ...RessursStandalone
-        orgTilknytning {
-          orgEnhet {
-            id
-            navn
-          }
-        }
-      }
-    }
-  }
-  ressursKoblinger: organisasjonsenhet(where: {id: $id}) {
-    koblinger {
+  query HentHierarki($id: String!) {
+    enhet: orgEnhet(where: {id: $id}) {
+      id
+      remedyEnhetId
+      navn
       gyldigFom
       gyldigTom
-      ressurs {
-        ...RessursStandalone
-        ledere {
-          ressurs {
-            ...RessursStandalone
+      type {
+        kode
+      }
+      leder {
+        ressurs {
+          ...RessursStandalone
+          orgTilknytning {
+            orgEnhet {
+              id
+              navn
+            }
           }
         }
       }
     }
-  }
-  enhetsKoblinger: organisasjonsenhet(where: {id: $id}) {
-    underenheter: organiseringer(retning: under) {
-      organisasjonsenhet {
-        ...OrgenhetStandaloneWithLeder
+    ressursKoblinger: organisasjonsenhet(where: {id: $id}) {
+      koblinger {
+        gyldigFom
+        gyldigTom
+        ressurs {
+          ...RessursStandalone
+          ledere {
+            ressurs {
+              ...RessursStandalone
+            }
+          }
+        }
       }
     }
-    overenheter: organiseringer(retning: over) {
-      organisasjonsenhet {
-        ...OrgenhetStandaloneWithLeder
-        organiseringer(retning: over) {
-          organisasjonsenhet {
-            ...OrgenhetStandaloneWithLeder
-            organiseringer(retning: over) {
-              organisasjonsenhet {
-                ...OrgenhetStandaloneWithLeder
-                organiseringer(retning: over) {
-                  organisasjonsenhet {
-                    ...OrgenhetStandaloneWithLeder
-                    organiseringer(retning: over) {
-                      organisasjonsenhet {
-                        ...OrgenhetStandaloneWithLeder
-                        organiseringer(retning: over) {
-                          organisasjonsenhet {
-                            ...OrgenhetStandaloneWithLeder
+    enhetsKoblinger: organisasjonsenhet(where: {id: $id}) {
+      underenheter: organiseringer(retning: under) {
+        organisasjonsenhet {
+          ...OrgenhetStandaloneWithLeder
+        }
+      }
+      overenheter: organiseringer(retning: over) {
+        organisasjonsenhet {
+          ...OrgenhetStandaloneWithLeder
+          organiseringer(retning: over) {
+            organisasjonsenhet {
+              ...OrgenhetStandaloneWithLeder
+              organiseringer(retning: over) {
+                organisasjonsenhet {
+                  ...OrgenhetStandaloneWithLeder
+                  organiseringer(retning: over) {
+                    organisasjonsenhet {
+                      ...OrgenhetStandaloneWithLeder
+                      organiseringer(retning: over) {
+                        organisasjonsenhet {
+                          ...OrgenhetStandaloneWithLeder
+                          organiseringer(retning: over) {
+                            organisasjonsenhet {
+                              ...OrgenhetStandaloneWithLeder
+                            }
                           }
                         }
                       }
@@ -1209,8 +1210,7 @@ export const HentHierarkiDocument = gql`
       }
     }
   }
-}
-    ${RessursStandaloneFragmentDoc}
+  ${RessursStandaloneFragmentDoc}
 ${OrgenhetStandaloneWithLederFragmentDoc}`;
 
 /**
@@ -1230,37 +1230,37 @@ ${OrgenhetStandaloneWithLederFragmentDoc}`;
  * });
  */
 export function useHentHierarkiQuery(baseOptions: Apollo.QueryHookOptions<HentHierarkiQuery, HentHierarkiQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentHierarkiQuery, HentHierarkiQueryVariables>(HentHierarkiDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentHierarkiQuery, HentHierarkiQueryVariables>(HentHierarkiDocument, options);
+}
 export function useHentHierarkiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentHierarkiQuery, HentHierarkiQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentHierarkiQuery, HentHierarkiQueryVariables>(HentHierarkiDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentHierarkiQuery, HentHierarkiQueryVariables>(HentHierarkiDocument, options);
+}
 export type HentHierarkiQueryHookResult = ReturnType<typeof useHentHierarkiQuery>;
 export type HentHierarkiLazyQueryHookResult = ReturnType<typeof useHentHierarkiLazyQuery>;
 export type HentHierarkiQueryResult = Apollo.QueryResult<HentHierarkiQuery, HentHierarkiQueryVariables>;
 export const HentLederFornavidentDocument = gql`
-    query HentLederFornavident($navident: String) {
-  ressurs(where: {navident: $navident}) {
-    navident
-    ledere {
-      ressurs {
-        navident
-        visningsnavn
-        fornavn
-        etternavn
-        koblinger {
-          organisasjonsenhet {
-            navn
-            id
+  query HentLederFornavident($navident: String) {
+    ressurs(where: {navident: $navident}) {
+      navident
+      ledere {
+        ressurs {
+          navident
+          visningsnavn
+          fornavn
+          etternavn
+          koblinger {
+            organisasjonsenhet {
+              navn
+              id
+            }
           }
         }
       }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useHentLederFornavidentQuery__
@@ -1279,35 +1279,35 @@ export const HentLederFornavidentDocument = gql`
  * });
  */
 export function useHentLederFornavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
+}
 export function useHentLederFornavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
+}
 export type HentLederFornavidentQueryHookResult = ReturnType<typeof useHentLederFornavidentQuery>;
 export type HentLederFornavidentLazyQueryHookResult = ReturnType<typeof useHentLederFornavidentLazyQuery>;
 export type HentLederFornavidentQueryResult = Apollo.QueryResult<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>;
 export const HentRessursDocument = gql`
-    query HentRessurs($navident: String) {
-  ressurs(where: {navident: $navident}) {
-    ...RessursWithKobling
-    sektor
-    ledere {
-      ressurs {
-        ...RessursStandalone
-        orgTilknytning {
-          orgEnhet {
-            navn
-            id
+  query HentRessurs($navident: String) {
+    ressurs(where: {navident: $navident}) {
+      ...RessursWithKobling
+      sektor
+      ledere {
+        ressurs {
+          ...RessursStandalone
+          orgTilknytning {
+            orgEnhet {
+              navn
+              id
+            }
           }
         }
       }
     }
   }
-}
-    ${RessursWithKoblingFragmentDoc}
+  ${RessursWithKoblingFragmentDoc}
 ${RessursStandaloneFragmentDoc}`;
 
 /**
@@ -1327,30 +1327,30 @@ ${RessursStandaloneFragmentDoc}`;
  * });
  */
 export function useHentRessursQuery(baseOptions?: Apollo.QueryHookOptions<HentRessursQuery, HentRessursQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentRessursQuery, HentRessursQueryVariables>(HentRessursDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<HentRessursQuery, HentRessursQueryVariables>(HentRessursDocument, options);
+}
 export function useHentRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentRessursQuery, HentRessursQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentRessursQuery, HentRessursQueryVariables>(HentRessursDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<HentRessursQuery, HentRessursQueryVariables>(HentRessursDocument, options);
+}
 export type HentRessursQueryHookResult = ReturnType<typeof useHentRessursQuery>;
 export type HentRessursLazyQueryHookResult = ReturnType<typeof useHentRessursLazyQuery>;
 export type HentRessursQueryResult = Apollo.QueryResult<HentRessursQuery, HentRessursQueryVariables>;
 export const SearchOrgenheterDocument = gql`
-    query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
-  searchOrgEnhet(term: $term, filter: $filter) {
-    id
-    navn
-    remedyEnhetId
-    leder {
-      ressurs {
-        visningsnavn
+  query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
+    searchOrgEnhet(term: $term, filter: $filter) {
+      id
+      navn
+      remedyEnhetId
+      leder {
+        ressurs {
+          visningsnavn
+        }
       }
     }
   }
-}
-    `;
+`;
 
 /**
  * __useSearchOrgenheterQuery__
@@ -1370,26 +1370,26 @@ export const SearchOrgenheterDocument = gql`
  * });
  */
 export function useSearchOrgenheterQuery(baseOptions: Apollo.QueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
+}
 export function useSearchOrgenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>(SearchOrgenheterDocument, options);
+}
 export type SearchOrgenheterQueryHookResult = ReturnType<typeof useSearchOrgenheterQuery>;
 export type SearchOrgenheterLazyQueryHookResult = ReturnType<typeof useSearchOrgenheterLazyQuery>;
 export type SearchOrgenheterQueryResult = Apollo.QueryResult<SearchOrgenheterQuery, SearchOrgenheterQueryVariables>;
 export const GetAllOrgenheterAdminDocument = gql`
-    query GetAllOrgenheterAdmin {
-  orgEnheter(where: {}) {
-    nomId
-    orgEnhet {
-      ...OrgEnhetAdmin
+  query GetAllOrgenheterAdmin {
+    orgEnheter(where: {}) {
+      nomId
+      orgEnhet {
+        ...OrgEnhetAdmin
+      }
     }
   }
-}
-    ${OrgEnhetAdminFragmentDoc}`;
+${OrgEnhetAdminFragmentDoc}`;
 
 /**
  * __useGetAllOrgenheterAdminQuery__
@@ -1407,13 +1407,13 @@ export const GetAllOrgenheterAdminDocument = gql`
  * });
  */
 export function useGetAllOrgenheterAdminQuery(baseOptions?: Apollo.QueryHookOptions<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
-      }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
+}
 export function useGetAllOrgenheterAdminLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
-        }
+  const options = {...defaultOptions, ...baseOptions}
+  return Apollo.useLazyQuery<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>(GetAllOrgenheterAdminDocument, options);
+}
 export type GetAllOrgenheterAdminQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminQuery>;
 export type GetAllOrgenheterAdminLazyQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminLazyQuery>;
 export type GetAllOrgenheterAdminQueryResult = Apollo.QueryResult<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>;

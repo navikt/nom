@@ -14,9 +14,9 @@ import {
   useHasWriteAccess,
 } from "~/api/useGetSession";
 import {
-  adminRoute,
   createRessursRoute,
   indexRoute,
+  orgEnheterAdminRoute,
   ressursRoute,
 } from "~/reactRouterRoutes";
 import hierarchyFilled from "~/resources/hierarchyFilled.svg";
@@ -77,7 +77,7 @@ export function BurgerMenu() {
           )}
           {hasAdminAccess && (
             <Dropdown.Menu.List.Item
-              onClick={() => navigate({ to: adminRoute.to })}
+              onClick={() => navigate({ to: orgEnheterAdminRoute.to })}
             >
               <TokenFillIcon color="black" fontSize="24px" />
               <span>Admin</span>

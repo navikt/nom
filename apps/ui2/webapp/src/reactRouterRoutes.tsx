@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { Tabs } from "@navikt/ds-react";
 import {
   Navigate,
   Outlet,
@@ -15,6 +16,8 @@ import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { AdminPage } from "~/pages/AdminPage/AdminPage";
+import { OrgEnheterAdminPage } from "~/pages/AdminPage/OrgEnheterAdminPage";
+import { RessurserAdminPage } from "~/pages/AdminPage/RessurserAdminPage";
 import OrganisasjonHierarkiPage from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { ResourcePage } from "~/pages/ResourcePage/ResourcePage";
 import { isInDevelopment } from "~/utils";
@@ -143,12 +146,36 @@ export const adminRoute = new Route({
       return <AdminPage />;
     }
   },
+});
+
+export const orgEnheterAdminRoute = new Route({
+  getParentRoute: () => adminRoute,
+  path: "orgenheter",
+  component: () => {
+    return (
+      <Tabs.Panel value="/admin/orgenheter">
+        <OrgEnheterAdminPage />
+      </Tabs.Panel>
+    );
+  },
   validateSearch: (
     search: Record<string, unknown>,
   ): { allowEdit?: boolean } => {
     return {
       allowEdit: Boolean(search.allowEdit),
     };
+  },
+});
+
+export const ressurserAdminRoute = new Route({
+  getParentRoute: () => adminRoute,
+  path: "ressurser",
+  component: () => {
+    return (
+      <Tabs.Panel value="/admin/ressurser">
+        <RessurserAdminPage />
+      </Tabs.Panel>
+    );
   },
 });
 
@@ -163,7 +190,7 @@ const routeTree = rootRoute.addChildren([
   ressursRoute,
   createRessursRoute,
   orgRoute,
-  adminRoute,
+  adminRoute.addChildren([orgEnheterAdminRoute, ressurserAdminRoute]),
   notFoundRoute,
 ]);
 

@@ -1,278 +1,278 @@
 query HentAlleRessurser {
-  ressurser(where: {}) {
-    ressurs {
-      navident
+    ressurser(where: {}) {
+        ressurs {
+            navident
+        }
     }
-  }
 }
 
 query HentRessursMedNavident($navident: String) {
-  ressurs(where: { navident: $navident }) {
-    navident
-    fornavn
-    etternavn
-    epost
-    sektor
-    visningsnavn
-    sluttdato
-    telefon {
-      beskrivelse
-      nummer
-      type
-    }
-    ledere {
-      erDagligOppfolging
-      ressurs {
+    ressurs(where: { navident: $navident }) {
         navident
-        visningsnavn
         fornavn
         etternavn
+        epost
+        sektor
+        visningsnavn
+        sluttdato
+        telefon {
+            beskrivelse
+            nummer
+            type
+        }
+        ledere {
+            erDagligOppfolging
+            ressurs {
+                navident
+                visningsnavn
+                fornavn
+                etternavn
+                orgTilknytning {
+                    orgEnhet {
+                        navn
+                        id
+                    }
+                }
+            }
+        }
+        lederFor {
+            orgEnhet {
+                id
+                navn
+            }
+        }
         orgTilknytning {
-          orgEnhet {
-            navn
-            id
-          }
+            gyldigFom
+            gyldigTom
+            erDagligOppfolging
+            orgEnhet {
+                navn
+                id
+                leder {
+                    ressurs {
+                        navident
+                        fornavn
+                        etternavn
+                    }
+                }
+            }
         }
-      }
     }
-    lederFor {
-        orgEnhet {
-            id
-            navn
-        }
-    }
-    orgTilknytning {
-      gyldigFom
-      gyldigTom
-      erDagligOppfolging
-      orgEnhet {
-        navn
-        id
-        leder {
-          ressurs {
-            navident
-            fornavn
-            etternavn
-          }
-        }
-      }
-    }
-  }
 }
 
 query HentAlleOrganisasjonsenheter {
-  organisasjonsenheter(where: {}) {
-    id
-    organisasjonsenhet {
-      navn
-      leder {
-        ressurs {
-          navident
-          personident
+    organisasjonsenheter(where: {}) {
+        id
+        organisasjonsenhet {
+            navn
+            leder {
+                ressurs {
+                    navident
+                    personident
+                }
+            }
         }
-      }
+        code
     }
-    code
-  }
 }
 
 query hentPerson($personident: String!) {
-  person(where: { personident: $personident }) {
-    navident
-    personident
-    person {
-      navn {
-        fornavn
-        mellomnavn
-        etternavn
-      }
+    person(where: { personident: $personident }) {
+        navident
+        personident
+        person {
+            navn {
+                fornavn
+                mellomnavn
+                etternavn
+            }
+        }
     }
-  }
 }
 
 query searchRessurs($term: String!) {
-  search(term: $term) {
-    ... on Ressurs {
-      navident
-      visningsnavn
+    search(term: $term) {
+        ... on Ressurs {
+            navident
+            visningsnavn
+        }
     }
-  }
 }
 
 fragment RessursStandalone on Ressurs {
-  navident
-  fornavn
-  etternavn
-  visningsnavn
-  epost
-  sektor
-  telefon {
-    beskrivelse
-    nummer
-    type
-  }
+    navident
+    fornavn
+    etternavn
+    visningsnavn
+    epost
+    sektor
+    telefon {
+        beskrivelse
+        nummer
+        type
+    }
 }
 
 fragment RessursWithLeder on Ressurs {
-  ...RessursStandalone
-  ledere {
-    ressurs {
-      navident
+    ...RessursStandalone
+    ledere {
+        ressurs {
+            navident
+        }
     }
-  }
 }
 
 fragment RessursWithKobling on Ressurs {
-  ...RessursStandalone
-  koblinger {
-    organisasjonsenhet {
-      id
-      navn
+    ...RessursStandalone
+    koblinger {
+        organisasjonsenhet {
+            id
+            navn
+        }
     }
-  }
 }
 
 fragment RessursWithLederAndKobling on Ressurs {
-  ...RessursWithLeder
-  ...RessursWithKobling
+    ...RessursWithLeder
+    ...RessursWithKobling
 }
 
 fragment OrgenhetStandaloneWithLeder on OrgEnhet {
-  id
-  navn
-  gyldigFom
-  gyldigTom
-  leder {
-    ressurs {
-      ...RessursStandalone
-      koblinger {
-        organisasjonsenhet {
-          id
-          navn
-        }
-      }
-    }
-  }
-}
-
-query HentHierarki($id: String!) {
-  enhet: orgEnhet(where: { id: $id }) {
     id
-    remedyEnhetId
     navn
     gyldigFom
     gyldigTom
-    type {
-      kode
-    }
     leder {
-      ressurs {
-        ...RessursStandalone
-        orgTilknytning {
-          orgEnhet {
-            id
-            navn
-          }
-        }
-      }
-    }
-  }
-
-  ressursKoblinger: organisasjonsenhet(
-    where: { id: $id }
-  ) {
-    koblinger {
-      gyldigFom
-      gyldigTom
-      ressurs {
-        ...RessursStandalone
-        ledere {
-          ressurs {
+        ressurs {
             ...RessursStandalone
-          }
+            koblinger {
+                organisasjonsenhet {
+                    id
+                    navn
+                }
+            }
         }
-      }
     }
-  }
+}
 
-  enhetsKoblinger: organisasjonsenhet(
-    where: { id: $id }
-  ) {
-    underenheter: organiseringer(retning: under) {
-      organisasjonsenhet {
-        ...OrgenhetStandaloneWithLeder
-      }
+query HentHierarki($id: String!) {
+    enhet: orgEnhet(where: { id: $id }) {
+        id
+        remedyEnhetId
+        navn
+        gyldigFom
+        gyldigTom
+        type {
+            kode
+        }
+        leder {
+            ressurs {
+                ...RessursStandalone
+                orgTilknytning {
+                    orgEnhet {
+                        id
+                        navn
+                    }
+                }
+            }
+        }
     }
 
-    overenheter: organiseringer(retning: over) {
-      organisasjonsenhet {
-        ...OrgenhetStandaloneWithLeder
-        organiseringer(retning: over) {
-          organisasjonsenhet {
-            ...OrgenhetStandaloneWithLeder
-            organiseringer(retning: over) {
-              organisasjonsenhet {
+    ressursKoblinger: organisasjonsenhet(
+        where: { id: $id }
+    ) {
+        koblinger {
+            gyldigFom
+            gyldigTom
+            ressurs {
+                ...RessursStandalone
+                ledere {
+                    ressurs {
+                        ...RessursStandalone
+                    }
+                }
+            }
+        }
+    }
+
+    enhetsKoblinger: organisasjonsenhet(
+        where: { id: $id }
+    ) {
+        underenheter: organiseringer(retning: under) {
+            organisasjonsenhet {
+                ...OrgenhetStandaloneWithLeder
+            }
+        }
+
+        overenheter: organiseringer(retning: over) {
+            organisasjonsenhet {
                 ...OrgenhetStandaloneWithLeder
                 organiseringer(retning: over) {
-                  organisasjonsenhet {
-                    ...OrgenhetStandaloneWithLeder
-                    organiseringer(retning: over) {
-                      organisasjonsenhet {
+                    organisasjonsenhet {
                         ...OrgenhetStandaloneWithLeder
                         organiseringer(retning: over) {
-                          organisasjonsenhet {
-                            ...OrgenhetStandaloneWithLeder
-                          }
+                            organisasjonsenhet {
+                                ...OrgenhetStandaloneWithLeder
+                                organiseringer(retning: over) {
+                                    organisasjonsenhet {
+                                        ...OrgenhetStandaloneWithLeder
+                                        organiseringer(retning: over) {
+                                            organisasjonsenhet {
+                                                ...OrgenhetStandaloneWithLeder
+                                                organiseringer(retning: over) {
+                                                    organisasjonsenhet {
+                                                        ...OrgenhetStandaloneWithLeder
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                      }
                     }
-                  }
                 }
-              }
             }
-          }
         }
-      }
     }
-  }
 }
 
 query HentLederFornavident($navident: String) {
-  ressurs(where: { navident: $navident }) {
-    navident
-    ledere {
-      ressurs {
+    ressurs(where: { navident: $navident }) {
         navident
-        visningsnavn
-        fornavn
-        etternavn
-        koblinger {
-          organisasjonsenhet {
-            navn
-            id
-          }
+        ledere {
+            ressurs {
+                navident
+                visningsnavn
+                fornavn
+                etternavn
+                koblinger {
+                    organisasjonsenhet {
+                        navn
+                        id
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }
 
 query HentRessurs($navident: String) {
-  ressurs(where: { navident: $navident }) {
-    ...RessursWithKobling
-    sektor
-    ledere {
-      ressurs {
-        ...RessursStandalone
-        orgTilknytning {
-          orgEnhet {
-            navn
-            id
-          }
+    ressurs(where: { navident: $navident }) {
+        ...RessursWithKobling
+        sektor
+        ledere {
+            ressurs {
+                ...RessursStandalone
+                orgTilknytning {
+                    orgEnhet {
+                        navn
+                        id
+                    }
+                }
+            }
         }
-      }
     }
-  }
 }
 
 query SearchOrgenheter($term: String!, $filter: OrgEnhetSearchFilter) {
