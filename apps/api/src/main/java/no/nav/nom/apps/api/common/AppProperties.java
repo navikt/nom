@@ -23,7 +23,8 @@ public record AppProperties(
             String baseUrl,
             String enhetPath,
             String orgtilknytningPath,
-            String ressursStillingerPath
+            String ressursStillingerPath,
+            String eksterneRessurserPath
     ) {}
 
     public record Pdl(

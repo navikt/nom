@@ -12,6 +12,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
@@ -52,6 +53,7 @@ public class DvhRestConsumer {
     private final OrgEnhetTypeHandler orgEnhetTypeHandler;
 
     private final RessursStillingLoader ressursStillingLoader;
+    private final EksterneRessurserLoader eksterneRessurserLoader;
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -67,6 +69,7 @@ public class DvhRestConsumer {
             try {
                 Thread.sleep(5_000);
                 log.debug("InitialState er ikke klar enda");
+                log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
             } catch (Exception ignored) {
                 log.error("Waiting for initialState last feilet", ignored);
             }
@@ -85,6 +88,8 @@ public class DvhRestConsumer {
 
         if (leaderElection.isLeader()) { // Oppdater state fra dvh - holder at en Pod gjør dette
             updateOrgtilknytningerStateFromDvh();
+
+            updateOrgtilknytningerForEksterneFromDvh();
 
             loadRessurserFromDvh();
 
@@ -155,6 +160,13 @@ public class DvhRestConsumer {
             log.error("Feilet i last av ressursStillinger", e);
         }
     }
+
+    private void updateOrgtilknytningerForEksterneFromDvh() {
+        log.info("Oppdater Orgtilknytninger for eksterne fra dvh");
+        eksterneRessurserLoader.loadAndProcess();
+    }
+
+
 
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
