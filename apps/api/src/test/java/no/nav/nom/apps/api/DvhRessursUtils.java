@@ -67,13 +67,15 @@ public class DvhRessursUtils {
             @JsonProperty("REMEDY_PERMISJON") String REMEDY_PERMISJON,
             @JsonProperty("REMEDY_START_DATO") LocalDate REMEDY_START_DATO,
             @JsonProperty("REMEDY_SLUTT_DATO") LocalDate REMEDY_SLUTT_DATO,
+            @JsonProperty("AGRESSO_START_DATO") LocalDate AGRESSO_START_DATO,
             @JsonProperty("AGRESSO_SLUTT_DATO") LocalDate AGRESSO_SLUTT_DATO,
             @JsonProperty("IDENT_TYPE") String IDENT_TYPE
     ) {
         public RessursMock(
-                String NAV_IDENT, String FNR, String FORNAVN, String ETTERNAVN, String ANSATT_TYPE, LocalDate REMEDY_SLUTT_DATO
+            String NAV_IDENT, String FNR, String FORNAVN, String ETTERNAVN, String ANSATT_TYPE, LocalDate REMEDY_SLUTT_DATO
         ) {
-            this(NAV_IDENT, FNR, FORNAVN, ETTERNAVN, ANSATT_TYPE, "F", "JA", "NEI", LocalDate.now(), REMEDY_SLUTT_DATO, LocalDate.parse("2099-12-31"),"STANDARD");
+            this(NAV_IDENT, FNR, FORNAVN, ETTERNAVN, ANSATT_TYPE, "F", "JA", "NEI", LocalDate.now(), REMEDY_SLUTT_DATO, null, LocalDate.parse("2099-12-31"),"STANDARD");
         }
     }
+
 }
