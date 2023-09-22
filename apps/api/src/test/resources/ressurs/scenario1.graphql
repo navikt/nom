@@ -3,9 +3,15 @@ query {
         navIdent
         personIdent
         ...SluttDato
+        ...StartDato
     }
 }
 
 fragment SluttDato on Ressurs{
     sluttdato
+}
+
+
+fragment StartDato on Ressurs{
+    startdato
 }

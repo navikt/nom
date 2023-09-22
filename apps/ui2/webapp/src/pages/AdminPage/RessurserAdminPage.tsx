@@ -81,6 +81,7 @@ export function RessurserAdminPage() {
             <Table.ColumnHeader scope="col">OrgEnhet</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Ledere</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Sluttdato</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Startdato</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -100,6 +101,7 @@ export function RessurserAdminPage() {
                 {ressurs.ledere.map((leder) => leder.ressurs.navident)}
               </Table.DataCell>
               <Table.DataCell>{ressurs.sluttdato}</Table.DataCell>
+              <Table.DataCell>{ressurs.startdato}</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>
@@ -135,6 +137,7 @@ query HentAlleRessurser {
             visningsnavn
             sektor
             sluttdato
+            startdato
         }
     }
 }
@@ -163,4 +166,5 @@ type RessursFields = {
   visningsnavn: string;
   sektor: string[];
   sluttdato: string;
+  startdato: string;
 };

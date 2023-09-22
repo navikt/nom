@@ -177,6 +177,33 @@ class RessursTest extends RessursTestBase {
         assertEquals(ressursState.sluttdato().orElseThrow(), outputRessurs.getSluttdato());
     }
 
+    @Test
+    @DisplayName("Kan hente startdato når satt")
+    void scenario32() {
+        RessursState ressursState = new RessursState(
+            PrefixedUlidCreator.createRessursUlid(),
+            "testPersonIdent",
+            "testNavIdent",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn",
+                Optional.of("mellomnavn"),
+                "etternavn"
+            ),
+            Optional.of(LocalDate.now().plusDays(10)),
+            Optional.of(LocalDate.now().minusDays(10))
+        );
+
+        createRessursHendelseEventSource(ressursState);
+
+        final var response = postForResource("ressurs/scenario1.graphql");
+
+        final var outputRessurs = response.path("ressurs").entity(Ressurs.class).get();
+        assertEquals(ressursState.navident(), outputRessurs.getNavIdent());
+        assertEquals(ressursState.personident(), outputRessurs.getPersonIdent());
+        assertEquals(ressursState.startdato().orElseThrow(), outputRessurs.getStartdato());
+    }
+
     @Nested
     @WireMockStubs(RsaStub.class)
     @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
@@ -423,4 +450,6 @@ class RessursTest extends RessursTestBase {
         assertEquals(ressursState.navident(), outputRessurs.get("navident").textValue());
         assertEquals(outputRessurs.get("telefon").get(0).get("nummer").textValue(), telefonNummer);
     }
+
+
 }

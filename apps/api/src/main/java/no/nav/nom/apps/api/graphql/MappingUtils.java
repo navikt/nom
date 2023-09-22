@@ -19,6 +19,7 @@ public class MappingUtils {
                 .personIdent(ressursState.personident())
                 .ressurstype(sektor)
                 .sektor(sektor)
+                .startdato(ressursState.startdato().orElse(null))
                 .sluttdato(ressursState.sluttdato().orElse(null))
                 .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())
                 .etternavn(ressursState.visningsnavn().etternavn())
