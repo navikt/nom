@@ -16,8 +16,7 @@ import {
 } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import axios from "axios";
-import { isAfter } from "date-fns";
-import partition from "lodash/partition";
+import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
@@ -102,13 +101,24 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
     return <></>;
   }
 
-  const [activeOrgtilknytninger, expiredOrgTilknytninger] = partition(
-    ressurs.orgTilknytning,
-    (orgtilknytning) =>
+  const activeOrgtilknytninger = ressurs.orgTilknytning.filter(
+    (orgTilknytning) =>
       isGyldighetsPeriodeActive(
-        orgtilknytning.gyldigFom,
-        orgtilknytning.gyldigTom,
+        orgTilknytning.gyldigFom,
+        orgTilknytning.gyldigTom,
       ),
+  );
+
+  const expiredOrgTilknytninger = ressurs.orgTilknytning.filter(
+    (orgTilknytning) =>
+      orgTilknytning.gyldigTom &&
+      isBefore(new Date(orgTilknytning.gyldigTom), new Date()),
+  );
+
+  const futureOrgTilknytninger = ressurs.orgTilknytning.filter(
+    (orgTilknytning) =>
+      orgTilknytning.gyldigFom &&
+      isAfter(new Date(orgTilknytning.gyldigFom), new Date()),
   );
 
   return (
@@ -125,27 +135,61 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
           ressurs={ressurs}
         />
       ))}
-      <ExpiredOrgTilknytninger orgTilknytninger={expiredOrgTilknytninger} />
+      <FutureOrgTilknytninger
+        futureOrgTilknytninger={futureOrgTilknytninger}
+        ressurs={ressurs}
+      />
+      <ExpiredOrgTilknytninger
+        expiredOrgTilknytninger={expiredOrgTilknytninger}
+      />
+    </>
+  );
+}
+
+function FutureOrgTilknytninger({
+  futureOrgTilknytninger,
+  ressurs,
+}: {
+  futureOrgTilknytninger: RessursOrgTilknytning[];
+  ressurs: Ressurs;
+}) {
+  if (futureOrgTilknytninger.length === 0) {
+    return <></>;
+  }
+
+  return (
+    <>
+      <Heading level="2" size="xsmall">
+        Fremtidige org.tilknytninger
+      </Heading>
+      {futureOrgTilknytninger.map((orgTilknytning) => (
+        <OrganisationHierarchyTree
+          key={orgTilknytning.orgEnhet.id}
+          orgTilknytning={orgTilknytning}
+          ressurs={ressurs}
+        />
+      ))}
     </>
   );
 }
 
 function ExpiredOrgTilknytninger({
-  orgTilknytninger,
+  expiredOrgTilknytninger,
 }: {
-  orgTilknytninger: RessursOrgTilknytning[];
+  expiredOrgTilknytninger: RessursOrgTilknytning[];
 }) {
   const [showAll, setShowAll] = useState(false);
-  if (orgTilknytninger.length === 0) {
+  if (expiredOrgTilknytninger.length === 0) {
     return <></>;
   }
 
-  const tilknyttingerToShow = orgTilknytninger.slice(
+  const tilknyttingerToShow = expiredOrgTilknytninger.slice(
     0,
-    showAll ? orgTilknytninger.length : 3,
+    showAll ? expiredOrgTilknytninger.length : 3,
   );
 
-  const shouldDisplayShowAllButton = orgTilknytninger.length > 3 && !showAll;
+  const shouldDisplayShowAllButton =
+    expiredOrgTilknytninger.length > 3 && !showAll;
 
   return (
     <>
