@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Tag(name = "Remedy")
@@ -119,10 +120,12 @@ public class RemedyController {
         return ResponseEntity.ok(opprettRessurs(request, SecurityUtil.getSystemFromToken(token).orElseThrow()));
     }
 
-    public RessursDTO opprettRessurs(OpprettRessursRequest request, String systemOriginator) {
+    public RessursDTO   opprettRessurs(OpprettRessursRequest request, String systemOriginator) {
+        log.info(SECURE_LOGS, "Opprett ressurs request mottatt:\n{}", request);
         var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
+            log.debug(SECURE_LOGS, "Ressurs med personident {} finnes fra før", request.getPersonident());
             return funnetRessurs.map(this::from).get();
         }
 
@@ -161,6 +164,8 @@ public class RemedyController {
             // Det kan være at identen person har byttet f.nr. i såfall har nav-ident returnert eksisterende navident for personen
             funnetRessurs = ressursService.findByNavident(opprettetNavident);
             if (funnetRessurs.isPresent()) {
+                log.debug("Ressurs funnet med navident {}", opprettetNavident);
+
                 // Endre personident på eksisterende ressurs
                 var eksisterendeRessurs = funnetRessurs.get();
 
