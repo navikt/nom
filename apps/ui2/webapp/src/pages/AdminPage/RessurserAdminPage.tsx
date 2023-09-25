@@ -16,6 +16,7 @@ import { useQuery } from "react-query";
 type AdminFilter = {
   navn?: string;
   aktiv?: boolean;
+  navident?: string;
 };
 
 export function RessurserAdminPage() {
@@ -133,6 +134,12 @@ export function RessurserAdminPage() {
             setFilter((filter) => ({ ...filter, navn: event.target.value }))
           }
         />
+        <TextField
+          label="NavIdent"
+          onChange={(event) =>
+            setFilter((filter) => ({ ...filter, navident: event.target.value }))
+          }
+        />
       </div>
       <b>Treff: {filteredRessurser.length}</b>
       <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
@@ -186,14 +193,21 @@ export function RessurserAdminPage() {
 
 function filterRessurser(ressurser: RessursFields[], adminFilter: AdminFilter) {
   return ressurser.filter((ressurs) => {
+    const navidentmatch =
+      !adminFilter.navident ||
+      ressurs.navident === adminFilter.navident.toUpperCase();
+
     const nameMatch =
       !adminFilter.navn || searchName(adminFilter.navn, ressurs.visningsnavn);
+
     if (adminFilter.aktiv === undefined) {
-      return nameMatch;
+      return nameMatch && navidentmatch;
     }
+
     const isAktiv =
       !ressurs.sluttdato || new Date() < new Date(ressurs.sluttdato);
-    return nameMatch && adminFilter.aktiv === isAktiv;
+
+    return nameMatch && navidentmatch && adminFilter.aktiv === isAktiv;
   });
 }
 
