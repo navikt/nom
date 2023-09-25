@@ -4,9 +4,9 @@ import {
   Alert,
   Loader,
   Pagination,
+  Select,
   Table,
   TextField,
-  UNSAFE_Combobox,
 } from "@navikt/ds-react";
 import type { AxiosResponse } from "axios";
 import axios from "axios";
@@ -116,18 +116,20 @@ export function RessurserAdminPage() {
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         `}
       >
-        <UNSAFE_Combobox
+        <Select
           defaultValue={"Alle"}
           label="Aktiv"
-          onToggleSelected={(option, isSelected) => {
-            setFilter((filter) => ({
+          onChange={(changeEvent) =>
+            setFilter({
               ...filter,
-              aktiv: isSelected ? activeStringToAdminValue(option) : undefined,
-            }));
-          }}
-          options={["Aktive", "Alle", "Inaktive"]}
-          shouldAutocomplete={true}
-        />
+              aktiv: activeStringToAdminValue(changeEvent.target.value),
+            })
+          }
+        >
+          <option value={undefined}>Alle</option>
+          <option value={"aktive"}>Aktive</option>
+          <option value={"inaktive"}>Inaktive</option>
+        </Select>
         <TextField
           label="Navn"
           onChange={(event) =>
@@ -262,8 +264,8 @@ type RessursFields = {
 };
 
 function activeStringToAdminValue(option: string) {
-  if ("Aktive" === option) return true;
-  if ("Inaktive" === option) return false;
+  if ("aktive" === option) return true;
+  if ("inaktive" === option) return false;
   return;
 }
 
