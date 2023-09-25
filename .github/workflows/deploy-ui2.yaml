@@ -6,7 +6,7 @@ on:
       - 'main'
       - 'dev/*'
     paths:
-      - '.github/workflows/deploy-ui2.yml'
+      - '.github/workflows/deploy-ui2.yaml'
       - 'apps/ui2/**'
       - '.nais/apps/ui2/**'
   workflow_dispatch:
