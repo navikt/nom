@@ -55,7 +55,7 @@ class EventsrcToState {
                                     if (data.navident().isPresent()) {
                                         state.put("navident", data.navident().get());
                                         if(data.startdato().isPresent()) {
-                                            state.put("startdato", data.startdato().toString());
+                                            state.put("startdato", data.startdato().get().toString());
                                         }
                                     }
                                     if(data.startdato().isPresent()){
@@ -101,7 +101,13 @@ class EventsrcToState {
     }
 
     private static <T> T parseNullableFromJson(JsonNode jsonNode, String key, Function<String, T> transform) {
-        return jsonNode.hasNonNull(key) ? transform.apply(jsonNode.get(key).asText()) : null;
+        return keyIsNonNullAndEksluderOptionalEmptyText(jsonNode, key) ? transform.apply(jsonNode.get(key).asText()) : null;
+    }
+
+    // Ser ut til at vi i stream prosessing state har fått startdato="Optional.empty" som string. Dette må kunne prosesseres, men bør kunne tas vekk på senere tidspunkt.
+    // Fordi dette vil 'forsvinne' når mellomstegene er behandlet, og bør ikke oppstå igjen
+    private static boolean keyIsNonNullAndEksluderOptionalEmptyText(JsonNode jsonNode, String key) {
+        return jsonNode.hasNonNull(key) && !jsonNode.get(key).asText().equals("Optional.empty");
     }
 
     private static String parseNullableFromJson(JsonNode jsonNode, String key) {
