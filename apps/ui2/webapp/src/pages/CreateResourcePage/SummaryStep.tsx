@@ -105,11 +105,11 @@ function InformationText({ ressurs }: { ressurs: Ressurs }) {
       <BodyShort>
         Medarbeideren er nå registrert i NOM og NAV-ident {ressurs.navident} er
         opprettet for {ressurs.visningsnavn}. For å fullføre opprettelsen må det
-        også gis tilganger i identrutina i Remedy. (Leder eller
-        identadministrator kan gjøre dette)
+        også gis tilganger i identrutina i Remedy. Leder eller
+        identadministrator kan gjøre dette.
       </BodyShort>
       <BodyShort>
-        Du kan også legge in teamtilhørighet i{" "}
+        Du kan også legge inn teamtilhørighet i{" "}
         <Link href={teamcatBaseUrl} target="_blank">
           Teamkatalogen
         </Link>

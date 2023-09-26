@@ -20,8 +20,9 @@ export function SektorStep() {
   return (
     <ContainerWithHighlightedTop title="Sektor">
       <Alert variant="info">
-        For øyeblikket kan du kun bruke NOM til å opprette eksterne. Roboter,
-        Vikafossen og utenlandske konsulenter opprettes i Remedy.
+        For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter.
+        Statlig og kommunalt ansatte opprettes i Remedy. Dette gjelder også
+        roboter, Vikafossen og utenlandske konsulenter opprettes i Remedy.
       </Alert>
 
       <form
@@ -40,11 +41,11 @@ export function SektorStep() {
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
         >
-          <Radio disabled value={Sektor.NavStatlig}>
-            {SektorNameMapping[Sektor.NavStatlig]}
-          </Radio>
           <Radio value={Sektor.Ekstern}>
             {SektorNameMapping[Sektor.Ekstern]}
+          </Radio>
+          <Radio disabled value={Sektor.NavStatlig}>
+            {SektorNameMapping[Sektor.NavStatlig]}
           </Radio>
           <Radio disabled value={Sektor.NavKommunal}>
             {SektorNameMapping[Sektor.NavKommunal]}

@@ -112,8 +112,8 @@ function VisningsnavnForm({ person }: { person: FolkeregisterPerson }) {
       >
         <b>Visningnavn</b>
         <BodyShort spacing>
-          Navnet under vil bli brukt i alle NAVs applikasjoner. Ressursen må ha
-          minst ett fornavn og minst ett etternavn.
+          Navnet under vil bli brukt i alle NAVs applikasjoner. Medarbeideren må
+          ha minst ett fornavn og minst ett etternavn.
         </BodyShort>
         <div css={rowStyles}>
           <TextField

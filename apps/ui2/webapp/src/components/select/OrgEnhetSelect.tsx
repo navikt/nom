@@ -22,10 +22,10 @@ export function OrgEnhetSelectFormPart({
       name="orgEnhetId"
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
-          description="Med organisasjonenhet menes hvilken enhet personen skal tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
+          description="Med organisasjonenhet menes hvilken enhet medarbeideren skal tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
 Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan du legge i inn i Teamkatalogen. "
           error={fieldState.error}
-          label="Org.enhet"
+          label="Organisasjonsenhet"
           onChange={field.onChange}
           orgEnheter={orgEnheter}
           value={field.value}
@@ -89,7 +89,7 @@ function OrgEnhetSelect({
             : `Fant ingen resultater for "${inputValue}"`
         }
         onChange={(option) => onChange(option?.value)}
-        placeholder="Søk etter navn på org.enhet"
+        placeholder="Søk etter navn på organisasjonsenhet"
         value={currentValue ?? null}
       />
     </SelectLayoutWrapper>

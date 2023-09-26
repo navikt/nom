@@ -115,7 +115,7 @@ function CreateStatligRessurs() {
           <DatePicker.Input
             {...startDatePicker.inputProps}
             error={errors.startDato?.message?.toString()}
-            label="Første arbeidsdag"
+            label="Startdato (første arbeidsdag)"
           />
         </DatePicker>
         <NavigationButtons />
@@ -209,7 +209,7 @@ function CreateEksternRessurs() {
                       height: 24px;
                     `}
                   >
-                    Første arbeidsdag
+                    Startdato (første arbeidsdag)
                   </span>
                 }
               />
@@ -227,7 +227,7 @@ function CreateEksternRessurs() {
                       gap: var(--a-spacing-2);
                     `}
                   >
-                    SluttDato
+                    Sluttdato
                     <HelpText strategy="fixed">
                       Bruk datoen for normal avvikling av avtalen. Opsjoner skal
                       ikke beregnes med her
