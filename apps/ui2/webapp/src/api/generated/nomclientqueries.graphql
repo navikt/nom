@@ -48,11 +48,13 @@ query HentRessursMedNavident($navident: String) {
             orgEnhet {
                 navn
                 id
+                remedyEnhetId
                 leder {
                     ressurs {
                         navident
                         fornavn
                         etternavn
+                        visningsnavn
                     }
                 }
             }

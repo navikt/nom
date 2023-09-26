@@ -3,7 +3,7 @@ import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Link, Loader } from "@navikt/ds-react";
 import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
+import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import {
   AnsettelsesType,
   Sektor,
@@ -36,7 +36,7 @@ export function SummaryStep() {
   const ressurs = hentRessursQuery.data?.ressurs;
 
   if (ressurs) {
-    return <Receipt ressurs={ressurs as Ressurs} />;
+    return <Receipt ressurs={ressurs} />;
   }
 
   if (hentRessursQuery.error) {
@@ -46,7 +46,11 @@ export function SummaryStep() {
   return <></>;
 }
 
-function Receipt({ ressurs }: { ressurs: Ressurs }) {
+function Receipt({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   return (
     <ContainerWithHighlightedTop title="Medarbeideren er nå registrert i NOM">
       <ReceiptRessurs ressurs={ressurs} />
@@ -68,7 +72,11 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function StatligInstructions({ ressurs }: { ressurs: Ressurs }) {
+function StatligInstructions({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   return (
     <>
       <InformationText ressurs={ressurs} />
@@ -86,7 +94,11 @@ function StatligInstructions({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function EksternInstructions({ ressurs }: { ressurs: Ressurs }) {
+function EksternInstructions({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   return (
     <>
       <InformationText ressurs={ressurs} />
@@ -95,7 +107,11 @@ function EksternInstructions({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
-function InformationText({ ressurs }: { ressurs: Ressurs }) {
+function InformationText({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   const teamcatBaseUrl = isInDevelopment()
     ? "https://teamkatalog.ekstern.dev.nav.no"
     : "https://teamkatalog.nav.no";
@@ -149,10 +165,6 @@ function Unit4Link() {
 }
 
 function RemedyLink() {
-  // if (isInDevelopment()) {
-  //   return <></>;
-  // }
-
   return (
     <Button
       as="a"

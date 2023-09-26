@@ -3,13 +3,17 @@ import { Heading, Link } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
+import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { ressursRoute } from "~/reactRouterRoutes";
 
-export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
+export function ReceiptRessurs({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   const orgEnhet = ressurs.orgTilknytning.find(
     (kobling) => kobling.erDagligOppfolging,
   )?.orgEnhet;
