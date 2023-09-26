@@ -38,6 +38,7 @@ public class DvhRessurs {
     LocalDate agressoSluttdato;
     boolean remedyPermisjon;
     String identType;
+    String epost;
 
     public DvhRessurs(JsonNode node) {
         navIdent = node.get("NAV_IDENT").asText();
@@ -54,6 +55,7 @@ public class DvhRessurs {
         agressoSluttdato = parseNullableDateFromJson(node, "AGRESSO_SLUTT_DATO");
         remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
         identType = node.get("IDENT_TYPE").asText();
+        epost = node.get("EPOST").asText();
 
     }
 
