@@ -7,7 +7,6 @@ import {
   Route,
   Router,
   ScrollRestoration,
-  useParams,
 } from "@tanstack/react-router";
 import React from "react";
 
@@ -18,6 +17,10 @@ import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { AdminPage } from "~/pages/AdminPage/AdminPage";
 import { OrgEnheterAdminPage } from "~/pages/AdminPage/OrgEnheterAdminPage";
 import { RessurserAdminPage } from "~/pages/AdminPage/RessurserAdminPage";
+import {
+  CreateRessursPage,
+  validateCreateRessursSearch,
+} from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import OrganisasjonHierarkiPage from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { ResourcePage } from "~/pages/ResourcePage/ResourcePage";
 import { isInDevelopment } from "~/utils";
@@ -87,9 +90,7 @@ export const ressursRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "ressurs/$id",
   component: ResourcePage,
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { alreadyExists?: boolean } => {
+  validateSearch: (search): { alreadyExists?: boolean } => {
     // validate and parse the search params into a typed state
     return {
       alreadyExists: Boolean(search.alreadyExists),
@@ -97,38 +98,16 @@ export const ressursRoute = new Route({
   },
 });
 
-function CreateRessursDummyPage() {
-  const { step } = useParams({ from: createRessursRoute.id });
-
-  let FormComponent = "Sektor";
-
-  if (step === "2") {
-    FormComponent = "Person";
-  }
-  if (step === "3") {
-    FormComponent = "Org";
-  }
-  if (step === "4") {
-    FormComponent = "SUmmary";
-  }
-
-  return (
-    <div>
-      Stepper
-      {FormComponent}
-    </div>
-  );
-}
-
 export const createRessursRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: "ressurs/create/step/$step",
+  path: "ressurs/create/$step",
   component: () => {
     const hasWriteAccess = useHasWriteAccess();
     if (hasWriteAccess) {
-      return <CreateRessursDummyPage />;
+      return <CreateRessursPage />;
     }
   },
+  validateSearch: validateCreateRessursSearch,
 });
 
 export const orgRoute = new Route({
@@ -158,9 +137,7 @@ export const orgEnheterAdminRoute = new Route({
       </Tabs.Panel>
     );
   },
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { allowEdit?: boolean } => {
+  validateSearch: (search): { allowEdit?: boolean } => {
     return {
       allowEdit: Boolean(search.allowEdit),
     };

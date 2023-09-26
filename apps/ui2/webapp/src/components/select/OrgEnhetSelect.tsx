@@ -22,6 +22,8 @@ export function OrgEnhetSelectFormPart({
       name="orgEnhetId"
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
+          description="Med organisasjonenhet menes hvilken enhet personen skal tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
+Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan du legge i inn i Teamkatalogen. "
           error={fieldState.error}
           label="Org.enhet"
           onChange={field.onChange}
@@ -36,14 +38,16 @@ export function OrgEnhetSelectFormPart({
 function OrgEnhetSelect({
   onChange,
   orgEnheter,
-  label = "Status",
+  label,
+  description,
   value,
   error,
 }: {
   orgEnheter: OrgEnhet[];
   onChange: (s: string | undefined) => void;
   value?: string;
-  label?: string;
+  description: string;
+  label: string;
   error?: FieldError;
 }) {
   const options = orgEnheter.map((orgEnhet) => ({
@@ -54,7 +58,12 @@ function OrgEnhetSelect({
   const currentValue = options.find((option) => option.value === value);
 
   return (
-    <SelectLayoutWrapper error={error} htmlFor={label} label={label}>
+    <SelectLayoutWrapper
+      description={description}
+      error={error}
+      htmlFor={label}
+      label={label}
+    >
       {/*
         Even though this is not an Async search, there is a good reason why this AsyncSearch> is used instead of BaseSelect.
         Presently there are over 1000 orgenheter. These are all fetched at once and input to this component simply filters that list.

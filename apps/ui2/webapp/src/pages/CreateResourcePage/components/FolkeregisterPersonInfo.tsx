@@ -3,20 +3,20 @@ import { Heading } from "@navikt/ds-react";
 
 import type { FolkeregisterPerson } from "~/api/generated/graphql_generated";
 
-const contentStyles = css`
+const backgroundBox = css`
   background-color: var(--nom-secondary-hover);
   border: 1px solid var(--a-gray-400);
   border-radius: 4px;
   padding: 1rem;
 `;
 
-export const ResourceMetadata = ({
+export function FolkeregisterPersonInfo({
   person,
 }: {
   person: FolkeregisterPerson;
-}) => {
+}) {
   return (
-    <div css={contentStyles}>
+    <div css={backgroundBox}>
       <Heading size="small">Opplysninger fra Folkeregisteret</Heading>
       <div
         css={css`
@@ -39,4 +39,4 @@ export const ResourceMetadata = ({
       </div>
     </div>
   );
-};
+}

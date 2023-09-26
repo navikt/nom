@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import React from "react";
 
 import type { Ressurs } from "~/api/generated/graphql_generated";
-import { SektorNameMapping } from "~/pages/CreateResourcePage/components/CreateResourceForm";
+import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { DATE_FORMATS } from "~/utils";
 

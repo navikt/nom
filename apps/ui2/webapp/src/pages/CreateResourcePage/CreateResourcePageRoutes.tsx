@@ -1,148 +1,130 @@
 import { css } from "@emotion/react";
-import { CheckmarkIcon } from "@navikt/aksel-icons";
-import type { ReactNode } from "react";
+import { Stepper } from "@navikt/ds-react";
+import { useParams } from "@tanstack/react-router";
+import { decode } from "js-base64";
 import React from "react";
-import { Outlet, Route, Routes, useMatch } from "react-router";
-import { NavLink } from "react-router-dom";
+import * as yup from "yup";
 
-import { useHasWriteAccess } from "~/api/useGetSession";
+import { AnsettelsesType, Sektor } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
+import { ConfirmStep } from "~/pages/CreateResourcePage/ConfirmStep";
+import { OrganisasjonstilknytningStep } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
+import { PersonopplysningerStep } from "~/pages/CreateResourcePage/PersonopplysningerStep";
+import { SektorStep } from "~/pages/CreateResourcePage/SektorStep";
+import { SummaryStep } from "~/pages/CreateResourcePage/SummaryStep";
+import { createRessursRoute } from "~/reactRouterRoutes";
 
 import ContentWrapper from "../../components/ContentWrapper";
-import CreateResourceForm from "./components/CreateResourceForm";
-import { SearchForPerson } from "./components/SearchForPerson";
-import { ResourceCreatedReceiptPage } from "./subPages/ResourceCreatedReceiptPage";
 
-export function CreateResourcePageRoutes() {
-  const hasWrite = useHasWriteAccess();
+export function CreateRessursPage() {
+  const { step } = useParams({ from: createRessursRoute.id });
 
-  return hasWrite ? (
-    <Routes>
-      <Route element={<Wrapper />} path="/">
-        <Route element={<SearchForPerson />} path="/">
-          <Route element={<CreateResourceForm />} path=":personidentInBase64" />
-        </Route>
-        <Route
-          element={<ResourceCreatedReceiptPage />}
-          path=":navident/receipt"
-        />
-      </Route>
-    </Routes>
-  ) : (
-    <Routes>
-      <Route element={<NotAuthorizedPage />} path="*" />
-    </Routes>
-  );
-}
+  const stepIdAsNumber = Number(step);
 
-function Wrapper() {
-  const isAtReceiptPage = !!useMatch(
-    "ressurs/create/:navidentInBase64/receipt",
-  );
+  const steps = [
+    "Sektor",
+    "Personopplysninger",
+    "Organisasjonstilknytning",
+    "Oppsummering og veien videre",
+  ];
+
+  let StepComponent;
+  if (stepIdAsNumber === 1) {
+    StepComponent = <SektorStep />;
+  }
+  if (stepIdAsNumber === 2) {
+    StepComponent = <PersonopplysningerStep />;
+  }
+  if (stepIdAsNumber === 3) {
+    StepComponent = <OrganisasjonstilknytningStep />;
+  }
+  // TODO: solve this in a better way
+  if (stepIdAsNumber === 9) {
+    StepComponent = <ConfirmStep />;
+  }
+  if (stepIdAsNumber === 4) {
+    StepComponent = <SummaryStep />;
+  }
+
   return (
     <>
       <PageBanner text="Opprett medarbeider" />
       <ContentWrapper>
-        <>
-          <div
-            css={css`
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: var(--a-spacing-3);
-              margin-bottom: var(--a-spacing-12);
-            `}
-          >
-            <div
-              css={css`
-                display: flex;
-                align-items: center;
-              `}
-            >
-              <FilledCircle filled={!isAtReceiptPage}>
-                {isAtReceiptPage ? (
-                  <CheckmarkIcon
-                    css={css`
-                      path {
-                        stroke: var(--a-lightblue-800);
-                        stroke-width: 2px;
-                      }
-                    `}
-                  />
-                ) : (
-                  <b>1</b>
-                )}
-              </FilledCircle>
-              <div
-                css={css`
-                  width: 205px;
-                  height: 2px;
-                  background: var(--a-lightblue-800);
-                `}
-              />
-              <FilledCircle filled={isAtReceiptPage}>
-                <b>2</b>
-              </FilledCircle>
-            </div>
-            <div
-              css={css`
-                display: flex;
-                gap: 100px;
-                color: var(--a-lightblue-800);
-              `}
-            >
-              <b>Personopplysninger</b>
-              <b>Lønnsopplysninger i Unit4</b>
-            </div>
-          </div>
-          <Outlet />
-        </>
+        <Stepper
+          activeStep={stepIdAsNumber}
+          css={css`
+            margin-bottom: var(--a-spacing-8);
+          `}
+          interactive={false}
+          orientation="horizontal"
+        >
+          {steps.map((step, index) => (
+            <Stepper.Step completed={stepIdAsNumber > index + 1} key={step}>
+              {step}
+            </Stepper.Step>
+          ))}
+        </Stepper>
+        {StepComponent}
       </ContentWrapper>
     </>
   );
 }
 
-function FilledCircle({
-  children,
-  filled,
-}: {
-  filled: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      css={css(
-        css`
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid var(--a-lightblue-800);
-          border-radius: 50%;
-          height: 42px;
-          width: 42px;
-        `,
-        filled
-          ? css`
-              background: var(--a-lightblue-800);
-              color: var(--a-white);
-            `
-          : css`
-              background: var(--a-white);
-              color: var(--a-lightblue-800);
-            `,
-      )}
-    >
-      {children}
-    </div>
-  );
+const commonValidationSchema = yup.object({
+  personident: yup.string().required("Obligatorisk"),
+  visningsfornavn: yup.string().required("Obligatorisk"),
+  visningsmellomnavn: yup.string().optional(),
+  visningsetternavn: yup.string().required("Obligatorisk"),
+  sektor: yup
+    .mixed<Sektor>()
+    .oneOf(Object.values(Sektor))
+    .required("Obligatorisk"),
+  orgEnhetId: yup.string().required("Obligatorisk"),
+  startDato: yup.string().required("Obligatorisk"),
+  ansettelsesType: yup
+    .mixed<AnsettelsesType>()
+    .oneOf(Object.values(AnsettelsesType))
+    .required("Obligatorisk"),
+});
+
+// eslint-disable-next-line unicorn/prefer-spread
+const statligValidationSchema = commonValidationSchema.concat(
+  yup.object({
+    sluttDato: yup.string().optional(),
+  }),
+);
+
+export function validateCreateRessursSearch(
+  search: Record<string, unknown>,
+): Partial<StatligFormValues> & { navident?: string } {
+  // validate and parse the search params into a typed state
+  return {
+    personident: decode(String(search.personident ?? "")) || undefined,
+    navident: String(search.navident ?? ""),
+    visningsfornavn: String(search.visningsfornavn ?? ""),
+    visningsmellomnavn: String(search.visningsmellomnavn ?? ""),
+    visningsetternavn: String(search.visningsetternavn ?? ""),
+    sektor: (search.sektor as Sektor) ?? undefined,
+    orgEnhetId: String(search.orgEnhetId ?? ""),
+    startDato: String(search.startDato ?? ""),
+    sluttDato: String(search.sluttDato ?? ""),
+    ansettelsesType: (search.ansettelsesType as AnsettelsesType) ?? undefined,
+  };
 }
 
-function NotAuthorizedPage() {
-  return (
-    <ContentWrapper>
-      <>
-        403. Ingen tilgang til undersiden. Gå <NavLink to="/">hjem</NavLink>
-      </>
-    </ContentWrapper>
-  );
-}
+export type StatligFormValues = yup.InferType<typeof statligValidationSchema>;
+
+export const rowStyles = css`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+
+  & > * {
+    flex: 1;
+  }
+`;
+
+export const AnsettelsesTypeNameMapping = {
+  [AnsettelsesType.Fast]: "Fast",
+  [AnsettelsesType.Midlertidig]: "Midlertidig",
+};

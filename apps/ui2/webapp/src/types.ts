@@ -9,12 +9,12 @@ export type OpprettRessursRequest = {
   personident: string;
   sektor: Sektor;
   startDato?: string;
+  sluttDato?: string;
   visningsetternavn: string;
   visningsfornavn: string;
   visningsmellomnavn?: string;
 };
 
-/**  Responses */
 export type OpprettRessursResponse = {
   __typename?: "OpprettRessursResponse";
   navident: string;

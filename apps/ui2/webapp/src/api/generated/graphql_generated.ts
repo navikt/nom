@@ -462,6 +462,13 @@ export type GetAllOrgenheterAdminQueryVariables = Exact<{ [key: string]: never; 
 
 export type GetAllOrgenheterAdminQuery = { __typename?: 'Query', orgEnheter: Array<{ __typename?: 'OrgEnhetResult', nomId: string, orgEnhet?: { __typename?: 'OrgEnhet', id: string, agressoId: string, orgNiv: string, agressoOrgenhetType?: string | null, navn: string, gyldigFom: any, gyldigTom?: any | null, nomNivaa?: NomNivaa | null, orgEnhetsType?: OrgEnhetsType | null, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string } }> } | null }> };
 
+export type GetOrgEnhetQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GetOrgEnhetQuery = { __typename?: 'Query', orgEnhet?: { __typename?: 'OrgEnhet', id: string, navn: string, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null } }> } | null };
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -1417,3 +1424,46 @@ export function useGetAllOrgenheterAdminLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetAllOrgenheterAdminQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminQuery>;
 export type GetAllOrgenheterAdminLazyQueryHookResult = ReturnType<typeof useGetAllOrgenheterAdminLazyQuery>;
 export type GetAllOrgenheterAdminQueryResult = Apollo.QueryResult<GetAllOrgenheterAdminQuery, GetAllOrgenheterAdminQueryVariables>;
+export const GetOrgEnhetDocument = gql`
+    query GetOrgEnhet($id: String!) {
+  orgEnhet(where: {id: $id}) {
+    id
+    navn
+    remedyEnhetId
+    leder {
+      ressurs {
+        navident
+        visningsnavn
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetOrgEnhetQuery__
+ *
+ * To run a query within a React component, call `useGetOrgEnhetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetOrgEnhetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetOrgEnhetQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetOrgEnhetQuery(baseOptions: Apollo.QueryHookOptions<GetOrgEnhetQuery, GetOrgEnhetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetOrgEnhetQuery, GetOrgEnhetQueryVariables>(GetOrgEnhetDocument, options);
+      }
+export function useGetOrgEnhetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetOrgEnhetQuery, GetOrgEnhetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetOrgEnhetQuery, GetOrgEnhetQueryVariables>(GetOrgEnhetDocument, options);
+        }
+export type GetOrgEnhetQueryHookResult = ReturnType<typeof useGetOrgEnhetQuery>;
+export type GetOrgEnhetLazyQueryHookResult = ReturnType<typeof useGetOrgEnhetLazyQuery>;
+export type GetOrgEnhetQueryResult = Apollo.QueryResult<GetOrgEnhetQuery, GetOrgEnhetQueryVariables>;

@@ -27,7 +27,7 @@ import type {
 } from "~/api/generated/graphql_generated";
 import * as Gq from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
-import { SektorNameMapping } from "~/pages/CreateResourcePage/components/CreateResourceForm";
+import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";

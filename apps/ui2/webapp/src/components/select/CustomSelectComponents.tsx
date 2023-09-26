@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { ErrorMessage, Label } from "@navikt/ds-react";
+import { BodyShort, ErrorMessage, Label } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
 import type {
@@ -116,11 +116,13 @@ function CustomMenuList<
 export function SelectLayoutWrapper({
   label,
   children,
+  description,
   htmlFor,
   error,
 }: {
   label: string;
   htmlFor: string;
+  description?: string;
   children: ReactNode;
   error?: FieldError;
 }) {
@@ -134,6 +136,11 @@ export function SelectLayoutWrapper({
       `}
     >
       <Label htmlFor={htmlFor}>{label}</Label>
+      {description && (
+        <BodyShort className="navds-form-field__description">
+          {description}
+        </BodyShort>
+      )}
       {children}
       {error && <ErrorMessage>{error.message}</ErrorMessage>}
     </div>

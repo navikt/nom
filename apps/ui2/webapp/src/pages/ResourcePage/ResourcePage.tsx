@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { Alert, Link } from "@navikt/ds-react";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { isBefore } from "date-fns";
@@ -28,7 +29,12 @@ export const ResourcePage = () => {
       {hentRessursQuery.data?.ressurs && (
         <>
           {alreadyExists ? (
-            <Alert variant="info">
+            <Alert
+              css={css`
+                margin-bottom: var(--a-spacing-4);
+              `}
+              variant="info"
+            >
               Medarbeider finnes allerede i NOM. Statlige medarbeidere må også
               etableres i{" "}
               <Link href="https://agresso.adeo.no/agresso/">Unit4</Link>.
