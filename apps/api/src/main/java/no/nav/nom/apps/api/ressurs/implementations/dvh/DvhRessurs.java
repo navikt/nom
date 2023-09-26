@@ -49,7 +49,7 @@ public class DvhRessurs {
         remedyAnsattType = node.get("ANSATT_TYPE").asText();
         this.rawData = node;
         ansattRessursKode = node.get("ANSATT_RESSURS_KODE").asText();
-        remedyStartDato = parseNullableDateFromJson(node, "START_DATO");
+        remedyStartDato = parseNullableDateFromJson(node, "REMEDY_START_DATO");
         remedySluttdato = parseNullableDateFromJson(node, "REMEDY_SLUTT_DATO");
         agressoStartDato = parseNullableDateFromJson(node, "AGRESSO_START_DATO");
         agressoSluttdato = parseNullableDateFromJson(node, "AGRESSO_SLUTT_DATO");
