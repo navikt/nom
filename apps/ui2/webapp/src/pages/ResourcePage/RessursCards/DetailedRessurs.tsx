@@ -439,7 +439,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
                     <HelpText title="Hva er daglig leder">
                       Denne lederen har det daglige ansvaret for
                       sykefraværsoppfølging, godkjenning i MinWinTid, og har
-                      tilgang til den ansatte i Læringsportalen
+                      tilgang til den ansatte i Læringsportalen.
                     </HelpText>
                   </>
                 )}
