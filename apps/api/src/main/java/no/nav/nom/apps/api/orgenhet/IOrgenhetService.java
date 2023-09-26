@@ -17,9 +17,9 @@ public interface IOrgenhetService {
 
     List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds);
 
-//    List<IOrgenhet> findEnheterByAgressoIdConcatOrgnivIn(Set<IOrgenhet.AgressoIdCombo> agressoIdConcatOrgnivSet);
-
     Collection<IOrgenhet> getAllEnheter();
+
+    Collection<IOrgenhet> getAllEnheterMedOrganisering();
 
     List<IOrgenhet> matchByAgressoId(String agressoId);
 
@@ -28,4 +28,8 @@ public interface IOrgenhetService {
     Map<String, IOrgenhet> getByIdBulk(List<String> idList);
 
     Map<String, IOrgenhet> getByFidBulk(List<String> fidList);
+
+    Collection<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId);
+
+    void setOrganiserteEnheter(List<IOrgenhet> organiserteEnheter);
 }

@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -89,6 +90,17 @@ public class DvhRepository {
                     return false;
                 })
                 .collect(toList());
+
+        var overEnheter = organiseringer.stream().map( o -> cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver())).toList();
+        var underEnheter = organiseringer.stream().map( o -> cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder())).toList();
+
+        // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
+        var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        orgenhetService.setOrganiserteEnheter(organiserteEnheter);
+
         this.updateListeners();
     }
 
