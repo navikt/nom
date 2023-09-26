@@ -157,7 +157,7 @@ public abstract class TestBase {
                 "etternavn" + suffix
             ),
             null,
-            null
+                Optional.of(LocalDate.now())
         );
 
         createRessursHendelseEventSource(ressursState);

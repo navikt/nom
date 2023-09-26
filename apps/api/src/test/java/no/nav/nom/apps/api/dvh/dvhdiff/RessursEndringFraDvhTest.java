@@ -160,7 +160,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         dvhRessursUtils.addToResponse(response2);
         loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSluttetEventV1));
@@ -216,7 +216,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         dvhRessursUtils.addToResponse(response2);
         loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
@@ -272,7 +272,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         dvhRessursUtils.addToResponse(response2);
         loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursPersonaliaOppdatertV1));
@@ -345,7 +345,7 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
         dvhRessursUtils.addToResponse(response2);
         loadFromDvh();
 
-        Mockito.verify(ressursEventProducerTemplate, Mockito.times(2)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
+        Mockito.verify(ressursEventProducerTemplate, Mockito.times(3)).sendDefault(Mockito.notNull(), eventArgumentCaptor.capture());
 
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursOpprettetEventV1));
         Assertions.assertTrue(eventArgumentCaptor.getAllValues().stream().anyMatch(e -> e instanceof RessursSektorOppdatertV1));
