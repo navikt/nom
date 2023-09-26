@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;

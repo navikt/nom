@@ -8,6 +8,8 @@ public record DvhEksternRessurs(
     String payload,
     String navident,
     String remedyEnhetId,
+    String orgenhetPaaRessurs,
+    String orgenhetPaaRessursNivaa,
     LocalDate remedyStart,
     LocalDate remedySlutt,
     boolean remedyAktiv
@@ -18,9 +20,11 @@ public record DvhEksternRessurs(
             json.toString(),
             json.get("NAV_IDENT").asText(),
             json.get("REMEDY_ENHET_ID").asText(),
+            json.get("ORGENHET_PAA_RESSURS").asText(),
+            json.get("ORGENHET_PAA_RESSURS_NIVA").asText(),
             LocalDate.parse(json.get("REMEDY_START_DATO").asText()),
             getOrNullIfMaxDate(LocalDate.parse(json.get("REMEDY_SLUTT_DATO").asText())),
-            "JA".equals(json.get("REMEDY_SLUTT_DATO").asText())
+            "JA".equals(json.get("REMEDY_AKTIV").asText())
         );
     }
 
