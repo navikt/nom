@@ -10,6 +10,7 @@ import no.nav.nom.apps.nom.unit4.unit4.Unit4RequestException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4ServerException;
 import no.nav.nom.apps.nom.unit4.unit4.Unit4UnknownException;
 import no.nav.nom.apps.nom.unit4.unit4.dto.Unit4RessursDto;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,13 @@ public class KafkaRessursListener {
     public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_KEY) String uuid) {
         log.info("Unit4 ressurs listener mottok melding for ressurs {} på meldings-key: {}", record.getFid(), uuid);
         if(record instanceof RessursOpprettetEventV1 ressursOpprettetEventV1) {
+
+            if(ressursOpprettetEventV1.getData() instanceof RessursOpprettetEventV1.RessursOpprettetEventData ressursData) {
+                // Hvis en ressurs er ekstern skal vi ikke sende noe data videre til Unit4.
+                if (ressursData.sektor() == Sektor.EKSTERN) {
+                    return;
+                }
+            }
             if(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedFrom().contains("nom-ui")) {
                 Unit4RessursDto unit4RessursDto;
                 try {

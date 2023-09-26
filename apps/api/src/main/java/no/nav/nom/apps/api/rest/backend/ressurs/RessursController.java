@@ -12,12 +12,18 @@ import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -49,21 +55,24 @@ public class RessursController {
 
     private final IRessursService ressursService;
     private final RessursCommadService ressursCommadService;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
     private final OrgenhetService orgenhetService;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     public RessursController(
-        IRessursService ressursService,
-        RessursCommadService ressursCommadService,
-        NIKClient nikClient,
-        PdlClient pdlClient,
-        OrgenhetService orgenhetService,
-        RessursOpprettetEmailService ressursOpprettetEmailService
+            IRessursService ressursService,
+            RessursCommadService ressursCommadService,
+            OrgtilknytningCommandService orgtilknytningCommandService,
+            NIKClient nikClient,
+            PdlClient pdlClient,
+            OrgenhetService orgenhetService,
+            RessursOpprettetEmailService ressursOpprettetEmailService
     ) {
         this.ressursService = ressursService;
         this.ressursCommadService = ressursCommadService;
+        this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
         this.orgenhetService = orgenhetService;
@@ -138,6 +147,15 @@ public class RessursController {
 
         log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.getVisningsetternavn());
 
+        var metaData = new InputMetadata(
+                "GraphQL",
+                "opprettRessurs",
+                request,
+                new Origination(
+                        SecurityUtil.getUserFromToken(token).orElseThrow(),
+                        SecurityUtil.getSystemFromToken(token).orElseThrow()
+                )
+        );
 
         final var opprettRessursCommand = new OpprettRessursCommand(
             request.getPersonident(),
@@ -149,15 +167,7 @@ public class RessursController {
                 Optional.ofNullable(request.getVisningsmellomnavn()),
                 request.getVisningsetternavn()
             ),
-            new InputMetadata(
-                "GraphQL",
-                "opprettRessurs",
-                request,
-                new Origination(
-                    SecurityUtil.getUserFromToken(token).orElseThrow(),
-                    SecurityUtil.getSystemFromToken(token).orElseThrow()
-                )
-            ),
+            metaData,
             request.getStartDato(),
             Optional.ofNullable(request.getOrgEnhetId())
                 .flatMap(orgenhetService::getById)
@@ -166,7 +176,51 @@ public class RessursController {
             request.getAnsettelsesType()
         );
 
-        return ressursCommadService.createRessursSync(opprettRessursCommand);
+        var opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand);
+
+        // If ressurs is EKSTERN we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
+        if (request.getSektor() == Sektor.EKSTERN && request.getSluttDato() != null) {
+            ressursCommadService.avsluttRessursEvent(
+                    new OpphorRessursCommand(opprettetRessurs.fid(), request.getSluttDato()),
+                    metaData
+            );
+
+            var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
+                new OpprettOrgtilknytning(
+                    opprettetRessurs.navident(),
+                    request.getOrgEnhetId(),
+                    request.getStartDato(),
+                    metaData,
+                    null
+                )
+            );
+
+            orgtilknytningCommandService.avvikleOrgtilknytning(
+                    orgTilknytningFid,
+                    new AvvikleOrgtilknytning(
+                            opprettetRessurs.navident(),
+                            request.getOrgEnhetId(),
+                            request.getSluttDato(),
+                            metaData,
+                            null
+                    )
+            );
+
+            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(
+                orgTilknytningFid,
+                new EndreDagligOppfolgingOrgtilknytning(
+                    opprettetRessurs.navident(),
+                    request.getOrgEnhetId(),
+                    request.getStartDato(),
+                    Optional.of(request.getSluttDato()),
+                    true,
+                    metaData,
+                    null
+                )
+            );
+        }
+
+        return opprettetRessurs;
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {

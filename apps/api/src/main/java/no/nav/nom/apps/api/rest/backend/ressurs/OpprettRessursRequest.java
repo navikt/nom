@@ -18,5 +18,6 @@ public class OpprettRessursRequest {
     private Sektor sektor;
     private String orgEnhetId;
     private LocalDate startDato;
+    private LocalDate sluttDato;
     private AnsettelsesType ansettelsesType;
 }
