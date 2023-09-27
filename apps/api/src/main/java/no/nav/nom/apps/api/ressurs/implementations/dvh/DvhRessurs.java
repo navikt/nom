@@ -84,13 +84,24 @@ public class DvhRessurs {
         return null;
     }
 
+
+    private boolean withinSixMonths(LocalDate d1, LocalDate d2){
+        var stepLen = 6/2;
+        var bound1 = d1.plusMonths(stepLen).isAfter(d2.minusMonths(stepLen));
+        var bound2 = d1.minusMonths(stepLen).isBefore(d2.plusMonths(stepLen));
+        return bound1 && bound2;
+    }
+
     public LocalDate getStartDato() {
-        var isStatlig = Arrays.asList(STATLIG.beskrivelse).contains(this.remedyAnsattType);
-        if(isStatlig && this.agressoStartDato != null){
-            return this.agressoStartDato;
-        }else{
-            return this.remedyStartDato;
+        if (this.agressoStartDato != null) {
+            var u4StartBeforeRemedy = this.agressoStartDato.getYear() < 2006;
+            var isStatlig = Arrays.asList(STATLIG.beskrivelse).contains(this.remedyAnsattType);
+            var inBounds = withinSixMonths(this.agressoStartDato, this.remedyStartDato);
+            if (u4StartBeforeRemedy || (inBounds && isStatlig)) {
+                return this.agressoStartDato;
+            }
         }
+        return this.remedyStartDato;
     }
 
     public boolean hasPermisjon() {
