@@ -17,7 +17,6 @@ import {
 } from "react-hook-form";
 import * as yup from "yup";
 
-import type { OrgEnhet } from "~/api/generated/graphql_generated";
 import {
   AnsettelsesType,
   GyldigTomSelection,
@@ -266,7 +265,7 @@ function InnerOrgEnhetSelect() {
 
   return (
     <>
-      <OrgEnhetSelectFormPart orgEnheter={orgEnheter as OrgEnhet[]} />
+      <OrgEnhetSelectFormPart orgEnheter={orgEnheter} />
       {selectedOrgEnhet ? (
         <div
           css={css`

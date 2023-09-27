@@ -21,11 +21,8 @@ import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 
-import type {
-  Ressurs,
-  RessursOrgTilknytning,
-} from "~/api/generated/graphql_generated";
-import * as Gq from "~/api/generated/graphql_generated";
+import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -37,6 +34,9 @@ import {
   isGyldighetsPeriodeActive,
   isInDevelopment,
 } from "~/utils";
+
+type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+type OrgTilknytninger = Ressurs["orgTilknytning"];
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   return (
@@ -150,7 +150,9 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger,
   ressurs,
 }: {
-  futureOrgTilknytninger: RessursOrgTilknytning[];
+  futureOrgTilknytninger: NonNullable<
+    HentRessursMedNavidentQuery["ressurs"]
+  >["orgTilknytning"];
   ressurs: Ressurs;
 }) {
   if (futureOrgTilknytninger.length === 0) {
@@ -176,7 +178,7 @@ function FutureOrgTilknytninger({
 function ExpiredOrgTilknytninger({
   expiredOrgTilknytninger,
 }: {
-  expiredOrgTilknytninger: RessursOrgTilknytning[];
+  expiredOrgTilknytninger: OrgTilknytninger;
 }) {
   const [showAll, setShowAll] = useState(false);
   if (expiredOrgTilknytninger.length === 0) {
@@ -235,10 +237,10 @@ function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
 }: {
-  orgTilknytning: RessursOrgTilknytning;
+  orgTilknytning: OrgTilknytninger[0];
   ressurs: Ressurs;
 }) {
-  const hentHierarkiQuery = Gq.useHentHierarkiQuery({
+  const hentHierarkiQuery = useHentHierarkiQuery({
     variables: {
       id: orgTilknytning.orgEnhet.id ?? "",
     },

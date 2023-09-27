@@ -5,9 +5,14 @@ import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 
-import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
-import * as Gq from "~/api/generated/graphql_generated";
-import { Sektor } from "~/api/generated/graphql_generated";
+import type {
+  HentHierarkiQuery,
+  OrgenhetStandaloneWithLederFragment,
+} from "~/api/generated/graphql_generated";
+import {
+  Sektor,
+  useHentHierarkiQuery,
+} from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
@@ -46,7 +51,7 @@ export function OrgEnhetView({
   orgEnhet,
   autoFocus = false,
 }: {
-  orgEnhet: OrgEnhet;
+  orgEnhet: OrgenhetStandaloneWithLederFragment;
   autoFocus?: boolean;
 }) {
   const fornavnAndEtternavnForImg =
@@ -55,7 +60,7 @@ export function OrgEnhetView({
   const navidentForImg = orgEnhet.leder[0]?.ressurs.navident;
 
   // Optimistically fetch orgEnhet this view links to.
-  Gq.useHentHierarkiQuery({
+  useHentHierarkiQuery({
     variables: {
       id: orgEnhet.id,
     },
@@ -104,11 +109,15 @@ export function OrgEnhetView({
   );
 }
 
+type HierarkiQueryRessurs = NonNullable<
+  NonNullable<NonNullable<HentHierarkiQuery>["ressursKoblinger"]>["koblinger"]
+>[0]["ressurs"];
+
 export function ResourceLink({
   ressurs,
   autoFocus = false,
 }: {
-  ressurs: Ressurs;
+  ressurs: HierarkiQueryRessurs;
   autoFocus?: boolean;
 }) {
   const reference = useRef<HTMLAnchorElement>(null);

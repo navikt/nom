@@ -4,19 +4,18 @@ import { useParams, useSearch } from "@tanstack/react-router";
 import { isBefore } from "date-fns";
 import React from "react";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
+import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursCards/DetailedRessurs";
 import { RessursHasQuit } from "~/pages/ResourcePage/RessursCards/RessursHasQuit";
 import { ressursRoute } from "~/reactRouterRoutes";
 
-import * as Gq from "../../api/generated/graphql_generated";
 import ContentWrapper from "../../components/ContentWrapper";
 
 export const ResourcePage = () => {
   const { id } = useParams({ from: ressursRoute.id });
   const { alreadyExists } = useSearch({ from: ressursRoute.id });
 
-  const hentRessursQuery = Gq.useHentRessursMedNavidentQuery({
+  const hentRessursQuery = useHentRessursMedNavidentQuery({
     variables: { navident: id },
   });
 
@@ -26,7 +25,7 @@ export const ResourcePage = () => {
     ressurs?.sluttdato && isBefore(new Date(ressurs.sluttdato), new Date());
   return (
     <ContentWrapper>
-      {hentRessursQuery.data?.ressurs && (
+      {ressurs && (
         <>
           {alreadyExists ? (
             <Alert
@@ -44,13 +43,9 @@ export const ResourcePage = () => {
             </Alert>
           ) : undefined}
           {hasQuit ? (
-            <RessursHasQuit
-              ressurs={hentRessursQuery.data.ressurs as Ressurs}
-            />
+            <RessursHasQuit ressurs={ressurs} />
           ) : (
-            <DetailedRessurs
-              ressurs={hentRessursQuery.data.ressurs as Ressurs}
-            />
+            <DetailedRessurs ressurs={ressurs} />
           )}
         </>
       )}

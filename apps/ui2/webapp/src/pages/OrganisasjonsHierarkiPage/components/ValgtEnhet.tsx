@@ -2,15 +2,19 @@ import { css } from "@emotion/react";
 import { Heading, Link } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 
-import type { OrgEnhet } from "~/api/generated/graphql_generated";
+import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { ressursRoute } from "~/reactRouterRoutes";
 import buildingFilled from "~/resources/buildingFilled.svg";
 
 import { HorizontalEdge } from "./CardViews";
 
-const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
-  const { leder } = properties.enhet;
+const OrgenhetLederLink = ({
+  enhet,
+}: {
+  enhet: NonNullable<HentHierarkiQuery["enhet"]>;
+}) => {
+  const { leder } = enhet;
   const firstLeder = leder[0]?.ressurs;
   const { navident, visningsnavn } = firstLeder ?? {};
 
@@ -25,7 +29,11 @@ const OrgenhetLederLink = (properties: { enhet: OrgEnhet }) => {
   );
 };
 
-export const ValgtEnhet = ({ valgtEnhet }: { valgtEnhet: OrgEnhet }) => (
+export const ValgtEnhet = ({
+  valgtEnhet,
+}: {
+  valgtEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
+}) => (
   <div
     css={css`
       display: grid;

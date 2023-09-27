@@ -7,13 +7,12 @@ import uniqBy from "lodash/uniqBy";
 import { Fragment } from "react";
 import React from "react";
 
-import type { OrgEnhet, Ressurs } from "~/api/generated/graphql_generated";
-import type { HentHierarkiQueryHookResult } from "~/api/generated/graphql_generated";
+import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
+import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
 import { orgRoute } from "~/reactRouterRoutes";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
-import * as Gq from "../../api/generated/graphql_generated";
 import ContentWrapper from "../../components/ContentWrapper";
 import {
   DynamicColumnContainer,
@@ -24,7 +23,7 @@ import {
 import { ValgtEnhet } from "./components/ValgtEnhet";
 
 function sortUnderenheterForHierarchyFrontPage(
-  orgHierarchy: HentHierarkiQueryHookResult["data"],
+  orgHierarchy: HentHierarkiQuery,
 ) {
   const underEnheter = (orgHierarchy?.enhetsKoblinger?.underenheter ?? []).map(
     ({ organisasjonsenhet }) => organisasjonsenhet,
@@ -45,9 +44,13 @@ function sortUnderenheterForHierarchyFrontPage(
   return [...direktoratet, ...linjene];
 }
 
+type OverEnhet = NonNullable<
+  NonNullable<HentHierarkiQuery["enhetsKoblinger"]>["overenheter"]
+>[0]["organisasjonsenhet"];
+
 export function getOverEnheterBackToRootRecursively(
-  orgEnhet: OrgEnhet,
-): OrgEnhet[] {
+  orgEnhet: OverEnhet,
+): OverEnhet[] {
   if (!orgEnhet || !orgEnhet.organiseringer) {
     return [];
   }
@@ -55,24 +58,30 @@ export function getOverEnheterBackToRootRecursively(
   const firstOrganisering = orgEnhet.organiseringer[0]?.organisasjonsenhet;
 
   return firstOrganisering
-    ? [...getOverEnheterBackToRootRecursively(firstOrganisering), orgEnhet]
+    ? [
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- for some reason recursion does not agree with tsc
+        ...getOverEnheterBackToRootRecursively(firstOrganisering as any),
+        orgEnhet,
+      ]
     : [orgEnhet];
 }
 
-export const OrganisasjonHierarkiPageInner = (properties: {
-  data: HentHierarkiQueryHookResult["data"];
-}) => {
+function OrganisasjonHierarkiPageInner({
+  hierarchyEntry,
+}: {
+  hierarchyEntry: NonNullable<HentHierarkiQuery>;
+}) {
   const firstOverEnhet = (
-    properties.data?.enhetsKoblinger?.overenheter ?? []
+    hierarchyEntry.enhetsKoblinger?.overenheter ?? []
   ).map(({ organisasjonsenhet }) => organisasjonsenhet)[0];
   const overEnheter = firstOverEnhet
-    ? getOverEnheterBackToRootRecursively(firstOverEnhet as OrgEnhet)
+    ? getOverEnheterBackToRootRecursively(firstOverEnhet)
     : [];
-  const underEnheter = sortUnderenheterForHierarchyFrontPage(properties.data);
+  const underEnheter = sortUnderenheterForHierarchyFrontPage(hierarchyEntry);
 
-  const valgtEnhet = properties.data?.enhet;
+  const valgtEnhet = hierarchyEntry.enhet;
 
-  const ressurser = (properties.data?.ressursKoblinger?.koblinger ?? [])
+  const ressurser = (hierarchyEntry.ressursKoblinger?.koblinger ?? [])
     .filter((kobling) =>
       isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
     )
@@ -93,7 +102,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
       ))}
 
       <>
-        {valgtEnhet && <ValgtEnhet valgtEnhet={valgtEnhet as OrgEnhet} />}
+        {valgtEnhet && <ValgtEnhet valgtEnhet={valgtEnhet} />}
         <DynamicColumnContainer
           shouldUseDynamicSecondColumn={underEnheter.length > 5}
         >
@@ -105,10 +114,7 @@ export const OrganisasjonHierarkiPageInner = (properties: {
               {valgtEnhet?.navn === "NAV" && index === 1 && (
                 <Heading size="small">Linjene</Heading>
               )}
-              <OrgEnhetView
-                autoFocus={index === 0}
-                orgEnhet={underEnhet as OrgEnhet}
-              />
+              <OrgEnhetView autoFocus={index === 0} orgEnhet={underEnhet} />
             </Fragment>
           ))}
         </DynamicColumnContainer>
@@ -123,19 +129,19 @@ export const OrganisasjonHierarkiPageInner = (properties: {
             <ResourceLink
               autoFocus={index === 0}
               key={ressurs.navident}
-              ressurs={ressurs as Ressurs}
+              ressurs={ressurs}
             />
           ))}
         </DynamicColumnContainer>
       </>
     </div>
   );
-};
+}
 
-function OrganisasjonsHierarkiPageOuter() {
+export function OrganisasjonHierarkiPage() {
   const { id } = useParams({ from: orgRoute.id });
 
-  const hentHierarkiQuery = Gq.useHentHierarkiQuery({
+  const hentHierarkiQuery = useHentHierarkiQuery({
     variables: {
       id: id ?? "",
     },
@@ -144,7 +150,7 @@ function OrganisasjonsHierarkiPageOuter() {
   let innerContent;
   if (hentHierarkiQuery.data) {
     innerContent = (
-      <OrganisasjonHierarkiPageInner data={hentHierarkiQuery.data} />
+      <OrganisasjonHierarkiPageInner hierarchyEntry={hentHierarkiQuery.data} />
     );
   } else if (hentHierarkiQuery.loading) {
     innerContent = (
@@ -181,5 +187,3 @@ function OrganisasjonsHierarkiPageOuter() {
     </>
   );
 }
-
-export default OrganisasjonsHierarkiPageOuter;

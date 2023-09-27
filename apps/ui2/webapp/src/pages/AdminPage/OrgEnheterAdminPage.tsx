@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-array-callback-reference */
 import { css } from "@emotion/react";
 import {
   PadlockLockedFillIcon,
@@ -23,7 +24,7 @@ import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
 
 import { apolloClient } from "~/api/apolloclient";
-import type { OrgEnhet } from "~/api/generated/graphql_generated";
+import type { GetAllOrgenheterAdminQuery } from "~/api/generated/graphql_generated";
 import {
   NomNivaa,
   OrgEnhetsType,
@@ -31,6 +32,11 @@ import {
 } from "~/api/generated/graphql_generated";
 import { showToast } from "~/hooks/showToast";
 import { orgEnheterAdminRoute } from "~/reactRouterRoutes";
+import { isNotNil } from "~/typeguards";
+
+type OrgEnhetAdmin = NonNullable<
+  GetAllOrgenheterAdminQuery["orgEnheter"][0]["orgEnhet"]
+>;
 
 type AdminFilter = {
   id?: string;
@@ -73,7 +79,8 @@ export function OrgEnheterAdminPage() {
 
   const orgEnheter =
     getAllOrgenheterQuery.data?.orgEnheter
-      .map(({ orgEnhet }) => orgEnhet as OrgEnhet)
+      .map(({ orgEnhet }) => orgEnhet)
+      .filter(isNotNil)
       .filter((oe) => oe.leder.length > 0)
       .filter(
         (oe) =>
@@ -275,7 +282,7 @@ export function OrgEnheterAdminPage() {
   );
 }
 
-function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
   const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
   const updateOrgEnhetsTypeMutation = useMutation(
     (newOrgEnhetsType: OrgEnhetsType | null) =>
@@ -356,7 +363,7 @@ function sortOrgEnheter({
   orgEnheter,
   sort,
 }: {
-  orgEnheter: OrgEnhet[];
+  orgEnheter: OrgEnhetAdmin[];
   sort: SortState;
 }) {
   const { orderBy, direction } = sort;
@@ -367,12 +374,15 @@ function sortOrgEnheter({
   return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
 }
 
-function filterOrgEnheter(orgEnheter: OrgEnhet[], adminFilter: AdminFilter) {
+function filterOrgEnheter(
+  orgEnheter: OrgEnhetAdmin[],
+  adminFilter: AdminFilter,
+) {
   return orgEnheter.filter((orgEnhet) =>
     Object.entries(adminFilter)
       .filter(([, filterValue]) => filterValue !== undefined)
       .every(([filterKey, filterValue]) => {
-        const orgEnhetValue = orgEnhet[filterKey as keyof OrgEnhet];
+        const orgEnhetValue = orgEnhet[filterKey as keyof OrgEnhetAdmin];
 
         if (isString(orgEnhetValue)) {
           return orgEnhetValue

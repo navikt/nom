@@ -3,12 +3,16 @@ import { Heading, Label, Tag } from "@navikt/ds-react";
 import { format } from "date-fns";
 import React from "react";
 
-import type { Ressurs } from "~/api/generated/graphql_generated";
+import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { DATE_FORMATS } from "~/utils";
 
-export function RessursHasQuit({ ressurs }: { ressurs: Ressurs }) {
+export function RessursHasQuit({
+  ressurs,
+}: {
+  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+}) {
   return (
     <div
       css={css`

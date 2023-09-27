@@ -21,7 +21,7 @@ import {
   CreateRessursPage,
   validateCreateRessursSearch,
 } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
-import OrganisasjonHierarkiPage from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
+import { OrganisasjonHierarkiPage } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { ResourcePage } from "~/pages/ResourcePage/ResourcePage";
 import { isInDevelopment } from "~/utils";
 

@@ -6,9 +6,8 @@ import React from "react";
 
 import type {
   HentHierarkiQuery,
-  OrgEnhet,
+  HentRessursMedNavidentQuery,
 } from "~/api/generated/graphql_generated";
-import type { Ressurs } from "~/api/generated/graphql_generated";
 import {
   OverEnheterDivider,
   VerticalEdge,
@@ -16,6 +15,8 @@ import {
 import { getOverEnheterBackToRootRecursively } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
+
+type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
 
 export function CompactOrganisasjonHierarki({
   orgHierarki,
@@ -29,7 +30,7 @@ export function CompactOrganisasjonHierarki({
   )[0];
 
   const overEnheter = firstOverEnhet
-    ? getOverEnheterBackToRootRecursively(firstOverEnhet as OrgEnhet)
+    ? getOverEnheterBackToRootRecursively(firstOverEnhet)
     : [];
 
   const valgtEnhet = orgHierarki.enhet;
@@ -42,20 +43,22 @@ export function CompactOrganisasjonHierarki({
           <OverEnheterDivider />
         </React.Fragment>
       ))}
-      {valgtEnhet && (
-        <CompactOrgEnhet orgEnhet={valgtEnhet as OrgEnhet} selected />
-      )}
+      {valgtEnhet && <CompactOrgEnhet orgEnhet={valgtEnhet} selected />}
       <OverEnheterDivider />
       <SelectedResource ressurs={ressurs} />
     </>
   );
 }
-
+type OverEnhet =
+  | NonNullable<
+      NonNullable<HentHierarkiQuery["enhetsKoblinger"]>["overenheter"]
+    >[0]["organisasjonsenhet"]
+  | NonNullable<HentHierarkiQuery["enhet"]>;
 function CompactOrgEnhet({
   orgEnhet,
   selected,
 }: {
-  orgEnhet: OrgEnhet;
+  orgEnhet: OverEnhet;
   selected: boolean;
 }) {
   return (
