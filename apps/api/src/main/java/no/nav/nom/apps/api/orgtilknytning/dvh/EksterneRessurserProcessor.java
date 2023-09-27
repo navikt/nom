@@ -1,15 +1,25 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import com.fasterxml.jackson.annotation.OptBoolean;
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,15 +27,19 @@ import java.util.Optional;
 @Service
 public class EksterneRessurserProcessor {
 
+    public static final String UNLEASH_LAG_EVENTS = "nom.persister_events_ved_last_orgtilknytninger_for_eksterne";
+    private final Unleash unleash;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
 
-    public EksterneRessurserProcessor(RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningStateService orgtilknytningStateService,
-                                      OrgenhetService orgenhetService,
-                                      OrgtilknytningCommandService orgtilknytningCommandService
+    public EksterneRessurserProcessor(
+        Unleash unleash, RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningStateService orgtilknytningStateService,
+        OrgenhetService orgenhetService,
+        OrgtilknytningCommandService orgtilknytningCommandService
     ) {
+        this.unleash = unleash;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.orgenhetService = orgenhetService;
@@ -48,17 +62,50 @@ public class EksterneRessurserProcessor {
 
         rapporterEvtDiffpaaRemedyenhet(eksternRessurs, orgenhet);
 
+        InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
+
         var eksisterendeOrgtilknytninger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(eksternRessurs.navident());
 
         if (eksisterendeOrgtilknytninger.isEmpty()) {
-            log.debug("Oppretter orgtilknytning for ekstern ressurs {}", eksternRessurs.navident());
-            opprettOrgtilknytning(eksternRessurs, orgenhet);
+            log.debug("Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
+            opprettOrgtilknytning(eksternRessurs, orgenhet, eksternRessurs.remedyStart(), metadata);
         } else {
-            // Sjekk om det er ren match på orgtilknytningen - vi bryr oss kun om sluttdato, ikke startdato.
-            var eksisterendeOrgtilknytning = eksisterendeOrgtilknytninger.stream()
-                .filter(orgtilknytning -> orgtilknytning.orgEnhetId().equals(orgenhet.getId()) && orgtilknytning.gyldigTom().equals(eksternRessurs.remedySlutt()))
-                .findFirst();
+            // Eneste endring vi forventer fra DVH er endring av remedy_slutt og/eller enhet
+            // Vi trenger kun å sammenligne dette med siste orgtilknytningsperiode for identen.
+            // Denne kan være med start i dag (var tidligere fremtidig, eller allerede endret orgtilknytning for den eksterne i dag)
+            // Fremtidige orgtilknytninger er kun for eksterne som ikke har startet enda.
+            var sisteEksisterendeOrgtilknytning = eksisterendeOrgtilknytninger.stream()
+                .max(Comparator.comparing(OrgtilknytningState::gyldigFom))
+                .get();
+
+            if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
+                log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
+            } else {
+                if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
+                    // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
+                    endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
+                } else {
+                    // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
+                    if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
+                        avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, LocalDate.now().minusDays(1), metadata);
+                        opprettOrgtilknytning(eksternRessurs, orgenhet, LocalDate.now(), metadata);
+                    } else {
+                        // Orgenhet er endret
+                        // Fjern den eksisterende, opprett ny med samme gyldigFom
+                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, orgenhet, metadata);
+                        opprettOrgtilknytning(eksternRessurs, orgenhet, sisteEksisterendeOrgtilknytning.gyldigFom(), metadata);
+                    }
+                }
+            }
         }
+    }
+
+    private static boolean erSammeEnhet(OrgtilknytningState sisteEksisterendeOrgtilknytning, IOrgenhet orgenhet) {
+        return sisteEksisterendeOrgtilknytning.orgEnhetId().equals(orgenhet.getId());
+    }
+
+    private static boolean harSammeSluttdato(DvhEksternRessurs eksternRessurs, OrgtilknytningState sisteEksisterendeOrgtilknytning) {
+        return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom().orElse(null), eksternRessurs.remedySlutt());
     }
 
     private void rapporterEvtDiffpaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
@@ -110,7 +157,103 @@ public class EksterneRessurserProcessor {
         }
     }
 
-    private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
+    private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
+        var opprettOrgtilknytning = new OpprettOrgtilknytning(
+            eksternRessurs.navident(),
+            orgenhet.getId(),
+            gyldigFom,
+            metadata,
+            null
+        );
 
+        log.debug("Lager OpprettOrgtilknytning event: {}", opprettOrgtilknytning);
+
+        String fid = null;
+        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+            fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
+        }
+
+        if (eksternRessurs.remedySlutt() != null) {
+            var avvikleOrgtilknytning = new AvvikleOrgtilknytning(
+                eksternRessurs.navident(),
+                orgenhet.getId(),
+                eksternRessurs.remedySlutt(),
+                metadata,
+                null
+            );
+
+            log.debug("Lager AvvikleOrgtilknytning event: {}", avvikleOrgtilknytning);
+
+            if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+                orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOrgtilknytning);
+            }
+        }
+
+        var endreDagligOppfolgingOrgtilknytning = new EndreDagligOppfolgingOrgtilknytning(
+            eksternRessurs.navident(),
+            orgenhet.getId(),
+            gyldigFom,
+            Optional.ofNullable(eksternRessurs.remedySlutt()),
+            true,
+            metadata,
+            null
+        );
+
+        log.debug("Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
+
+        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
+        }
+    }
+
+
+    private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+        var korrigerOrgtilknytningDato = new KorrigerOrgtilknytningDato(
+            orgtilknytning.navident(),
+            orgtilknytning.orgEnhetId(),
+            orgtilknytning.gyldigFom(),
+            Optional.ofNullable(gyldigTom),
+            metadata,
+            null
+        );
+
+        log.debug("Lager KorrigerOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), korrigerOrgtilknytningDato);
+
+        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+            orgtilknytningCommandService.korrigerOrgtilknytningDato(orgtilknytning.fid(), korrigerOrgtilknytningDato);
+        }
+    }
+
+    private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+        var avvikleOrgtilknytning = new AvvikleOrgtilknytning(
+            orgtilknytning.navident(),
+            orgtilknytning.orgEnhetId(),
+            gyldigTom,
+            metadata,
+            null
+        );
+
+        log.debug("Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
+
+        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+            orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
+        }
+    }
+
+    private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, IOrgenhet orgenhet, InputMetadata metadata) {
+        var fjernOrgtilknytning = new FjernOrgtilknytning(
+            orgtilknytning.navident(),
+            orgtilknytning.orgEnhetId(),
+            orgtilknytning.gyldigFom(),
+            orgtilknytning.gyldigTom(),
+            metadata,
+            null
+        );
+
+        log.debug("Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
+
+        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
+            orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
+        }
     }
 }
