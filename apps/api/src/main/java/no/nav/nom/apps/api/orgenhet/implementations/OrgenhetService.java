@@ -7,7 +7,6 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,12 +14,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 
 @Service
 public class OrgenhetService implements IOrgenhetService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
-    private List<IOrgenhet> organiserteEnheter = Collections.emptyList();
+    private List<IOrgenhet> organiserteEnheter = emptyList();
 
 
     public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository) {

@@ -3,8 +3,12 @@ package no.nav.nom.apps.api.orgenhet.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.websocket.server.PathParam;
+
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetDvhService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -15,11 +19,13 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -30,10 +36,15 @@ public class OrgEnhetController {
 
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final OrgEnhetDvhService orgEnhetDvhService;
 
-    public OrgEnhetController(OrgEnhetCommandService orgEnhetCommandService, OrgEnhetStateRepository orgEnhetStateRepository) {
+    public OrgEnhetController(OrgEnhetCommandService orgEnhetCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
+                              OrgEnhetDvhService orgEnhetDvhService
+    ) {
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+
+        this.orgEnhetDvhService = orgEnhetDvhService;
     }
 
     @PostMapping("/orgEnhetsType")
@@ -56,6 +67,17 @@ public class OrgEnhetController {
                 );
             })
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new StandardResponse("NotFound")));
+
+    }
+
+    @GetMapping("/underLiggende/{parentId}")
+    @Operation(
+        description = "Henter ut id for alle underliggende organisasjonsenheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathParam("parentId") String parentId) {
+        return ResponseEntity.ok(orgEnhetDvhService.findAllUnderliggendeOrgenheter(parentId));
 
     }
 
