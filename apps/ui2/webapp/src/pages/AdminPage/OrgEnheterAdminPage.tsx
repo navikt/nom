@@ -48,7 +48,9 @@ type AdminFilter = {
 };
 
 export function OrgEnheterAdminPage() {
-  const getAllOrgenheterQuery = useGetAllOrgenheterAdminQuery();
+  const getAllOrgenheterQuery = useGetAllOrgenheterAdminQuery({
+    fetchPolicy: "cache-first",
+  });
   const [filter, setFilter] = useState<AdminFilter>({});
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState | undefined>({

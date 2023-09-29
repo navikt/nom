@@ -16,6 +16,7 @@ import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
 import { Footer, footerHeight } from "~/components/Footer";
 import { headerHeight, NavHeader } from "~/components/NavHeader";
 import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
+import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { AdminPage } from "~/pages/AdminPage/AdminPage";
 import { OrgEnheterAdminPage } from "~/pages/AdminPage/OrgEnheterAdminPage";
 import { RessurserAdminPage } from "~/pages/AdminPage/RessurserAdminPage";
@@ -63,8 +64,11 @@ const rootRoute = new RootRoute({
 });
 
 function Root() {
+  const hasAdminAccess = useHasAdminAccess();
+
   return (
     <>
+      {hasAdminAccess && <PrefetchUsefulAdminQueries />}
       <React.Suspense fallback="">
         <TanStackRouterDevtools />
       </React.Suspense>

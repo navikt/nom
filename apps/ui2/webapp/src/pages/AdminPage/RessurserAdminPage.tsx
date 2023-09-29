@@ -8,10 +8,11 @@ import {
   Table,
   TextField,
 } from "@navikt/ds-react";
-import type { AxiosResponse } from "axios";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
+
+import type { RessursFields } from "~/api/react-query-endpoints";
+import { getAlleRessurser } from "~/api/react-query-endpoints";
 
 type AdminFilter = {
   navn?: string;
@@ -21,22 +22,10 @@ type AdminFilter = {
 
 export function RessurserAdminPage() {
   // Using react query instead of apollo because it runs more smoothly
-  const alleRessurser = useQuery<
-    AxiosResponse<GraphqlResponseWrapper>,
-    unknown,
-    RessursFields[]
-  >({
-    queryKey: "AlleRessurser",
-    queryFn: () =>
-      axios.post("/nom-api/graphql", {
-        operationName: "HentAlleRessurser",
-        query: hentAlleRessurserQuery,
-        variables: {},
-      }),
-    select: (data) => {
-      return data.data.data.ressurser.map((ressurs) => ressurs.ressurs);
-    },
+  const alleRessurser = useQuery<RessursFields[], unknown>({
+    ...getAlleRessurser,
   });
+
   const [filter, setFilter] = useState<AdminFilter>({});
   const [sort, setSort] = useState<SortState | undefined>({
     orderBy: "id",
@@ -212,56 +201,6 @@ function filterRessurser(ressurser: RessursFields[], adminFilter: AdminFilter) {
     return nameMatch && navidentmatch && adminFilter.aktiv === isAktiv;
   });
 }
-
-const hentAlleRessurserQuery = `
-query HentAlleRessurser {
-    ressurser(where: {}) {
-        ressurs {
-            navident,
-            orgTilknytning{
-                orgEnhet {
-                    id
-                }
-            }
-            ledere {
-                ressurs {
-                    navident
-                }
-            }
-            visningsnavn
-            sektor
-            sluttdato
-            startdato
-        }
-    }
-}
-`;
-
-type GraphqlResponseWrapper = {
-  data: {
-    ressurser: {
-      ressurs: RessursFields;
-    }[];
-  };
-};
-
-type RessursFields = {
-  navident: string;
-  orgTilknytning: {
-    orgEnhet: {
-      id: string;
-    };
-  }[];
-  ledere: {
-    ressurs: {
-      navident: string;
-    };
-  }[];
-  visningsnavn: string;
-  sektor: string[];
-  sluttdato: string;
-  startdato: string;
-};
 
 function activeStringToAdminValue(option: string) {
   if ("aktive" === option) return true;
