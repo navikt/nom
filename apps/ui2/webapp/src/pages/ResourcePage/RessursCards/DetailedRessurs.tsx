@@ -16,7 +16,7 @@ import {
 } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import axios from "axios";
-import { isAfter, isBefore } from "date-fns";
+import {format, isAfter, isBefore} from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 import { useQuery } from "react-query";
@@ -29,6 +29,7 @@ import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/Car
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import {
+  DATE_FORMATS,
   formatDisplayDate,
   formatTlf,
   isGyldighetsPeriodeActive,
@@ -404,6 +405,10 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           <RessursInformationDetail
             label="NAV-ident"
             value={ressurs.navident}
+          />
+          <RessursInformationDetail
+            label="Startdato"
+            value={format(new Date(ressurs.startdato), DATE_FORMATS.no)}
           />
           <RessursInformationDetail
             label="Sektor"

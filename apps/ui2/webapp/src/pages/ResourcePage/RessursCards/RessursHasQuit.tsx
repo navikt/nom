@@ -55,6 +55,8 @@ export function RessursHasQuit({
               .map((sektor) => SektorNameMapping[sektor])
               .join(", ")}
           </span>
+          <span>Startdato:</span>
+          <span>{format(new Date(ressurs.startdato), DATE_FORMATS.no)}</span>
           <span>Sluttdato:</span>
           <span>{format(new Date(ressurs.sluttdato), DATE_FORMATS.no)}</span>
         </div>
