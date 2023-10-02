@@ -16,7 +16,7 @@ import {
 } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import axios from "axios";
-import {format, isAfter, isBefore} from "date-fns";
+import { format, isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 import { useQuery } from "react-query";

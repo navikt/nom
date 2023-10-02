@@ -1,8 +1,8 @@
 import "react-json-view-lite/dist/index.css";
 
 import { css } from "@emotion/react";
-import { Alert, Loader, Pagination, Table } from "@navikt/ds-react";
-import { useSearch } from "@tanstack/react-router";
+import { Alert, Chips, Loader, Pagination, Table } from "@navikt/ds-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 import { useQuery } from "react-query";
@@ -88,6 +88,7 @@ export function RessurserAdminPage() {
       `}
     >
       <RessursFilter />
+      <FilterChips />
       <b>Treff: {filteredRessurser.length}</b>
       <Table>
         <Table.Header>
@@ -143,6 +144,30 @@ function RessursFilter() {
     <div>
       <OrgEnhetSearch />
     </div>
+  );
+}
+
+function FilterChips() {
+  const navigate = useNavigate();
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+
+  return (
+    <Chips>
+      {Object.entries(ressursFilterValues).map((entry) => {
+        const [key, value] = entry;
+        if (key === "includeUnderliggendeOrgEnheter" && !value) {
+          return;
+        }
+        return (
+          <Chips.Removable
+            key={key}
+            onClick={() =>
+              navigate({ search: { ...ressursFilterValues, [key]: undefined } })
+            }
+          >{`${key}: ${value}`}</Chips.Removable>
+        );
+      })}
+    </Chips>
   );
 }
 
