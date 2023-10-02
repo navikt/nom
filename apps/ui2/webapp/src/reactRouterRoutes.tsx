@@ -19,6 +19,7 @@ import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { AdminPage } from "~/pages/AdminPage/AdminPage";
 import { OrgEnheterAdminPage } from "~/pages/AdminPage/OrgEnheterAdminPage";
+import type { RessursFilterValues } from "~/pages/AdminPage/RessurserAdminPage";
 import { RessurserAdminPage } from "~/pages/AdminPage/RessurserAdminPage";
 import {
   CreateRessursPage,
@@ -177,6 +178,14 @@ export const ressurserAdminRoute = new Route({
         <RessurserAdminPage />
       </Tabs.Panel>
     );
+  },
+  validateSearch: (search: Record<string, unknown>): RessursFilterValues => {
+    return {
+      ...search,
+      includeUnderliggendeOrgEnheter: Boolean(
+        search.includeUnderliggendeOrgEnheter,
+      ),
+    };
   },
 });
 

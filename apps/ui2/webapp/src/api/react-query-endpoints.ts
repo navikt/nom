@@ -5,6 +5,12 @@ export const ressurserKeys = {
   all: ["ALLE_RESSURSER"] as const,
 };
 
+export const underLiggendeOrgEnheterKeys = {
+  all: ["ALLE_UNDERLIGGENDE_ORGENHETER"] as const,
+  childOrgEnheter: (parent: string) =>
+    [...underLiggendeOrgEnheterKeys.all, parent] as const,
+};
+
 export const getAlleRessurser = {
   queryKey: ressurserKeys.all,
   queryFn: async () =>
@@ -19,6 +25,7 @@ export const getAlleRessurser = {
                         orgTilknytning{
                             orgEnhet {
                                 id
+                                navn
                             }
                         }
                         ledere {
@@ -39,6 +46,17 @@ export const getAlleRessurser = {
     ).data.data.ressurser.map((ressurs) => ressurs.ressurs),
 };
 
+export const getUnderliggendeOrgenheter = {
+  queryKey: (parentId: string) =>
+    underLiggendeOrgEnheterKeys.childOrgEnheter(parentId),
+  queryFn: async (parentId: string): Promise<string[]> =>
+    (
+      await axios.get<string[]>(
+        `/nom-api/app/orgenhet/underLiggende/${parentId}`,
+      )
+    ).data,
+};
+
 type GraphqlResponseWrapper = {
   data: {
     ressurser: {
@@ -52,7 +70,10 @@ export type RessursFields = {
   orgTilknytning: {
     orgEnhet: {
       id: string;
+      navn: string;
     };
+    gyldigFom: string;
+    gyldigTom: string;
   }[];
   ledere: {
     ressurs: {
@@ -62,5 +83,4 @@ export type RessursFields = {
   visningsnavn: string;
   sektor: string[];
   sluttdato: string;
-  startdato: string;
 };
