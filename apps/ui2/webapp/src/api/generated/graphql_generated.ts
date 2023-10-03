@@ -386,11 +386,6 @@ export enum TelefonType {
   PrivatTelefon = 'PRIVAT_TELEFON'
 }
 
-export type HentAlleRessurserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type HentAlleRessurserQuery = { __typename?: 'Query', ressurser: Array<{ __typename?: 'RessursResult', ressurs?: { __typename?: 'Ressurs', navident: string } | null }> };
-
 export type HentRessursMedNavidentQueryVariables = Exact<{
   navident?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -398,24 +393,12 @@ export type HentRessursMedNavidentQueryVariables = Exact<{
 
 export type HentRessursMedNavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, epost?: string | null, sektor: Array<Sektor>, visningsnavn?: string | null, sluttdato?: any | null, startdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }>, ledere: Array<{ __typename?: 'RessursLeder', erDagligOppfolging?: boolean | null, ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }>, lederFor: Array<{ __typename?: 'LederOrgEnhet', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', gyldigFom: any, gyldigTom?: any | null, erDagligOppfolging?: boolean | null, orgEnhet: { __typename?: 'OrgEnhet', navn: string, id: string, remedyEnhetId?: string | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null } }> } }> } | null };
 
-export type HentAlleOrganisasjonsenheterQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type HentAlleOrganisasjonsenheterQuery = { __typename?: 'Query', organisasjonsenheter: Array<{ __typename?: 'OrgEnhetResult', id: string, code: ResultCode, organisasjonsenhet?: { __typename?: 'OrgEnhet', navn: string, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, personident: string } }> } | null }> };
-
 export type HentPersonQueryVariables = Exact<{
   personident: Scalars['String']['input'];
 }>;
 
 
 export type HentPersonQuery = { __typename?: 'Query', person?: { __typename?: 'PersonResult', navident?: string | null, personident: string, person?: { __typename?: 'FolkeregisterPerson', navn: { __typename?: 'Navn', fornavn: string, mellomnavn?: string | null, etternavn: string } } | null } | null };
-
-export type SearchRessursQueryVariables = Exact<{
-  term: Scalars['String']['input'];
-}>;
-
-
-export type SearchRessursQuery = { __typename?: 'Query', search: Array<{ __typename?: 'OrgEnhet' } | { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null }> };
 
 export type RessursStandaloneFragment = { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> };
 
@@ -433,13 +416,6 @@ export type HentHierarkiQueryVariables = Exact<{
 
 
 export type HentHierarkiQuery = { __typename?: 'Query', enhet?: { __typename?: 'OrgEnhet', id: string, remedyEnhetId?: string | null, navn: string, gyldigFom: any, gyldigTom?: any | null, type?: { __typename?: 'Kode', kode: string } | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, orgTilknytning: Array<{ __typename?: 'RessursOrgTilknytning', orgEnhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, ressursKoblinger?: { __typename?: 'OrgEnhet', koblinger: Array<{ __typename?: 'OrgEnhetsKobling', gyldigFom: any, gyldigTom?: any | null, ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } | null, enhetsKoblinger?: { __typename?: 'OrgEnhet', underenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, overenheter: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, organiseringer: Array<{ __typename?: 'Organisering', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string, gyldigFom: any, gyldigTom?: any | null, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }>, leder: Array<{ __typename?: 'OrgEnhetsLeder', ressurs: { __typename?: 'Ressurs', navident: string, fornavn?: string | null, etternavn?: string | null, visningsnavn?: string | null, epost?: string | null, sektor: Array<Sektor>, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', id: string, navn: string } }>, telefon: Array<{ __typename?: 'Telefon', beskrivelse?: string | null, nummer: string, type: TelefonType }> } }> } }> } | null };
-
-export type HentLederFornavidentQueryVariables = Exact<{
-  navident?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type HentLederFornavidentQuery = { __typename?: 'Query', ressurs?: { __typename?: 'Ressurs', navident: string, ledere: Array<{ __typename?: 'RessursLeder', ressurs: { __typename?: 'Ressurs', navident: string, visningsnavn?: string | null, fornavn?: string | null, etternavn?: string | null, startdato?: any | null, koblinger: Array<{ __typename?: 'RessursOrgTilknytning', organisasjonsenhet: { __typename?: 'OrgEnhet', navn: string, id: string } }> } }> } | null };
 
 export type HentRessursQueryVariables = Exact<{
   navident?: InputMaybe<Scalars['String']['input']>;
@@ -901,42 +877,6 @@ export const OrgEnhetAdminFragmentDoc = gql`
   }
 }
     `;
-export const HentAlleRessurserDocument = gql`
-    query HentAlleRessurser {
-  ressurser(where: {}) {
-    ressurs {
-      navident
-    }
-  }
-}
-    `;
-
-/**
- * __useHentAlleRessurserQuery__
- *
- * To run a query within a React component, call `useHentAlleRessurserQuery` and pass it any options that fit your needs.
- * When your component renders, `useHentAlleRessurserQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHentAlleRessurserQuery({
- *   variables: {
- *   },
- * });
- */
-export function useHentAlleRessurserQuery(baseOptions?: Apollo.QueryHookOptions<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
-      }
-export function useHentAlleRessurserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>(HentAlleRessurserDocument, options);
-        }
-export type HentAlleRessurserQueryHookResult = ReturnType<typeof useHentAlleRessurserQuery>;
-export type HentAlleRessurserLazyQueryHookResult = ReturnType<typeof useHentAlleRessurserLazyQuery>;
-export type HentAlleRessurserQueryResult = Apollo.QueryResult<HentAlleRessurserQuery, HentAlleRessurserQueryVariables>;
 export const HentRessursMedNavidentDocument = gql`
     query HentRessursMedNavident($navident: String) {
   ressurs(where: {navident: $navident}) {
@@ -1023,50 +963,6 @@ export function useHentRessursMedNavidentLazyQuery(baseOptions?: Apollo.LazyQuer
 export type HentRessursMedNavidentQueryHookResult = ReturnType<typeof useHentRessursMedNavidentQuery>;
 export type HentRessursMedNavidentLazyQueryHookResult = ReturnType<typeof useHentRessursMedNavidentLazyQuery>;
 export type HentRessursMedNavidentQueryResult = Apollo.QueryResult<HentRessursMedNavidentQuery, HentRessursMedNavidentQueryVariables>;
-export const HentAlleOrganisasjonsenheterDocument = gql`
-    query HentAlleOrganisasjonsenheter {
-  organisasjonsenheter(where: {}) {
-    id
-    organisasjonsenhet {
-      navn
-      leder {
-        ressurs {
-          navident
-          personident
-        }
-      }
-    }
-    code
-  }
-}
-    `;
-
-/**
- * __useHentAlleOrganisasjonsenheterQuery__
- *
- * To run a query within a React component, call `useHentAlleOrganisasjonsenheterQuery` and pass it any options that fit your needs.
- * When your component renders, `useHentAlleOrganisasjonsenheterQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHentAlleOrganisasjonsenheterQuery({
- *   variables: {
- *   },
- * });
- */
-export function useHentAlleOrganisasjonsenheterQuery(baseOptions?: Apollo.QueryHookOptions<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
-      }
-export function useHentAlleOrganisasjonsenheterLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>(HentAlleOrganisasjonsenheterDocument, options);
-        }
-export type HentAlleOrganisasjonsenheterQueryHookResult = ReturnType<typeof useHentAlleOrganisasjonsenheterQuery>;
-export type HentAlleOrganisasjonsenheterLazyQueryHookResult = ReturnType<typeof useHentAlleOrganisasjonsenheterLazyQuery>;
-export type HentAlleOrganisasjonsenheterQueryResult = Apollo.QueryResult<HentAlleOrganisasjonsenheterQuery, HentAlleOrganisasjonsenheterQueryVariables>;
 export const HentPersonDocument = gql`
     query hentPerson($personident: String!) {
   person(where: {personident: $personident}) {
@@ -1110,44 +1006,6 @@ export function useHentPersonLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions
 export type HentPersonQueryHookResult = ReturnType<typeof useHentPersonQuery>;
 export type HentPersonLazyQueryHookResult = ReturnType<typeof useHentPersonLazyQuery>;
 export type HentPersonQueryResult = Apollo.QueryResult<HentPersonQuery, HentPersonQueryVariables>;
-export const SearchRessursDocument = gql`
-    query searchRessurs($term: String!) {
-  search(term: $term) {
-    ... on Ressurs {
-      navident
-      visningsnavn
-    }
-  }
-}
-    `;
-
-/**
- * __useSearchRessursQuery__
- *
- * To run a query within a React component, call `useSearchRessursQuery` and pass it any options that fit your needs.
- * When your component renders, `useSearchRessursQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSearchRessursQuery({
- *   variables: {
- *      term: // value for 'term'
- *   },
- * });
- */
-export function useSearchRessursQuery(baseOptions: Apollo.QueryHookOptions<SearchRessursQuery, SearchRessursQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
-      }
-export function useSearchRessursLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchRessursQuery, SearchRessursQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SearchRessursQuery, SearchRessursQueryVariables>(SearchRessursDocument, options);
-        }
-export type SearchRessursQueryHookResult = ReturnType<typeof useSearchRessursQuery>;
-export type SearchRessursLazyQueryHookResult = ReturnType<typeof useSearchRessursLazyQuery>;
-export type SearchRessursQueryResult = Apollo.QueryResult<SearchRessursQuery, SearchRessursQueryVariables>;
 export const HentHierarkiDocument = gql`
     query HentHierarki($id: String!) {
   enhet: orgEnhet(where: {id: $id}) {
@@ -1253,56 +1111,6 @@ export function useHentHierarkiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type HentHierarkiQueryHookResult = ReturnType<typeof useHentHierarkiQuery>;
 export type HentHierarkiLazyQueryHookResult = ReturnType<typeof useHentHierarkiLazyQuery>;
 export type HentHierarkiQueryResult = Apollo.QueryResult<HentHierarkiQuery, HentHierarkiQueryVariables>;
-export const HentLederFornavidentDocument = gql`
-    query HentLederFornavident($navident: String) {
-  ressurs(where: {navident: $navident}) {
-    navident
-    ledere {
-      ressurs {
-        navident
-        visningsnavn
-        fornavn
-        etternavn
-        koblinger {
-          organisasjonsenhet {
-            navn
-            id
-          }
-        }
-        startdato
-      }
-    }
-  }
-}
-    `;
-
-/**
- * __useHentLederFornavidentQuery__
- *
- * To run a query within a React component, call `useHentLederFornavidentQuery` and pass it any options that fit your needs.
- * When your component renders, `useHentLederFornavidentQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHentLederFornavidentQuery({
- *   variables: {
- *      navident: // value for 'navident'
- *   },
- * });
- */
-export function useHentLederFornavidentQuery(baseOptions?: Apollo.QueryHookOptions<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
-      }
-export function useHentLederFornavidentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>(HentLederFornavidentDocument, options);
-        }
-export type HentLederFornavidentQueryHookResult = ReturnType<typeof useHentLederFornavidentQuery>;
-export type HentLederFornavidentLazyQueryHookResult = ReturnType<typeof useHentLederFornavidentLazyQuery>;
-export type HentLederFornavidentQueryResult = Apollo.QueryResult<HentLederFornavidentQuery, HentLederFornavidentQueryVariables>;
 export const HentRessursDocument = gql`
     query HentRessurs($navident: String) {
   ressurs(where: {navident: $navident}) {
