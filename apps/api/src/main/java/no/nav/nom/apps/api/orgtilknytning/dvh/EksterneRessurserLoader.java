@@ -55,7 +55,7 @@ public class EksterneRessurserLoader {
         log.debug("Lastet eksterneRessurser: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
 
         List<DvhEksternRessurs> eksterneRessurser = StreamSupport.stream(jsonEksterneRessurser.spliterator(), true)
-            .map(DvhEksternRessurs::new)
+            .map(DvhEksternRessurs::fromJson)
             .collect(Collectors.toList());
 
         log.info("Lastet {} eksterneRessurser. Tok {}", eksterneRessurser.size(), durationAsH24(start));
