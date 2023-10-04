@@ -92,6 +92,18 @@ public class DvhLast {
     }
 
     @Operation(
+        description = "Last av orgtilknytninger for eksterne",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success")
+    })
+    @GetMapping(value = "/loadOrgtilknytningerForEksterne")
+    public void loadOrgtilknytningerForEksterne() {
+        triggerlastEksterneOrgtilknytningerTilEvtsrc();
+    }
+    
+    @Operation(
         description = "Start last av typer for orgenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
@@ -134,6 +146,11 @@ public class DvhLast {
     @Async
     public void triggerlastOrgtilknytningerTilEvtsrc() {
         dvhRestConsumer.lastOrgtilknytningerTilEvtsrc();
+    }
+
+    @Async
+    public void triggerlastEksterneOrgtilknytningerTilEvtsrc() {
+        dvhRestConsumer.updateOrgtilknytningerForEksterneFromDvh();
     }
 
     @Async

@@ -161,7 +161,7 @@ public class DvhRestConsumer {
         }
     }
 
-    private void updateOrgtilknytningerForEksterneFromDvh() {
+    public void updateOrgtilknytningerForEksterneFromDvh() {
         log.info("Oppdater Orgtilknytninger for eksterne fra dvh");
         eksterneRessurserLoader.loadAndProcess();
     }
