@@ -1,7 +1,14 @@
 import "react-json-view-lite/dist/index.css";
 
 import { css } from "@emotion/react";
-import { Alert, Chips, Loader, Pagination, Table } from "@navikt/ds-react";
+import {
+  Alert,
+  Checkbox,
+  Chips,
+  Loader,
+  Pagination,
+  Table,
+} from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
@@ -14,6 +21,7 @@ import {
 } from "~/api/react-query-endpoints";
 import { OrgEnhetSearch } from "~/pages/AdminPage/components/OrgEnhetSearch";
 import { ressurserAdminRoute } from "~/reactRouterRoutes";
+import { isGyldighetsPeriodeActive } from "~/utils";
 
 export function RessurserAdminPage() {
   const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
@@ -140,9 +148,29 @@ export function RessurserAdminPage() {
 }
 
 function RessursFilter() {
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const navigate = useNavigate();
+
   return (
-    <div>
+    <div
+      css={css`
+        display: flex;
+      `}
+    >
       <OrgEnhetSearch />
+      <Checkbox
+        checked={ressursFilterValues.includeInactive}
+        onChange={() =>
+          navigate({
+            search: {
+              ...ressursFilterValues,
+              includeInactive: !ressursFilterValues.includeInactive,
+            },
+          })
+        }
+      >
+        Inkluder inaktive ressurser
+      </Checkbox>
     </div>
   );
 }
@@ -150,12 +178,14 @@ function RessursFilter() {
 function FilterChips() {
   const navigate = useNavigate();
   const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
-
   return (
     <Chips>
       {Object.entries(ressursFilterValues).map((entry) => {
         const [key, value] = entry;
-        if (key === "includeUnderliggendeOrgEnheter" && !value) {
+        if (
+          ["includeUnderliggendeOrgEnheter", "includeInactive"].includes(key) &&
+          !value
+        ) {
           return;
         }
         return (
@@ -186,6 +216,27 @@ function applyFilter(
   filter: RessursFilterValues,
   underLiggendeOrgenheter: string[],
 ) {
+  return (
+    orgEnhetMatches(ressurs, filter, underLiggendeOrgenheter) &&
+    gyldighetsPeriodeMatches(ressurs, filter)
+  );
+}
+
+function gyldighetsPeriodeMatches(
+  ressurs: RessursFields,
+  filter: RessursFilterValues,
+) {
+  return (
+    filter.includeInactive ||
+    isGyldighetsPeriodeActive(undefined, ressurs.sluttdato)
+  );
+}
+
+function orgEnhetMatches(
+  ressurs: RessursFields,
+  filter: RessursFilterValues,
+  underLiggendeOrgenheter: string[],
+) {
   const orgEnhetMatch = filter.orgEnhet
     ? ressurs.orgTilknytning.some((orgTilknytning) => {
         const orgEnhetMatch = orgTilknytning.orgEnhet.id === filter.orgEnhet;
@@ -208,4 +259,5 @@ function applyFilter(
 export type RessursFilterValues = {
   orgEnhet?: string;
   includeUnderliggendeOrgEnheter?: boolean;
+  includeInactive?: boolean;
 };

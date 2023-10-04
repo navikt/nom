@@ -185,6 +185,7 @@ export const ressurserAdminRoute = new Route({
       includeUnderliggendeOrgEnheter: Boolean(
         search.includeUnderliggendeOrgEnheter,
       ),
+      includeInactive: Boolean(search.includeInactive),
     };
   },
 });
