@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public record DvhEksternRessurs(
     String payload,
@@ -15,13 +16,14 @@ public record DvhEksternRessurs(
     boolean remedyAktiv
 ) {
     private static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
+
     public DvhEksternRessurs(JsonNode json) {
         this(
             json.toString(),
             json.get("NAV_IDENT").asText(),
-            json.get("REMEDY_ENHET_ID").asText(),
-            json.get("ORGENHET_PAA_RESSURS").asText(),
-            json.get("ORGENHET_PAA_RESSURS_NIVA").asText(),
+            getNullableStringNode(json, "REMEDY_ENHET_ID"),
+            getNullableStringNode(json, "ORGENHET_PAA_RESSURS"),
+            getNullableStringNode(json, "ORGENHET_PAA_RESSURS_NIVA"),
             LocalDate.parse(json.get("REMEDY_START_DATO").asText()),
             getOrNullIfMaxDate(LocalDate.parse(json.get("REMEDY_SLUTT_DATO").asText())),
             "JA".equals(json.get("REMEDY_AKTIV").asText())
@@ -30,5 +32,10 @@ public record DvhEksternRessurs(
 
     private static LocalDate getOrNullIfMaxDate(LocalDate date) {
         return MAX_DATE.equals(date) ? null : date;
+    }
+
+    private static String getNullableStringNode(JsonNode json, String field_name) {
+        JsonNode node = json.get(field_name);
+        return node.isNull() ? null : node.asText();
     }
 }

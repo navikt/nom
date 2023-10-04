@@ -102,7 +102,7 @@ public class DvhLast {
     public void loadOrgtilknytningerForEksterne() {
         triggerlastEksterneOrgtilknytningerTilEvtsrc();
     }
-    
+
     @Operation(
         description = "Start last av typer for orgenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
