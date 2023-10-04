@@ -59,19 +59,19 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        var aktiveKoblinger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+        var aktiveKoblinger = orgtilknytningStateService.getByNavIdent(navIdent)
             .stream()
             .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom().orElse(null))).collect(Collectors.toList());
 
         // If there are no active koblinger, we find which date the earlist kobling will start, and select all koblinger starting that day.
-        var dateForNextKobling = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+        var dateForNextKobling = orgtilknytningStateService.getByNavIdent(navIdent)
             .stream()
             .map(OrgtilknytningState::gyldigFom)
             .filter(gyldigFom -> gyldigFom.isAfter(LocalDate.now()))
             .min(LocalDate::compareTo);
 
 
-        var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getOrgtilknytningerByNavIdent(navIdent)
+        var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getByNavIdent(navIdent)
             .stream()
             .filter(kobling -> kobling.gyldigFom().isEqual(dateForNextKobling.orElse(LocalDate.MIN)))
             .toList();

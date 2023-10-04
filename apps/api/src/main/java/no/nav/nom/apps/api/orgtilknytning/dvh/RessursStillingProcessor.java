@@ -99,7 +99,7 @@ public class RessursStillingProcessor {
         }
 
         // Hent orgtilknytninger fra State
-        var orgtilknytninger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(navident);
+        var orgtilknytninger = orgtilknytningStateService.getByNavIdent(navident);
         stillingPerioder.forEach( midlStillingPeriode -> {
 
             // Ikke behandle stillingperioder som starter etter Ressurs sluttdato.

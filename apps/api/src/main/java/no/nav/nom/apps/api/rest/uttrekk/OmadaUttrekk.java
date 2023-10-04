@@ -113,7 +113,7 @@ public class OmadaUttrekk {
         final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "fid", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            orgtilknytningStateService.getAllOrgtilknytninger()
+            orgtilknytningStateService.getAll()
                 .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {

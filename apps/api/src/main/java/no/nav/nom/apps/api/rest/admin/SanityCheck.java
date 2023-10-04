@@ -196,7 +196,7 @@ public class SanityCheck {
         List<IOrgenhet> enheterIkkeAktiveEllerUtenOrganisering = enheterIkkeBlandtAgressoIder(alleEnheter, aktiveOrganiseringerUniqueAgressoIder);
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
-        var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+        var alleOrgtilknytningState = orgtilknytningStateService.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
 
         List<RessursState> ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = null;
@@ -249,7 +249,7 @@ public class SanityCheck {
     @GetMapping(value = "/listTilkoblingerUtoverOgEnhetGyldighetPeriode")
     public String listTilkoblingerUtoverOgEnhetGyldighetPeriode() {
         StringBuffer result = new StringBuffer();
-        var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+        var alleOrgtilknytningState = orgtilknytningStateService.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
         var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
 
@@ -412,7 +412,7 @@ public class SanityCheck {
 
         List<String> uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getUniqueAgressoId).toList();
 
-        var alleOrgtilknytningState = orgtilknytningStateService.getAllOrgtilknytninger();
+        var alleOrgtilknytningState = orgtilknytningStateService.getAll();
         var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
         var aktiveOrgtilknytningerStateUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
 

@@ -23,26 +23,26 @@ public class OrgtilknytningStateService implements OrgtilknytningService {
     }
 
     @Override
-    public Collection<OrgtilknytningState> getAllOrgtilknytninger() {
+    public Collection<OrgtilknytningState> getAll() {
         return orgtilknytningStateRepository.getAll();
     }
 
     @Override
-    public Collection<OrgtilknytningState> getOrgtilknytningerByNavIdent(String navident) {
+    public Collection<OrgtilknytningState> getByNavIdent(String navident) {
         return orgtilknytningStateRepository.findByNavident(navident);
     }
 
     @Override
-    public List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id) {
-        return getAllOrgtilknytninger().stream()
+    public List<OrgtilknytningState> getByEnhet(String id) {
+        return getAll().stream()
             .filter(ot -> ot.orgEnhetId().equals(id))
             .toList();
     }
 
     @Override
-    public <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
+    public <T> Map<String, Collection<T>> getByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer) {
         return navidenter.stream().collect(Collectors.toMap(navident -> navident, navident -> {
-            var value = this.getOrgtilknytningerByNavIdent(navident);
+            var value = this.getByNavIdent(navident);
             return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();
         }));
     }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -34,7 +35,12 @@ public class EksterneRessurserLoader {
     public void loadAndProcess() {
         if (unleash.isEnabled(UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE)) {
             List<DvhEksternRessurs> eksterneRessurser = load();
-            eksterneRessurser.forEach(eksterneRessurserProcessor::process);
+            List<String> report = new ArrayList<>();
+            eksterneRessurser.forEach( e -> report.addAll(eksterneRessurserProcessor.process(e)));
+            if (!report.isEmpty()) {
+                log.info("Rapport fra prosessering av {} eksterne ressurser:\n", eksterneRessurser.size());
+                report.forEach( r -> log.info("  {}", r));
+            }
         } else {
             log.info("Unleash {} er ikke aktivert - laster ikke eksterne ressurser", UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE);
         }

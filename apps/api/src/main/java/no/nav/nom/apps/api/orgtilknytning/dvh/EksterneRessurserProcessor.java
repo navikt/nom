@@ -19,7 +19,9 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -46,25 +48,36 @@ public class EksterneRessurserProcessor {
         this.orgtilknytningCommandService = orgtilknytningCommandService;
     }
 
-    public void process(DvhEksternRessurs eksternRessurs) {
+    public List<String> process(DvhEksternRessurs eksternRessurs) {
+        List<String> warnings = new ArrayList<>();
+
         log.debug("Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {
             log.debug("Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
-            return;
+            return warnings;
         }
 
         var orgenhet = getOrgenhetForEkstern(eksternRessurs);
 
         if (orgenhet == null) {
-            log.error("Ekstern ressurs {} - Fant ikke orgenhet for remedyEnhet {} eller agressoId/Nivå {}/{}. Kan ikke behandles.", eksternRessurs.navident(), eksternRessurs.remedyEnhetId(), eksternRessurs.orgenhetPaaRessurs(), eksternRessurs.orgenhetPaaRessursNivaa());
-            return;
+            String msg = String.format(
+                "Ekstern ressurs %s - Fant ikke orgenhet for remedyEnhet %s eller agressoId/Nivå %s/%s. Kan ikke behandles.",
+                eksternRessurs.navident(),
+                eksternRessurs.remedyEnhetId(),
+                eksternRessurs.orgenhetPaaRessurs(),
+                eksternRessurs.orgenhetPaaRessursNivaa()
+            );
+            log.error(msg);
+            warnings.add(msg);
+            return warnings;
         }
 
-        rapporterEvtDiffpaaRemedyenhet(eksternRessurs, orgenhet);
+        rapporterEvtDiffPaaRemedyenhet(eksternRessurs, orgenhet, warnings);
+
 
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
 
-        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getOrgtilknytningerByNavIdent(eksternRessurs.navident());
+        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident());
 
         if (eksisterendeOrgtilknytninger.isEmpty()) {
             log.debug("Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
@@ -98,6 +111,7 @@ public class EksterneRessurserProcessor {
                 }
             }
         }
+        return warnings;
     }
 
     private static boolean erSammeEnhet(OrgtilknytningState sisteEksisterendeOrgtilknytning, IOrgenhet orgenhet) {
@@ -108,14 +122,20 @@ public class EksterneRessurserProcessor {
         return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom().orElse(null), eksternRessurs.remedySlutt());
     }
 
-    private void rapporterEvtDiffpaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
-        var remedyEnhetForMappetOrgenhet = remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::nomId).orElse(null);
+    private void rapporterEvtDiffPaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, List<String> warnings) {
+        var remedyEnhetForMappetOrgenhet = remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
         if (!Objects.equals(remedyEnhetForMappetOrgenhet, eksternRessurs.remedyEnhetId())) {
-            log.warn("Ekstern ressurs {} med angitt remedyEnhet {} og agressoId/Nivå {}/{} er matchet til orgenhet {} i NOM som mapping til en annen remedy enhet {}.",
-                eksternRessurs.navident(), eksternRessurs.remedyEnhetId(), eksternRessurs.orgenhetPaaRessurs(), eksternRessurs.orgenhetPaaRessursNivaa(),
+            String warn = String.format(
+                "Ekstern ressurs %s er i DVH angitt remedyEnhet %s og agressoId/Nivå %s/%s er i NOM matchet til i orgenhet %s som mapper til en annen remedy enhet %s.",
+                eksternRessurs.navident(),
+                eksternRessurs.remedyEnhetId(),
+                eksternRessurs.orgenhetPaaRessurs(),
+                eksternRessurs.orgenhetPaaRessursNivaa(),
                 orgenhet.getId(),
                 remedyEnhetForMappetOrgenhet != null ? remedyEnhetForMappetOrgenhet : "'ingen remedyenhet mappet for NOM enhet'"
             );
+            log.warn(warn);
+            warnings.add(warn);
         }
     }
 
@@ -141,17 +161,43 @@ public class EksterneRessurserProcessor {
             );
 
         if (orgenhetPaaRessurs.startsWith("-")) {
-            log.debug("For navident {} - ORGENHET_PAA_RESSURS i DVH er ikke angitt. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.", navident, orgenhetPaaRessurs, remedyEnhet);
+            log.debug(
+                "For navident {} - ORGENHET_PAA_RESSURS i DVH er ikke angitt. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.",
+                navident,
+                orgenhetPaaRessurs,
+                remedyEnhet
+            );
             return orgenhetByRemedyEnhet.orElse(null);
         } else {
-            var nomOrgenheterByOrgenhetPaaRessurs = orgenhetService.getByAgressoIdForEnheterMedOrganisering(orgenhetPaaRessurs).stream().filter( o -> Objects.equals(o.getOrgNiv(), orgenhetPaaRessursNivaa)).toList();
+            var nomOrgenheterByOrgenhetPaaRessurs = orgenhetService.getByAgressoIdForEnheterMedOrganisering(orgenhetPaaRessurs)
+                .stream()
+                .filter(o -> Objects.equals(o.getOrgNiv(), orgenhetPaaRessursNivaa))
+                .toList();
             if (nomOrgenheterByOrgenhetPaaRessurs.size() == 1) {
-                log.debug("For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.", navident, nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(), orgenhetPaaRessurs, remedyEnhet);
+                log.debug(
+                    "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.",
+                    navident,
+                    nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),
+                    orgenhetPaaRessurs,
+                    remedyEnhet
+                );
                 return nomOrgenheterByOrgenhetPaaRessurs.get(0);
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
-                log.error("For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.", navident, orgenhetPaaRessurs, orgenhetPaaRessursNivaa, remedyEnhet);
+                log.error(
+                    "For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
+                    navident,
+                    orgenhetPaaRessurs,
+                    orgenhetPaaRessursNivaa,
+                    remedyEnhet
+                );
             } else {
-                log.error("For navident {} - Fant flere orgenheter for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.", navident, orgenhetPaaRessurs, orgenhetPaaRessursNivaa, remedyEnhet);
+                log.error(
+                    "For navident {} - Fant flere orgenheter for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
+                    navident,
+                    orgenhetPaaRessurs,
+                    orgenhetPaaRessursNivaa,
+                    remedyEnhet
+                );
             }
             return orgenhetByRemedyEnhet.orElse(null);
         }

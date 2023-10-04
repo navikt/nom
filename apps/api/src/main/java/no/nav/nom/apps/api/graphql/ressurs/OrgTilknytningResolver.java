@@ -38,7 +38,7 @@ public class OrgTilknytningResolver {
 
     private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
         return orgtilknytningStateService
-            .getOrgtilknytningerByNavIdent(ressurs.getNavIdent()).stream()
+            .getByNavIdent(ressurs.getNavIdent()).stream()
             .map(this::fromOrgtilknytningState)
             .toList();
     }

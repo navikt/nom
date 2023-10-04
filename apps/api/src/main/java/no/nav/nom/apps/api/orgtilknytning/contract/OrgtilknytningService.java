@@ -9,15 +9,15 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface OrgtilknytningService {
-    Collection<OrgtilknytningState> getAllOrgtilknytninger();
+    Collection<OrgtilknytningState> getAll();
 
-    Collection<OrgtilknytningState> getOrgtilknytningerByNavIdent(String navident);
+    Collection<OrgtilknytningState> getByNavIdent(String navident);
 
-    default Map<String, Collection<OrgtilknytningState>> getOrgtilknytningerByNavidenter(Set<String> navidenter) {
+    default Map<String, Collection<OrgtilknytningState>> getByNavidenter(Set<String> navidenter) {
         // Use a NOOP-transformer to preserve original use.
-        return getOrgtilknytningerByNavidenter(navidenter, Function.identity());
+        return getByNavidenter(navidenter, Function.identity());
     }
-    List<OrgtilknytningState> getOrgtilknytningerByEnhet(String id);
+    List<OrgtilknytningState> getByEnhet(String id);
 
-    <T> Map<String, Collection<T>> getOrgtilknytningerByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);
+    <T> Map<String, Collection<T>> getByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);
 }

@@ -21,7 +21,7 @@ public class OrgEnhetKoblingResolver {
     }
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
-        return orgtilknytningStateService.getOrgtilknytningerByEnhet(orgEnhet.getId())
+        return orgtilknytningStateService.getByEnhet(orgEnhet.getId())
             .stream()
             .map(this::tilOrgEnhetsKobling)
             .toList();
