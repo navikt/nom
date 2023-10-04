@@ -54,7 +54,7 @@ public class EksterneRessurserLoader {
         val listField = jsonEksterneRessurser.fields().next();
         log.debug("Lastet eksterneRessurser: Første field: {} med {} ant noder", listField.getKey(), listField.getValue().size());
 
-        List<DvhEksternRessurs> eksterneRessurser = StreamSupport.stream(jsonEksterneRessurser.get("dummy").spliterator(), true)
+        List<DvhEksternRessurs> eksterneRessurser = StreamSupport.stream(jsonEksterneRessurser.spliterator(), true)
             .map(DvhEksternRessurs::new)
             .collect(Collectors.toList());
 
