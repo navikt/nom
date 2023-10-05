@@ -31,57 +31,57 @@ public class OrgtilknytningStateRepository {
     }
 
     public Optional<OrgtilknytningState> findByFid(String fid) {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            return Optional.ofNullable(orgtilknytningByFid.get(fid));
+//        } else {
             return Optional.ofNullable(orgtilknytningByFid.get(fid));
-        } else {
-            return Optional.ofNullable(orgtilknytningByFid.get(fid));
-        }
+//        }
     }
 
     public List<OrgtilknytningState> findByFidIn(List<String> fids) {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            return orgtilknytningByFid.entrySet().stream()
+//                .filter(e -> fids.contains(e.getKey()))
+//                .map(Map.Entry::getValue)
+//                .filter(e -> !eksterneNavidenter.contains(e.navident()))
+//                .collect(Collectors.toList());
+//        } else {
             return orgtilknytningByFid.entrySet().stream()
                 .filter(e -> fids.contains(e.getKey()))
                 .map(Map.Entry::getValue)
-                .filter(e -> !eksterneNavidenter.contains(e.navident()))
                 .collect(Collectors.toList());
-        } else {
-            return orgtilknytningByFid.entrySet().stream()
-                .filter(e -> fids.contains(e.getKey()))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-        }
+//        }
     }
 
     public Collection<OrgtilknytningState> findByNavident(String navident) {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
-            if (eksterneNavidenter.contains(navident)) {
-                return Collections.emptyList();
-            }
-        }
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            if (eksterneNavidenter.contains(navident)) {
+//                return Collections.emptyList();
+//            }
+//        }
         return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyMap()).values();
     }
 
     public Collection<OrgtilknytningState> findByNavident(String navident, boolean hentForEksterneUavhengigAvFeatureFlag) {
-        if (hentForEksterneUavhengigAvFeatureFlag) {
-            return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyMap()).values();
-        } else {
+//        if (hentForEksterneUavhengigAvFeatureFlag) {
+//            return orgtilknytningerByNavident.getOrDefault(navident, Collections.emptyMap()).values();
+//        } else {
             return findByNavident(navident);
-        }
+//        }
     }
 
     public List<OrgtilknytningState> findByNavidentIn(List<String> navidents) {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
-            navidents.removeAll(eksterneNavidenter);
-        }
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            navidents.removeAll(eksterneNavidenter);
+//        }
         return orgtilknytningerByNavident.entrySet().stream()
             .filter(e -> navidents.contains(e.getKey()))
             .map(Map.Entry::getValue)
@@ -90,27 +90,27 @@ public class OrgtilknytningStateRepository {
     }
 
     public Collection<OrgtilknytningState> getAll() {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
-            return orgtilknytningByFid.values().stream()
-                .filter(e -> !eksterneNavidenter.contains(e.navident()))
-                .collect(Collectors.toList());
-        } else {
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            return orgtilknytningByFid.values().stream()
+//                .filter(e -> !eksterneNavidenter.contains(e.navident()))
+//                .collect(Collectors.toList());
+//        } else {
             return orgtilknytningByFid.values();
-        }
+//        }
     }
 
     public int count() {
-        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
-            List<String> eksterneNavidenter = getNavidenterForEksterne();
-
-            return (int)orgtilknytningByFid.values().stream()
-                .filter(e -> !eksterneNavidenter.contains(e.navident()))
-                .count();
-        } else {
+//        if (!unleash.isEnabled(UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE)) {
+//            List<String> eksterneNavidenter = getNavidenterForEksterne();
+//
+//            return (int)orgtilknytningByFid.values().stream()
+//                .filter(e -> !eksterneNavidenter.contains(e.navident()))
+//                .count();
+//        } else {
             return orgtilknytningByFid.size();
-        }
+//        }
     }
 
     public void putEventAggregate(String fid, OrgtilknytningState newOrgtilknytningState) {

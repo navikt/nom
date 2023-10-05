@@ -1,46 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
-            </evaluator>
-            <OnMatch>DENY</OnMatch>
-        </filter>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
-            <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
-            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                <exclude>java\.util\.concurrent\..*</exclude>
-                <exclude>org\.apache\.catalina\..*</exclude>
-                <exclude>org\.apache\.coyote\..*</exclude>
-                <exclude>org\.apache\.tomcat\..*</exclude>
-                <exclude>org\.springframework\.aop\..*</exclude>
-                <exclude>org\.springframework\.security\.web\.ObservationFilterChainDecorator</exclude>
-            </throwableConverter>
-        </encoder>
-    </appender>
-
-    <appender name="SECURE_LOGS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/secure-logs/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- rollover daily -->
-            <fileNamePattern>secure-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <!-- each file should be at most 100MB, keep 15 days worth of history, but at most 2GB -->
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>15</maxHistory>
-            <totalSizeCap>2GB</totalSizeCap>
-        </rollingPolicy>
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- Deny log messages not having marker SECURE_LOGS -->
-            <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SECURE_LOGS</marker>
-            </evaluator>
-            <OnMatch>ACCEPT</OnMatch>
-            <OnMismatch>DENY</OnMismatch>
-        </filter>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <!-- Add MDC-keys always as it removes the pattern if the MDC does not contain a value for the key -->
             <includeMdcKeyName>Nav-Consumer-Id</includeMdcKeyName>
             <includeMdcKeyName>Nav-Call-Id</includeMdcKeyName>
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
@@ -55,8 +16,8 @@
     </appender>
 
 <!-- NOM loggers -->
+        <logger name="no.nav.nom.apps.api.orgtilknytning" level="debug" />
     <logger name="no.nav.nom.apps.api.orgtilknytning" level="debug" />
-    <logger name="no.nav.nom.apps.api.common.StartupStateHealthIndicator" level="debug" />
 <!--    <logger name="no.nav.nom" level="debug" />-->
 <!--    <logger name="no.nav.nom.apps.api.common.security" level="trace"/>-->
 <!--    <logger name="no.nav.nom.apps.api.graphql.common.SecurityUtil" level="trace"/>-->
