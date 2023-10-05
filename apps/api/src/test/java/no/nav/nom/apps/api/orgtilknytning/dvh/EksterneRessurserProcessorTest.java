@@ -10,8 +10,8 @@ import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -21,12 +21,10 @@ import java.util.Optional;
 
 import static no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor.UNLEASH_LAG_EVENTS;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-@DisplayName("Tester prossessering av ekstern for endring/legge til orgtilkknytninger på last fra DVH")
+@DisplayName("Tester prosessering av ekstern for endring/legge til orgtilkknytninger på last fra DVH")
 public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTestBase {
     EksterneRessurserProcessor eksterneRessurserProcessor;
     @Mock
@@ -208,7 +206,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "----", "UKJENT_AGRESSO_ID", "ORGENHET", yesterday, tomorrow, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(tomorrow))
         ));
 
@@ -223,7 +221,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(tomorrow))
         ));
 
@@ -238,7 +236,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(today))
         ));
 
@@ -256,7 +254,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, yesterday.minusMonths(1), Optional.of(tomorrow))
         ));
 
@@ -288,7 +286,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", tomorrow, inTwoMonths, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, tomorrow, Optional.of(inTwoMonths))
         ));
 
@@ -319,7 +317,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         DvhEksternRessurs ekstern =
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", tomorrow, inTwoMonths, true);
 
-        when(orgtilknytningStateService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
+        when(orgtilknytningStateService.getByNavIdent(ekstern.navident(), true)).thenReturn(List.of(
             new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, tomorrow, Optional.of(tomorrow.plusDays(10)))
         ));
 

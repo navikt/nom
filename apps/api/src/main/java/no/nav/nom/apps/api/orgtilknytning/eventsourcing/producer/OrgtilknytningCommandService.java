@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 public class OrgtilknytningCommandService {
-
     private final no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer;
 
     public OrgtilknytningCommandService(no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningEventProducer eventProducer) {

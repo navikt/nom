@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository.UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE;
+
 @Service
 public class OrgtilknytningStateService implements OrgtilknytningService {
 
@@ -30,6 +32,12 @@ public class OrgtilknytningStateService implements OrgtilknytningService {
     @Override
     public Collection<OrgtilknytningState> getByNavIdent(String navident) {
         return orgtilknytningStateRepository.findByNavident(navident);
+    }
+
+    @Override
+    public Collection<OrgtilknytningState> getByNavIdent(String navident, boolean hentForEksterneUavhengigAvFeatureFlag) {
+        String flag = UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE; // Lagt inn  for å minne på fjerning av metoden når feature toggle fjernes
+        return orgtilknytningStateRepository.findByNavident(navident, hentForEksterneUavhengigAvFeatureFlag);
     }
 
     @Override

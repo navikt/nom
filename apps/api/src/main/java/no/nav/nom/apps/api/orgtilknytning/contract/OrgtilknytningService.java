@@ -17,6 +17,10 @@ public interface OrgtilknytningService {
         // Use a NOOP-transformer to preserve original use.
         return getByNavidenter(navidenter, Function.identity());
     }
+
+    // Fjernes når UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE fjernes
+    Collection<OrgtilknytningState> getByNavIdent(String navident, boolean hentForEksterneUavhengigAvFeatureFlag);
+
     List<OrgtilknytningState> getByEnhet(String id);
 
     <T> Map<String, Collection<T>> getByNavidenter(Set<String> navidenter, Function<OrgtilknytningState, T> transformer);

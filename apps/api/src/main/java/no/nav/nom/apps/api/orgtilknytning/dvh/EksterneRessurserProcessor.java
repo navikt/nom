@@ -77,7 +77,7 @@ public class EksterneRessurserProcessor {
 
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
 
-        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident());
+        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident(), true);
 
         if (eksisterendeOrgtilknytninger.isEmpty()) {
             log.debug("Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
