@@ -64,11 +64,11 @@
 <!-- Spring Security logger -->
 <!--    <logger name="org.springframework.security" level="trace"/>-->
 
-<!-- GraphQL loggers -->
-<!--    <logger name="graphql" level="trace"/>-->
-<!--    <logger name="org.dataloader" level="trace"/>-->
-<!--    <logger name="org.springframework.graphql" level="trace"/>-->
-<!--    <logger name="org.springframework.boot.autoconfigure.graphql" level="trace"/>-->
+ GraphQL loggers
+    <logger name="graphql" level="debug"/>
+    <logger name="org.dataloader" level="debug"/>
+    <logger name="org.springframework.graphql" level="debug"/>
+    <logger name="org.springframework.boot.autoconfigure.graphql" level="debug"/>
 
     <!-- Kafka loggers -->
     <logger name="org.apache.kafka" level="WARN"/>
