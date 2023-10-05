@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
-import { Checkbox, Tag } from "@navikt/ds-react";
+import { Checkbox } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
-import type { OptionProps } from "react-select";
+import { useState } from "react";
+import type { OptionProps, SingleValueProps } from "react-select";
 import { components } from "react-select";
 
 import type { OrgEnhetSearchFilter } from "~/api/generated/graphql_generated";
@@ -12,6 +13,9 @@ import { ressurserAdminRoute } from "~/reactRouterRoutes";
 const SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 export function OrgEnhetSearch() {
   const search = useSearch({ from: ressurserAdminRoute.id });
+  const [selectedOrgEnhet, setSelectedOrgEnhet] = useState<
+    OrgEnhetSearchResult | undefined
+  >();
   const navigate = useNavigate();
 
   const includeUnderliggendeOrgEnheter = search.includeUnderliggendeOrgEnheter;
@@ -25,23 +29,28 @@ export function OrgEnhetSearch() {
       `}
     >
       <AsyncSearch
-        components={{ Option: OrgenhetOption }}
-        controlShouldRenderValue={false}
-        hideSelectedOptions={false}
+        components={{
+          Option: OrgenhetOption,
+          SingleValue: OrgenhetOptionSingleValue,
+        }}
+        css={css`
+          min-width: 300px;
+        `}
+        key={selectedOrgEnhet?.id}
         loadOptions={(inputValue) => searchOrgEnheter(inputValue, {})}
         noOptionsMessage={({ inputValue }: { inputValue: string }) =>
           inputValue.length < SEARCH_TERM_LOWER_LENGTH_LIMIT
             ? "Du må skrive minst 3 tegn for å søke"
             : `Fant ingen resultater for "${inputValue}"`
         }
-        onChange={(selectedOrgEnhet) =>
-          selectedOrgEnhet
-            ? navigate({
-                search: { ...search, orgEnhet: selectedOrgEnhet.id },
-              })
-            : undefined
-        }
+        onChange={(selectedOrgEnhet) => {
+          navigate({
+            search: { ...search, orgEnhet: selectedOrgEnhet?.id },
+          });
+          setSelectedOrgEnhet(selectedOrgEnhet ?? undefined);
+        }}
         placeholder="Søk etter organisasjonsenheter"
+        value={search.orgEnhet ? selectedOrgEnhet : null}
       />
       <Checkbox
         checked={includeUnderliggendeOrgEnheter}
@@ -60,6 +69,16 @@ export function OrgEnhetSearch() {
   );
 }
 
+const OrgenhetOptionSingleValue = (
+  properties: SingleValueProps<OrgEnhetSearchResult, false>,
+) => {
+  return (
+    <components.SingleValue {...properties}>
+      {properties.data.navn}
+    </components.SingleValue>
+  );
+};
+
 const OrgenhetOption = (
   properties: OptionProps<OrgEnhetSearchResult, false>,
 ) => {
@@ -69,19 +88,12 @@ const OrgenhetOption = (
         css={css`
           display: flex;
           justify-content: space-between;
+          gap: var(--a-spacing-4);
         `}
       >
         <span>{properties.data.navn}</span>
-        <Tag
-          css={css`
-            background: #ebcbd4;
-            border-color: #d4a9b6;
-          `}
-          size="small"
-          variant="info"
-        >
-          {properties.data.orgNiv}
-        </Tag>
+        <b>{properties.data.id}</b>
+        <span>{properties.data.orgNiv}</span>
       </div>
     </components.Option>
   );
@@ -107,14 +119,7 @@ async function performSearch(
     searchOrgEnhet(term: $searchString, filter: $filter) {
       id
       navn
-      gyldigTom
       orgNiv
-      organiseringer {
-      retning
-      orgEnhet {
-        id
-      }
-    }
     }
   }
 `;
@@ -134,12 +139,5 @@ async function performSearch(
 type OrgEnhetSearchResult = {
   id: string;
   navn: string;
-  gyldigTom: string | null;
   orgNiv: string;
-  organiseringer: {
-    retning: string;
-    orgEnhet: {
-      id: string;
-    };
-  }[];
 };
