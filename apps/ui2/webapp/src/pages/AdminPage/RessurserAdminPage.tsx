@@ -121,14 +121,10 @@ export function RessurserAdminPage() {
               </Table.HeaderCell>
               <Table.DataCell>{ressurs.visningsnavn}</Table.DataCell>
               <Table.DataCell>{ressurs.sektor}</Table.DataCell>
-              <Table.DataCell>
-                {ressurs.orgTilknytning.map(
-                  (orgTilknytning) => orgTilknytning.orgEnhet.navn,
-                )}
-              </Table.DataCell>
-              <Table.DataCell>
-                {ressurs.ledere.map((leder) => leder.ressurs.navident)}
-              </Table.DataCell>
+              <OrgTilknytningDataCell
+                orgTilknytninger={ressurs.orgTilknytning}
+              />
+              <LedereDataCell ledere={ressurs.ledere} />
               <Table.DataCell>{ressurs.sluttdato}</Table.DataCell>
             </Table.ExpandableRow>
           ))}
@@ -145,6 +141,79 @@ export function RessurserAdminPage() {
       />
     </div>
   );
+}
+
+function OrgTilknytningDataCell({
+  orgTilknytninger,
+}: {
+  orgTilknytninger: {
+    orgEnhet: {
+      id: string;
+      navn: string;
+    };
+    gyldigFom: string;
+    gyldigTom: string;
+  }[];
+}) {
+  const activeOrgtilknytninger = orgTilknytninger.filter((orgTilknytning) =>
+    isGyldighetsPeriodeActive(
+      orgTilknytning.gyldigFom,
+      orgTilknytning.gyldigTom,
+    ),
+  );
+
+  return (
+    <Table.DataCell>
+      {pluralize(
+        activeOrgtilknytninger.length,
+        activeOrgtilknytninger[0]?.orgEnhet.navn,
+        `${activeOrgtilknytninger[0]?.orgEnhet.navn} (+${
+          activeOrgtilknytninger.length - 1
+        })`,
+      )}
+    </Table.DataCell>
+  );
+}
+
+function LedereDataCell({
+  ledere,
+}: {
+  ledere: {
+    ressurs: {
+      navident: string;
+      visningsnavn: string;
+    };
+    gyldigFom: string;
+    gyldigTom: string;
+  }[];
+}) {
+  const activeLedere = ledere.filter((leder) =>
+    isGyldighetsPeriodeActive(leder.gyldigFom, leder.gyldigTom),
+  );
+
+  return (
+    <Table.DataCell>
+      {pluralize(
+        activeLedere.length,
+        `${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`,
+        `${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs
+          .navident}) (+${activeLedere.length - 1})`,
+      )}
+    </Table.DataCell>
+  );
+}
+
+function pluralize(
+  numberElements: number,
+  singleForm?: string,
+  pluralForm?: string,
+) {
+  if (numberElements === 1) {
+    return singleForm;
+  }
+  if (numberElements > 1) {
+    return pluralForm;
+  }
 }
 
 function RessursFilter() {
@@ -238,13 +307,20 @@ function orgEnhetMatches(
   underLiggendeOrgenheter: string[],
 ) {
   const orgEnhetMatch = filter.orgEnhet
-    ? ressurs.orgTilknytning.some((orgTilknytning) => {
-        const orgEnhetMatch = orgTilknytning.orgEnhet.id === filter.orgEnhet;
-        const underLiggendeMatch = filter.includeUnderliggendeOrgEnheter
-          ? underLiggendeOrgenheter.includes(orgTilknytning.orgEnhet.id)
-          : false;
-        return orgEnhetMatch || underLiggendeMatch;
-      })
+    ? ressurs.orgTilknytning
+        .filter((orgTilknytning) =>
+          isGyldighetsPeriodeActive(
+            orgTilknytning.gyldigFom,
+            orgTilknytning.gyldigTom,
+          ),
+        )
+        .some((orgTilknytning) => {
+          const orgEnhetMatch = orgTilknytning.orgEnhet.id === filter.orgEnhet;
+          const underLiggendeMatch = filter.includeUnderliggendeOrgEnheter
+            ? underLiggendeOrgenheter.includes(orgTilknytning.orgEnhet.id)
+            : false;
+          return orgEnhetMatch || underLiggendeMatch;
+        })
     : true;
 
   const underliggendeOrgEnhetMatch =

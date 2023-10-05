@@ -27,11 +27,16 @@ export const getAlleRessurser = {
                                 id
                                 navn
                             }
+                            gyldigFom
+                            gyldigTom
                         }
                         ledere {
                             ressurs {
                                 navident
+                                visningsnavn
                             }
+                            gyldigFom
+                            gyldigTom
                         }
                         visningsnavn
                         sektor
@@ -78,7 +83,10 @@ export type RessursFields = {
   ledere: {
     ressurs: {
       navident: string;
+      visningsnavn: string;
     };
+    gyldigFom: string;
+    gyldigTom: string;
   }[];
   visningsnavn: string;
   sektor: string[];
