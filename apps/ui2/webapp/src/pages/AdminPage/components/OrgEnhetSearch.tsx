@@ -7,7 +7,10 @@ import type { OptionProps, SingleValueProps } from "react-select";
 import { components } from "react-select";
 
 import type { OrgEnhetSearchFilter } from "~/api/generated/graphql_generated";
-import { AsyncSearch } from "~/components/select/CustomSelectComponents";
+import {
+  AsyncSearch,
+  SelectLayoutWrapper,
+} from "~/components/select/CustomSelectComponents";
 import { ressurserAdminRoute } from "~/reactRouterRoutes";
 
 const SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
@@ -26,32 +29,39 @@ export function OrgEnhetSearch() {
         display: flex;
         flex-direction: row;
         gap: var(--a-spacing-4);
+        align-items: end;
       `}
     >
-      <AsyncSearch
-        components={{
-          Option: OrgenhetOption,
-          SingleValue: OrgenhetOptionSingleValue,
-        }}
-        css={css`
-          min-width: 300px;
-        `}
-        key={selectedOrgEnhet?.id}
-        loadOptions={(inputValue) => searchOrgEnheter(inputValue, {})}
-        noOptionsMessage={({ inputValue }: { inputValue: string }) =>
-          inputValue.length < SEARCH_TERM_LOWER_LENGTH_LIMIT
-            ? "Du må skrive minst 3 tegn for å søke"
-            : `Fant ingen resultater for "${inputValue}"`
-        }
-        onChange={(selectedOrgEnhet) => {
-          navigate({
-            search: { ...search, orgEnhet: selectedOrgEnhet?.id },
-          });
-          setSelectedOrgEnhet(selectedOrgEnhet ?? undefined);
-        }}
-        placeholder="Søk etter organisasjonsenheter"
-        value={search.orgEnhet ? selectedOrgEnhet : null}
-      />
+      <SelectLayoutWrapper
+        htmlFor="Organisasjonsenhet"
+        label="Organisasjonsenhet"
+      >
+        <AsyncSearch
+          components={{
+            Option: OrgenhetOption,
+            SingleValue: OrgenhetOptionSingleValue,
+          }}
+          css={css`
+            min-width: 300px;
+          `}
+          inputId="Organisasjonsenhet"
+          key={selectedOrgEnhet?.id}
+          loadOptions={(inputValue) => searchOrgEnheter(inputValue, {})}
+          noOptionsMessage={({ inputValue }: { inputValue: string }) =>
+            inputValue.length < SEARCH_TERM_LOWER_LENGTH_LIMIT
+              ? "Du må skrive minst 3 tegn for å søke"
+              : `Fant ingen resultater for "${inputValue}"`
+          }
+          onChange={(selectedOrgEnhet) => {
+            navigate({
+              search: { ...search, orgEnhet: selectedOrgEnhet?.id },
+            });
+            setSelectedOrgEnhet(selectedOrgEnhet ?? undefined);
+          }}
+          placeholder="Søk etter organisasjonsenheter"
+          value={search.orgEnhet ? selectedOrgEnhet : null}
+        />
+      </SelectLayoutWrapper>
       <Checkbox
         checked={includeUnderliggendeOrgEnheter}
         onChange={() =>
@@ -63,7 +73,7 @@ export function OrgEnhetSearch() {
           })
         }
       >
-        Inkluder underliggende orgenheter
+        <small>Inkluder underliggende orgenheter</small>
       </Checkbox>
     </div>
   );

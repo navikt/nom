@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { BodyShort, ErrorMessage, Label } from "@navikt/ds-react";
+import { BodyShort, ErrorMessage, HelpText, Label } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
 import type {
@@ -116,26 +116,44 @@ function CustomMenuList<
 export function SelectLayoutWrapper({
   label,
   children,
-  description,
   htmlFor,
+  helpText,
   error,
+  description,
 }: {
   label: string;
-  htmlFor: string;
-  description?: string;
   children: ReactNode;
+  htmlFor: string;
+  helpText?: string;
   error?: FieldError;
+  description?: string;
 }) {
   return (
     <div
       className="navds-form-field"
-      css={css`
-        display: flex;
-        flex-direction: column;
-        gap: var(--a-spacing-2);
-      `}
+      css={[
+        css`
+          display: flex;
+          flex-direction: column;
+          gap: var(--a-spacing-2);
+        `,
+        error && errorCss,
+      ]}
     >
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <Label
+        css={css`
+          display: flex;
+          gap: var(--a-spacing-2);
+        `}
+        htmlFor={htmlFor}
+      >
+        {label}
+        {helpText ? (
+          <HelpText strategy="fixed" title="Mer informasjon">
+            {helpText}
+          </HelpText>
+        ) : undefined}
+      </Label>
       {description && (
         <BodyShort className="navds-form-field__description">
           {description}
@@ -160,9 +178,16 @@ export function BasicSelect<
       escapeClearsValue
       isClearable
       isSearchable
-      menuPortalTarget={document.body}
+      menuPosition="fixed"
       placeholder={properties.placeholder ?? ""}
       styles={commonSelectOverwriteStyles}
     />
   );
 }
+
+const errorCss = css`
+  > div {
+    border-color: var(--a-border-danger);
+    box-shadow: 0 0 0 1px var(--a-border-danger);
+  }
+`;

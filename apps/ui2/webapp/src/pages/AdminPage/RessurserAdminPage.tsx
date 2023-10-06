@@ -14,11 +14,16 @@ import { useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 import { useQuery } from "react-query";
 
+import { Sektor } from "~/api/generated/graphql_generated";
 import type { RessursFields } from "~/api/react-query-endpoints";
 import {
   getAlleRessurser,
   getUnderliggendeOrgenheter,
 } from "~/api/react-query-endpoints";
+import {
+  BasicSelect,
+  SelectLayoutWrapper,
+} from "~/components/select/CustomSelectComponents";
 import { OrgEnhetSearch } from "~/pages/AdminPage/components/OrgEnhetSearch";
 import { ressurserAdminRoute } from "~/reactRouterRoutes";
 import { isGyldighetsPeriodeActive } from "~/utils";
@@ -54,6 +59,8 @@ export function RessurserAdminPage() {
         `}
       >
         <Loader size="large" />
+        <RessursFilter />
+        <FilterChips />
         <span>Laster ressurser ...</span>
       </div>
     );
@@ -93,6 +100,9 @@ export function RessurserAdminPage() {
       css={css`
         padding: 2rem;
         background: white;
+        display: flex;
+        flex-direction: column;
+        gap: var(--a-spacing-4);
       `}
     >
       <RessursFilter />
@@ -224,9 +234,12 @@ function RessursFilter() {
     <div
       css={css`
         display: flex;
+        gap: var(--a-spacing-4);
+        align-items: end;
       `}
     >
       <OrgEnhetSearch />
+      <SektorSelect />
       <Checkbox
         checked={ressursFilterValues.includeInactive}
         onChange={() =>
@@ -238,9 +251,41 @@ function RessursFilter() {
           })
         }
       >
-        Inkluder inaktive ressurser
+        <small>Inkluder inaktive ressurser</small>
       </Checkbox>
     </div>
+  );
+}
+
+function SektorSelect() {
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const navigate = useNavigate();
+
+  const options = Object.entries(Sektor).map((entry) => ({
+    label: entry[1],
+    value: entry[1],
+  }));
+
+  const selectedOption = ressursFilterValues.sektor
+    ? options.find((option) => option.value === ressursFilterValues.sektor)
+    : undefined;
+
+  return (
+    <SelectLayoutWrapper htmlFor="Sektor" label="Sektor">
+      <BasicSelect
+        css={css`
+          min-width: 200px;
+        `}
+        inputId="Sektor"
+        onChange={(option) =>
+          navigate({
+            search: { ...ressursFilterValues, sektor: option?.value },
+          })
+        }
+        options={options}
+        value={selectedOption ?? null}
+      />
+    </SelectLayoutWrapper>
   );
 }
 
@@ -334,6 +379,7 @@ function orgEnhetMatches(
 
 export type RessursFilterValues = {
   orgEnhet?: string;
+  sektor?: string;
   includeUnderliggendeOrgEnheter?: boolean;
   includeInactive?: boolean;
 };
