@@ -74,7 +74,6 @@ public class OrgEnhetController {
         description = "Henter ut id for alle underliggende organisasjonsenheter",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable("parentId") String parentId) {
         return ResponseEntity.ok(orgEnhetDvhService.findAllUnderliggendeOrgenheter(parentId));
 
