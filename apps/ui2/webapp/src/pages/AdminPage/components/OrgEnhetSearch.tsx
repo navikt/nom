@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Checkbox } from "@navikt/ds-react";
+import { BodyShort, Checkbox } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import { useState } from "react";
@@ -73,7 +73,7 @@ export function OrgEnhetSearch() {
           })
         }
       >
-        <small>Inkluder underliggende orgenheter</small>
+        <BodyShort size="small">Inkluder underliggende orgenheter</BodyShort>
       </Checkbox>
     </div>
   );

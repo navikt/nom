@@ -90,5 +90,6 @@ export type RessursFields = {
   }[];
   visningsnavn: string;
   sektor: string[];
+  startdato: string;
   sluttdato: string;
 };

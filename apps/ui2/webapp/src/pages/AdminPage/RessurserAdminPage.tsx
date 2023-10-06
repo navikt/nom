@@ -3,14 +3,18 @@ import "react-json-view-lite/dist/index.css";
 import { css } from "@emotion/react";
 import {
   Alert,
+  BodyShort,
   Checkbox,
   Chips,
+  DatePicker,
   Loader,
   Pagination,
   Table,
+  useDatepicker,
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { isAfter, isBefore, maxTime } from "date-fns";
+import { useEffect, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 import { useQuery } from "react-query";
 
@@ -26,7 +30,7 @@ import {
 } from "~/components/select/CustomSelectComponents";
 import { OrgEnhetSearch } from "~/pages/AdminPage/components/OrgEnhetSearch";
 import { ressurserAdminRoute } from "~/reactRouterRoutes";
-import { isGyldighetsPeriodeActive } from "~/utils";
+import { formatDateWithoutTimezone, isGyldighetsPeriodeActive } from "~/utils";
 
 export function RessurserAdminPage() {
   const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
@@ -59,8 +63,6 @@ export function RessurserAdminPage() {
         `}
       >
         <Loader size="large" />
-        <RessursFilter />
-        <FilterChips />
         <span>Laster ressurser ...</span>
       </div>
     );
@@ -117,6 +119,7 @@ export function RessurserAdminPage() {
             <Table.ColumnHeader scope="col">Sektor</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Org Tilknytning</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Ledere</Table.ColumnHeader>
+            <Table.ColumnHeader scope="col">Startdato</Table.ColumnHeader>
             <Table.ColumnHeader scope="col">Sluttdato</Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
@@ -135,6 +138,7 @@ export function RessurserAdminPage() {
                 orgTilknytninger={ressurs.orgTilknytning}
               />
               <LedereDataCell ledere={ressurs.ledere} />
+              <Table.DataCell>{ressurs.startdato}</Table.DataCell>
               <Table.DataCell>{ressurs.sluttdato}</Table.DataCell>
             </Table.ExpandableRow>
           ))}
@@ -240,6 +244,8 @@ function RessursFilter() {
     >
       <OrgEnhetSearch />
       <SektorSelect />
+      <DateSelect filterKey="startDato" label="Start dato" />
+      <DateSelect filterKey="sluttDato" label="Slutt dato" />
       <Checkbox
         checked={ressursFilterValues.includeInactive}
         onChange={() =>
@@ -251,9 +257,45 @@ function RessursFilter() {
           })
         }
       >
-        <small>Inkluder inaktive ressurser</small>
+        <BodyShort size="small">Inkluder inaktive ressurser</BodyShort>
       </Checkbox>
     </div>
+  );
+}
+
+function DateSelect({
+  label,
+  filterKey,
+}: {
+  label: string;
+  filterKey: "startDato" | "sluttDato";
+}) {
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const navigate = useNavigate();
+
+  const defaultValue = ressursFilterValues[filterKey] as string;
+
+  const { datepickerProps, inputProps, setSelected } = useDatepicker({
+    fromDate: new Date("Aug 23 2019"),
+    defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
+    onDateChange: (date) =>
+      navigate({
+        search: {
+          ...ressursFilterValues,
+          [filterKey]: date ? formatDateWithoutTimezone(date) : undefined,
+        },
+      }),
+  });
+
+  useEffect(() => {
+    const selectedValue = ressursFilterValues[filterKey];
+    setSelected(selectedValue ? new Date(selectedValue) : undefined);
+  }, [ressursFilterValues[filterKey]]);
+
+  return (
+    <DatePicker {...datepickerProps}>
+      <DatePicker.Input {...inputProps} label={label} />
+    </DatePicker>
   );
 }
 
@@ -332,11 +374,14 @@ function applyFilter(
 ) {
   return (
     orgEnhetMatches(ressurs, filter, underLiggendeOrgenheter) &&
-    gyldighetsPeriodeMatches(ressurs, filter)
+    sektorMatches(ressurs, filter) &&
+    includeInactiveMatches(ressurs, filter) &&
+    startDatoMatches(ressurs, filter) &&
+    sluttDatoMatches(ressurs, filter)
   );
 }
 
-function gyldighetsPeriodeMatches(
+function includeInactiveMatches(
   ressurs: RessursFields,
   filter: RessursFilterValues,
 ) {
@@ -344,6 +389,25 @@ function gyldighetsPeriodeMatches(
     filter.includeInactive ||
     isGyldighetsPeriodeActive(undefined, ressurs.sluttdato)
   );
+}
+
+function startDatoMatches(ressurs: RessursFields, filter: RessursFilterValues) {
+  return filter.startDato
+    ? isAfter(new Date(ressurs.startdato), new Date(filter.startDato))
+    : true;
+}
+
+function sluttDatoMatches(ressurs: RessursFields, filter: RessursFilterValues) {
+  return filter.sluttDato
+    ? isBefore(
+        new Date(ressurs.sluttdato ?? maxTime),
+        new Date(filter.sluttDato),
+      )
+    : true;
+}
+
+function sektorMatches(ressurs: RessursFields, filter: RessursFilterValues) {
+  return filter.sektor ? ressurs.sektor.includes(filter.sektor) : true;
 }
 
 function orgEnhetMatches(
@@ -382,4 +446,6 @@ export type RessursFilterValues = {
   sektor?: string;
   includeUnderliggendeOrgEnheter?: boolean;
   includeInactive?: boolean;
+  startDato?: string;
+  sluttDato?: string;
 };
