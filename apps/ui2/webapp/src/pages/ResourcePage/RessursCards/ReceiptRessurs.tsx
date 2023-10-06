@@ -14,9 +14,8 @@ export function ReceiptRessurs({
 }: {
   ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
 }) {
-  const orgEnhet = ressurs.orgTilknytning.find(
-    (kobling) => kobling.erDagligOppfolging,
-  )?.orgEnhet;
+  // Presently there will only be one orgTilknytning after creation.
+  const orgEnhet = ressurs.orgTilknytning[0]?.orgEnhet;
   const leder = orgEnhet?.leder[0]?.ressurs;
 
   return (
