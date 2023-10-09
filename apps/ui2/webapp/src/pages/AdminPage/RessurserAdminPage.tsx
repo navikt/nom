@@ -1,6 +1,7 @@
 import "react-json-view-lite/dist/index.css";
 
 import { css } from "@emotion/react";
+import type { SortState } from "@navikt/ds-react";
 import {
   Alert,
   BodyShort,
@@ -15,6 +16,7 @@ import {
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { isAfter, isBefore, maxTime } from "date-fns";
+import sortBy from "lodash/sortBy";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
@@ -35,6 +37,11 @@ import { ressurserAdminRoute } from "~/reactRouterRoutes";
 import { formatDateWithoutTimezone, isGyldighetsPeriodeActive } from "~/utils";
 
 export function RessurserAdminPage() {
+  const [sort, setSort] = useState<SortState | undefined>({
+    orderBy: "navident",
+    direction: "ascending",
+  });
+
   const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
   // Using react query instead of apollo because it runs  more smoothly
   const alleRessurser = useQuery<RessursFields[], unknown>({
@@ -53,6 +60,25 @@ export function RessurserAdminPage() {
   });
 
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [ressursFilterValues]);
+
+  const handleSort = (sortKey: string | undefined) => {
+    if (sortKey) {
+      setSort({
+        orderBy: sortKey,
+        direction:
+          sort && sortKey === sort.orderBy && sort.direction === "ascending"
+            ? "descending"
+            : "ascending",
+      });
+    } else {
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      setSort(undefined);
+    }
+  };
 
   if (alleRessurser.isLoading) {
     return (
@@ -94,7 +120,11 @@ export function RessurserAdminPage() {
     ),
   );
 
-  const ressurserToDisplay = filteredRessurser.slice(
+  const sortedRessurser = sort
+    ? sortRessurser({ ressurser: filteredRessurser, sort })
+    : filteredRessurser;
+
+  const ressurserToDisplay = sortedRessurser.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage,
   );
@@ -112,17 +142,31 @@ export function RessurserAdminPage() {
       <RessursFilter />
       <FilterChips />
       <b>Treff: {filteredRessurser.length}</b>
-      <Table>
+      <Table onSortChange={(sortKey) => handleSort(sortKey)} sort={sort}>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell />
-            <Table.ColumnHeader scope="col">Navident</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Visningsnavn</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Sektor</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Org Tilknytning</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Ledere</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Startdato</Table.ColumnHeader>
-            <Table.ColumnHeader scope="col">Sluttdato</Table.ColumnHeader>
+            <Table.DataCell />
+            <Table.ColumnHeader scope="col" sortKey="navident" sortable>
+              Navident
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="visningsnavn" sortable>
+              Visningsnavn
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="sektor" sortable>
+              Sektor
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="orgTilknytning" sortable>
+              Org Tilknytning
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="ledere" sortable>
+              Ledere
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="startdato" sortable>
+              Startdato
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
+              Sluttdato
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -484,6 +528,49 @@ function orgEnhetMatches(
     );
 
   return orgEnhetMatch || underliggendeOrgEnhetMatch;
+}
+
+function sortRessurser({
+  ressurser,
+  sort,
+}: {
+  ressurser: RessursFields[];
+  sort: SortState;
+}) {
+  const { orderBy, direction } = sort;
+
+  const sortedMembersAscending = sortRessurserAscending(ressurser, orderBy);
+
+  const reversed = direction === "descending";
+
+  return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
+}
+
+function sortRessurserAscending(ressurser: RessursFields[], orderBy: string) {
+  if (
+    ["navident", "visningsnavn", "startdato", "sluttdato"].includes(orderBy)
+  ) {
+    return sortBy(ressurser, orderBy);
+  }
+
+  if (orderBy === "sektor") {
+    return sortBy(ressurser, (ressurs) => ressurs.sektor[0]);
+  }
+
+  if (orderBy === "orgTilknytning") {
+    return sortBy(
+      ressurser,
+      (ressurs) => ressurs.orgTilknytning[0]?.orgEnhet.navn,
+    );
+  }
+
+  if (orderBy === "ledere") {
+    return sortBy(
+      ressurser,
+      (ressurs) => ressurs.ledere[0]?.ressurs.visningsnavn,
+    );
+  }
+  return ressurser;
 }
 
 export type RessursFilterValues = {
