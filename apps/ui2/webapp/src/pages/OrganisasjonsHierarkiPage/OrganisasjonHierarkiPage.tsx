@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
 import { useParams } from "@tanstack/react-router";
-import partition from "lodash/partition";
 import sortBy from "lodash/sortBy";
 import uniqBy from "lodash/uniqBy";
 import { Fragment } from "react";
@@ -10,39 +9,13 @@ import React from "react";
 import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
+import { HierarkiFrontPage } from "~/pages/OrganisasjonsHierarkiPage/components/HierarkiFrontPage";
 import { orgRoute } from "~/reactRouterRoutes";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
-import {
-  DynamicColumnContainer,
-  OrgEnhetView,
-  OverEnheterDivider,
-  ResourceLink,
-} from "./components/CardViews";
-import { ValgtEnhet } from "./components/ValgtEnhet";
-
-function sortUnderenheterForHierarchyFrontPage(
-  orgHierarchy: HentHierarkiQuery,
-) {
-  const underEnheter = (orgHierarchy?.enhetsKoblinger?.underenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet,
-  );
-
-  const collator = new Intl.Collator("no", { sensitivity: "base" });
-  underEnheter.sort((a, b) => collator.compare(a.navn, b.navn));
-
-  if (orgHierarchy?.enhet?.navn !== "NAV") {
-    return underEnheter;
-  }
-
-  const [direktoratet, linjene] = partition(
-    underEnheter,
-    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet",
-  );
-
-  return [...direktoratet, ...linjene];
-}
+import { OrgEnhetView, OverEnheterDivider } from "./components/CardViews";
+import { ValgtOrgEnhet } from "./components/ValgtOrgEnhet";
 
 type OverEnhet = NonNullable<
   NonNullable<HentHierarkiQuery["enhetsKoblinger"]>["overenheter"]
@@ -69,15 +42,18 @@ export function getOverEnheterBackToRootRecursively(
 function OrganisasjonHierarkiPageInner({
   hierarchyEntry,
 }: {
-  hierarchyEntry: NonNullable<HentHierarkiQuery>;
+  hierarchyEntry: HentHierarkiQuery;
 }) {
   const firstOverEnhet = (
     hierarchyEntry.enhetsKoblinger?.overenheter ?? []
   ).map(({ organisasjonsenhet }) => organisasjonsenhet)[0];
+
   const overEnheter = firstOverEnhet
     ? getOverEnheterBackToRootRecursively(firstOverEnhet)
     : [];
-  const underEnheter = sortUnderenheterForHierarchyFrontPage(hierarchyEntry);
+  const underEnheter = (
+    hierarchyEntry?.enhetsKoblinger?.underenheter ?? []
+  ).map(({ organisasjonsenhet }) => organisasjonsenhet);
 
   const valgtEnhet = hierarchyEntry.enhet;
 
@@ -86,6 +62,11 @@ function OrganisasjonHierarkiPageInner({
       isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
     )
     .map(({ ressurs }) => ressurs);
+
+  const sortedRessurser = sortBy(
+    uniqBy(ressurser, (ressurs) => ressurs.navident),
+    "visningsnavn",
+  );
 
   return (
     <div
@@ -101,39 +82,61 @@ function OrganisasjonHierarkiPageInner({
         </Fragment>
       ))}
 
-      <>
-        {valgtEnhet && <ValgtEnhet valgtEnhet={valgtEnhet} />}
-        <DynamicColumnContainer
-          shouldUseDynamicSecondColumn={underEnheter.length > 5}
-        >
-          {underEnheter.map((underEnhet, index) => (
-            <Fragment key={underEnhet.id}>
-              {valgtEnhet?.navn === "NAV" && index === 0 && (
-                <Heading size="small">Direktoratet</Heading>
-              )}
-              {valgtEnhet?.navn === "NAV" && index === 1 && (
-                <Heading size="small">Linjene</Heading>
-              )}
-              <OrgEnhetView autoFocus={index === 0} orgEnhet={underEnhet} />
-            </Fragment>
-          ))}
-        </DynamicColumnContainer>
+      {valgtEnhet && (
+        <>
+          <ValgtOrgEnhet ressurser={sortedRessurser} valgtEnhet={valgtEnhet} />
+          {underEnheter.length > 0 && (
+            <UnderEnheterGraphic valgtEnhet={valgtEnhet} />
+          )}
+        </>
+      )}
 
-        <DynamicColumnContainer
-          shouldUseDynamicSecondColumn={ressurser.length > 5}
-        >
-          {sortBy(
-            uniqBy(ressurser, (ressurs) => ressurs.navident),
-            "visningsnavn",
-          ).map((ressurs, index) => (
-            <ResourceLink
-              autoFocus={index === 0}
-              key={ressurs.navident}
-              ressurs={ressurs}
-            />
-          ))}
-        </DynamicColumnContainer>
-      </>
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--a-spacing-4);
+          margin-left: var(--a-spacing-24);
+        `}
+      >
+        {underEnheter.map((underEnhet, index) => (
+          <OrgEnhetView
+            autoFocus={index === 0}
+            key={underEnhet.id}
+            orgEnhet={underEnhet}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function UnderEnheterGraphic({
+  valgtEnhet,
+}: {
+  valgtEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
+}) {
+  return (
+    <div
+      css={css`
+        display: flex;
+        align-items: flex-end;
+        gap: var(--a-spacing-2);
+        margin-left: 65px;
+        font-weight: var(--a-font-weight-bold);
+        margin-bottom: var(--a-spacing-2);
+      `}
+    >
+      <div
+        css={css`
+          width: 24px;
+          height: 40px;
+          margin-bottom: 10px;
+          border-left: 6px solid var(--nom-primary);
+          border-bottom: 6px solid var(--nom-primary);
+        `}
+      />
+      Organisasjonsenheter under {valgtEnhet.navn}
     </div>
   );
 }
@@ -143,15 +146,22 @@ export function OrganisasjonHierarkiPage() {
 
   const hentHierarkiQuery = useHentHierarkiQuery({
     variables: {
-      id: id ?? "",
+      id: id,
     },
+    fetchPolicy: "cache-first",
+    returnPartialData: true,
   });
 
   let innerContent;
   if (hentHierarkiQuery.data) {
-    innerContent = (
-      <OrganisasjonHierarkiPageInner hierarchyEntry={hentHierarkiQuery.data} />
-    );
+    innerContent =
+      hentHierarkiQuery.data.enhet?.navn === "NAV" ? (
+        <HierarkiFrontPage hierarchyEntry={hentHierarkiQuery.data} />
+      ) : (
+        <OrganisasjonHierarkiPageInner
+          hierarchyEntry={hentHierarkiQuery.data}
+        />
+      );
   } else if (hentHierarkiQuery.loading) {
     innerContent = (
       <div

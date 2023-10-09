@@ -114,35 +114,18 @@ function SelectedResource({ ressurs }: { ressurs: Ressurs }) {
     <div
       css={css`
         display: flex;
+        gap: 1rem;
+        border-radius: 5px;
+        border: 1px solid var(--a-gray-400);
+        align-items: center;
+        width: 100%;
+        height: 40px;
       `}
     >
-      <div>
-        <OverEnheterDivider />
-        <div
-          css={css`
-            margin-left: 13px;
-            background-color: var(--a-lightblue-800);
-            width: 13px;
-            height: 2px;
-          `}
-        />
-      </div>
-      <div
-        css={css`
-          display: flex;
-          gap: 1rem;
-          border-radius: 5px;
-          border: 1px solid var(--a-gray-400);
-          align-items: center;
-          width: 100%;
-          height: 40px;
-        `}
-      >
-        <VerticalEdge>
-          <PersonFillIcon color="white" />
-        </VerticalEdge>
-        <Label as="span">{ressurs.visningsnavn}</Label>
-      </div>
+      <VerticalEdge>
+        <PersonFillIcon color="white" />
+      </VerticalEdge>
+      <Label as="span">{ressurs.visningsnavn}</Label>
     </div>
   );
 }

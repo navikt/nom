@@ -1,9 +1,9 @@
 import { css } from "@emotion/react";
-import { ChevronRightIcon, PersonFillIcon } from "@navikt/aksel-icons";
-import { Heading } from "@navikt/ds-react";
+import { ChevronRightIcon } from "@navikt/aksel-icons";
+import { BodyShort, Heading } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import type {
   HentHierarkiQuery,
@@ -17,36 +17,6 @@ import { UserImage } from "~/components/UserImage";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 
-export function DynamicColumnContainer({
-  children,
-  shouldUseDynamicSecondColumn,
-}: {
-  children: ReactNode;
-  shouldUseDynamicSecondColumn: boolean;
-}) {
-  return (
-    <div
-      css={css(
-        css`
-          display: grid;
-          grid-template-rows: min-content;
-          column-gap: 1rem;
-          row-gap: 1rem;
-          grid-template-columns: 1fr;
-        `,
-        shouldUseDynamicSecondColumn &&
-          css`
-            @media (width >= 60rem) {
-              grid-template-columns: 1fr 1fr;
-            }
-          `,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
 export function OrgEnhetView({
   orgEnhet,
   autoFocus = false,
@@ -54,11 +24,6 @@ export function OrgEnhetView({
   orgEnhet: OrgenhetStandaloneWithLederFragment;
   autoFocus?: boolean;
 }) {
-  const fornavnAndEtternavnForImg =
-    orgEnhet.leder[0]?.ressurs.visningsnavn ?? "";
-
-  const navidentForImg = orgEnhet.leder[0]?.ressurs.navident;
-
   // Optimistically fetch orgEnhet this view links to.
   useHentHierarkiQuery({
     variables: {
@@ -87,23 +52,22 @@ export function OrgEnhetView({
       to={orgRoute.to}
     >
       <UnitContainerLink>
-        <VerticalEdge>
-          <img alt={"Enhet"} src={building} />
+        <VerticalEdge size="large">
+          <img alt={"orgenhet"} src={building} />
         </VerticalEdge>
         <div
           css={css`
-            padding: 1rem 0;
+            margin: var(--a-spacing-3) 0;
           `}
         >
-          <Heading level={"2"} size="medium">
+          <Heading level="2" size="small">
             {orgEnhet.navn}
           </Heading>
-          Leder:{" "}
-          <span>
+          <BodyShort size="small">
+            Leder:{" "}
             {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
-          </span>
+          </BodyShort>
         </div>
-        <UserImage navident={navidentForImg} navn={fornavnAndEtternavnForImg} />
       </UnitContainerLink>
     </ReactRouterLink>
   );
@@ -113,47 +77,34 @@ type HierarkiQueryRessurs = NonNullable<
   NonNullable<NonNullable<HentHierarkiQuery>["ressursKoblinger"]>["koblinger"]
 >[0]["ressurs"];
 
-export function ResourceLink({
-  ressurs,
-  autoFocus = false,
-}: {
-  ressurs: HierarkiQueryRessurs;
-  autoFocus?: boolean;
-}) {
-  const reference = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    // Give autofocus on initial load.
-    // This way the user can continue navigation from where they were before page change.
-    if (autoFocus) {
-      reference.current?.focus();
-    }
-  }, []);
+export function ResourceLink({ ressurs }: { ressurs: HierarkiQueryRessurs }) {
   return (
     <ReactRouterLink
       css={css`
         text-decoration: none;
         color: var(--a-gray-900);
+
+        > div {
+          padding: var(--a-spacing-2);
+        }
       `}
       params={{ id: ressurs.navident }}
-      ref={reference}
       to={ressursRoute.to}
     >
       <UnitContainerLink>
-        <VerticalEdge>
-          <PersonFillIcon color="white" />
-        </VerticalEdge>
-        <Heading
-          css={css`
-            padding: 1rem 0;
-          `}
-          level={"2"}
-          size="medium"
-        >
-          {`${ressurs.visningsnavn ?? "uten navn"} ${
-            ressurs.sektor.includes(Sektor.Ekstern) ? "(Ekstern)" : ""
-          }`}
-        </Heading>
-        <div />
+        <UserImage
+          navident={ressurs.navident}
+          navn={ressurs.visningsnavn ?? ""}
+          size="55px"
+        />
+        <div>
+          <Heading level="2" size="small">
+            {ressurs.visningsnavn ?? "uten navn"}
+          </Heading>
+          <span>
+            {ressurs.sektor.includes(Sektor.Ekstern) ? "(Ekstern)" : ""}
+          </span>
+        </div>
       </UnitContainerLink>
     </ReactRouterLink>
   );
@@ -169,7 +120,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
         border: 1px solid var(--a-gray-400);
         background-color: var(--a-white);
         display: grid;
-        grid-template-columns: min-content 1fr max-content 40px;
+        grid-template-columns: min-content 1fr 40px;
         align-items: center;
         gap: 1rem;
         cursor: pointer;
@@ -180,20 +131,30 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
       `}
     >
       {children}
-      <ChevronRightIcon height="2rem" width="2rem" />
+      <ChevronRightIcon fontSize="2rem" />
     </div>
   );
 }
 
-export function VerticalEdge({ children }: { children: ReactNode }) {
+export function VerticalEdge({
+  size = "medium",
+  children,
+}: {
+  size?: "large" | "medium";
+  children: ReactNode;
+}) {
   return (
     <div
+      // Using outline with a border behind creates some weird lines showing through.
+      // A hack around that to use 2px for the outline and -1 for the offset.
       css={css`
+        outline: 2px solid var(--a-lightblue-800);
+        outline-offset: -1px;
         background-color: var(--a-lightblue-800);
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 24px;
+        width: ${size === "large" ? 42 : 24}px;
         border-radius: 4px 0 0 4px;
         height: 100%;
       `}
@@ -220,10 +181,10 @@ export function OverEnheterDivider() {
   return (
     <div
       css={css`
-        margin-left: 13px;
+        margin-left: 65px;
         height: var(--a-spacing-4);
         background-color: var(--a-lightblue-800);
-        width: 2px;
+        width: 6px;
       `}
     />
   );
