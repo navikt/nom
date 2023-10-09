@@ -10,10 +10,12 @@ import {
   Loader,
   Pagination,
   Table,
+  Tooltip,
   useDatepicker,
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { isAfter, isBefore, maxTime } from "date-fns";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 import { useQuery } from "react-query";
@@ -176,15 +178,33 @@ function OrgTilknytningDataCell({
     ),
   );
 
+  const pluralDisplay = (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: row;
+        gap: var(--a-spacing-2);
+      `}
+    >
+      {`${activeOrgtilknytninger[0]?.orgEnhet.navn}`}
+      <Tooltip
+        content={activeOrgtilknytninger
+          .slice(1)
+          .map((orgTilknytning) => `${orgTilknytning.orgEnhet.navn}`)
+          .join(", ")}
+      >
+        <b>{`(+${activeOrgtilknytninger.length - 1})`}</b>
+      </Tooltip>
+    </div>
+  );
+
   return (
     <Table.DataCell>
-      {pluralize(
-        activeOrgtilknytninger.length,
-        activeOrgtilknytninger[0]?.orgEnhet.navn,
-        `${activeOrgtilknytninger[0]?.orgEnhet.navn} (+${
-          activeOrgtilknytninger.length - 1
-        })`,
-      )}
+      <Pluralize
+        numberOfElements={activeOrgtilknytninger.length}
+        pluralForm={pluralDisplay}
+        singleForm={activeOrgtilknytninger[0]?.orgEnhet.navn}
+      />
     </Table.DataCell>
   );
 }
@@ -205,27 +225,53 @@ function LedereDataCell({
     isGyldighetsPeriodeActive(leder.gyldigFom, leder.gyldigTom),
   );
 
+  const pluralDisplay = (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: row;
+        gap: var(--a-spacing-2);
+      `}
+    >
+      {`${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`}
+      <Tooltip
+        content={activeLedere
+          .slice(1)
+          .map(
+            (leder) =>
+              `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`,
+          )
+          .join(", ")}
+      >
+        <b>{`(+${activeLedere.length - 1})`}</b>
+      </Tooltip>
+    </div>
+  );
+
   return (
     <Table.DataCell>
-      {pluralize(
-        activeLedere.length,
-        `${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`,
-        `${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs
-          .navident}) (+${activeLedere.length - 1})`,
-      )}
+      <Pluralize
+        numberOfElements={activeLedere.length}
+        pluralForm={pluralDisplay}
+        singleForm={`${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`}
+      />
     </Table.DataCell>
   );
 }
 
-function pluralize(
-  numberElements: number,
-  singleForm?: string,
-  pluralForm?: string,
-) {
-  if (numberElements === 1) {
+function Pluralize({
+  numberOfElements,
+  singleForm,
+  pluralForm,
+}: {
+  numberOfElements: number;
+  singleForm?: ReactNode;
+  pluralForm?: ReactNode;
+}) {
+  if (numberOfElements === 1) {
     return singleForm;
   }
-  if (numberElements > 1) {
+  if (numberOfElements > 1) {
     return pluralForm;
   }
 }
@@ -276,7 +322,6 @@ function DateSelect({
   const defaultValue = ressursFilterValues[filterKey] as string;
 
   const { datepickerProps, inputProps, setSelected } = useDatepicker({
-    fromDate: new Date("Aug 23 2019"),
     defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
     onDateChange: (date) =>
       navigate({
