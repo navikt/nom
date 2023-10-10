@@ -185,7 +185,7 @@ app:
         scopes: ["MUTATE_RESSURS"]
       remedy:
         client-id: "92ab93bd-0782-40c0-902b-7758c8878cb4"
-        scopes: ["QUERY_PERSON"]
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
       fullmaktsregister-web:
         client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
         scopes: ["QUERY_PERSON"]
@@ -228,7 +228,7 @@ app:
         scopes: ["QUERY_PERSON"]
       remedy:
         client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
-        scopes: ["QUERY_PERSON"]
+        scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
     groups:
       write:
         group-id: "${NOM_WRITE_GROUPID}"
