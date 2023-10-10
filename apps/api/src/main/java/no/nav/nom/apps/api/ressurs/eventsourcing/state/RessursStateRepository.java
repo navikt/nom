@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
 import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,14 @@ public class RessursStateRepository implements IRessursService {
     private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
+    private final Map<String, RessursState> ressursByNavidentBareEksterne = new ConcurrentHashMap<>();
 
+    @Override
     public Optional<RessursState> findByFid(String fid) {
         return Optional.ofNullable(ressursByFid.get(fid));
     }
 
+    @Override
     public Optional<RessursState> findByPersonident(String personident) {
         return Optional.ofNullable(ressursByPersonident.get(personident));
     }
@@ -31,15 +35,23 @@ public class RessursStateRepository implements IRessursService {
         return Optional.ofNullable(ressursByNavident.get(navident));
     }
 
+    @Override
     public <T> Optional<T> findByNavident(String navIdent, Function<RessursState, T> withMapper) {
         return findByNavident(navIdent)
             .map(withMapper);
     }
 
+    @Override
     public Collection<RessursState> getAll() {
         return ressursByNavident.values();
     }
 
+    @Override
+    public Collection<RessursState> getAllBareEksterne() {
+        return ressursByNavidentBareEksterne.values();
+    }
+
+    @Override
     public Collection<RessursState> getAllByFid() {
         return ressursByFid.values();
     }
@@ -66,6 +78,9 @@ public class RessursStateRepository implements IRessursService {
         ressursByFid.put(ressursEventData.fid(), ressursEventData);
         ressursByPersonident.put(ressursEventData.personident(), ressursEventData);
         ressursByNavident.put(ressursEventData.navident(), ressursEventData);
+        if (ressursEventData.sektor().equals(Sektor.EKSTERN)) {
+            ressursByNavidentBareEksterne.put(ressursEventData.navident(), ressursEventData);
+        }
     }
 
     @Override
@@ -73,27 +88,21 @@ public class RessursStateRepository implements IRessursService {
         ressursByFid.clear();
         ressursByPersonident.clear();
         ressursByNavident.clear();
+        ressursByNavidentBareEksterne.clear();
     }
 
+    @Override
     public void remove(String fid) {
         RessursState ressursStateToDelete = ressursByFid.get(fid);
-
         if (ressursStateToDelete == null) return;
-
         ressursByFid.remove(fid);
 
-        // Slett ressurs med denne personidenten fra ressursByPersonident, hvis fid er lik
-        // Sjekk også om det evt. finnes en annen ressursFid med samme personident - isåfall må byPersonident bytte til denne ResssursState'en
-        RessursState ressursByPersonidentForFid = ressursByPersonident.getOrDefault(ressursStateToDelete.personident(), null);
-        if (Objects.equals(fid, ressursByPersonidentForFid == null ? null : ressursByPersonidentForFid.fid())) {
-            ressursByPersonident.remove(ressursStateToDelete.personident());
-            Optional<RessursState> samePersonidentOtherFid = ressursByFid.values().stream()
-                .filter(ressursState -> Objects.equals(ressursState.personident(), ressursStateToDelete.personident()))
-                .findFirst();
+        removeInRessursByPersonident(fid, ressursStateToDelete);
+        removeInRessursByNavident(fid, ressursStateToDelete);
+        removeInRessursByNavidentBareEksterne(fid, ressursStateToDelete);
+    }
 
-            samePersonidentOtherFid.ifPresent(ressursState -> ressursByPersonident.put(ressursState.personident(), ressursState));
-        }
-
+    private void removeInRessursByNavident(String fid, RessursState ressursStateToDelete) {
         // Slett ressurs med denne navidenten fra ressursByNavident, hvis fid er lik
         // Sjekk også om det evt. finnes en annen ressursFid med samme navident - isåfall må byNAvident bytte til denne ResssursState'en
         RessursState ressursByNavidentForFid = ressursByNavident.getOrDefault(ressursStateToDelete.navident(), null);
@@ -104,6 +113,34 @@ public class RessursStateRepository implements IRessursService {
                 .findFirst();
 
             sameNavidentOtherFid.ifPresent(ressursState -> ressursByNavident.put(ressursState.navident(), ressursState));
+        }
+    }
+
+    private void removeInRessursByNavidentBareEksterne(String fid, RessursState ressursStateToDelete) {
+        // Slett ressurs med denne navidenten fra ressursByNavidentBareEksterne, hvis fid er lik
+        // Sjekk også om det evt. finnes en annen ressursFid med samme navident - isåfall må byNAvident bytte til denne ResssursState'en
+        RessursState ressursByNavidentForFid = ressursByNavidentBareEksterne.getOrDefault(ressursStateToDelete.navident(), null);
+        if (Objects.equals(fid, ressursByNavidentForFid == null ? null : ressursByNavidentForFid.fid())) {
+            ressursByNavidentBareEksterne.remove(ressursStateToDelete.navident());
+            Optional<RessursState> sameNavidentOtherFid = ressursByFid.values().stream()
+                .filter(ressursState -> Objects.equals(ressursState.navident(), ressursStateToDelete.navident()))
+                .findFirst();
+
+            sameNavidentOtherFid.ifPresent(ressursState -> ressursByNavidentBareEksterne.put(ressursState.navident(), ressursState));
+        }
+    }
+
+    private void removeInRessursByPersonident(String fid, RessursState ressursStateToDelete) {
+        // Slett ressurs med denne personidenten fra ressursByPersonident, hvis fid er lik
+        // Sjekk også om det evt. finnes en annen ressursFid med samme personident - isåfall må byPersonident bytte til denne ResssursState'en
+        RessursState ressursByPersonidentForFid = ressursByPersonident.getOrDefault(ressursStateToDelete.personident(), null);
+        if (Objects.equals(fid, ressursByPersonidentForFid == null ? null : ressursByPersonidentForFid.fid())) {
+            ressursByPersonident.remove(ressursStateToDelete.personident());
+            Optional<RessursState> samePersonidentOtherFid = ressursByFid.values().stream()
+                .filter(ressursState -> Objects.equals(ressursState.personident(), ressursStateToDelete.personident()))
+                .findFirst();
+
+            samePersonidentOtherFid.ifPresent(ressursState -> ressursByPersonident.put(ressursState.personident(), ressursState));
         }
     }
 }

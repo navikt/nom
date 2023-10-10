@@ -21,6 +21,7 @@ public interface IRessursService {
     }
 
     Collection<RessursState> getAll();
+    Collection<RessursState> getAllBareEksterne();
 
     Collection<RessursState> getAllByFid();
 
