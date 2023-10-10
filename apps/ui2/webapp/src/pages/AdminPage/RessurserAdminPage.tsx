@@ -5,20 +5,26 @@ import type { SortState } from "@navikt/ds-react";
 import {
   Alert,
   BodyShort,
+  Button,
   Checkbox,
   Chips,
   DatePicker,
+  Link,
   Loader,
   Pagination,
+  Popover,
   Table,
-  Tooltip,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  Link as ReactRouterLink,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import { isAfter, isBefore, maxTime } from "date-fns";
 import sortBy from "lodash/sortBy";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 import { useQuery } from "react-query";
 
@@ -33,7 +39,11 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 import { OrgEnhetSearch } from "~/pages/AdminPage/components/OrgEnhetSearch";
-import { ressurserAdminRoute } from "~/reactRouterRoutes";
+import {
+  orgRoute,
+  ressurserAdminRoute,
+  ressursRoute,
+} from "~/reactRouterRoutes";
 import { formatDateWithoutTimezone, isGyldighetsPeriodeActive } from "~/utils";
 
 export function RessurserAdminPage() {
@@ -230,15 +240,15 @@ function OrgTilknytningDataCell({
         gap: var(--a-spacing-2);
       `}
     >
-      {`${activeOrgtilknytninger[0]?.orgEnhet.navn}`}
-      <Tooltip
-        content={activeOrgtilknytninger
-          .slice(1)
-          .map((orgTilknytning) => `${orgTilknytning.orgEnhet.navn}`)
-          .join(", ")}
-      >
-        <b>{`(+${activeOrgtilknytninger.length - 1})`}</b>
-      </Tooltip>
+      <OrgEnhetLink orgenhet={activeOrgtilknytninger[0]?.orgEnhet} />
+      <ExtraRowContent
+        content={activeOrgtilknytninger.slice(1).map((orgTilknytning) => (
+          <OrgEnhetLink
+            key={orgTilknytning.orgEnhet.id}
+            orgenhet={orgTilknytning.orgEnhet}
+          />
+        ))}
+      />
     </div>
   );
 
@@ -247,10 +257,24 @@ function OrgTilknytningDataCell({
       <Pluralize
         numberOfElements={activeOrgtilknytninger.length}
         pluralForm={pluralDisplay}
-        singleForm={activeOrgtilknytninger[0]?.orgEnhet.navn}
+        singleForm={
+          <OrgEnhetLink orgenhet={activeOrgtilknytninger[0]?.orgEnhet} />
+        }
       />
     </Table.DataCell>
   );
+}
+
+function OrgEnhetLink({
+  orgenhet,
+}: {
+  orgenhet?: { id: string; navn: string };
+}) {
+  return orgenhet ? (
+    <ReactRouterLink params={{ id: orgenhet.id }} to={orgRoute.to}>
+      <Link>{orgenhet.navn}</Link>
+    </ReactRouterLink>
+  ) : undefined;
 }
 
 function LedereDataCell({
@@ -277,18 +301,12 @@ function LedereDataCell({
         gap: var(--a-spacing-2);
       `}
     >
-      {`${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`}
-      <Tooltip
-        content={activeLedere
-          .slice(1)
-          .map(
-            (leder) =>
-              `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`,
-          )
-          .join(", ")}
-      >
-        <b>{`(+${activeLedere.length - 1})`}</b>
-      </Tooltip>
+      <RessursLink ressurs={activeLedere[0]?.ressurs} />
+      <ExtraRowContent
+        content={activeLedere.slice(1).map((leder) => (
+          <RessursLink key={leder.ressurs.navident} ressurs={leder.ressurs} />
+        ))}
+      />
     </div>
   );
 
@@ -297,9 +315,45 @@ function LedereDataCell({
       <Pluralize
         numberOfElements={activeLedere.length}
         pluralForm={pluralDisplay}
-        singleForm={`${activeLedere[0]?.ressurs.visningsnavn} (${activeLedere[0]?.ressurs.navident})`}
+        singleForm={<RessursLink ressurs={activeLedere[0]?.ressurs} />}
       />
     </Table.DataCell>
+  );
+}
+
+function RessursLink({
+  ressurs,
+}: {
+  ressurs?: { navident: string; visningsnavn: string };
+}) {
+  return ressurs ? (
+    <ReactRouterLink params={{ id: ressurs.navident }} to={ressursRoute.to}>
+      <Link>{`${ressurs.visningsnavn} (${ressurs.navident})`}</Link>
+    </ReactRouterLink>
+  ) : undefined;
+}
+
+function ExtraRowContent({ content }: { content: ReactNode[] }) {
+  const buttonReference = useRef<HTMLButtonElement>(null);
+  const [showExtra, setShowExtra] = useState(false);
+
+  return (
+    <>
+      <Button
+        onClick={() => setShowExtra(!showExtra)}
+        ref={buttonReference}
+        size="xsmall"
+      >
+        +1
+      </Button>
+      <Popover
+        anchorEl={buttonReference.current}
+        onClose={() => setShowExtra(false)}
+        open={showExtra}
+      >
+        <Popover.Content>{content}</Popover.Content>
+      </Popover>
+    </>
   );
 }
 
