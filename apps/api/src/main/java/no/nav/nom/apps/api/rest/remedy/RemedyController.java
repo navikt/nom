@@ -237,6 +237,7 @@ public class RemedyController {
 
     private RessursDTO from(RessursState state) {
         return RessursDTO.builder()
+            .status(Integer.toString(HttpStatus.OK.value()))
             .personident(state.personident())
             .navident(state.navident())
             .navn(NavnDTO.builder()
@@ -249,6 +250,7 @@ public class RemedyController {
 
     private RessursDTO from(Person person) {
         return RessursDTO.builder()
+            .status(Integer.toString(HttpStatus.OK.value()))
             .navn(NavnDTO.builder()
                 .fornavn(person.getFornavn())
                 .mellomnavn(person.getMellomnavn())
