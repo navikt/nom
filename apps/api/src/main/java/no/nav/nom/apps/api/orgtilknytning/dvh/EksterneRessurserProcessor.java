@@ -175,7 +175,7 @@ public class EksterneRessurserProcessor {
                 .toList();
             if (nomOrgenheterByOrgenhetPaaRessurs.size() == 1) {
                 log.debug(
-                    "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.",
+                    "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH agressoId/Nivå: {}/{}.",
                     navident,
                     nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),
                     orgenhetPaaRessurs,
