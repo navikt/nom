@@ -52,7 +52,7 @@ https://engineering.atspotify.com/2018/01/11/testing-of-microservices/[Spotify]
 I NOM praktiserer vi QA / Parprogrammering på alle endringer av større betydning som skjer i prosjektet.
 På en QA trenger man derfor godkjennelse av minst 1 annet team medlem på en pullrequest før endringene går i master.
 
-Ved parprogrammering har man vært 2 som har skrevet koden, og dermed fått en implisitt QA av koden underveis, denne koden kan derfor pushes rett i produksjon.
+Ved parprogrammering har man vært to som har skrevet koden og dermed fått en implisitt QA av koden underveis. Denne koden kan derfor pushes rett til produksjon.
 
 
 == Monorepo
