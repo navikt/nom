@@ -79,6 +79,7 @@ public class RemedyControllerTest extends RestTestBase {
         request.setPersonident(personident);
 
         RessursDTO expected = RessursDTO.builder()
+            .status("200")
             .personident(personident)
             .navident("testNavIdent")
             .navn(navn)
@@ -116,7 +117,7 @@ public class RemedyControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().is2xxSuccessful()
             .expectBody(RessursDTO.class)
-            .isEqualTo(RessursDTO.builder().navn(expectedNavn).build());
+            .isEqualTo(RessursDTO.builder().status("200").navn(expectedNavn).build());
     }
 
     @Test
@@ -139,6 +140,7 @@ public class RemedyControllerTest extends RestTestBase {
             .build();
 
         RessursDTO expected = RessursDTO.builder()
+            .status("200")
             .personident(personident)
             .navident("testNavIdent")
             .navn(navn)
@@ -189,6 +191,7 @@ public class RemedyControllerTest extends RestTestBase {
             .build();
 
         RessursDTO expected = RessursDTO.builder()
+            .status("200")
             .personident(personident)
             .navident(navident)
             .navn(navn)
