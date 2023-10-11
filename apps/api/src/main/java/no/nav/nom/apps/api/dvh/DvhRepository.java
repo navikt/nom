@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toMap;
 @RequiredArgsConstructor
 public class DvhRepository {
 
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private List<DvhLeder> ledere = Collections.emptyList();
     private List<DvhOrganisering> organiseringer = Collections.emptyList();
     private List<DvhTelefon> navidentTelefonNrMap;

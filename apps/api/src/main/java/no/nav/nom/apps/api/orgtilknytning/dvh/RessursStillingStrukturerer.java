@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import org.springframework.core.env.Environment;
@@ -29,12 +29,12 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 @Component
 @Slf4j
 public class RessursStillingStrukturerer {
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final IRessursService ressursService;
     private final Environment environment;
 
-    public RessursStillingStrukturerer(IOrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
+    public RessursStillingStrukturerer(OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
                                        IRessursService ressursService,
                                        Environment environment) {
         this.orgenhetService = orgenhetService;

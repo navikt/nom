@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
@@ -23,10 +23,10 @@ import static java.util.stream.Collectors.toMap;
 public class OrgTilknytningResolver {
 
     private final OrgtilknytningService orgtilknytningStateService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
 
     @Autowired
-    public OrgTilknytningResolver(OrgtilknytningService orgtilknytningStateService, IOrgenhetService orgenhetService) {
+    public OrgTilknytningResolver(OrgtilknytningService orgtilknytningStateService, OrgenhetService orgenhetService) {
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.orgenhetService = orgenhetService;
     }

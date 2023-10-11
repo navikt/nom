@@ -36,7 +36,7 @@ public class OrgEnhetTest extends TestBase {
     @Autowired
     private OrgEnhetStateRepository orgEnhetStateRepository;
     @Autowired
-    private IOrgenhetService orgenhetService;
+    private OrgenhetService orgenhetService;
 
     @MockBean
     private OrgEnhetCommandService orgEnhetCommandService;

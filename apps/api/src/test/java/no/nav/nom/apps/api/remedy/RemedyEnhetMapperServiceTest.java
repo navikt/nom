@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.remedy;
 
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

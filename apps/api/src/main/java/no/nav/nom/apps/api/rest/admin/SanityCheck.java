@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -38,11 +38,11 @@ public class SanityCheck {
     private final Logger log = LoggerFactory.getLogger(SanityCheck.class);
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
 
     public SanityCheck(DvhRepository dvhRepository,
-                       IRessursService ressursService, IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService,
+                       IRessursService ressursService, OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService,
                        Unleash unleash) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;

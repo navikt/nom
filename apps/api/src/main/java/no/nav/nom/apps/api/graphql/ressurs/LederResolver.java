@@ -4,7 +4,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
@@ -30,10 +30,10 @@ public class LederResolver {
 
     private final DvhRepository dvhRepository;
     private final IRessursService ressursService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningStateService;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, IOrgenhetService orgenhetService,
+    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, OrgenhetService orgenhetService,
                          OrgtilknytningService orgtilknytningStateService) {
         this.dvhRepository = dvhRepository;
         this.ressursService = ressursService;

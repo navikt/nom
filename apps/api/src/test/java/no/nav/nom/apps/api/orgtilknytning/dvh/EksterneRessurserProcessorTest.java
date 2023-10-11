@@ -2,8 +2,8 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;

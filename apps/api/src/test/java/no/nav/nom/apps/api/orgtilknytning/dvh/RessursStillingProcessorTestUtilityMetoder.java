@@ -1,8 +1,8 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
@@ -33,7 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 @DisplayName("Tester Utility metoder for bruk i tolking og generering av events for RessursStillinger fra DVH")
 class RessursStillingProcessorTestUtilityMetoder {
-
 
     @Mock
     OrgtilknytningCommandService orgtilknytningCommandService;

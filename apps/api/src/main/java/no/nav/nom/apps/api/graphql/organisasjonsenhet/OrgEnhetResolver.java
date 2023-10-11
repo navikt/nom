@@ -4,7 +4,7 @@ import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
@@ -19,10 +19,10 @@ import static java.util.stream.Collectors.toList;
 @Component
 public class OrgEnhetResolver {
 
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
 
     OrgEnhetResolver(
-        IOrgenhetService orgenhetService
+        OrgenhetService orgenhetService
     ) {
         this.orgenhetService = orgenhetService;
     }

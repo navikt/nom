@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
@@ -37,7 +37,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfo
 @Component
 @Slf4j
 public class RessursStillingProcessor {
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
@@ -46,7 +46,7 @@ public class RessursStillingProcessor {
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
 
-    public RessursStillingProcessor(IOrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
+    public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
                                     RessursStillingLoadStatus ressursStillingLoadStatus, IRessursService ressursService
     ) {
         this.orgenhetService = orgenhetService;

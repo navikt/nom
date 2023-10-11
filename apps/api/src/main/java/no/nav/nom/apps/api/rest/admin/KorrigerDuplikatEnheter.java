@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -30,10 +30,10 @@ import java.util.Map;
 @RequestMapping("/api/admin/korrigerreduplikatenheter")
 public class KorrigerDuplikatEnheter {
 
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final OrgEnhetCommandService orgEnhetCommandService;
 
-    public KorrigerDuplikatEnheter(IOrgenhetService orgenhetService, OrgEnhetCommandService orgEnhetCommandService) {
+    public KorrigerDuplikatEnheter(OrgenhetService orgenhetService, OrgEnhetCommandService orgEnhetCommandService) {
         this.orgenhetService = orgenhetService;
         this.orgEnhetCommandService = orgEnhetCommandService;
     }

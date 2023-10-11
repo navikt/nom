@@ -10,7 +10,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -38,14 +38,14 @@ public class OmadaUttrekk {
     private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final IRessursService ressursService;
-    private final IOrgenhetService orgenhetService;
+    private final OrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final DvhRepository dvhRepository;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public OmadaUttrekk(
-        IRessursService ressursService, IOrgenhetService orgenhetService,
+        IRessursService ressursService, OrgenhetService orgenhetService,
         OrgtilknytningStateService orgtilknytningStateService,
         RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
     ) {

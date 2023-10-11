@@ -1,8 +1,7 @@
-package no.nav.nom.apps.api.orgenhet.implementations;
+package no.nav.nom.apps.api.orgenhet;
 
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.IOrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 
 @Service
-public class OrgenhetService implements IOrgenhetService {
+public class OrgenhetService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
@@ -27,29 +26,29 @@ public class OrgenhetService implements IOrgenhetService {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
     }
 
-    @Override
+
     public Optional<IOrgenhet> getById(String id) {
         return map(orgEnhetStateRepository.findById(id));
     }
 
-    @Override
+
     public Optional<IOrgenhet> getByFid(String fid) {
         return map(orgEnhetStateRepository.findByFid(fid));
     }
 
-    @Override
+
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
             return map(
                 orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
-                .stream()
-                .max(comparing(OrgEnhetState::gyldigFom))
+                    .stream()
+                    .max(comparing(OrgEnhetState::gyldigFom))
             );
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
-    @Override
+
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
         return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
             .stream()
@@ -57,55 +56,55 @@ public class OrgenhetService implements IOrgenhetService {
         );
     }
 
-    @Override
+
     public List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds) {
         return orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds).stream().map(this::map).toList();
     }
 
-    @Override
+
     public Collection<IOrgenhet> getAllEnheter() {
         return orgEnhetStateRepository.getAll().stream().map(this::map).toList();
     }
 
-    @Override
+
     public Collection<IOrgenhet> getAllEnheterMedOrganisering() {
         return organiserteEnheter;
     }
 
-    @Override
+
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
         return orgEnhetStateRepository.getAll().stream()
-            .filter( orgEnhetState -> orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().contains(agressoId))
+            .filter(orgEnhetState -> orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().contains(agressoId))
             .map(this::map)
             .toList();
     }
 
-    @Override
+
     public List<IOrgenhet> matchByNavn(String navn) {
         return orgEnhetStateRepository.getAll().stream()
-            .filter( orgEnhetState -> orgEnhetState.navn().toLowerCase().contains(navn))
+            .filter(orgEnhetState -> orgEnhetState.navn().toLowerCase().contains(navn))
             .map(this::map)
             .toList();
     }
 
-    @Override
+
     public Map<String, IOrgenhet> getByIdBulk(List<String> ids) {
         return orgEnhetStateRepository.findByIdIn(ids).stream().collect(Collectors.toMap(OrgEnhetState::id, this::map));
     }
 
-    @Override
+
     public Map<String, IOrgenhet> getByFidBulk(List<String> fids) {
         return orgEnhetStateRepository.findByIdIn(fids).stream().collect(Collectors.toMap(OrgEnhetState::id, this::map));
     }
 
-    @Override
+
     public Collection<IOrgenhet> getByAgressoIdForEnheterMedOrganisering(String agressoId) {
         return getAllEnheterMedOrganisering().stream()
-            .filter( orgenhet -> Objects.equals(orgenhet.getAgressoId(), agressoId))
+            .filter(orgenhet -> Objects.equals(orgenhet.getAgressoId(), agressoId))
             .toList();
     }
 
-    @Override
+
     public void setOrganiserteEnheter(List<IOrgenhet> organiserteEnheter) {
         this.organiserteEnheter = organiserteEnheter;
     }
@@ -118,3 +117,4 @@ public class OrgenhetService implements IOrgenhetService {
         return new OrgEnhet(orgEnhetState);
     }
 }
+

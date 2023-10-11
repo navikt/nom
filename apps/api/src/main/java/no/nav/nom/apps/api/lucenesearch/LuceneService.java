@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.orgenhet.implementations.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
