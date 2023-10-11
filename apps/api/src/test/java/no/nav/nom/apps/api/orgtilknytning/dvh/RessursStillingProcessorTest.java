@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
@@ -43,7 +44,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     public void init() {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
-        orgenhetService = new OrgenhetService(orgEnhetStateRepository);
+        orgenhetService = new OrgenhetService(orgEnhetStateRepository, new DvhRepository());
         ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
             ressursService);

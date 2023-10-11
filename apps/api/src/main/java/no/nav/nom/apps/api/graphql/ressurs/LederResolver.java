@@ -47,7 +47,7 @@ public class LederResolver {
     }
 
     public List<LederOrgEnhet> lederFor(Ressurs ressurs) {
-        return dvhRepository.getEnheterByLeder(ressurs.getNavIdent())
+        return orgenhetService.getEnheterByLeder(ressurs.getNavIdent())
                 .stream()
                 .map(MappingUtils::toOrgEnhet)
                 .map(LederOrgEnhet::new)

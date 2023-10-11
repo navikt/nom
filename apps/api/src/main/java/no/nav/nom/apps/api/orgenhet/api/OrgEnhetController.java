@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.orgenhet.OrgEnhetDvhService;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -35,15 +35,15 @@ public class OrgEnhetController {
 
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
-    private final OrgEnhetDvhService orgEnhetDvhService;
+    private final OrgenhetService orgenhetService;
 
     public OrgEnhetController(OrgEnhetCommandService orgEnhetCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
-                              OrgEnhetDvhService orgEnhetDvhService
+                              OrgenhetService orgenhetService
     ) {
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
 
-        this.orgEnhetDvhService = orgEnhetDvhService;
+        this.orgenhetService = orgenhetService;
     }
 
     @PostMapping("/orgEnhetsType")
@@ -75,7 +75,7 @@ public class OrgEnhetController {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable("parentId") String parentId) {
-        return ResponseEntity.ok(orgEnhetDvhService.findAllUnderliggendeOrgenheter(parentId));
+        return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
 
     }
 

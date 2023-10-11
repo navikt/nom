@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.IRessursService;
@@ -12,9 +13,13 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Service
@@ -57,5 +62,50 @@ public class DvhService {
         log.info(enhetAndRessursMissing.size() + " leder koblinger hvor ressurs og enhet mangler");
         log.info(enhetMissing.size() + " leder koblinger hvor enhet mangler");
         log.info(ressursMissing.size() + " leder koblinger hvor ressurs mangler");
+    }
+
+    public void saveOrganiseringerAndSetOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
+        val cachedEnheter = orgenhetService.getAllEnheter().stream()
+            .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
+            .values().stream()
+            .map(orgenheter -> orgenheter.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+
+        var organiseringerToSave = organiseringer.stream()
+            .distinct()
+            .filter(o -> {
+
+                final var overEnhet = cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver());
+                final var underEnhet = cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder());
+                if (overEnhet == null && underEnhet == null) {
+                    log.info(
+                        "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Over- og Underenhet mangler",
+                        o.getAgressoIdOver(),
+                        o.getAgressoIdUnder()
+                    );
+                } else if (overEnhet == null) {
+                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler", o.getAgressoIdOver(), o.getAgressoIdUnder());
+                } else if (underEnhet == null) {
+                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler", o.getAgressoIdOver(), o.getAgressoIdUnder());
+                } else {
+                    return true;
+                }
+                return false;
+            })
+            .toList();
+
+        dvhRepository.saveOrganiseringer(organiseringerToSave);
+
+        var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver())).toList();
+        var underEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder())).toList();
+
+        // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
+        var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+        orgenhetService.setOrganiserteEnheter(organiserteEnheter);
     }
 }

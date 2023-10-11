@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -211,7 +210,7 @@ public class DvhRestConsumer {
                     });
 
             dvhService.saveLedere(ledere);
-            dvhRepository.saveOrganiseringer(organiseringer);
+            dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
