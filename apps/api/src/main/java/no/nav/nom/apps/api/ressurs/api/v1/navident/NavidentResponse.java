@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.navident;
+package no.nav.nom.apps.api.ressurs.api.v1.navident;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;

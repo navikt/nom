@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.orgenhet.api;
+package no.nav.nom.apps.api.orgenhet.api.app;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

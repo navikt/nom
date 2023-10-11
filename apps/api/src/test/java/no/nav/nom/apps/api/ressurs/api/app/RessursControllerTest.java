@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.backend.ressurs;
+package no.nav.nom.apps.api.ressurs.api.app;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
@@ -9,7 +9,6 @@ import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.AnsettelsesType;
@@ -18,8 +17,6 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;

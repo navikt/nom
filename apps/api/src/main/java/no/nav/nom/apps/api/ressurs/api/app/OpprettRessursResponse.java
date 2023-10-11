@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.backend.ressurs;
+package no.nav.nom.apps.api.ressurs.api.app;
 
 import lombok.Builder;
 import lombok.Data;

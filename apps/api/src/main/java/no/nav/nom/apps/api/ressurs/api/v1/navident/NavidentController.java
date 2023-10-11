@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.navident;
+package no.nav.nom.apps.api.ressurs.api.v1.navident;
 
 import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,9 +16,9 @@ import no.nav.nom.apps.api.pdl.Person;
 import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
-import no.nav.nom.apps.api.rest.remedy.OpprettRessursRequest;
-import no.nav.nom.apps.api.rest.remedy.RemedyController;
-import no.nav.nom.apps.api.rest.remedy.RessursDTO;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.OpprettRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.RemedyController;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;

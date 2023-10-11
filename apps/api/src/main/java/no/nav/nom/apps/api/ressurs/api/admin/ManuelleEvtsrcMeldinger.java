@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.admin;
+package no.nav.nom.apps.api.ressurs.api.admin;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

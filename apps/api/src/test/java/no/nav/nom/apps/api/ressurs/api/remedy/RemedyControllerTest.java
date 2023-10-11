@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.remedy;
+package no.nav.nom.apps.api.ressurs.api.remedy;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
@@ -7,6 +7,10 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.FinnRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.OpprettRessursRequest;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.RemedyController;
+import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;

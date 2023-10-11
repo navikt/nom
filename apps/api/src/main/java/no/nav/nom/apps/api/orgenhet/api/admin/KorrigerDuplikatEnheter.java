@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.admin;
+package no.nav.nom.apps.api.orgenhet.api.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;

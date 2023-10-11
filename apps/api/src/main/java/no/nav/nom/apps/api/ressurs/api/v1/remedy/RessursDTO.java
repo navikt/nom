@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.remedy;
+package no.nav.nom.apps.api.ressurs.api.v1.remedy;
 
 import lombok.Builder;
 import lombok.Value;
