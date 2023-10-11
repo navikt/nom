@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.rest.exceptions;
+package no.nav.nom.apps.api.ressurs.api.exceptions;
 
 public class RessursNotFoundException extends RuntimeException{
 
