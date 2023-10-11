@@ -31,9 +31,6 @@ spec:
         - application: nom-api
           namespace: nom
           cluster: prod-gcp
-        - application: nom-api-qa
-          namespace: nom
-          cluster: prod-gcp
         - application: nom-unit4
           namespace: org
           cluster: prod-gcp
