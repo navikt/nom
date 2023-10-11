@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.rest.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -61,6 +62,10 @@ public class RessursRestService {
         this.pdlClient = pdlClient;
         this.orgenhetService = orgenhetService;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
+    }
+
+    public RessursState findRessursByNavident(String navident) {
+        return ressursService.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
     public RessursState createRessursAndNotify(

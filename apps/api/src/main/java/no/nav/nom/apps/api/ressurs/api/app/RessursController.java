@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.rest.exceptions.RessursNotFoundException;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +55,19 @@ public class RessursController {
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
         @RequestBody OpprettRessursRequest request,
         JwtAuthenticationToken token) {
-        return ResponseEntity.ok().body(toResponse(ressursRestService.createRessursAndNotify(request, token)));
+        return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request, token)));
+    }
+
+    @GetMapping("/byNavident/{navident}")
+    @Operation(
+        description = "Henter alle ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Ressurser"),
+    })
+    public ResponseEntity<RessursState> opprettRessurs(@PathVariable String navident){
+        return ResponseEntity.ok(ressursRestService.findRessursByNavident(navident));
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {
@@ -80,8 +96,17 @@ public class RessursController {
             .body(exception.getMessage());
     }
 
+    @ExceptionHandler(
+        {RessursNotFoundException.class}
+    )
+    public ResponseEntity<StandardResponse> handleNotFound(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleBadRequest(Exception exception) {
+    public ResponseEntity<String> handleServerError(Exception exception) {
         log.error("Intern feil ved opprettelse av ny ressurs", exception);
 
         return ResponseEntity

@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -60,12 +61,15 @@ public class OrgEnhetController {
                 sendEndreOrgEnhetsTypeEvent(orgEnhet, setOrgEnhetsTypeRequest.getOrgEnhetsType());
 
                 return ResponseEntity.ok().body(
-                    new StandardResponse(String.format(
-                        "Oppdatert orgEnhetsType for %s", setOrgEnhetsTypeRequest.getNomId()
-                    ))
+                    StandardResponse.builder().message(String.format(
+                            "Oppdatert orgEnhetsType for %s", setOrgEnhetsTypeRequest.getNomId()
+                        ))
+                        .build()
                 );
             })
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new StandardResponse("NotFound")));
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                StandardResponse.builder().message("NotFound").build()
+            ));
 
     }
 
