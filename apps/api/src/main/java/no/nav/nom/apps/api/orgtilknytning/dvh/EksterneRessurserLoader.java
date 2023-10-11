@@ -37,10 +37,10 @@ public class EksterneRessurserLoader {
             List<DvhEksternRessurs> eksterneRessurser = load();
             List<String> report = new ArrayList<>();
             eksterneRessurser.forEach( e -> report.addAll(eksterneRessurserProcessor.process(e)));
-            if (!report.isEmpty()) {
-                log.info("Rapport fra prosessering av {} eksterne ressurser:\n", eksterneRessurser.size());
-                report.forEach( r -> log.info("  {}", r));
-            }
+//            if (!report.isEmpty()) {
+//                log.info("Rapport fra prosessering av {} eksterne ressurser:\n", eksterneRessurser.size());
+//                report.forEach( r -> log.info("  {}", r));
+//            }
         } else {
             log.info("Unleash {} er ikke aktivert - laster ikke eksterne ressurser", UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE);
         }

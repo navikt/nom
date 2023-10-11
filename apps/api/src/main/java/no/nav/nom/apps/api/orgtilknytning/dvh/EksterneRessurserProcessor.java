@@ -155,13 +155,13 @@ public class EksterneRessurserProcessor {
                 }
             ).orElseGet(
                 () -> {
-                    log.error("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
+                    log.info("For navident {} - Fant ikke orgenhet for remedyEnhet {}", navident, remedyEnhet);
                     return Optional.empty();
                 }
             );
 
         if (orgenhetPaaRessurs.startsWith("-")) {
-            log.debug(
+            log.info(
                 "For navident {} - ORGENHET_PAA_RESSURS i DVH er ikke angitt. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.",
                 navident,
                 orgenhetPaaRessurs,
@@ -174,7 +174,7 @@ public class EksterneRessurserProcessor {
                 .filter(o -> Objects.equals(o.getOrgNiv(), orgenhetPaaRessursNivaa))
                 .toList();
             if (nomOrgenheterByOrgenhetPaaRessurs.size() == 1) {
-                log.debug(
+                log.info(
                     "For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH agressoId/Nivå: {}/{}.",
                     navident,
                     nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),
@@ -183,7 +183,7 @@ public class EksterneRessurserProcessor {
                 );
                 return nomOrgenheterByOrgenhetPaaRessurs.get(0);
             } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {
-                log.error(
+                log.info(
                     "For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
                     navident,
                     orgenhetPaaRessurs,
@@ -191,7 +191,7 @@ public class EksterneRessurserProcessor {
                     remedyEnhet
                 );
             } else {
-                log.error(
+                log.info(
                     "For navident {} - Fant flere orgenheter for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.",
                     navident,
                     orgenhetPaaRessurs,
