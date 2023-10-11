@@ -16,6 +16,7 @@ import {
   Table,
   useDatepicker,
 } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Link as ReactRouterLink,
   useNavigate,
@@ -26,7 +27,6 @@ import sortBy from "lodash/sortBy";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
-import { useQuery } from "react-query";
 
 import { Sektor } from "~/api/generated/graphql_generated";
 import type { RessursFields } from "~/api/react-query-endpoints";

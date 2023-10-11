@@ -1,10 +1,10 @@
 import { css } from "@emotion/react";
 import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import { format } from "date-fns";
-import { useMutation } from "react-query";
 
 import { useGetOrgEnhetQuery } from "~/api/generated/graphql_generated";
 import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";

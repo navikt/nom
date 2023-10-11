@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import { useQuery } from "react-query";
 
 import person from "~/resources/person.svg";
 

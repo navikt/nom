@@ -1,6 +1,4 @@
 import { css } from "@emotion/react";
-import { getWebInstrumentations, initializeFaro } from "@grafana/faro-web-sdk";
-import { TracingInstrumentation } from "@grafana/faro-web-tracing";
 import { Tabs } from "@navikt/ds-react";
 import {
   Navigate,
@@ -29,24 +27,6 @@ import { OrganisasjonHierarkiPage } from "~/pages/OrganisasjonsHierarkiPage/Orga
 import { ResourcePage } from "~/pages/ResourcePage/ResourcePage";
 import { isInDevelopment } from "~/utils";
 
-// Don't initialize faro when running the dev-server
-if (process.env.NODE_ENV === "production") {
-  const url = isInDevelopment()
-    ? "https://telemetry.ekstern.dev.nav.no/collect"
-    : "https://telemetry.nav.no/collect";
-
-  initializeFaro({
-    url,
-    app: {
-      name: "nom-ui",
-    },
-    instrumentations: [
-      ...getWebInstrumentations(),
-      new TracingInstrumentation(),
-    ],
-  });
-}
-
 const TanStackRouterDevtools =
   process.env.NODE_ENV === "production"
     ? () => null // Render nothing in production
@@ -71,7 +51,7 @@ function Root() {
     <>
       {hasAdminAccess && <PrefetchUsefulAdminQueries />}
       <React.Suspense fallback="">
-        <TanStackRouterDevtools />
+        <TanStackRouterDevtools position="bottom-right" />
       </React.Suspense>
       <ScrollRestoration />
       <NavHeader />

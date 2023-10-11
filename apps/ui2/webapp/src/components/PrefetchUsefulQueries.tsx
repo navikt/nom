@@ -1,4 +1,4 @@
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useGetAllOrgenheterAdminQuery } from "~/api/generated/graphql_generated";
 import { getAlleRessurser } from "~/api/react-query-endpoints";

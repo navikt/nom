@@ -14,6 +14,7 @@ import {
   TextField,
   UNSAFE_Combobox,
 } from "@navikt/ds-react";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import { isBefore } from "date-fns";
@@ -21,7 +22,6 @@ import { isBefore } from "date-fns";
 import { isString, uniq } from "lodash";
 import sortBy from "lodash/sortBy";
 import { useEffect, useState } from "react";
-import { useMutation } from "react-query";
 
 import { apolloClient } from "~/api/apolloclient";
 import type { GetAllOrgenheterAdminQuery } from "~/api/generated/graphql_generated";

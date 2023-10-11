@@ -14,12 +14,12 @@ import {
   Link,
   Tag,
 } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import axios from "axios";
 import { format, isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
-import { useQuery } from "react-query";
 
 import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
