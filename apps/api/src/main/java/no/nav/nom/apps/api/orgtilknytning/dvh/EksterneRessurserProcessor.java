@@ -48,13 +48,21 @@ public class EksterneRessurserProcessor {
         this.orgtilknytningCommandService = orgtilknytningCommandService;
     }
 
-    public List<String> process(DvhEksternRessurs eksternRessurs) {
-        List<String> warnings = new ArrayList<>();
+    public void process(DvhEksternRessurs eksternRessurs) {
+        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident(), true);
 
         log.debug("Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {
-            log.debug("Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
-            return warnings;
+            var aktiveOrgtilkntyninger = eksisterendeOrgtilknytninger.stream().filter( o -> o.gyldigTom().isEmpty()).toList();
+            if (aktiveOrgtilkntyninger.isEmpty()) {
+                log.debug("Ekstern ressurs {} er ikke aktiv - skipping", eksternRessurs.navident());
+                return;
+            } else {
+                log.debug("Ekstern ressurs {} er ikke aktiv - men har orgtilknytninger som må avsluttes", eksternRessurs.navident());
+                var meta = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
+                aktiveOrgtilkntyninger.forEach( o ->
+                    avsluttOrgtilknytning(o, eksternRessurs.remedySlutt(), meta));
+            }
         }
 
         var orgenhet = getOrgenhetForEkstern(eksternRessurs);
@@ -68,16 +76,13 @@ public class EksterneRessurserProcessor {
                 eksternRessurs.orgenhetPaaRessursNivaa()
             );
             log.error(msg);
-            warnings.add(msg);
-            return warnings;
+            return;
         }
 
-        rapporterEvtDiffPaaRemedyenhet(eksternRessurs, orgenhet, warnings);
+        rapporterEvtDiffPaaRemedyenhet(eksternRessurs, orgenhet);
 
 
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
-
-        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident(), true);
 
         if (eksisterendeOrgtilknytninger.isEmpty()) {
             log.debug("Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom", eksternRessurs.navident());
@@ -111,7 +116,6 @@ public class EksterneRessurserProcessor {
                 }
             }
         }
-        return warnings;
     }
 
     private static boolean erSammeEnhet(OrgtilknytningState sisteEksisterendeOrgtilknytning, IOrgenhet orgenhet) {
@@ -122,7 +126,7 @@ public class EksterneRessurserProcessor {
         return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom().orElse(null), eksternRessurs.remedySlutt());
     }
 
-    private void rapporterEvtDiffPaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, List<String> warnings) {
+    private void rapporterEvtDiffPaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
         var remedyEnhetForMappetOrgenhet = remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);
         if (!Objects.equals(remedyEnhetForMappetOrgenhet, eksternRessurs.remedyEnhetId())) {
             String warn = String.format(
@@ -135,7 +139,6 @@ public class EksterneRessurserProcessor {
                 remedyEnhetForMappetOrgenhet != null ? remedyEnhetForMappetOrgenhet : "'ingen remedyenhet mappet for NOM enhet'"
             );
             log.warn(warn);
-            warnings.add(warn);
         }
     }
 
