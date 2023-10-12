@@ -13,7 +13,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
@@ -37,15 +37,15 @@ import java.util.Set;
 public class SanityCheck {
     private final Logger log = LoggerFactory.getLogger(SanityCheck.class);
     private final DvhRepository dvhRepository;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
 
     public SanityCheck(DvhRepository dvhRepository,
-                       IRessursService ressursService, OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService,
+                       RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService,
                        Unleash unleash) {
         this.dvhRepository = dvhRepository;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
     }
@@ -182,7 +182,7 @@ public class SanityCheck {
     public String listRessurserTilIkkeAktivEnhet() {
         StringBuffer result = new StringBuffer();
 
-        List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
+        List<RessursState> alleRessurser = ressursStateRepository.getAll().stream().toList();
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
@@ -320,8 +320,8 @@ public class SanityCheck {
     public String duplikateRessurserPaaNavident() {
         StringBuffer result = new StringBuffer();
 
-        var ressurserByFid = ressursService.getAllByFid();
-        var ressurserByNavident = ressursService.getAll();
+        var ressurserByFid = ressursStateRepository.getAllByFid();
+        var ressurserByNavident = ressursStateRepository.getAll();
 
         result.append("Ant ressurser ByFid/ByNavident: %s/%s\n".formatted(ressurserByFid.size(), ressurserByNavident.size()));
 
@@ -396,7 +396,7 @@ public class SanityCheck {
 
     private String aktiveRessurser() {
         StringBuffer result = new StringBuffer();
-        List<RessursState> alleRessurser = ressursService.getAll().stream().toList();
+        List<RessursState> alleRessurser = ressursStateRepository.getAll().stream().toList();
 
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();

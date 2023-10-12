@@ -9,11 +9,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -36,11 +36,11 @@ import java.util.Optional;
 public class ManuelleEvtsrcMeldinger {
 
     private final RessursCommadService ressursCommadService;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
 
-    public ManuelleEvtsrcMeldinger(RessursCommadService ressursCommadService, IRessursService ressursService) {
+    public ManuelleEvtsrcMeldinger(RessursCommadService ressursCommadService, RessursStateRepository ressursStateRepository) {
         this.ressursCommadService = ressursCommadService;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
 
@@ -64,7 +64,7 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("lagSlettRessursMelding : " + token.getName());
-        var ressursState = ressursService.findByFid(fid);
+        var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
         }
@@ -120,7 +120,7 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("oppdaterPersonidentForRessurs : " + token.getName());
-        var ressursState = ressursService.findByFid(fid);
+        var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
         }
@@ -179,7 +179,7 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("oppdaterPersonaliaForRessurs : " + token.getName());
-        var ressursState = ressursService.findByFid(fid);
+        var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
         }

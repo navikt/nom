@@ -12,7 +12,7 @@ import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter;
 public class OmadaUttrekk {
     private final String EXCLUDE_ORG_ENHET = "bu282j"; // bu282j;0000000;ORGENHET;;Deltar i Rekruttering;01-05-2019;;;;
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
@@ -45,11 +45,11 @@ public class OmadaUttrekk {
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public OmadaUttrekk(
-        IRessursService ressursService, OrgenhetService orgenhetService,
+        RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
         OrgtilknytningStateService orgtilknytningStateService,
         RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
     ) {
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
@@ -72,7 +72,7 @@ public class OmadaUttrekk {
         final var cSVFormat = getCSVFormat("nomId", "navident", "fornavn", "mellomnavn", "etternavn", "visningsnavn", "sektor", "sluttdato");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            ressursService.getAll().forEach(ressurs -> {
+            ressursStateRepository.getAll().forEach(ressurs -> {
                 try {
                     printer.printRecord(
                         ressurs.fid(),

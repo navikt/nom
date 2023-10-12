@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.graphql.common.exception.NIKException;
 import no.nav.nom.apps.api.graphql.common.exception.OpprettRessursException;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearch;
 import no.nav.nom.apps.api.graphql.common.projections.RessurserSearch;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -25,14 +25,14 @@ import java.util.stream.Stream;
 public class RessursResolver {
 
     private final static Logger log = LoggerFactory.getLogger(RessursResolver.class);
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final DvhRepository dvhRepository;
 
     RessursResolver(
-            IRessursService ressursService,
+            RessursStateRepository ressursStateRepository,
             DvhRepository dvhRepository
     ) {
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.dvhRepository = dvhRepository;
     }
 
@@ -42,12 +42,12 @@ public class RessursResolver {
         if (search.getTelefonNummer() != null) {
             ident = dvhRepository.getTelefonByNummer(search.getTelefonNummer())
                 .map(DvhTelefon::getNavIdent)
-                .flatMap(ressursService::findByNavident);
+                .flatMap(ressursStateRepository::findByNavident);
         }
         if (search.isNavidentPresent()) {
-            ident = search.resolveIdent().flatMap(ressursService::findByNavident);
+            ident = search.resolveIdent().flatMap(ressursStateRepository::findByNavident);
         } else if (search.isPersonidentPresent()) {
-            ident = search.resolveIdent().flatMap(ressursService::findByPersonident);
+            ident = search.resolveIdent().flatMap(ressursStateRepository::findByPersonident);
         }
 
         return ident.map(MappingUtils::toRessurs);
@@ -56,11 +56,11 @@ public class RessursResolver {
     public List<RessursResult> ressurser(RessurserSearch search) {
         Stream<Result> results;
         if (search.resolveNavidenter().isEmpty() && search.resolvePersonidenter().isEmpty()) {
-            results = ressursService.getAll().stream().map(Result::from);
+            results = ressursStateRepository.getAll().stream().map(Result::from);
         } else {
             results = Stream.concat(
-                    search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursService.findByNavident(ident).orElse(null))),
-                    search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursService.findByPersonident(ident).orElse(null)))
+                    search.resolveNavidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByNavident(ident).orElse(null))),
+                    search.resolvePersonidenter().stream().map(ident -> new Result(ident, ressursStateRepository.findByPersonident(ident).orElse(null)))
             );
         }
         return results

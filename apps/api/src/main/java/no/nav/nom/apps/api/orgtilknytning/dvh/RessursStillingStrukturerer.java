@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfolging;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -31,15 +31,15 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.isHistoricPerio
 public class RessursStillingStrukturerer {
     private final OrgenhetService orgenhetService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final Environment environment;
 
     public RessursStillingStrukturerer(OrgenhetService orgenhetService, RessursStillingLoadStatus ressursStillingLoadStatus,
-                                       IRessursService ressursService,
+                                       RessursStateRepository ressursStateRepository,
                                        Environment environment) {
         this.orgenhetService = orgenhetService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.environment = environment;
     }
 
@@ -56,7 +56,7 @@ public class RessursStillingStrukturerer {
         Map <String, List<StillingPeriode>> stillingPerioderPerNavident = new HashMap<>();
 
         ressursStillingerGruppert.forEach((navident, rsList) -> {
-            if (ressursService.findByNavident(navident).isEmpty()) {
+            if (ressursStateRepository.findByNavident(navident).isEmpty()) {
                 log.error("Har ressursStillinger fra DVH for navident {} som ikke finnes i NOM", navident);
                 return;
             }
@@ -166,7 +166,7 @@ public class RessursStillingStrukturerer {
         var grupperteStillinger = ressursStillinger.stream().collect(groupingBy( rs -> new StillingPeriode.StillingAgressoOrgIdOgNavn(rs.getStillingAgressoId(), rs.getStillingOrgenhetNavn(), rs.getRessursAgressoId(), rs.getRessursOrgenhetNiv())));
         List<StillingPeriode> perioderGruppert = new ArrayList<>();
 
-        LocalDate ressursSluttdato = ressursService.findByNavident(navident).get().sluttdato().orElse(null);
+        LocalDate ressursSluttdato = ressursStateRepository.findByNavident(navident).get().sluttdato().orElse(null);
 
         // Sorter og slå sammen sammenhengende perioder
         grupperteStillinger.forEach( (stillingAgressoOrgIdOgNavn, grupperteRessursStillinger)  -> {

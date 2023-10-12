@@ -8,7 +8,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Mock
     OrgenhetService orgenhetService;
     @Mock
-    IRessursService ressursService;
+    RessursStateRepository ressursStateRepository;
     @Mock
     RessursStillingLoadStatus ressursStillingLoadStatus;
     RessursStillingProcessor ressursStillingProcessor;
@@ -59,7 +59,7 @@ class RessursStillingProcessorTestUtilityMetoder {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursService);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursStateRepository);
     }
 
     @Test

@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -27,7 +27,7 @@ import static java.util.stream.Collectors.toMap;
 public class DvhService {
 
     private final DvhRepository dvhRepository;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
 
     public void saveLedere(List<DvhLeder> ledere) {
@@ -46,7 +46,7 @@ public class DvhService {
                 ledere.stream()
                         .filter(l -> {
                             val enhet = cachedEnheter.get(l.getOrgEnhetNr() + "-" + l.getOrgenhetNavn() + "-" + l.getOrgNiv());
-                            val ressurs = ressursService.findByNavident(l.getNavIdent());
+                            val ressurs = ressursStateRepository.findByNavident(l.getNavIdent());
                             if (enhet == null && ressurs.isEmpty()) {
                                 enhetAndRessursMissing.add(l);
                             } else if (enhet == null) {

@@ -39,7 +39,7 @@ class RessursStillingStrukturererTest extends TestBase {
     OrgenhetService orgenhetService;
 
     @MockBean
-    RessursStateRepository ressursService;
+    RessursStateRepository ressursStateRepository;
 
     private static IOrgenhet dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4;
     private static String navident_A001001 = "A001001";
@@ -55,9 +55,9 @@ class RessursStillingStrukturererTest extends TestBase {
 
     @BeforeEach
     public void beforeEach() {
-        when(ressursService.findByNavident(navident_A001001))
+        when(ressursStateRepository.findByNavident(navident_A001001))
             .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident_A001001, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
-        when(ressursService.findByNavident(navident_B002002))
+        when(ressursStateRepository.findByNavident(navident_B002002))
             .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", navident_B002002, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
     }
 
@@ -282,7 +282,7 @@ class RessursStillingStrukturererTest extends TestBase {
 
         LocalDate ressursSluttdato = LocalDate.of(2022, 1, 31);
 
-        when(ressursService.findByNavident(navid_3))
+        when(ressursStateRepository.findByNavident(navid_3))
             .thenReturn(Optional.of(new RessursState("FID_3", "03030354321", navid_3, Sektor.NAV_STATLIG, null, Optional.of(ressursSluttdato), Optional.empty())));
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));

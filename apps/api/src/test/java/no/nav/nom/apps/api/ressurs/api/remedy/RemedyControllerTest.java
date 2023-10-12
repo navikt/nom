@@ -48,7 +48,7 @@ public class RemedyControllerTest extends RestTestBase {
     private RessursCommadService ressursCommadService;
 
     @MockBean
-    protected RessursStateRepository ressursService;
+    protected RessursStateRepository ressursStateRepository;
 
     private Optional<RessursState> createRessursState(String personident, NavnDTO navn) {
         RessursState ressursState = new RessursState(
@@ -77,7 +77,7 @@ public class RemedyControllerTest extends RestTestBase {
             .etternavn("testEtternavn")
             .build();
 
-        when(ressursService.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
+        when(ressursStateRepository.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
 
         FinnRessursRequest request = new FinnRessursRequest();
         request.setPersonident(personident);
@@ -135,7 +135,7 @@ public class RemedyControllerTest extends RestTestBase {
             .etternavn("testEtternavn")
             .build();
 
-        when(ressursService.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
+        when(ressursStateRepository.findByPersonident(personident)).thenReturn(createRessursState(personident, navn));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()
             .personident(personident)
@@ -241,8 +241,8 @@ public class RemedyControllerTest extends RestTestBase {
 
         when(unleash.isEnabled(RemedyController.UNLEASH_HANDLE_PERSONIDENT_CHANGE)).thenReturn(true);
 
-        when(ressursService.findByPersonident(ny_personident)).thenReturn(Optional.empty()); // Nom har ikke ressurs på ny personident
-        when(ressursService.findByNavident(navident)).thenReturn(Optional.of(new RessursState(  // Men har eksisterende ressurs for navidenten returnert av nik
+        when(ressursStateRepository.findByPersonident(ny_personident)).thenReturn(Optional.empty()); // Nom har ikke ressurs på ny personident
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(new RessursState(  // Men har eksisterende ressurs for navidenten returnert av nik
             eksisterendeFid, gml_personident, navident, Sektor.NAV_STATLIG,
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
             Optional.empty(), Optional.empty()

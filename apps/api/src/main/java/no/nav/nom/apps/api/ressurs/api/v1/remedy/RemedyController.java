@@ -12,11 +12,11 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
@@ -47,7 +47,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RequestMapping("/api/v1/remedy")
 public class RemedyController {
     private final Logger log = LoggerFactory.getLogger(RemedyController.class);
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final PdlClient pdlClient;
     private final NIKClient nikClient;
     private final RessursCommadService ressursCommadService;
@@ -56,10 +56,10 @@ public class RemedyController {
     private final Unleash unleash;
 
     public RemedyController(
-        IRessursService ressursService, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
+        RessursStateRepository ressursStateRepository, PdlClient pdlClient, NIKClient nikClient, RessursCommadService ressursCommadService,
         Unleash unleash
     ) {
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.pdlClient = pdlClient;
         this.nikClient = nikClient;
         this.ressursCommadService = ressursCommadService;
@@ -88,7 +88,7 @@ public class RemedyController {
                 "Gitt personident er ikke gyldig"
             );
         }
-        var response = ressursService.findByPersonident(personident)
+        var response = ressursStateRepository.findByPersonident(personident)
             .map(this::from);
 
         if (response.isPresent()) {
@@ -122,7 +122,7 @@ public class RemedyController {
 
     public RessursDTO   opprettRessurs(OpprettRessursRequest request, String systemOriginator) {
         log.info(SECURE_LOGS, "Opprett ressurs request mottatt:\n{}", request);
-        var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
+        var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
             log.debug(SECURE_LOGS, "Ressurs med personident {} finnes fra før", request.getPersonident());
@@ -162,7 +162,7 @@ public class RemedyController {
 
         if (unleash.isEnabled(UNLEASH_HANDLE_PERSONIDENT_CHANGE)) {
             // Det kan være at identen person har byttet f.nr. i såfall har nav-ident returnert eksisterende navident for personen
-            funnetRessurs = ressursService.findByNavident(opprettetNavident);
+            funnetRessurs = ressursStateRepository.findByNavident(opprettetNavident);
             if (funnetRessurs.isPresent()) {
                 log.debug("Ressurs funnet med navident {}", opprettetNavident);
 

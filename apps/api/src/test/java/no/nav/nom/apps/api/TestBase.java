@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
 import no.nav.nom.apps.api.postgresql.GenericStorage;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -75,7 +75,7 @@ public abstract class TestBase {
     protected KafkaUtils kafkaUtils;
 
     @Autowired
-    protected IRessursService ressursService;
+    protected RessursStateRepository ressursStateRepository;
 
     @MockBean
     protected Unleash unleash;
@@ -97,7 +97,7 @@ public abstract class TestBase {
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
         kafkaUtils.clearKafka();
-        ressursService.clear();
+        ressursStateRepository.clear();
         dvhRessursUtils.createEmptyResponse();
     }
 

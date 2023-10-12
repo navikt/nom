@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreD
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -41,19 +41,19 @@ public class RessursStillingProcessor {
     private final OrgtilknytningStateService orgtilknytningStateService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private ProcessCmdResult processCmdResult = new ProcessCmdResult();
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
 
     public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
-                                    RessursStillingLoadStatus ressursStillingLoadStatus, IRessursService ressursService
+                                    RessursStillingLoadStatus ressursStillingLoadStatus, RessursStateRepository ressursStateRepository
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     public void process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
@@ -88,7 +88,7 @@ public class RessursStillingProcessor {
         }
 
         // Enn sålenge skal vi ikke behandle eksterne
-        RessursState ressurs = ressursService.findByNavident(navident).orElse(null);
+        RessursState ressurs = ressursStateRepository.findByNavident(navident).orElse(null);
         if (ressurs == null) {
             String msg = "Navident %s finnes ikke. Behandler ikke DVH ressursStillinger\n%s".formatted(navident, stillingPerioder);
             log.error(msg);

@@ -2,9 +2,8 @@ package no.nav.nom.apps.api.orgtilknytning.eventsourcing.state;
 
 import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
-import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class OrgtilknytningStateRepository {
     public static final String UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE = "nom.eksponer_orgtilknytninger_for_eksterne";
     private final Unleash unleash;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final Map<String, OrgtilknytningState> orgtilknytningByFid = new ConcurrentHashMap<>();
     private final Map<String, Map<String, OrgtilknytningState>> orgtilknytningerByNavident = new ConcurrentHashMap<>();
 
@@ -30,9 +29,9 @@ public class OrgtilknytningStateRepository {
     private final Map<String, Map<String, OrgtilknytningState>> orgtilknytningerByNavidentEksklusiveEksterne = new ConcurrentHashMap<>();
     private final RessursStateListener ressursStateListener;
 
-    public OrgtilknytningStateRepository(Unleash unleash, IRessursService ressursService, RessursStateListener ressursStateListener) {
+    public OrgtilknytningStateRepository(Unleash unleash, RessursStateRepository ressursStateRepository, RessursStateListener ressursStateListener) {
         this.unleash = unleash;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.ressursStateListener = ressursStateListener;
     }
 
@@ -177,7 +176,7 @@ public class OrgtilknytningStateRepository {
                 log.error("Feil ved venting på at ressursStateListener skal bli ferdig med initload", e);
             }
         }
-        List<String> eksterneNavidenter = ressursService.getAllBareEksterne().stream()
+        List<String> eksterneNavidenter = ressursStateRepository.getAllBareEksterne().stream()
             .map(RessursState::navident)
             .collect(Collectors.toList());
         return eksterneNavidenter;

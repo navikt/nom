@@ -13,12 +13,12 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.OpprettRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RemedyController;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -51,7 +51,7 @@ public class NavidentController {
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
     public static final String BASE_URL = "/api/v1/navident";
     private final RessursCommadService ressursCommadService;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
     public static final String UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER = "nom.remedy_redirect_til_remedycontroller";
@@ -61,14 +61,14 @@ public class NavidentController {
 
     public NavidentController(
         RessursCommadService ressursCommadService,
-        IRessursService ressursService,
+        RessursStateRepository ressursStateRepository,
         NIKClient nikClient,
         PdlClient pdlClient,
         Unleash unleash,
         RemedyController remedyController
     ) {
         this.ressursCommadService = ressursCommadService;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
         this.unleash = unleash;
@@ -103,7 +103,7 @@ public class NavidentController {
             )));
         }
 
-        final var funnetRessurs = ressursService.findByPersonident(request.getPersonident());
+        final var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
 
         if (funnetRessurs.isPresent()) {
             return funnetRessurs.map(this::toNavidentResponse)

@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
@@ -29,14 +29,14 @@ import static java.util.stream.Collectors.toMap;
 public class LederResolver {
 
     private final DvhRepository dvhRepository;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningStateService;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService, OrgenhetService orgenhetService,
+    public LederResolver(DvhRepository dvhRepository, RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
                          OrgtilknytningService orgtilknytningStateService) {
         this.dvhRepository = dvhRepository;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningStateService = orgtilknytningStateService;
     }
@@ -113,7 +113,7 @@ public class LederResolver {
         return dvhRepository.getLederByAgressoIdAndNiv(agressoId, orgNiv)
                 .stream()
                 .map(DvhLeder::getNavIdent)
-                .map(ressursService::findByNavident)
+                .map(ressursStateRepository::findByNavident)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(not(r -> r.navident().equals(excludeNavIdent)))

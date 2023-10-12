@@ -11,13 +11,13 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -38,7 +38,7 @@ public class RessursRestService {
 
     private final static Logger log = LoggerFactory.getLogger(RessursRestService.class);
 
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NIKClient nikClient;
@@ -47,7 +47,7 @@ public class RessursRestService {
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     public RessursRestService(
-        IRessursService ressursService,
+        RessursStateRepository ressursStateRepository,
         RessursCommadService ressursCommadService,
         OrgtilknytningCommandService orgtilknytningCommandService,
         NIKClient nikClient,
@@ -55,7 +55,7 @@ public class RessursRestService {
         OrgenhetService orgenhetService,
         RessursOpprettetEmailService ressursOpprettetEmailService
     ) {
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.ressursCommadService = ressursCommadService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nikClient = nikClient;
@@ -65,7 +65,7 @@ public class RessursRestService {
     }
 
     public RessursState findRessursByNavident(String navident) {
-        return ressursService.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
+        return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
     public RessursState createRessursAndNotify(
@@ -73,7 +73,7 @@ public class RessursRestService {
         JwtAuthenticationToken token
     ) {
 
-        return ressursService.findByPersonident(request.getPersonident()).orElseGet(() -> {
+        return ressursStateRepository.findByPersonident(request.getPersonident()).orElseGet(() -> {
             final var createRessursResponse = createRessurs(request, token);
 
             try {

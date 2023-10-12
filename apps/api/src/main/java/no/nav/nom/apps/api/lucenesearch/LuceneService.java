@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgenhetFilter;
@@ -31,7 +31,7 @@ public class LuceneService {
 
     private final WrappedLucene wrappedLucene;
 
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
 
     private List<String> invalidatedNavidentList = new ArrayList<>();
     private List<String> invalidatedOrgEnhetList = new ArrayList<>();
@@ -45,7 +45,7 @@ public class LuceneService {
 
     private final boolean isLocal;
 
-    public LuceneService(IRessursService ressursService, OrgenhetService orgenhetService, Environment environment) {
+    public LuceneService(RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment) {
         this.orgenhetService = orgenhetService;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
@@ -54,7 +54,7 @@ public class LuceneService {
         this.orgenhetEntityType = indexOrgEnhet.typeString();
         this.ressursEntityType = indexRessurs.typeString();
 
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         List<String> profiles = Arrays.asList(environment.getActiveProfiles());
         isLocal = profiles.contains("local") || profiles.contains("test");
     }
@@ -73,7 +73,7 @@ public class LuceneService {
         {
             final var navidentsToIndex =  grabAndResetNavidentInvalidationList();
             final var luceneRessursStream = navidentsToIndex.stream()
-                    .map(ressursService::findByNavident)
+                    .map(ressursStateRepository::findByNavident)
                     .map(Optional::get)
                     // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
                     .filter( ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run

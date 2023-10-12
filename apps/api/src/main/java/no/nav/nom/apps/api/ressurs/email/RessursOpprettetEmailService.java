@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class RessursOpprettetEmailService {
@@ -23,30 +22,30 @@ public class RessursOpprettetEmailService {
     private final EmailClient emailClient;
     private final AdClient adClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
-    private final RessursStateRepository ressursService;
+    private final RessursStateRepository ressursStateRepository;
 
     public RessursOpprettetEmailService(
         EmailClient emailClient,
         AdClient adClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        RessursStateRepository ressursService
+        RessursStateRepository ressursStateRepository
     ) {
         this.emailClient = emailClient;
         this.adClient = adClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     public void notifyByEmail(String navident, String orgenhetId) {
         log.info("Sender epost om opprettelse av ressurs {} til leder av orgenhet {}", navident, orgenhetId);
 
-        var opprettetRessurs = ressursService.findByNavident(navident)
+        var opprettetRessurs = ressursStateRepository.findByNavident(navident)
             .orElseThrow(() -> new RessursOpprettetEmailException("Opprettet ressurs mangler i state"));
         var orgEnhet = orgEnhetStateRepository.findById(orgenhetId)
             .orElseThrow(() -> new RessursOpprettetEmailException("Fant ikke orgenhet med gitt id"));
 
         // lederFid vil alltid være null siden den ikke er persistert enda
-        var maybeLederNavidents = orgEnhet.lederFid().flatMap(ressursService::findByFid).map(RessursState::navident);
+        var maybeLederNavidents = orgEnhet.lederFid().flatMap(ressursStateRepository::findByFid).map(RessursState::navident);
 
         maybeLederNavidents.ifPresentOrElse(
             lederNavident -> composeAndSendEmail(opprettetRessurs, Set.of(lederNavident)),

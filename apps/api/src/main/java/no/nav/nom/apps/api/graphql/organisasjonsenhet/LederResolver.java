@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.ErrorCode;
 import no.nav.nom.apps.api.graphql.common.exception.LederNotFoundException;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -19,17 +19,17 @@ import java.util.List;
 public class LederResolver {
 
     private final DvhRepository dvhRepository;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
 
-    public LederResolver(DvhRepository dvhRepository, IRessursService ressursService) {
+    public LederResolver(DvhRepository dvhRepository, RessursStateRepository ressursStateRepository) {
         this.dvhRepository = dvhRepository;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
         return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
                 .stream()
-                .map(leder -> tilOrgEnhetsLeder(ressursService.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
+                .map(leder -> tilOrgEnhetsLeder(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
                                                         .orElseThrow(LederNotFoundException::new)))
                 .toList();
     }

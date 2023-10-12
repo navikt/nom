@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -13,11 +13,11 @@ import java.util.List;
 @Component
 public class OrgEnhetKoblingResolver {
     private final OrgtilknytningService orgtilknytningStateService;
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
 
-    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningStateService, IRessursService ressursService) {
+    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningStateService, RessursStateRepository ressursStateRepository) {
         this.orgtilknytningStateService = orgtilknytningStateService;
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
     }
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
@@ -29,7 +29,7 @@ public class OrgEnhetKoblingResolver {
 
     private OrgEnhetsKobling tilOrgEnhetsKobling(OrgtilknytningState orgtilknytning) {
         return OrgEnhetsKobling.builder()
-            .ressurs(MappingUtils.toRessurs(ressursService.findByNavident(orgtilknytning.navident()).get()))
+            .ressurs(MappingUtils.toRessurs(ressursStateRepository.findByNavident(orgtilknytning.navident()).get()))
             .erDagligOppfolging(orgtilknytning.erDagligOppfolging())
             .gyldigFom(orgtilknytning.gyldigFom())
             .gyldigTom(orgtilknytning.gyldigTom().orElse(null))

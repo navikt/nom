@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.state;
 
-import no.nav.nom.apps.api.ressurs.IRessursService;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Service;
@@ -15,18 +14,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RessursStateRepository implements IRessursService {
+public class RessursStateRepository {
     private final Map<String, RessursState> ressursByFid = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByPersonident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavident = new ConcurrentHashMap<>();
     private final Map<String, RessursState> ressursByNavidentBareEksterne = new ConcurrentHashMap<>();
 
-    @Override
+
     public Optional<RessursState> findByFid(String fid) {
         return Optional.ofNullable(ressursByFid.get(fid));
     }
 
-    @Override
     public Optional<RessursState> findByPersonident(String personident) {
         return Optional.ofNullable(ressursByPersonident.get(personident));
     }
@@ -35,23 +33,19 @@ public class RessursStateRepository implements IRessursService {
         return Optional.ofNullable(ressursByNavident.get(navident));
     }
 
-    @Override
     public <T> Optional<T> findByNavident(String navIdent, Function<RessursState, T> withMapper) {
         return findByNavident(navIdent)
             .map(withMapper);
     }
 
-    @Override
     public Collection<RessursState> getAll() {
         return ressursByNavident.values();
     }
 
-    @Override
     public Collection<RessursState> getAllBareEksterne() {
         return ressursByNavidentBareEksterne.values();
     }
 
-    @Override
     public Collection<RessursState> getAllByFid() {
         return ressursByFid.values();
     }
@@ -60,14 +54,13 @@ public class RessursStateRepository implements IRessursService {
         return ressursByFid.size();
     }
 
-    @Override
+
     public Map<String, RessursState> findByPersonidentBulk(List<String> personIdenter) {
         return ressursByPersonident.entrySet().stream()
             .filter(entry -> personIdenter.contains(entry.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    @Override
     public Map<String, RessursState> findByNavidentBulk(List<String> navIdenter) {
         return ressursByNavident.entrySet().stream()
             .filter(entry -> navIdenter.contains(entry.getKey()))
@@ -83,7 +76,6 @@ public class RessursStateRepository implements IRessursService {
         }
     }
 
-    @Override
     public void clear() {
         ressursByFid.clear();
         ressursByPersonident.clear();
@@ -91,10 +83,11 @@ public class RessursStateRepository implements IRessursService {
         ressursByNavidentBareEksterne.clear();
     }
 
-    @Override
     public void remove(String fid) {
         RessursState ressursStateToDelete = ressursByFid.get(fid);
-        if (ressursStateToDelete == null) return;
+        if (ressursStateToDelete == null) {
+            return;
+        }
         ressursByFid.remove(fid);
 
         removeInRessursByPersonident(fid, ressursStateToDelete);

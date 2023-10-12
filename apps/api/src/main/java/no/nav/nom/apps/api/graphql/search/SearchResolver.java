@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearchFilter;
 import no.nav.nom.apps.api.graphql.common.projections.RessursSearchFilter;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.libs.lucenewrapper.domain.LuceneOrgEnhet;
@@ -21,16 +21,16 @@ import java.util.stream.Stream;
 @Component
 public class SearchResolver {
 
-    private final IRessursService ressursService;
+    private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
     private final LuceneService luceneService;
 
     public SearchResolver(
-        IRessursService ressursService,
+        RessursStateRepository ressursStateRepository,
         OrgenhetService orgenhetService,
         LuceneService luceneService
     ) {
-        this.ressursService = ressursService;
+        this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.luceneService = luceneService;
     }
@@ -45,7 +45,7 @@ public class SearchResolver {
                 if (result.entityClass().equals(LuceneOrgEnhet.class)) {
                     return MappingUtils.toOrgEnhet(orgenhetService.getById(result.id()).orElseThrow());
                 } else if (result.entityClass().equals(LuceneRessurs.class)) {
-                    return MappingUtils.toRessurs(ressursService.findByNavident(result.id()).orElseThrow());
+                    return MappingUtils.toRessurs(ressursStateRepository.findByNavident(result.id()).orElseThrow());
                 } else {
                     throw new RuntimeException("Unknown entity class: " + result.entityClass());
                 }
@@ -56,7 +56,7 @@ public class SearchResolver {
 
     public List<Ressurs> searchRessurs(String term, RessursSearchFilter filter) {
         var matchedNavidentsSorted = luceneService.searchRessurs(term, filter.toLuceneFilter(), filter.getLimit().getValue());
-        var matchedNavidentsMap = ressursService.findByNavidentBulk(matchedNavidentsSorted.stream().map(SearchResult::id).toList());
+        var matchedNavidentsMap = ressursStateRepository.findByNavidentBulk(matchedNavidentsSorted.stream().map(SearchResult::id).toList());
 
         return matchedNavidentsSorted.stream()
             .map(it -> MappingUtils.toRessurs(matchedNavidentsMap.get(it.id())))

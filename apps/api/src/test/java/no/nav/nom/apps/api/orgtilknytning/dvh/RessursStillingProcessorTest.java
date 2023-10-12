@@ -4,7 +4,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
-import no.nav.nom.apps.api.ressurs.IRessursService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -32,7 +32,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     @Mock
     OrgtilknytningStateService orgtilknytningStateService;
     @Mock
-    IRessursService ressursService;
+    RessursStateRepository ressursStateRepository;
     @Mock
     RessursStillingLoadStatus ressursStillingLoadStatus;
     RessursStillingProcessor ressursStillingProcessor;
@@ -47,7 +47,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         orgenhetService = new OrgenhetService(orgEnhetStateRepository, new DvhRepository());
         ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
-            ressursService);
+            ressursStateRepository);
 
         when(orgtilknytningCommandService.opprettOrgtilknytning(any())).thenReturn("FID_1");
 
@@ -141,7 +141,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     private void svarAtAlleNavidenterErStatlig(String navident) {
-        when(ressursService.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+        when(ressursStateRepository.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningStateService.getAll()).thenReturn(Collections.emptyList());
-        when(ressursService.findByNavident(any())).thenReturn(
+        when(ressursStateRepository.findByNavident(any())).thenReturn(
             Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato), Optional.empty()))
         );
 
@@ -261,7 +261,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         OrgtilknytningState eksisterendeNyEnhet = new OrgtilknytningState("OT_FID_2", navident, "a004bc", false, startDate, Optional.empty());
 
         when(orgtilknytningStateService.getByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
-        when(ressursService.findByNavident(any())).thenReturn(
+        when(ressursStateRepository.findByNavident(any())).thenReturn(
             Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty(), Optional.empty()))
         );
         ressursStillingProcessor.process(navident, stillingPerioder);
