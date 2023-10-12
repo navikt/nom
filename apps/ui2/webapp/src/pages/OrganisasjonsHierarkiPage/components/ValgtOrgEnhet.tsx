@@ -121,7 +121,6 @@ function TopBorder() {
       css={css`
         display: flex;
         gap: var(--a-spacing-3);
-        height: 100%;
         outline: 2px solid var(--a-lightblue-800);
         outline-offset: -1px;
         background-color: var(--a-lightblue-800);
