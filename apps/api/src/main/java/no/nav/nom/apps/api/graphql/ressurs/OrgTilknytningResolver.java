@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.graphql.ressurs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -22,12 +22,12 @@ import static java.util.stream.Collectors.toMap;
 
 public class OrgTilknytningResolver {
 
-    private final OrgtilknytningService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
 
     @Autowired
-    public OrgTilknytningResolver(OrgtilknytningService orgtilknytningStateService, OrgenhetService orgenhetService) {
-        this.orgtilknytningStateService = orgtilknytningStateService;
+    public OrgTilknytningResolver(OrgtilknytningService orgtilknytningService, OrgenhetService orgenhetService) {
+        this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
     }
 
@@ -37,7 +37,7 @@ public class OrgTilknytningResolver {
     }
 
     private List<RessursOrgTilknytning> getOrgTilknytningerForRessurs(Ressurs ressurs) {
-        return orgtilknytningStateService
+        return orgtilknytningService
             .getByNavIdent(ressurs.getNavIdent()).stream()
             .map(this::fromOrgtilknytningState)
             .toList();

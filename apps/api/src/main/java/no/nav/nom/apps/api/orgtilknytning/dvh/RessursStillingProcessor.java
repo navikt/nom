@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
@@ -38,7 +38,7 @@ import static no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode.DagligOppfo
 @Slf4j
 public class RessursStillingProcessor {
     private final OrgenhetService orgenhetService;
-    private final OrgtilknytningStateService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final RessursStateRepository ressursStateRepository;
@@ -46,11 +46,11 @@ public class RessursStillingProcessor {
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
 
-    public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningStateService orgtilknytningStateService, OrgtilknytningCommandService orgtilknytningCommandService,
+    public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService,
                                     RessursStillingLoadStatus ressursStillingLoadStatus, RessursStateRepository ressursStateRepository
     ) {
         this.orgenhetService = orgenhetService;
-        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningService = orgtilknytningService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursStateRepository = ressursStateRepository;
@@ -99,7 +99,7 @@ public class RessursStillingProcessor {
         }
 
         // Hent orgtilknytninger fra State
-        var orgtilknytninger = orgtilknytningStateService.getByNavIdent(navident);
+        var orgtilknytninger = orgtilknytningService.getByNavIdent(navident);
         stillingPerioder.forEach( midlStillingPeriode -> {
 
             // Ikke behandle stillingperioder som starter etter Ressurs sluttdato.

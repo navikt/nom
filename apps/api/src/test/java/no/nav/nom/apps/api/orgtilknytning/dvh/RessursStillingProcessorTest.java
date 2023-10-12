@@ -3,7 +3,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -30,7 +30,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     private static final LocalDate MAX_DATE = LocalDate.of(2099, 12, 31);
 
     @Mock
-    OrgtilknytningStateService orgtilknytningStateService;
+    OrgtilknytningService orgtilknytningService;
     @Mock
     RessursStateRepository ressursStateRepository;
     @Mock
@@ -45,7 +45,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
         orgenhetService = new OrgenhetService(orgEnhetStateRepository, new DvhRepository());
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningStateService, orgtilknytningCommandService,
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
             ressursStateRepository);
 
@@ -76,7 +76,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         );
 
         // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningStateService.getAll()).thenReturn(Collections.emptyList());
+        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -118,7 +118,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         );
 
         // Ingen eksitsterende orgtilknytninger
-        when(orgtilknytningStateService.getAll()).thenReturn(Collections.emptyList());
+        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         // Alle er sttatlig ansatte
         svarAtAlleNavidenterErStatlig(navident);
 
@@ -167,7 +167,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         );
 
         // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningStateService.getAll()).thenReturn(Collections.emptyList());
+        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -212,7 +212,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         );
 
         // Ingen ekststerende orgtilknytninger
-        when(orgtilknytningStateService.getAll()).thenReturn(Collections.emptyList());
+        when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         when(ressursStateRepository.findByNavident(any())).thenReturn(
             Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato), Optional.empty()))
         );
@@ -260,7 +260,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         OrgtilknytningState eksisterendeGammelEnhet = new OrgtilknytningState("OT_FID_1", navident, "a003bc", true, startDate, Optional.empty());
         OrgtilknytningState eksisterendeNyEnhet = new OrgtilknytningState("OT_FID_2", navident, "a004bc", false, startDate, Optional.empty());
 
-        when(orgtilknytningStateService.getByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
+        when(orgtilknytningService.getByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
         when(ressursStateRepository.findByNavident(any())).thenReturn(
             Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty(), Optional.empty()))
         );

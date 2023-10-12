@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
@@ -31,14 +31,15 @@ public class LederResolver {
     private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
-    private final OrgtilknytningService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
 
     public LederResolver(DvhRepository dvhRepository, RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
-                         OrgtilknytningService orgtilknytningStateService) {
+                         OrgtilknytningService orgtilknytningService
+    ) {
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
-        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningService = orgtilknytningService;
     }
 
     public <T> Map<Ressurs, List<T>> load(Collection<Ressurs> ressurser, Function<Ressurs, List<T>> loader) {
@@ -59,19 +60,19 @@ public class LederResolver {
     }
 
     public List<RessursLeder> ledere(String navIdent) {
-        var aktiveKoblinger = orgtilknytningStateService.getByNavIdent(navIdent)
+        var aktiveKoblinger = orgtilknytningService.getByNavIdent(navIdent)
             .stream()
             .filter(kobling -> DateUtil.isNow(kobling.gyldigFom(), kobling.gyldigTom().orElse(null))).collect(Collectors.toList());
 
         // If there are no active koblinger, we find which date the earlist kobling will start, and select all koblinger starting that day.
-        var dateForNextKobling = orgtilknytningStateService.getByNavIdent(navIdent)
+        var dateForNextKobling = orgtilknytningService.getByNavIdent(navIdent)
             .stream()
             .map(OrgtilknytningState::gyldigFom)
             .filter(gyldigFom -> gyldigFom.isAfter(LocalDate.now()))
             .min(LocalDate::compareTo);
 
 
-        var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningStateService.getByNavIdent(navIdent)
+        var koblinger = aktiveKoblinger.size() > 0 ? aktiveKoblinger : orgtilknytningService.getByNavIdent(navIdent)
             .stream()
             .filter(kobling -> kobling.gyldigFom().isEqual(dateForNextKobling.orElse(LocalDate.MIN)))
             .toList();

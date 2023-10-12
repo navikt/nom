@@ -1,7 +1,7 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
 import no.nav.nom.apps.api.graphql.MappingUtils;
-import no.nav.nom.apps.api.orgtilknytning.contract.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
@@ -12,16 +12,16 @@ import java.util.List;
 
 @Component
 public class OrgEnhetKoblingResolver {
-    private final OrgtilknytningService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
 
-    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningStateService, RessursStateRepository ressursStateRepository) {
-        this.orgtilknytningStateService = orgtilknytningStateService;
+    public OrgEnhetKoblingResolver(OrgtilknytningService orgtilknytningService, RessursStateRepository ressursStateRepository) {
+        this.orgtilknytningService = orgtilknytningService;
         this.ressursStateRepository = ressursStateRepository;
     }
 
     public List<OrgEnhetsKobling> koblinger(OrgEnhet orgEnhet) {
-        return orgtilknytningStateService.getByEnhet(orgEnhet.getId())
+        return orgtilknytningService.getByEnhet(orgEnhet.getId())
             .stream()
             .map(this::tilOrgEnhetsKobling)
             .toList();

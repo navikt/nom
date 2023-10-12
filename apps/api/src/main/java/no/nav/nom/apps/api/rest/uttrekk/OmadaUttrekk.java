@@ -11,7 +11,7 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import org.apache.commons.csv.CSVFormat;
@@ -39,19 +39,19 @@ public class OmadaUttrekk {
     private final Logger log = LoggerFactory.getLogger(OmadaUttrekk.class);
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
-    private final OrgtilknytningStateService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final DvhRepository dvhRepository;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public OmadaUttrekk(
         RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
-        OrgtilknytningStateService orgtilknytningStateService,
+        OrgtilknytningService orgtilknytningService,
         RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
-        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningService = orgtilknytningService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
     }
@@ -113,7 +113,7 @@ public class OmadaUttrekk {
         final var cSVFormat = getCSVFormat("navident", "org_enhet_id", "fid", "erDagligOppfolging", "gyldig_fom", "gyldig_tom");
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
-            orgtilknytningStateService.getAll()
+            orgtilknytningService.getAll()
                 .stream().filter( ot -> !ot.orgEnhetId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(kobling -> {
                     try {

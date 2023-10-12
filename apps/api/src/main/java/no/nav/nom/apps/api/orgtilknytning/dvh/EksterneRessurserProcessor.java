@@ -4,7 +4,7 @@ import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningStateService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
@@ -19,9 +19,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,24 +30,24 @@ public class EksterneRessurserProcessor {
     public static final String UNLEASH_LAG_EVENTS = "nom.persister_events_ved_last_orgtilknytninger_for_eksterne";
     private final Unleash unleash;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
-    private final OrgtilknytningStateService orgtilknytningStateService;
+    private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
 
     public EksterneRessurserProcessor(
-        Unleash unleash, RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningStateService orgtilknytningStateService,
+        Unleash unleash, RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         OrgtilknytningCommandService orgtilknytningCommandService
     ) {
         this.unleash = unleash;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
-        this.orgtilknytningStateService = orgtilknytningStateService;
+        this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
     }
 
     public void process(DvhEksternRessurs eksternRessurs) {
-        var eksisterendeOrgtilknytninger = orgtilknytningStateService.getByNavIdent(eksternRessurs.navident(), true);
+        var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(eksternRessurs.navident(), true);
 
         log.debug("Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {
@@ -110,7 +108,7 @@ public class EksterneRessurserProcessor {
                     } else {
                         // Orgenhet er endret
                         // Fjern den eksisterende, opprett ny med samme gyldigFom
-                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, orgenhet, metadata);
+                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, metadata);
                         opprettOrgtilknytning(eksternRessurs, orgenhet, sisteEksisterendeOrgtilknytning.gyldigFom(), metadata);
                     }
                 }
@@ -289,7 +287,7 @@ public class EksterneRessurserProcessor {
         }
     }
 
-    private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, IOrgenhet orgenhet, InputMetadata metadata) {
+    private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
         var fjernOrgtilknytning = new FjernOrgtilknytning(
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),
