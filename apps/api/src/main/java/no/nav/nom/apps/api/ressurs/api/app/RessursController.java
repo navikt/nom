@@ -60,13 +60,13 @@ public class RessursController {
 
     @GetMapping("/byNavident/{navident}")
     @Operation(
-        description = "Henter alle ressurser",
+        description = "Henter ressurs med navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Ressurser"),
+        @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<RessursState> opprettRessurs(@PathVariable String navident){
+    public ResponseEntity<RessursState> getRessurs(@PathVariable String navident){
         return ResponseEntity.ok(ressursRestService.findRessursByNavident(navident));
     }
 
