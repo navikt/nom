@@ -99,10 +99,8 @@ public class RemedyController {
             log.debug("Forsøker å finne ressurs i PDL");
             return pdlClient.hentPerson(personident)
                 .map(this::from)
-                .orElse(createErrorResponse(
-                    HttpStatus.NOT_FOUND,
-                    "Kunne ikke finne ressurs med gitt personident"
-                ));
+                .orElse(null);
+
         }
     }
 
