@@ -72,7 +72,7 @@ public class DvhRepository {
     }
 
     private void updateListeners() {
-        for(var listener: this.listeners){
+        for (var listener : this.listeners) {
             listener.get();
         }
     }

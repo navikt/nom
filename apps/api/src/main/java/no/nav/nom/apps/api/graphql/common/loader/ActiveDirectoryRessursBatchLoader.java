@@ -14,21 +14,19 @@ import no.nav.nom.contract.ad.AdRessurs.AdStatus;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static no.nav.nom.apps.api.clients.ad.AdClient.AD_MAX_BATCH_SIZE;
+import static no.nav.nom.apps.api.clients.ad.AdClient.listToBatches;
 
 @Slf4j
 @Component
 public class ActiveDirectoryRessursBatchLoader {
 
-    private final static int MAX_BATCH_SIZE = 100;
+
     private final AdClient adClient;
 
     public ActiveDirectoryRessursBatchLoader(AdClient adClient) {
@@ -36,7 +34,7 @@ public class ActiveDirectoryRessursBatchLoader {
     }
 
     public <T> Map<Ressurs, DataFetcherResult<T>> load(List<Ressurs> ressurser, Function<AdRessurs, T> propertyResolver) {
-        final var adRessurser = batchCollection(ressurser).stream() // Split into MAX_BATCH_SIZE lists
+        final var adRessurser = listToBatches(ressurser, AD_MAX_BATCH_SIZE).stream() // Split into MAX_BATCH_SIZE lists
             .map(batch -> getAdRessurser(batch.stream().map(Ressurs::getNavIdent).collect(toSet()), propertyResolver)) // Get AD ressurser from nom-proxy
             .flatMap(batchResult -> batchResult.entrySet().stream()) // Convert all Maps to a big stream of EntrySet
             .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)); // Collect all entries to a Map
@@ -58,19 +56,6 @@ public class ActiveDirectoryRessursBatchLoader {
         }
     }
 
-    private Collection<Collection<Ressurs>> batchCollection(List<Ressurs> ressurser) {
-        Collection<Collection<Ressurs>> batchListe = new LinkedList<>();
-        int times = (ressurser.size() / MAX_BATCH_SIZE) + 1;
-
-        for (int i = 0; i < times; i++) {
-            int batchStart = MAX_BATCH_SIZE * i;
-            int possibleBatchEnd = MAX_BATCH_SIZE * (i+1);
-            int batchEnd = possibleBatchEnd > ressurser.size() ? (MAX_BATCH_SIZE * i) + ressurser.size() % MAX_BATCH_SIZE : possibleBatchEnd;
-            batchListe.add(ressurser.subList(batchStart, batchEnd));
-        }
-
-        return batchListe;
-    }
 
     private <T> DataFetcherResult<T> convert(AdRessurs ressurs, Function<AdRessurs, T> propertyResolver) {
         if (ressurs.getStatus() == AdStatus.OK) {

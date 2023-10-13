@@ -48,4 +48,6 @@ public class RessursPropertyResolver {
         }
         return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail);
     }
+
+
 }
