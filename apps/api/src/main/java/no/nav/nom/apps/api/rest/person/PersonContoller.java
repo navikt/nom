@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.pdl.Person;
@@ -19,9 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+
 @Tag(name = "Person")
 @RestController
 @RequestMapping("/api/v1/person")
+@Slf4j
 public class PersonContoller {
 
     public static final String UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER = "nom.remedy_redirect_til_remedycontroller";
@@ -45,6 +49,8 @@ public class PersonContoller {
     })
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
+        log.info(SECURE_LOGS, "getPerson kalt fra Remedy:\n{}", request);
+
         if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
             return  ResponseEntity.ok(convert(remedyController.finnRessurs(request.getPersonident())));
 

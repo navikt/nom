@@ -80,16 +80,20 @@ public class RemedyController {
     }
 
     public RessursDTO finnRessurs(String personident) {
-        if (personident.isBlank()) {
+        log.info(SECURE_LOGS, "Finn ressurs request mottatt:\n{}", personident);
+
+        if (personident == null || personident.isBlank()) {
+            log.error("Personident er tom");
             return createErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                "Gitt personident er ikke gyldig"
+                "Angitt personident er ikke gyldig"
             );
         }
         var response = ressursStateRepository.findByPersonident(personident)
             .map(this::from);
 
         if (response.isPresent()) {
+            log.info(SECURE_LOGS, "Ressurs {} funnet med personident {}", response.get().getNavident(), personident);
             return response.get();
         } else {
             log.debug("Forsøker å finne ressurs i PDL");
@@ -227,6 +231,7 @@ public class RemedyController {
     }
 
     private RessursDTO createErrorResponse(HttpStatusCode httpStatusCode, String feilmelding) {
+        log.error("Feilhåndtering i kall fra Remedy - Returnerer feil '{} - {}'", httpStatusCode, feilmelding);
         return RessursDTO.builder()
             .status(String.valueOf(httpStatusCode.value()))
             .feilmelding(feilmelding)

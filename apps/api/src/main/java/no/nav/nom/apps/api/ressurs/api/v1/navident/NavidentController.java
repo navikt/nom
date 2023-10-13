@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
@@ -94,6 +95,8 @@ public class NavidentController {
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Success")})
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
+        log.info(SECURE_LOGS, "opprettNavident kalt fra Remedy:\n{}", request);
+
         if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
             return ResponseEntity.ok(
                 toNavidentResponse(remedyController.tryOpprettRessurs(convert(request)))
