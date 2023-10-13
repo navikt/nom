@@ -28,7 +28,7 @@
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
 
-        <unleash.version>8.3.1</unleash.version>
+        <unleash.version>8.4.0</unleash.version>
     </properties>
 
     <dependencies>
