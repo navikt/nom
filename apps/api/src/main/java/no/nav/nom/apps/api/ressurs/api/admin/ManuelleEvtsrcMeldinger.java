@@ -85,7 +85,7 @@ public class ManuelleEvtsrcMeldinger {
                 "lagSlettRessursMelding",
                 fid,
                 new Origination(
-                    SecurityUtil.getUserFromToken(token).orElseThrow(),
+                    SecurityUtil.getAuthenticatedNavIdent(),
                     "Admin swagger/rest"
                 )
             )
@@ -141,7 +141,7 @@ public class ManuelleEvtsrcMeldinger {
                 "oppdaterPersonidentForRessurs",
                 fid,
                 new Origination(
-                    SecurityUtil.getUserFromToken(token).orElseThrow(),
+                    SecurityUtil.getAuthenticatedNavIdent(),
                     "Admin swagger/rest"
                 )
             )
@@ -205,7 +205,7 @@ public class ManuelleEvtsrcMeldinger {
                 "oppdaterPersonaliaForRessurs",
                 fid,
                 new Origination(
-                    SecurityUtil.getUserFromToken(token).orElseThrow(),
+                    SecurityUtil.getAuthenticatedNavIdent(),
                     "Admin swagger/rest"
                 )
             )

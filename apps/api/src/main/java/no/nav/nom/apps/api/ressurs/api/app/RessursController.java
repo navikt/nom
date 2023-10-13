@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,9 +52,8 @@ public class RessursController {
         "hasAuthority('MUTATE_RESSURS')"
     )
     public ResponseEntity<OpprettRessursResponse> opprettRessurs(
-        @RequestBody OpprettRessursRequest request,
-        JwtAuthenticationToken token) {
-        return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request, token)));
+        @RequestBody OpprettRessursRequest request) {
+        return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request)));
     }
 
     @GetMapping("/byNavident/{navident}")

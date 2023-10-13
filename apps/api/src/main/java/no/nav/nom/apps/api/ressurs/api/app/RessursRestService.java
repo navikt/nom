@@ -25,7 +25,6 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -69,12 +68,11 @@ public class RessursRestService {
     }
 
     public RessursState createRessursAndNotify(
-        OpprettRessursRequest request,
-        JwtAuthenticationToken token
+        OpprettRessursRequest request
     ) {
 
         return ressursStateRepository.findByPersonident(request.getPersonident()).orElseGet(() -> {
-            final var createRessursResponse = createRessurs(request, token);
+            final var createRessursResponse = createRessurs(request);
 
             try {
                 ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.getOrgEnhetId());
@@ -89,7 +87,7 @@ public class RessursRestService {
 
     }
 
-    private RessursState createRessurs(OpprettRessursRequest request, JwtAuthenticationToken token) {
+    private RessursState createRessurs(OpprettRessursRequest request) {
 
         final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
             OpprettNavidentRequest.builder()
@@ -128,8 +126,8 @@ public class RessursRestService {
             "opprettRessurs",
             request,
             new Origination(
-                SecurityUtil.getUserFromToken(token).orElseThrow(),
-                SecurityUtil.getSystemFromToken(token).orElseThrow()
+                SecurityUtil.getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
             )
         );
 

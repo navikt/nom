@@ -28,9 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -116,11 +114,11 @@ public class RemedyController {
         }
     )
     @PreAuthorize("hasAuthority('MUTATE_RESSURS')")
-    public ResponseEntity<RessursDTO> opprettRessurs(@RequestBody OpprettRessursRequest request, @NonNull JwtAuthenticationToken token) {
-        return ResponseEntity.ok(opprettRessurs(request, SecurityUtil.getSystemFromToken(token).orElseThrow()));
+    public ResponseEntity<RessursDTO> opprettRessurs(@RequestBody OpprettRessursRequest request) {
+        return ResponseEntity.ok(tryOpprettRessurs(request));
     }
 
-    public RessursDTO   opprettRessurs(OpprettRessursRequest request, String systemOriginator) {
+    public RessursDTO tryOpprettRessurs(OpprettRessursRequest request) {
         log.info(SECURE_LOGS, "Opprett ressurs request mottatt:\n{}", request);
         var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
 
@@ -157,7 +155,7 @@ public class RemedyController {
             "REST",
             "/api/v1/remedy/ressurs",
             request,
-            new Origination(request.getSubmitter(), systemOriginator)
+            new Origination(request.getSubmitter(), SecurityUtil.getAuthenticatedAzpName())
         );
 
         if (unleash.isEnabled(UNLEASH_HANDLE_PERSONIDENT_CHANGE)) {

@@ -26,10 +26,8 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -95,12 +93,11 @@ public class NavidentController {
     )
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Success")})
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
-    public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request, @NonNull JwtAuthenticationToken token) {
+    public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
         if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
-            return ResponseEntity.ok(toNavidentResponse(remedyController.opprettRessurs(
-                convert(request),
-                SecurityUtil.getSystemFromToken(token).orElseThrow()
-            )));
+            return ResponseEntity.ok(
+                toNavidentResponse(remedyController.tryOpprettRessurs(convert(request)))
+            );
         }
 
         final var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
@@ -150,7 +147,7 @@ public class NavidentController {
                     "REST",
                     "/api/v1/navident",
                     request,
-                    new Origination(request.getSubmitter(), SecurityUtil.getSystemFromToken(token).orElseThrow())
+                    new Origination(request.getSubmitter(), SecurityUtil.getAuthenticatedAzpName())
                 ),
                 null,
                 null,

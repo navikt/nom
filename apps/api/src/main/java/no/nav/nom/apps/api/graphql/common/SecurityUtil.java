@@ -5,15 +5,18 @@ import no.nav.nom.apps.api.common.security.NomApiAccessScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +30,9 @@ public class SecurityUtil {
 
     private final boolean securityEnabled;
     private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
+
+    public static final String NAVIDENT = "NAVident";
+    public static final String AZP_NAME = "azp_name";
 
     public SecurityUtil(Environment environment) {
         securityEnabled = !Arrays.stream(environment.getActiveProfiles()).toList().contains("local");
@@ -108,18 +114,34 @@ public class SecurityUtil {
             final var auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (auth instanceof JwtAuthenticationToken token) {
-                var azp_name = token.getTokenAttributes().get("azp_name");
+                var azp_name = token.getTokenAttributes().get(AZP_NAME);
                 return Optional.ofNullable(azp_name).map(Objects::toString);
             }
         }
         return Optional.empty();
     }
 
-    public static Optional<String> getUserFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-        return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("NAVident"));
+    public static Optional<String> getNavIdent(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return Optional.ofNullable(jwt.getClaimAsString(NAVIDENT));
     }
 
-    public static Optional<String> getSystemFromToken(JwtAuthenticationToken jwtAuthenticationToken) {
-        return Optional.ofNullable(jwtAuthenticationToken.getToken().getClaimAsString("azp_name"));
+    // When consumer is an application
+    public static Optional<String> getAzpName(Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return Optional.ofNullable(jwt.getClaimAsString(AZP_NAME));
+    }
+
+
+    public static String getAuthenticatedNavIdent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return getNavIdent(authentication).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", NAVIDENT)));
+    }
+
+    public static String getAuthenticatedAzpName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return getAzpName(authentication).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Couldn't find %s in Claims", AZP_NAME)));
     }
 }
