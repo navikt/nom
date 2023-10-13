@@ -10,24 +10,10 @@ public record TeamcatRessursDTO(
     String epost,
     String navident,
     ResourceType ressurstype,
-    String visningsnavn
+    String visningsnavn,
+
+    String avdelingnavn
 ) {
-
-    /*
-            switch (ressursType) {
-            case "INTERN":
-                return INTERNAL;
-            case "EKSTERN":
-                return EXTERNAL;
-            case "ANNEN_STAT":
-                // Annen statlig org? Helfo etc kommer her, filtrerer de ut
-                return OTHER;
-            default:
-                log.warn("unknown resource type {}", ressursType);
-                return OTHER;
-        }
-     */
-
     public enum ResourceType {
         ANNEN_STAT("ANNEN_STAT"),
         EKSTERN("EKSTERN"),
