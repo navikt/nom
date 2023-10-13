@@ -26,12 +26,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
 
 @Slf4j
 @Component
@@ -140,9 +143,17 @@ public class DvhRestConsumer {
                     .toList();
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
+            dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
         } catch(Exception e) {
             log.error("Feilet i last av ressurser fra dvh", e);
         }
+    }
+
+    private Set<String> findAnnenStatNavIdenter(List<DvhRessurs> dvhRessurs) {
+        return dvhRessurs.stream()
+            .filter(r -> r.getRemedyAnsattType().equals(ANNEN_STATLIG.beskrivelse))
+            .map(DvhRessurs::getNavIdent)
+            .collect(Collectors.toSet());
     }
 
     private void updateOrgtilknytningerStateFromDvh() {

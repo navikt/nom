@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.ressurs.api.v1.teamcat;
 import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public record TeamcatRessursDTO(
     LocalDate startdato,
@@ -12,7 +11,6 @@ public record TeamcatRessursDTO(
     String navident,
     ResourceType ressurstype,
     String visningsnavn
-
 ) {
 
     /*
@@ -43,7 +41,7 @@ public record TeamcatRessursDTO(
             this.textRepresentation = textRepresentation;
         }
 
-        public static ResourceType fromSektor(Sektor sektor, boolean isAnnenStat) {
+        public static ResourceType from(Sektor sektor, boolean isAnnenStat) {
             if (isAnnenStat) {
                 return ResourceType.ANNEN_STAT;
             }
