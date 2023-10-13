@@ -71,6 +71,7 @@ public class PersonContoller {
     }
 
     private PdlPersonDTO convert(RessursDTO ressursDTO) {
+        if (ressursDTO == null) return null;
         return PdlPersonDTO.builder()
                 .navn(NavnDTO.builder()
                         .fornavn(ressursDTO.getNavn().getFornavn())
