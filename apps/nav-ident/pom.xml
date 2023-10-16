@@ -26,7 +26,7 @@
         <postgresql.version>42.5.4</postgresql.version>
         <springdoc.version>2.2.0</springdoc.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.24.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.25.0</gcp.libraries-bom.version>
 
     </properties>
 
