@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.api.remedy;
+package no.nav.nom.apps.api.ressurs.api.v1.remedy;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
