@@ -12,7 +12,7 @@ spec:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
     - name: JAVA_OPTS
-      value: "-Xms512m -Xmx2048m"
+      value: "-Xms2048m -Xmx8192m"
   envFrom:
     - secret: nom-sluttdato-override-json
     - secret: nom-api-unleash-api-token
@@ -43,10 +43,10 @@ spec:
   resources:
     requests:
       cpu: 300m
-      memory: 1024Mi
+      memory: 2048Mi
     limits:
       cpu: 2000m
-      memory: 3072Mi
+      memory: 10240Mi
   leaderElection: true
   prometheus:
     enabled: true
