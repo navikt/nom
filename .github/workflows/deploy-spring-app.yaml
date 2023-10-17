@@ -42,6 +42,11 @@ on:
         required: false
         description: Additional template variables besides image var. Must adhere to pattern ',var1=value,var2=value'
         default: ''
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests. This makes build faster.
     secrets:
       NAIS_DEPLOY_APIKEY:
         required: true
@@ -73,7 +78,7 @@ jobs:
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
-        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make --batch-mode
+        run: mvn clean package --projects :${{ inputs.maven-project }} --also-make -Dmaven.test.skip=${{ inputs.skip-tests }} --batch-mode
       - name: Build and push Docker image
         uses: nais/docker-build-push@v0
         id: docker-push
@@ -115,7 +120,7 @@ jobs:
 
   deploy-prod:
     name: Deploy to NAIS ${{ inputs.prod-cluster }}
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.ref == 'refs/heads/main' && !inputs.skip-tests }}
     needs: build-app-docker
     runs-on: ubuntu-latest
     steps:

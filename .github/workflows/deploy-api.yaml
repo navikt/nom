@@ -13,6 +13,12 @@ on:
       - 'apps/pom.xml'
       - 'pom.xml'
   workflow_dispatch:
+    inputs:
+      skip-tests:
+        type: boolean
+        required: false
+        default: false
+        description: Skip tests.
 
 jobs:
   deploy-spring-app:
@@ -28,6 +34,7 @@ jobs:
       nais-config-file-path-prod: .nais/apps/api/api-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/api/unleash-vars.yaml
       deploy-timeout: 20m
+      skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
     secrets:
       NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
