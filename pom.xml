@@ -52,6 +52,7 @@
         <netty.version>4.1.100.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <h2.version>2.2.224</h2.version> <!-- https://github.com/navikt/nom/security/dependabot/87 -->
         <zookeeper.version>3.7.2</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
+        <commons-compress.version>1.24.0</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
     </properties>
 
     <dependencyManagement>
@@ -202,11 +203,19 @@
                 </exclusions>
             </dependency>
 
-            <!--            org.springframework.kafka:spring-kafka-test-->
+            <!-- fra org.springframework.kafka:spring-kafka-test-->
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/91 -->
+                <scope>test</scope>
+            </dependency>
+
+            <!-- fra org.testcontainers:testcontainers:jar:1.18.3:test -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/88 -->
                 <scope>test</scope>
             </dependency>
 
