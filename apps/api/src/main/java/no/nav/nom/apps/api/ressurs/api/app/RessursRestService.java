@@ -11,9 +11,11 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.Avvikl
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
@@ -67,6 +69,26 @@ public class RessursRestService {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
+    public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
+        var ressursState = findRessursByNavident(navident);
+
+        if (ressursState.sektor() != Sektor.EKSTERN){
+            throw new InvalidSektorException("Kun eksterne ressurser kan endres");
+        }
+
+        var oppdaterPersonaliaCommand = new OppdaterPersonaliaCommand(
+            ressursState.fid(),
+            new Visningsnavn(updateVisningsnavnRequest.fornavn(), updateVisningsnavnRequest.mellomnavn(), updateVisningsnavnRequest.etternavn())
+        );
+
+        var inputMetadata = new InputMetadata("REST", "updateRessursNavn", updateVisningsnavnRequest, new Origination(
+            SecurityUtil.getAuthenticatedNavIdent(),
+            SecurityUtil.getAuthenticatedAzpName()
+        ));
+
+        ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+    }
+
     public RessursState createRessursAndNotify(
         OpprettRessursRequest request
     ) {
@@ -83,7 +105,6 @@ public class RessursRestService {
 
             return createRessursResponse;
         });
-
 
     }
 

@@ -15,7 +15,11 @@ import {
   Tag,
 } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
-import { Link as ReactRouterLink } from "@tanstack/react-router";
+import {
+  Link as ReactRouterLink,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import axios from "axios";
 import { format, isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
@@ -23,10 +27,13 @@ import React, { useState } from "react";
 
 import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
+import { useHasAdminAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
+import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
+import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import {
   DATE_FORMATS,
@@ -40,6 +47,8 @@ type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
 type OrgTilknytninger = Ressurs["orgTilknytning"];
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
+  const hasAdminAccess = useHasAdminAccess();
+
   return (
     <div
       css={css`
@@ -70,8 +79,29 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <LeaderForSection ressurs={ressurs} />
         <OrgTilknytningSection ressurs={ressurs} />
         <TeamCatSection navident={ressurs.navident} />
+        {hasAdminAccess && <ToggleEditButton />}
       </div>
     </div>
+  );
+}
+
+function ToggleEditButton() {
+  const { edit } = useSearch({ from: ressursRoute.id });
+  const navigate = useNavigate();
+  if (edit) {
+    return (
+      <Button
+        onClick={() => navigate({ search: { edit: false } })}
+        size="small"
+      >
+        Ferdig
+      </Button>
+    );
+  }
+  return (
+    <Button onClick={() => navigate({ search: { edit: true } })} size="small">
+      Endre
+    </Button>
   );
 }
 
@@ -361,6 +391,44 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
   );
 }
 
+function Name({ ressurs }: { ressurs: Ressurs }) {
+  const { edit } = useSearch({ from: ressursRoute.id });
+
+  if (edit) {
+    return <EditNameForm ressurs={ressurs} />;
+  }
+  return (
+    <Heading
+      css={css`
+        margin-bottom: var(--a-spacing-8);
+      `}
+      level="1"
+      size="large"
+    >
+      {ressurs.visningsnavn}
+    </Heading>
+  );
+}
+
+function Telephone({ ressurs }: { ressurs: Ressurs }) {
+  const { edit } = useSearch({ from: ressursRoute.id });
+
+  if (edit) {
+    return (
+      <>
+        <span>Telefon:</span>
+        <EditPhoneNumber ressurs={ressurs} />
+      </>
+    );
+  }
+  return (
+    <RessursInformationDetail
+      label="Telefon"
+      value={ressurs.telefon.map(({ nummer }) => formatTlf(nummer)).join(", ")}
+    />
+  );
+}
+
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
   const dagligLeder = ressurs.ledere.find((leder) => leder.erDagligOppfolging);
 
@@ -375,15 +443,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
       `}
     >
       <div>
-        <Heading
-          css={css`
-            margin-bottom: var(--a-spacing-8);
-          `}
-          level="1"
-          size="large"
-        >
-          {ressurs.visningsnavn}
-        </Heading>
+        <Name ressurs={ressurs} />
         <Heading
           css={css`
             margin-bottom: var(--a-spacing-6);
@@ -417,12 +477,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               .join(", ")}
           />
           <RessursInformationDetail label="E-post" value={ressurs.epost} />
-          <RessursInformationDetail
-            label="Telefon"
-            value={ressurs.telefon
-              .map(({ nummer }) => formatTlf(nummer))
-              .join(", ")}
-          />
+          <Telephone ressurs={ressurs} />
           {dagligLeder ? (
             <>
               <span>Leder:</span>

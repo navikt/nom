@@ -95,10 +95,11 @@ export const ressursRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "ressurs/$id",
   component: ResourcePage,
-  validateSearch: (search): { alreadyExists?: boolean } => {
+  validateSearch: (search): { alreadyExists?: boolean; edit?: boolean } => {
     // validate and parse the search params into a typed state
     return {
       alreadyExists: Boolean(search.alreadyExists),
+      edit: Boolean(search.edit),
     };
   },
 });

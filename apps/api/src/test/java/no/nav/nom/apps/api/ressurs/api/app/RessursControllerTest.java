@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
@@ -25,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.ressurs.api.app.RessursController.UNLEASH_EDIT_RESSURS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -45,6 +47,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private OrgtilknytningCommandService orgtilknytningCommandService;
+
+    @MockBean
+    private RessursStateRepository ressursStateRepository;
 
 
     @Test
@@ -183,6 +188,60 @@ public class RessursControllerTest extends RestTestBase {
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    void skal_kunne_endre_navn_for_eksterne() {
+        var navident = "A123456";
+        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
+        when(ressursStateRepository.findByNavident(navident))
+            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident, Sektor.EKSTERN, null, Optional.empty(), Optional.empty())));
+
+
+        var request = new UpdateVisningsnavnRequest(
+            "Erik",
+            Optional.of("Ten"),
+            "Haag"
+        );
+
+        webTestClient.post()
+            .uri("/app/ressurs/" + navident + "/navn")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(ressursCommadService, times(1)).oppdaterPersonaliaEvent(any(), any());
+    }
+
+    @Test
+    void skal_ikke_kunne_endre_navn_for_statlig() {
+        var navident = "A123456";
+        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
+        when(ressursStateRepository.findByNavident(navident))
+            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+
+
+        var request = new UpdateVisningsnavnRequest(
+            "Erik",
+            Optional.of("Ten"),
+            "Haag"
+        );
+
+        webTestClient.post()
+            .uri("/app/ressurs/" + navident + "/navn")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
     }
 
     private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {
