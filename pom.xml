@@ -49,8 +49,9 @@
         <orgjson.version>20231013</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
         <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
-        <netty.version>4.1.100.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 -->
+        <netty.version>4.1.100.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <h2.version>2.2.224</h2.version> <!-- https://github.com/navikt/nom/security/dependabot/87 -->
+        <zookeeper.version>3.7.2</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
     </properties>
 
     <dependencyManagement>
@@ -72,6 +73,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
 
             <!-- Ordinære dependencies ikke definert i Spring starter -->
             <dependency>
@@ -185,6 +187,7 @@
                 <groupId>no.nav.nom</groupId>
                 <artifactId>utils-test</artifactId>
                 <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -199,13 +202,21 @@
                 </exclusions>
             </dependency>
 
+            <!--            org.springframework.kafka:spring-kafka-test-->
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${zookeeper.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/91 -->
+                <scope>test</scope>
+            </dependency>
+
             <dependency> <!-- Påkrevd for mac M1  -->
                 <groupId>io.netty</groupId>
                 <artifactId>netty-resolver-dns-native-macos</artifactId>
                 <classifier>osx-x86_64</classifier>
                 <version>${netty.version}</version>
+                <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
