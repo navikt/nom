@@ -49,7 +49,8 @@
         <orgjson.version>20231013</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
         <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
-        <netty-codec-http2.version>4.1.100.Final</netty-codec-http2.version> <!-- https://github.com/navikt/nom/security/dependabot/90 -->
+        <netty.version>4.1.100.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 -->
+        <h2.version>2.2.224</h2.version> <!-- https://github.com/navikt/nom/security/dependabot/87 -->
     </properties>
 
     <dependencyManagement>
@@ -70,18 +71,6 @@
                         <artifactId>org.osgi.core</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>    <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln. -->
-            </dependency>
-
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http2</artifactId>
-                <version>${netty-codec-http2.version}</version> <!-- https://github.com/navikt/nom/security/dependabot/90 -->
             </dependency>
 
             <!-- Ordinære dependencies ikke definert i Spring starter -->
