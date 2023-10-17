@@ -16,7 +16,7 @@
     <name>NOM :: Utils :: Test</name>
 
     <properties>
-        <nimbus-jose-jwt.version>9.36</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
         <wiremock.version>2.35.1</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
     </properties>
