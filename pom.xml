@@ -48,6 +48,7 @@
         <!-- Override av andre transient dependencies -->
         <orgjson.version>20231013</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
         <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
+        <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
     </properties>
 
     <dependencyManagement>
@@ -55,7 +56,25 @@
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>${orgjson.version}</version>
+                <version>${orgjson.version}</version> <!-- https://github.com/navikt/nom/security/dependabot/92 -->
+            </dependency>
+
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <version>${snappy-java.test.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>    <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln. -->
             </dependency>
 
             <!-- Ordinære dependencies ikke definert i Spring starter -->
@@ -191,17 +210,6 @@
                 <version>${netty.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.xerial.snappy</groupId>
-                <artifactId>snappy-java</artifactId>
-                <version>${snappy-java.test.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
