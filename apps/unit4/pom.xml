@@ -16,20 +16,20 @@
     <artifactId>unit4</artifactId>
     <version>1.1.0</version>
 
-    <properties>
-        <java.version>17</java.version>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Bruk felles pom for angivelse av versjoner -->
+            <!-- Prosjekt overstyrte versjoner må angis over denne -->
+            <dependency>
+                <groupId>no.nav.nom</groupId>
+                <artifactId>nom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-        <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <versions-maven-plugin.version>2.14.2</versions-maven-plugin.version>
-
-        <snakeyaml.version>1.33</snakeyaml.version> <!-- Override spring-boot-dependencies version -->
-        <springdoc-openapi-starter-webmvc-ui.version>2.2.0</springdoc-openapi-starter-webmvc-ui.version>
-        <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
-        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-
-        <unleash.version>8.4.0</unleash.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -70,32 +70,26 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>utils-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-security</artifactId>
-            <version>${springdoc-openapi-security.version}</version>
         </dependency>
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>${unleash.version}</version>
         </dependency>
 
         <dependency>
