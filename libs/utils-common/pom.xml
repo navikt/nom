@@ -16,10 +16,28 @@
     <name>NOM :: Libs :: Utils Common</name>
 
     <properties>
-        <unleash.version>8.4.0</unleash.version>
-        <wiremock.version>2.35.1</wiremock.version>
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
+        <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/85 -->
+            </dependency>
+
+            <!-- Bruk felles pom for angivelse av versjoner -->
+            <!-- Prosjekt overstyrte versjoner må angis over denne -->
+            <dependency>
+                <groupId>no.nav.nom</groupId>
+                <artifactId>nom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -27,6 +45,7 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional> <!-- Ikke være med i jars -->
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -69,7 +88,6 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>${unleash.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -91,20 +109,12 @@
         <dependency>
             <groupId>com.thomaskasene.wiremock</groupId>
             <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>${wiremock.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-fileupload</groupId>
-                    <artifactId>commons-fileupload</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -114,7 +124,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
         </dependency>
-
     </dependencies>
 
 </project>

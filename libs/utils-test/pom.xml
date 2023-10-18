@@ -15,11 +15,20 @@
     <version>1.1.0</version>
     <name>NOM :: Utils :: Test</name>
 
-    <properties>
-        <nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
-        <wiremock.version>2.35.1</wiremock.version>
-        <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
-    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Bruk felles pom for angivelse av versjoner -->
+            <!-- Prosjekt overstyrte versjoner må angis over denne -->
+            <dependency>
+                <groupId>no.nav.nom</groupId>
+                <artifactId>nom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -39,17 +48,14 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>${nimbus-jose-jwt.version}</version>
         </dependency>
         <dependency>
             <groupId>com.thomaskasene.wiremock</groupId>
             <artifactId>wiremock-junit-extension</artifactId>
-            <version>${wiremock-extension.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>${wiremock.version}</version>
         </dependency>
     </dependencies>
 
