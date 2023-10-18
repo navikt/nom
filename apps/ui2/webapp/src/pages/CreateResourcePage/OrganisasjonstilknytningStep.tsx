@@ -18,11 +18,9 @@ import {
 import * as yup from "yup";
 
 import {
-  AnsettelsesType,
   GyldigTomSelection,
   OrgnivSelection,
   ResultLimit,
-  Sektor,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
@@ -34,13 +32,14 @@ import {
   rowStyles,
 } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
   const { sektor } = useSearch({ from: createRessursRoute.id });
   return (
     <ContainerWithHighlightedTop title="Organisasjonstilknytninger">
-      {sektor === Sektor.NavStatlig ? (
+      {sektor === Sektor.NAV_STATLIG ? (
         <CreateStatligRessurs />
       ) : (
         <CreateEksternRessurs />
@@ -56,7 +55,7 @@ function CreateStatligRessurs() {
   });
   const methods = useForm({
     defaultValues: {
-      ansettelsesType: ansettelsesType ?? AnsettelsesType.Fast,
+      ansettelsesType: ansettelsesType ?? AnsettelsesType.FAST,
       orgEnhetId,
       startDato: undefined,
     },
@@ -100,11 +99,11 @@ function CreateStatligRessurs() {
           name="ansettelsesType"
           render={({ field }) => (
             <RadioGroup {...field} legend="Ansettelsestype" size="medium">
-              <Radio checked value={AnsettelsesType.Fast}>
-                {AnsettelsesTypeNameMapping[AnsettelsesType.Fast]}
+              <Radio checked value={AnsettelsesType.FAST}>
+                {AnsettelsesTypeNameMapping[AnsettelsesType.FAST]}
               </Radio>
-              <Radio value={AnsettelsesType.Midlertidig}>
-                {AnsettelsesTypeNameMapping[AnsettelsesType.Midlertidig]}
+              <Radio value={AnsettelsesType.MIDLERTIDIG}>
+                {AnsettelsesTypeNameMapping[AnsettelsesType.MIDLERTIDIG]}
               </Radio>
             </RadioGroup>
           )}

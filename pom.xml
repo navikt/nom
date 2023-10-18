@@ -42,6 +42,7 @@
         <commons-fileupload.version>1.5</commons-fileupload.version>
         <ulid-creator.version>5.2.2</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
+        <swagger-annotations-jakarta.version>2.2.15</swagger-annotations-jakarta.version>
 
         <!-- Override spring-boot-dependencies version -->
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->

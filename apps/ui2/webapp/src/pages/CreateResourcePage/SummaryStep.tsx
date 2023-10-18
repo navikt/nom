@@ -4,14 +4,11 @@ import { Alert, BodyShort, Button, Link, Loader } from "@navikt/ds-react";
 import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
 
 import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
-import {
-  AnsettelsesType,
-  Sektor,
-  useHentRessursMedNavidentQuery,
-} from "~/api/generated/graphql_generated";
+import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { ReceiptRessurs } from "~/pages/ResourcePage/RessursCards/ReceiptRessurs";
 import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
+import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { isInDevelopment } from "~/utils";
 
 export function SummaryStep() {
@@ -54,8 +51,9 @@ function Receipt({
   return (
     <ContainerWithHighlightedTop title="Medarbeideren er nå registrert i NOM">
       <ReceiptRessurs ressurs={ressurs} />
-
-      {ressurs.sektor.includes(Sektor.NavStatlig) ? (
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/* @ts-ignore -- ignored until there is only the Sektor enum from REST api*/}
+      {ressurs.sektor.includes(Sektor.NAV_STATLIG) ? (
         <StatligInstructions ressurs={ressurs} />
       ) : (
         <EksternInstructions ressurs={ressurs} />
@@ -151,7 +149,7 @@ function Unit4Link() {
         width: max-content;
       `}
       href={`${unit4BaseUrl}/Default.aspx?&accessId=003316&attribute_id=S108&client=HR&personId=${navidentWithoutFirstLetter}&PersonellType=${
-        ansettelsesType === AnsettelsesType.Fast ? "F" : "M"
+        ansettelsesType === AnsettelsesType.FAST ? "F" : "M"
       }`}
       icon={<ExternalLinkIcon aria-hidden />}
       iconPosition="right"

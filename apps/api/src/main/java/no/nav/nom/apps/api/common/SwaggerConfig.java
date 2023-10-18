@@ -13,12 +13,11 @@ public class SwaggerConfig {
 
     public static final String BEARER_TOKEN = "BearerAuth";
 
-    // Sort order er på groupid
-    public static final String API_V1_ID = "1 - External API v1";
+    public static final String API_V1_ID = "external_api_v1";
     public static final String API_V1_DISPLAY_NAME = "External API v1";
-    public static final String BACKEND_ID = "2 - app";
+    public static final String BACKEND_ID = "internal";
     public static final String BACKEND_DISPLAY_NAME = "Internal App api";
-    public static final String INTERN_ADMIN_ID = "3 - Intern admin";
+    public static final String INTERN_ADMIN_ID = "internal_admin";
     public static final String INTERN_ADMIN_DISPLAY_NAME = "Internal admin";
 
     @Bean

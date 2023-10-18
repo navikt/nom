@@ -11,7 +11,10 @@ import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
-import type { OpprettRessursRequest, OpprettRessursResponse } from "~/types";
+import type {
+  OpprettRessursRequest,
+  OpprettRessursResponse,
+} from "~/types/api-models";
 import { DATE_FORMATS } from "~/utils";
 
 export function ConfirmStep() {

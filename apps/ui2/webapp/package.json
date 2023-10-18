@@ -11,7 +11,8 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
     "stylelint": "stylelint '**/*.{tsx,css}'",
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
-    "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
+    "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
+    "generate-types": "swagger-typescript-api --path http://localhost:8081/v3/api-docs/internal --output ./src/types --no-client -r -n api-models"
   },
   "dependencies": {
     "@apollo/client": "3.8.5",
@@ -69,6 +70,7 @@
     "prettier": "3.0.3",
     "stylelint": "15.10.3",
     "stylelint-config-standard": "34.0.0",
+    "swagger-typescript-api": "13.0.3",
     "typescript": "5.2.2",
     "vite": "4.4.11"
   }

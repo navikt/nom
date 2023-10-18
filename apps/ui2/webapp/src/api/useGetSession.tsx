@@ -1,22 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-export interface SessionInterface {
-  name: string;
-  navident: string;
-  roles: UserRole[];
-}
-
-enum UserRole {
-  ROLE_NONE = "ROLE_NONE",
-  ROLE_WRITE = "ROLE_WRITE",
-  ROLE_ADMIN = "ROLE_ADMIN",
-}
+import type { SessionInfoResponse } from "~/types/api-models";
+import { UserRoles } from "~/types/api-models";
 
 export function useGetSession() {
   return useQuery({
     queryKey: ["SESSION"],
-    queryFn: () => axios.get<SessionInterface>("/nom-api/app/sessioninfo"),
+    queryFn: () => axios.get<SessionInfoResponse>("/nom-api/app/sessioninfo"),
     cacheTime: 60 * 60 * 1000,
     staleTime: 60 * 60 * 1000,
     select: (response) => response.data,
@@ -25,10 +16,10 @@ export function useGetSession() {
 
 export function useHasWriteAccess() {
   const session = useGetSession();
-  return !!session.data?.roles.includes(UserRole.ROLE_WRITE);
+  return !!session.data?.roles.includes(UserRoles.ROLE_WRITE);
 }
 
 export function useHasAdminAccess() {
   const session = useGetSession();
-  return !!session.data?.roles.includes(UserRole.ROLE_ADMIN);
+  return !!session.data?.roles.includes(UserRoles.ROLE_ADMIN);
 }

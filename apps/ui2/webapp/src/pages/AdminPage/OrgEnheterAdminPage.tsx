@@ -27,12 +27,13 @@ import { apolloClient } from "~/api/apolloclient";
 import type { GetAllOrgenheterAdminQuery } from "~/api/generated/graphql_generated";
 import {
   NomNivaa,
-  OrgEnhetsType,
   useGetAllOrgenheterAdminQuery,
 } from "~/api/generated/graphql_generated";
 import { showToast } from "~/hooks/showToast";
 import { orgEnheterAdminRoute } from "~/reactRouterRoutes";
 import { isNotNil } from "~/typeguards";
+import type { SetOrgEnhetsTypeRequest } from "~/types/api-models";
+import { OrgEnhetsType } from "~/types/api-models";
 
 type OrgEnhetAdmin = NonNullable<
   GetAllOrgenheterAdminQuery["orgEnheter"][0]["orgEnhet"]
@@ -288,10 +289,13 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
   const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
   const updateOrgEnhetsTypeMutation = useMutation(
     (newOrgEnhetsType: OrgEnhetsType | null) =>
-      axios.post("/nom-api/app/orgenhet/orgEnhetsType", {
-        nomId: orgEnhet.id,
-        orgEnhetsType: newOrgEnhetsType,
-      }),
+      axios.post<void, unknown, SetOrgEnhetsTypeRequest>(
+        "/nom-api/app/orgenhet/orgEnhetsType",
+        {
+          nomId: orgEnhet.id,
+          orgEnhetsType: newOrgEnhetsType ?? undefined,
+        },
+      ),
     {
       onSuccess: (_, newOrgEnhetsType) => {
         /*

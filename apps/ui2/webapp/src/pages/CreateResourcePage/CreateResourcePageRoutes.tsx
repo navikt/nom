@@ -5,7 +5,6 @@ import { decode } from "js-base64";
 import React from "react";
 import * as yup from "yup";
 
-import { AnsettelsesType, Sektor } from "~/api/generated/graphql_generated";
 import { PageBanner } from "~/components/PageBanner";
 import { ConfirmStep } from "~/pages/CreateResourcePage/ConfirmStep";
 import { OrganisasjonstilknytningStep } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
@@ -13,6 +12,7 @@ import { PersonopplysningerStep } from "~/pages/CreateResourcePage/Personopplysn
 import { SektorStep } from "~/pages/CreateResourcePage/SektorStep";
 import { SummaryStep } from "~/pages/CreateResourcePage/SummaryStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import { AnsettelsesType, Sektor } from "~/types/api-models";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
@@ -125,6 +125,6 @@ export const rowStyles = css`
 `;
 
 export const AnsettelsesTypeNameMapping = {
-  [AnsettelsesType.Fast]: "Fast",
-  [AnsettelsesType.Midlertidig]: "Midlertidig",
+  [AnsettelsesType.FAST]: "Fast",
+  [AnsettelsesType.MIDLERTIDIG]: "Midlertidig",
 };

@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.rest.sessioninfo;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +46,16 @@ public class SessioninfoController {
         );
     }
 
+    @Schema(enumAsRef = true)
     public enum UserRoles {
         ROLE_WRITE,
         ROLE_ADMIN
     }
 
     public record SessionInfoResponse(
-            String navident,
-            String name,
-            List<UserRoles> roles
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<UserRoles> roles
     ) {}
 
 }

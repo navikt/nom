@@ -2,19 +2,19 @@ import { Alert, Radio, RadioGroup } from "@navikt/ds-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { Sektor } from "~/api/generated/graphql_generated";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import { Sektor } from "~/types/api-models";
 
 export const SektorNameMapping = {
-  [Sektor.Ekstern]: "Ekstern",
-  [Sektor.NavKommunal]: "Kommunal",
-  [Sektor.NavStatlig]: "Statlig",
+  [Sektor.EKSTERN]: "Ekstern",
+  [Sektor.NAV_KOMMUNAL]: "Kommunal",
+  [Sektor.NAV_STATLIG]: "Statlig",
 };
 
 export function SektorStep() {
-  const [selectedSektor, setSelectedSektor] = useState(Sektor.Ekstern);
+  const [selectedSektor, setSelectedSektor] = useState(Sektor.EKSTERN);
   const navigate = useNavigate();
 
   return (
@@ -41,14 +41,14 @@ export function SektorStep() {
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
         >
-          <Radio value={Sektor.Ekstern}>
-            {SektorNameMapping[Sektor.Ekstern]}
+          <Radio value={Sektor.EKSTERN}>
+            {SektorNameMapping[Sektor.EKSTERN]}
           </Radio>
-          <Radio disabled value={Sektor.NavStatlig}>
-            {SektorNameMapping[Sektor.NavStatlig]}
+          <Radio disabled value={Sektor.NAV_STATLIG}>
+            {SektorNameMapping[Sektor.NAV_STATLIG]}
           </Radio>
-          <Radio disabled value={Sektor.NavKommunal}>
-            {SektorNameMapping[Sektor.NavKommunal]}
+          <Radio disabled value={Sektor.NAV_KOMMUNAL}>
+            {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
           </Radio>
         </RadioGroup>
         <NavigationButtons />

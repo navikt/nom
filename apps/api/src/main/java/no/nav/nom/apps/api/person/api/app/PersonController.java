@@ -48,8 +48,8 @@ public class PersonController {
 
         var ressursState = ressursStateRepository.findByPersonident(personident);
         var person = ressursState
-            .map(rs -> new Person(rs.personident(), rs.fid(), rs.navident(), folkeregisterPerson.get()))
-            .orElse(new Person(personident, null, null, folkeregisterPerson.get()));
+            .map(rs -> new Person(rs.personident(), rs.navident(), folkeregisterPerson.get()))
+            .orElse(new Person(personident, null, folkeregisterPerson.get()));
 
         return ResponseEntity.ok(person);
     }
