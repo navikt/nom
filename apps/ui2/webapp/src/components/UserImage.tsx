@@ -18,7 +18,7 @@ export function UserImage(properties: UserImageProperties) {
     queryFn: () => getPhotoQuery.queryFn(navident as string),
     enabled: !!navident,
     staleTime: getPhotoQuery.staleTime,
-    cacheTime: getPhotoQuery.cacheTime,
+    gcTime: getPhotoQuery.cacheTime,
     retry: false,
   });
 

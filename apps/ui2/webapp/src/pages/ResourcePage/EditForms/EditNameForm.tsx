@@ -5,12 +5,12 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
-import type { RessursState } from "~/api/react-query-endpoints";
 import {
   getRessursByRest,
   updateNavnForRessurs,
 } from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
+import type { Visningsnavn } from "~/types/api-models";
 
 type GraphQlRessurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
 
@@ -51,11 +51,9 @@ export function EditNameForm({ ressurs }: { ressurs: GraphQlRessurs }) {
     }
   }, [ressursStateQuery.isSuccess]);
 
-  const { mutate } = useMutation<
-    unknown,
-    unknown,
-    RessursState["visningsnavn"]
-  >(async (values) => updateNavnForRessurs(ressurs.navident, values), {
+  const { mutate } = useMutation<unknown, unknown, Visningsnavn>({
+    mutationFn: async (values) =>
+      updateNavnForRessurs(ressurs.navident, values),
     onSettled: () => {
       showToast({ text: "Lagret" });
       reset({}, { keepValues: true });

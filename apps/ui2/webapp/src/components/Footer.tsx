@@ -25,8 +25,7 @@ export function Footer() {
         css={css(
           css`
             align-self: center;
-            row-gap: 1rem;
-            column-gap: 3rem;
+            gap: 1rem 3rem;
             display: grid;
             grid-template-columns: max-content 1fr;
 

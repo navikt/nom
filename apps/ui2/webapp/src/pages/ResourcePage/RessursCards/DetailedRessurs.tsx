@@ -458,8 +458,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           css={css`
             display: grid;
             grid-template-columns: max-content 1fr;
-            column-gap: 1rem;
-            row-gap: 0.5rem;
+            gap: 0.5rem 1rem;
           `}
         >
           <RessursInformationDetail
@@ -539,9 +538,10 @@ function RessursInformationDetail({
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
-  const { data } = useQuery(["memberships", navident], () =>
-    axios.get(`/teamcat/member/membership/${navident}`),
-  );
+  const { data } = useQuery({
+    queryKey: ["memberships", navident],
+    queryFn: () => axios.get(`/teamcat/member/membership/${navident}`),
+  });
   const memberships = data?.data;
   if (!memberships) {
     return <></>;

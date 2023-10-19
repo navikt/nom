@@ -56,8 +56,8 @@ export function ConfirmStep() {
     AxiosResponse<OpprettRessursResponse>,
     AxiosError<Error>,
     void
-  >(
-    () => {
+  >({
+    mutationFn: () => {
       // TODO: better type safety here
       const opprettRessursRequest: Partial<OpprettRessursRequest> = {
         personident,
@@ -72,22 +72,21 @@ export function ConfirmStep() {
       };
       return axios.post("/nom-api/app/ressurs", opprettRessursRequest);
     },
-    {
-      onSuccess: (opprettRessursResponse) => {
-        // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
-        navigate({
-          to: createRessursRoute.to,
-          search: (old) => ({
-            ...old,
-            navident: opprettRessursResponse.data.navident,
-            ansettelsesType,
-          }),
-          params: { step: "4" },
-          replace: true,
-        });
-      },
+
+    onSuccess: (opprettRessursResponse) => {
+      // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
+      navigate({
+        to: createRessursRoute.to,
+        search: (old) => ({
+          ...old,
+          navident: opprettRessursResponse.data.navident,
+          ansettelsesType,
+        }),
+        params: { step: "4" },
+        replace: true,
+      });
     },
-  );
+  });
 
   return (
     <Modal
@@ -154,7 +153,7 @@ export function ConfirmStep() {
       </Modal.Body>
       <Modal.Footer>
         <Button
-          loading={opprettRessursMutation.isLoading}
+          loading={opprettRessursMutation.isPending}
           onClick={() => opprettRessursMutation.mutate()}
           type="button"
         >

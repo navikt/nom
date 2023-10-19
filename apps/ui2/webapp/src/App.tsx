@@ -20,7 +20,7 @@ const queryClient = new QueryClient();
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
       <ApolloProvider client={apolloClient}>
         <LoadSession>
           <RouterProvider router={router} />

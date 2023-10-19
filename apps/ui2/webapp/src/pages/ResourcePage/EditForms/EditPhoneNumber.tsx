@@ -25,15 +25,13 @@ export function EditPhoneNumber({ ressurs }: { ressurs: Ressurs }) {
     },
   });
 
-  const { mutate } = useMutation<unknown, unknown, EditNameFormTypes>(
-    async (values) => alert(values),
-    {
-      onSettled: () => {
-        showToast({ text: "Lagret" });
-        reset({}, { keepValues: true });
-      },
+  const { mutate } = useMutation<unknown, unknown, EditNameFormTypes>({
+    mutationFn: async (values) => alert(values),
+    onSettled: () => {
+      showToast({ text: "Lagret" });
+      reset({}, { keepValues: true });
     },
-  );
+  });
 
   return (
     <form

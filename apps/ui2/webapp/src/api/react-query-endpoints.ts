@@ -2,7 +2,7 @@
 import type { AxiosResponse } from "axios";
 import axios from "axios";
 
-import type { Sektor } from "~/api/generated/graphql_generated";
+import type { RessursState } from "~/types/api-models";
 
 export const ressurserKeys = {
   all: ["ALLE_RESSURSER_GRAPHQL"] as const,
@@ -93,20 +93,6 @@ type GraphqlResponseWrapper = {
       ressurs: RessursFields;
     }[];
   };
-};
-
-export type RessursState = {
-  fid: string;
-  personident: string;
-  navident: string;
-  sektor: Sektor;
-  visningsnavn: {
-    fornavn: string;
-    mellomnavn?: string;
-    etternavn: string;
-  };
-  sluttdato?: string;
-  startdato?: string;
 };
 
 export type RessursFields = {

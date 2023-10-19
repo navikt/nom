@@ -14,8 +14,7 @@ const outerDiv = css`
   grid-template-columns: 1fr;
   min-height: ${headerHeight};
   width: 100%;
-  justify-content: center;
-  align-content: center;
+  place-content: center center;
 `;
 
 const innerDiv = css(

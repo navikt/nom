@@ -8,7 +8,7 @@ export function useGetSession() {
   return useQuery({
     queryKey: ["SESSION"],
     queryFn: () => axios.get<SessionInfoResponse>("/nom-api/app/sessioninfo"),
-    cacheTime: 60 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     staleTime: 60 * 60 * 1000,
     select: (response) => response.data,
   });

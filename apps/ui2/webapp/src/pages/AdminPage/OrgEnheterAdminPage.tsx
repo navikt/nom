@@ -287,8 +287,8 @@ export function OrgEnheterAdminPage() {
 
 function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
   const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
-  const updateOrgEnhetsTypeMutation = useMutation(
-    (newOrgEnhetsType: OrgEnhetsType | null) =>
+  const updateOrgEnhetsTypeMutation = useMutation({
+    mutationFn: (newOrgEnhetsType: OrgEnhetsType | null) =>
       axios.post<void, unknown, SetOrgEnhetsTypeRequest>(
         "/nom-api/app/orgenhet/orgEnhetsType",
         {
@@ -296,25 +296,24 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
           orgEnhetsType: newOrgEnhetsType ?? undefined,
         },
       ),
-    {
-      onSuccess: (_, newOrgEnhetsType) => {
-        /*
+
+    onSuccess: (_, newOrgEnhetsType) => {
+      /*
          When this mutation returns we have only sent a message on kafka to change its type. It is not immediately available in orgEnhet-state.
          Therefore, we do a manual optimistic update of the orgEnhetsType for this orgEnhet in the cache.
         */
-        apolloClient.cache.modify({
-          id: apolloClient.cache.identify(orgEnhet),
-          fields: {
-            orgEnhetsType: () => newOrgEnhetsType,
-          },
-        });
-        showToast({ text: "OrgEnhetsType endret" });
-      },
-
-      onError: () =>
-        showToast({ text: "OrgEnhetsType endring feilet", variant: "error" }),
+      apolloClient.cache.modify({
+        id: apolloClient.cache.identify(orgEnhet),
+        fields: {
+          orgEnhetsType: () => newOrgEnhetsType,
+        },
+      });
+      showToast({ text: "OrgEnhetsType endret" });
     },
-  );
+
+    onError: () =>
+      showToast({ text: "OrgEnhetsType endring feilet", variant: "error" }),
+  });
   return (
     <Table.DataCell>
       <Select
