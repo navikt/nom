@@ -64,6 +64,11 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("lagSlettRessursMelding : " + token.getName());
+
+        if (!validFid(fid)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
+        }
+
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
@@ -120,6 +125,15 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("oppdaterPersonidentForRessurs : " + token.getName());
+
+        if (!validFid(fid)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
+        }
+
+        if (!validPersonident(nyPersonident)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Personident er ikke gyldig");
+        }
+
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
@@ -179,6 +193,11 @@ public class ManuelleEvtsrcMeldinger {
         @NonNull JwtAuthenticationToken token
     ) {
         log.debug("oppdaterPersonaliaForRessurs : " + token.getName());
+
+        if (!validFid(fid)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
+        }
+
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
@@ -217,5 +236,13 @@ public class ManuelleEvtsrcMeldinger {
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
+    }
+
+    private boolean validFid(String fid) {
+        return fid.matches("[a-zA-Z0-9\\-]+");
+    }
+
+    private boolean validPersonident(String fid) {
+        return fid.matches("[0-9]+");
     }
 }
