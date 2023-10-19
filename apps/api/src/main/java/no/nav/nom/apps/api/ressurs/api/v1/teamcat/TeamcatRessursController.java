@@ -4,10 +4,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "Temacat")
+@Tag(name = "Teamkatalog")
 @RestController
 @RequestMapping("/api/v1/teamcat")
 public class TeamcatRessursController {
@@ -35,6 +38,7 @@ public class TeamcatRessursController {
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
+    private final OrgEnhetOverordnetResolver overordnetResolver;
     private final String IT_AVDELING_ID;
 
     public TeamcatRessursController(
@@ -43,13 +47,15 @@ public class TeamcatRessursController {
         DvhRepository dvhRepository,
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
-        Environment env
+        Environment env,
+        OrgEnhetOverordnetResolver overordnetResolver
     ) {
         this.adclient = adclient;
         this.dvhRepository = dvhRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.ressursStateRepository = ressursStateRepository;
+        this.overordnetResolver = overordnetResolver;
         var isDev = "dev-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
         this.IT_AVDELING_ID = isDev ? "hu357k" : "ve673e";
     }
@@ -77,7 +83,9 @@ public class TeamcatRessursController {
 
         // build hierarchy
         while (enhet.isPresent()) {
-            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid);
+            var overenhetidByResolver = overordnetResolver.findOverordnetOrgEnhet(enhet.get().getFid()).map(OrgEnhetState::fid);
+            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid).or(() -> overenhetidByResolver);
+
             if (overenhetid.isEmpty()) {
                 enhet = Optional.empty();
             } else {
@@ -121,7 +129,13 @@ public class TeamcatRessursController {
         }
         var ressurs = maybeRessurs.get();
 
-        var out = new TeamcatRessursDTO(
+        var out = getTeamcatRessursDTO(navident, ressurs, adResource);
+
+        return ResponseEntity.ok(out);
+    }
+
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource) {
+        return new TeamcatRessursDTO(
             ressurs.startdato().orElse(null),
             ressurs.sluttdato().orElse(null),
             adResource != null ? adResource.get(navident).getEmail() : null,
@@ -130,8 +144,6 @@ public class TeamcatRessursController {
             ressurs.visningsnavn().getFormattedVisningsnavn(),
             determineAvdelingNavn(navident)
         );
-
-        return ResponseEntity.ok(out);
     }
 
     @PostMapping("ressurser")
@@ -149,15 +161,7 @@ public class TeamcatRessursController {
         for (var x : maybeRessursList.entrySet()) {
             var ressurs = x.getValue();
             var navident = x.getKey();
-            var tmp = new TeamcatRessursDTO(
-                ressurs.startdato().orElse(null),
-                ressurs.sluttdato().orElse(null),
-                adResource != null ? adResource.get(navident).getEmail() : null,
-                navident,
-                TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
-                ressurs.visningsnavn().getFormattedVisningsnavn(),
-                determineAvdelingNavn(navident)
-            );
+            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource);
             out.put(navident, tmp);
         }
 
