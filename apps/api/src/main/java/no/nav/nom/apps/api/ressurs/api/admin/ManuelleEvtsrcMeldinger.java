@@ -17,6 +17,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -77,7 +78,7 @@ public class ManuelleEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke slettes da handling ikke er bekreftet".formatted(
-                    fid,
+                    HtmlUtils.htmlEncode(fid),
                     ressursState.get().navident(),
                     ressursState.get().personident()
                 ));
@@ -98,7 +99,7 @@ public class ManuelleEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s og personident %s. Slett event er nå sendt".formatted(
-                fid,
+                HtmlUtils.htmlEncode(fid),
                 ressursState.get().navident(),
                 ressursState.get().personident()
             ));
@@ -163,7 +164,7 @@ public class ManuelleEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s og personident %s. Endre personident til %s event er nå sendt".formatted(
-                fid,
+                HtmlUtils.htmlEncode(fid),
                 ressursState.get().navident(),
                 ressursState.get().personident(),
                 nyPersonident
@@ -206,7 +207,7 @@ public class ManuelleEvtsrcMeldinger {
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s med navn %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    fid,
+                    HtmlUtils.htmlEncode(fid),
                     ressursState.get().navident(),
                     ressursState.get().visningsnavn().toString()
                 ));
@@ -216,7 +217,7 @@ public class ManuelleEvtsrcMeldinger {
 
         ressursCommadService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(
-                fid,
+                HtmlUtils.htmlEncode(fid),
                 new Visningsnavn(fornavn, Optional.ofNullable(mellomnavn), etternavn)
                 ),
             new InputMetadata(
@@ -232,7 +233,7 @@ public class ManuelleEvtsrcMeldinger {
 
         return ResponseEntity.ok()
             .body("Ressurs med FID %s er funnet for navident %s med navn %s. Endre personalia event er nå sendt".formatted(
-                fid,
+                HtmlUtils.htmlEncode(fid),
                 ressursState.get().navident(),
                 ressursState.get().visningsnavn().toString()
             ));
