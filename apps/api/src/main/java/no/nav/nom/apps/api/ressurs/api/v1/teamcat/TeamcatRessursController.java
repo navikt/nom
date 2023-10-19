@@ -1,7 +1,10 @@
 package no.nav.nom.apps.api.ressurs.api.v1.teamcat;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
@@ -117,6 +120,10 @@ public class TeamcatRessursController {
         }
     }
 
+    @Operation(
+        description = "Returnerer en teamkatalog ressurs",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     @GetMapping("ressurs/{navident}")
     public ResponseEntity<TeamcatRessursDTO> ressurs(@PathVariable("navident") String navident) {
 
@@ -146,6 +153,11 @@ public class TeamcatRessursController {
         );
     }
 
+
+    @Operation(
+        description = "Hent teamkatalog ressurser i batch",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
     @PostMapping("ressurser")
     public ResponseEntity<Map<String, TeamcatRessursDTO>> ressurser(@RequestBody List<String> navidentListInput) {
         var maybeBadNavident = navidentListInput.stream().filter(s -> !s.matches("[a-zA-Z]\\d{6}")).findFirst();
