@@ -126,6 +126,7 @@ public class TeamcatRessursController {
     )
     @GetMapping("ressurs/{navident}")
     public ResponseEntity<TeamcatRessursDTO> ressurs(@PathVariable("navident") String navident) {
+        navident = navident.toUpperCase();
 
         var adResource = adclient.fetchInAdRessursInBatches(List.of(navident));
 
@@ -164,6 +165,8 @@ public class TeamcatRessursController {
         if (maybeBadNavident.isPresent()) {
             throw new IllegalArgumentException("Bad navident: " + maybeBadNavident.get());
         }
+
+        navidentListInput = navidentListInput.stream().map(String::toUpperCase).toList();
 
         var adResource = adclient.fetchInAdRessursInBatches(navidentListInput);
 
