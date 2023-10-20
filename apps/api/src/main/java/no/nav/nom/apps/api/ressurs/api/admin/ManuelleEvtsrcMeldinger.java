@@ -72,7 +72,7 @@ public class ManuelleEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
@@ -137,13 +137,13 @@ public class ManuelleEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Ressurs med FID %s er funnet for navident %s og personident %s. Men vil ikke endres da handling ikke er bekreftet".formatted(
-                    fid,
+                    HtmlUtils.htmlEncode(fid),
                     ressursState.get().navident(),
                     ressursState.get().personident()
                 ));
@@ -167,7 +167,7 @@ public class ManuelleEvtsrcMeldinger {
                 HtmlUtils.htmlEncode(fid),
                 ressursState.get().navident(),
                 ressursState.get().personident(),
-                nyPersonident
+                HtmlUtils.htmlEncode(nyPersonident)
             ));
     }
 
@@ -201,7 +201,7 @@ public class ManuelleEvtsrcMeldinger {
 
         var ressursState = ressursStateRepository.findByFid(fid);
         if (ressursState.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " + fid);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen ressurs med FID: " +  HtmlUtils.htmlEncode(fid));
         }
 
         if (!"CONFIRM".equals(confirm)) {
