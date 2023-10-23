@@ -1,13 +1,15 @@
 package no.nav.nom.contract.nom.state;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDate;
 import java.util.Optional;
 
 public record OrgtilknytningState(
-    String fid,
-    String navident,
-    String orgEnhetId,
-    boolean erDagligOppfolging,
-    LocalDate gyldigFom,
-    Optional<LocalDate> gyldigTom
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgEnhetId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean erDagligOppfolging,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
+        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom
 ) {}
