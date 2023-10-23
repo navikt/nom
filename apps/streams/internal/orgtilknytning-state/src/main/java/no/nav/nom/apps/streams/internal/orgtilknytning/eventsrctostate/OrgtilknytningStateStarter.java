@@ -1,11 +1,11 @@
-package no.nav.nom.apps.streams.kafkaapi.orgenhet.state;
+package no.nav.nom.apps.streams.internal.orgtilknytning.eventsrctostate;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AppStarter {
+public class OrgtilknytningStateStarter {
     public static void main(String[] args) {
-        SpringApplication.run(AppStarter.class, args);
+        SpringApplication.run(OrgtilknytningStateStarter.class, args);
     }
 }
