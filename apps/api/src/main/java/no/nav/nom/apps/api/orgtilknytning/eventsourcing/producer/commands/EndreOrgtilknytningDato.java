@@ -6,7 +6,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import java.time.LocalDate;
 import java.util.Optional;
 
-public record KorrigerOrgtilknytningDato (
+public record EndreOrgtilknytningDato(
         String navident,
         String orgenhetId,
         LocalDate gyldigFom,

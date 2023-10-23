@@ -13,6 +13,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import no.nav.nom.libs.test.RsaStub;
 import no.nav.nom.libs.test.SecurityTestUtils;
@@ -35,6 +36,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -127,6 +129,16 @@ public abstract class TestBase {
         return securityTestUtils.validJwtClaims().claim("azp", subjectClaim);
     }
 
+    protected JWTClaimsSet.Builder validJwtWithAzpNameClaim(String navident, String azpName) {
+        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
+        jwtClaimsBuilder.claim("azp", azpName);
+        jwtClaimsBuilder.claim("NAVident", navident);
+        jwtClaimsBuilder.claim("azp_name", azpName);
+
+        return jwtClaimsBuilder;
+    }
+
+
     /**
      * Loads a given resource from the test classpath using ResourceLoader
      *
@@ -195,5 +207,17 @@ public abstract class TestBase {
         kafkaUtils.sendOrgenhet(orgEnhetState.fid(), orgEnhetState);
     }
 
+    protected void saveOrgtilknytninger(List<OrgtilknytningState> orgtilknytningStateList) {
+        orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), o));
+    }
+
+    protected void clearOrgtilknytninger() {
+        orgtilknytningStateRepository.getAll()
+            .forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), null));
+    }
+
+    protected void saveRessurser(List<RessursState> ressursStateList) {
+        ressursStateList.forEach(r -> ressursStateRepository.putEventAggregate(r));
+    }
 
 }

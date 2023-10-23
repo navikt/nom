@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
+import lombok.Builder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
@@ -7,6 +8,7 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import java.time.LocalDate;
 import java.util.Optional;
 
+@Builder(toBuilder = true)
 public record RessursState(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String personident,

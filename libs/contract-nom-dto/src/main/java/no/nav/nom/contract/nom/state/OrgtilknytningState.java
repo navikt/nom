@@ -1,10 +1,13 @@
 package no.nav.nom.contract.nom.state;
 
+import lombok.Builder;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
+@Builder(toBuilder = true)
 public record OrgtilknytningState(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,

@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
@@ -255,7 +255,7 @@ public class EksterneRessurserProcessor {
 
 
     private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
-        var korrigerOrgtilknytningDato = new KorrigerOrgtilknytningDato(
+        var endreOrgtilknytningDato = new EndreOrgtilknytningDato(
             orgtilknytning.navident(),
             orgtilknytning.orgEnhetId(),
             orgtilknytning.gyldigFom(),
@@ -264,10 +264,10 @@ public class EksterneRessurserProcessor {
             null
         );
 
-        log.debug("Lager KorrigerOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), korrigerOrgtilknytningDato);
+        log.debug("Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
 
         if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            orgtilknytningCommandService.korrigerOrgtilknytningDato(orgtilknytning.fid(), korrigerOrgtilknytningDato);
+            orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
         }
     }
 

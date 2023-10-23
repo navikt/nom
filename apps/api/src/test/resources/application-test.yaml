@@ -18,6 +18,13 @@ app:
         scopes:
           - QUERY_PERSON
           - MUTATE_RESSURS
+      mutate-ressurs:
+        client-id: mutate-ressurs
+        scopes:
+          - MUTATE_RESSURS
+      no-scopes:
+        client-id: no-scopes
+        scopes: []
       no-admin:
         client-id: noAdmin
         scopes:

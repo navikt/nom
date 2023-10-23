@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -48,7 +48,7 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
     @Captor
-    ArgumentCaptor<KorrigerOrgtilknytningDato> korrigerOrgtilknytningDatoArgumentCaptor;
+    ArgumentCaptor<EndreOrgtilknytningDato> korrigerOrgtilknytningDatoArgumentCaptor;
     @Captor
     ArgumentCaptor<AvvikleOrgtilknytning> avvikleOrgtilknytningArgumentCaptor;
 
@@ -179,7 +179,7 @@ class RessursStillingProcessorTestUtilityMetoder {
 
         ressursStillingProcessor.endreOrgtilknytningGyldigFOM(orginalOrgtilknytningState, stillingPeriode, null);
 
-        verify(orgtilknytningCommandService, times(1)).korrigerOrgtilknytningDato(any(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
 
         assertEquals(orginalOrgtilknytningState.navident(), korrigerOrgtilknytningDatoArgumentCaptor.getValue().navident());
         assertEquals(orginalOrgtilknytningState.orgEnhetId(), korrigerOrgtilknytningDatoArgumentCaptor.getValue().orgenhetId());
@@ -221,7 +221,7 @@ class RessursStillingProcessorTestUtilityMetoder {
 
         ressursStillingProcessor.endreOrgtilknytningGyldigTOM(orginalOrgtilknytningState, stillingPeriode, null);
 
-        verify(orgtilknytningCommandService, times(1)).korrigerOrgtilknytningDato(any(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
+        verify(orgtilknytningCommandService, times(1)).endreOrgtilknytningDato(any(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
 
         assertEquals(orginalOrgtilknytningState.navident(), korrigerOrgtilknytningDatoArgumentCaptor.getValue().navident());
         assertEquals(orginalOrgtilknytningState.orgEnhetId(), korrigerOrgtilknytningDatoArgumentCaptor.getValue().orgenhetId());

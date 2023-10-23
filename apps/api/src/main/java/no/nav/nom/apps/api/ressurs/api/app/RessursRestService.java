@@ -4,12 +4,12 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
@@ -24,6 +24,7 @@ import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class RessursRestService {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
-    private final OrgenhetService orgenhetService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
 
     public RessursRestService(
@@ -53,7 +54,7 @@ public class RessursRestService {
         OrgtilknytningCommandService orgtilknytningCommandService,
         NIKClient nikClient,
         PdlClient pdlClient,
-        OrgenhetService orgenhetService,
+        OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService
     ) {
         this.ressursStateRepository = ressursStateRepository;
@@ -61,7 +62,7 @@ public class RessursRestService {
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
-        this.orgenhetService = orgenhetService;
+        this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
     }
 
@@ -165,8 +166,8 @@ public class RessursRestService {
             metaData,
             request.getStartDato(),
             Optional.ofNullable(request.getOrgEnhetId())
-                .flatMap(orgenhetService::getById)
-                .map(IOrgenhet::getAgressoId)
+                .flatMap(orgEnhetStateRepository::findById)
+                .flatMap(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
             request.getAnsettelsesType()
         );

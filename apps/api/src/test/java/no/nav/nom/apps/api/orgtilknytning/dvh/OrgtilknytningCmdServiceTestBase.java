@@ -5,7 +5,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +33,7 @@ public class OrgtilknytningCmdServiceTestBase {
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
     @Captor
-    ArgumentCaptor<KorrigerOrgtilknytningDato> korrigerOrgtilknytningDatoArgumentCaptor;
+    ArgumentCaptor<EndreOrgtilknytningDato> korrigerOrgtilknytningDatoArgumentCaptor;
     @Captor
     ArgumentCaptor<AvvikleOrgtilknytning> avvikleOrgtilknytningArgumentCaptor;
     @Captor
@@ -107,7 +107,7 @@ public class OrgtilknytningCmdServiceTestBase {
                 }
             }
             case KORRIGERT -> {
-                mock.korrigerOrgtilknytningDato(korrigertFidArgumentCaptor.capture(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
+                mock.endreOrgtilknytningDato(korrigertFidArgumentCaptor.capture(), korrigerOrgtilknytningDatoArgumentCaptor.capture());
                 log.debug("KORRIGERT ({})- FID argument: {}", korrigertTimes, korrigertFidArgumentCaptor.getAllValues());
                 if (verificationMode != NEVER_INVOKED) {
                     return new KorrigertOrgtilknytningDatoAssert(korrigertFidArgumentCaptor.getAllValues().get(korrigertTimes -1), korrigerOrgtilknytningDatoArgumentCaptor.getAllValues().get(korrigertTimes - 1));
@@ -264,11 +264,11 @@ public class OrgtilknytningCmdServiceTestBase {
     }
 
     class KorrigertOrgtilknytningDatoAssert extends OrgtilknytningAssert {
-        private final KorrigerOrgtilknytningDato korrigerOrgtilknytningDato;
+        private final EndreOrgtilknytningDato endreOrgtilknytningDato;
 
-        KorrigertOrgtilknytningDatoAssert(String fid, KorrigerOrgtilknytningDato korrigerOrgtilknytningDato) {
+        KorrigertOrgtilknytningDatoAssert(String fid, EndreOrgtilknytningDato endreOrgtilknytningDato) {
             super(fid);
-            this.korrigerOrgtilknytningDato = korrigerOrgtilknytningDato;
+            this.endreOrgtilknytningDato = endreOrgtilknytningDato;
         }
 
         @Override
@@ -279,13 +279,13 @@ public class OrgtilknytningCmdServiceTestBase {
 
         @Override
         public OrgtilknytningAssert gyldigFom(LocalDate gyldigFom) {
-            assertEquals(gyldigFom, korrigerOrgtilknytningDato.gyldigFom(), "GyldigFOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
+            assertEquals(gyldigFom, endreOrgtilknytningDato.gyldigFom(), "GyldigFOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
             return this;
         }
 
         @Override
         public OrgtilknytningAssert gyldigTom(LocalDate gyldigTom) {
-            assertEquals(gyldigTom, korrigerOrgtilknytningDato.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
+            assertEquals(gyldigTom, endreOrgtilknytningDato.gyldigTom().orElse(null), "GyldigTOM dato er ikke korrekt for KorrigerOrgtilknytningDato");
             return this;
         }
     }

@@ -5,10 +5,10 @@ import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
@@ -46,7 +46,10 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(String fid, EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreDagligOppfolgingOrgtilknytning(
+        String fid,
+        EndreDagligOppfolgingOrgtilknytning primaeOrgtilknytningEndret
+    ) {
         return eventProducer.sendMessage(new OrgtilknytningDagligOppfolgingEndretEventV1(
             fid,
             new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
@@ -74,19 +77,18 @@ public class OrgtilknytningCommandService {
         ));
     }
 
-    // Alle verdier i KorrigerOrgEnhet objektet erstatter eksisterende verdier. Også tomme.
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> korrigerOrgtilknytningDato(String fid, KorrigerOrgtilknytningDato korrigerOrgtilknytningDato) {
-        return eventProducer.sendMessage(new OrgtilknytningDatoEndretEventV1(
-            fid,
-            new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
-                korrigerOrgtilknytningDato.navident(),
-                korrigerOrgtilknytningDato.orgenhetId(),
-                korrigerOrgtilknytningDato.gyldigFom(),
-                korrigerOrgtilknytningDato.gyldigTom()
-            ),
-            korrigerOrgtilknytningDato.inputMetadata(),
-            korrigerOrgtilknytningDato.additionalAgressoData()
-        ));
+    // Alle verdier i OrgtilknytningDatoEndretEventData objektet erstatter eksisterende verdier. Også tomme.
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningDato(String fid, EndreOrgtilknytningDato endreOrgtilknytningDato) {
+        return eventProducer.sendMessage(
+            new OrgtilknytningDatoEndretEventV2(
+                fid,
+                new OrgtilknytningDatoEndretEventV2.OrgtilknytningDatoEndretEventData(
+                    endreOrgtilknytningDato.gyldigFom(),
+                    endreOrgtilknytningDato.gyldigTom()
+                ),
+                endreOrgtilknytningDato.inputMetadata(),
+                endreOrgtilknytningDato.additionalAgressoData()
+            ));
     }
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> fjernOrgtilknytning(String fid, FjernOrgtilknytning fjernOrgtilknytning) {

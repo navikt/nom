@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.KorrigerOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.Sektor;
@@ -459,9 +459,17 @@ public class RessursStillingProcessor {
             stillingPerioderAsString
         );
 
-        InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"));
+        InputMetadata metadata = new InputMetadata(
+            "nom-api BatchJob",
+            "Datavarehus",
+            Map.of(
+            "navident", originalOrgtilknytning.navident(),
+            "orgEnhetId", originalOrgtilknytning.orgEnhetId()
+            ),
+            new Origination("nom-api", "nom-api")
+        );
 
-        var command = new KorrigerOrgtilknytningDato(
+        var command = new EndreOrgtilknytningDato(
             originalOrgtilknytning.navident(),
             originalOrgtilknytning.orgEnhetId(),
             stillingPeriode.gyldigFom(),
@@ -472,7 +480,7 @@ public class RessursStillingProcessor {
 
         loggCommand(originalOrgtilknytning.navident(), originalOrgtilknytning.fid(), command);
 
-        orgtilknytningCommandService.korrigerOrgtilknytningDato(originalOrgtilknytning.fid(), command);
+        orgtilknytningCommandService.endreOrgtilknytningDato(originalOrgtilknytning.fid(), command);
     }
 
     public void endreOrgtilknytningGyldigTOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
@@ -481,10 +489,17 @@ public class RessursStillingProcessor {
             stillingPerioderAsString
         );
 
-        InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"));
+        InputMetadata metadata = new InputMetadata(
+            "nom-api BatchJob",
+            "Datavarehus",
+            Map.of(
+                "navident", originalOrgtilknytning.navident(),
+                "orgEnhetId", originalOrgtilknytning.orgEnhetId()
+            ),
+            new Origination("nom-api", "nom-api"));
 
         if (originalOrgtilknytning.gyldigTom().isPresent()) {
-            var command = new KorrigerOrgtilknytningDato(
+            var command = new EndreOrgtilknytningDato(
                 originalOrgtilknytning.navident(),
                 originalOrgtilknytning.orgEnhetId(),
                 originalOrgtilknytning.gyldigFom(),
@@ -495,7 +510,7 @@ public class RessursStillingProcessor {
 
             loggCommand(originalOrgtilknytning.navident(), originalOrgtilknytning.fid(), command);
 
-            orgtilknytningCommandService.korrigerOrgtilknytningDato(originalOrgtilknytning.fid(), command);
+            orgtilknytningCommandService.endreOrgtilknytningDato(originalOrgtilknytning.fid(), command);
         } else {
             var command = new AvvikleOrgtilknytning(
                 originalOrgtilknytning.navident(),
@@ -609,7 +624,7 @@ public class RessursStillingProcessor {
         }
         processCmdResult.numAvviklet++;
     }
-    private void loggCommand(String navident, String fid, KorrigerOrgtilknytningDato cmd) {
+    private void loggCommand(String navident, String fid, EndreOrgtilknytningDato cmd) {
         if (log.isDebugEnabled() && evtsrcCommandsPerNavident.containsKey(navident)) {
             evtsrcCommandsPerNavident.get(navident).add("\n\t\tAvvikleOrgtilknytning for fid %s enhet %s gyldigFom %s - gyldigTom %s".formatted(fid, cmd.orgenhetId(), cmd.gyldigFom(), cmd.gyldigTom()));
         }

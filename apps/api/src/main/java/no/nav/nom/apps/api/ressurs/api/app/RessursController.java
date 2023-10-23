@@ -145,7 +145,7 @@ public class RessursController {
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<StandardResponse> handleServerError(Exception exception) {
+    private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
         log.error("Intern feil ved opprettelse av ny ressurs", exception);
 
         return ResponseEntity
