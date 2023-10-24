@@ -141,7 +141,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
         when(ressursStateRepository.findByNavident(resId)).thenReturn(createRessursState(resId));
         when(adClient.fetchInAdRessursInBatches(anyList())).thenReturn(Map.of(resId, createAdRessurs(resId)));
         when(orgtilknytningService.getByNavIdent(resId)).thenReturn(List.of(createOtks(resId, oeId)));
-        when(orgenhetService.getByFid(oeId)).thenReturn(Optional.of(createOes(oeId, oeNavn,null)));
+        when(orgenhetService.getById(oeId)).thenReturn(Optional.of(createOes(oeId, oeNavn,null)));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
@@ -179,7 +179,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
         when(orgenhetService.getByFid(oe1.getFid())).thenReturn(Optional.of(oe1));
         when(orgenhetService.getByFid(oe2.getFid())).thenReturn(Optional.of(oe2));
         when(orgenhetService.getByFid(oe3.getFid())).thenReturn(Optional.of(oe3));
-        when(orgenhetService.getByFid(oe4.getFid())).thenReturn(Optional.of(oe4));
+        when(orgenhetService.getById(oe4.getId())).thenReturn(Optional.of(oe4));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)

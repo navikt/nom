@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,7 +64,58 @@ public class TeamcatRessursController {
         this.IT_AVDELING_ID = isDev ? "hu357k" : "ve673e";
     }
 
-    private String determineAvdelingNavn(String navident) {
+
+    private String determineAvdelingNavnByEnhet(IOrgenhet inputEnhet, PerRequestCache perRequestCache){
+        var maybeCachedResult = perRequestCache.getNameIfCached(inputEnhet.getId());
+        if(maybeCachedResult != null){
+            return maybeCachedResult;
+        }
+
+        var hierarchy = new LinkedList<IOrgenhet>();
+        hierarchy.addFirst(inputEnhet);
+
+        var enhet = Optional.of(inputEnhet);
+
+        // build hierarchy
+        while (enhet.isPresent()) {
+            var overenhetidByResolver = overordnetResolver.findOverordnetOrgEnhet(enhet.get().getFid()).map(OrgEnhetState::fid);
+            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid).or(() -> overenhetidByResolver);
+
+            if (overenhetid.isEmpty()) {
+                enhet = Optional.empty();
+            } else {
+                enhet = orgenhetService.getByFid(overenhetid.get());
+                enhet.ifPresent(hierarchy::addFirst);
+            }
+        }
+
+        String out;
+        switch (hierarchy.size()) {
+            case 1 -> {
+                out = hierarchy.get(0).getNavn();
+            }
+            case 2 -> {
+                out = hierarchy.get(1).getNavn();
+            }
+            default -> {
+                var includesItDept = hierarchy.stream().filter(it -> it.getFid().equals(IT_AVDELING_ID)).findFirst();
+                if (includesItDept.isPresent()) {
+                    var itDeptIdx = hierarchy.indexOf(includesItDept.get());
+                    var subItIdx = itDeptIdx + 1;
+                    if (subItIdx < hierarchy.size()) {
+                        var subItDept = hierarchy.get(subItIdx);
+                        return subItDept.getNavn();
+                    }
+                }
+                out = hierarchy.get(2).getNavn();
+
+            }
+        }
+        perRequestCache.putEnhetToName(inputEnhet.getId(),out);
+        return out;
+    }
+
+    private String determineAvdelingNavn(String navident, PerRequestCache perRequestCache) {
 
         var orgtilknytningStates = orgtilknytningService.getByNavIdent(navident);
         if (orgtilknytningStates.isEmpty()) {
@@ -81,43 +133,7 @@ public class TeamcatRessursController {
             return null;
         }
 
-        var hierarchy = new LinkedList<IOrgenhet>();
-        hierarchy.addFirst(enhet.get());
-
-        // build hierarchy
-        while (enhet.isPresent()) {
-            var overenhetidByResolver = overordnetResolver.findOverordnetOrgEnhet(enhet.get().getFid()).map(OrgEnhetState::fid);
-            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid).or(() -> overenhetidByResolver);
-
-            if (overenhetid.isEmpty()) {
-                enhet = Optional.empty();
-            } else {
-                enhet = orgenhetService.getByFid(overenhetid.get());
-                enhet.ifPresent(hierarchy::addFirst);
-            }
-        }
-
-        switch (hierarchy.size()) {
-            case 1 -> {
-                return hierarchy.get(0).getNavn();
-            }
-            case 2 -> {
-                return hierarchy.get(1).getNavn();
-            }
-            default -> {
-                var includesItDept = hierarchy.stream().filter(it -> it.getFid().equals(IT_AVDELING_ID)).findFirst();
-                if (includesItDept.isPresent()) {
-                    var itDeptIdx = hierarchy.indexOf(includesItDept.get());
-                    var subItIdx = itDeptIdx + 1;
-                    if (subItIdx < hierarchy.size()) {
-                        var subItDept = hierarchy.get(subItIdx);
-                        return subItDept.getNavn();
-                    }
-                }
-                return hierarchy.get(2).getNavn();
-
-            }
-        }
+        return determineAvdelingNavnByEnhet(enhet.get(), perRequestCache);
     }
 
     @Operation(
@@ -142,16 +158,20 @@ public class TeamcatRessursController {
         return ResponseEntity.ok(out);
     }
 
-    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource) {
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource, PerRequestCache perRequestCache) {
         return new TeamcatRessursDTO(
             ressurs.startdato().orElse(null),
             ressurs.sluttdato().orElse(null),
-            adResource != null ? adResource.get(navident).getEmail() : null,
+            adResource.get(navident) != null ? adResource.get(navident).getEmail() : null,
             navident,
             TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
             ressurs.visningsnavn().getFormattedVisningsnavn(),
-            determineAvdelingNavn(navident)
+            determineAvdelingNavn(navident, perRequestCache)
         );
+    }
+
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource){
+        return getTeamcatRessursDTO(navident,ressurs,adResource,new PerRequestCache());
     }
 
 
@@ -173,15 +193,50 @@ public class TeamcatRessursController {
         var maybeRessursList = ressursStateRepository.findByNavidentBulk(navidentListInput);
         var out = new HashMap<String, TeamcatRessursDTO>(maybeRessursList.size());
 
+        var perRequestCache = new PerRequestCache();
         for (var x : maybeRessursList.entrySet()) {
             var ressurs = x.getValue();
             var navident = x.getKey();
-            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource);
+            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource, perRequestCache);
             out.put(navident, tmp);
         }
 
 
         return ResponseEntity.ok(out);
+    }
+
+    @Operation(
+        description = "Hent alle teamkatalog ressurser",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/alleRessurser")
+    public ResponseEntity<Map<String, TeamcatRessursDTO>> alleRessurser() {
+        System.out.println("Timing - Start: " + 0);
+        var alleressurser = ressursStateRepository.getAll();
+        var adResources = adclient.fetchInAdRessursInBatches(alleressurser.stream()
+            // only active resources are available in ad
+            .filter(it -> it.sluttdato().map(sluttdato -> sluttdato.isAfter(LocalDate.now())).orElse(true))
+            .map(RessursState::navident).toList());
+
+        var perRequestCache = new PerRequestCache();
+        var out = new HashMap<String, TeamcatRessursDTO>(alleressurser.size());
+        for (var r : alleressurser) {
+            var tmp = getTeamcatRessursDTO(r.navident(), r, adResources, perRequestCache);
+            out.put(r.navident(), tmp);
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    private static class PerRequestCache{
+
+        private final HashMap<Object,String> enhetToName = new HashMap<>();
+        public void putEnhetToName(String orgenhetId, String out) {
+            this.enhetToName.put(orgenhetId,out);
+        }
+
+        public String getNameIfCached(String orgenhetId){
+            return this.enhetToName.get(orgenhetId);
+        }
     }
 
 
