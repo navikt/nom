@@ -75,7 +75,7 @@ public class TeamcatRessursController {
             .findFirst();
 
         var orgTilknytning = dagligOppfoelgingOrgtilknytning.orElseGet(() -> orgtilknytningStates.stream().findFirst().get());
-        var enhet = orgenhetService.getByFid(orgTilknytning.fid());
+        var enhet = orgenhetService.getById(orgTilknytning.orgEnhetId());
 
         if (enhet.isEmpty()) {
             return null;
