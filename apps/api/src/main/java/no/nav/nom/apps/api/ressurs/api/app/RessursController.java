@@ -7,9 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
-import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,17 @@ public class RessursController {
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
     public static final String UNLEASH_EDIT_RESSURS = "nom.ressurs.edit-external";
     private final RessursRestService ressursRestService;
+
+    private final RessursContactDetailsResolver ressursContactDetailsResolver;
     private final Unleash unleash;
 
     public RessursController(
         RessursRestService ressursRestService,
+        RessursContactDetailsResolver ressursContactDetailsResolver,
         Unleash unleash
     ) {
         this.ressursRestService = ressursRestService;
+        this.ressursContactDetailsResolver = ressursContactDetailsResolver;
         this.unleash = unleash;
     }
 
@@ -94,8 +99,16 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<RessursState> getRessurs(@PathVariable String navident){
-        return ResponseEntity.ok(ressursRestService.findRessursByNavident(navident));
+    public ResponseEntity<Ressurs> getRessurs(@PathVariable String navident){
+        var ressursState = ressursRestService.findRessursByNavident(navident);
+        var telefoner = ressursContactDetailsResolver.fetchTelefoner(navident);
+        var epost = ressursContactDetailsResolver.fetchEmail(navident);
+
+        return ResponseEntity.ok(new Ressurs(
+            ressursState,
+            telefoner,
+            epost.orElse(null)
+        ));
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {
