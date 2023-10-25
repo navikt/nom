@@ -27,6 +27,6 @@ jobs:
       dev-cluster: dev-fss
       prod-cluster: prod-fss
     secrets:
-      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
