@@ -1,0 +1,32 @@
+name: 'deploy: nom-remedy-integrasjon'
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/nom-remedy-integrasjon/**'
+      - '.nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon*.yaml'
+      - '.github/workflows/deploy-nom-remedy-integrasjon.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+  workflow_dispatch:
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: nom-remedy-integrasjon
+      jar-path: apps/nom-remedy-integrasjon/target/app.jar
+      image-suffix: nom-remedy-integrasjon
+      nais-config-file-path-dev: .nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon-dev-fss.yaml
+      nais-config-file-path-prod: .nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon-prod-fss.yaml
+      dev-cluster: dev-fss
+      prod-cluster: prod-fss
+    secrets:
+      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

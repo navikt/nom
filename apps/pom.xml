@@ -21,5 +21,6 @@
         <module>unit4</module>
         <module>nav-ident</module>
         <module>streams</module>
+        <module>nom-remedy-integrasjon</module>
     </modules>
 </project>

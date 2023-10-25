@@ -1,0 +1,19 @@
+name: 'verify: api'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/nom-remedy-integrasjon/**'
+      - 'libs/utils-common/**'
+      - 'libs/contract-nom-dto/**'
+      - '.github/*/verify-nom-remedy-integrasjon.yaml'
+      - 'apps/pom.xml'
+      - 'pom.xml'
+
+jobs:
+  verify:
+    uses: ./.github/workflows/verify-spring-app.yml
+    with:
+      maven-project: nom-remedy-integrasjon
