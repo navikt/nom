@@ -31,14 +31,14 @@ public class OrgEnheterController {
         this.orgEnhetMapper = orgEnhetMapper;
     }
 
-    @GetMapping("/{orgenhetid}")
+    @GetMapping("/{orgenhetId}")
     @Operation(
         description = "Henter orgenhet med gitt id",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    public ResponseEntity<OrgEnhet> hentOrgenhet(@PathVariable String orgenhetid) {
+    public ResponseEntity<OrgEnhet> hentOrgenhet(@PathVariable String orgenhetId) {
 
-        return orgenhetService.getById(orgenhetid)
+        return orgenhetService.getById(orgenhetId)
             .map(orgEnhetMapper::mapFrom)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());

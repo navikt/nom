@@ -13,7 +13,10 @@ import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.stereotype.Component;
 
+import java.text.Collator;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 @Component
@@ -47,7 +50,13 @@ public class OrgEnhetMapper {
 
         var remedyEnhetId = remedyEnhetMapperService.findByNomId(orgEnhet.getId()).map(RemedyEnhet::remedyEnhetId);
         var overordnetId = overordnetResolver.findOverordnetOrgEnhet(orgEnhet.getFid()).map(OrgEnhetState::id);
-        var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid()).stream().map(OrgEnhetState::id).toList();
+
+        Collator norwegianCollator = Collator.getInstance(new Locale("no", "NO"));
+        var underordnedeOrgEnhetIds = underordnetResolver.findUnderordnedeOrgEnheter(orgEnhet.getFid())
+                .stream()
+                .sorted(Comparator.comparing(OrgEnhetState::navn, norwegianCollator))
+                .map(OrgEnhetState::id)
+                .toList();
 
         return new OrgEnhet(
             orgEnhet.getId(),
