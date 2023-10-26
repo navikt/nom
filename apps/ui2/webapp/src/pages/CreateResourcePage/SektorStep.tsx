@@ -22,7 +22,7 @@ export function SektorStep() {
       <Alert variant="info">
         For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter.
         Statlig og kommunalt ansatte opprettes i Remedy. Dette gjelder også
-        roboter, Vikafossen og utenlandske konsulenter opprettes i Remedy.
+        roboter, Vikafossen og utenlandske konsulenter.
       </Alert>
 
       <form
