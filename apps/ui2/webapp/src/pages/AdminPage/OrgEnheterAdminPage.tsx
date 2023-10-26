@@ -18,9 +18,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import { isBefore } from "date-fns";
-// eslint-disable-next-line lodash/import-scope,you-dont-need-lodash-underscore/is-string,you-dont-need-lodash-underscore/uniq
-import { isString, uniq } from "lodash";
+// eslint-disable-next-line you-dont-need-lodash-underscore/is-string
+import isString from "lodash/isString";
 import sortBy from "lodash/sortBy";
+// eslint-disable-next-line you-dont-need-lodash-underscore/uniq
+import uniq from "lodash/uniq";
 import { useEffect, useState } from "react";
 
 import { apolloClient } from "~/api/apolloclient";
