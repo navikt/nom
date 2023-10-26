@@ -227,7 +227,6 @@
                 <groupId>no.nav.nom</groupId>
                 <artifactId>utils-test</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -247,7 +246,6 @@
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/91 -->
-                <scope>test</scope>
             </dependency>
 
             <!-- fra org.testcontainers:testcontainers:jar:1.18.3:test -->
@@ -255,7 +253,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/88 -->
-                <scope>test</scope>
             </dependency>
 
             <dependency> <!-- Påkrevd for mac M1  -->
@@ -263,7 +260,6 @@
                 <artifactId>netty-resolver-dns-native-macos</artifactId>
                 <classifier>osx-x86_64</classifier>
                 <version>${netty.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
