@@ -53,4 +53,13 @@ public class OrgEnheterController {
         return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
     }
 
+    @GetMapping("/ledetAv/{navident}")
+    @Operation(
+        description = "Henter alle orgenheter som er ledet av en gitt leder",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public List<OrgEnhet> hentOrgEnheterByLeder(@PathVariable String navident) {
+        return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
+    }
+
 }

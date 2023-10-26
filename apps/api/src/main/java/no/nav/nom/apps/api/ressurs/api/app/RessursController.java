@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Tag(name = "Ressurs")
@@ -38,15 +40,19 @@ public class RessursController {
     private final RessursRestService ressursRestService;
 
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
+
+    private final RessursLedereResolver ressursLedereResolver;
     private final Unleash unleash;
 
     public RessursController(
         RessursRestService ressursRestService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
+        RessursLedereResolver ressursLedereResolver,
         Unleash unleash
     ) {
         this.ressursRestService = ressursRestService;
         this.ressursContactDetailsResolver = ressursContactDetailsResolver;
+        this.ressursLedereResolver = ressursLedereResolver;
         this.unleash = unleash;
     }
 
@@ -109,6 +115,18 @@ public class RessursController {
             telefoner,
             epost.orElse(null)
         ));
+    }
+
+    @GetMapping("/lederFor/{navident}")
+    @Operation(
+        description = "Henter ledere for en ressurs med navident",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "List of Ressurs if found or empty list"),
+    })
+    public List<RessursLeder> getRessursLedere(@PathVariable String navident){
+        return ressursLedereResolver.ledere(navident);
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {
