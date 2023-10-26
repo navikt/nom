@@ -33,7 +33,7 @@ export function SearchForPerson() {
             autoComplete="off"
             error={error?.message}
             hideLabel={false}
-            label="Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret"
+            label="Fyll inn personnummer/D-nummer så finner vi personen i Folkeregisteret."
             onChange={(newValue) => onChange(newValue)}
             onClear={() => {
               reset({ personident: "" });
