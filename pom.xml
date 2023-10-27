@@ -46,6 +46,8 @@
         <wiremock.version>2.35.1</wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
         <nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <ojdbc.version>23.3.0.23.09</ojdbc.version>
 
         <!-- Override spring-boot-dependencies version -->
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
@@ -220,6 +222,19 @@
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+
+            <!-- For å koble på Oracle datakilder  -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.database.jdbc</groupId>
+                <artifactId>ojdbc11</artifactId>
+                <version>${ojdbc.version}</version>
+                <scope>runtime</scope>
             </dependency>
 
             <!-- Test dependencies -->

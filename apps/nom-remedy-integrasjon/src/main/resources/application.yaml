@@ -9,4 +9,20 @@ management:
       base-path: /internal
       exposure:
         include: prometheus, info, health, metrics
+spring:
+  datasource:
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${REMEDY_DATASOURCE_URL}
+    username: nom_integrasjon
+    password: ${REMEDY_DB_PWD} # Lastes inn fra vault ved deploy
 
+    hikari:
+      data-source-properties:
+        defaultRowPrefetch: 1000
+      minimum-idle: 2
+      maximum-pool-size: 10
+      idle-timeout: 30000
+      max-lifetime: 2000000
+      connection-timeout: 30000
+  jpa:
+    database-platform: org.hibernate.dialect.OracleDialect

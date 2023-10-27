@@ -8,6 +8,9 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  env:
+    - name: REMEDY_DATASOURCE_URL
+      value: jdbc:oracle:thin:@//a01dbfl042.adeo.no:1521/remedy_q2
   liveness:
     path: /internal/health/liveness
     initialDelay: 30
