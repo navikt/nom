@@ -10,7 +10,7 @@ spec:
   port: 8080
   env:
     - name: REMEDY_DATASOURCE_URL
-      value: jdbc:oracle:thin:@//a01dbfl050.adeo.no:1521/remedyp
+      value: jdbc:oracle:thin:@//d26dbfl022.test.local:1521/remedy_u2
   liveness:
     path: /internal/health/liveness
     initialDelay: 30
