@@ -9,6 +9,8 @@ import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganisering;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
@@ -18,6 +20,8 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -57,6 +61,8 @@ public class DvhRestConsumer {
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
 
+    private final OrganiseringEventCommandService organiseringEventCommandService;
+
     public boolean initloadComplete() {
         return initialLoadComplete.get();
     }
@@ -67,15 +73,16 @@ public class DvhRestConsumer {
         log.info("Starter schedulert oppdatering fra DVH");
         LocalDateTime start = LocalDateTime.now();
 
-        while ( !isInitialStateReady() ) { // Wait on startup until state topics are read
-            try {
-                Thread.sleep(5_000);
-                log.debug("InitialState er ikke klar enda");
-                log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
-            } catch (Exception ignored) {
-                log.error("Waiting for initialState last feilet", ignored);
-            }
-        }
+//        TODO Remove before merge!
+//        while ( !isInitialStateReady() ) { // Wait on startup until state topics are read
+//            try {
+//                Thread.sleep(5_000);
+//                log.debug("InitialState er ikke klar enda");
+//                log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
+//            } catch (Exception ignored) {
+//                log.error("Waiting for initialState last feilet", ignored);
+//            }
+//        }
 
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
@@ -212,7 +219,10 @@ public class DvhRestConsumer {
                     .filter(this::determineEnhetNotIgnored)
                     .forEach(e -> {
                         if (validateOrganisering(e)) {
-                            organiseringer.add(new DvhOrganisering(e));
+                            DvhOrganisering dvhOrganisering = new DvhOrganisering(e);
+                            organiseringer.add(dvhOrganisering);
+                            // TEST publish organisering event
+                            organiseringEventCommandService.opprettOrganisering(getOpprettOrganisering(dvhOrganisering));
                         }
 
                         if (validateLeder(e)) {
@@ -225,6 +235,21 @@ public class DvhRestConsumer {
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
+    }
+
+
+    private OpprettOrganisering getOpprettOrganisering(DvhOrganisering dvhOrganisering) {
+        return new OpprettOrganisering(
+            dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivOver(),
+            dvhOrganisering.getOrgNivUnder(),
+            dvhOrganisering.getNavnOver(),
+            dvhOrganisering.getNavnUnder(),
+            dvhOrganisering.getGyldigFom(),
+            dvhOrganisering.getGyldigTom(),
+            new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrganisering, new Origination("nom-api", "nom-api"))
+        );
     }
 
     private boolean determineEnhetNotIgnored(JsonNode jsonNode) {

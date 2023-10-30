@@ -10,6 +10,8 @@ app:
     orgtilknytning:
       state-topic: org.nom.intern-orgtilknytning-state
       eventsource-topic: org.nom.orgtilknytning-eventsource
+    organisering:
+      eventsourceTopic: org.nom.organisering-eventsource
   clients:
     nom-proxy:
       base-url: ${NOM_PROXY_BASEURL}
