@@ -1,66 +1,76 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
 import { Heading, Label, Link } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
 
-import type {
-  HentHierarkiQuery,
-  HentRessursMedNavidentQuery,
-} from "~/api/generated/graphql_generated";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import {
   OverEnheterDivider,
   VerticalEdge,
 } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
-import { getOverEnheterBackToRootRecursively } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
-
-type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+import type { OrgEnhet, Ressurs } from "~/types/api-models";
+import { formatVisningsnavn } from "~/utils";
 
 export function CompactOrganisasjonHierarki({
-  orgHierarki,
+  orgEnhet,
   ressurs,
 }: {
-  orgHierarki: HentHierarkiQuery;
+  orgEnhet: OrgEnhet;
   ressurs: Ressurs;
 }) {
-  const firstOverEnhet = (orgHierarki.enhetsKoblinger?.overenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet,
-  )[0];
-
-  const overEnheter = firstOverEnhet
-    ? getOverEnheterBackToRootRecursively(firstOverEnhet)
-    : [];
-
-  const valgtEnhet = orgHierarki.enhet;
-
   return (
     <>
-      {overEnheter.map((overEnhet) => (
-        <React.Fragment key={overEnhet.id}>
-          <CompactOrgEnhet orgEnhet={overEnhet} selected={false} />
-          <OverEnheterDivider />
-        </React.Fragment>
-      ))}
-      {valgtEnhet && <CompactOrgEnhet orgEnhet={valgtEnhet} selected />}
-      <OverEnheterDivider />
+      <OverEnheter isRoot orgEnhetId={orgEnhet.id} />
       <SelectedResource ressurs={ressurs} />
     </>
   );
 }
-type OverEnhet =
-  | NonNullable<
-      NonNullable<HentHierarkiQuery["enhetsKoblinger"]>["overenheter"]
-    >[0]["organisasjonsenhet"]
-  | NonNullable<HentHierarkiQuery["enhet"]>;
+
+function OverEnheter({
+  orgEnhetId,
+  isRoot,
+}: {
+  orgEnhetId: string;
+  isRoot: boolean;
+}) {
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+  });
+
+  const overEnhetId = orgEnhetQuery.data?.overordnetEnhetId;
+
+  return (
+    <>
+      {overEnhetId && <OverEnheter isRoot={false} orgEnhetId={overEnhetId} />}
+      <CompactOrgEnhet orgEnhetId={orgEnhetId} selected={isRoot} />
+      <OverEnheterDivider />
+    </>
+  );
+}
+
 function CompactOrgEnhet({
-  orgEnhet,
+  orgEnhetId,
   selected,
 }: {
-  orgEnhet: OverEnhet;
+  orgEnhetId: string;
   selected: boolean;
 }) {
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
+  if (!orgEnhet) {
+    return <></>;
+  }
+
   return (
     <div
       css={[
@@ -96,12 +106,11 @@ function CompactOrgEnhet({
           </Link>
         </ReactRouterLink>
         <ReactRouterLink
-          params={{ id: orgEnhet.leder[0]?.ressurs.navident }}
+          params={{ id: orgEnhet.ledere[0]?.navident }}
           to={ressursRoute.to}
         >
           <Link as="span">
-            Leder:{" "}
-            {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
+            Leder: {formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
           </Link>
         </ReactRouterLink>
       </div>
@@ -125,7 +134,7 @@ function SelectedResource({ ressurs }: { ressurs: Ressurs }) {
       <VerticalEdge>
         <PersonFillIcon color="white" />
       </VerticalEdge>
-      <Label as="span">{ressurs.visningsnavn}</Label>
+      <Label as="span">{formatVisningsnavn(ressurs.visningsnavn)}</Label>
     </div>
   );
 }

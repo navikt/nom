@@ -3,22 +3,19 @@ import { BodyShort, Heading, Link } from "@navikt/ds-react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
 
-import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
-
-type Hierarchyressurs = NonNullable<
-  HentHierarkiQuery["ressursKoblinger"]
->["koblinger"][0]["ressurs"];
+import type { OrgEnhet } from "~/types/api-models";
+import { formatVisningsnavn } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   ressurser,
-  valgtEnhet,
+  orgEnhet,
 }: {
-  ressurser: Hierarchyressurs[];
-  valgtEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
+  ressurser: string[];
+  orgEnhet: OrgEnhet;
 }) => (
   <div
     css={css`
@@ -46,7 +43,7 @@ export const ValgtOrgEnhet = ({
       >
         <div>
           <Heading level="2" size="large" spacing>
-            {valgtEnhet.navn}
+            {orgEnhet.navn}
           </Heading>
           <div
             css={css`
@@ -54,10 +51,10 @@ export const ValgtOrgEnhet = ({
               column-gap: var(--a-spacing-4);
             `}
           >
-            <BodyShort size="small">ID: {valgtEnhet.id}</BodyShort>
-            {valgtEnhet.remedyEnhetId && (
+            <BodyShort size="small">ID: {orgEnhet.id}</BodyShort>
+            {orgEnhet.remedyEnhetId && (
               <BodyShort size="small">
-                Remedy-enhet: {valgtEnhet.remedyEnhetId}
+                Remedy-enhet: {orgEnhet.remedyEnhetId}
               </BodyShort>
             )}
           </div>
@@ -72,14 +69,14 @@ export const ValgtOrgEnhet = ({
           `}
         >
           <UserImage
-            navident={valgtEnhet.leder[0]?.ressurs.navident}
-            navn={valgtEnhet.leder[0]?.ressurs.visningsnavn ?? ""}
+            navident={orgEnhet.ledere[0]?.navident}
+            navn={formatVisningsnavn(orgEnhet.ledere[0]?.visningsnavn)}
             size="90px"
           />
-          <OrgenhetLederLink orgEnhet={valgtEnhet} />
+          <OrgenhetLederLink orgEnhet={orgEnhet} />
         </div>
       </div>
-      <MedarbeidereList orgEnhet={valgtEnhet} ressurser={ressurser} />
+      <MedarbeidereList orgEnhet={orgEnhet} ressurser={ressurser} />
     </div>
   </div>
 );
@@ -88,8 +85,8 @@ function MedarbeidereList({
   orgEnhet,
   ressurser,
 }: {
-  orgEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
-  ressurser: Hierarchyressurs[];
+  orgEnhet: OrgEnhet;
+  ressurser: string[];
 }) {
   if (ressurser.length === 0) {
     return <></>;
@@ -108,7 +105,7 @@ function MedarbeidereList({
         `}
       >
         {ressurser.map((ressurs) => (
-          <ResourceLink key={ressurs.navident} ressurs={ressurs} />
+          <ResourceLink key={ressurs} navident={ressurs} />
         ))}
       </div>
     </div>
@@ -135,13 +132,8 @@ function TopBorder() {
   );
 }
 
-function OrgenhetLederLink({
-  orgEnhet,
-}: {
-  orgEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
-}) {
-  const { leder } = orgEnhet;
-  const firstLeder = leder[0]?.ressurs;
+function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const firstLeder = orgEnhet.ledere[0];
   const { navident, visningsnavn } = firstLeder ?? {};
 
   if (!navident) {
@@ -152,7 +144,7 @@ function OrgenhetLederLink({
     <span>
       Leder:{" "}
       <ReactRouterLink params={{ id: navident }} to={ressursRoute.to}>
-        <Link as="span">{visningsnavn ?? "Uten navn"}</Link>
+        <Link as="span">{formatVisningsnavn(visningsnavn)}</Link>
       </ReactRouterLink>
     </span>
   );

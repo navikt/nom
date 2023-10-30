@@ -1,35 +1,28 @@
 import { css } from "@emotion/react";
 import { ChevronRightIcon } from "@navikt/aksel-icons";
 import { BodyShort, Heading } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import React, { useEffect, useRef } from "react";
 
-import type {
-  HentHierarkiQuery,
-  OrgenhetStandaloneWithLederFragment,
-} from "~/api/generated/graphql_generated";
-import {
-  Sektor,
-  useHentHierarkiQuery,
-} from "~/api/generated/graphql_generated";
+import { getOrgEnhet, getRessurs } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
+import { Sektor } from "~/types/api-models";
+import { formatVisningsnavn } from "~/utils";
 
 export function OrgEnhetView({
-  orgEnhet,
+  orgEnhetId,
   autoFocus = false,
 }: {
-  orgEnhet: OrgenhetStandaloneWithLederFragment;
+  orgEnhetId: string;
   autoFocus?: boolean;
 }) {
-  // Optimistically fetch orgEnhet this view links to.
-  useHentHierarkiQuery({
-    variables: {
-      id: orgEnhet.id,
-    },
-    fetchPolicy: "cache-first",
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
   });
 
   const reference = useRef<HTMLAnchorElement>(null);
@@ -47,7 +40,7 @@ export function OrgEnhetView({
         text-decoration: none;
         color: var(--a-gray-900);
       `}
-      params={{ id: orgEnhet.id }}
+      params={{ id: orgEnhetId }}
       ref={reference}
       to={orgRoute.to}
     >
@@ -61,11 +54,11 @@ export function OrgEnhetView({
           `}
         >
           <Heading level="2" size="small">
-            {orgEnhet.navn}
+            {orgEnhetQuery.data?.navn}
           </Heading>
           <BodyShort size="small">
             Leder:{" "}
-            {orgEnhet.leder[0]?.ressurs.visningsnavn || "Leder ikke funnet"}
+            {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
           </BodyShort>
         </div>
       </UnitContainerLink>
@@ -73,11 +66,18 @@ export function OrgEnhetView({
   );
 }
 
-type HierarkiQueryRessurs = NonNullable<
-  NonNullable<NonNullable<HentHierarkiQuery>["ressursKoblinger"]>["koblinger"]
->[0]["ressurs"];
+export function ResourceLink({ navident }: { navident: string }) {
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(navident),
+    queryFn: () => getRessurs.queryFn(navident),
+  });
 
-export function ResourceLink({ ressurs }: { ressurs: HierarkiQueryRessurs }) {
+  const ressurs = ressursQuery.data;
+
+  if (!ressurs) {
+    return <></>;
+  }
+
   return (
     <ReactRouterLink
       css={css`
@@ -94,15 +94,15 @@ export function ResourceLink({ ressurs }: { ressurs: HierarkiQueryRessurs }) {
       <UnitContainerLink>
         <UserImage
           navident={ressurs.navident}
-          navn={ressurs.visningsnavn ?? ""}
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="55px"
         />
         <div>
           <Heading level="2" size="small">
-            {ressurs.visningsnavn ?? "uten navn"}
+            {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
           <span>
-            {ressurs.sektor.includes(Sektor.Ekstern) ? "(Ekstern)" : ""}
+            {ressurs.sektor.includes(Sektor.EKSTERN) ? "(Ekstern)" : ""}
           </span>
         </div>
       </UnitContainerLink>

@@ -1,29 +1,27 @@
 import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
-import partition from "lodash/partition";
 import React, { Fragment } from "react";
 
-import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
 import { OrgEnhetView } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { ValgtOrgEnhet } from "~/pages/OrganisasjonsHierarkiPage/components/ValgtOrgEnhet";
 import { UnderEnheterGraphic } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
+import type { OrgEnhet } from "~/types/api-models";
+import { isInDevelopment } from "~/utils";
 
-export function HierarkiFrontPage({
-  hierarchyEntry,
-}: {
-  hierarchyEntry: HentHierarkiQuery;
-}) {
-  const underEnheter = sortUnderenheterForHierarchyFrontPage(hierarchyEntry);
-  const valgtEnhet = hierarchyEntry.enhet;
+const DIREKTORAT_ORGENHET_ID = isInDevelopment() ? "fa965e" : "bu431e";
 
-  if (!valgtEnhet) {
-    return <></>;
-  }
+export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const underEnheterOrgEnhetIds = [
+    DIREKTORAT_ORGENHET_ID,
+    ...orgEnhet.underordnedeOrgEnhetId.filter(
+      (id) => id !== DIREKTORAT_ORGENHET_ID,
+    ),
+  ];
 
   return (
     <>
-      <ValgtOrgEnhet ressurser={[]} valgtEnhet={valgtEnhet} />
-      <UnderEnheterGraphic valgtEnhet={valgtEnhet} />
+      <ValgtOrgEnhet orgEnhet={orgEnhet} ressurser={[]} />
+      <UnderEnheterGraphic valgtEnhet={orgEnhet} />
       <div
         css={css`
           display: flex;
@@ -37,36 +35,14 @@ export function HierarkiFrontPage({
           }
         `}
       >
-        {underEnheter.map((underEnhet, index) => (
-          <Fragment key={underEnhet.id}>
+        {underEnheterOrgEnhetIds.map((underEnhetId, index) => (
+          <Fragment key={underEnhetId}>
             {index === 0 && <Heading size="small">Direktoratet</Heading>}
             {index === 1 && <Heading size="small">Linjene</Heading>}
-            <OrgEnhetView autoFocus={index === 0} orgEnhet={underEnhet} />
+            <OrgEnhetView autoFocus={index === 0} orgEnhetId={underEnhetId} />
           </Fragment>
         ))}
       </div>
     </>
   );
-}
-
-function sortUnderenheterForHierarchyFrontPage(
-  orgHierarchy: HentHierarkiQuery,
-) {
-  const underEnheter = (orgHierarchy?.enhetsKoblinger?.underenheter ?? []).map(
-    ({ organisasjonsenhet }) => organisasjonsenhet,
-  );
-
-  const collator = new Intl.Collator("no", { sensitivity: "base" });
-  underEnheter.sort((a, b) => collator.compare(a.navn, b.navn));
-
-  if (orgHierarchy?.enhet?.navn !== "NAV") {
-    return underEnheter;
-  }
-
-  const [direktoratet, linjene] = partition(
-    underEnheter,
-    (enhet) => enhet?.navn === "Arbeids- og velferdsdirektoratet",
-  );
-
-  return [...direktoratet, ...linjene];
 }

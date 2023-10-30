@@ -1,37 +1,18 @@
 import { css } from "@emotion/react";
 import { Button, TextField } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import React from "react";
 import { useForm } from "react-hook-form";
 
-import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
-import {
-  getRessursByRest,
-  updateNavnForRessurs,
-} from "~/api/react-query-endpoints";
+import { updateNavnForRessurs } from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
-import type { Visningsnavn } from "~/types/api-models";
+import type { Ressurs, Visningsnavn } from "~/types/api-models";
 
-type GraphQlRessurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-
-export function EditNameForm({ ressurs }: { ressurs: GraphQlRessurs }) {
-  /**
-   * Why fetch ressurs (again) when it is already passed to this component?
-   * Because the passed ressurs is from graphql that only has fornavn (which is actually fornavn+mellomnavn concatenated from state) and etternavn.
-   * When fetching with REST we get the actual RessursState entry in return which has the "true" name.
-   * Can be removed when we no longer use graphql for nom-UI
-   */
-  const ressursStateQuery = useQuery({
-    queryKey: getRessursByRest.queryKey(ressurs.navident),
-    queryFn: () => getRessursByRest.queryFn(ressurs.navident),
-  });
-
-  const visningsnavnFromRessursState = ressursStateQuery.data?.visningsnavn;
-
+export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
   const defaultValues = {
-    fornavn: visningsnavnFromRessursState?.fornavn ?? "",
-    mellomnavn: visningsnavnFromRessursState?.mellomnavn ?? "",
-    etternavn: visningsnavnFromRessursState?.etternavn ?? "",
+    fornavn: ressurs.visningsnavn.fornavn,
+    mellomnavn: ressurs.visningsnavn.mellomnavn,
+    etternavn: ressurs.visningsnavn.etternavn,
   };
 
   const {
@@ -42,14 +23,6 @@ export function EditNameForm({ ressurs }: { ressurs: GraphQlRessurs }) {
   } = useForm({
     defaultValues,
   });
-
-  useEffect(() => {
-    if (ressursStateQuery.isSuccess) {
-      // When the form is initialized the RessursState is most likely not fetched yet.
-      // Therefore, we reset the form with the correct defaults when the query is completed
-      reset(defaultValues);
-    }
-  }, [ressursStateQuery.isSuccess]);
 
   const { mutate } = useMutation<unknown, unknown, Visningsnavn>({
     mutationFn: async (values) =>

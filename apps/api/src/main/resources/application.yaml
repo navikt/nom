@@ -148,6 +148,9 @@ unleash:
     url: ${UNLEASH_SERVER_API_URL}/api
   api-key: ${UNLEASH_SERVER_API_TOKEN}
 
+springdoc:
+  writer-with-order-by-keys: true
+
 --- # This is the same as having an application-dev.yaml file
 spring:
   config:

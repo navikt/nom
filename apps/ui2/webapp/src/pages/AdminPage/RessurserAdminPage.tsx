@@ -28,10 +28,9 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
 
-import { Sektor } from "~/api/generated/graphql_generated";
 import type { RessursFields } from "~/api/react-query-endpoints";
 import {
-  getAlleRessurser,
+  getAlleRessurserGraphql,
   getUnderliggendeOrgenheter,
 } from "~/api/react-query-endpoints";
 import {
@@ -44,6 +43,7 @@ import {
   ressurserAdminRoute,
   ressursRoute,
 } from "~/reactRouterRoutes";
+import { Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone, isGyldighetsPeriodeActive } from "~/utils";
 
 export function RessurserAdminPage() {
@@ -55,7 +55,7 @@ export function RessurserAdminPage() {
   const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
   // Using react query instead of apollo because it runs  more smoothly
   const alleRessurser = useQuery<RessursFields[], unknown>({
-    ...getAlleRessurser,
+    ...getAlleRessurserGraphql,
   });
 
   const underliggendeOrgenheter = useQuery<string[], unknown>({

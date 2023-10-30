@@ -1,72 +1,29 @@
 import { css } from "@emotion/react";
 import { Alert, Heading, Loader } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import sortBy from "lodash/sortBy";
-import uniqBy from "lodash/uniqBy";
-import { Fragment } from "react";
 import React from "react";
 
-import type { HentHierarkiQuery } from "~/api/generated/graphql_generated";
-import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { PageBanner } from "~/components/PageBanner";
 import { HierarkiFrontPage } from "~/pages/OrganisasjonsHierarkiPage/components/HierarkiFrontPage";
 import { orgRoute } from "~/reactRouterRoutes";
+import type { OrgEnhet } from "~/types/api-models";
 import { isGyldighetsPeriodeActive } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
 import { OrgEnhetView, OverEnheterDivider } from "./components/CardViews";
 import { ValgtOrgEnhet } from "./components/ValgtOrgEnhet";
 
-type OverEnhet = NonNullable<
-  NonNullable<HentHierarkiQuery["enhetsKoblinger"]>["overenheter"]
->[0]["organisasjonsenhet"];
+function OrganisasjonHierarkiPageInner({ orgEnhet }: { orgEnhet: OrgEnhet }) {
+  const underEnheter = orgEnhet.underordnedeOrgEnhetId;
 
-export function getOverEnheterBackToRootRecursively(
-  orgEnhet: OverEnhet,
-): OverEnhet[] {
-  if (!orgEnhet || !orgEnhet.organiseringer) {
-    return [];
-  }
-
-  const firstOrganisering = orgEnhet.organiseringer[0]?.organisasjonsenhet;
-
-  return firstOrganisering
-    ? [
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- for some reason recursion does not agree with tsc
-        ...getOverEnheterBackToRootRecursively(firstOrganisering as any),
-        orgEnhet,
-      ]
-    : [orgEnhet];
-}
-
-function OrganisasjonHierarkiPageInner({
-  hierarchyEntry,
-}: {
-  hierarchyEntry: HentHierarkiQuery;
-}) {
-  const firstOverEnhet = (
-    hierarchyEntry.enhetsKoblinger?.overenheter ?? []
-  ).map(({ organisasjonsenhet }) => organisasjonsenhet)[0];
-
-  const overEnheter = firstOverEnhet
-    ? getOverEnheterBackToRootRecursively(firstOverEnhet)
-    : [];
-  const underEnheter = (
-    hierarchyEntry?.enhetsKoblinger?.underenheter ?? []
-  ).map(({ organisasjonsenhet }) => organisasjonsenhet);
-
-  const valgtEnhet = hierarchyEntry.enhet;
-
-  const ressurser = (hierarchyEntry.ressursKoblinger?.koblinger ?? [])
+  const ressurserNavidents = orgEnhet.ressursKoblinger
     .filter((kobling) =>
       isGyldighetsPeriodeActive(kobling.gyldigFom, kobling.gyldigTom),
     )
-    .map(({ ressurs }) => ressurs);
-
-  const sortedRessurser = sortBy(
-    uniqBy(ressurser, (ressurs) => ressurs.navident),
-    "visningsnavn",
-  );
+    .map((tilknytning) => tilknytning.navident)
+    .sort();
 
   return (
     <div
@@ -75,21 +32,10 @@ function OrganisasjonHierarkiPageInner({
         flex-direction: column;
       `}
     >
-      {overEnheter.map((overEnhet) => (
-        <Fragment key={overEnhet.id}>
-          <OrgEnhetView orgEnhet={overEnhet} />
-          <OverEnheterDivider />
-        </Fragment>
-      ))}
+      <OverEnheter isRoot orgEnhetId={orgEnhet.id} />
 
-      {valgtEnhet && (
-        <>
-          <ValgtOrgEnhet ressurser={sortedRessurser} valgtEnhet={valgtEnhet} />
-          {underEnheter.length > 0 && (
-            <UnderEnheterGraphic valgtEnhet={valgtEnhet} />
-          )}
-        </>
-      )}
+      <ValgtOrgEnhet orgEnhet={orgEnhet} ressurser={ressurserNavidents} />
+      {underEnheter.length > 0 && <UnderEnheterGraphic valgtEnhet={orgEnhet} />}
 
       <div
         css={css`
@@ -102,8 +48,8 @@ function OrganisasjonHierarkiPageInner({
         {underEnheter.map((underEnhet, index) => (
           <OrgEnhetView
             autoFocus={index === 0}
-            key={underEnhet.id}
-            orgEnhet={underEnhet}
+            key={underEnhet}
+            orgEnhetId={underEnhet}
           />
         ))}
       </div>
@@ -111,11 +57,30 @@ function OrganisasjonHierarkiPageInner({
   );
 }
 
-export function UnderEnheterGraphic({
-  valgtEnhet,
+function OverEnheter({
+  orgEnhetId,
+  isRoot,
 }: {
-  valgtEnhet: NonNullable<HentHierarkiQuery["enhet"]>;
+  orgEnhetId: string;
+  isRoot: boolean;
 }) {
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId),
+  });
+
+  const overEnhetId = orgEnhetQuery.data?.overordnetEnhetId;
+
+  return (
+    <>
+      {overEnhetId && <OverEnheter isRoot={false} orgEnhetId={overEnhetId} />}
+      {!isRoot && <OrgEnhetView orgEnhetId={orgEnhetId} />}
+      <OverEnheterDivider />
+    </>
+  );
+}
+
+export function UnderEnheterGraphic({ valgtEnhet }: { valgtEnhet: OrgEnhet }) {
   return (
     <div
       css={css`
@@ -144,25 +109,21 @@ export function UnderEnheterGraphic({
 export function OrganisasjonHierarkiPage() {
   const { id } = useParams({ from: orgRoute.id });
 
-  const hentHierarkiQuery = useHentHierarkiQuery({
-    variables: {
-      id: id,
-    },
-    fetchPolicy: "cache-first",
-    returnPartialData: true,
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(id as string),
+    queryFn: () => getOrgEnhet.queryFn(id as string),
+    enabled: !!id,
   });
 
   let innerContent;
-  if (hentHierarkiQuery.data) {
+  if (orgEnhetQuery.data) {
     innerContent =
-      hentHierarkiQuery.data.enhet?.navn === "NAV" ? (
-        <HierarkiFrontPage hierarchyEntry={hentHierarkiQuery.data} />
+      orgEnhetQuery.data.navn === "NAV" ? (
+        <HierarkiFrontPage orgEnhet={orgEnhetQuery.data} />
       ) : (
-        <OrganisasjonHierarkiPageInner
-          hierarchyEntry={hentHierarkiQuery.data}
-        />
+        <OrganisasjonHierarkiPageInner orgEnhet={orgEnhetQuery.data} />
       );
-  } else if (hentHierarkiQuery.loading) {
+  } else if (orgEnhetQuery.isLoading) {
     innerContent = (
       <div
         css={css`
@@ -172,7 +133,7 @@ export function OrganisasjonHierarkiPage() {
         <Loader size="3xlarge" variant="neutral" />
       </div>
     );
-  } else if (hentHierarkiQuery.error) {
+  } else if (orgEnhetQuery.error) {
     innerContent = (
       <Alert variant="error">
         <Heading level="3" size="small">

@@ -1,13 +1,14 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Optional;
 
 public record Visningsnavn(
-        String fornavn,
-        Optional<String> mellomnavn,
-        String etternavn
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fornavn,
+        @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> mellomnavn,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String etternavn
 ){
     public String toString(){
         return getFormattedVisningsnavn();

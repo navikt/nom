@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 
-import type { FolkeregisterPerson } from "~/api/generated/graphql_generated";
+import type { FolkeregisterPerson } from "~/types/api-models";
 
 const backgroundBox = css`
   background-color: var(--nom-secondary-hover);
@@ -11,9 +11,9 @@ const backgroundBox = css`
 `;
 
 export function FolkeregisterPersonInfo({
-  person,
+  folkeregisterPerson,
 }: {
-  person: FolkeregisterPerson;
+  folkeregisterPerson: FolkeregisterPerson;
 }) {
   return (
     <div css={backgroundBox}>
@@ -27,15 +27,15 @@ export function FolkeregisterPersonInfo({
         `}
       >
         <span>Fornavn</span>
-        <b>{person.navn.fornavn}</b>
-        {person.navn.mellomnavn ? (
+        <b>{folkeregisterPerson.navn.fornavn}</b>
+        {folkeregisterPerson.navn.mellomnavn ? (
           <>
             <span>Mellomnavn</span>
-            <b>{person.navn.mellomnavn}</b>
+            <b>{folkeregisterPerson.navn.mellomnavn}</b>
           </>
         ) : undefined}
         <span>Etternavn</span>
-        <b>{person.navn.etternavn}</b>
+        <b>{folkeregisterPerson.navn.etternavn}</b>
       </div>
     </div>
   );

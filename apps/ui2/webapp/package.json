@@ -12,7 +12,7 @@
     "stylelint": "stylelint '**/*.{tsx,css}'",
     "stylelint:fix": "stylelint --fix '**/*.{tsx,css}'",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
-    "generate-types": "swagger-typescript-api --path http://localhost:8081/v3/api-docs/internal --output ./src/types --no-client -r -n api-models"
+    "generate-types": "swagger-typescript-api --path https://nom-api.intern.dev.nav.no/v3/api-docs/internal --output ./src/types --no-client -r -n api-models"
   },
   "dependencies": {
     "@apollo/client": "3.8.6",

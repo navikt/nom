@@ -14,32 +14,62 @@ export enum AnsettelsesType {
   MIDLERTIDIG = "MIDLERTIDIG",
 }
 
-export interface OpprettRessursRequest {
-  personident: string;
-  visningsfornavn: string;
-  visningsmellomnavn?: string;
-  visningsetternavn: string;
-  sektor: Sektor;
-  orgEnhetId?: string;
+export interface EndreOrgtilknytningDatoRequest {
   /** @format date */
-  startDato: string;
+  gyldigFom?: string;
   /** @format date */
-  sluttDato?: string;
-  ansettelsesType: AnsettelsesType;
+  gyldigTom?: string;
 }
 
-export enum Sektor {
-  NAV_STATLIG = "NAV_STATLIG",
-  NAV_KOMMUNAL = "NAV_KOMMUNAL",
-  EKSTERN = "EKSTERN",
+export interface FolkeregisterPerson {
+  navn: RessursNavn;
+}
+
+export enum NomNivaa {
+  LINJEENHET = "LINJEENHET",
+  DRIFTSENHET = "DRIFTSENHET",
+  ARBEIDSOMRAADE = "ARBEIDSOMRAADE",
+}
+
+export interface OpprettRessursRequest {
+  ansettelsesType: AnsettelsesType;
+  orgEnhetId?: string;
+  personident: string;
+  sektor: Sektor;
+  /** @format date */
+  sluttDato?: string;
+  /** @format date */
+  startDato: string;
+  visningsetternavn: string;
+  visningsfornavn: string;
+  visningsmellomnavn?: string;
 }
 
 export interface OpprettRessursResponse {
-  personident: string;
   navident: string;
-  visningsfornavn: string;
-  visningsetternavn: string;
+  personident: string;
   sektor: Sektor;
+  visningsetternavn: string;
+  visningsfornavn: string;
+}
+
+export interface OrgEnhet {
+  agressoId: string;
+  agressoOrgenhetType: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  id: string;
+  ledere: RessursState[];
+  navn: string;
+  nomNivaa?: NomNivaa;
+  orgEnhetsType?: OrgEnhetsType;
+  orgNiv: string;
+  overordnetEnhetId?: string;
+  remedyEnhetId?: string;
+  ressursKoblinger: OrgtilknytningState[];
+  underordnedeOrgEnhetId: string[];
 }
 
 export enum OrgEnhetsType {
@@ -59,19 +89,97 @@ export enum OrgEnhetsType {
   NAV_OKONOMITJENESTE = "NAV_OKONOMITJENESTE",
 }
 
+export interface OrgtilknytningState {
+  erDagligOppfolging: boolean;
+  fid: string;
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  navident: string;
+  orgEnhetId: string;
+}
+
+export interface Person {
+  folkeregisterPerson: FolkeregisterPerson;
+  navident?: string;
+  personident: string;
+}
+
+export interface Ressurs {
+  epost?: string;
+  fid: string;
+  navident: string;
+  personident: string;
+  sektor: Sektor;
+  /** @format date */
+  sluttdato?: string;
+  /** @format date */
+  startdato?: string;
+  telefoner: Telefon[];
+  visningsnavn: Visningsnavn;
+}
+
+export interface RessursLeder {
+  erDagligOppfolging: boolean;
+  leder: RessursState;
+  lederForNavident: string;
+}
+
+export interface RessursNavn {
+  etternavn: string;
+  fornavn: string;
+  mellomnavn?: string;
+}
+
+export interface RessursState {
+  fid: string;
+  navident: string;
+  personident: string;
+  sektor: Sektor;
+  /** @format date */
+  sluttdato?: string;
+  /** @format date */
+  startdato?: string;
+  visningsnavn: Visningsnavn;
+}
+
+export enum Sektor {
+  NAV_STATLIG = "NAV_STATLIG",
+  NAV_KOMMUNAL = "NAV_KOMMUNAL",
+  EKSTERN = "EKSTERN",
+}
+
+export interface SessionInfoResponse {
+  name: string;
+  navident: string;
+  roles: UserRoles[];
+}
+
 export interface SetOrgEnhetsTypeRequest {
   nomId: string;
   orgEnhetsType?: OrgEnhetsType;
 }
 
 export interface StandardResponse {
-  message?: string;
+  message: string;
 }
 
-export interface SessionInfoResponse {
-  navident: string;
-  name: string;
-  roles: UserRoles[];
+export interface Telefon {
+  nummer: string;
+  type: TelefonType;
+}
+
+export enum TelefonType {
+  NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
+  NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
+  PRIVAT_TELEFON = "PRIVAT_TELEFON",
+}
+
+export interface UpdateVisningsnavnRequest {
+  etternavn?: string;
+  fornavn?: string;
+  mellomnavn?: string;
 }
 
 export enum UserRoles {
@@ -79,36 +187,8 @@ export enum UserRoles {
   ROLE_ADMIN = "ROLE_ADMIN",
 }
 
-export interface RessursState {
-  fid?: string;
-  personident?: string;
-  navident?: string;
-  sektor?: Sektor;
-  visningsnavn?: Visningsnavn;
-  /** @format date */
-  sluttdato?: string;
-  /** @format date */
-  startdato?: string;
-}
-
 export interface Visningsnavn {
-  fornavn?: string;
-  mellomnavn?: string;
-  etternavn?: string;
-}
-
-export interface FolkeregisterPerson {
-  navn: RessursNavn;
-}
-
-export interface Person {
-  personident: string;
-  navident?: string;
-  folkeregisterPerson: FolkeregisterPerson;
-}
-
-export interface RessursNavn {
+  etternavn: string;
   fornavn: string;
   mellomnavn?: string;
-  etternavn: string;
 }

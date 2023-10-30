@@ -1,12 +1,12 @@
 import { css } from "@emotion/react";
 import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import { format } from "date-fns";
 
-import { useGetOrgEnhetQuery } from "~/api/generated/graphql_generated";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
@@ -15,7 +15,7 @@ import type {
   OpprettRessursRequest,
   OpprettRessursResponse,
 } from "~/types/api-models";
-import { DATE_FORMATS } from "~/utils";
+import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
 export function ConfirmStep() {
   const navigate = useNavigate({ from: createRessursRoute.id });
@@ -35,14 +35,14 @@ export function ConfirmStep() {
     .filter((navn) => !!navn)
     .join(" ");
 
-  const orgenheterQuery = useGetOrgEnhetQuery({
-    variables: {
-      id: orgEnhetId || "",
-    },
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgEnhetId as string),
+    queryFn: () => getOrgEnhet.queryFn(orgEnhetId as string),
+    enabled: !!orgEnhetId,
   });
 
-  const selectOrgEnhet = orgenheterQuery.data?.orgEnhet;
-  const lederNavn = selectOrgEnhet?.leder[0]?.ressurs.visningsnavn;
+  const selectOrgEnhet = orgEnhetQuery.data;
+  const lederNavn = formatVisningsnavn(selectOrgEnhet?.ledere[0]?.visningsnavn);
 
   const onClose = () =>
     navigate({

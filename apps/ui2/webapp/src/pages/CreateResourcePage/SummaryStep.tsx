@@ -1,24 +1,27 @@
 import { css } from "@emotion/react";
 import { ExternalLinkIcon } from "@navikt/aksel-icons";
 import { Alert, BodyShort, Button, Link, Loader } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
 
-import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
-import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { ReceiptRessurs } from "~/pages/ResourcePage/RessursCards/ReceiptRessurs";
 import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
+import type { Ressurs } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
-import { isInDevelopment } from "~/utils";
+import { formatVisningsnavn, isInDevelopment } from "~/utils";
 
 export function SummaryStep() {
   const { navident } = useSearch({ from: createRessursRoute.id });
 
-  const hentRessursQuery = useHentRessursMedNavidentQuery({
-    variables: { navident },
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(navident as string),
+    queryFn: () => getRessurs.queryFn(navident as string),
+    enabled: !!navident,
   });
 
-  if (hentRessursQuery.loading) {
+  if (ressursQuery.isLoading) {
     return (
       <Loader
         css={css`
@@ -30,30 +33,24 @@ export function SummaryStep() {
     );
   }
 
-  const ressurs = hentRessursQuery.data?.ressurs;
+  const ressurs = ressursQuery.data;
 
   if (ressurs) {
     return <Receipt ressurs={ressurs} />;
   }
 
-  if (hentRessursQuery.error) {
-    return <Alert variant="error">{hentRessursQuery.error.message}</Alert>;
+  if (ressursQuery.error) {
+    return <Alert variant="error">{ressursQuery.error.message}</Alert>;
   }
 
   return <></>;
 }
 
-function Receipt({
-  ressurs,
-}: {
-  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-}) {
+function Receipt({ ressurs }: { ressurs: Ressurs }) {
   return (
     <ContainerWithHighlightedTop title="Medarbeideren er nå registrert i NOM">
       <ReceiptRessurs ressurs={ressurs} />
-      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-      {/* @ts-ignore -- ignored until there is only the Sektor enum from REST api*/}
-      {ressurs.sektor.includes(Sektor.NAV_STATLIG) ? (
+      {ressurs.sektor === Sektor.NAV_STATLIG ? (
         <StatligInstructions ressurs={ressurs} />
       ) : (
         <EksternInstructions ressurs={ressurs} />
@@ -70,11 +67,7 @@ function Receipt({
   );
 }
 
-function StatligInstructions({
-  ressurs,
-}: {
-  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-}) {
+function StatligInstructions({ ressurs }: { ressurs: Ressurs }) {
   return (
     <>
       <InformationText ressurs={ressurs} />
@@ -92,11 +85,7 @@ function StatligInstructions({
   );
 }
 
-function EksternInstructions({
-  ressurs,
-}: {
-  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-}) {
+function EksternInstructions({ ressurs }: { ressurs: Ressurs }) {
   return (
     <>
       <InformationText ressurs={ressurs} />
@@ -105,11 +94,7 @@ function EksternInstructions({
   );
 }
 
-function InformationText({
-  ressurs,
-}: {
-  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-}) {
+function InformationText({ ressurs }: { ressurs: Ressurs }) {
   const teamcatBaseUrl = isInDevelopment()
     ? "https://teamkatalog.ekstern.dev.nav.no"
     : "https://teamkatalog.nav.no";
@@ -118,9 +103,9 @@ function InformationText({
     <>
       <BodyShort>
         Medarbeideren er nå registrert i NOM og NAV-ident {ressurs.navident} er
-        opprettet for {ressurs.visningsnavn}. For å fullføre opprettelsen må det
-        også gis tilganger i identrutina i Remedy. Leder eller
-        identadministrator kan gjøre dette.
+        opprettet for {formatVisningsnavn(ressurs.visningsnavn)}. For å fullføre
+        opprettelsen må det også gis tilganger i identrutina i Remedy. Leder
+        eller identadministrator kan gjøre dette.
       </BodyShort>
       <BodyShort>
         Du kan også legge inn teamtilhørighet i{" "}

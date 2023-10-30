@@ -20,13 +20,17 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import axios from "axios";
-import { format, isAfter, isBefore } from "date-fns";
+import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
-import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
-import { useHentHierarkiQuery } from "~/api/generated/graphql_generated";
+import {
+  getLedereForRessurs,
+  getOrgEnhet,
+  getOrgEnheterLedetAv,
+  getOrgTilknytninger,
+  getTeamcatMemberships,
+} from "~/api/react-query-endpoints";
 import { useHasAdminAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
@@ -35,16 +39,14 @@ import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganis
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
+import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
-  DATE_FORMATS,
   formatDisplayDate,
   formatTlf,
+  formatVisningsnavn,
   isGyldighetsPeriodeActive,
   isInDevelopment,
 } from "~/utils";
-
-type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-type OrgTilknytninger = Ressurs["orgTilknytning"];
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   const hasAdminAccess = useHasAdminAccess();
@@ -128,25 +130,31 @@ function Divider({ size = "large" }: { size?: "large" | "small" }) {
 }
 
 function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
-  if (ressurs.orgTilknytning.length === 0) {
+  const orgtilknytningerQuery = useQuery({
+    queryKey: getOrgTilknytninger.queryKey(ressurs.navident),
+    queryFn: () => getOrgTilknytninger.queryFn(ressurs.navident),
+  });
+
+  const orgtilknytninger = orgtilknytningerQuery.data ?? [];
+
+  if (orgtilknytninger.length === 0) {
     return <></>;
   }
 
-  const activeOrgtilknytninger = ressurs.orgTilknytning.filter(
-    (orgTilknytning) =>
-      isGyldighetsPeriodeActive(
-        orgTilknytning.gyldigFom,
-        orgTilknytning.gyldigTom,
-      ),
+  const activeOrgtilknytninger = orgtilknytninger.filter((orgTilknytning) =>
+    isGyldighetsPeriodeActive(
+      orgTilknytning.gyldigFom,
+      orgTilknytning.gyldigTom,
+    ),
   );
 
-  const expiredOrgTilknytninger = ressurs.orgTilknytning.filter(
+  const expiredOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigTom &&
       isBefore(new Date(orgTilknytning.gyldigTom), new Date()),
   );
 
-  const futureOrgTilknytninger = ressurs.orgTilknytning.filter(
+  const futureOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigFom &&
       isAfter(new Date(orgTilknytning.gyldigFom), new Date()),
@@ -161,7 +169,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
       </Heading>
       {activeOrgtilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhet.id}
+          key={orgTilknytning.orgEnhetId}
           orgTilknytning={orgTilknytning}
           ressurs={ressurs}
         />
@@ -181,9 +189,7 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger,
   ressurs,
 }: {
-  futureOrgTilknytninger: NonNullable<
-    HentRessursMedNavidentQuery["ressurs"]
-  >["orgTilknytning"];
+  futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
   if (futureOrgTilknytninger.length === 0) {
@@ -197,7 +203,7 @@ function FutureOrgTilknytninger({
       </Heading>
       {futureOrgTilknytninger.map((orgTilknytning) => (
         <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhet.id}
+          key={orgTilknytning.orgEnhetId}
           orgTilknytning={orgTilknytning}
           ressurs={ressurs}
         />
@@ -209,7 +215,7 @@ function FutureOrgTilknytninger({
 function ExpiredOrgTilknytninger({
   expiredOrgTilknytninger,
 }: {
-  expiredOrgTilknytninger: OrgTilknytninger;
+  expiredOrgTilknytninger: OrgtilknytningState[];
 }) {
   const [showAll, setShowAll] = useState(false);
   if (expiredOrgTilknytninger.length === 0) {
@@ -230,26 +236,10 @@ function ExpiredOrgTilknytninger({
         Avsluttede org.tilknytninger
       </Heading>
       {tilknyttingerToShow.map((orgTilknytning) => (
-        <div
-          css={css`
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            background: white;
-            padding: 1.5rem;
-            border: 1px solid var(--a-border-default);
-            border-radius: var(--a-border-radius-large);
-          `}
-          key={orgTilknytning.orgEnhet.id}
-        >
-          <Heading level="3" size="medium">
-            {orgTilknytning.orgEnhet.navn}
-          </Heading>
-          <span>
-            {formatDisplayDate(orgTilknytning.gyldigFom)} -{" "}
-            {formatDisplayDate(orgTilknytning.gyldigTom)}
-          </span>
-        </div>
+        <ExpiredOrgTilknytning
+          expiredOrgTilknytning={orgTilknytning}
+          key={orgTilknytning.fid}
+        />
       ))}
       {shouldDisplayShowAllButton && (
         <Button
@@ -264,26 +254,59 @@ function ExpiredOrgTilknytninger({
   );
 }
 
+function ExpiredOrgTilknytning({
+  expiredOrgTilknytning,
+}: {
+  expiredOrgTilknytning: OrgtilknytningState;
+}) {
+  const orgEnhet = useQuery({
+    queryKey: getOrgEnhet.queryKey(expiredOrgTilknytning.orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(expiredOrgTilknytning.orgEnhetId),
+  }).data;
+
+  return (
+    <div
+      css={css`
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        background: white;
+        padding: 1.5rem;
+        border: 1px solid var(--a-border-default);
+        border-radius: var(--a-border-radius-large);
+      `}
+      key={expiredOrgTilknytning.orgEnhetId}
+    >
+      <Heading level="3" size="medium">
+        {orgEnhet?.navn}
+      </Heading>
+      <span>
+        {formatDisplayDate(expiredOrgTilknytning.gyldigFom)} -{" "}
+        {formatDisplayDate(expiredOrgTilknytning.gyldigTom)}
+      </span>
+    </div>
+  );
+}
+
 function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
 }: {
-  orgTilknytning: OrgTilknytninger[0];
+  orgTilknytning: OrgtilknytningState;
   ressurs: Ressurs;
 }) {
-  const hentHierarkiQuery = useHentHierarkiQuery({
-    variables: {
-      id: orgTilknytning.orgEnhet.id ?? "",
-    },
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
   });
 
-  const orgHierarki = hentHierarkiQuery.data;
+  const orgEnhet = orgEnhetQuery.data;
 
-  if (!orgHierarki) {
+  if (!orgEnhet) {
     return <></>;
   }
 
-  const orgHierarkiLeder = orgHierarki.enhet?.leder[0]?.ressurs;
+  const orgEnhetLeder = orgEnhet.ledere[0];
 
   const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
 
@@ -305,7 +328,7 @@ function OrganisationHierarchyTree({
     >
       <ExpansionCard.Header>
         <ExpansionCard.Title>
-          <span>{orgHierarki.enhet?.navn}</span>
+          <span>{orgEnhet.navn}</span>
           {startsInTheFuture && (
             <span
               css={css`
@@ -320,7 +343,7 @@ function OrganisationHierarchyTree({
           )}
         </ExpansionCard.Title>
         <ExpansionCard.Description>
-          Leder: {orgHierarkiLeder?.visningsnavn}
+          Leder: {formatVisningsnavn(orgEnhetLeder.visningsnavn)}
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
@@ -339,17 +362,20 @@ function OrganisationHierarchyTree({
         <br />
         {gyldigTom && <span>Sluttdato: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
-        <CompactOrganisasjonHierarki
-          orgHierarki={orgHierarki}
-          ressurs={ressurs}
-        />
+        <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
       </ExpansionCard.Content>
     </ExpansionCard>
   );
 }
 
 function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
-  if (ressurs.lederFor.length === 0) {
+  const lederForOrgenheter =
+    useQuery({
+      queryKey: getOrgEnheterLedetAv.queryKey(ressurs.navident),
+      queryFn: () => getOrgEnheterLedetAv.queryFn(ressurs.navident),
+    }).data ?? [];
+
+  if (lederForOrgenheter.length === 0) {
     return <></>;
   }
 
@@ -358,10 +384,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
    Her antas det at første forekomst av navn for en orgEnhet er den høyest i hierarkiet.
    Se https://jira.adeo.no/browse/ORG-1437 for flere detaljer.
   */
-  const uniqLederFor = uniqBy(
-    ressurs.lederFor,
-    ({ orgEnhet }) => orgEnhet.navn,
-  );
+  const uniqLederFor = uniqBy(lederForOrgenheter, (orgEnhet) => orgEnhet.navn);
 
   return (
     <>
@@ -377,7 +400,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           gap: 0.5rem;
         `}
       >
-        {uniqLederFor.map(({ orgEnhet }) => (
+        {uniqLederFor.map((orgEnhet) => (
           <ReactRouterLink
             key={orgEnhet.id}
             params={{ id: orgEnhet.id }}
@@ -405,7 +428,7 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
       level="1"
       size="large"
     >
-      {ressurs.visningsnavn}
+      {formatVisningsnavn(ressurs.visningsnavn)}
     </Heading>
   );
 }
@@ -417,6 +440,7 @@ function Telephone({ ressurs }: { ressurs: Ressurs }) {
     return (
       <>
         <span>Telefon:</span>
+
         <EditPhoneNumber ressurs={ressurs} />
       </>
     );
@@ -424,13 +448,19 @@ function Telephone({ ressurs }: { ressurs: Ressurs }) {
   return (
     <RessursInformationDetail
       label="Telefon"
-      value={ressurs.telefon.map(({ nummer }) => formatTlf(nummer)).join(", ")}
+      value={ressurs.telefoner
+        .map(({ nummer }) => formatTlf(nummer))
+        .join(", ")}
     />
   );
 }
 
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
-  const dagligLeder = ressurs.ledere.find((leder) => leder.erDagligOppfolging);
+  const dagligLeder = useQuery({
+    queryKey: getLedereForRessurs.queryKey(ressurs.navident),
+    queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
+    select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
+  }).data;
 
   return (
     <div
@@ -467,13 +497,11 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           />
           <RessursInformationDetail
             label="Startdato"
-            value={format(new Date(ressurs.startdato), DATE_FORMATS.no)}
+            value={formatDisplayDate(ressurs.startdato)}
           />
           <RessursInformationDetail
             label="Sektor"
-            value={ressurs.sektor
-              .map((sektor) => SektorNameMapping[sektor])
-              .join(", ")}
+            value={SektorNameMapping[ressurs.sektor]}
           />
           <RessursInformationDetail label="E-post" value={ressurs.epost} />
           <Telephone ressurs={ressurs} />
@@ -487,10 +515,12 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
                 `}
               >
                 <ReactRouterLink
-                  params={{ id: dagligLeder.ressurs.navident }}
+                  params={{ id: dagligLeder.navident }}
                   to={ressursRoute.to}
                 >
-                  <Link as="span">{dagligLeder.ressurs.visningsnavn}</Link>
+                  <Link as="span">
+                    {formatVisningsnavn(dagligLeder.visningsnavn)}
+                  </Link>
                 </ReactRouterLink>
 
                 {dagligLeder && (
@@ -511,7 +541,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
       </div>
       <UserImage
         navident={ressurs.navident}
-        navn={ressurs.visningsnavn ?? ""}
+        navn={formatVisningsnavn(ressurs.visningsnavn)}
         size="126px"
       />
     </div>
@@ -538,11 +568,11 @@ function RessursInformationDetail({
 }
 
 function TeamCatSection({ navident }: { navident: string }) {
-  const { data } = useQuery({
-    queryKey: ["memberships", navident],
-    queryFn: () => axios.get(`/teamcat/member/membership/${navident}`),
-  });
-  const memberships = data?.data;
+  const memberships = useQuery({
+    queryKey: getTeamcatMemberships.queryKey(navident),
+    queryFn: () => getTeamcatMemberships.queryFn(navident),
+  }).data;
+
   if (!memberships) {
     return <></>;
   }

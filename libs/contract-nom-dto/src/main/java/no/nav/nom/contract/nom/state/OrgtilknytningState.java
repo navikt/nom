@@ -1,5 +1,6 @@
 package no.nav.nom.contract.nom.state;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Builder(toBuilder = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record OrgtilknytningState(
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
         @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,

@@ -1,10 +1,11 @@
 import { css } from "@emotion/react";
 import { Alert, Link } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
 import { isBefore } from "date-fns";
 import React from "react";
 
-import { useHentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
+import { getRessurs } from "~/api/react-query-endpoints";
 import { DetailedRessurs } from "~/pages/ResourcePage/RessursCards/DetailedRessurs";
 import { RessursHasQuit } from "~/pages/ResourcePage/RessursCards/RessursHasQuit";
 import { ressursRoute } from "~/reactRouterRoutes";
@@ -15,14 +16,17 @@ export const ResourcePage = () => {
   const { id } = useParams({ from: ressursRoute.id });
   const { alreadyExists } = useSearch({ from: ressursRoute.id });
 
-  const hentRessursQuery = useHentRessursMedNavidentQuery({
-    variables: { navident: id },
+  const ressursQuery = useQuery({
+    queryKey: getRessurs.queryKey(id as string),
+    queryFn: () => getRessurs.queryFn(id as string),
+    enabled: !!id,
   });
 
-  const ressurs = hentRessursQuery.data?.ressurs;
+  const ressurs = ressursQuery.data;
 
   const hasQuit =
     ressurs?.sluttdato && isBefore(new Date(ressurs.sluttdato), new Date());
+
   return (
     <ContentWrapper>
       {ressurs && (

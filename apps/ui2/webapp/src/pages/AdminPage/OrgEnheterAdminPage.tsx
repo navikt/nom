@@ -14,7 +14,7 @@ import {
   TextField,
   UNSAFE_Combobox,
 } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
 import { isBefore } from "date-fns";
@@ -25,21 +25,11 @@ import sortBy from "lodash/sortBy";
 import uniq from "lodash/uniq";
 import { useEffect, useState } from "react";
 
-import { apolloClient } from "~/api/apolloclient";
-import type { GetAllOrgenheterAdminQuery } from "~/api/generated/graphql_generated";
-import {
-  NomNivaa,
-  useGetAllOrgenheterAdminQuery,
-} from "~/api/generated/graphql_generated";
+import { getAllOrgEnheter, orgEnheterKeys } from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
 import { orgEnheterAdminRoute } from "~/reactRouterRoutes";
-import { isNotNil } from "~/typeguards";
-import type { SetOrgEnhetsTypeRequest } from "~/types/api-models";
-import { OrgEnhetsType } from "~/types/api-models";
-
-type OrgEnhetAdmin = NonNullable<
-  GetAllOrgenheterAdminQuery["orgEnheter"][0]["orgEnhet"]
->;
+import type { OrgEnhet, SetOrgEnhetsTypeRequest } from "~/types/api-models";
+import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
 
 type AdminFilter = {
   id?: string;
@@ -51,9 +41,8 @@ type AdminFilter = {
 };
 
 export function OrgEnheterAdminPage() {
-  const getAllOrgenheterQuery = useGetAllOrgenheterAdminQuery({
-    fetchPolicy: "cache-first",
-  });
+  const getAllOrgEnheterQuery = useQuery(getAllOrgEnheter);
+
   const [filter, setFilter] = useState<AdminFilter>({});
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<SortState | undefined>({
@@ -83,16 +72,15 @@ export function OrgEnheterAdminPage() {
   };
 
   const orgEnheter =
-    getAllOrgenheterQuery.data?.orgEnheter
-      .map(({ orgEnhet }) => orgEnhet)
-      .filter(isNotNil)
-      .filter((oe) => oe.leder.length > 0)
+    getAllOrgEnheterQuery.data
+      ?.filter((oe) => oe.ledere.length > 0)
       .filter(
         (oe) =>
-          oe.gyldigTom === null || isBefore(new Date(), new Date(oe.gyldigTom)),
+          oe.gyldigTom === undefined ||
+          isBefore(new Date(), new Date(oe.gyldigTom)),
       ) ?? [];
 
-  if (getAllOrgenheterQuery.loading) {
+  if (getAllOrgEnheterQuery.isLoading) {
     return (
       <div
         css={css`
@@ -113,7 +101,6 @@ export function OrgEnheterAdminPage() {
   }
 
   const filteredOrgEnheter = filterOrgEnheter(orgEnheter, filter);
-
   const sortedOrgEnheter = sort
     ? sortOrgEnheter({ orgEnheter: filteredOrgEnheter, sort })
     : filteredOrgEnheter;
@@ -287,8 +274,10 @@ export function OrgEnheterAdminPage() {
   );
 }
 
-function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
+function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
+  const queryClient = useQueryClient();
+
   const updateOrgEnhetsTypeMutation = useMutation({
     mutationFn: (newOrgEnhetsType: OrgEnhetsType | null) =>
       axios.post<void, unknown, SetOrgEnhetsTypeRequest>(
@@ -304,12 +293,13 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhetAdmin }) {
          When this mutation returns we have only sent a message on kafka to change its type. It is not immediately available in orgEnhet-state.
          Therefore, we do a manual optimistic update of the orgEnhetsType for this orgEnhet in the cache.
         */
-      apolloClient.cache.modify({
-        id: apolloClient.cache.identify(orgEnhet),
-        fields: {
-          orgEnhetsType: () => newOrgEnhetsType,
-        },
-      });
+      queryClient.setQueryData<OrgEnhet[]>(orgEnheterKeys.all, (previousData) =>
+        (previousData ?? []).map((oe) =>
+          oe.id === orgEnhet.id
+            ? orgEnhet
+            : { ...orgEnhet, orgEnhetsType: newOrgEnhetsType ?? undefined },
+        ),
+      );
       showToast({ text: "OrgEnhetsType endret" });
     },
 
@@ -370,7 +360,7 @@ function sortOrgEnheter({
   orgEnheter,
   sort,
 }: {
-  orgEnheter: OrgEnhetAdmin[];
+  orgEnheter: OrgEnhet[];
   sort: SortState;
 }) {
   const { orderBy, direction } = sort;
@@ -381,15 +371,12 @@ function sortOrgEnheter({
   return reversed ? sortedMembersAscending.reverse() : sortedMembersAscending;
 }
 
-function filterOrgEnheter(
-  orgEnheter: OrgEnhetAdmin[],
-  adminFilter: AdminFilter,
-) {
+function filterOrgEnheter(orgEnheter: OrgEnhet[], adminFilter: AdminFilter) {
   return orgEnheter.filter((orgEnhet) =>
     Object.entries(adminFilter)
       .filter(([, filterValue]) => filterValue !== undefined)
       .every(([filterKey, filterValue]) => {
-        const orgEnhetValue = orgEnhet[filterKey as keyof OrgEnhetAdmin];
+        const orgEnhetValue = orgEnhet[filterKey as keyof OrgEnhet] as string;
 
         if (isString(orgEnhetValue)) {
           return orgEnhetValue

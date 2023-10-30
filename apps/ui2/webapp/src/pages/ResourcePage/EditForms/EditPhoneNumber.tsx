@@ -4,10 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { showToast } from "~/hooks/showToast";
-
-type Ressurs = NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
+import type { Ressurs } from "~/types/api-models";
 
 type EditNameFormTypes = {
   telefonnummer: string;
@@ -21,7 +19,7 @@ export function EditPhoneNumber({ ressurs }: { ressurs: Ressurs }) {
     formState: { isDirty },
   } = useForm({
     defaultValues: {
-      telefonnummer: ressurs.telefon[0]?.nummer ?? "",
+      telefonnummer: ressurs.telefoner[0]?.nummer ?? "",
     },
   });
 

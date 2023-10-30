@@ -6,6 +6,8 @@ import {
   minTime,
 } from "date-fns";
 
+import type { Visningsnavn } from "~/types/api-models";
+
 /**
  * Very primitive function for checking if we are in a dev or production environment by checking if the hostname includes "localhost" or ".dev."
  */
@@ -31,6 +33,17 @@ export function capitalizeName(name: string) {
   return nameInProgress;
 }
 
+export function formatVisningsnavn(visningsNavn?: Visningsnavn) {
+  if (!visningsNavn) {
+    return "";
+  }
+  return [
+    visningsNavn.fornavn,
+    visningsNavn.mellomnavn ?? "",
+    visningsNavn.etternavn,
+  ].join(" ");
+}
+
 export function formatTlf(nr: string) {
   const temporaryNumber =
     nr.startsWith("47") && nr.length === 10 ? nr.slice(2) : nr;
@@ -49,7 +62,10 @@ export function formatDateWithoutTimezone(date: Date) {
   return formatISO(date, { representation: "date" });
 }
 
-export function formatDisplayDate(date: string) {
+export function formatDisplayDate(date?: string) {
+  if (!date) {
+    return "";
+  }
   return format(new Date(date), DATE_FORMATS.no);
 }
 

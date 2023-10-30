@@ -3,16 +3,12 @@ import { Heading, Label, Tag } from "@navikt/ds-react";
 import { format } from "date-fns";
 import React from "react";
 
-import type { HentRessursMedNavidentQuery } from "~/api/generated/graphql_generated";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
-import { DATE_FORMATS } from "~/utils";
+import type { Ressurs } from "~/types/api-models";
+import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
-export function RessursHasQuit({
-  ressurs,
-}: {
-  ressurs: NonNullable<HentRessursMedNavidentQuery["ressurs"]>;
-}) {
+export function RessursHasQuit({ ressurs }: { ressurs: Ressurs }) {
   return (
     <div
       css={css`
@@ -36,7 +32,7 @@ export function RessursHasQuit({
           `}
         >
           <Heading level="2" size="large">
-            {ressurs.visningsnavn}
+            {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
           <Tag variant="warning">Sluttet</Tag>
         </div>
@@ -50,15 +46,19 @@ export function RessursHasQuit({
           <span>NAV-ident:</span>
           <Label as="span">{ressurs.navident}</Label>
           <span>Sektor:</span>
-          <span>
-            {ressurs.sektor
-              .map((sektor) => SektorNameMapping[sektor])
-              .join(", ")}
-          </span>
+          <span>{SektorNameMapping[ressurs.sektor]}</span>
           <span>Startdato:</span>
-          <span>{format(new Date(ressurs.startdato), DATE_FORMATS.no)}</span>
+          <span>
+            {ressurs.startdato
+              ? format(new Date(ressurs.startdato), DATE_FORMATS.no)
+              : ""}
+          </span>
           <span>Sluttdato:</span>
-          <span>{format(new Date(ressurs.sluttdato), DATE_FORMATS.no)}</span>
+          <span>
+            {ressurs.sluttdato
+              ? format(new Date(ressurs.sluttdato), DATE_FORMATS.no)
+              : ""}
+          </span>
         </div>
       </div>
     </div>
