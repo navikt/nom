@@ -1,5 +1,7 @@
 package no.nav.nom.apps.api.organisering;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.val;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
@@ -23,16 +25,16 @@ public class OrganiseringTest extends TestBase {
 
     @Test
     @DisplayName("Innlesing av organiseringer")
-    void innlesing_av_organiseringer() {
-        // Given
-        // Lage tre objekter i rest-responsen
+    void innlesing_av_organiseringer() throws JsonProcessingException {
 
-
-
+        // make mock response
+        val mockedOrganesering1 = DvhOrganiseringMockUtils.DvhOrganiseringMock.DEFAULT;
+        val mockedOrganesering2 = DvhOrganiseringMockUtils.DvhOrganiseringMock.DEFAULT;
+        val mockedOrganesering3 = DvhOrganiseringMockUtils.DvhOrganiseringMock.DEFAULT;
+        dvhOrganiseringMockUtils.addToResponse(mockedOrganesering1, mockedOrganesering2, mockedOrganesering3);
 
         // When
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
-
 
         // Then
         verify(organiseringEventCommandService, times(3)).opprettOrganisering(any());

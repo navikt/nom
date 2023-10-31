@@ -5,6 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
@@ -66,6 +67,9 @@ public abstract class TestBase {
 
     @Autowired
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
+
+    @Autowired
+    public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
 
     @Autowired
     public DvhRessursUtils dvhRessursUtils;
