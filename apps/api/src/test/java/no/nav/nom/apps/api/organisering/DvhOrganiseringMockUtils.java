@@ -66,7 +66,7 @@ public class DvhOrganiseringMockUtils {
             "210155",
             "ORGNIV3",
             "Internasjonalt Medlemskap og Bidrag",
-            "C"
+            "N"
         );
     }
     
