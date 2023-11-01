@@ -102,7 +102,8 @@ export const getAlleRessurserGraphql = {
 export const getRessurs = {
   queryKey: (navident: string) => ressurserKeys.id(navident),
   queryFn: async (navident: string) =>
-    (await axios.get<Ressurs>(`/nom-api/app/ressurs/${navident}`)).data,
+    (await axios.get<Ressurs>(`/nom-api/app/ressurs/byNavident/${navident}`))
+      .data,
 };
 
 export const getLedereForRessurs = {

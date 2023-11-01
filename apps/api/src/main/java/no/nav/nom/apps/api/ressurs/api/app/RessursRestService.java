@@ -9,8 +9,9 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningC
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -47,6 +49,8 @@ public class RessursRestService {
     private final PdlClient pdlClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
+    private final RessursContactDetailsResolver ressursContactDetailsResolver;
+    private final RessursLedereResolver ressursLedereResolver;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -55,7 +59,8 @@ public class RessursRestService {
         NIKClient nikClient,
         PdlClient pdlClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
-        RessursOpprettetEmailService ressursOpprettetEmailService
+        RessursOpprettetEmailService ressursOpprettetEmailService,
+        RessursContactDetailsResolver ressursContactDetailsResolver, RessursLedereResolver ressursLedereResolver
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommadService = ressursCommadService;
@@ -64,14 +69,37 @@ public class RessursRestService {
         this.pdlClient = pdlClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
+        this.ressursContactDetailsResolver = ressursContactDetailsResolver;
+        this.ressursLedereResolver = ressursLedereResolver;
     }
 
-    public RessursState findRessursByNavident(String navident) {
+    public Ressurs findRessursByNavident(String navident) {
+        var ressursState = findRessursStateByNavident(navident);
+        return enrichRessursStateWithDvhData(ressursState);
+    }
+
+    private RessursState findRessursStateByNavident(String navident) {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
+    public Ressurs findRessursByFid(String fid) {
+        var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
+        return enrichRessursStateWithDvhData(ressursState);
+    }
+
+    private Ressurs enrichRessursStateWithDvhData(RessursState ressursState) {
+        var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
+        var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
+
+        return new Ressurs(
+            ressursState,
+            telefoner,
+            epost.orElse(null)
+        );
+    }
+
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
-        var ressursState = findRessursByNavident(navident);
+        var ressursState = findRessursStateByNavident(navident);
 
         if (ressursState.sektor() != Sektor.EKSTERN){
             throw new InvalidSektorException("Kun eksterne ressurser kan endres");
@@ -88,6 +116,10 @@ public class RessursRestService {
         ));
 
         ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+    }
+
+    public List<RessursLeder> getLedereForRessurs(String navident) {
+        return ressursLedereResolver.ledere(navident);
     }
 
     public RessursState createRessursAndNotify(
