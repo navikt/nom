@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.val;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
@@ -18,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -36,15 +36,21 @@ public class OrganiseringTest extends TestBase {
     @Captor
     ArgumentCaptor<OrganiseringOpprettetEventV1> eventCaptor;
 
-
     @Test
     @DisplayName("Innlesing av organiseringer")
     void innlesing_av_organiseringer() throws JsonProcessingException {
 
         // make mock response
-        val mockedOrganisering1 = DvhOrganiseringMock.getBuilderWithDefault().ORGNODE_KODE("1111111").build();
-        val mockedOrganisering2 = DvhOrganiseringMock.getBuilderWithDefault().ORGNODE_KODE("2222222").build();
-        val mockedOrganisering3 = DvhOrganiseringMock.getBuilderWithDefault().ORGNODE_KODE("3333333").build();
+        var mockedOrganisering1 = DvhOrganiseringMock.getBuilderWithDefault()
+            .ORGNODE_KODE("1111111")
+            .ORGNODE_NAVN("Navn_1111111")
+            .ORGNODE_KODE_OVER("01111111")
+            .ORGNODE_NAVN_OVER("Navn_0111111")
+            .ORGNODE_NIVA("Niva_111111")
+            .ORGNODE_NIVA_OVER("Niva_0111111")
+            .build();
+        var mockedOrganisering2 = DvhOrganiseringMock.getBuilderWithDefault().ORGNODE_KODE("2222222").build();
+        var mockedOrganisering3 = DvhOrganiseringMock.getBuilderWithDefault().ORGNODE_KODE("3333333").build();
 
         dvhOrganiseringMockUtils.addToResponse(mockedOrganisering1, mockedOrganisering2, mockedOrganisering3);
 
@@ -56,6 +62,11 @@ public class OrganiseringTest extends TestBase {
 
         List<OrganiseringOpprettetEventV1> events = eventCaptor.getAllValues();
 
-
+        var data = (OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData) events.get(0).getData();
+        assertThat(data.agressoIdOver()).isEqualTo(mockedOrganisering1.getORGNODE_KODE_OVER());
+        assertThat(data.agressoIdUnder()).isEqualTo(mockedOrganisering1.getORGNODE_KODE());
+        assertThat(data.navnUnder()).isEqualTo(mockedOrganisering1.getORGNODE_NAVN());
+        assertThat(data.orgNivOver()).isEqualTo(mockedOrganisering1.getORGNODE_NIVA_OVER());
+        assertThat(data.orgNivUnder()).isEqualTo(mockedOrganisering1.getORGNODE_NIVA());
     }
 }
