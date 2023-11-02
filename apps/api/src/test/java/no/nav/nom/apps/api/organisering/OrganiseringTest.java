@@ -1,40 +1,47 @@
 package no.nav.nom.apps.api.organisering;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
-import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventProducer;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class OrganiseringTest extends TestBase {
+
+    @Autowired
+    private EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
     @Autowired
     OrganiseringEventCommandService organiseringEventCommandService;
-
-    @MockBean
-    OrganiseringEventProducer eventProducerMock;
-
-    @Captor
-    ArgumentCaptor<OrganiseringOpprettetEventV1> eventCaptor;
 
     @Test
     @DisplayName("Innlesing av organiseringer")
@@ -54,15 +61,29 @@ public class OrganiseringTest extends TestBase {
 
         dvhOrganiseringMockUtils.addToResponse(mockedOrganisering1, mockedOrganisering2, mockedOrganisering3);
 
-        // When
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // Then
-        verify(eventProducerMock, times(3)).sendMessage(eventCaptor.capture());
+        final var jsonDeserializer = new JsonDeserializer<>(OrganiseringOpprettetEventV1.class, objectMapper);
+        Map<String, Object> configs = new HashMap<>(KafkaTestUtils.consumerProps("consumerGroup", "false", embeddedKafkaBroker));
+        Consumer<String, OrganiseringOpprettetEventV1> consumer = new DefaultKafkaConsumerFactory<>(
+            configs,
+            new StringDeserializer(),
+            jsonDeserializer
+        ).createConsumer();
+        consumer.subscribe(singleton("org.nom.organisering-eventsource"));
 
-        List<OrganiseringOpprettetEventV1> events = eventCaptor.getAllValues();
+        ConsumerRecords<String, OrganiseringOpprettetEventV1> records = KafkaTestUtils.getRecords(consumer);
 
-        var data = (OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData) events.get(0).getData();
+        assertThat(records.count()).isEqualTo(3);
+
+        var receivedRecords = records.records("org.nom.organisering-eventsource");
+        List<ConsumerRecord<String, OrganiseringOpprettetEventV1>> consumerRecords = new ArrayList<>();
+        receivedRecords.forEach(consumerRecords::add);
+
+        assertThat(consumerRecords.size()).isEqualTo(3);
+        var consumerRecord0 = consumerRecords.get(0);
+
+        var data = (OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData) consumerRecord0.value().getData();
         assertThat(data.agressoIdOver()).isEqualTo(mockedOrganisering1.getORGNODE_KODE_OVER());
         assertThat(data.agressoIdUnder()).isEqualTo(mockedOrganisering1.getORGNODE_KODE());
         assertThat(data.navnUnder()).isEqualTo(mockedOrganisering1.getORGNODE_NAVN());
