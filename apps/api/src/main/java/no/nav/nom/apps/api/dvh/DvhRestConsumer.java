@@ -248,7 +248,7 @@ public class DvhRestConsumer {
             dvhOrganisering.getNavnUnder(),
             dvhOrganisering.getGyldigFom(),
             dvhOrganisering.getGyldigTom(),
-            new InputMetadata("nom-api BatchJob", "Datavarehus", dvhOrganisering, new Origination("nom-api", "nom-api"))
+            createInputMetadata(dvhOrganisering.getRawData())
         );
     }
 
@@ -302,5 +302,9 @@ public class DvhRestConsumer {
     private String durationAsH24(LocalDateTime start) {
         Duration duration = Duration.between(start, LocalDateTime.now());
         return  "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
+    }
+
+    private InputMetadata createInputMetadata(Object rawData) {
+        return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
     }
 }

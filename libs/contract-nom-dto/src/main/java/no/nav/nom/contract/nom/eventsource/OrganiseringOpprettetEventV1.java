@@ -18,10 +18,8 @@ public class OrganiseringOpprettetEventV1 extends OrganiseringEvent {
     }
 
     public record OrganiseringOpprettetEventData(
-        String agressoIdOver,
-        String agressoIdUnder,
-        String orgNivOver,
-        String orgNivUnder,
+        String idOver,
+        String idUnder,
         String navnOver,
         String navnUnder,
         LocalDate gyldigFom,
