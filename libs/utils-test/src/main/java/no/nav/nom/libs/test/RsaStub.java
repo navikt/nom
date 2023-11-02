@@ -18,9 +18,9 @@ public class RsaStub implements WireMockStub {
     @SneakyThrows
     private static RSAKey rsaKey() {
         return new RSAKeyGenerator(2048)
-                .keyUse(KeyUse.SIGNATURE)
-                .keyID(RSA_KEY_ID)
-                .generate();
+            .keyUse(KeyUse.SIGNATURE)
+            .keyID(RSA_KEY_ID)
+            .generate();
     }
 
     @Override

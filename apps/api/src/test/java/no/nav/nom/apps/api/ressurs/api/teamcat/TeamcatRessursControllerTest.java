@@ -16,10 +16,8 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
@@ -29,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyList;
-//import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.Assert.isTrue;
 
@@ -48,9 +45,6 @@ public class TeamcatRessursControllerTest extends RestTestBase {
     @MockBean
     private AdClient adClient;
 
-
-    @Autowired
-    private SecurityTestUtils securityTestUtils;
 
     private Optional<RessursState> createRessursState(String navident) {
         RessursState ressursState = new RessursState(
@@ -89,7 +83,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -110,7 +104,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .exchange()
             .expectStatus().isNotFound();
@@ -147,7 +141,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -185,7 +179,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -225,7 +219,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
             .bodyValue(List.of(resid1,resid2))
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()

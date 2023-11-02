@@ -4,12 +4,10 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.OrgEnhetsType;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Optional;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
@@ -22,11 +20,9 @@ import static org.mockito.Mockito.verify;
 public class OrgEnhetControllerTest extends RestTestBase {
 
     public static final String ORGENHETSTYPE_URL = "/app/orgenhet/orgEnhetsType";
+
     @MockBean
     OrgEnhetCommandService orgEnhetCommandService;
-
-    @Autowired
-    private SecurityTestUtils securityTestUtils;
 
     @Captor
     ArgumentCaptor<EndreOrgEnhetsType> endreOrgEnhetsTypeArgumentCaptor;
@@ -49,9 +45,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         webTestClient.post()
             .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                validJwtWithAzpClaim("admin", "admin")))
-            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
             .bodyValue(setOrgEnhetsTypeRequest)
             .exchange()
             .expectStatus().isOk();
@@ -76,9 +70,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         webTestClient.post()
             .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                validJwtWithAzpClaim("admin", "admin")))
-            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
             .bodyValue(new SetOrgEnhetsTypeRequest(
                 existingOrgEnhet.id(),
                 existingOrgenhetsType
@@ -94,9 +86,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         webTestClient.post()
             .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                validJwtWithAzpClaim("admin", "admin"))
-            ))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomAdminUserToken()))
             .bodyValue(new SetOrgEnhetsTypeRequest("yobrah", OrgEnhetsType.ARBEIDSLIVSSENTER))
             .exchange()
             .expectStatus().isNotFound();
@@ -111,9 +101,7 @@ public class OrgEnhetControllerTest extends RestTestBase {
 
         webTestClient.post()
             .uri(ORGENHETSTYPE_URL)
-            .headers(httpHeaders -> httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                validJwtWithAzpClaim("noAdmin", "no-admin"))
-            ))
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(noScopesUserToken()))
             .bodyValue(new SetOrgEnhetsTypeRequest("yobrah", OrgEnhetsType.ARBEIDSLIVSSENTER))
             .exchange()
             .expectStatus().isForbidden();

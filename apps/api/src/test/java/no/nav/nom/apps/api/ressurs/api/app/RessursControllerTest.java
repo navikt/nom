@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.nik.NIKClient;
@@ -16,9 +15,7 @@ import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +29,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class RessursControllerTest extends RestTestBase {
-
-    @Autowired
-    private SecurityTestUtils securityTestUtils;
 
     @MockBean
     private NIKClient nikClient;
@@ -102,7 +96,7 @@ public class RessursControllerTest extends RestTestBase {
             .uri("/app/ressurs")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+                httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(request)
             .exchange()
@@ -168,7 +162,7 @@ public class RessursControllerTest extends RestTestBase {
                 .uri("/app/ressurs")
                 .headers(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                    httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+                    httpHeaders.setBearerAuth(nomWriteUserToken());
                 })
                 .bodyValue(request)
                 .exchange()
@@ -208,7 +202,7 @@ public class RessursControllerTest extends RestTestBase {
             .uri("/app/ressurs/" + navident + "/navn")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+                httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(request)
             .exchange()
@@ -235,7 +229,7 @@ public class RessursControllerTest extends RestTestBase {
             .uri("/app/ressurs/" + navident + "/navn")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpNameClaim()));
+                httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(request)
             .exchange()
@@ -243,16 +237,4 @@ public class RessursControllerTest extends RestTestBase {
 
         verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
     }
-
-    private JWTClaimsSet.Builder validJwtWithAzpNameClaim() {
-        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
-        final var subject = jwtClaimsBuilder.getClaims().get("sub");
-        jwtClaimsBuilder.claim("azp", subject);
-        jwtClaimsBuilder.claim("NAVident", "NAVIDENT");
-        jwtClaimsBuilder.claim("azp_name", subject);
-
-        return jwtClaimsBuilder;
-    }
-
-
 }

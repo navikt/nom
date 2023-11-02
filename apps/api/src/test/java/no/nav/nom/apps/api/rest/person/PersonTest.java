@@ -4,17 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.nom.apps.api.rest.RestTestBase;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 public class PersonTest extends RestTestBase {
-
-    @Autowired
-    private SecurityTestUtils securityTestUtils;
 
     @Test
     @SneakyThrows
@@ -27,7 +22,7 @@ public class PersonTest extends RestTestBase {
             .uri("/api/v1/person/getPerson")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim()));
+                httpHeaders.setBearerAuth(queryPersonClientToken());
             })
             .bodyValue(new PdlPersonRequest(personident))
             .exchange()
@@ -41,7 +36,7 @@ public class PersonTest extends RestTestBase {
 
     @Test
     @SneakyThrows
-    @DisplayName("Ingen tilgang med ugyldig AZP")
+    @DisplayName("Ingen tilgang uten QUERY_PERSON authority")
     void scenario2() {
         var path = "/api/v1/person/getPerson";
 
@@ -49,7 +44,7 @@ public class PersonTest extends RestTestBase {
             .uri(path)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(validJwtWithAzpClaim().claim("azp", "invalid")));
+                httpHeaders.setBearerAuth(noScopesClientToken());
             })
             .bodyValue(new PdlPersonRequest("12345678910"))
             .exchange()
