@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
 
 @Tag(name = "Ressurs")
 @RestController
-@RequestMapping(value={"/app/ressurs"})
+@RequestMapping(value={"/app/ressurser"})
 public class RessursController {
 
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);

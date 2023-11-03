@@ -70,7 +70,7 @@ export function ConfirmStep() {
         sluttDato,
         orgEnhetId,
       };
-      return axios.post("/nom-api/app/ressurs", opprettRessursRequest);
+      return axios.post("/nom-api/app/ressurser", opprettRessursRequest);
     },
 
     onSuccess: (opprettRessursResponse) => {

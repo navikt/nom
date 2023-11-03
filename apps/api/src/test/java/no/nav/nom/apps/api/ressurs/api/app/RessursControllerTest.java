@@ -93,7 +93,7 @@ public class RessursControllerTest extends RestTestBase {
 
 
         webTestClient.post()
-            .uri("/app/ressurs")
+            .uri("/app/ressurser")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());
@@ -159,7 +159,7 @@ public class RessursControllerTest extends RestTestBase {
 
 
         webTestClient.post()
-                .uri("/app/ressurs")
+                .uri("/app/ressurser")
                 .headers(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setBearerAuth(nomWriteUserToken());
@@ -199,7 +199,7 @@ public class RessursControllerTest extends RestTestBase {
         );
 
         webTestClient.post()
-            .uri("/app/ressurs/" + navident + "/navn")
+            .uri("/app/ressurser/" + navident + "/navn")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());
@@ -226,7 +226,7 @@ public class RessursControllerTest extends RestTestBase {
         );
 
         webTestClient.post()
-            .uri("/app/ressurs/" + navident + "/navn")
+            .uri("/app/ressurser/" + navident + "/navn")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());

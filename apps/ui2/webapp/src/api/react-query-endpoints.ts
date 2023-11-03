@@ -102,7 +102,7 @@ export const getAlleRessurserGraphql = {
 export const getRessurs = {
   queryKey: (navident: string) => ressurserKeys.id(navident),
   queryFn: async (navident: string) =>
-    (await axios.get<Ressurs>(`/nom-api/app/ressurs/byNavident/${navident}`))
+    (await axios.get<Ressurs>(`/nom-api/app/ressurser/byNavident/${navident}`))
       .data,
 };
 
@@ -111,7 +111,7 @@ export const getLedereForRessurs = {
   queryFn: async (navident: string) =>
     (
       await axios.get<RessursLeder[]>(
-        `/nom-api/app/ressurs/lederFor/${navident}`,
+        `/nom-api/app/ressurser/lederFor/${navident}`,
       )
     ).data,
 };
@@ -169,7 +169,7 @@ export const updateNavnForRessurs = async (
 ) =>
   (
     await axios.post<unknown, AxiosResponse<unknown>>(
-      `/nom-api/app/ressurs/${navident}/navn`,
+      `/nom-api/app/ressurser/${navident}/navn`,
       updateNavnForRessursRequest,
     )
   ).data;

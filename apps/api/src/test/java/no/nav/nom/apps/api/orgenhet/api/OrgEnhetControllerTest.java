@@ -19,8 +19,7 @@ import static org.mockito.Mockito.verify;
 
 public class OrgEnhetControllerTest extends RestTestBase {
 
-    public static final String ORGENHETSTYPE_URL = "/app/orgenhet/orgEnhetsType";
-
+    public static final String ORGENHETSTYPE_URL = "/app/orgenheter/orgEnhetsType";
     @MockBean
     OrgEnhetCommandService orgEnhetCommandService;
 
