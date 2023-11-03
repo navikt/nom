@@ -62,6 +62,7 @@
         <orgjson.version>20231013</orgjson.version>  <!-- https://github.com/navikt/nom/security/dependabot/92 -->
         <snappy-java.test.version>1.1.10.5</snappy-java.test.version>
         <commons-compress.version>1.24.0</commons-compress.version> <!-- https://github.com/navikt/nom/security/dependabot/88 -->
+        <httpclient.version>4.5.14</httpclient.version> <!-- https://github.com/navikt/nom/security/dependabot/94 -->
     </properties>
 
     <dependencyManagement>
@@ -293,6 +294,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/88 -->
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>    <!-- https://github.com/navikt/nom/security/dependabot/94 -->
             </dependency>
 
             <dependency> <!-- Påkrevd for mac M1  -->
