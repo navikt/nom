@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
@@ -7,7 +8,10 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -35,13 +39,15 @@ public class OrgenhetService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final DvhRepository dvhRepository;
+    private final KafkaTopicReader kafkaTopicReader;
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository) {
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
+        this.kafkaTopicReader = kafkaTopicReader;
     }
 
 
@@ -215,6 +221,10 @@ public class OrgenhetService {
                 )
             );
         }
+    }
+
+    public List<JsonNode> getOrgEnhetEvents(ReadTopicRequest readTopicRequest) {
+        return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 }
 

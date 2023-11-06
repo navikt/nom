@@ -1,17 +1,22 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
+
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,6 +120,15 @@ public class RessursController {
         var ressurs = ressursRestService.findRessursByFid(fid);
 
         return ResponseEntity.ok(ressurs);
+    }
+
+    @GetMapping("/read-topic")
+    @Operation(
+        description = "Henter records fra ressurs event-source",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+     public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+        return ResponseEntity.ok(ressursRestService.getRessursEvents(request));
     }
 
     @GetMapping("/lederFor/{navident}")

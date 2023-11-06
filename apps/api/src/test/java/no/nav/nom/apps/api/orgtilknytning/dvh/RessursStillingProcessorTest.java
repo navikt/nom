@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -41,13 +42,15 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     OrgEnhetStateRepository orgEnhetStateRepository;
     @Mock
     OrgEnhetCommandService orgEnhetCommandService;
+    @Mock
+    KafkaTopicReader kafkaTopicReader;
 
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
-        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository());
+        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader);
         ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
             ressursStateRepository);

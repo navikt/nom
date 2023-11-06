@@ -1,12 +1,15 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,7 +76,15 @@ public class OrgEnhetController {
     )
     public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable("parentId") String parentId) {
         return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
+    }
 
+    @GetMapping("/read-topic")
+    @Operation(
+            description = "Henter records fra ressurs event-source",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+        return ResponseEntity.ok(orgenhetService.getOrgEnhetEvents(request));
     }
 
     @PostMapping("/orgEnhetsType")

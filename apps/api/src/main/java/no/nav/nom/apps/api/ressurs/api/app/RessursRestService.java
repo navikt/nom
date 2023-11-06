@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
@@ -21,6 +22,8 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessurs
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -37,6 +40,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+
 @Service
 public class RessursRestService {
 
@@ -51,6 +56,7 @@ public class RessursRestService {
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
     private final RessursLedereResolver ressursLedereResolver;
+    private final KafkaTopicReader kafkaTopicReader;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -60,7 +66,9 @@ public class RessursRestService {
         PdlClient pdlClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService,
-        RessursContactDetailsResolver ressursContactDetailsResolver, RessursLedereResolver ressursLedereResolver
+        RessursContactDetailsResolver ressursContactDetailsResolver,
+        RessursLedereResolver ressursLedereResolver,
+        KafkaTopicReader kafkaTopicReader
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommadService = ressursCommadService;
@@ -69,6 +77,7 @@ public class RessursRestService {
         this.pdlClient = pdlClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
+        this.kafkaTopicReader = kafkaTopicReader;
         this.ressursContactDetailsResolver = ressursContactDetailsResolver;
         this.ressursLedereResolver = ressursLedereResolver;
     }
@@ -111,11 +120,15 @@ public class RessursRestService {
         );
 
         var inputMetadata = new InputMetadata("REST", "updateRessursNavn", updateVisningsnavnRequest, new Origination(
-            SecurityUtil.getAuthenticatedNavIdent(),
+            getAuthenticatedNavIdent(),
             SecurityUtil.getAuthenticatedAzpName()
         ));
 
         ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+    }
+
+    public List<JsonNode> getRessursEvents(ReadTopicRequest readTopicRequest) {
+        return kafkaTopicReader.getRessursEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 
     public List<RessursLeder> getLedereForRessurs(String navident) {
@@ -180,7 +193,7 @@ public class RessursRestService {
             "opprettRessurs",
             request,
             new Origination(
-                SecurityUtil.getAuthenticatedNavIdent(),
+                getAuthenticatedNavIdent(),
                 SecurityUtil.getAuthenticatedAzpName()
             )
         );
