@@ -204,7 +204,7 @@ public class OmadaUttrekk {
                 "gyldig_fom",
                 "gyldig_tom",
                 "leder_navident",
-                "org_enhets_nomNivaa",
+                "org_enhets_nivaa",
                 "org_enhet_type",
                 "org_enhet_over",
                 "remedyEnhetId"
@@ -222,7 +222,6 @@ public class OmadaUttrekk {
                 "org_enhet_over",
                 "remedyEnhetId"
             );
-
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgenhetService.getAllEnheter()
