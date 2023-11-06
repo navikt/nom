@@ -26,6 +26,10 @@ public class DvhOrganiseringMockUtils {
         createResponse(response);
     }
 
+    public void clearResponse() {
+        response.clear();
+    }
+
     private void createResponse(List<DvhOrganiseringMock> dvhOrganiseringMocks) throws JsonProcessingException {
         val response = objectMapper.createObjectNode();
         response.set("NOM_HRORG_HIERARKI2_v2Response", objectMapper.convertValue(dvhOrganiseringMocks, JsonNode.class));

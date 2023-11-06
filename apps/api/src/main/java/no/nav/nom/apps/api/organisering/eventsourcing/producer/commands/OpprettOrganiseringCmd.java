@@ -4,7 +4,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 
 import java.time.LocalDate;
 
-public record OpprettOrganisering (
+public record OpprettOrganiseringCmd(
     String agressoIdOver,
     String agressoIdUnder,
     String orgNivOver,

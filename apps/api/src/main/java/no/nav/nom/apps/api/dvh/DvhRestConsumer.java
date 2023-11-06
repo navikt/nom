@@ -10,7 +10,9 @@ import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
-import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganisering;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
@@ -62,6 +64,8 @@ public class DvhRestConsumer {
     private final EksterneRessurserLoader eksterneRessurserLoader;
 
     private final OrganiseringEventCommandService organiseringEventCommandService;
+
+    private final OrganiseringStateRepository organiseringStateRepository;
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -221,8 +225,17 @@ public class DvhRestConsumer {
                         if (validateOrganisering(e)) {
                             DvhOrganisering dvhOrganisering = new DvhOrganisering(e);
                             organiseringer.add(dvhOrganisering);
-                            // TEST publish organisering event
-                            organiseringEventCommandService.opprettOrganisering(getOpprettOrganisering(dvhOrganisering));
+                            String stateFid = getFidForOrganisering(dvhOrganisering);
+                            if(erOrganiseringEndret(stateFid, dvhOrganisering)){
+                                //if organisering is changed
+                                organiseringEventCommandService.endreOrganisering(stateFid, getEndreOrganiseringCmd(dvhOrganisering));
+                            } else {
+                                // TEST publish organisering event
+                                var opprettetFid = organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
+                                // TODO remove, and get it properly from state topics
+                                // save to the repository for the time being
+                                organiseringStateRepository.put(opprettetFid, dvhOrganisering);
+                            }
                         }
 
                         if (validateLeder(e)) {
@@ -237,9 +250,36 @@ public class DvhRestConsumer {
         }
     }
 
+    private String getFidForOrganisering(DvhOrganisering dvhOrganisering) {
+        // TODO
+        return String.valueOf(organiseringStateRepository.findFidlByUniqueAgressoId(dvhOrganisering));
+    }
 
-    private OpprettOrganisering getOpprettOrganisering(DvhOrganisering dvhOrganisering) {
-        return new OpprettOrganisering(
+    private boolean erOrganiseringEndret(String fid, DvhOrganisering dvhOrganisering) {
+        // TODO
+        var organiseringEndret = false;
+        if(fid.startsWith("organisering")){
+            organiseringEndret = true;
+        }
+        return organiseringEndret;
+    }
+
+    private EndreOrganiseringCmd getEndreOrganiseringCmd(DvhOrganisering dvhOrganisering) {
+        return new EndreOrganiseringCmd(
+            dvhOrganisering.getAgressoIdOver(),
+            dvhOrganisering.getAgressoIdUnder(),
+            dvhOrganisering.getOrgNivOver(),
+            dvhOrganisering.getOrgNivUnder(),
+            dvhOrganisering.getNavnOver(),
+            dvhOrganisering.getNavnUnder(),
+            dvhOrganisering.getGyldigFom(),
+            dvhOrganisering.getGyldigTom(),
+            createInputMetadata(dvhOrganisering.getRawData())
+        );
+    }
+
+    private OpprettOrganiseringCmd getOpprettOrganiseringCmd(DvhOrganisering dvhOrganisering) {
+        return new OpprettOrganiseringCmd(
             dvhOrganisering.getAgressoIdOver(),
             dvhOrganisering.getAgressoIdUnder(),
             dvhOrganisering.getOrgNivOver(),
