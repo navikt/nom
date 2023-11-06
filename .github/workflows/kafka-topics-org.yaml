@@ -9,6 +9,7 @@ on:
       - '.nais/topics/topics-internal.yaml'
       - '.nais/topics/topics-kafka-api.yaml'
       - '.github/workflows/kafka-topics-org.yaml'
+  workflow_dispatch:
 
 jobs:
   deploy-kafka-topics-dev:
