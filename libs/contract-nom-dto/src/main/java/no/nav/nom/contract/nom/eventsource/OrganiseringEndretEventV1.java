@@ -16,8 +16,8 @@ public class OrganiseringEndretEventV1  extends OrganiseringEvent{
     }
 
     public record OrganiseringEndretEventData(
-        String agressoIdOver,
-        String agressoIdUnder,
+        String idOver,
+        String idUnder,
         String navnOver,
         String navnUnder,
         LocalDate gyldigFom,
