@@ -7,6 +7,7 @@ import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.cache.RnRClientTokenCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.apps.navident.rnrservices.Need;
+import no.nav.nom.contract.nom.IdentType;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -58,5 +59,23 @@ public class EventSourceProducer {
 
             MDC.clear();
         }
+    }
+
+    public void produceSlettEvent(String navident, IdentType identType, String personid) {
+        val sourceEvent = SourceEvent.builder()
+            .event(EventType.SLETT)
+            .payload(
+                EventPayload.builder()
+                    .navident(navident)
+                    .identType(identType)
+                    .personid(personid)
+                    .build()
+            ).build();
+
+        val persistedSourceEvent = sourceEventRepository.save(sourceEvent);
+
+        producer.send(eventSourceTopic, persistedSourceEvent);
+
+        log.debug("Persisted SourceEvent posted: %s".formatted(persistedSourceEvent.maskedToString()));
     }
 }
