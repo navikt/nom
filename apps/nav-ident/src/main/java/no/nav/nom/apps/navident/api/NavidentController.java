@@ -17,6 +17,7 @@ import no.nav.nom.apps.navident.common.LogConfig;
 import no.nav.nom.apps.navident.common.SwaggerConfig;
 import no.nav.nom.apps.navident.domain.Navident;
 import no.nav.nom.apps.navident.eventsource.EventSourceProducer;
+import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.libs.utils.common.mdc.MdcConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,25 +114,29 @@ public class NavidentController {
     public ResponseEntity<String> deleteNavident(
         @Parameter(description = "Navident som skal slettes") @RequestParam String navident,
         @Parameter(description = "Personid som er knyttet til navidenten") @RequestParam String personid,
+        @Parameter(description = "IdentType for navidenten") @RequestParam IdentType identType,
         @Parameter(description = "Skriv CONFIRM for å bekrefte sletting!") @RequestParam String confirm
     ) {
-        if (!"CONFIRM".equals(confirm)) {
+        if (!("CONFIRM".equals(confirm) || "CONFIRM_NO_VALIDATION".equals(confirm))) {
             return ResponseEntity.badRequest().body("Må bekrefte sletting med CONFIRM");
         }
+        
+        if (!"CONFIRM_NO_VALIDATION".equals(confirm)) {
+            if (!navidenter.containsKey(navident)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navident finnes ikke");
+            }
 
-        if (!navidenter.containsKey(navident)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navident finnes ikke");
+            Navident eksisterende = navidenter.get(navident);
+
+            if (!eksisterende.getGjeldendePersonid().equals(personid)) {
+                logger.info(LogConfig.SECURE_LOGS, "Angitt personid er ikke det som er gjeldende. Gjeldende er: {}", eksisterende.getGjeldendePersonid());
+                return ResponseEntity.badRequest().body("Kan angitt personid er ikke det som er gjeldende for navidenten.");
+            }
         }
 
-        Navident eksisterende = navidenter.get(navident);
-
-        if (!eksisterende.getGjeldendePersonid().equals(personid)) {
-            logger.info(LogConfig.SECURE_LOGS, "Angitt personid er ikke det som er gjeldende. Gjeldende er: {}", eksisterende.getGjeldendePersonid());
-            return ResponseEntity.badRequest().body("Kan angitt personid er ikke det som er gjeldende for navidenten.");
-        }
         logger.info(LogConfig.SECURE_LOGS, "Sletter Navident/personid: {}/{}", navident, personid);
 
-        eventSourceProducer.produceSlettEvent(navident, eksisterende.getIdentType(), personid);
+        eventSourceProducer.produceSlettEvent(navident, identType, personid);
 
         return ResponseEntity.ok("Navident %s er slettet".formatted(navident));
     }
