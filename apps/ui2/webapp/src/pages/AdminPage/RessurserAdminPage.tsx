@@ -26,7 +26,7 @@ import { isAfter, isBefore, maxTime } from "date-fns";
 import sortBy from "lodash/sortBy";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import { allExpanded, defaultStyles, JsonView } from "react-json-view-lite";
+import { JsonView } from "react-json-view-lite";
 
 import type { RessursFields } from "~/api/react-query-endpoints";
 import {
@@ -501,13 +501,7 @@ function FilterChips() {
 }
 
 function FullRessursInfo({ ressurs }: { ressurs: RessursFields }) {
-  return (
-    <JsonView
-      data={ressurs}
-      shouldExpandNode={allExpanded}
-      style={defaultStyles}
-    />
-  );
+  return <JsonView data={ressurs} />;
 }
 
 function applyFilter(

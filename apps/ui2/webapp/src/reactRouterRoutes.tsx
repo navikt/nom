@@ -17,8 +17,10 @@ import PilotBanner, { pilotBannerHeight } from "~/components/PilotBanner";
 import { PrefetchUsefulAdminQueries } from "~/components/PrefetchUsefulQueries";
 import { AdminPage } from "~/pages/AdminPage/AdminPage";
 import { OrgEnheterAdminPage } from "~/pages/AdminPage/OrgEnheterAdminPage";
+import { OrgEnhetHistoryPage } from "~/pages/AdminPage/OrgEnhetHistoryPage";
 import type { RessursFilterValues } from "~/pages/AdminPage/RessurserAdminPage";
 import { RessurserAdminPage } from "~/pages/AdminPage/RessurserAdminPage";
+import { RessursHistoryPage } from "~/pages/AdminPage/RessursHistoryPage";
 import {
   CreateRessursPage,
   validateCreateRessursSearch,
@@ -171,6 +173,30 @@ export const ressurserAdminRoute = new Route({
   },
 });
 
+export const ressursHistoryRoute = new Route({
+  getParentRoute: () => adminRoute,
+  path: "history-ressurser",
+  component: () => {
+    return (
+      <Tabs.Panel value="/admin/history-ressurser">
+        <RessursHistoryPage />
+      </Tabs.Panel>
+    );
+  },
+});
+
+export const orgEnhetHistoryRoute = new Route({
+  getParentRoute: () => adminRoute,
+  path: "history-orgenheter",
+  component: () => {
+    return (
+      <Tabs.Panel value="/admin/history-orgenheter">
+        <OrgEnhetHistoryPage />
+      </Tabs.Panel>
+    );
+  },
+});
+
 const notFoundRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "*",
@@ -182,7 +208,12 @@ const routeTree = rootRoute.addChildren([
   ressursRoute,
   createRessursRoute,
   orgRoute,
-  adminRoute.addChildren([orgEnheterAdminRoute, ressurserAdminRoute]),
+  adminRoute.addChildren([
+    orgEnheterAdminRoute,
+    ressurserAdminRoute,
+    ressursHistoryRoute,
+    orgEnhetHistoryRoute,
+  ]),
   notFoundRoute,
 ]);
 

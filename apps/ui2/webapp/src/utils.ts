@@ -56,6 +56,7 @@ export function formatTlf(nr: string) {
 
 export const DATE_FORMATS = {
   no: "dd.MM.yyyy",
+  noLong: "dd.MM.yyyy hh:MM",
 };
 
 export function formatDateWithoutTimezone(date: Date) {
@@ -67,6 +68,13 @@ export function formatDisplayDate(date?: string) {
     return "";
   }
   return format(new Date(date), DATE_FORMATS.no);
+}
+
+export function formatDisplayDatetime(dateTime?: string) {
+  if (!dateTime) {
+    return "";
+  }
+  return format(new Date(dateTime), DATE_FORMATS.noLong);
 }
 
 export function isGyldighetsPeriodeActive(

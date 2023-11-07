@@ -1,7 +1,12 @@
 import { Tabs } from "@navikt/ds-react";
 import { Outlet, useNavigate } from "@tanstack/react-router";
 
-import { orgEnheterAdminRoute, ressurserAdminRoute } from "~/reactRouterRoutes";
+import {
+  orgEnheterAdminRoute,
+  orgEnhetHistoryRoute,
+  ressurserAdminRoute,
+  ressursHistoryRoute,
+} from "~/reactRouterRoutes";
 
 export function AdminPage() {
   const navigate = useNavigate();
@@ -19,6 +24,16 @@ export function AdminPage() {
           label="Ressurser"
           onClick={() => navigate({ to: ressurserAdminRoute.fullPath })}
           value="/admin/ressurser"
+        />
+        <Tabs.Tab
+          label="Historikk ressurser"
+          onClick={() => navigate({ to: ressursHistoryRoute.fullPath })}
+          value="/admin/history-ressurser"
+        />
+        <Tabs.Tab
+          label="Historikk orgenheter"
+          onClick={() => navigate({ to: orgEnhetHistoryRoute.fullPath })}
+          value="/admin/history-orgenheter"
         />
       </Tabs.List>
       <Outlet />
