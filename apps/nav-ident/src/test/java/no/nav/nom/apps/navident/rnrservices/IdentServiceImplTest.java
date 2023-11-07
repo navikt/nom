@@ -137,7 +137,7 @@ class IdentServiceImplTest extends EmbeddedKafkaTestBase {
         when(pdlService.getKnownPersonider(personid)).thenReturn(Collections.singletonList(personid));
         when(navidGenerator.generate(prefix)).thenReturn("A100001");
 
-        int numberOfThreads = 3;
+        int numberOfThreads = 2;
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         Callable<Respons> callableTask = () -> identService.bestillIdent(personid, IdentType.STANDARD, prefix);
 

@@ -120,7 +120,7 @@ public class NavidentController {
         if (!("CONFIRM".equals(confirm) || "CONFIRM_NO_VALIDATION".equals(confirm))) {
             return ResponseEntity.badRequest().body("Må bekrefte sletting med CONFIRM");
         }
-        
+
         if (!"CONFIRM_NO_VALIDATION".equals(confirm)) {
             if (!navidenter.containsKey(navident)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Navident finnes ikke");
