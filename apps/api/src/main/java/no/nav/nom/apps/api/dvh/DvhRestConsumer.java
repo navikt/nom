@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrg
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
@@ -24,6 +25,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -65,6 +68,7 @@ public class DvhRestConsumer {
 
     private final OrganiseringEventCommandService organiseringEventCommandService;
 
+    private final OrgenhetService orgenhetService;
     private final OrganiseringStateRepository organiseringStateRepository;
 
     public boolean initloadComplete() {
@@ -77,16 +81,16 @@ public class DvhRestConsumer {
         log.info("Starter schedulert oppdatering fra DVH");
         LocalDateTime start = LocalDateTime.now();
 
-//        TODO Remove before merge!
-//        while ( !isInitialStateReady() ) { // Wait on startup until state topics are read
-//            try {
-//                Thread.sleep(5_000);
-//                log.debug("InitialState er ikke klar enda");
-//                log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
-//            } catch (Exception ignored) {
-//                log.error("Waiting for initialState last feilet", ignored);
-//            }
-//        }
+        //        TODO Remove before merge!
+        //        while ( !isInitialStateReady() ) { // Wait on startup until state topics are read
+        //            try {
+        //                Thread.sleep(5_000);
+        //                log.debug("InitialState er ikke klar enda");
+        //                log.debug("Ressurs state: {}  Orgtilkn. state: {}  Orgenhet state: {}", ressursStateListener.initloadComplete(), orgtilknytningStateListener.initloadComplete(), orgEnhetStateListener.initloadComplete());
+        //            } catch (Exception ignored) {
+        //                log.error("Waiting for initialState last feilet", ignored);
+        //            }
+        //        }
 
         log.info("State topics er lest, fortsetter schedulert oppdatering fra DVH etter {}", durationAsH24(start));
 
@@ -129,33 +133,33 @@ public class DvhRestConsumer {
             var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2");
 
             val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), false)
-                    .map(DvhRessurs::new)
-                    .distinct()
-                    .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
-                    .values()
-                    .stream()
-                    .peek(l -> {
+                .map(DvhRessurs::new)
+                .distinct()
+                .collect(Collectors.groupingBy(DvhRessurs::getPersonIdent))
+                .values()
+                .stream()
+                .peek(l -> {
+                    if (l.size() > 1) {
+                        l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
                         if (l.size() > 1) {
-                            l.removeAll(l.stream().filter(Predicate.not(DvhRessurs::getRemedyAktiv)).toList());
-                            if (l.size() > 1) {
-                                val personIdent = l.get(0).getPersonIdent();
-                                val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
-                                log.warn(SECURE_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
-                                l.clear();
-                            }
+                            val personIdent = l.get(0).getPersonIdent();
+                            val navIdenter = l.stream().map(DvhRessurs::getNavIdent).toList();
+                            log.warn(SECURE_LOGS, "Forkastet lesing av ansatt med personident " + personIdent + " har flere aktive navidenter: " + navIdenter);
+                            l.clear();
                         }
-                    })
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
-                    .values()
-                    .stream()
-                    .filter(l -> l.size() == 1)
-                    .flatMap(Collection::stream)
-                    .toList();
+                    }
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(DvhRessurs::getNavIdent))
+                .values()
+                .stream()
+                .filter(l -> l.size() == 1)
+                .flatMap(Collection::stream)
+                .toList();
 
             ressursHendelseForEventsourceService.handterRessursIderFraDvh(dvhRessurs);
             dvhRepository.saveAnnenStatNavIdenter(findAnnenStatNavIdenter(dvhRessurs));
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Feilet i last av ressurser fra dvh", e);
         }
     }
@@ -177,7 +181,7 @@ public class DvhRestConsumer {
     public void lastOrgtilknytningerTilEvtsrc() {
         try {
             ressursStillingLoader.loadAndProcess();
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Feilet i last av ressursStillinger", e);
         }
     }
@@ -188,15 +192,14 @@ public class DvhRestConsumer {
     }
 
 
-
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
             val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
             val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
-                    .filter(this::validateTlf)
-                    .map(DvhTelefon::new)
-                    .collect(Collectors.toList());
+                .filter(this::validateTlf)
+                .map(DvhTelefon::new)
+                .collect(Collectors.toList());
             log.info("Telefonnr lastet: Antall rader = " + tlfRader.size());
             dvhRepository.saveTlf(tlfRader);
         } catch (Exception e) {
@@ -219,29 +222,33 @@ public class DvhRestConsumer {
             val organiseringer = new LinkedList<DvhOrganisering>();
 
             StreamSupport.stream(jsonOrgenheter.get("NOM_HRORG_HIERARKI2_v2Response").spliterator(), false)
-                    .filter(this::determineEnhetActive)
-                    .filter(this::determineEnhetNotIgnored)
-                    .forEach(e -> {
-                        if (validateOrganisering(e)) {
-                            DvhOrganisering dvhOrganisering = new DvhOrganisering(e);
-                            organiseringer.add(dvhOrganisering);
-                            String stateFid = getFidForOrganisering(dvhOrganisering);
-                            if(erOrganiseringEndret(stateFid, dvhOrganisering)){
+                .filter(this::determineEnhetActive)
+                .filter(this::determineEnhetNotIgnored)
+                .forEach(e -> {
+                    if (validateOrganisering(e)) {
+                        DvhOrganisering dvhOrganisering = new DvhOrganisering(e);
+                        organiseringer.add(dvhOrganisering);
+
+                        // TODO remove, and get it properly from state topics
+                        // save to the repository for the time being
+                        Optional<String> stateFid = getFidForOrganisering(dvhOrganisering);
+
+                        if (stateFid.isPresent()) {
+                            if (erOrganiseringEndret(stateFid.get(), dvhOrganisering)) {
                                 //if organisering is changed
-                                organiseringEventCommandService.endreOrganisering(stateFid, getEndreOrganiseringCmd(dvhOrganisering));
-                            } else {
-                                // TEST publish organisering event
-                                var opprettetFid = organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
-                                // TODO remove, and get it properly from state topics
-                                // save to the repository for the time being
-                                organiseringStateRepository.put(opprettetFid, dvhOrganisering);
+                                organiseringEventCommandService.endreOrganisering(stateFid.get(), getEndreOrganiseringCmd(dvhOrganisering));
                             }
+                        } else {
+                            var opprettetFid = organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
+                            addToStateRepository(opprettetFid, dvhOrganisering);
                         }
 
-                        if (validateLeder(e)) {
-                            ledere.add(new DvhLeder(e));
-                        }
-                    });
+                    }
+
+                    if (validateLeder(e)) {
+                        ledere.add(new DvhLeder(e));
+                    }
+                });
 
             dvhService.saveLedere(ledere);
             dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);
@@ -250,16 +257,65 @@ public class DvhRestConsumer {
         }
     }
 
-    private String getFidForOrganisering(DvhOrganisering dvhOrganisering) {
-        // TODO
-        return String.valueOf(organiseringStateRepository.findFidlByUniqueAgressoId(dvhOrganisering));
+    private void addToStateRepository(String fid, DvhOrganisering dvhOrganisering) {
+        var nomIdUnder = orgenhetService
+            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder());
+
+        var nomIdOver = orgenhetService
+            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
+
+        if (nomIdUnder.isEmpty() || nomIdOver.isEmpty()) {
+            return;
+        }
+
+        OrganiseringState organiseringState = OrganiseringState.builder()
+            .fid(fid)
+            .idUnder(nomIdUnder.get().getId())
+            .idOver(nomIdOver.get().getId())
+            .navnUnder(dvhOrganisering.getNavnUnder())
+            .navnOver(dvhOrganisering.getNavnOver())
+            .gyldigFom(dvhOrganisering.getGyldigFom())
+            .gyldigTom(Optional.ofNullable(dvhOrganisering.getGyldigTom()))
+            .build();
+
+        organiseringStateRepository.put(fid, organiseringState);
     }
 
-    private boolean erOrganiseringEndret(String fid, DvhOrganisering dvhOrganisering) {
+    private Optional<String> getFidForOrganisering(DvhOrganisering dvhOrganisering) {
+        // TODO Flytte til en service i stedet for å bruke repository direkte?
+        return Optional.ofNullable(organiseringStateRepository
+            .findFidByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()));
+    }
+
+    private boolean erOrganiseringEndret(String fid, DvhOrganisering dvhOrg) {
         // TODO
-        var organiseringEndret = false;
-        if(fid.startsWith("organisering")){
-            organiseringEndret = true;
+        boolean organiseringEndret = false;
+
+        if (fid.startsWith("organisering")) {
+            Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
+
+            if (eksisterendeOrganisering.isPresent()) {
+                OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
+
+                var orgEnhetUnder = orgenhetService
+                    .getEnhetByAgressoIdNivaAndName(dvhOrg.getAgressoIdUnder(), dvhOrg.getOrgNivUnder(), dvhOrg.getNavnUnder());
+
+                var orgEnhetOver = orgenhetService
+                    .getEnhetByAgressoIdNivaAndName(dvhOrg.getAgressoIdOver(), dvhOrg.getOrgNivOver(), dvhOrg.getNavnOver());
+
+                if (orgEnhetUnder.isPresent() && orgEnhetOver.isPresent()) {
+
+                    if (!eksisterendeOrg.idUnder().equals(orgEnhetUnder.get().getId()) ||
+                        !eksisterendeOrg.idOver().equals(orgEnhetOver.get().getId()) ||
+                        !eksisterendeOrg.navnUnder().equals(dvhOrg.getNavnUnder()) ||
+                        !eksisterendeOrg.navnOver().equals(dvhOrg.getNavnOver()) ||
+                        !eksisterendeOrg.gyldigFom().equals(dvhOrg.getGyldigFom()) ||
+                        !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(dvhOrg.getGyldigTom()))
+                    ) {
+                        organiseringEndret = true;
+                    }
+                }
+            }
         }
         return organiseringEndret;
     }
@@ -315,7 +371,7 @@ public class DvhRestConsumer {
 
     private boolean validateOrganisering(JsonNode e) {
         final var validate = e.hasNonNull("ORGNODE_KODE_OVER") && e.hasNonNull("ORGNODE_KODE")
-                && e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
+            && e.hasNonNull("ORGNODE_NIVA_OVER") && e.hasNonNull("ORGNODE_NIVA");
         if (!validate) {
             log.info("Ugyldig organisering fra dvh, ORGNODE_KODE_OVER: {}, ORGNODE_KODE: {}", getAsText(e, "ORGNODE_KODE_OVER"), getAsText(e, "ORGNODE_KODE"));
         }
@@ -341,7 +397,7 @@ public class DvhRestConsumer {
 
     private String durationAsH24(LocalDateTime start) {
         Duration duration = Duration.between(start, LocalDateTime.now());
-        return  "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
+        return "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 
     private InputMetadata createInputMetadata(Object rawData) {

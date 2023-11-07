@@ -8,10 +8,14 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OrganiseringEventCommandService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final OrgenhetService orgenhetService;
 
@@ -27,10 +31,12 @@ public class OrganiseringEventCommandService {
     public String opprettOrganisering(OpprettOrganiseringCmd opprettOrganiseringCmd) {
         String fid = PrefixedUlidCreator.createOrganiseringUlid();
         eventProducer.sendMessage(getOpprettEvent(fid, opprettOrganiseringCmd));
+        logger.debug("Sendt opprettOrganisering: command={}", opprettOrganiseringCmd);
         return fid;
     }
 
     public void endreOrganisering(String fid, EndreOrganiseringCmd endreOrganiseringCmd) {
+        logger.debug("Sendt endreOrganisering: fid={} command={}", fid, endreOrganiseringCmd);
         eventProducer.sendMessage(getEndreEvent(fid, endreOrganiseringCmd));
     }
 

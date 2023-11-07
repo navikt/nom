@@ -1,7 +1,9 @@
 package no.nav.nom.apps.api.organisering.eventsourcing.state;
 
-import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,24 +11,37 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class OrganiseringStateRepository {
 
-    private final Map<String, DvhOrganisering> organiseringByFid = new ConcurrentHashMap<>();
+    private final OrgenhetService orgenhetService;
 
-    public void put(String fid, DvhOrganisering dvhOrganisering) {
-        organiseringByFid.put(fid, dvhOrganisering);
+    private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>();
+
+    public OrganiseringStateRepository(OrgenhetService orgenhetService) {
+        this.orgenhetService = orgenhetService;
     }
 
-    public Optional<DvhOrganisering> findByFid(String fid){
+    public void put(String fid, OrganiseringState organiseringState) {
+        organiseringByFid.put(fid, organiseringState);
+    }
+
+    public Optional<OrganiseringState> findByFid(String fid) {
         return Optional.ofNullable(organiseringByFid.get(fid));
     }
 
-    public String findFidlByUniqueAgressoId(DvhOrganisering dvhOrganisering){
+    public String findFidByAgressoIdNivaAndName(String agressoId, String niva, String name) {
+        var orgEnhet = orgenhetService
+            .getEnhetByAgressoIdNivaAndName(agressoId, niva, name);
+
+        if (orgEnhet.isEmpty()) {
+            return null;
+        }
+
         var result = organiseringByFid.entrySet()
             .stream()
-            .filter(dvhOrganiseringInState -> dvhOrganiseringInState.getValue().getAgressoIdUnder().equals(dvhOrganisering.getAgressoIdUnder()))
+            .filter(organiseringInState -> organiseringInState.getValue().idUnder().equals(orgEnhet.get().getId()))
             .findFirst()
             .orElse(null);
 
-        return (result == null)? null : result.getKey();
+        return (result == null) ? null : result.getKey();
     }
 
 }
