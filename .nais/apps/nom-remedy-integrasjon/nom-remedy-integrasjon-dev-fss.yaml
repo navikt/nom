@@ -24,6 +24,8 @@ spec:
     periodSeconds: 5
     timeout: 4
     failureThreshold: 5
+  kafka:
+    pool: nav-dev
   prometheus:
     enabled: true
     path: /internal/prometheus

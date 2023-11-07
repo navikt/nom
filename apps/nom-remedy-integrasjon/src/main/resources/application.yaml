@@ -1,3 +1,8 @@
+app:
+  name: ${NAIS_APP_NAME:nom-remedy-integrasjon}
+  kafka-topics:
+    ressurs-eventsource: org.nom.ressurs-eventsource
+
 management:
   endpoint:
     health:
@@ -24,5 +29,29 @@ spring:
       idle-timeout: 30000
       max-lifetime: 2000000
       connection-timeout: 30000
+  kafka:
+    client-id: ${app.name}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    security:
+      protocol: SSL
+    properties:
+      security.protocol: SSL
+      ssl:
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: latest
+      properties:
+        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
+      isolation-level: read_committed
+      group-id: ${app.name}
+
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
