@@ -1,7 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon;
 
+import io.getunleash.Unleash;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
-import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,10 +14,24 @@ public class NomIntegrasjonKafkaListener {
 
     private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonKafkaListener.class);
 
+    private final Unleash unleash;
+
+    public NomIntegrasjonKafkaListener(Unleash unleash) {
+        this.unleash = unleash;
+    }
+
     @KafkaListener(topics = "${app.kafka-topics.ressurs-eventsource}")
-    public void listener(RessursEvent record, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
-        if (record instanceof RessursOpprettetEventV1) {
-            logger.info("Received: " + record.getFid());
+    public void listener(RessursEvent ressursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
+        String msg = "Received: " + ressursEvent.getFid();
+        if (isWriteToRemedyEnabled()) {
+            logger.info(msg + " writing to remedy is enabled");
         }
+        else {
+            logger.info(msg + " writing to remedy is not enabled");
+        }
+    }
+
+    private boolean isWriteToRemedyEnabled() {
+        return unleash.isEnabled("nom-remedy-integrasjon.write_to_remedy");
     }
 }

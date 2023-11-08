@@ -24,6 +24,7 @@ jobs:
       image-suffix: nom-remedy-integrasjon
       nais-config-file-path-dev: .nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon-dev-fss.yaml
       nais-config-file-path-prod: .nais/apps/nom-remedy-integrasjon/nom-remedy-integrasjon-prod-fss.yaml
+      unleash-vars-file-path: .nais/apps/nom-remedy-integrasjon/unleash-vars.yaml
       dev-cluster: dev-fss
       prod-cluster: prod-fss
     secrets:

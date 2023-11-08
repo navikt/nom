@@ -55,3 +55,8 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
+
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}

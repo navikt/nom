@@ -93,9 +93,18 @@
         </dependency>
         <dependency>
             <groupId>no.nav.nom</groupId>
+            <artifactId>utils-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.nom</groupId>
             <artifactId>contract-nom-dto</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.getunleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+        </dependency>
 
+        <!-- Test dependencies  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
