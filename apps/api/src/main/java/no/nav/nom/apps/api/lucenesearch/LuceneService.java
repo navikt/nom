@@ -64,7 +64,7 @@ public class LuceneService {
         isLocal = profiles.contains("local") || profiles.contains("test");
     }
 
-    @Scheduled(initialDelayString = "PT30S", fixedRateString = "PT30S")
+    @Scheduled(initialDelayString = "PT30S", fixedDelayString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
         if(!dvhStartupLoadMonitor.hasCompleted()) {
             log.info("Lucene indexing waiting for initial DVH load to complete.");
@@ -124,7 +124,6 @@ public class LuceneService {
 
         log.info("Lucene indexing completed.");
         this.initialLoadComplete.set(true);
-
     }
 
     //@Scheduled(initialDelayString = "PT20S", fixedRateString = "PT3H")
