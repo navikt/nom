@@ -13,7 +13,7 @@ Kjør NavIdent med VM options
 Her er eksempel Curl som kan brukes. Denne personid'en finnes også i PDL test, så den skal treffe der.
 Husk å sett inn JWT token som kan lages på IDA. ida.intern.nav.no -> AAD On-Behalf-Of Token for navIdent Client Id (AZURE_APP_CLIENT_ID)
 
-    curl -i --location --request POST 'http://localhost:8081/navident' \
+    curl -i --location --request POST 'http://localhost:8081/navident/create' \
     -H 'Content-Type: application/json' \
     -H 'Nav-Consumer-Id: Test' \
     -H 'Nav-Call-Id: Test_id_2' \
