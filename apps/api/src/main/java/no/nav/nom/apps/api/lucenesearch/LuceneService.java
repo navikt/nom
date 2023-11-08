@@ -59,7 +59,7 @@ public class LuceneService {
         isLocal = profiles.contains("local") || profiles.contains("test");
     }
 
-    @Scheduled(initialDelayString = "PT10S", fixedRateString = "PT30S")
+    @Scheduled(initialDelayString = "PT30S", fixedRateString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
         var orgenheterCountToIndex = this.invalidatedOrgEnhetList.size();
