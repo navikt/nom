@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.lucenesearch;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
@@ -42,11 +43,15 @@ public class LuceneService {
     private final String ressursEntityType;
 
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
     private final boolean isLocal;
 
-    public LuceneService(RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment) {
+    public LuceneService(RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, Environment environment,
+                         DvhStartupLoadMonitor dvhStartupLoadMonitor
+    ) {
         this.orgenhetService = orgenhetService;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
         var indexOrgEnhet = new OrgEnhetIndexer();
         var indexRessurs = new RessursIndexer();
         this.wrappedLucene = new WrappedLucene(List.of(indexOrgEnhet, indexRessurs));
@@ -59,8 +64,19 @@ public class LuceneService {
         isLocal = profiles.contains("local") || profiles.contains("test");
     }
 
-    @Scheduled(initialDelayString = "PT2M", fixedRateString = "PT30S")
+    @Scheduled(initialDelayString = "PT30S", fixedRateString = "PT30S")
     public void addInvalidatedEntitiesToIndex() {
+        if(!dvhStartupLoadMonitor.hasCompleted()) {
+            log.info("Lucene indexing waiting for initial DVH load to complete.");
+        }
+        while ( !dvhStartupLoadMonitor.hasCompleted() ) { // Wait on initial DVH load to complete
+            try {
+                Thread.sleep(5_000);
+            } catch (Exception ignored) {
+                log.error("Waiting for initial DVH last feilet", ignored);
+            }
+        }
+
         var ressurserCountToIndex = this.invalidatedNavidentList.size();
         var orgenheterCountToIndex = this.invalidatedOrgEnhetList.size();
         var sumCount = ressurserCountToIndex + orgenheterCountToIndex;

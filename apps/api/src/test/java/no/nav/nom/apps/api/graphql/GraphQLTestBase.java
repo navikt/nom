@@ -3,9 +3,11 @@ package no.nav.nom.apps.api.graphql;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.TestBase;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.graphql.tester.AutoConfigureGraphQlTester;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,14 @@ public abstract class GraphQLTestBase extends TestBase {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    DvhStartupLoadMonitor dvhStartupLoadMonitor;
+
+    @BeforeEach
+    protected void setup() {
+        dvhStartupLoadMonitor.setCompleted();
+    }
 
     @SneakyThrows
     protected GraphQlTester.Response postForResource(String resource) {

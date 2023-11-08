@@ -45,7 +45,7 @@ public class DvhRestConsumer {
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
-    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
+//    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
@@ -56,10 +56,11 @@ public class DvhRestConsumer {
 
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
-    public boolean initloadComplete() {
-        return initialLoadComplete.get();
-    }
+//    public boolean initloadComplete() {
+//        return initialLoadComplete.get();
+//    }
 
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
@@ -83,8 +84,8 @@ public class DvhRestConsumer {
         loadTlfFromDvh();
 
 
-        if (!initialLoadComplete.get()) { // Pod kan markeres som klar etter oppstart
-            initialLoadComplete.set(true);
+        if (!dvhStartupLoadMonitor.hasCompleted()) { // Pod kan markeres som klar etter oppstart
+            dvhStartupLoadMonitor.setCompleted();
             log.info("Initial oppdatering fra DVH er klar. Etter {}", durationAsH24(start));
         }
 
@@ -157,7 +158,7 @@ public class DvhRestConsumer {
     }
 
     private void updateOrgtilknytningerStateFromDvh() {
-        if (initialLoadComplete.get() && leaderElection.isLeader()) {
+        if (dvhStartupLoadMonitor.hasCompleted() && leaderElection.isLeader()) {
             log.info("Oppdater Orgtilnytninger state fra dvh");
             lastOrgtilknytningerTilEvtsrc();
         }

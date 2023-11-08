@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.common;
 
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
@@ -17,11 +18,11 @@ public class StartupStateHealthIndicator implements HealthIndicator {
     private final static Logger logger = LoggerFactory.getLogger(StartupStateHealthIndicator.class);
 
     private final ApplicationAvailability applicationAvailability;
-    private final DvhRestConsumer dvhRestConsumer;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
-    public StartupStateHealthIndicator(ApplicationAvailability applicationAvailability, DvhRestConsumer dvhRestConsumer) {
+    public StartupStateHealthIndicator(ApplicationAvailability applicationAvailability, DvhStartupLoadMonitor dvhStartupLoadMonitor) {
         this.applicationAvailability = applicationAvailability;
-        this.dvhRestConsumer = dvhRestConsumer;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
     }
 
     @Override
@@ -45,6 +46,6 @@ public class StartupStateHealthIndicator implements HealthIndicator {
     }
 
     private boolean hasInitialLoadCompleted() {
-        return dvhRestConsumer.initloadComplete();
+        return dvhStartupLoadMonitor.hasCompleted();
     }
 }
