@@ -44,4 +44,8 @@ public class OrganiseringStateRepository {
         return (result == null) ? null : result.getKey();
     }
 
+    public void clear() {
+        organiseringByFid.clear();
+    }
+
 }

@@ -6,6 +6,7 @@ import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
@@ -90,6 +91,9 @@ public abstract class TestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
+    protected OrganiseringStateRepository organiseringStateRepository;
+
+    @Autowired
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @MockBean
@@ -99,6 +103,7 @@ public abstract class TestBase {
     void reset() {
         dvhRepository.clearRepository();
         orgEnhetStateRepository.clear();
+        organiseringStateRepository.clear();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();
