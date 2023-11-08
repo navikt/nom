@@ -89,18 +89,19 @@ public class LuceneService {
         {
             final var navidentsToIndex =  grabAndResetNavidentInvalidationList();
             final var luceneRessursStream = navidentsToIndex.stream()
-                    .map(ressursStateRepository::findByNavident)
-                    .map(Optional::get)
-                    // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
-                    .filter( ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run
-                    .map(ressurs -> new LuceneRessurs(ressurs.navident(),
-                            ressurs.visningsnavn().getFormattedVisningsnavn(),
-                            "tlf-nr",
-                            "epost",
-                            ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
-                            ressurs.sektor().toString()
-                            )
-                    );
+                .map(ressursStateRepository::findByNavident)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                // Indexer kun ressurser til søk kun for de med vanlig personnummer - Fjerner type 'Nav Ukjent' ressurser slik som https://nom.nav.no/ressurs/U165173
+                .filter( ressurs -> ressurs.personident().length() == 11 || isLocal) // Unntatt ved lokalkjøring eller test run
+                .map(ressurs -> new LuceneRessurs(ressurs.navident(),
+                        ressurs.visningsnavn().getFormattedVisningsnavn(),
+                        "tlf-nr",
+                        "epost",
+                        ressurs.sluttdato().map(date -> date.isAfter(LocalDate.now())).orElse(true),
+                        ressurs.sektor().toString()
+                        )
+                );
 
             wrappedLucene.upsertEntities(luceneRessursStream, LuceneRessurs.class);
         }
@@ -108,6 +109,7 @@ public class LuceneService {
         {
             final var luceneOrgEnhetStream = grabAndResetOrgenhetInvalidationList().stream()
                     .map(orgenhetService::getById)
+                    .filter(Optional::isPresent)
                     .map(Optional::get)
                     .map(orgenhet -> new LuceneOrgEnhet(
                             orgenhet.getId(),

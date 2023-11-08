@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -45,7 +44,6 @@ public class DvhRestConsumer {
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
-//    private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
@@ -57,10 +55,6 @@ public class DvhRestConsumer {
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
-
-//    public boolean initloadComplete() {
-//        return initialLoadComplete.get();
-//    }
 
 
     @Scheduled(fixedDelay = LOAD_INTERVAL) // Run on startup and every 30 min
