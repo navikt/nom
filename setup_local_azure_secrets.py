@@ -121,14 +121,18 @@ def setup_node_backend_secrets(app_info: AppInfo):
         print(f"Successfully written new secrets to {env_file_path}")
 
 
-def setup_secrets(apps_filter: list, env: str):
+def setup_secrets(apps_filter: list, env: str, fss_included: bool):
 
     run_command(f"kubectl config use-context {env}-gcp")
 
-    spring_apps = [
+    gcp_spring_apps = [
         AppInfo("api", "nom-api", "nom", uses_unleash=True),
         AppInfo("nav-ident", "nav-ident", "org"),
         AppInfo("unit4", "nom-unit4", "org", uses_unleash=True)
+    ]
+
+    fss_spring_apps = [
+        AppInfo("nom-remedy-integrasjon", "nom-remedy-integrasjon", "org", uses_unleash=True)
     ]
 
     node_apps = [
@@ -136,21 +140,27 @@ def setup_secrets(apps_filter: list, env: str):
     ]
 
     if apps_filter:
-        spring_apps = [app for app in spring_apps if app.kubernetes_name in apps_filter]
+        gcp_spring_apps = [app for app in gcp_spring_apps if app.kubernetes_name in apps_filter]
         node_apps = [app for app in node_apps if app.kubernetes_name in apps_filter]
+        fss_spring_apps = [app for app in fss_spring_apps if app.kubernetes_name in apps_filter]
 
-    [setup_spring_app_secrets(app_info) for app_info in spring_apps]
+    [setup_spring_app_secrets(app_info) for app_info in gcp_spring_apps]
     [setup_node_backend_secrets(app_info) for app_info in node_apps]
+
+    if fss_included:
+        run_command(f"kubectl config use-context {env}-fss")
+        [setup_spring_app_secrets(app_info) for app_info in fss_spring_apps]
 
 
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("--env", type=str, required=False, default="dev", choices=["dev", "prod"])
     argument_parser.add_argument("--apps", type=str, required=False)
+    argument_parser.add_argument("--fss-included", action=argparse.BooleanOptionalAction)
     arguments = argument_parser.parse_args()
 
     app_filter = []
     if arguments.apps:
         app_filter = arguments.apps.split(",")
 
-    setup_secrets(app_filter, arguments.env)
+    setup_secrets(app_filter, arguments.env, arguments.fss_included)

@@ -1,7 +1,9 @@
 app:
   name: ${NAIS_APP_NAME:nom-remedy-integrasjon}
   kafka-topics:
-    ressurs-eventsource: org.nom.ressurs-eventsource
+    ressurs-eventsource:
+      topic-name: org.nom.ressurs-eventsource
+      auto-startup: true
 
 management:
   endpoint:
@@ -52,6 +54,12 @@ spring:
         spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
       isolation-level: read_committed
       group-id: ${app.name}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect

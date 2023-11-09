@@ -20,7 +20,10 @@ public class NomIntegrasjonKafkaListener {
         this.unleash = unleash;
     }
 
-    @KafkaListener(topics = "${app.kafka-topics.ressurs-eventsource}")
+    @KafkaListener(
+        topics = "${app.kafka-topics.ressurs-eventsource.topic-name}",
+        autoStartup = "${app.kafka-topics.ressurs-eventsource.auto-startup}"
+    )
     public void listener(RessursEvent ressursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
         String msg = "Received: " + ressursEvent.getFid();
         if (isWriteToRemedyEnabled()) {

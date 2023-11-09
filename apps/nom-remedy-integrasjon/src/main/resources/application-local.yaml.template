@@ -3,9 +3,6 @@ server.port: 8087
 REMEDY_DATASOURCE_URL: jdbc:oracle:thin:@//10.52.128.42:1521/remedy_u2
 REMEDY_DB_PWD: placeholder
 
-UNLEASH_SERVER_API_TOKEN: placeholder
-UNLEASH_SERVER_API_URL: 'https://teamorg-unleash-api.nav.cloud.nais.io'
-
 NAIS_APP_NAME: nom-remedy-integrasjon-local
 
 KAFKA_BROKERS: localhost:39092

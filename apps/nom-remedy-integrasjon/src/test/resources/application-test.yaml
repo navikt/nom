@@ -1,0 +1,17 @@
+spring:
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+    properties:
+      security.protocol: PLAINTEXT
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${mock-oauth2-server.baseUrl}/aad
+          audiences: nom-remedy-integrasjon
+
+REMEDY_DATASOURCE_URL: jdbc:oracle:thin:@//host:1521/ehatevs
+REMEDY_DB_PWD: whatevs
+
+UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
+UNLEASH_SERVER_API_TOKEN: some-token
