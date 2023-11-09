@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

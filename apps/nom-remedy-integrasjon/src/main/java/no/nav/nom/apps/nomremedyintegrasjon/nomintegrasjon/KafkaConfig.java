@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;

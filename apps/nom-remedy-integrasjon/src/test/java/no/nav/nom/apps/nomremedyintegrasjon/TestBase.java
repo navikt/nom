@@ -2,6 +2,7 @@ package no.nav.nom.apps.nomremedyintegrasjon;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.nomremedyintegrasjon.api.FysiskBrukerstedReadOnlyRepository;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.NomIntegrasjonRepository;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.test.context.EmbeddedKafka;

@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import io.getunleash.Unleash;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
