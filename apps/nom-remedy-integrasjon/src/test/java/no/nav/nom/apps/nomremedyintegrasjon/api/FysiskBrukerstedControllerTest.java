@@ -12,6 +12,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.Mockito.when;
+
 public class FysiskBrukerstedControllerTest extends TestBase {
 
     @Autowired
@@ -22,17 +24,25 @@ public class FysiskBrukerstedControllerTest extends TestBase {
 
     private final String apiPath = "/api/fysiskebrukersteder";
 
-
     @Test
     @DisplayName("Should get fysiske brukersteder")
     public void testGetFysiskeBrukerstederOk() {
+
+        var fysiskeBrukersteder = List.of(
+            new FysiskBrukersted("", "", "")
+        );
+
+        when(fysiskBrukerstedReadOnlyRepository.findAll()).thenReturn(fysiskeBrukersteder);
+
         webTestClient.get()
             .uri(apiPath)
             .headers(httpHeaders -> httpHeaders.setBearerAuth(
                 generateToken("nom-remedy-integrasjon")
             ))
             .exchange()
-            .expectStatus().isOk();
+            .expectStatus().isOk()
+            .expectBodyList(FysiskBrukersted.class)
+            .isEqualTo(fysiskeBrukersteder);
     }
 
     @Test
