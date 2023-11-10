@@ -46,21 +46,16 @@ public class OmadaUttrekk {
     private final DvhRepository dvhRepository;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public static final String UNLEASH_NOM_OMADA_NYTT_FORMAT_ORGENHETER_DUMP = "nom.omada.nytt_format_orgenheter_dump";
-    private final Unleash unleash;
-
     public OmadaUttrekk(
         RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
         OrgtilknytningService orgtilknytningService,
-        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository,
-        Unleash unleash
+        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
-        this.unleash = unleash;
     }
 
     @Operation(
@@ -194,7 +189,7 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = unleash.isEnabled(UNLEASH_NOM_OMADA_NYTT_FORMAT_ORGENHETER_DUMP) ?
+        final var cSVFormat =
             getCSVFormat(
                 "org_enhet_id",
                 "agresso_id",
@@ -208,19 +203,6 @@ public class OmadaUttrekk {
                 "org_enhet_type",
                 "org_enhet_over",
                 "remedyEnhetId"
-            ) :
-            getCSVFormat(
-                "org_enhet_id",
-                "agresso_id",
-                "agresso_org_niv",
-                "agresso_orgenhet_type",
-                "navn",
-                "gyldig_fom",
-                "gyldig_tom",
-                "leder_navident",
-                "org_enhets_kategori",
-                "org_enhet_over",
-                "remedyEnhetId"
             );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
@@ -228,70 +210,37 @@ public class OmadaUttrekk {
                 .stream().filter( oe -> !oe.getId().equals(EXCLUDE_ORG_ENHET))
                 .forEach(orgenhet -> {
                 try {
-                    if (unleash.isEnabled(UNLEASH_NOM_OMADA_NYTT_FORMAT_ORGENHETER_DUMP)) {
-                        printer.printRecord(
-                            orgenhet.getId(),
-                            orgenhet.getAgressoId(),
-                            orgenhet.getOrgNiv(),
-                            orgenhet.getAgressoOrgenhetType(),
-                            orgenhet.getNavn(),
-                            orgenhet.getGyldigFom().format(dateTimeFormatter),
-                            orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
-                            dvhRepository.getLedere().stream()
-                                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                                .findAny()
-                                .map(DvhLeder::getNavIdent)
-                                .orElse(""),
-                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
-                            orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
-                            dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-                                .filter(organisering ->
-                                    organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
-                                        organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
-                                        organisering.getNavnUnder().equals(orgenhet.getNavn())
-                                )
-                                .findAny()
-                                .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
-                                    organisering.getAgressoIdOver(),
-                                    organisering.getOrgNivOver(),
-                                    organisering.getNavnOver()
-                                ).map(IOrgenhet::getId).orElse(null))
-                                .orElse(""),
-                            remedyEnhetIdResolver.remedyEnhetId(orgenhet)
-                        );
-                    } else {
-                        printer.printRecord(
-                            orgenhet.getId(),
-                            orgenhet.getAgressoId(),
-                            orgenhet.getOrgNiv(),
-                            orgenhet.getAgressoOrgenhetType(),
-                            orgenhet.getNavn(),
-                            orgenhet.getGyldigFom().format(dateTimeFormatter),
-                            orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
-                            dvhRepository.getLedere().stream()
-                                .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
-                                    .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
-                                .findAny()
-                                .map(DvhLeder::getNavIdent)
-                                .orElse(""),
-                            orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
-                            dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-                                .filter(organisering ->
-                                    organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
-                                        organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
-                                        organisering.getNavnUnder().equals(orgenhet.getNavn())
-                                )
-                                .findAny()
-                                .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
-                                    organisering.getAgressoIdOver(),
-                                    organisering.getOrgNivOver(),
-                                    organisering.getNavnOver()
-                                ).map(IOrgenhet::getId).orElse(null))
-                                .orElse(""),
-                            remedyEnhetIdResolver.remedyEnhetId(orgenhet)
-                        );
-                    }
+                    printer.printRecord(
+                        orgenhet.getId(),
+                        orgenhet.getAgressoId(),
+                        orgenhet.getOrgNiv(),
+                        orgenhet.getAgressoOrgenhetType(),
+                        orgenhet.getNavn(),
+                        orgenhet.getGyldigFom().format(dateTimeFormatter),
+                        orgenhet.getGyldigTom().map(dateTimeFormatter::format).orElse(""),
+                        dvhRepository.getLedere().stream()
+                            .filter(leder -> leder.getOrgEnhetNr().equals(orgenhet.getAgressoId()) && leder.getOrgNiv()
+                                .equals(orgenhet.getOrgNiv()) && leder.getOrgenhetNavn().equals(orgenhet.getNavn()))
+                            .findAny()
+                            .map(DvhLeder::getNavIdent)
+                            .orElse(""),
+                        orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
+                        orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
+                        dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
+                            .filter(organisering ->
+                                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
+                                    organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
+                                    organisering.getNavnUnder().equals(orgenhet.getNavn())
+                            )
+                            .findAny()
+                            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
+                                organisering.getAgressoIdOver(),
+                                organisering.getOrgNivOver(),
+                                organisering.getNavnOver()
+                            ).map(IOrgenhet::getId).orElse(null))
+                            .orElse(""),
+                        remedyEnhetIdResolver.remedyEnhetId(orgenhet)
+                    );
                     writer.close();
                 } catch (IOException e) {
                     log.error("Error writing to CSV", e);
