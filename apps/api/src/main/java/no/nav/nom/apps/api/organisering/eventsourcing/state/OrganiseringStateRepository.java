@@ -31,17 +31,11 @@ public class OrganiseringStateRepository {
         var orgEnhet = orgenhetService
             .getEnhetByAgressoIdNivaAndName(agressoId, niva, name);
 
-        if (orgEnhet.isEmpty()) {
-            return null;
-        }
-
-        var result = organiseringByFid.entrySet()
+        return orgEnhet.flatMap(iOrgenhet -> organiseringByFid.entrySet()
             .stream()
-            .filter(organiseringInState -> organiseringInState.getValue().idUnder().equals(orgEnhet.get().getId()))
-            .findFirst()
-            .orElse(null);
-
-        return (result == null) ? null : result.getKey();
+            .filter(organiseringInState -> organiseringInState.getValue().idUnder().equals(iOrgenhet.getId()))
+            .map(Map.Entry::getKey)
+            .findFirst()).orElse(null);
     }
 
     public void clear() {

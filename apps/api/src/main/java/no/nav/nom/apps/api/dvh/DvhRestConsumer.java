@@ -9,12 +9,8 @@ import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
-import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
-import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
-import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
@@ -23,9 +19,6 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -35,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -65,11 +57,7 @@ public class DvhRestConsumer {
 
     private final RessursStillingLoader ressursStillingLoader;
     private final EksterneRessurserLoader eksterneRessurserLoader;
-
-    private final OrganiseringEventCommandService organiseringEventCommandService;
-
-    private final OrgenhetService orgenhetService;
-    private final OrganiseringStateRepository organiseringStateRepository;
+    private final OrganiseringService organiseringService;
 
     public boolean initloadComplete() {
         return initialLoadComplete.get();
@@ -120,7 +108,7 @@ public class DvhRestConsumer {
 
     public void loadRessurserOgOrgEnheter() {
         if (leaderElection.isLeader()) {
-            loadRessurserFromDvh();
+            //            loadRessurserFromDvh();
 
             dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();
         }
@@ -228,21 +216,6 @@ public class DvhRestConsumer {
                     if (validateOrganisering(e)) {
                         DvhOrganisering dvhOrganisering = new DvhOrganisering(e);
                         organiseringer.add(dvhOrganisering);
-
-                        // TODO remove, and get it properly from state topics
-                        // save to the repository for the time being
-                        Optional<String> stateFid = getFidForOrganisering(dvhOrganisering);
-
-                        if (stateFid.isPresent()) {
-                            if (erOrganiseringEndret(stateFid.get(), dvhOrganisering)) {
-                                //if organisering is changed
-                                organiseringEventCommandService.endreOrganisering(stateFid.get(), getEndreOrganiseringCmd(dvhOrganisering));
-                            }
-                        } else {
-                            var opprettetFid = organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
-                            addToStateRepository(opprettetFid, dvhOrganisering);
-                        }
-
                     }
 
                     if (validateLeder(e)) {
@@ -250,102 +223,13 @@ public class DvhRestConsumer {
                     }
                 });
 
+
             dvhService.saveLedere(ledere);
             dvhService.saveOrganiseringerAndSetOrganiserteOrgenheter(organiseringer);
+            organiseringService.saveOrganiseringer(organiseringer);
         } catch (Exception e) {
             log.error("Failure loading ledere og Organisering data from DVH", e);
         }
-    }
-
-    private void addToStateRepository(String fid, DvhOrganisering dvhOrganisering) {
-        var nomIdUnder = orgenhetService
-            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder());
-
-        var nomIdOver = orgenhetService
-            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
-
-        if (nomIdUnder.isEmpty() || nomIdOver.isEmpty()) {
-            return;
-        }
-
-        OrganiseringState organiseringState = OrganiseringState.builder()
-            .fid(fid)
-            .idUnder(nomIdUnder.get().getId())
-            .idOver(nomIdOver.get().getId())
-            .navnUnder(dvhOrganisering.getNavnUnder())
-            .navnOver(dvhOrganisering.getNavnOver())
-            .gyldigFom(dvhOrganisering.getGyldigFom())
-            .gyldigTom(Optional.ofNullable(dvhOrganisering.getGyldigTom()))
-            .build();
-
-        organiseringStateRepository.put(fid, organiseringState);
-    }
-
-    private Optional<String> getFidForOrganisering(DvhOrganisering dvhOrganisering) {
-        // TODO Flytte til en service i stedet for å bruke repository direkte?
-        return Optional.ofNullable(organiseringStateRepository
-            .findFidByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()));
-    }
-
-    private boolean erOrganiseringEndret(String fid, DvhOrganisering dvhOrg) {
-        // TODO
-        boolean organiseringEndret = false;
-
-        if (fid.startsWith("organisering")) {
-            Optional<OrganiseringState> eksisterendeOrganisering = organiseringStateRepository.findByFid(fid);
-
-            if (eksisterendeOrganisering.isPresent()) {
-                OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
-
-                var orgEnhetUnder = orgenhetService
-                    .getEnhetByAgressoIdNivaAndName(dvhOrg.getAgressoIdUnder(), dvhOrg.getOrgNivUnder(), dvhOrg.getNavnUnder());
-
-                var orgEnhetOver = orgenhetService
-                    .getEnhetByAgressoIdNivaAndName(dvhOrg.getAgressoIdOver(), dvhOrg.getOrgNivOver(), dvhOrg.getNavnOver());
-
-                if (orgEnhetUnder.isPresent() && orgEnhetOver.isPresent()) {
-
-                    if (!eksisterendeOrg.idUnder().equals(orgEnhetUnder.get().getId()) ||
-                        !eksisterendeOrg.idOver().equals(orgEnhetOver.get().getId()) ||
-                        !eksisterendeOrg.navnUnder().equals(dvhOrg.getNavnUnder()) ||
-                        !eksisterendeOrg.navnOver().equals(dvhOrg.getNavnOver()) ||
-                        !eksisterendeOrg.gyldigFom().equals(dvhOrg.getGyldigFom()) ||
-                        !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(dvhOrg.getGyldigTom()))
-                    ) {
-                        organiseringEndret = true;
-                    }
-                }
-            }
-        }
-        return organiseringEndret;
-    }
-
-    private EndreOrganiseringCmd getEndreOrganiseringCmd(DvhOrganisering dvhOrganisering) {
-        return new EndreOrganiseringCmd(
-            dvhOrganisering.getAgressoIdOver(),
-            dvhOrganisering.getAgressoIdUnder(),
-            dvhOrganisering.getOrgNivOver(),
-            dvhOrganisering.getOrgNivUnder(),
-            dvhOrganisering.getNavnOver(),
-            dvhOrganisering.getNavnUnder(),
-            dvhOrganisering.getGyldigFom(),
-            dvhOrganisering.getGyldigTom(),
-            createInputMetadata(dvhOrganisering.getRawData())
-        );
-    }
-
-    private OpprettOrganiseringCmd getOpprettOrganiseringCmd(DvhOrganisering dvhOrganisering) {
-        return new OpprettOrganiseringCmd(
-            dvhOrganisering.getAgressoIdOver(),
-            dvhOrganisering.getAgressoIdUnder(),
-            dvhOrganisering.getOrgNivOver(),
-            dvhOrganisering.getOrgNivUnder(),
-            dvhOrganisering.getNavnOver(),
-            dvhOrganisering.getNavnUnder(),
-            dvhOrganisering.getGyldigFom(),
-            dvhOrganisering.getGyldigTom(),
-            createInputMetadata(dvhOrganisering.getRawData())
-        );
     }
 
     private boolean determineEnhetNotIgnored(JsonNode jsonNode) {
@@ -400,7 +284,4 @@ public class DvhRestConsumer {
         return "%02d:%02d:%02d".formatted(duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 
-    private InputMetadata createInputMetadata(Object rawData) {
-        return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
-    }
 }

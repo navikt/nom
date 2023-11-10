@@ -1,12 +1,16 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Getter
+@Builder(toBuilder = true)
+@AllArgsConstructor
 public class DvhOrganisering {
 
     String agressoIdOver;

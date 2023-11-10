@@ -114,10 +114,12 @@ public class OrganiseringTest extends TestBase {
 
         // Mock OrgenhetService where we find NOM id
         var orgeEnhetStateUnder = mockOrgenhetServiceGetEnhet("mock_id_under", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN());
+            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        );
 
         var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER());
+            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        );
 
 
         // load records from DVH
@@ -154,10 +156,12 @@ public class OrganiseringTest extends TestBase {
 
         // Mock OrgenhetService where we find NOM id
         var orgeEnhetStateUnder = mockOrgenhetServiceGetEnhet("mock_id_under", mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN());
+            mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
+        );
 
         var orgeEnhetStateOver = mockOrgenhetServiceGetEnhet("mock_id_over", mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER());
+            mockedOrganisering.getORGNODE_NIVA_OVER(), mockedOrganisering.getORGNODE_NAVN_OVER()
+        );
 
 
         // load records from DVH
@@ -171,7 +175,8 @@ public class OrganiseringTest extends TestBase {
             .build();
 
         var orgEnhetStateOver_modified = mockOrgenhetServiceGetEnhet("mock_id_over_modified", mockedOrganisering_modified.getORGNODE_KODE_OVER(),
-            mockedOrganisering_modified.getORGNODE_NIVA_OVER(), mockedOrganisering_modified.getORGNODE_NAVN_OVER());
+            mockedOrganisering_modified.getORGNODE_NIVA_OVER(), mockedOrganisering_modified.getORGNODE_NAVN_OVER()
+        );
 
 
         dvhOrganiseringMockUtils.clearResponse();
@@ -314,7 +319,6 @@ public class OrganiseringTest extends TestBase {
 
     }
 
-
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
         var orgeEnhetStateOver = orgEnhetStateBuilderWithDefaultValues()
             .id(id)
@@ -324,32 +328,6 @@ public class OrganiseringTest extends TestBase {
             .thenReturn(Optional.of(new OrgEnhet(orgeEnhetStateOver)));
 
         return orgeEnhetStateOver;
-    }
-
-    private OrgEnhetState mockOrgenhetServiceGetEnhetOver(String idOver, DvhOrganiseringMock mockedOrganisering) {
-        var orgeEnhetStateOver = orgEnhetStateBuilderWithDefaultValues()
-            .id(idOver)
-            .build();
-
-        when(orgenhetService.getEnhetByAgressoIdNivaAndName(
-            mockedOrganisering.getORGNODE_KODE_OVER(),
-            mockedOrganisering.getORGNODE_NIVA_OVER(),
-            mockedOrganisering.getORGNODE_NAVN_OVER()
-        )).thenReturn(Optional.of(new OrgEnhet(orgeEnhetStateOver)));
-        return orgeEnhetStateOver;
-    }
-
-    private OrgEnhetState mockOrgenhetServiceGetEnhetUnder(String idUnder, DvhOrganiseringMock mockedOrganisering) {
-        var orgeEnhetStateUnder = orgEnhetStateBuilderWithDefaultValues()
-            .id(idUnder)
-            .build();
-
-        when(orgenhetService.getEnhetByAgressoIdNivaAndName(
-            mockedOrganisering.getORGNODE_KODE(),
-            mockedOrganisering.getORGNODE_NIVA(),
-            mockedOrganisering.getORGNODE_NAVN()
-        )).thenReturn(Optional.of(new OrgEnhet(orgeEnhetStateUnder)));
-        return orgeEnhetStateUnder;
     }
 
 }
