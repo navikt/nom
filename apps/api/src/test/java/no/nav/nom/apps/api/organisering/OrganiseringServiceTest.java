@@ -56,7 +56,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.erOrganiseringEndret(fid, initialDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isFalse();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, initialDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isFalse();
     }
 
     @Test
@@ -93,7 +93,7 @@ class OrganiseringServiceTest {
             .navn(newNavnOver)
             .build());
 
-        assertThat(organiseringService.erOrganiseringEndret(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
     }
 
     @Test
@@ -132,7 +132,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.erOrganiseringEndret(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
     }
 
     @Test
@@ -171,7 +171,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.erOrganiseringEndret(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
     }
 
     private void mockOrganiseringStateLookup(String fid, DvhOrganisering initialDvhOrg, String nomIdUnder, String nomIdOver) {

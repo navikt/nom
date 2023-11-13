@@ -70,7 +70,6 @@ public class OrganiseringTest extends TestBase {
     public void setUp() {
         dvhOrganiseringMockUtils.clearResponse();
 
-
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
             .consumerProps("consumerGroup", "false", embeddedKafkaBroker));
 
@@ -100,7 +99,7 @@ public class OrganiseringTest extends TestBase {
     @DisplayName("Opprett en organisering")
     void opprett_en_organisering() throws JsonProcessingException, InterruptedException {
 
-        // make mock response
+        // Mock DVH API response
         var mockedOrganisering = DvhOrganiseringMock.getBuilderWithDefault()
             .ORGNODE_KODE("1000000")
             .ORGNODE_NAVN("Navn_1000000")
@@ -122,7 +121,7 @@ public class OrganiseringTest extends TestBase {
         );
 
 
-        // load records from DVH
+        // Get organiseringer from DVH
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
 
@@ -164,10 +163,10 @@ public class OrganiseringTest extends TestBase {
         );
 
 
-        // load records from DVH
+        // Get organiseringer from DVH
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // change organisering
+        // Change organisering
         var mockedOrganisering_modified = mockedOrganisering.toBuilder()
             .ORGNODE_KODE_OVER("4000000")
             .ORGNODE_NAVN_OVER("Navn_4000000")
@@ -182,23 +181,22 @@ public class OrganiseringTest extends TestBase {
         dvhOrganiseringMockUtils.clearResponse();
         dvhOrganiseringMockUtils.addToResponse(mockedOrganisering_modified);
 
-        // load changed records
+        // Get organiseringer from DVH again
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
 
-        // assert that first record is OrganiseringOpprettetEventV1
+        // Check that first record is OrganiseringOpprettetEventV1
         var opprettetConsumerRecord = recordsQueue.poll(100, MILLISECONDS);
         assertThat(opprettetConsumerRecord).isNotNull();
         assertThat(opprettetConsumerRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
 
-        // assert mockedOrganisering
         var opprettetEventData = (OrganiseringOpprettetEventData) opprettetConsumerRecord.value().getData();
         assertThat(opprettetEventData.idOver()).isEqualTo(orgeEnhetStateOver.id());
         assertThat(opprettetEventData.navnOver()).isEqualTo(mockedOrganisering.getORGNODE_NAVN_OVER());
         assertThat(opprettetEventData.idUnder()).isEqualTo(orgeEnhetStateUnder.id());
         assertThat(opprettetEventData.navnUnder()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
 
-        // assert modified mockedOrganisering
+        // Check that second record is OrganiseringEndretEventV1
         var endretConsumerRecord = recordsQueue.poll(100, MILLISECONDS);
         assertThat(endretConsumerRecord).isNotNull();
         assertThat(endretConsumerRecord.value().getData()).isExactlyInstanceOf(OrganiseringEndretEventData.class);
@@ -211,10 +209,6 @@ public class OrganiseringTest extends TestBase {
     @Test
     @DisplayName("Endringer av organiseringer")
     void endringer_av_organiseringer() throws JsonProcessingException {
-        // 0. [(1), 2+]
-        // 1. [(1), 3+, 2*]
-        // 2. [(1), 3, 4+, 2*]
-        // + means opprettet, * means endret
 
         // Initial configuration with node 1 as parent for node 3, and node 3 as parent for 2
         var organisering3 = DvhOrganiseringMock.getBuilderWithDefault()
@@ -235,21 +229,23 @@ public class OrganiseringTest extends TestBase {
             .ORGNODE_NIVA_OVER("Niva_3")
             .build();
 
-        dvhOrganiseringMockUtils.addToResponse(organisering2, organisering3); // 2+
-        // Mock OrgenhetService where we find NOM id
-        var orgEnhetState1 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
+        dvhOrganiseringMockUtils.addToResponse(organisering2, organisering3);
+
+
+        // Setup response from orgEnhet state lookup where we find NOM id
+        mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
             organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
         );
 
-        var orgEnhetState2 = mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getORGNODE_KODE(),
+        mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getORGNODE_KODE(),
             organisering2.getORGNODE_NIVA(), organisering2.getORGNODE_NAVN()
         );
 
-        var orgEnhetState3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
+        mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
             organisering3.getORGNODE_NIVA(), organisering3.getORGNODE_NAVN()
         );
 
-        // load records from DVH, should generate two opprettet meldinger
+        // Get organiseringer from DVH, should generate two opprettet messages (organisering 2 + 3)
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
 
@@ -274,32 +270,26 @@ public class OrganiseringTest extends TestBase {
 
 
         dvhOrganiseringMockUtils.clearResponse();
-        dvhOrganiseringMockUtils.addToResponse(organisering3, organisering2_modified, organisering4); //3, 2*, 4+
-        //        var orgEnhetState4 = mockOrgenhetServiceGetEnhetUnder("nom_id_4", mockedOrganisering4);
+        dvhOrganiseringMockUtils.addToResponse(organisering3, organisering2_modified, organisering4);
+
         var orgEnhetState4 = mockOrgenhetServiceGetEnhet("nom_id_4", organisering4.getORGNODE_KODE(),
             organisering4.getORGNODE_NIVA(), organisering4.getORGNODE_NAVN()
         );
 
 
-        // load records from DVH again
+        // Get organiseringer from DVH again
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
-        // Then
-        // 3: Ikke endret, ingen melding
-        // 2: Endret
-        // 4: Opprettet
 
-        // 2 messages initially + 2 from second part
-        //        assertThat(recordsQueue.size()).isEqualTo(4);
-
-
+        // Wait until 4 messages have arrived
+        // 2 messages initially + 2 from second part (organisering 4 created and organisering 2 changed)
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
             .until(() -> recordsQueue.size() == 4);
 
         var createRecord = recordsQueue.remove();
-        recordsQueue.remove();
+        recordsQueue.remove(); // Skip second create message
         var changedRecord = recordsQueue.remove();
 
         assertThat(createRecord.value().getFid()).isEqualTo(changedRecord.value().getFid());
@@ -307,27 +297,25 @@ public class OrganiseringTest extends TestBase {
         assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
         assertThat(changedRecord.value().getData()).isExactlyInstanceOf(OrganiseringEndretEventData.class);
 
+
         var createMessage = (OrganiseringOpprettetEventData) createRecord.value().getData();
         var changeMessage = (OrganiseringEndretEventData) changedRecord.value().getData();
 
         assertThat(createMessage.idUnder()).isEqualTo(changeMessage.idUnder());
         assertThat(createMessage.navnUnder()).isEqualTo(changeMessage.navnUnder());
-
-
         assertThat(changeMessage.idOver()).isEqualTo(orgEnhetState4.id());
         assertThat(changeMessage.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
-
     }
 
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
-        var orgeEnhetStateOver = orgEnhetStateBuilderWithDefaultValues()
+        var orgEnhetState = orgEnhetStateBuilderWithDefaultValues()
             .id(id)
             .build();
 
         when(orgenhetService.getEnhetByAgressoIdNivaAndName(kode, niva, navn))
-            .thenReturn(Optional.of(new OrgEnhet(orgeEnhetStateOver)));
+            .thenReturn(Optional.of(new OrgEnhet(orgEnhetState)));
 
-        return orgeEnhetStateOver;
+        return orgEnhetState;
     }
 
 }

@@ -55,8 +55,7 @@ public class OrganiseringService {
                 Optional<String> organiseringFid = getFidForOrganisering(dvhOrganisering);
 
                 if (organiseringFid.isPresent()) {
-                    if (erOrganiseringEndret(organiseringFid.get(), dvhOrganisering, orgEnhetUnder.get(), orgEnhetOver.get())) {
-                        //if organisering is changed
+                    if (hasOrganiseringChanged(organiseringFid.get(), dvhOrganisering, orgEnhetUnder.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.endreOrganisering(organiseringFid.get(), getEndreOrganiseringCmd(dvhOrganisering));
                         numberOfUpdated++;
                     }
@@ -105,8 +104,7 @@ public class OrganiseringService {
             .findFidByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()));
     }
 
-    public boolean erOrganiseringEndret(String fid, DvhOrganisering dvhOrg, IOrgenhet orgEnhetUnder, IOrgenhet orgEnhetOver) {
-        // TODO
+    public boolean hasOrganiseringChanged(String fid, DvhOrganisering dvhOrg, IOrgenhet orgEnhetUnder, IOrgenhet orgEnhetOver) {
         boolean organiseringEndret = false;
 
         if (fid.startsWith("organisering")) {
