@@ -56,7 +56,7 @@ public class EventsrcToState {
                 eventStateAggregate.get("idUnder").asText(),
                 eventStateAggregate.get("navnOver").asText(),
                 eventStateAggregate.get("navnUnder").asText(),
-                Optional.ofNullable(eventStateAggregate.get("gyldigTom")).map(JsonNode::asText).map(LocalDate::parse),
+                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText())
             );
         } catch (Exception e){
