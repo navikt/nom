@@ -27,19 +27,16 @@ import java.util.Optional;
 @Service
 public class EksterneRessurserProcessor {
 
-    public static final String UNLEASH_LAG_EVENTS = "nom.persister_events_ved_last_orgtilknytninger_for_eksterne";
-    private final Unleash unleash;
     private final RemedyEnhetMapperService remedyEnhetMapperService;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
 
     public EksterneRessurserProcessor(
-        Unleash unleash, RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
+        RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         OrgtilknytningCommandService orgtilknytningCommandService
     ) {
-        this.unleash = unleash;
         this.remedyEnhetMapperService = remedyEnhetMapperService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
@@ -216,9 +213,7 @@ public class EksterneRessurserProcessor {
         log.debug("Lager OpprettOrgtilknytning event: {}", opprettOrgtilknytning);
 
         String fid = null;
-        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
-        }
+        fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);
 
         if (eksternRessurs.remedySlutt() != null) {
             var avvikleOrgtilknytning = new AvvikleOrgtilknytning(
@@ -231,9 +226,7 @@ public class EksterneRessurserProcessor {
 
             log.debug("Lager AvvikleOrgtilknytning event: {}", avvikleOrgtilknytning);
 
-            if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-                orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOrgtilknytning);
-            }
+            orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOrgtilknytning);
         }
 
         var endreDagligOppfolgingOrgtilknytning = new EndreDagligOppfolgingOrgtilknytning(
@@ -248,9 +241,7 @@ public class EksterneRessurserProcessor {
 
         log.debug("Lager EndreDagligOppfolgingOrgtilknytning event: {}", endreDagligOppfolgingOrgtilknytning);
 
-        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
-        }
+        orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);
     }
 
 
@@ -266,9 +257,7 @@ public class EksterneRessurserProcessor {
 
         log.debug("Lager EndreOrgtilknytningDato event for fid {}:\n {}", orgtilknytning.fid(), endreOrgtilknytningDato);
 
-        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
-        }
+        orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);
     }
 
     private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
@@ -282,9 +271,7 @@ public class EksterneRessurserProcessor {
 
         log.debug("Lager AvvikleOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), avvikleOrgtilknytning);
 
-        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
-        }
+        orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);
     }
 
     private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
@@ -299,8 +286,6 @@ public class EksterneRessurserProcessor {
 
         log.debug("Lager FjernOrgtilknytning event for fid {}:\n {}", orgtilknytning.fid(), fjernOrgtilknytning);
 
-        if (unleash.isEnabled(UNLEASH_LAG_EVENTS)) {
-            orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
-        }
+        orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);
     }
 }

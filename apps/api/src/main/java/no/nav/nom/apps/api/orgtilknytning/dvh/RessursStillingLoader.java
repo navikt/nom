@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;

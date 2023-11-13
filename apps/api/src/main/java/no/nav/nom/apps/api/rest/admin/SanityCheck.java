@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.admin;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -42,8 +41,7 @@ public class SanityCheck {
     private final OrgtilknytningService orgtilknytningService;
 
     public SanityCheck(DvhRepository dvhRepository,
-                       RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                       Unleash unleash) {
+                       RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService) {
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
