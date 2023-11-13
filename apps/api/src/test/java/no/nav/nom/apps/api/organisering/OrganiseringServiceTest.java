@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRep
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,7 @@ class OrganiseringServiceTest {
 
 
     @Test
+    @DisplayName("Returnere false når det ikke er noen endring")
     void should_return_false_when_nothing_has_changed() {
         String fid = "organisering-xyz123";
         String nomIdUnder = "nomIdUnder";
@@ -38,17 +40,7 @@ class OrganiseringServiceTest {
         DvhOrganisering initialDvhOrg = initialDvhOrganisering();
 
         // Setup response from organisering state lookup
-        OrganiseringState organiseringState = OrganiseringState.builder()
-            .fid(fid)
-            .idUnder(nomIdUnder)
-            .idOver(nomIdOver)
-            .navnUnder(initialDvhOrg.getNavnUnder())
-            .navnOver(initialDvhOrg.getNavnOver())
-            .gyldigTom(Optional.empty())
-            .gyldigFom(LocalDate.now().minusDays(1))
-            .build();
-
-        when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
+        mockOrganiseringStateLookup(fid, initialDvhOrg, nomIdUnder, nomIdOver);
 
 
         // Setup response from orgEnhet state lookup
@@ -57,6 +49,7 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnUnder())
             .build());
 
+        // No change to OrgEnhet over
         OrgEnhet dvhOrgenhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(nomIdOver)
             .navn(initialDvhOrg.getNavnOver())
@@ -67,6 +60,7 @@ class OrganiseringServiceTest {
     }
 
     @Test
+    @DisplayName("Returnere true når navnOver er endret")
     void should_return_true_when_navnOver_has_changed() {
         String fid = "organisering-xyz123";
         String nomIdUnder = "nomIdUnder";
@@ -83,19 +77,8 @@ class OrganiseringServiceTest {
             .navnOver(newNavnOver)
             .build();
 
-
         // Setup response from organisering state lookup
-        OrganiseringState organiseringState = OrganiseringState.builder()
-            .fid(fid)
-            .idUnder(nomIdUnder)
-            .idOver(nomIdOver)
-            .navnUnder(initialDvhOrg.getNavnUnder())
-            .navnOver(initialDvhOrg.getNavnOver())
-            .gyldigTom(Optional.empty())
-            .gyldigFom(LocalDate.now().minusDays(1))
-            .build();
-
-        when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
+        mockOrganiseringStateLookup(fid, initialDvhOrg, nomIdUnder, nomIdOver);
 
 
         // Setup response from orgEnhet state lookup
@@ -104,6 +87,7 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnUnder())
             .build());
 
+        // OrgEnhet over has changed
         OrgEnhet dvhOrgenhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(newNomIdOver)
             .navn(newNavnOver)
@@ -113,7 +97,8 @@ class OrganiseringServiceTest {
     }
 
     @Test
-    void should_return_true_when_OrgNivOver_has_changed() {
+    @DisplayName("Returnere true når orgNivOver er endret")
+    void should_return_true_when_orgNivOver_has_changed() {
         String fid = "organisering-xyz123";
         String nomIdUnder = "nomIdUnder";
         String nomIdOver = "nomIdOver";
@@ -129,19 +114,8 @@ class OrganiseringServiceTest {
             .orgNivOver(newOrgNivOver)
             .build();
 
-
         // Setup response from organisering state lookup
-        OrganiseringState organiseringState = OrganiseringState.builder()
-            .fid(fid)
-            .idUnder(nomIdUnder)
-            .idOver(nomIdOver)
-            .navnUnder(initialDvhOrg.getNavnUnder())
-            .navnOver(initialDvhOrg.getNavnOver())
-            .gyldigTom(Optional.empty())
-            .gyldigFom(LocalDate.now().minusDays(1))
-            .build();
-
-        when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
+        mockOrganiseringStateLookup(fid, initialDvhOrg, nomIdUnder, nomIdOver);
 
 
         // Setup response from orgEnhet state lookup
@@ -150,6 +124,7 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnUnder())
             .build());
 
+        // OrgEnhet over has changed
         OrgEnhet dvhOrgenhetOver = new OrgEnhet(OrgEnhetState.builder()
             .id(newNomIdOver)
             .navn(initialDvhOrg.getNavnOver())
@@ -161,6 +136,7 @@ class OrganiseringServiceTest {
     }
 
     @Test
+    @DisplayName("Returnere true når agressoId er endret")
     void should_return_true_when_agressoId_has_changed() {
         String fid = "organisering-xyz123";
         String nomIdUnder = "nomIdUnder";
@@ -177,8 +153,28 @@ class OrganiseringServiceTest {
             .agressoIdOver(newAgressoIdOver)
             .build();
 
-
         // Setup response from organisering state lookup
+        mockOrganiseringStateLookup(fid, initialDvhOrg, nomIdUnder, nomIdOver);
+
+
+        // Setup response from orgEnhet state lookup
+        OrgEnhet dvhOrgenhetUnder = new OrgEnhet(OrgEnhetState.builder()
+            .id(nomIdUnder)
+            .navn(initialDvhOrg.getNavnUnder())
+            .build());
+
+        // OrgEnhet over has changed
+        OrgEnhet dvhOrgenhetOver = new OrgEnhet(OrgEnhetState.builder()
+            .id(newNomIdOver)
+            .navn(initialDvhOrg.getNavnOver())
+            .agressoId(Optional.of(newAgressoIdOver))
+            .build());
+
+
+        assertThat(organiseringService.erOrganiseringEndret(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
+    }
+
+    private void mockOrganiseringStateLookup(String fid, DvhOrganisering initialDvhOrg, String nomIdUnder, String nomIdOver) {
         OrganiseringState organiseringState = OrganiseringState.builder()
             .fid(fid)
             .idUnder(nomIdUnder)
@@ -190,22 +186,6 @@ class OrganiseringServiceTest {
             .build();
 
         when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
-
-
-        // Setup response from orgEnhet state lookup
-        OrgEnhet dvhOrgenhetUnder = new OrgEnhet(OrgEnhetState.builder()
-            .id(nomIdUnder)
-            .navn(initialDvhOrg.getNavnUnder())
-            .build());
-
-        OrgEnhet dvhOrgenhetOver = new OrgEnhet(OrgEnhetState.builder()
-            .id(newNomIdOver)
-            .navn(initialDvhOrg.getNavnOver())
-            .agressoId(Optional.of(newAgressoIdOver))
-            .build());
-
-
-        assertThat(organiseringService.erOrganiseringEndret(fid, newDvhOrg, dvhOrgenhetUnder, dvhOrgenhetOver)).isTrue();
     }
 
     private static DvhOrganisering initialDvhOrganisering() {
