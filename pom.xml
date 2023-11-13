@@ -55,7 +55,7 @@
         <!-- Override spring-boot-dependencies version -->
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
             <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
-        <netty.version>4.1.100.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
+        <netty.version>4.1.101.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <zookeeper.version>3.9.1</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
 
         <!-- Override av andre transient dependencies -->
