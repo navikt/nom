@@ -1,21 +1,15 @@
 package no.nav.nom.apps.api.orgenhet.api.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
-import no.nav.nom.contract.nom.OrgEnhetsType;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import org.springframework.http.HttpStatus;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,51 +20,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Slf4j
-@Tag(name = "OrgEnhet")
+@Tag(name = "OrgEnheter")
 @RestController
-@RequestMapping(value={"/app/orgenhet"})
+@RequestMapping(value = {"/app/orgenheter"})
 public class OrgEnhetController {
 
-    private final OrgEnhetCommandService orgEnhetCommandService;
-    private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgenhetService orgenhetService;
+    private final OrgEnhetMapper orgEnhetMapper;
 
-    public OrgEnhetController(OrgEnhetCommandService orgEnhetCommandService, OrgEnhetStateRepository orgEnhetStateRepository,
-                              OrgenhetService orgenhetService
+    public OrgEnhetController(
+        OrgenhetService orgenhetService,
+        OrgEnhetMapper orgEnhetMapper
     ) {
-        this.orgEnhetCommandService = orgEnhetCommandService;
-        this.orgEnhetStateRepository = orgEnhetStateRepository;
-
         this.orgenhetService = orgenhetService;
+        this.orgEnhetMapper = orgEnhetMapper;
     }
 
-    @PostMapping("/orgEnhetsType")
+    @GetMapping("/{orgenhetId}")
     @Operation(
-        description = "Sett orgEnhetsType for en organisasjonsenhet",
+        description = "Henter orgenhet med gitt id",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest){
+    public ResponseEntity<OrgEnhet> hentOrgenhet(@PathVariable String orgenhetId) {
 
-        return orgEnhetStateRepository.findById(setOrgEnhetsTypeRequest.getNomId())
-            .map(orgEnhet -> {
+        return orgenhetService.getById(orgenhetId)
+            .map(orgEnhetMapper::mapFrom)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
 
-                sendEndreOrgEnhetsTypeEvent(orgEnhet, setOrgEnhetsTypeRequest.getOrgEnhetsType());
+    @GetMapping
+    @Operation(
+        description = "Henter alle orgenheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public List<OrgEnhet> hentOrgEnheter() {
+        return orgenhetService.getAllEnheter().stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
+    }
 
-                return ResponseEntity.ok().body(
-                    StandardResponse.builder().message(String.format(
-                            "Oppdatert orgEnhetsType for %s", setOrgEnhetsTypeRequest.getNomId()
-                        ))
-                        .build()
-                );
-            })
-            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                StandardResponse.builder().message("NotFound").build()
-            ));
-
+    @GetMapping("/ledetAv/{navident}")
+    @Operation(
+        description = "Henter alle orgenheter som er ledet av en gitt leder",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public List<OrgEnhet> hentOrgEnheterByLeder(@PathVariable String navident) {
+        return orgenhetService.getEnheterByLeder(navident).stream().map(orgEnhetMapper::mapFrom).collect(Collectors.toList());
     }
 
     @GetMapping("/underLiggende/{parentId}")
@@ -80,27 +76,24 @@ public class OrgEnhetController {
     )
     public ResponseEntity<List<String>> getUnderliggendeOrgEnheter(@PathVariable("parentId") String parentId) {
         return ResponseEntity.ok(orgenhetService.findAllUnderliggendeOrgenheter(parentId));
-
     }
 
-    private void sendEndreOrgEnhetsTypeEvent(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
-        var existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent = orgEnhetState.orgEnhetsType()
-            .map(existingOrgenhetsType -> existingOrgenhetsType != orgEnhetsType)
-            .orElse(true);
-
-        if (existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent) {
-            orgEnhetCommandService.endreOrgEnhetsType(
-                orgEnhetState.fid(),
-                new EndreOrgEnhetsType(
-                    Optional.ofNullable(orgEnhetsType),
-                    new InputMetadata(
-                        "nom-api REST",
-                        "setOrgEnhetsType",
-                        null,
-                        new Origination("nom-api", "nom-api"))
-                )
-            );
-        }
+    @GetMapping("/read-topic")
+    @Operation(
+            description = "Henter records fra ressurs event-source",
+            security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+        return ResponseEntity.ok(orgenhetService.getOrgEnhetEvents(request));
     }
 
+    @PostMapping("/orgEnhetsType")
+    @Operation(
+        description = "Sett orgEnhetsType for en organisasjonsenhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<StandardResponse> setOrgEnhetsType(@RequestBody SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest){
+        return orgenhetService.setOrgEnhetsType(setOrgEnhetsTypeRequest);
+    }
 }

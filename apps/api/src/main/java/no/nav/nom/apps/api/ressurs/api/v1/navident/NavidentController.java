@@ -49,28 +49,11 @@ public class NavidentController {
 
     // TODO: Consider using RessursResolver methods to avoid duplicating code in here.
     public static final String BASE_URL = "/api/v1/navident";
-    private final RessursCommadService ressursCommadService;
-    private final RessursStateRepository ressursStateRepository;
-    private final NIKClient nikClient;
-    private final PdlClient pdlClient;
-    public static final String UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER = "nom.remedy_redirect_til_remedycontroller";
-    private final Unleash unleash;
     private final RemedyController remedyController;
 
-
     public NavidentController(
-        RessursCommadService ressursCommadService,
-        RessursStateRepository ressursStateRepository,
-        NIKClient nikClient,
-        PdlClient pdlClient,
-        Unleash unleash,
         RemedyController remedyController
     ) {
-        this.ressursCommadService = ressursCommadService;
-        this.ressursStateRepository = ressursStateRepository;
-        this.nikClient = nikClient;
-        this.pdlClient = pdlClient;
-        this.unleash = unleash;
         this.remedyController = remedyController;
     }
 
@@ -97,71 +80,9 @@ public class NavidentController {
     public ResponseEntity<NavidentResponse> opprettNavident(@RequestBody NavidentRequest request) {
         log.info(SECURE_LOGS, "opprettNavident kalt fra Remedy:\n{}", request);
 
-        if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
-            return ResponseEntity.ok(
-                toNavidentResponse(remedyController.tryOpprettRessurs(convert(request)))
-            );
-        }
-
-        final var funnetRessurs = ressursStateRepository.findByPersonident(request.getPersonident());
-
-        if (funnetRessurs.isPresent()) {
-            return funnetRessurs.map(this::toNavidentResponse)
-                .map(ResponseEntity::ok)
-                .get();
-        }
-
-        String opprettetNavident;
-        try {
-            final var nikResponse = nikClient.opprettNavident(
-                OpprettNavidentRequest.builder()
-                    .personid(request.getPersonident())
-                    .identPrefix(request.getForbokstav())
-                    .identType(request.getIdentType())
-                    .build()
-            );
-
-            if (!nikResponse.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.ok(
-                    NavidentResponse.medFeilmelding(
-                        nikResponse.getStatusCode(),
-                        nikResponse.hasBody() ? nikResponse.getBody().getFeilmelding() : "Ukjent feil har oppstått under opprettelse av navident"
-                    )
-                );
-            }
-
-            opprettetNavident = nikResponse.getBody().getNavident();
-
-        } catch (Exception exception) {
-            log.warn("Unhandled exception during call to nav-ident: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
-        }
-
-        Optional<Person> pdlPerson = pdlClient.hentPerson(request.getPersonident());
-
-        try {
-            final var opprettRessursCommand = new OpprettRessursCommand(
-                request.getPersonident(),
-                opprettetNavident,
-                pdlPerson,
-                Sektor.valueOf(request.getSektor()),
-                new Visningsnavn(request.getFornavn(), Optional.ofNullable(request.getMellomnavn()), request.getEtternavn()),
-                new InputMetadata(
-                    "REST",
-                    "/api/v1/navident",
-                    request,
-                    new Origination(request.getSubmitter(), SecurityUtil.getAuthenticatedAzpName())
-                ),
-                null,
-                null,
-                null
-            );
-
-            return ResponseEntity.ok(toNavidentResponse(ressursCommadService.createRessursSync(opprettRessursCommand)));
-        } catch (Exception exception) {
-            log.warn("Unhandled exception during creation of ressurs: " + exception.getMessage(), exception);
-            return ResponseEntity.ok(NavidentResponse.medFeilmelding(INTERNAL_SERVER_ERROR, "Intern feil inntraff"));
-        }
+        return ResponseEntity.ok(
+            toNavidentResponse(remedyController.tryOpprettRessurs(convert(request)))
+        );
     }
 
     private OpprettRessursRequest convert(NavidentRequest request) {
@@ -174,17 +95,6 @@ public class NavidentController {
             .identType(request.getIdentType())
             .sektor(request.getSektor())
             .submitter(request.getSubmitter())
-            .build();
-    }
-
-    private NavidentResponse toNavidentResponse(RessursState ressurs) {
-        return NavidentResponse.builder()
-            .status(Integer.toString(HttpStatus.OK.value()))
-            .personident(ressurs.personident())
-            .navident(ressurs.navident())
-            .fornavn(ressurs.visningsnavn().fornavn())
-            .mellomnavn(ressurs.visningsnavn().mellomnavn().orElse(null))
-            .etternavn(ressurs.visningsnavn().etternavn())
             .build();
     }
 

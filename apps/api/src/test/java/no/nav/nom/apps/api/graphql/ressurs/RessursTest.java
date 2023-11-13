@@ -1,15 +1,12 @@
 package no.nav.nom.apps.api.graphql.ressurs;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.thomaskasene.wiremock.junit.WireMockStubs;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
 import no.nav.nom.apps.api.graphql.GraphQLMatchers;
-import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
@@ -17,14 +14,11 @@ import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.RsaStub;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -68,9 +62,9 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("2");
 
         final var response = postForResource("ressurs/scenario12.graphql")
-                .path("ressurser")
-                .entityList(RessursResult.class)
-                .get();
+            .path("ressurser")
+            .entityList(RessursResult.class)
+            .get();
 
         assertThat(response).hasSize(4);
         RessursResult navIdent = get(response, "testNavIdent1");
@@ -127,10 +121,18 @@ class RessursTest extends RessursTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test get methods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
-        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState.navident(), "ID_1", true, LocalDate.now(), Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+            enhet,
+            1,
+            String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
+            Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
+        ));
+        orgtilknytningStateRepository.putEventAggregate(
+            "FID_1",
+            new OrgtilknytningState("FID_1", ressursState.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+        );
 
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("ressurs/scenario42.graphql");
 
@@ -154,16 +156,16 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Kan hente sluttdato når satt")
     void scenario31() {
         RessursState ressursState = new RessursState(
-                PrefixedUlidCreator.createRessursUlid(),
-                "testPersonIdent",
-                "testNavIdent",
-                Sektor.NAV_STATLIG,
-                new Visningsnavn(
-                        "fornavn",
-                        Optional.of("mellomnavn"),
-                        "etternavn"
-                ),
-                Optional.of(LocalDate.now().plusDays(10)),
+            PrefixedUlidCreator.createRessursUlid(),
+            "testPersonIdent",
+            "testNavIdent",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn",
+                Optional.of("mellomnavn"),
+                "etternavn"
+            ),
+            Optional.of(LocalDate.now().plusDays(10)),
             Optional.empty()
         );
 
@@ -204,81 +206,77 @@ class RessursTest extends RessursTestBase {
         assertEquals(ressursState.startdato().orElseThrow(), outputRessurs.getStartdato());
     }
 
-    @Nested
-    @WireMockStubs(RsaStub.class)
-    @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1"}, controlledShutdown = true)
-    class Navn {
 
-        @Test
-        @DisplayName("Kan hente fulle navn fra PDL")
-        void scenario31() {
-            createRessursHendelseEventSource("3");
-            createRessursHendelseEventSource("4");
+    @Test
+    @DisplayName("Kan hente fulle navn fra PDL")
+    void scenarioNavn1() {
+        createRessursHendelseEventSource("3");
+        createRessursHendelseEventSource("4");
 
-            pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
+        pdlUtils.addPersonToPdlResponse(true, "testPersonIdent3", "testPersonIdent4");
 
-            final var response = postForResource("ressurs/scenario5.graphql");
+        final var response = postForResource("ressurs/scenario5.graphql");
 
-            final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
-            assertEquals(2, ressurser.size());
+        final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
+        assertEquals(2, ressurser.size());
 
-            pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-            pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
-        }
-
-        @Test
-        @DisplayName("Kan hente navn uten mellomnavn fra PDL")
-        void scenario32() {
-            createRessursHendelseEventSource("3");
-            createRessursHendelseEventSource("4");
-
-            pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-
-            final var response = postForResource("ressurs/scenario5.graphql");
-
-            final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
-            assertEquals(2, ressurser.size());
-
-            pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
-            pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
-        }
-
-        @Test
-        @DisplayName("Hente navn hvor PDL er utilgjengelig")
-        void scenario33() {
-            createRessursHendelseEventSource("3");
-            createRessursHendelseEventSource("4");
-
-            pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
-            stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
-
-            final var response = postForResource("ressurs/scenario5.graphql");
-
-            response.errors().satisfy(errors -> assertEquals(2, errors.size()));
-
-            final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
-            assertTrue(ressurs.hasNonNull("id"));
-            assertFalse(ressurs.hasNonNull("person"));
-        }
-
-        @Test
-        @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
-        void scenario34() {
-            createRessursHendelseEventSource("3");
-            createRessursHendelseEventSource("4");
-
-            pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
-            pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
-
-            final var response = postForResource("ressurs/scenario5.graphql");
-
-            response.errors().satisfy(errors -> assertEquals(2, errors.size()));
-
-            final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
-            assertTrue(ressurs.hasNonNull("id"));
-            assertFalse(ressurs.hasNonNull("person"));
-        }
+        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
     }
+
+    @Test
+    @DisplayName("Kan hente navn uten mellomnavn fra PDL")
+    void scenarioNavn2() {
+        createRessursHendelseEventSource("3");
+        createRessursHendelseEventSource("4");
+
+        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
+
+        final var response = postForResource("ressurs/scenario5.graphql");
+
+        final var ressurser = response.path("ressurser").entityList(JsonNode.class).get();
+        assertEquals(2, ressurser.size());
+
+        pdlUtils.assertNavn(ressurser.get(0).get("ressurs").get("personIdent").textValue(), ressurser.get(0).get("ressurs").get("person").get("navn"));
+        pdlUtils.assertNavn(ressurser.get(1).get("ressurs").get("personIdent").textValue(), ressurser.get(1).get("ressurs").get("person").get("navn"));
+    }
+
+    @Test
+    @DisplayName("Hente navn hvor PDL er utilgjengelig")
+    void scenarioNavn3() {
+        createRessursHendelseEventSource("3");
+        createRessursHendelseEventSource("4");
+
+        pdlUtils.addPersonToPdlResponse(false, "testPersonIdent3", "testPersonIdent4");
+        stubFor(post("/graphql").willReturn(aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
+
+        final var response = postForResource("ressurs/scenario5.graphql");
+
+        response.errors().satisfy(errors -> assertEquals(2, errors.size()));
+
+        final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
+        assertTrue(ressurs.hasNonNull("id"));
+        assertFalse(ressurs.hasNonNull("person"));
+    }
+
+    @Test
+    @DisplayName("Hente navn hvor PDL er gir feil og manglende respons")
+    void scenarioNavn4() {
+        createRessursHendelseEventSource("3");
+        createRessursHendelseEventSource("4");
+
+        pdlUtils.addErrorToPdlResponse("testPersonIdent3", "bad_request");
+        pdlUtils.addErrorToPdlResponse("testPersonIdent4", "not_found");
+
+        final var response = postForResource("ressurs/scenario5.graphql");
+
+        response.errors().satisfy(errors -> assertEquals(2, errors.size()));
+
+        final var ressurs = response.path("ressurser").entityList(JsonNode.class).get().get(0);
+        assertTrue(ressurs.hasNonNull("id"));
+        assertFalse(ressurs.hasNonNull("person"));
+    }
+
 
     @Test
     @DisplayName("Kan hente email fra AD og visningsnavn")
@@ -291,9 +289,9 @@ class RessursTest extends RessursTestBase {
         MatcherAssert.assertThat(response, GraphQLMatchers.hasErrors());
 
         final var ressurser = response.path("ressurser")
-                .entityList(JsonNode.class)
-                .hasSize(3)
-                .get();
+            .entityList(JsonNode.class)
+            .hasSize(3)
+            .get();
 
         ressurser.sort(Comparator.comparing(j -> j.get("id").asText()));
 
@@ -311,7 +309,7 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Hente enheter ressurs er leder for")
     void scenario35() {
         createRessursHendelseEventSource("");
-        var enhet =  DvhOrgEnhetMock.getBuilderWithDefault()
+        var enhet = DvhOrgEnhetMock.getBuilderWithDefault()
             .ORGENHET_KODE("testId1")
             .ORGNODE_NIV("ORGENHET")
             .ORGENHET_NAVN("testNavn")
@@ -321,7 +319,12 @@ class RessursTest extends RessursTestBase {
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(enhet, 1, String.valueOf(enhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+            enhet,
+            1,
+            String.valueOf(enhet.getORGENHET_FRA_PERIODE()),
+            Optional.of(String.valueOf(enhet.getORGENHET_TIL_PERIODE()))
+        ));
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -336,19 +339,27 @@ class RessursTest extends RessursTestBase {
     @DisplayName("Hente leder for ressurs")
     void scenario36() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2")
-                .ORGENHET_NAVN("testNavn")
-                .ORGNODE_NIV("ORGENHET")
-                .build();
+            .ORGENHET_NAVN("testNavn")
+            .ORGNODE_NIV("ORGENHET")
+            .build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
         final var ressursState1 = createRessursHendelseEventSource("1");
-        final var ressursState2 =createRessursHendelseEventSource("2");
+        final var ressursState2 = createRessursHendelseEventSource("2");
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockedEnhet, 1, String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))));
-        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty()));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+            mockedEnhet,
+            1,
+            String.valueOf(mockedEnhet.getORGENHET_FRA_PERIODE()),
+            Optional.of(String.valueOf(mockedEnhet.getORGENHET_TIL_PERIODE()))
+        ));
+        orgtilknytningStateRepository.putEventAggregate(
+            "FID_1",
+            new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+        );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -366,18 +377,31 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("2");
         final var ressursState4 = createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-                .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-                .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
+            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(ressursLederForDenneEnheten, 1, String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))));
-        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(lederenErPaDenneEnheten, 2, String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+            ressursLederForDenneEnheten,
+            1,
+            String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()),
+            Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))
+        ));
+        orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
+            lederenErPaDenneEnheten,
+            2,
+            String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()),
+            Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))
+        ));
 
-        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty()));
+        orgtilknytningStateRepository.putEventAggregate(
+            "FID_1",
+            new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty())
+        );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -395,9 +419,9 @@ class RessursTest extends RessursTestBase {
         createRessursHendelseEventSource("2");
         createRessursHendelseEventSource("4");
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-                .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-                .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
+            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
 
         dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
 

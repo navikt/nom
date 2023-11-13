@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

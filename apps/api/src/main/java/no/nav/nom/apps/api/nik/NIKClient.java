@@ -58,7 +58,7 @@ public class NIKClient {
     private ResponseEntity<OpprettNavidentResponse> opprettNavidentWithSuppliedWebClient(WebClient suppliedWebClient, OpprettNavidentRequest opprettNavidentRequest) {
 
         return suppliedWebClient.post()
-            .uri("/navident")
+            .uri("/navident/create")
             .bodyValue(opprettNavidentRequest)
             .retrieve()
             .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response -> Mono.empty()) // nav-ident has its own body type for errors actually caught.

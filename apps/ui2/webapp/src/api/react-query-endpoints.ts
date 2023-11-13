@@ -51,10 +51,18 @@ export const underliggendeOrgEnheterKeys = {
     [...underliggendeOrgEnheterKeys.all, parent] as const,
 };
 
-export const teamcatMemberships = {
+export const teamcatMembershipsKeys = {
   all: ["TEAMCAT_MEMBERSHIPS"] as const,
   navident: (navident: string) =>
-    [...teamcatMemberships.all, navident] as const,
+    [...teamcatMembershipsKeys.all, navident] as const,
+};
+
+export const eventSourceForRessursKeys = {
+  all: ["RESSURS_EVENTS"] as const,
+};
+
+export const eventSourceForOrgEnhetKeys = {
+  all: ["ORGENHET_EVENTS"] as const,
 };
 
 export const getAlleRessurserGraphql = {
@@ -102,7 +110,8 @@ export const getAlleRessurserGraphql = {
 export const getRessurs = {
   queryKey: (navident: string) => ressurserKeys.id(navident),
   queryFn: async (navident: string) =>
-    (await axios.get<Ressurs>(`/nom-api/app/ressurs/${navident}`)).data,
+    (await axios.get<Ressurs>(`/nom-api/app/ressurser/byNavident/${navident}`))
+      .data,
 };
 
 export const getLedereForRessurs = {
@@ -110,7 +119,7 @@ export const getLedereForRessurs = {
   queryFn: async (navident: string) =>
     (
       await axios.get<RessursLeder[]>(
-        `/nom-api/app/ressurs/lederFor/${navident}`,
+        `/nom-api/app/ressurser/lederFor/${navident}`,
       )
     ).data,
 };
@@ -157,9 +166,35 @@ export const getPerson = {
 };
 
 export const getTeamcatMemberships = {
-  queryKey: (navident: string) => teamcatMemberships.navident(navident),
+  queryKey: (navident: string) => teamcatMembershipsKeys.navident(navident),
   queryFn: async (navident: string) =>
     (await axios.get(`/teamcat/member/membership/${navident}`)).data,
+};
+
+export const getRessursEvents = {
+  queryFn: async ({ pageParam }: { pageParam: number }) =>
+    (
+      await axios.get("/nom-api/app/ressurser/read-topic", {
+        params: {
+          partition: 0,
+          maxRecords: 50,
+          fromOffset: pageParam,
+        },
+      })
+    ).data.reverse(),
+};
+
+export const getOrgEnhetEvents = {
+  queryFn: async ({ pageParam }: { pageParam: number }) =>
+    (
+      await axios.get("/nom-api/app/orgenheter/read-topic", {
+        params: {
+          partition: 0,
+          maxRecords: 50,
+          fromOffset: pageParam,
+        },
+      })
+    ).data.reverse(),
 };
 
 export const updateNavnForRessurs = async (
@@ -168,7 +203,7 @@ export const updateNavnForRessurs = async (
 ) =>
   (
     await axios.post<unknown, AxiosResponse<unknown>>(
-      `/nom-api/app/ressurs/${navident}/navn`,
+      `/nom-api/app/ressurser/${navident}/navn`,
       updateNavnForRessursRequest,
     )
   ).data;

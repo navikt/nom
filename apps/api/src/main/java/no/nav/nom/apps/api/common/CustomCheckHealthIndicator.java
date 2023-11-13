@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.common;
 
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
@@ -18,13 +19,14 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
     private final RessursStateListener ressursStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
-    private final DvhRestConsumer dvhRestConsumer;
+//    private final DvhRestConsumer dvhRestConsumer;
     private final LuceneService luceneService;
+    private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
     public CustomCheckHealthIndicator(
         ApplicationAvailability availability,
         RessursStateListener ressursStateListener, OrgEnhetStateListener orgEnhetStateListener,
-        OrgtilknytningStateListener orgtilknytningStateListener, DvhRestConsumer dvhRestConsumer, LuceneService luceneService
+        OrgtilknytningStateListener orgtilknytningStateListener, LuceneService luceneService, DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
         super(availability, ReadinessState.class, (statusMappings) -> {
             statusMappings.add(ReadinessState.ACCEPTING_TRAFFIC, Status.UP);
@@ -33,14 +35,14 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         this.ressursStateListener = ressursStateListener;
         this.orgEnhetStateListener = orgEnhetStateListener;
         this.orgtilknytningStateListener = orgtilknytningStateListener;
-        this.dvhRestConsumer = dvhRestConsumer;
         this.luceneService = luceneService;
+        this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
     }
 
     @Override
     protected AvailabilityState getState(ApplicationAvailability applicationAvailability) {
         if (orgEnhetStateListener.initloadComplete() && ressursStateListener.initloadComplete() &&
-            dvhRestConsumer.initloadComplete() && luceneService.initLoadComplete() &&
+            dvhStartupLoadMonitor.hasCompleted() && luceneService.initLoadComplete() &&
             orgtilknytningStateListener.initloadComplete()) {
             return ReadinessState.ACCEPTING_TRAFFIC;
         } else {

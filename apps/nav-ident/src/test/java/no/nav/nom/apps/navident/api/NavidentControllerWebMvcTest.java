@@ -5,6 +5,7 @@ import com.thomaskasene.wiremock.junit.WireMockStubs;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.api.dto.NavidentRequestDTO;
+import no.nav.nom.apps.navident.eventsource.EventSourceProducer;
 import no.nav.nom.contract.nom.IdentType;
 import no.nav.nom.apps.navident.rnrservices.Respons;
 import no.nav.nom.libs.test.RsaStub;
@@ -39,6 +40,9 @@ class NavidentControllerWebMvcTest {
 
     @MockBean
     IdentService identService;
+
+    @MockBean
+    EventSourceProducer eventSourceProducer;
 
     @Test
     public void createNavident() throws Exception {
@@ -77,7 +81,7 @@ class NavidentControllerWebMvcTest {
         String reqJson = gson.toJson(req);
         log.debug("Request body: %s".formatted(reqJson));
 
-        return post(NavidentController.BASE_URL)
+        return post(NavidentController.BASE_URL+"/create")
                 .with(jwt()) // Lager en JWT som will passere alle SecurityFilters
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(reqJson);

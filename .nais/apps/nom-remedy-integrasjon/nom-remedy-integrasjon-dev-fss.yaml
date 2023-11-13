@@ -8,9 +8,21 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - https://nom-remedy-integrasjon.dev-fss-pub.nais.io
   env:
     - name: REMEDY_DATASOURCE_URL
       value: jdbc:oracle:thin:@//d26dbfl022.test.local:1521/remedy_u2
+  envFrom:
+    - secret: nom-remedy-integrasjon-unleash-api-token
+  vault:
+    enabled: true
+  webproxy: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
+      allowAllUsers: true
   liveness:
     path: /internal/health/liveness
     initialDelay: 30
@@ -22,6 +34,20 @@ spec:
     periodSeconds: 5
     timeout: 4
     failureThreshold: 5
+  kafka:
+    pool: nav-dev
   prometheus:
     enabled: true
     path: /internal/prometheus
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nom-ui2
+          namespace: org
+          cluster: dev-gcp
+        - application: org-token-tool
+          namespace: org
+          cluster: dev-gcp
+    outbound:
+      external:
+        - host: teamorg-unleash-api.nav.cloud.nais.io

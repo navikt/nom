@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository.UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE;
-
 @Service
 public class OrgtilknytningService {
 
@@ -29,12 +27,6 @@ public class OrgtilknytningService {
 
     public Collection<OrgtilknytningState> getByNavIdent(String navident) {
         return orgtilknytningStateRepository.findByNavident(navident);
-    }
-
-    public Collection<OrgtilknytningState> getByNavIdent(String navident, boolean hentForEksterneUavhengigAvFeatureFlag) {
-        // TODO: remove når feature flag ikke brukes mer
-        String flag = UNLEASH_EKSPONER_TILKNYTNINGER_FOR_EKSTERNE; // Kodelinje lagt inn  for å minne på fjerning av metoden når feature toggle fjernes
-        return orgtilknytningStateRepository.findByNavident(navident, hentForEksterneUavhengigAvFeatureFlag);
     }
 
     public List<OrgtilknytningState> getByEnhet(String id) {

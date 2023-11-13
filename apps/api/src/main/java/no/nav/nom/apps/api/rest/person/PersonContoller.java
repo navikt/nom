@@ -28,15 +28,10 @@ import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 @Slf4j
 public class PersonContoller {
 
-    public static final String UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER = "nom.remedy_redirect_til_remedycontroller";
-    private final Unleash unleash;
     private final RemedyController remedyController;
-    private final PdlClient pdlClient;
 
-    public PersonContoller(Unleash unleash, RemedyController remedyController, PdlClient pdlClient) {
-        this.unleash = unleash;
+    public PersonContoller(RemedyController remedyController) {
         this.remedyController = remedyController;
-        this.pdlClient = pdlClient;
     }
 
     @PostMapping("/getPerson")
@@ -50,24 +45,8 @@ public class PersonContoller {
     @PreAuthorize("hasAuthority('QUERY_PERSON')")
     public ResponseEntity<PdlPersonDTO> getPerson(@RequestBody PdlPersonRequest request) {
         log.info(SECURE_LOGS, "getPerson kalt fra Remedy:\n{}", request);
+        return  ResponseEntity.ok(convert(remedyController.finnRessurs(request.getPersonident())));
 
-        if (unleash.isEnabled(UNLEASH_REDIRECT_TIL_REMEDY_CONTROLLER)) {
-            return  ResponseEntity.ok(convert(remedyController.finnRessurs(request.getPersonident())));
-
-        }
-        return ResponseEntity.ok(pdlClient.hentPerson(request.getPersonident())
-                                         .map(this::convert)
-                                         .orElse(null));
-    }
-
-    private PdlPersonDTO convert(Person person) {
-        return PdlPersonDTO.builder()
-            .navn(NavnDTO.builder()
-                .fornavn(person.getFornavn())
-                .mellomnavn(person.getMellomnavn())
-                .etternavn(person.getEtternavn())
-                .build())
-            .build();
     }
 
     private PdlPersonDTO convert(RessursDTO ressursDTO) {

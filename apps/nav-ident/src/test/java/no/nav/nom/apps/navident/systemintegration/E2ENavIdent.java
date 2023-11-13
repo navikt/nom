@@ -327,7 +327,7 @@ public class E2ENavIdent {
         log.debug("Request: %s".formatted(request));
 
         ResponseEntity<NavidentResponseDTO> result = webClient.post()
-            .uri("/navident")
+            .uri("/navident/create")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.set(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));

@@ -1,13 +1,17 @@
 package no.nav.nom.libs.utils.common.platform;
 
 
-import com.thomaskasene.wiremock.junit.WireMockStub;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 
-public class LeaderElectionStub implements WireMockStub {
+public class LeaderElectionStub extends WireMockExtension {
+
+    public LeaderElectionStub(Builder builder) {
+        super(builder);
+    }
+
     public void setElectionResult(String body) {
         stubFor(
             get("/elect").willReturn(

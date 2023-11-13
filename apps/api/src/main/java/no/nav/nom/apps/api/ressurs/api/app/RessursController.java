@@ -1,17 +1,22 @@
 package no.nav.nom.apps.api.ressurs.api.app;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import jakarta.validation.Valid;
+
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,27 +37,19 @@ import java.util.NoSuchElementException;
 
 @Tag(name = "Ressurs")
 @RestController
-@RequestMapping(value={"/app/ressurs"})
+@RequestMapping(value={"/app/ressurser"})
 public class RessursController {
 
     private final static Logger log = LoggerFactory.getLogger(RessursController.class);
     public static final String UNLEASH_EDIT_RESSURS = "nom.ressurs.edit-external";
     private final RessursRestService ressursRestService;
-
-    private final RessursContactDetailsResolver ressursContactDetailsResolver;
-
-    private final RessursLedereResolver ressursLedereResolver;
     private final Unleash unleash;
 
     public RessursController(
         RessursRestService ressursRestService,
-        RessursContactDetailsResolver ressursContactDetailsResolver,
-        RessursLedereResolver ressursLedereResolver,
         Unleash unleash
     ) {
         this.ressursRestService = ressursRestService;
-        this.ressursContactDetailsResolver = ressursContactDetailsResolver;
-        this.ressursLedereResolver = ressursLedereResolver;
         this.unleash = unleash;
     }
 
@@ -97,7 +94,7 @@ public class RessursController {
         return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
     }
 
-    @GetMapping("/{navident}")
+    @GetMapping("/byNavident/{navident}")
     @Operation(
         description = "Henter ressurs med navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -105,16 +102,33 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<Ressurs> getRessurs(@PathVariable String navident){
-        var ressursState = ressursRestService.findRessursByNavident(navident);
-        var telefoner = ressursContactDetailsResolver.fetchTelefoner(navident);
-        var epost = ressursContactDetailsResolver.fetchEmail(navident);
+    public ResponseEntity<Ressurs> getRessursByNavident(@PathVariable String navident){
+        var ressurs = ressursRestService.findRessursByNavident(navident);
 
-        return ResponseEntity.ok(new Ressurs(
-            ressursState,
-            telefoner,
-            epost.orElse(null)
-        ));
+        return ResponseEntity.ok(ressurs);
+    }
+
+    @GetMapping("/byFid/{fid}")
+    @Operation(
+        description = "Henter ressurs med fid",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Ressurs"),
+    })
+    public ResponseEntity<Ressurs> getRessursByFid(@PathVariable String fid){
+        var ressurs = ressursRestService.findRessursByFid(fid);
+
+        return ResponseEntity.ok(ressurs);
+    }
+
+    @GetMapping("/read-topic")
+    @Operation(
+        description = "Henter records fra ressurs event-source",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+     public ResponseEntity<List<JsonNode>> readRessursTopic(@Valid ReadTopicRequest request){
+        return ResponseEntity.ok(ressursRestService.getRessursEvents(request));
     }
 
     @GetMapping("/lederFor/{navident}")
@@ -126,7 +140,7 @@ public class RessursController {
         @ApiResponse(responseCode = "200", description = "List of Ressurs if found or empty list"),
     })
     public List<RessursLeder> getRessursLedere(@PathVariable String navident){
-        return ressursLedereResolver.ledere(navident);
+        return ressursRestService.getLedereForRessurs(navident);
     }
 
     private OpprettRessursResponse toResponse(RessursState ressurs) {

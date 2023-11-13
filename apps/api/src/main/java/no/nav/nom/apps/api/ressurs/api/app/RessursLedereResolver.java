@@ -64,7 +64,7 @@ public class RessursLedereResolver {
                 String orgenhetId = kobling.orgEnhetId();
                 var orgenhet = orgenhetService.getById(orgenhetId);
 
-                if(orgenhet.isPresent()){
+                if (orgenhet.isPresent()) {
                     var ledere = lederFor(orgenhet.get().getAgressoId(), orgenhet.get().getOrgNiv(), navident);
 
                     if (ledere.isEmpty()) {

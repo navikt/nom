@@ -3,6 +3,7 @@ package no.nav.nom.apps.navident.rnrservices;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.navident.IdentService;
 import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.common.cache.RedisSynchronizationCache;
 import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
 import no.nav.nom.contract.nom.IdentType;
 import org.apache.kafka.common.TopicPartition;
@@ -30,15 +31,30 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
     private final RnRMdcCache rnRMdcCache;
     private final NeedProducer needProducer;
+    private final RedisSynchronizationCache redisSynchronizationCache;
 
-    public IdentServiceImpl(RnRMdcCache rnRMdcCache, NeedProducer needProducer) {
+    public IdentServiceImpl(RnRMdcCache rnRMdcCache, NeedProducer needProducer, RedisSynchronizationCache redisSynchronizationCache) {
         this.rnRMdcCache = rnRMdcCache;
         this.needProducer = needProducer;
+        this.redisSynchronizationCache = redisSynchronizationCache;
     }
 
     public Respons bestillIdent(String personid, IdentType type, char idPrefix)  {
         log.debug(LogConfig.SECURE_LOGS, "bestillIdent(personId = {}, type = {}, idPrefix = '{}') invokert", personid, type, idPrefix);
         log.debug("bestillIdent(personId = %s, type = %s, idPrefix = '%s') invokert".formatted(mask(personid), type, idPrefix));
+
+        if (!redisSynchronizationCache.tryLock(personid)) {
+            // Some other process has lock on this personIdent. Return error response
+            log.debug(LogConfig.SECURE_LOGS, "Unable to obtain lock for personident %s".formatted(personid));
+            log.debug("Unable to obtain lock for personident %s".formatted(mask(personid)));
+            return Respons.builder()
+                .httpStatus(HttpStatus.CONFLICT)
+                .body(Respons.Body.builder()
+                    .feilmelding("Kall til bestillIdent for angitt personIdent er allerede i process")
+                    .build())
+                .build();
+        }
+
         CountDownLatch latch = new CountDownLatch(1);
         /*
          * Thread safe consideration.
@@ -52,6 +68,8 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
 
         try {
             if (latch.await(15, TimeUnit.SECONDS)) { // Often get 4-6 second delay on cold runs.
+                redisSynchronizationCache.unlock(personid);
+
                 if (responses.containsKey(uuid)) {
                     Respons respons = responses.get(uuid);
                     responses.remove(uuid);
@@ -69,6 +87,8 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                             .build();
                 }
             } else { // TimeOut
+                redisSynchronizationCache.unlock(personid);
+
                 log.error(LogConfig.SECURE_LOGS, "Tjenesten for bestilling av personid timet ut i bestilling av {}", personid);
                 log.error("Tjenesten for bestilling av personid timet ut i bestilling av %s".formatted(mask(personid)));
                 return Respons.builder()
@@ -79,6 +99,8 @@ public class IdentServiceImpl implements IdentService, ConsumerSeekAware {
                         .build();
             }
         } catch (InterruptedException e) {
+            redisSynchronizationCache.unlock(personid);
+
             log.error(LogConfig.SECURE_LOGS, "Ident bestilling for ident {} ble avbrutt", personid, e);
             log.error("Ident bestilling for ident %s ble avbrutt".formatted(mask(personid)), e);
             return Respons.builder()

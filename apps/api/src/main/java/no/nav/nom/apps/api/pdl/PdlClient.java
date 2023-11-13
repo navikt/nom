@@ -66,7 +66,13 @@ public class PdlClient {
             .variable("ident", personIdent)
             .execute()
             .filter(GraphQlResponse::isValid)
-            .mapNotNull(res -> res.field("hentPerson").toEntity(JsonNode.class))
+            .mapNotNull(res -> {
+                if (!res.getErrors().isEmpty()) {
+                    logger.warn("Error in lookup from PDL: {}", res.getErrors());
+                    return null;
+                }
+                return res.field("hentPerson").toEntity(JsonNode.class);
+            })
             .onErrorResume(throwable -> {
                 logger.warn("Error in lookup from PDL", throwable);
                 return Mono.empty();

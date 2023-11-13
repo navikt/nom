@@ -29,6 +29,9 @@ spec:
     - team: org
       application: nom-unit4
       access: read
+    - team: org
+      application: nom-remedy-integrasjon
+      access: read
 
 ---
 

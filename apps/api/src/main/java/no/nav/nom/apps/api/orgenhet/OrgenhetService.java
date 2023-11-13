@@ -1,10 +1,23 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
+import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
+import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
+import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -24,13 +37,17 @@ import static java.util.Comparator.comparing;
 @Service
 public class OrgenhetService {
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final OrgEnhetCommandService orgEnhetCommandService;
     private final DvhRepository dvhRepository;
+    private final KafkaTopicReader kafkaTopicReader;
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, DvhRepository dvhRepository) {
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
+        this.kafkaTopicReader = kafkaTopicReader;
     }
 
 
@@ -166,6 +183,48 @@ public class OrgenhetService {
                                 lowerOrganisering.getAgressoIdOver().equals(organisering.getAgressoIdUnder())
                     ).toList()
             ).flatMap(List::stream).collect(Collectors.toSet());
+    }
+
+    public ResponseEntity<StandardResponse> setOrgEnhetsType(SetOrgEnhetsTypeRequest setOrgEnhetsTypeRequest) {
+        return orgEnhetStateRepository.findById(setOrgEnhetsTypeRequest.getNomId())
+            .map(orgEnhet -> {
+
+                sendEndreOrgEnhetsTypeEvent(orgEnhet, setOrgEnhetsTypeRequest.getOrgEnhetsType());
+
+                return ResponseEntity.ok().body(
+                    StandardResponse.builder().message(String.format(
+                            "Oppdatert orgEnhetsType for %s", setOrgEnhetsTypeRequest.getNomId()
+                        ))
+                        .build()
+                );
+            })
+            .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                StandardResponse.builder().message("NotFound").build()
+            ));
+    }
+
+    private void sendEndreOrgEnhetsTypeEvent(OrgEnhetState orgEnhetState, OrgEnhetsType orgEnhetsType) {
+        var existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent = orgEnhetState.orgEnhetsType()
+            .map(existingOrgenhetsType -> existingOrgenhetsType != orgEnhetsType)
+            .orElse(true);
+
+        if (existingOrgEnhetsTypeIsDifferentFromNewValueOrNotPresent) {
+            orgEnhetCommandService.endreOrgEnhetsType(
+                orgEnhetState.fid(),
+                new EndreOrgEnhetsType(
+                    Optional.ofNullable(orgEnhetsType),
+                    new InputMetadata(
+                        "nom-api REST",
+                        "setOrgEnhetsType",
+                        null,
+                        new Origination("nom-api", "nom-api"))
+                )
+            );
+        }
+    }
+
+    public List<JsonNode> getOrgEnhetEvents(ReadTopicRequest readTopicRequest) {
+        return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 }
 

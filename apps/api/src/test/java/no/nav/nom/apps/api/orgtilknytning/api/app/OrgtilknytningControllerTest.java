@@ -6,13 +6,11 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
-import no.nav.nom.libs.test.SecurityTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
@@ -32,9 +30,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @MockBean
     private OrgtilknytningCommandService orgtilknytningCommandService;
-
-    @Autowired
-    private SecurityTestUtils securityTestUtils;
 
     @MockBean
     private RessursStateListener ressursStateListener;
@@ -67,7 +62,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .uri("/app/orgtilknytninger")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.getValidToken());
+                httpHeaders.setBearerAuth(noScopesUserToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -101,7 +96,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.getValidToken());
+                httpHeaders.setBearerAuth(noScopesUserToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -141,9 +136,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                    validJwtWithAzpNameClaim(orgtilknytningToUpdate.navident(), "mutate-ressurs")
-                ));
+                httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(endreOrgtilknytningDatoRequest)
             .exchange()
@@ -192,9 +185,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                    validJwtWithAzpNameClaim("X123456", "mutate-ressurs")
-                ));
+                httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(
                 new EndreOrgtilknytningDatoRequest(
@@ -218,9 +209,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(securityTestUtils.createToken(
-                    validJwtWithAzpNameClaim("X12345", "no-scopes")
-                ));
+                httpHeaders.setBearerAuth(noScopesUserToken());
             })
             .bodyValue(
                 new EndreOrgtilknytningDatoRequest(

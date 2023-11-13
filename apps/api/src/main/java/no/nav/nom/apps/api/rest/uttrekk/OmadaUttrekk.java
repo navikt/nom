@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,6 +15,7 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
+import no.nav.nom.contract.nom.OrgEnhetsType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
@@ -187,19 +189,21 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
-        final var cSVFormat = getCSVFormat(
-            "org_enhet_id",
-            "agresso_id",
-            "agresso_org_niv",
-            "agresso_orgenhet_type",
-            "navn",
-            "gyldig_fom",
-            "gyldig_tom",
-            "leder_navident",
-            "org_enhets_kategori",
-            "org_enhet_over",
-            "remedyEnhetId"
-        );
+        final var cSVFormat =
+            getCSVFormat(
+                "org_enhet_id",
+                "agresso_id",
+                "agresso_org_niv",
+                "agresso_orgenhet_type",
+                "navn",
+                "gyldig_fom",
+                "gyldig_tom",
+                "leder_navident",
+                "org_enhets_nivaa",
+                "org_enhet_type",
+                "org_enhet_over",
+                "remedyEnhetId"
+            );
 
         try (CSVPrinter printer = new CSVPrinter(writer, cSVFormat)) {
             orgenhetService.getAllEnheter()
@@ -221,6 +225,7 @@ public class OmadaUttrekk {
                             .map(DvhLeder::getNavIdent)
                             .orElse(""),
                         orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
+                        orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
                         dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
                             .filter(organisering ->
                                 organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
@@ -236,7 +241,6 @@ public class OmadaUttrekk {
                             .orElse(""),
                         remedyEnhetIdResolver.remedyEnhetId(orgenhet)
                     );
-
                     writer.close();
                 } catch (IOException e) {
                     log.error("Error writing to CSV", e);

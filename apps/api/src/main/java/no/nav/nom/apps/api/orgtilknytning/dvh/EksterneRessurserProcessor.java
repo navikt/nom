@@ -8,8 +8,8 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
@@ -47,7 +47,7 @@ public class EksterneRessurserProcessor {
     }
 
     public void process(DvhEksternRessurs eksternRessurs) {
-        var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(eksternRessurs.navident(), true);
+        var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(eksternRessurs.navident());
 
         log.debug("Prosesserer ekstern ressurs {}\n{}", eksternRessurs.navident(), eksternRessurs.payload());
         if (!eksternRessurs.remedyAktiv()) {

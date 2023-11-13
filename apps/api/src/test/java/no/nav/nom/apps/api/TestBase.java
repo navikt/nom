@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api;
 
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.thomaskasene.wiremock.junit.WireMockStubs;
+import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
@@ -17,12 +16,13 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
-import no.nav.nom.libs.test.RsaStub;
-import no.nav.nom.libs.test.SecurityTestUtils;
+import no.nav.security.mock.oauth2.MockOAuth2Server;
+import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -30,6 +30,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StreamUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -38,7 +39,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,16 +49,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@WireMockStubs(RsaStub.class)
 @SpringBootTest(
     classes = TestConfig.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
 @EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.organisering-eventsource"}, controlledShutdown = true)
+@ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
+@AutoConfigureWireMock(port = 0)
 public abstract class TestBase {
+
     @Autowired
-    private SecurityTestUtils securityTestUtils;
+    protected MockOAuth2Server mockOAuth2Server;
 
     @Autowired
     protected ResourceLoader resourceLoader;
@@ -99,6 +104,10 @@ public abstract class TestBase {
     @MockBean
     OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager;
 
+    public static String LOGGED_IN_USER_NAVIDENT = "A321321";
+    public static String OAUTH_VALID_AUDIENCE = "test";
+    public static String OAUTH_VALID_ISSUER = "aad";
+
     @BeforeEach
     void reset() {
         dvhRepository.clearRepository();
@@ -125,28 +134,6 @@ public abstract class TestBase {
             )
         );
     }
-
-    protected JWTClaimsSet.Builder validJwtWithAzpClaim() {
-        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
-        final var subject = jwtClaimsBuilder.getClaims().get("sub");
-        return securityTestUtils.validJwtClaims().claim("azp", subject).claim("azp_name", "testSystem");
-    }
-
-    protected JWTClaimsSet.Builder validJwtWithAzpClaim(String subject, String audience) {
-        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims(subject, audience);
-        final var subjectClaim = jwtClaimsBuilder.getClaims().get("sub");
-        return securityTestUtils.validJwtClaims().claim("azp", subjectClaim);
-    }
-
-    protected JWTClaimsSet.Builder validJwtWithAzpNameClaim(String navident, String azpName) {
-        final var jwtClaimsBuilder = securityTestUtils.validJwtClaims();
-        jwtClaimsBuilder.claim("azp", azpName);
-        jwtClaimsBuilder.claim("NAVident", navident);
-        jwtClaimsBuilder.claim("azp_name", azpName);
-
-        return jwtClaimsBuilder;
-    }
-
 
     /**
      * Loads a given resource from the test classpath using ResourceLoader
@@ -227,6 +214,74 @@ public abstract class TestBase {
 
     protected void saveRessurser(List<RessursState> ressursStateList) {
         ressursStateList.forEach(r -> ressursStateRepository.putEventAggregate(r));
+    }
+
+    protected String generateToken(String issuer, Map<String, Object>  claims, String audience) {
+        return mockOAuth2Server.issueToken(
+            issuer,
+            "clientId",
+            new DefaultOAuth2TokenCallback(
+                "aad",
+                "subjectId",
+                JOSEObjectType.JWT.getType(),
+                List.of(audience),
+                claims,
+                3600
+            )
+        ).serialize();
+    }
+
+    protected String validToken(Map<String, Object> claims) {
+        return generateToken(OAUTH_VALID_ISSUER, claims, OAUTH_VALID_AUDIENCE);
+    }
+
+
+
+    protected String nomAdminUserToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("groups", List.of("nomAdminGroup"));
+        claims.put("azp_name", "some-app");
+        return validToken(claims);
+    }
+
+    protected String nomWriteUserToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("groups", List.of("nomWriteGroup"));
+        claims.put("azp_name", "some-app");
+        return validToken(claims);
+    }
+
+    protected String noScopesUserToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("NAVident", LOGGED_IN_USER_NAVIDENT);
+        claims.put("azp_name", "some-app");
+        return validToken(claims);
+    }
+
+    protected String queryPersonClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "queryPersonClient");
+        return validToken(claims);
+    }
+
+    protected String mutateRessursClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "mutateRessursClient");
+        return validToken(claims);
+    }
+
+    protected String mutateRessursAndQueryPersonClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "mutateRessursAndQueryPersonClient");
+        return validToken(claims);
+    }
+
+    protected String noScopesClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "noScopesClient");
+        return validToken(claims);
     }
 
 }
