@@ -17,5 +17,6 @@
         <module>ressurs-state</module>
         <module>orgenhet-state</module>
         <module>orgtilknytning-state</module>
+        <module>organisering-state</module>
     </modules>
 </project>
