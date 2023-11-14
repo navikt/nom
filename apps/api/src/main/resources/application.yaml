@@ -11,6 +11,7 @@ app:
       state-topic: org.nom.intern-orgtilknytning-state
       eventsource-topic: org.nom.orgtilknytning-eventsource
     organisering:
+      stateTopic: org.nom.intern-organisering-state
       eventsourceTopic: org.nom.organisering-eventsource
   clients:
     nom-proxy:

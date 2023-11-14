@@ -42,4 +42,11 @@ public class OrganiseringStateRepository {
         organiseringByFid.clear();
     }
 
+    public void putEventAggregate(OrganiseringState organiseringState) {
+        organiseringByFid.put(organiseringState.fid(), organiseringState);
+    }
+
+    public int count() {
+        return organiseringByFid.size();
+    }
 }

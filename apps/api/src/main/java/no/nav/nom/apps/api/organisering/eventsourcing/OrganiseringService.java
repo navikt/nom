@@ -60,8 +60,7 @@ public class OrganiseringService {
                         numberOfUpdated++;
                     }
                 } else {
-                    var opprettetFid = organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
-                    addToStateRepository(opprettetFid, dvhOrganisering);
+                    organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
                     numberOfNew++;
                 }
             }
@@ -69,34 +68,6 @@ public class OrganiseringService {
         }
 
         logger.info("Antall nye organiseringer: {} Antall oppdaterte: {}", numberOfNew, numberOfUpdated);
-    }
-
-
-    private void addToStateRepository(String fid, DvhOrganisering dvhOrganisering) {
-        var nomIdUnder = orgenhetService
-            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder());
-
-        var nomIdOver = orgenhetService
-            .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
-
-        if (nomIdUnder.isEmpty() || nomIdOver.isEmpty()) {
-            logger.info("Kan ikke lagre organisering med fid={} agressoIdOver={} agressoIdUnder={} i organisering state, mangler nom ids (over={} under={})",
-                fid, dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getAgressoIdUnder(), nomIdOver, nomIdUnder
-            );
-            return;
-        }
-
-        OrganiseringState organiseringState = OrganiseringState.builder()
-            .fid(fid)
-            .idUnder(nomIdUnder.get().getId())
-            .idOver(nomIdOver.get().getId())
-            .navnUnder(dvhOrganisering.getNavnUnder())
-            .navnOver(dvhOrganisering.getNavnOver())
-            .gyldigFom(dvhOrganisering.getGyldigFom())
-            .gyldigTom(Optional.ofNullable(dvhOrganisering.getGyldigTom()))
-            .build();
-
-        organiseringStateRepository.put(fid, organiseringState);
     }
 
     private Optional<String> getFidForOrganisering(DvhOrganisering dvhOrganisering) {
