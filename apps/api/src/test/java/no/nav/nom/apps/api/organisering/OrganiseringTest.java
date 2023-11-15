@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.TestBase;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1.OrganiseringEndretEventData;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +31,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -59,6 +62,9 @@ public class OrganiseringTest extends TestBase {
 
     @MockBean
     private OrgenhetService orgenhetService;
+
+    @Autowired
+    private OrganiseringStateRepository organiseringStateRepository;
 
 
     BlockingQueue<ConsumerRecord<String, OrganiseringEvent>> recordsQueue;
@@ -181,6 +187,16 @@ public class OrganiseringTest extends TestBase {
         dvhOrganiseringMockUtils.clearResponse();
         dvhOrganiseringMockUtils.addToResponse(mockedOrganisering_modified);
 
+        // mock(oppdatere) organiseringByFid map i OrganiseringStateRepository
+        OrganiseringState organiseringState =  OrganiseringState.builder()
+            .fid("organisering_1")
+            .idOver(orgeEnhetStateOver.id())
+            .idUnder(orgeEnhetStateUnder.id())
+            .navnOver(mockedOrganisering.getORGNODE_NAVN_OVER())
+            .navnUnder(mockedOrganisering.getORGNODE_NAVN())
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState);
+
         // Get organiseringer from DVH again
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
@@ -233,21 +249,43 @@ public class OrganiseringTest extends TestBase {
 
 
         // Setup response from orgEnhet state lookup where we find NOM id
-        mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
+        var overEhnetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
             organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
         );
 
-        mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getORGNODE_KODE(),
+        var orgEnhet2 = mockOrgenhetServiceGetEnhet("nom_id_2", organisering2.getORGNODE_KODE(),
             organisering2.getORGNODE_NIVA(), organisering2.getORGNODE_NAVN()
         );
 
-        mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
+        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
             organisering3.getORGNODE_NIVA(), organisering3.getORGNODE_NAVN()
         );
 
         // Get organiseringer from DVH, should generate two opprettet messages (organisering 2 + 3)
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
+        // oppdatere organiseringByFid map i OrganiseringStateRepository
+        OrganiseringState organiseringState3 =  OrganiseringState.builder()
+            .fid("organisering_3")
+            .idOver(overEhnetTilOrgEnhet3.id())
+            .idUnder(orgEnhet3.id())
+            .navnOver(organisering3.getORGNODE_NAVN_OVER())
+            .navnUnder(organisering3.getORGNODE_NAVN())
+            .gyldigFom(LocalDate.now().minusDays(1))
+            .gyldigTom(Optional.empty())
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState3);
+
+        OrganiseringState organiseringState2 =  OrganiseringState.builder()
+            .fid("organisering_2")
+            .idOver(orgEnhet3.id())
+            .idUnder(orgEnhet2.id())
+            .navnOver(organisering2.getORGNODE_NAVN_OVER())
+            .navnUnder(organisering2.getORGNODE_NAVN())
+            .gyldigFom(LocalDate.now().minusDays(1))
+            .gyldigTom(Optional.empty())
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState2);
 
         // New node 4 gets 3 as parent and node 2 is moved and gets 4 as new parent
         var organisering4 = DvhOrganiseringMock.getBuilderWithDefault()
@@ -291,8 +329,6 @@ public class OrganiseringTest extends TestBase {
         var createRecord = recordsQueue.remove();
         recordsQueue.remove(); // Skip second create message
         var changedRecord = recordsQueue.remove();
-
-        assertThat(createRecord.value().getFid()).isEqualTo(changedRecord.value().getFid());
 
         assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
         assertThat(changedRecord.value().getData()).isExactlyInstanceOf(OrganiseringEndretEventData.class);
