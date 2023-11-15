@@ -33,7 +33,7 @@ public class OrganiseringStateRepository {
 
         return orgEnhet.flatMap(iOrgenhet -> organiseringByFid.entrySet()
             .stream()
-            .filter(organiseringInState -> organiseringInState.getValue().idUnder().equals(iOrgenhet.getId()))
+            .filter(organiseringInState -> organiseringInState.getValue().id().equals(iOrgenhet.getId()))
             .map(Map.Entry::getKey)
             .findFirst()).orElse(null);
     }

@@ -139,8 +139,8 @@ public class OrganiseringTest extends TestBase {
 
         assertThat(eventData.idOver()).isEqualTo(orgeEnhetStateOver.id());
         assertThat(eventData.navnOver()).isEqualTo(mockedOrganisering.getORGNODE_NAVN_OVER());
-        assertThat(eventData.idUnder()).isEqualTo(orgeEnhetStateUnder.id());
-        assertThat(eventData.navnUnder()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
+        assertThat(eventData.id()).isEqualTo(orgeEnhetStateUnder.id());
+        assertThat(eventData.navn()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
     }
 
     @Test
@@ -160,7 +160,7 @@ public class OrganiseringTest extends TestBase {
         dvhOrganiseringMockUtils.addToResponse(mockedOrganisering);
 
         // Mock OrgenhetService where we find NOM id
-        var orgeEnhetStateUnder = mockOrgenhetServiceGetEnhet("mock_id_under", mockedOrganisering.getORGNODE_KODE(),
+        var orgeEnhetStateUnder = mockOrgenhetServiceGetEnhet("mock_id", mockedOrganisering.getORGNODE_KODE(),
             mockedOrganisering.getORGNODE_NIVA(), mockedOrganisering.getORGNODE_NAVN()
         );
 
@@ -191,9 +191,9 @@ public class OrganiseringTest extends TestBase {
         OrganiseringState organiseringState =  OrganiseringState.builder()
             .fid("organisering_1")
             .idOver(orgeEnhetStateOver.id())
-            .idUnder(orgeEnhetStateUnder.id())
+            .id(orgeEnhetStateUnder.id())
             .navnOver(mockedOrganisering.getORGNODE_NAVN_OVER())
-            .navnUnder(mockedOrganisering.getORGNODE_NAVN())
+            .navn(mockedOrganisering.getORGNODE_NAVN())
             .build();
         organiseringStateRepository.putEventAggregate(organiseringState);
 
@@ -209,8 +209,8 @@ public class OrganiseringTest extends TestBase {
         var opprettetEventData = (OrganiseringOpprettetEventData) opprettetConsumerRecord.value().getData();
         assertThat(opprettetEventData.idOver()).isEqualTo(orgeEnhetStateOver.id());
         assertThat(opprettetEventData.navnOver()).isEqualTo(mockedOrganisering.getORGNODE_NAVN_OVER());
-        assertThat(opprettetEventData.idUnder()).isEqualTo(orgeEnhetStateUnder.id());
-        assertThat(opprettetEventData.navnUnder()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
+        assertThat(opprettetEventData.id()).isEqualTo(orgeEnhetStateUnder.id());
+        assertThat(opprettetEventData.navn()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
 
         // Check that second record is OrganiseringEndretEventV1
         var endretConsumerRecord = recordsQueue.poll(100, MILLISECONDS);
@@ -268,9 +268,9 @@ public class OrganiseringTest extends TestBase {
         OrganiseringState organiseringState3 =  OrganiseringState.builder()
             .fid("organisering_3")
             .idOver(overEhnetTilOrgEnhet3.id())
-            .idUnder(orgEnhet3.id())
+            .id(orgEnhet3.id())
             .navnOver(organisering3.getORGNODE_NAVN_OVER())
-            .navnUnder(organisering3.getORGNODE_NAVN())
+            .navn(organisering3.getORGNODE_NAVN())
             .gyldigFom(LocalDate.now().minusDays(1))
             .gyldigTom(Optional.empty())
             .build();
@@ -279,9 +279,9 @@ public class OrganiseringTest extends TestBase {
         OrganiseringState organiseringState2 =  OrganiseringState.builder()
             .fid("organisering_2")
             .idOver(orgEnhet3.id())
-            .idUnder(orgEnhet2.id())
+            .id(orgEnhet2.id())
             .navnOver(organisering2.getORGNODE_NAVN_OVER())
-            .navnUnder(organisering2.getORGNODE_NAVN())
+            .navn(organisering2.getORGNODE_NAVN())
             .gyldigFom(LocalDate.now().minusDays(1))
             .gyldigTom(Optional.empty())
             .build();
@@ -337,8 +337,8 @@ public class OrganiseringTest extends TestBase {
         var createMessage = (OrganiseringOpprettetEventData) createRecord.value().getData();
         var changeMessage = (OrganiseringEndretEventData) changedRecord.value().getData();
 
-        assertThat(createMessage.idUnder()).isEqualTo(changeMessage.idUnder());
-        assertThat(createMessage.navnUnder()).isEqualTo(changeMessage.navnUnder());
+        assertThat(createMessage.id()).isEqualTo(changeMessage.id());
+        assertThat(createMessage.navn()).isEqualTo(changeMessage.navn());
         assertThat(changeMessage.idOver()).isEqualTo(orgEnhetState4.id());
         assertThat(changeMessage.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
     }
