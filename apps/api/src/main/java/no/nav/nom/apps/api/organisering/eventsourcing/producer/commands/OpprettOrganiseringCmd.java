@@ -6,11 +6,11 @@ import java.time.LocalDate;
 
 public record OpprettOrganiseringCmd(
     String agressoIdOver,
-    String agressoIdUnder,
+    String agressoId,
     String orgNivOver,
-    String orgNivUnder,
+    String orgNiv,
     String navnOver,
-    String navnUnder,
+    String navn,
     LocalDate gyldigFom,
     LocalDate gyldigTom,
     InputMetadata inputMetadata

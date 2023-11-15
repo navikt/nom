@@ -53,9 +53,9 @@ public class EventsrcToState {
             return new OrganiseringState(
                 fid,
                 eventStateAggregate.get("idOver").asText(),
-                eventStateAggregate.get("idUnder").asText(),
+                eventStateAggregate.get("id").asText(),
                 eventStateAggregate.get("navnOver").asText(),
-                eventStateAggregate.get("navnUnder").asText(),
+                eventStateAggregate.get("navn").asText(),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText())
             );

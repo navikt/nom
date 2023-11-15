@@ -48,9 +48,9 @@ public class EventsrcToStateTest {
         final OrganiseringState expected = new OrganiseringState(
             event.getFid(),
             eventData.idOver(),
-            eventData.idUnder(),
+            eventData.id(),
             eventData.navnOver(),
-            eventData.navnUnder(),
+            eventData.navn(),
             Optional.of(eventData.gyldigTom()),
             eventData.gyldigFom()
         );
@@ -72,9 +72,9 @@ public class EventsrcToStateTest {
         final OrganiseringState expected = new OrganiseringState(
             event.getFid(),
             eventData.idOver(),
-            eventData.idUnder(),
+            eventData.id(),
             eventData.navnOver(),
-            eventData.navnUnder(),
+            eventData.navn(),
             Optional.of(eventData.gyldigTom()),
             eventData.gyldigFom()
         );
@@ -96,9 +96,9 @@ public class EventsrcToStateTest {
         final OrganiseringState expectedOpprett = new OrganiseringState(
             eventOpprett.getFid(),
             eventDataOpprett.idOver(),
-            eventDataOpprett.idUnder(),
+            eventDataOpprett.id(),
             eventDataOpprett.navnOver(),
-            eventDataOpprett.navnUnder(),
+            eventDataOpprett.navn(),
             Optional.of(eventDataOpprett.gyldigTom()),
             eventDataOpprett.gyldigFom()
         );
@@ -109,9 +109,9 @@ public class EventsrcToStateTest {
         final OrganiseringState expectedEndre = new OrganiseringState(
             eventEndre.getFid(),
             eventDataEndre.idOver(),
-            eventDataEndre.idUnder(),
+            eventDataEndre.id(),
             eventDataEndre.navnOver(),
-            eventDataEndre.navnUnder(),
+            eventDataEndre.navn(),
             Optional.of(eventDataEndre.gyldigTom()),
             eventDataEndre.gyldigFom()
         );
@@ -163,9 +163,9 @@ public class EventsrcToStateTest {
     private OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData getOpprettetEventData() {
         return new OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData(
             "idOver",
-            "idUnder",
+            "id",
             "navnOver",
-            "navnUnder",
+            "navn",
             LocalDate.of(2021, 1, 1),
             LocalDate.of(2099, 12, 1)
         );
@@ -187,9 +187,9 @@ public class EventsrcToStateTest {
     private OrganiseringEndretEventV1.OrganiseringEndretEventData getEndretEventData() {
         return new OrganiseringEndretEventV1.OrganiseringEndretEventData(
             "idOver",
-            "idUnder",
+            "id",
             "navnOver",
-            "navnUnder",
+            "navn",
             LocalDate.of(2021, 1, 1),
             LocalDate.of(2099, 12, 1)
         );
