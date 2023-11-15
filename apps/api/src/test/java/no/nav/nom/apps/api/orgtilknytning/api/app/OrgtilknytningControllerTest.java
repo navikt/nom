@@ -160,6 +160,50 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             );
     }
 
+    @Test
+    @DisplayName("Should verify sluttDato is after startStato")
+    void test_update_orgtilknytning_invalid_date_range() {
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
+            LocalDate.now(),
+            Optional.of(LocalDate.now().minusYears(1))
+        );
+
+        when(unleash.isEnabled(any())).thenReturn(true);
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(orgtilknytningToUpdate.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).endreOrgtilknytningDato(
+            stringArgumentCaptor.capture(),
+            endreOrgtilknytningDatoArgumentCaptor.capture()
+        );
+    }
+
 
     @Test
     @DisplayName("Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")

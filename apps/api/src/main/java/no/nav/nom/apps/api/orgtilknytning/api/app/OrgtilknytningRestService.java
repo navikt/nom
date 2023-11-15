@@ -44,6 +44,13 @@ public class OrgtilknytningRestService {
     }
 
     public void updateOrgtilknyting(String fid, EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest) {
+        endreOrgtilknytningDatoRequest.gyldigTom()
+            .ifPresent(sluttDato -> {
+                if (sluttDato.isBefore(endreOrgtilknytningDatoRequest.gyldigFom())) {
+                    throw new IllegalArgumentException("Sluttdato kan ikke være før startdato");
+                }
+            });
+
         var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)
             .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
 
