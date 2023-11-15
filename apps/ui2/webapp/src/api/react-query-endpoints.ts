@@ -15,6 +15,7 @@ import type {
   RessursLeder,
 } from "~/types/api-models";
 import type { OrgtilknytningState } from "~/types/api-models";
+import type { GetPersonRequest } from "~/types/api-models";
 
 export const ressurserGraphqlKeys = {
   all: ["ALLE_RESSURSER_GRAPHQL"] as const,
@@ -159,9 +160,10 @@ export const getPerson = {
   queryKey: (personident: string) => personKeys.id(personident),
   queryFn: async (personident: string) =>
     (
-      await axios.get<Person>("/nom-api/app/person", {
-        headers: { personident },
-      })
+      await axios.post<GetPersonRequest, AxiosResponse<Person>>(
+        "/nom-api/app/person",
+        { personident },
+      )
     ).data,
 };
 

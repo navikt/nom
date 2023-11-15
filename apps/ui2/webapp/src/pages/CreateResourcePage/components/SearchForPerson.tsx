@@ -18,6 +18,8 @@ export function SearchForPerson() {
     <form
       onSubmit={handleSubmit((values) =>
         navigate({
+          // Using this mask the encoded personindent is not shown in the url
+          mask: { search: {} },
           search: (oldSearch) => ({
             ...oldSearch,
             personident: encode(values.personident ?? ""),
@@ -37,7 +39,6 @@ export function SearchForPerson() {
             onChange={(newValue) => onChange(newValue)}
             onClear={() => {
               reset({ personident: "" });
-              navigate({ search: {} });
             }}
             type="number"
             value={value}

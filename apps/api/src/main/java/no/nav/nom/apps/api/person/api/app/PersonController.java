@@ -7,12 +7,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.person.api.dto.FolkeregisterPerson;
 import no.nav.nom.apps.api.person.api.dto.Person;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +31,7 @@ public class PersonController {
         this.personBatchLoader = personBatchLoader;
     }
 
-    @GetMapping
+    @PostMapping
     @Operation(
         description = "Henter person med gitt personident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -39,8 +39,8 @@ public class PersonController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Returnerer en instanse av Person"),
     })
-    public ResponseEntity<Person> findPerson(@RequestHeader("personident") String personident) {
-
+    public ResponseEntity<Person> findPerson(@RequestBody GetPersonRequest getPersonRequest) {
+        var personident = getPersonRequest.getPersonident();
         var folkeregisterPerson = resolveFrom(personident);
         if (folkeregisterPerson.isEmpty()) {
             return ResponseEntity.notFound().build();

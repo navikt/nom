@@ -192,3 +192,7 @@ export interface Visningsnavn {
   fornavn: string;
   mellomnavn?: string;
 }
+
+export interface GetPersonRequest {
+  personident: string;
+}
