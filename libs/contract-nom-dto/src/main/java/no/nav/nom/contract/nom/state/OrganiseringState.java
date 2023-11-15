@@ -9,9 +9,9 @@ import java.util.Optional;
 public record OrganiseringState(
     String fid,
     String idOver,
-    String idUnder,
+    String id,
     String navnOver,
-    String navnUnder,
+    String navn,
     Optional<LocalDate> gyldigTom,
     LocalDate gyldigFom
 ) {}

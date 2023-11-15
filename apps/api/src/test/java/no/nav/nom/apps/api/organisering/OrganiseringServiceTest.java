@@ -177,9 +177,9 @@ class OrganiseringServiceTest {
     private void mockOrganiseringStateLookup(String fid, DvhOrganisering initialDvhOrg, String nomIdUnder, String nomIdOver) {
         OrganiseringState organiseringState = OrganiseringState.builder()
             .fid(fid)
-            .idUnder(nomIdUnder)
+            .id(nomIdUnder)
             .idOver(nomIdOver)
-            .navnUnder(initialDvhOrg.getNavnUnder())
+            .navn(initialDvhOrg.getNavnUnder())
             .navnOver(initialDvhOrg.getNavnOver())
             .gyldigTom(Optional.empty())
             .gyldigFom(LocalDate.now().minusDays(1))
@@ -193,9 +193,9 @@ class OrganiseringServiceTest {
             "agressoIdOver",
             "orgNivOver",
             "navnOver",
-            "agressoIdUnder",
-            "orgNivUnder",
-            "navnUnder",
+            "agressoId",
+            "orgNiv",
+            "navn",
             LocalDate.now().minusDays(1),
             null
         );

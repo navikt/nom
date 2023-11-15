@@ -49,9 +49,9 @@ public class OrganiseringEventCommandService {
         ).map(IOrgenhet::getId).orElse("");
 
         String nomIdUnder = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            opprettOrganiseringCmd.agressoIdUnder(),
-            opprettOrganiseringCmd.orgNivUnder(),
-            opprettOrganiseringCmd.navnUnder()
+            opprettOrganiseringCmd.agressoId(),
+            opprettOrganiseringCmd.orgNiv(),
+            opprettOrganiseringCmd.navn()
         ).map(IOrgenhet::getId).orElse("");
 
 
@@ -61,7 +61,7 @@ public class OrganiseringEventCommandService {
                 nomIdOver,
                 nomIdUnder,
                 opprettOrganiseringCmd.navnOver(),
-                opprettOrganiseringCmd.navnUnder(),
+                opprettOrganiseringCmd.navn(),
                 opprettOrganiseringCmd.gyldigFom(),
                 opprettOrganiseringCmd.gyldigTom()
             ),
@@ -78,9 +78,9 @@ public class OrganiseringEventCommandService {
         ).map(IOrgenhet::getId).orElse("");
 
         String nomIdUnder = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            endreOrganiseringCmd.agressoIdUnder(),
-            endreOrganiseringCmd.orgNivUnder(),
-            endreOrganiseringCmd.navnUnder()
+            endreOrganiseringCmd.agressoId(),
+            endreOrganiseringCmd.orgNiv(),
+            endreOrganiseringCmd.navn()
         ).map(IOrgenhet::getId).orElse("");
 
         return new OrganiseringEndretEventV1(
@@ -89,7 +89,7 @@ public class OrganiseringEventCommandService {
                 nomIdOver,
                 nomIdUnder,
                 endreOrganiseringCmd.navnOver(),
-                endreOrganiseringCmd.navnUnder(),
+                endreOrganiseringCmd.navn(),
                 endreOrganiseringCmd.gyldigFom(),
                 endreOrganiseringCmd.gyldigTom()
             ),

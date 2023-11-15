@@ -19,9 +19,9 @@ public class OrganiseringOpprettetEventV1 extends OrganiseringEvent {
 
     public record OrganiseringOpprettetEventData(
         String idOver,
-        String idUnder,
+        String id,
         String navnOver,
-        String navnUnder,
+        String navn,
         LocalDate gyldigFom,
         LocalDate gyldigTom
     ) implements Data { }

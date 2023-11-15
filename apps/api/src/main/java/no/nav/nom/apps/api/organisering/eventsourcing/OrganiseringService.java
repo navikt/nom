@@ -84,9 +84,9 @@ public class OrganiseringService {
             if (eksisterendeOrganisering.isPresent()) {
                 OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
 
-                if (!eksisterendeOrg.idUnder().equals(orgEnhetUnder.getId()) ||
+                if (!eksisterendeOrg.id().equals(orgEnhetUnder.getId()) ||
                     !eksisterendeOrg.idOver().equals(orgEnhetOver.getId()) ||
-                    !eksisterendeOrg.navnUnder().equals(dvhOrg.getNavnUnder()) ||
+                    !eksisterendeOrg.navn().equals(dvhOrg.getNavnUnder()) ||
                     !eksisterendeOrg.navnOver().equals(dvhOrg.getNavnOver()) ||
                     !eksisterendeOrg.gyldigFom().equals(dvhOrg.getGyldigFom()) ||
                     !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(dvhOrg.getGyldigTom()))
