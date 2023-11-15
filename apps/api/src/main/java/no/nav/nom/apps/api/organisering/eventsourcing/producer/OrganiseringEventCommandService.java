@@ -1,11 +1,10 @@
 package no.nav.nom.apps.api.organisering.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
-import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
-import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
-import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,6 +31,11 @@ public class OrganiseringEventCommandService {
     public void endreOrganisering(String fid, EndreOrganiseringCmd endreOrganiseringCmd) {
         logger.debug("Sendt endreOrganisering: fid={} command={}", fid, endreOrganiseringCmd);
         eventProducer.sendMessage(getEndreEvent(fid, endreOrganiseringCmd));
+    }
+
+    public void avsluttOrganisering(String fid, AvsluttOrganiseringCmd avsluttOrganiseringCmd) {
+        logger.debug("Sendt avsluttOrganisering: fid={} command={}", fid, avsluttOrganiseringCmd);
+        eventProducer.sendMessage(getAvsluttEvent(fid, avsluttOrganiseringCmd));
     }
 
     private OrganiseringOpprettetEventV1 getOpprettEvent(String fid, OpprettOrganiseringCmd opprettOrganiseringCmd) {
@@ -63,6 +67,18 @@ public class OrganiseringEventCommandService {
             ),
             endreOrganiseringCmd.inputMetadata(),
             null
+        );
+    }
+
+    private OrganiseringEvent getAvsluttEvent(String fid, AvsluttOrganiseringCmd avsluttOrganiseringCmd) {
+        return new OrganiseringAvsluttetEventV1(
+            fid,
+            new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
+                avsluttOrganiseringCmd.id(),
+                avsluttOrganiseringCmd.idOver(),
+                avsluttOrganiseringCmd.gyldigTom()
+            ),
+            avsluttOrganiseringCmd.inputMetadata()
         );
     }
 

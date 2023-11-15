@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.organisering.eventsourcing;
 
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.OrganiseringEventCommandService;
+import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.AvsluttOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
@@ -64,6 +65,8 @@ public class OrganiseringService {
                     organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                     numberOfNew++;
                 }
+            } else {
+                logger.debug("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository");
             }
 
         }
@@ -122,6 +125,16 @@ public class OrganiseringService {
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }
+
+    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(IOrgenhet orgenhet, IOrgenhet orgenhetOver, DvhOrganisering dvhOrganisering) {
+        return new AvsluttOrganiseringCmd(
+            orgenhet.getId(),
+            orgenhetOver.getId(),
+            dvhOrganisering.getGyldigTom(), // TODO Fix dates!
+            createInputMetadata(dvhOrganisering.getRawData())
+        );
+    }
+
 
     private InputMetadata createInputMetadata(Object rawData) {
         return new InputMetadata(
