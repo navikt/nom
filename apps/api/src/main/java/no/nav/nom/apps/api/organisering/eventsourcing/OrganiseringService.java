@@ -44,23 +44,24 @@ public class OrganiseringService {
         int numberOfUpdated = 0;
 
         for (DvhOrganisering dvhOrganisering : dvhOrganiseringer) {
-            Optional<IOrgenhet> orgEnhetUnder = orgenhetService
+            Optional<IOrgenhet> orgEnhet = orgenhetService
                 .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder());
 
             Optional<IOrgenhet> orgEnhetOver = orgenhetService
                 .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
 
             // Ved første gangs innlesing mangler nomId-er over/under i OrgEnhetState, så hopp over
-            if (orgEnhetUnder.isPresent() && orgEnhetOver.isPresent()) {
+            if (orgEnhet.isPresent() && orgEnhetOver.isPresent()) {
                 Optional<String> organiseringFid = getFidForOrganisering(dvhOrganisering);
 
                 if (organiseringFid.isPresent()) {
-                    if (hasOrganiseringChanged(organiseringFid.get(), dvhOrganisering, orgEnhetUnder.get(), orgEnhetOver.get())) {
-                        organiseringEventCommandService.endreOrganisering(organiseringFid.get(), getEndreOrganiseringCmd(dvhOrganisering));
+                    if (hasOrganiseringChanged(organiseringFid.get(), dvhOrganisering, orgEnhet.get(), orgEnhetOver.get())) {
+                        organiseringEventCommandService
+                            .endreOrganisering(organiseringFid.get(), getEndreOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                         numberOfUpdated++;
                     }
                 } else {
-                    organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(dvhOrganisering));
+                    organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                     numberOfNew++;
                 }
             }
@@ -75,7 +76,7 @@ public class OrganiseringService {
             .findFidByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()));
     }
 
-    public boolean hasOrganiseringChanged(String fid, DvhOrganisering dvhOrg, IOrgenhet orgEnhetUnder, IOrgenhet orgEnhetOver) {
+    public boolean hasOrganiseringChanged(String fid, DvhOrganisering dvhOrg, IOrgenhet orgEnhet, IOrgenhet orgEnhetOver) {
         boolean organiseringEndret = false;
 
         if (fid.startsWith("organisering")) {
@@ -84,7 +85,7 @@ public class OrganiseringService {
             if (eksisterendeOrganisering.isPresent()) {
                 OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
 
-                if (!eksisterendeOrg.id().equals(orgEnhetUnder.getId()) ||
+                if (!eksisterendeOrg.id().equals(orgEnhet.getId()) ||
                     !eksisterendeOrg.idOver().equals(orgEnhetOver.getId()) ||
                     !eksisterendeOrg.navn().equals(dvhOrg.getNavnUnder()) ||
                     !eksisterendeOrg.navnOver().equals(dvhOrg.getNavnOver()) ||
@@ -98,29 +99,25 @@ public class OrganiseringService {
         return organiseringEndret;
     }
 
-    private EndreOrganiseringCmd getEndreOrganiseringCmd(DvhOrganisering dvhOrganisering) {
+    private EndreOrganiseringCmd getEndreOrganiseringCmd(IOrgenhet orgenhet, IOrgenhet orgenhetOver, DvhOrganisering dvhOrganisering) {
         return new EndreOrganiseringCmd(
-            dvhOrganisering.getAgressoIdOver(),
-            dvhOrganisering.getAgressoIdUnder(),
-            dvhOrganisering.getOrgNivOver(),
-            dvhOrganisering.getOrgNivUnder(),
-            dvhOrganisering.getNavnOver(),
-            dvhOrganisering.getNavnUnder(),
-            dvhOrganisering.getGyldigFom(),
+            orgenhet.getId(),
+            orgenhet.getNavn(),
+            orgenhetOver.getId(),
+            orgenhetOver.getNavn(),
+            dvhOrganisering.getGyldigFom(), // TODO Fix dates!
             dvhOrganisering.getGyldigTom(),
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }
 
-    private OpprettOrganiseringCmd getOpprettOrganiseringCmd(DvhOrganisering dvhOrganisering) {
+    private OpprettOrganiseringCmd getOpprettOrganiseringCmd(IOrgenhet orgenhet, IOrgenhet orgenhetOver, DvhOrganisering dvhOrganisering) {
         return new OpprettOrganiseringCmd(
-            dvhOrganisering.getAgressoIdOver(),
-            dvhOrganisering.getAgressoIdUnder(),
-            dvhOrganisering.getOrgNivOver(),
-            dvhOrganisering.getOrgNivUnder(),
-            dvhOrganisering.getNavnOver(),
-            dvhOrganisering.getNavnUnder(),
-            dvhOrganisering.getGyldigFom(),
+            orgenhet.getId(),
+            orgenhet.getNavn(),
+            orgenhetOver.getId(),
+            orgenhetOver.getNavn(),
+            dvhOrganisering.getGyldigFom(), // TODO Fix dates!
             dvhOrganisering.getGyldigTom(),
             createInputMetadata(dvhOrganisering.getRawData())
         );

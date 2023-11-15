@@ -8,10 +8,10 @@ import java.util.Optional;
 @Builder(toBuilder = true)
 public record OrganiseringState(
     String fid,
-    String idOver,
     String id,
-    String navnOver,
     String navn,
-    Optional<LocalDate> gyldigTom,
-    LocalDate gyldigFom
+    String idOver,
+    String navnOver,
+    LocalDate gyldigFom,
+    Optional<LocalDate> gyldigTom
 ) {}

@@ -3,8 +3,6 @@ package no.nav.nom.apps.api.organisering.eventsourcing.producer;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.EndreOrganiseringCmd;
 import no.nav.nom.apps.api.organisering.eventsourcing.producer.commands.OpprettOrganiseringCmd;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
-import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
@@ -17,22 +15,18 @@ public class OrganiseringEventCommandService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final OrgenhetService orgenhetService;
-
 
     private final OrganiseringEventProducer eventProducer;
 
 
-    public OrganiseringEventCommandService(OrgenhetService orgenhetService, OrganiseringEventProducer eventProducer) {
-        this.orgenhetService = orgenhetService;
+    public OrganiseringEventCommandService(OrganiseringEventProducer eventProducer) {
         this.eventProducer = eventProducer;
     }
 
-    public String opprettOrganisering(OpprettOrganiseringCmd opprettOrganiseringCmd) {
+    public void opprettOrganisering(OpprettOrganiseringCmd opprettOrganiseringCmd) {
         String fid = PrefixedUlidCreator.createOrganiseringUlid();
         eventProducer.sendMessage(getOpprettEvent(fid, opprettOrganiseringCmd));
         logger.debug("Sendt opprettOrganisering: command={}", opprettOrganiseringCmd);
-        return fid;
     }
 
     public void endreOrganisering(String fid, EndreOrganiseringCmd endreOrganiseringCmd) {
@@ -41,27 +35,13 @@ public class OrganiseringEventCommandService {
     }
 
     private OrganiseringOpprettetEventV1 getOpprettEvent(String fid, OpprettOrganiseringCmd opprettOrganiseringCmd) {
-
-        String nomIdOver = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            opprettOrganiseringCmd.agressoIdOver(),
-            opprettOrganiseringCmd.orgNivOver(),
-            opprettOrganiseringCmd.navnOver()
-        ).map(IOrgenhet::getId).orElse("");
-
-        String nomIdUnder = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            opprettOrganiseringCmd.agressoId(),
-            opprettOrganiseringCmd.orgNiv(),
-            opprettOrganiseringCmd.navn()
-        ).map(IOrgenhet::getId).orElse("");
-
-
         return new OrganiseringOpprettetEventV1(
             fid,
             new OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData(
-                nomIdOver,
-                nomIdUnder,
-                opprettOrganiseringCmd.navnOver(),
+                opprettOrganiseringCmd.id(),
                 opprettOrganiseringCmd.navn(),
+                opprettOrganiseringCmd.idOver(),
+                opprettOrganiseringCmd.navnOver(),
                 opprettOrganiseringCmd.gyldigFom(),
                 opprettOrganiseringCmd.gyldigTom()
             ),
@@ -71,25 +51,13 @@ public class OrganiseringEventCommandService {
     }
 
     private OrganiseringEvent getEndreEvent(String fid, EndreOrganiseringCmd endreOrganiseringCmd) {
-        String nomIdOver = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            endreOrganiseringCmd.agressoIdOver(),
-            endreOrganiseringCmd.orgNivOver(),
-            endreOrganiseringCmd.navnOver()
-        ).map(IOrgenhet::getId).orElse("");
-
-        String nomIdUnder = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            endreOrganiseringCmd.agressoId(),
-            endreOrganiseringCmd.orgNiv(),
-            endreOrganiseringCmd.navn()
-        ).map(IOrgenhet::getId).orElse("");
-
         return new OrganiseringEndretEventV1(
             fid,
             new OrganiseringEndretEventV1.OrganiseringEndretEventData(
-                nomIdOver,
-                nomIdUnder,
-                endreOrganiseringCmd.navnOver(),
+                endreOrganiseringCmd.id(),
                 endreOrganiseringCmd.navn(),
+                endreOrganiseringCmd.idOver(),
+                endreOrganiseringCmd.navnOver(),
                 endreOrganiseringCmd.gyldigFom(),
                 endreOrganiseringCmd.gyldigTom()
             ),

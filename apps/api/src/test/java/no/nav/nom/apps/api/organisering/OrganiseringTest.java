@@ -190,10 +190,10 @@ public class OrganiseringTest extends TestBase {
         // mock(oppdatere) organiseringByFid map i OrganiseringStateRepository
         OrganiseringState organiseringState =  OrganiseringState.builder()
             .fid("organisering_1")
-            .idOver(orgeEnhetStateOver.id())
             .id(orgeEnhetStateUnder.id())
-            .navnOver(mockedOrganisering.getORGNODE_NAVN_OVER())
             .navn(mockedOrganisering.getORGNODE_NAVN())
+            .idOver(orgeEnhetStateOver.id())
+            .navnOver(mockedOrganisering.getORGNODE_NAVN_OVER())
             .build();
         organiseringStateRepository.putEventAggregate(organiseringState);
 
@@ -267,10 +267,10 @@ public class OrganiseringTest extends TestBase {
         // oppdatere organiseringByFid map i OrganiseringStateRepository
         OrganiseringState organiseringState3 =  OrganiseringState.builder()
             .fid("organisering_3")
-            .idOver(overEhnetTilOrgEnhet3.id())
             .id(orgEnhet3.id())
-            .navnOver(organisering3.getORGNODE_NAVN_OVER())
             .navn(organisering3.getORGNODE_NAVN())
+            .idOver(overEhnetTilOrgEnhet3.id())
+            .navnOver(organisering3.getORGNODE_NAVN_OVER())
             .gyldigFom(LocalDate.now().minusDays(1))
             .gyldigTom(Optional.empty())
             .build();
@@ -278,10 +278,10 @@ public class OrganiseringTest extends TestBase {
 
         OrganiseringState organiseringState2 =  OrganiseringState.builder()
             .fid("organisering_2")
-            .idOver(orgEnhet3.id())
             .id(orgEnhet2.id())
-            .navnOver(organisering2.getORGNODE_NAVN_OVER())
             .navn(organisering2.getORGNODE_NAVN())
+            .idOver(orgEnhet3.id())
+            .navnOver(organisering2.getORGNODE_NAVN_OVER())
             .gyldigFom(LocalDate.now().minusDays(1))
             .gyldigTom(Optional.empty())
             .build();
@@ -346,6 +346,7 @@ public class OrganiseringTest extends TestBase {
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues()
             .id(id)
+            .navn(navn)
             .build();
 
         when(orgenhetService.getEnhetByAgressoIdNivaAndName(kode, niva, navn))

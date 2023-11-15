@@ -5,12 +5,10 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import java.time.LocalDate;
 
 public record EndreOrganiseringCmd(
-    String agressoIdOver,
-    String agressoId,
-    String orgNivOver,
-    String orgNiv,
-    String navnOver,
+    String id,
     String navn,
+    String idOver,
+    String navnOver,
     LocalDate gyldigFom,
     LocalDate gyldigTom,
     InputMetadata inputMetadata

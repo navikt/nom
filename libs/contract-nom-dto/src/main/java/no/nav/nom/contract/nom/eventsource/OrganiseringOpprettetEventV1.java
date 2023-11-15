@@ -18,10 +18,10 @@ public class OrganiseringOpprettetEventV1 extends OrganiseringEvent {
     }
 
     public record OrganiseringOpprettetEventData(
-        String idOver,
         String id,
-        String navnOver,
         String navn,
+        String idOver,
+        String navnOver,
         LocalDate gyldigFom,
         LocalDate gyldigTom
     ) implements Data { }

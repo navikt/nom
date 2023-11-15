@@ -52,12 +52,12 @@ public class EventsrcToState {
         try {
             return new OrganiseringState(
                 fid,
-                eventStateAggregate.get("idOver").asText(),
                 eventStateAggregate.get("id").asText(),
-                eventStateAggregate.get("navnOver").asText(),
                 eventStateAggregate.get("navn").asText(),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText())
+                eventStateAggregate.get("idOver").asText(),
+                eventStateAggregate.get("navnOver").asText(),
+                LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
+                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null)
             );
         } catch (Exception e){
             log.error("Error mapping to OrganiseringState", e);

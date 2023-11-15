@@ -47,12 +47,12 @@ public class EventsrcToStateTest {
         final OrganiseringEvent event = getOpprettetOrganiseringEvent(eventData);
         final OrganiseringState expected = new OrganiseringState(
             event.getFid(),
-            eventData.idOver(),
             eventData.id(),
-            eventData.navnOver(),
             eventData.navn(),
-            Optional.of(eventData.gyldigTom()),
-            eventData.gyldigFom()
+            eventData.idOver(),
+            eventData.navnOver(),
+            eventData.gyldigFom(),
+            Optional.of(eventData.gyldigTom())
         );
 
         //act
@@ -71,13 +71,13 @@ public class EventsrcToStateTest {
         final OrganiseringEvent event = getEndretOrganiseringEvent(eventData);
         final OrganiseringState expected = new OrganiseringState(
             event.getFid(),
-            eventData.idOver(),
             eventData.id(),
-            eventData.navnOver(),
             eventData.navn(),
-            Optional.of(eventData.gyldigTom()),
-            eventData.gyldigFom()
-        );
+            eventData.idOver(),
+            eventData.navnOver(),
+            eventData.gyldigFom(),
+            Optional.of(eventData.gyldigTom())
+            );
 
         //act
         inputTopic.pipeInput(event);
@@ -95,12 +95,12 @@ public class EventsrcToStateTest {
         final OrganiseringEvent eventOpprett = getOpprettetOrganiseringEvent(eventDataOpprett);
         final OrganiseringState expectedOpprett = new OrganiseringState(
             eventOpprett.getFid(),
-            eventDataOpprett.idOver(),
             eventDataOpprett.id(),
-            eventDataOpprett.navnOver(),
             eventDataOpprett.navn(),
-            Optional.of(eventDataOpprett.gyldigTom()),
-            eventDataOpprett.gyldigFom()
+            eventDataOpprett.idOver(),
+            eventDataOpprett.navnOver(),
+            eventDataOpprett.gyldigFom(),
+            Optional.of(eventDataOpprett.gyldigTom())
         );
 
         // endret event
@@ -108,13 +108,13 @@ public class EventsrcToStateTest {
         final OrganiseringEvent eventEndre = getEndretOrganiseringEvent(eventDataEndre);
         final OrganiseringState expectedEndre = new OrganiseringState(
             eventEndre.getFid(),
-            eventDataEndre.idOver(),
             eventDataEndre.id(),
-            eventDataEndre.navnOver(),
             eventDataEndre.navn(),
-            Optional.of(eventDataEndre.gyldigTom()),
-            eventDataEndre.gyldigFom()
-        );
+            eventDataEndre.idOver(),
+            eventDataEndre.navnOver(),
+            eventDataEndre.gyldigFom(),
+            Optional.of(eventDataEndre.gyldigTom())
+            );
 
         final List<OrganiseringEvent> inputList = Arrays.asList(eventOpprett, eventEndre);
         final List<OrganiseringState> expectedList = Arrays.asList(expectedOpprett, expectedEndre);
@@ -162,10 +162,10 @@ public class EventsrcToStateTest {
 
     private OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData getOpprettetEventData() {
         return new OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData(
-            "idOver",
             "id",
-            "navnOver",
             "navn",
+            "idOver",
+            "navnOver",
             LocalDate.of(2021, 1, 1),
             LocalDate.of(2099, 12, 1)
         );
@@ -186,10 +186,10 @@ public class EventsrcToStateTest {
 
     private OrganiseringEndretEventV1.OrganiseringEndretEventData getEndretEventData() {
         return new OrganiseringEndretEventV1.OrganiseringEndretEventData(
-            "idOver",
             "id",
-            "navnOver",
             "navn",
+            "idOver",
+            "navnOver",
             LocalDate.of(2021, 1, 1),
             LocalDate.of(2099, 12, 1)
         );

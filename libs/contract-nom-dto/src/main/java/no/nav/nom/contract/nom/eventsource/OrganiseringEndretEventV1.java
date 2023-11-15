@@ -16,10 +16,10 @@ public class OrganiseringEndretEventV1  extends OrganiseringEvent{
     }
 
     public record OrganiseringEndretEventData(
-        String idOver,
         String id,
-        String navnOver,
         String navn,
+        String idOver,
+        String navnOver,
         LocalDate gyldigFom,
         LocalDate gyldigTom
     ) implements Data { }
