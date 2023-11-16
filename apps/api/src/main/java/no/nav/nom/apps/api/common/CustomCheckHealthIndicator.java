@@ -1,11 +1,11 @@
 package no.nav.nom.apps.api.common;
 
-import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.lucenesearch.LuceneService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import org.springframework.boot.actuate.availability.AvailabilityStateHealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.availability.ApplicationAvailability;
@@ -19,14 +19,16 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
     private final RessursStateListener ressursStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
-//    private final DvhRestConsumer dvhRestConsumer;
+    private final NomMasteredRessursListener nomMasteredRessursListener;
     private final LuceneService luceneService;
     private final DvhStartupLoadMonitor dvhStartupLoadMonitor;
 
     public CustomCheckHealthIndicator(
         ApplicationAvailability availability,
         RessursStateListener ressursStateListener, OrgEnhetStateListener orgEnhetStateListener,
-        OrgtilknytningStateListener orgtilknytningStateListener, LuceneService luceneService, DvhStartupLoadMonitor dvhStartupLoadMonitor
+        OrgtilknytningStateListener orgtilknytningStateListener,
+        NomMasteredRessursListener nomMasteredRessursListener,
+        LuceneService luceneService, DvhStartupLoadMonitor dvhStartupLoadMonitor
     ) {
         super(availability, ReadinessState.class, (statusMappings) -> {
             statusMappings.add(ReadinessState.ACCEPTING_TRAFFIC, Status.UP);
@@ -35,6 +37,7 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
         this.ressursStateListener = ressursStateListener;
         this.orgEnhetStateListener = orgEnhetStateListener;
         this.orgtilknytningStateListener = orgtilknytningStateListener;
+        this.nomMasteredRessursListener = nomMasteredRessursListener;
         this.luceneService = luceneService;
         this.dvhStartupLoadMonitor = dvhStartupLoadMonitor;
     }
@@ -43,7 +46,7 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
     protected AvailabilityState getState(ApplicationAvailability applicationAvailability) {
         if (orgEnhetStateListener.initloadComplete() && ressursStateListener.initloadComplete() &&
             dvhStartupLoadMonitor.hasCompleted() && luceneService.initLoadComplete() &&
-            orgtilknytningStateListener.initloadComplete()) {
+            orgtilknytningStateListener.initloadComplete() && nomMasteredRessursListener.initloadComplete()) {
             return ReadinessState.ACCEPTING_TRAFFIC;
         } else {
             return ReadinessState.REFUSING_TRAFFIC;

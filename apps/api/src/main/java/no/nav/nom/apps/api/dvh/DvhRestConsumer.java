@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStat
 import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,7 @@ public class DvhRestConsumer {
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
+    private final NomMasteredRessursListener nomMasteredRessursListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhOrgenhetsLast dvhOrgenhetsLast;
@@ -266,7 +268,8 @@ public class DvhRestConsumer {
     }
 
     private boolean isInitialStateReady() {
-        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete() && orgEnhetStateListener.initloadComplete();
+        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete()
+            && orgEnhetStateListener.initloadComplete() && nomMasteredRessursListener.initloadComplete();
     }
 
     private String durationAsH24(LocalDateTime start) {
