@@ -44,7 +44,7 @@ spec:
       cpu: 300m
       memory: 1024Mi
     limits:
-      memory: 8192Mi
+      memory: 10240Mi
   leaderElection: true
   prometheus:
     enabled: true
