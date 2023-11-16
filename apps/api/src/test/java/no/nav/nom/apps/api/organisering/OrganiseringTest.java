@@ -74,7 +74,7 @@ public class OrganiseringTest extends TestBase {
 
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws JsonProcessingException {
         dvhOrganiseringMockUtils.clearResponse();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
@@ -202,8 +202,7 @@ public class OrganiseringTest extends TestBase {
         assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
         assertThat(terminateRecord.value().getData()).isExactlyInstanceOf(OrganiseringAvsluttetEventData.class);
 
-        var createMessage = (OrganiseringOpprettetEventData) createRecord.value().getData();
-        var terminateMessage = (OrganiseringAvsluttetEventData) createRecord.value().getData();
+        var terminateMessage = (OrganiseringAvsluttetEventData) terminateRecord.value().getData();
         assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
     }
 

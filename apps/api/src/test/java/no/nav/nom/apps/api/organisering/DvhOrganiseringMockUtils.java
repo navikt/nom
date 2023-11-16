@@ -26,8 +26,10 @@ public class DvhOrganiseringMockUtils {
         createResponse(response);
     }
 
-    public void clearResponse() {
+    public void clearResponse() throws JsonProcessingException {
         response.clear();
+        // and update stub such that it now returns an empty reponse
+        addToResponse();
     }
 
     private void createResponse(List<DvhOrganiseringMock> dvhOrganiseringMocks) throws JsonProcessingException {
