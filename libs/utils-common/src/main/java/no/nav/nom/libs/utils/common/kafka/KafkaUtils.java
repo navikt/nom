@@ -23,7 +23,7 @@ public class KafkaUtils {
             val endOffset = findEndOffsetForPartition(consumer, topic, 0);
             val complete = isAtOrAfterOffsetForPartition(consumer, topic, 0, endOffset);
 
-            if (complete) {
+            if (endOffset == 0 || complete) {
                 initialLoadComplete.set(true);
                 if (callback != null) {
                     try { Thread.sleep(200); } catch (InterruptedException ignored) { } // Ta en kunstpause her for å la andre tråder få oppdatert seg
