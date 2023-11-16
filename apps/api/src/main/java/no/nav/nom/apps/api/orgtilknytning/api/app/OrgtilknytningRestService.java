@@ -8,6 +8,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundE
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -24,14 +25,17 @@ public class OrgtilknytningRestService {
     private final OrgtilknytningStateRepository orgtilknytningStateRepository;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
 
     public OrgtilknytningRestService(
         OrgtilknytningStateRepository orgtilknytningStateRepository, OrgtilknytningCommandService orgtilknytningCommandService,
-        RessursStateRepository ressursStateRepository
+        RessursStateRepository ressursStateRepository,
+        NomMastered nomMastered
     ) {
         this.orgtilknytningStateRepository = orgtilknytningStateRepository;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
     }
 
     public List<OrgtilknytningState> getOrgtilknytninger(Optional<String> navident) {
@@ -85,5 +89,7 @@ public class OrgtilknytningRestService {
                 null
             )
         );
+
+        nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 }

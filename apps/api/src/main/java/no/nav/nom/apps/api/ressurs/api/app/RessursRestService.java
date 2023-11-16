@@ -22,6 +22,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessurs
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
 import no.nav.nom.contract.nom.Sektor;
@@ -57,6 +58,7 @@ public class RessursRestService {
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
     private final RessursLedereResolver ressursLedereResolver;
     private final KafkaTopicReader kafkaTopicReader;
+    private final NomMastered nomMastered;
 
     public RessursRestService(
         RessursStateRepository ressursStateRepository,
@@ -68,7 +70,8 @@ public class RessursRestService {
         RessursOpprettetEmailService ressursOpprettetEmailService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
         RessursLedereResolver ressursLedereResolver,
-        KafkaTopicReader kafkaTopicReader
+        KafkaTopicReader kafkaTopicReader,
+        NomMastered nomMastered
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommadService = ressursCommadService;
@@ -80,6 +83,7 @@ public class RessursRestService {
         this.kafkaTopicReader = kafkaTopicReader;
         this.ressursContactDetailsResolver = ressursContactDetailsResolver;
         this.ressursLedereResolver = ressursLedereResolver;
+        this.nomMastered = nomMastered;
     }
 
     public Ressurs findRessursByNavident(String navident) {
@@ -125,6 +129,7 @@ public class RessursRestService {
         ));
 
         ressursCommadService.oppdaterPersonaliaEvent(oppdaterPersonaliaCommand, inputMetadata);
+        nomMastered.markRessursAsMasteredInNom(navident);
     }
 
     public List<JsonNode> getRessursEvents(ReadTopicRequest readTopicRequest) {
@@ -217,8 +222,10 @@ public class RessursRestService {
             request.getAnsettelsesType()
         );
 
+
         try {
             RessursState opprettetRessurs = ressursCommadService.createRessursSync(opprettRessursCommand);
+            nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());
 
             // If ressurs is EKSTERN we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
             if (request.getSektor() == Sektor.EKSTERN && request.getSluttDato() != null) {

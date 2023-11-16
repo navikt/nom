@@ -4,6 +4,7 @@ app:
     ressurs:
       stateTopic: org.nom.intern-ressurs-state
       eventsourceTopic: org.nom.ressurs-eventsource
+      nomMasteredRessursTopic: org.nom.nom-mastered-ressurs
     orgEnhet:
       stateTopic: org.nom.intern-orgenhet-state
       eventsourceTopic: org.nom.orgenhet-eventsource

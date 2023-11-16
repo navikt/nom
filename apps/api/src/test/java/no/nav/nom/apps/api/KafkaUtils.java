@@ -2,6 +2,7 @@ package no.nav.nom.apps.api;
 
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateListener;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.apache.kafka.clients.admin.RecordsToDelete;
@@ -35,10 +36,11 @@ public class KafkaUtils {
     private final String orgenhetStateTopic;
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
     @SpyBean
-    private final RessursStateListener ressursStateListener;
-
+    final RessursStateListener ressursStateListener;
     @SpyBean
-    private final OrgEnhetStateListener orgEnhetStateListener;
+    public final NomMasteredRessursListener nomMasteredRessursListener;
+    @SpyBean
+    final OrgEnhetStateListener orgEnhetStateListener;
     private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
     private final KafkaTemplate<String, OrgEnhetState> orgEnhetStateKafkaTemplate;
 
@@ -48,12 +50,14 @@ public class KafkaUtils {
             RessursStateListener ressursStateListener,
             OrgEnhetStateListener orgEnhetStateListener,
             @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
-            @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic
+            @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
+            NomMasteredRessursListener nomMasteredRessursListener
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
 
         this.ressursStateListener = ressursStateListener;
         this.ressursStateTopic = ressursStateTopic;
+        this.nomMasteredRessursListener = nomMasteredRessursListener;
         this.ressursStateKafkaTemplate = ressursStateKafkaTemplate();
 
         this.orgEnhetStateListener = orgEnhetStateListener;
