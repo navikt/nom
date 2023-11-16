@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.organisering;
 
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService;
+import no.nav.nom.apps.api.organisering.eventsourcing.OrganiseringService.OrganiseringIdTuple;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -14,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -200,4 +203,33 @@ class OrganiseringServiceTest {
             null
         );
     }
+
+    @Test
+    void should_find_fids_in_state_but_not_in_dvh_organiseringer() {
+        String fidNotFound = "fid_not_found";
+        String fidFound = "fid_found";
+
+        var organiseringerFromDvh = List.of(new OrganiseringIdTuple("id_found", "idOver_found"));
+
+        var orgStateFound = OrganiseringState.builder()
+            .fid(fidFound)
+            .id("id_found")
+            .idOver("idOver_found")
+            .build();
+
+        var orgStateNotFound = OrganiseringState.builder()
+            .fid(fidNotFound)
+            .id("id_not_found")
+            .idOver("idOver_not_found")
+            .build();
+
+        var organiseringState = Map.of(fidFound, orgStateFound, fidNotFound, orgStateNotFound);
+
+        var fidsNotFromDvh = organiseringService.fidsInStateNotInDvhOrganiseringer(organiseringerFromDvh, organiseringState);
+        assertThat(fidsNotFromDvh.size()).isEqualTo(1);
+        assertThat(fidsNotFromDvh.get(0)).isEqualTo(fidNotFound);
+    }
+
+
+
 }

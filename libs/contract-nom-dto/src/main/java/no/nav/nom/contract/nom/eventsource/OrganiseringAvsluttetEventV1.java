@@ -15,8 +15,6 @@ public class OrganiseringAvsluttetEventV1 extends OrganiseringEvent{
     }
 
     public record OrganiseringAvsluttetEventData(
-        String id,
-        String idOver,
         LocalDate gyldigTom
     ) implements Data { }
 

@@ -5,8 +5,6 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import java.time.LocalDate;
 
 public record AvsluttOrganiseringCmd(
-    String id,
-    String idOver,
     LocalDate gyldigTom,
     InputMetadata inputMetadata
 ) {}

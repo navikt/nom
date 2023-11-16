@@ -74,8 +74,6 @@ public class OrganiseringEventCommandService {
         return new OrganiseringAvsluttetEventV1(
             fid,
             new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
-                avsluttOrganiseringCmd.id(),
-                avsluttOrganiseringCmd.idOver(),
                 avsluttOrganiseringCmd.gyldigTom()
             ),
             avsluttOrganiseringCmd.inputMetadata()

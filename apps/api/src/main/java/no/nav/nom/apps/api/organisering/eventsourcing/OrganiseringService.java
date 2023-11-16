@@ -15,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,9 +45,14 @@ public class OrganiseringService {
         logger.info("Starter innlesning av organiseringer");
 
         int numberOfNew = 0;
-        int numberOfUpdated = 0;
+        int numberOfTerminated = 0;
+
+        List<OrganiseringIdTuple> organiseringIdsFromDvh = new ArrayList<>();
+
 
         for (DvhOrganisering dvhOrganisering : dvhOrganiseringer) {
+            logger.debug("Organisering fra DVH: {}", dvhOrganisering);
+
             Optional<IOrgenhet> orgEnhet = orgenhetService
                 .getEnhetByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder());
 
@@ -57,29 +65,48 @@ public class OrganiseringService {
 
                 if (organiseringFid.isPresent()) {
                     if (hasOrganiseringChanged(organiseringFid.get(), dvhOrganisering, orgEnhet.get(), orgEnhetOver.get())) {
-                        organiseringEventCommandService
-                            .endreOrganisering(organiseringFid.get(), getEndreOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
-                        numberOfUpdated++;
+                        organiseringEventCommandService.avsluttOrganisering(organiseringFid.get(), getAvsluttOrganiseringCmd());
+                        numberOfTerminated++;
+
+                        organiseringEventCommandService.opprettOrganisering(
+                            getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
+                        numberOfNew++;
                     }
                 } else {
                     organiseringEventCommandService.opprettOrganisering(getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
                     numberOfNew++;
                 }
-            } else {
-                logger.debug("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository");
-            }
 
+                organiseringIdsFromDvh.add(new OrganiseringIdTuple(orgEnhet.get().getId(), orgEnhetOver.get().getId()));
+
+            } else {
+                logger.info("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: {} orgEnhetOver: {}", orgEnhet, orgEnhetOver);
+            }
         }
 
-        logger.info("Antall nye organiseringer: {} Antall oppdaterte: {}", numberOfNew, numberOfUpdated);
+        logger.info("Antall nye organiseringer: {} Antall avsluttede: {}", numberOfNew, numberOfTerminated);
+
+
+        List<String> fidsToTerminate = fidsInStateNotInDvhOrganiseringer(organiseringIdsFromDvh, organiseringStateRepository.getAll());
+        fidsToTerminate.forEach(fid -> organiseringEventCommandService.avsluttOrganisering(fid, getAvsluttOrganiseringCmd()));
+        logger.info("Antall organiseringer ikke lenget mottatt fra DVH og derfor avsluttet: {} ", fidsToTerminate.size());
     }
+
+    public record OrganiseringIdTuple(String id, String idOver) {}
 
     private Optional<String> getFidForOrganisering(DvhOrganisering dvhOrganisering) {
         return Optional.ofNullable(organiseringStateRepository
             .findFidByAgressoIdNivaAndName(dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder()));
     }
 
-    public boolean hasOrganiseringChanged(String fid, DvhOrganisering dvhOrg, IOrgenhet orgEnhet, IOrgenhet orgEnhetOver) {
+    public List<String> fidsInStateNotInDvhOrganiseringer(List<OrganiseringIdTuple> organiseringerFromDvh, Map<String, OrganiseringState> organiseringerInState) {
+        return organiseringerInState.entrySet().stream()
+            .filter(e -> !organiseringerFromDvh.contains(new OrganiseringIdTuple(e.getValue().id(), e.getValue().idOver())))
+            .map(Map.Entry::getKey)
+            .toList();
+    }
+
+    public boolean hasOrganiseringChanged(String fid, DvhOrganisering newOrganiseringFromDvh, IOrgenhet newOrgEnhet, IOrgenhet newOrgEnhetOver) {
         boolean organiseringEndret = false;
 
         if (fid.startsWith("organisering")) {
@@ -88,12 +115,12 @@ public class OrganiseringService {
             if (eksisterendeOrganisering.isPresent()) {
                 OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
 
-                if (!eksisterendeOrg.id().equals(orgEnhet.getId()) ||
-                    !eksisterendeOrg.idOver().equals(orgEnhetOver.getId()) ||
-                    !eksisterendeOrg.navn().equals(dvhOrg.getNavnUnder()) ||
-                    !eksisterendeOrg.navnOver().equals(dvhOrg.getNavnOver()) ||
-                    !eksisterendeOrg.gyldigFom().equals(dvhOrg.getGyldigFom()) ||
-                    !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(dvhOrg.getGyldigTom()))
+                if (!eksisterendeOrg.id().equals(newOrgEnhet.getId()) ||
+                    !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId()) ||
+                    !eksisterendeOrg.navn().equals(newOrganiseringFromDvh.getNavnUnder()) ||
+                    !eksisterendeOrg.navnOver().equals(newOrganiseringFromDvh.getNavnOver()) ||
+                    !eksisterendeOrg.gyldigFom().equals(newOrganiseringFromDvh.getGyldigFom()) ||
+                    !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(newOrganiseringFromDvh.getGyldigTom()))
                 ) {
                     organiseringEndret = true;
                 }
@@ -126,15 +153,17 @@ public class OrganiseringService {
         );
     }
 
-    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd(IOrgenhet orgenhet, IOrgenhet orgenhetOver, DvhOrganisering dvhOrganisering) {
+    private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd() {
         return new AvsluttOrganiseringCmd(
-            orgenhet.getId(),
-            orgenhetOver.getId(),
-            dvhOrganisering.getGyldigTom(), // TODO Fix dates!
-            createInputMetadata(dvhOrganisering.getRawData())
+            LocalDate.now().minusDays(1), // TODO Fix dates!
+            createInputMetadata()
         );
     }
 
+
+    private InputMetadata createInputMetadata() {
+        return createInputMetadata(null);
+    }
 
     private InputMetadata createInputMetadata(Object rawData) {
         return new InputMetadata(

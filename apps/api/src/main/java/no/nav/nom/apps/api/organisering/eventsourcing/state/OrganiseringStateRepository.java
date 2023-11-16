@@ -49,4 +49,8 @@ public class OrganiseringStateRepository {
     public int count() {
         return organiseringByFid.size();
     }
+
+    public Map<String, OrganiseringState> getAll() {
+        return organiseringByFid;
+    }
 }
