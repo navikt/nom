@@ -269,7 +269,7 @@ public class DvhRestConsumer {
 
     private boolean isInitialStateReady() {
         return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete()
-            && orgEnhetStateListener.initloadComplete() && nomMasteredRessursListener.initloadComplete();
+            && orgEnhetStateListener.initloadComplete();
     }
 
     private String durationAsH24(LocalDateTime start) {

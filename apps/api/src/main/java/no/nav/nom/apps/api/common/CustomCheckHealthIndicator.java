@@ -46,7 +46,7 @@ public class CustomCheckHealthIndicator extends AvailabilityStateHealthIndicator
     protected AvailabilityState getState(ApplicationAvailability applicationAvailability) {
         if (orgEnhetStateListener.initloadComplete() && ressursStateListener.initloadComplete() &&
             dvhStartupLoadMonitor.hasCompleted() && luceneService.initLoadComplete() &&
-            orgtilknytningStateListener.initloadComplete() && nomMasteredRessursListener.initloadComplete()) {
+            orgtilknytningStateListener.initloadComplete()) {
             return ReadinessState.ACCEPTING_TRAFFIC;
         } else {
             return ReadinessState.REFUSING_TRAFFIC;

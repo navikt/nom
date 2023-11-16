@@ -25,7 +25,6 @@ public class KafkaUtils {
             val endOffset = findEndOffsetForPartition(consumer, topic, 0);
             val complete = isAtOrAfterOffsetForPartition(consumer, topic, 0, endOffset);
 
-            log.info("Kafka topic [{}] listener initial load: {} of {} messages read", topic, endOffset, endOffset);
             if (endOffset == 0 || complete) {
                 initialLoadComplete.set(true);
                 if (callback != null) {
