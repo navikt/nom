@@ -26,6 +26,7 @@ public class KafkaUtils {
             if (complete) {
                 initialLoadComplete.set(true);
                 if (callback != null) {
+                    try { Thread.sleep(200); } catch (InterruptedException ignored) { } // Ta en kunstpause her for å la andre tråder få oppdatert seg
                     callback.run();
                 }
             }
