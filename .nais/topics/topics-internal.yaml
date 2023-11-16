@@ -98,6 +98,7 @@ spec:
     partitions: 1
     replication: 3
     cleanupPolicy: compact
+    maxCompactionLagMs: 3600000  # 1000 * 60 * 60 = 3600000 = 1 hour
   acl:
     - team: nom
       application: nom-api
