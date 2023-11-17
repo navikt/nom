@@ -144,11 +144,11 @@ public class RessursRestService {
         OpprettRessursRequest request
     ) {
 
-        return ressursStateRepository.findByPersonident(request.getPersonident()).orElseGet(() -> {
+        return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -> {
             final var createRessursResponse = createRessurs(request);
 
             try {
-                ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.getOrgEnhetId());
+                ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.orgEnhetId());
             } catch (RessursOpprettetEmailException exception) {
                 //TODO: consider handling exception if email sending is important
                 log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
@@ -160,11 +160,12 @@ public class RessursRestService {
     }
 
     private RessursState createRessurs(OpprettRessursRequest request) {
+        validateOpprettRessursRequest(request);
 
         final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
             OpprettNavidentRequest.builder()
-                .personid(request.getPersonident())
-                .identPrefix(request.getVisningsetternavn().substring(0, 1))
+                .personid(request.personident())
+                .identPrefix(request.visningsetternavn().substring(0, 1))
                 .identType("STANDARD")
                 .build()
         );
@@ -185,13 +186,13 @@ public class RessursRestService {
             );
         }
 
-        final var pdlPerson = pdlClient.hentPerson(request.getPersonident());
+        final var pdlPerson = pdlClient.hentPerson(request.personident());
 
-        if (request.getVisningsmellomnavn() != null && request.getVisningsmellomnavn().isBlank()) {
-            request.setVisningsmellomnavn(null);
+        if (request.visningsmellomnavn() != null && request.visningsmellomnavn().isBlank()) {
+            request = request.toBuilder().visningsmellomnavn(null).build();
         }
 
-        log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.getVisningsetternavn());
+        log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         var metaData = new InputMetadata(
             "GraphQL",
@@ -204,22 +205,22 @@ public class RessursRestService {
         );
 
         final var opprettRessursCommand = new OpprettRessursCommand(
-            request.getPersonident(),
+            request.personident(),
             opprettNavidentResponse.getBody().getNavident(),
             pdlPerson,
-            request.getSektor(),
+            request.sektor(),
             new Visningsnavn(
-                request.getVisningsfornavn(),
-                Optional.ofNullable(request.getVisningsmellomnavn()),
-                request.getVisningsetternavn()
+                request.visningsfornavn(),
+                Optional.ofNullable(request.visningsmellomnavn()),
+                request.visningsetternavn()
             ),
             metaData,
-            request.getStartDato(),
-            Optional.ofNullable(request.getOrgEnhetId())
+            request.startDato(),
+            Optional.ofNullable(request.orgEnhetId())
                 .flatMap(orgEnhetStateRepository::findById)
                 .flatMap(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
-            request.getAnsettelsesType()
+            request.ansettelsesType()
         );
 
 
@@ -228,17 +229,17 @@ public class RessursRestService {
             nomMastered.markRessursAsMasteredInNom(opprettetRessurs.navident());
 
             // If ressurs is EKSTERN we fire a separate "avsluttRessursEvent" so that other systems, such as skjerming, know the ressurs already has a sluttDato.
-            if (request.getSektor() == Sektor.EKSTERN && request.getSluttDato() != null) {
+            if (request.sektor() == Sektor.EKSTERN && request.sluttDato().isPresent()) {
                 ressursCommadService.avsluttRessursEvent(
-                    new OpphorRessursCommand(opprettetRessurs.fid(), request.getSluttDato()),
+                    new OpphorRessursCommand(opprettetRessurs.fid(), request.sluttDato().get()),
                     metaData
                 );
 
                 var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(
                     new OpprettOrgtilknytning(
                         opprettetRessurs.navident(),
-                        request.getOrgEnhetId(),
-                        request.getStartDato(),
+                        request.orgEnhetId(),
+                        request.startDato(),
                         metaData,
                         null
                     )
@@ -248,8 +249,8 @@ public class RessursRestService {
                     orgTilknytningFid,
                     new AvvikleOrgtilknytning(
                         opprettetRessurs.navident(),
-                        request.getOrgEnhetId(),
-                        request.getSluttDato(),
+                        request.orgEnhetId(),
+                        request.sluttDato().get(),
                         metaData,
                         null
                     )
@@ -259,9 +260,9 @@ public class RessursRestService {
                     orgTilknytningFid,
                     new EndreDagligOppfolgingOrgtilknytning(
                         opprettetRessurs.navident(),
-                        request.getOrgEnhetId(),
-                        request.getStartDato(),
-                        Optional.of(request.getSluttDato()),
+                        request.orgEnhetId(),
+                        request.startDato(),
+                        request.sluttDato(),
                         true,
                         metaData,
                         null
@@ -272,6 +273,14 @@ public class RessursRestService {
             return opprettetRessurs;
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void validateOpprettRessursRequest(OpprettRessursRequest request) {
+        if (request.sektor() == Sektor.EKSTERN) {
+            if (request.sluttDato().isEmpty()) {
+                throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
+            }
         }
     }
 }
