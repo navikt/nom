@@ -52,7 +52,7 @@ spec:
   kafka:
     pool: nav-dev
   secureLogs:
-    enabled: false
+    enabled: true
   azure:
     application:
       enabled: true
