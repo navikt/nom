@@ -138,6 +138,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!--suppress VulnerableLibrariesLocal -->
+        <!-- https://github.com/jeremylong/DependencyCheck/issues/5608 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
