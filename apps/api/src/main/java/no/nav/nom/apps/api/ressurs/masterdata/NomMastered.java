@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Slf4j
 public class NomMastered {
-
+    public static final String UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS = "nom.master-ressurs.ikke-oppdater-fra-dvh";
     final Map<String, LocalDateTime> masteredNavidenter = new ConcurrentHashMap<>();
     final RessursStateRepository ressursStateRepository;
     final KafkaTemplate<String, LocalDateTime> nomMasteredRessursProducerTemplate;
