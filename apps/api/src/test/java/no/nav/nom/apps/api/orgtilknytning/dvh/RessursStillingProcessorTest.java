@@ -356,8 +356,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
 
         //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
+        when(nomMastered.isMastered(any())).thenReturn(true);
+        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -483,8 +483,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
 
         //Unleash flagg ikke satt og ident er mastret
-        when(nomMastered.isMastered(any())).thenReturn(false);
-        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(true);
+        when(nomMastered.isMastered(any())).thenReturn(true);
+        when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
 
         ressursStillingProcessor.process(navident, stillingPerioder);
 
