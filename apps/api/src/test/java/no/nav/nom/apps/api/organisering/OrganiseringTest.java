@@ -45,6 +45,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStateBuilderWithDefaultValues;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,6 +77,10 @@ public class OrganiseringTest extends TestBase {
 
     @BeforeEach
     public void setUp() throws JsonProcessingException {
+
+        // Always enable features for tests
+        when(unleash.isEnabled(any())).thenReturn(true);
+
         dvhOrganiseringMockUtils.clearResponse();
 
         Map<String, Object> consumerProps = new HashMap<>(KafkaTestUtils
