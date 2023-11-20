@@ -7,9 +7,10 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
+import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData;
-import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1.OrganiseringEndretEventData;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
+import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrganiseringState;
@@ -203,7 +204,7 @@ public class OrganiseringTest extends TestBase {
         assertThat(terminateRecord.value().getData()).isExactlyInstanceOf(OrganiseringAvsluttetEventData.class);
 
         var terminateMessage = (OrganiseringAvsluttetEventData) terminateRecord.value().getData();
-        assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
+        assertThat(terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
     }
 
     @Test
@@ -236,8 +237,9 @@ public class OrganiseringTest extends TestBase {
 
 
         // Organisering is now available from OrganiseringStateRepository
-        OrganiseringState organiseringState =  OrganiseringState.builder()
-            .fid("organisering_1")
+        String fidInitialOrganisering = "organisering_1";
+        OrganiseringState organiseringState = OrganiseringState.builder()
+            .fid(fidInitialOrganisering)
             .id(orgEnhetState.id())
             .navn(orgEnhetState.navn())
             .idOver(orgEnhetStateOver.id())
@@ -253,7 +255,7 @@ public class OrganiseringTest extends TestBase {
             .ORGNODE_NIVA_OVER("Niva_4000000")
             .build();
 
-        var orgEnhetStateOver_modified = mockOrgenhetServiceGetEnhet("mock_id_over_modified", mockedOrganisering_modified.getORGNODE_KODE_OVER(),
+        mockOrgenhetServiceGetEnhet("mock_id_over_modified", mockedOrganisering_modified.getORGNODE_KODE_OVER(),
             mockedOrganisering_modified.getORGNODE_NIVA_OVER(), mockedOrganisering_modified.getORGNODE_NAVN_OVER()
         );
 
@@ -268,6 +270,7 @@ public class OrganiseringTest extends TestBase {
         // Expect one create message and then one terminate + one create message for the change in organisering
         await()
             .atMost(1, SECONDS)
+
             .pollInterval(10, MILLISECONDS)
             .until(() -> recordsQueue.size() == 3);
 
@@ -306,7 +309,7 @@ public class OrganiseringTest extends TestBase {
 
 
         // Setup response from orgEnhet state lookup where we find NOM id
-        var overEhnetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
+        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
             organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
         );
 
@@ -321,19 +324,20 @@ public class OrganiseringTest extends TestBase {
         // Get organiseringer from DVH, should generate two opprettet messages (organisering 2 + 3)
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
+
         // oppdatere organiseringByFid map i OrganiseringStateRepository
-        OrganiseringState organiseringState3 =  OrganiseringState.builder()
+        OrganiseringState organiseringState3 = OrganiseringState.builder()
             .fid("organisering_3")
             .id(orgEnhet3.id())
             .navn(organisering3.getORGNODE_NAVN())
-            .idOver(overEhnetTilOrgEnhet3.id())
+            .idOver(overEnhetTilOrgEnhet3.id())
             .navnOver(organisering3.getORGNODE_NAVN_OVER())
             .gyldigFom(LocalDate.now().minusDays(1))
             .gyldigTom(Optional.empty())
             .build();
         organiseringStateRepository.putEventAggregate(organiseringState3);
 
-        OrganiseringState organiseringState2 =  OrganiseringState.builder()
+        OrganiseringState organiseringState2 = OrganiseringState.builder()
             .fid("organisering_2")
             .id(orgEnhet2.id())
             .navn(organisering2.getORGNODE_NAVN())
@@ -376,28 +380,36 @@ public class OrganiseringTest extends TestBase {
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
 
 
-        // Wait until 4 messages have arrived
-        // 2 messages initially + 2 from second part (organisering 4 created and organisering 2 changed)
+        // Wait until 5 messages have arrived
+        // 2 messages initially + 3 from second part (organisering 4 created, old organisering 2 is terminated and new organisering 2 is created)
         await()
             .atMost(1, SECONDS)
             .pollInterval(10, MILLISECONDS)
-            .until(() -> recordsQueue.size() == 4);
+            .until(() -> recordsQueue.size() == 5);
 
-        var createRecord = recordsQueue.remove();
-        recordsQueue.remove(); // Skip second create message
-        var changedRecord = recordsQueue.remove();
+        var initialNode2Record = recordsQueue.remove();
+        recordsQueue.remove(); // Not checking second create message
+        var terminateNode2Record = recordsQueue.remove();
+        var replacementNode2Record = recordsQueue.remove();
 
-        assertThat(createRecord.value().getData()).isExactlyInstanceOf(OrganiseringOpprettetEventData.class);
-        assertThat(changedRecord.value().getData()).isExactlyInstanceOf(OrganiseringEndretEventData.class);
+        // Check that the expected events were received
+        assertThat(initialNode2Record.value()).isExactlyInstanceOf(OrganiseringOpprettetEventV1.class);
+        assertThat(terminateNode2Record.value()).isExactlyInstanceOf(OrganiseringAvsluttetEventV1.class);
+        assertThat(replacementNode2Record.value()).isExactlyInstanceOf(OrganiseringOpprettetEventV1.class);
 
 
-        var createMessage = (OrganiseringOpprettetEventData) createRecord.value().getData();
-        var changeMessage = (OrganiseringEndretEventData) changedRecord.value().getData();
+        var initialNode2Message = (OrganiseringOpprettetEventData) initialNode2Record.value().getData();
+        var replacementNode2Message = (OrganiseringOpprettetEventData) replacementNode2Record.value().getData();
+        var terminateNode2Message = (OrganiseringAvsluttetEventData) terminateNode2Record.value().getData();
 
-        assertThat(createMessage.id()).isEqualTo(changeMessage.id());
-        assertThat(createMessage.navn()).isEqualTo(changeMessage.navn());
-        assertThat(changeMessage.idOver()).isEqualTo(orgEnhetState4.id());
-        assertThat(changeMessage.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
+        // Check that node 2 has the new organisering
+        assertThat(replacementNode2Message.id()).isEqualTo(initialNode2Message.id());
+        assertThat(replacementNode2Message.navn()).isEqualTo(initialNode2Message.navn());
+        assertThat(replacementNode2Message.idOver()).isEqualTo(orgEnhetState4.id());
+        assertThat(replacementNode2Message.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
+
+        // Check that the initial node 2 organisering has ended
+        assertThat(terminateNode2Message.gyldigTom()).isEqualTo(LocalDate.now());
     }
 
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {

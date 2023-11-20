@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class OrganiseringService {
@@ -46,8 +47,10 @@ public class OrganiseringService {
 
         int numberOfNew = 0;
         int numberOfTerminated = 0;
+        AtomicInteger numberOfTerminatedNotFromDvh = new AtomicInteger();
 
         List<OrganiseringIdTuple> organiseringIdsFromDvh = new ArrayList<>();
+        List<String> organiseringerTerminatedByUpdate = new ArrayList<>();
 
 
         for (DvhOrganisering dvhOrganisering : dvhOrganiseringer) {
@@ -67,6 +70,7 @@ public class OrganiseringService {
                     if (hasOrganiseringChanged(organiseringFid.get(), dvhOrganisering, orgEnhet.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.avsluttOrganisering(organiseringFid.get(), getAvsluttOrganiseringCmd());
                         numberOfTerminated++;
+                        organiseringerTerminatedByUpdate.add(organiseringFid.get());
 
                         organiseringEventCommandService.opprettOrganisering(
                             getOpprettOrganiseringCmd(orgEnhet.get(), orgEnhetOver.get(), dvhOrganisering));
@@ -88,8 +92,13 @@ public class OrganiseringService {
 
 
         List<String> fidsToTerminate = fidsInStateNotInDvhOrganiseringer(organiseringIdsFromDvh, organiseringStateRepository.getAll());
-        fidsToTerminate.forEach(fid -> organiseringEventCommandService.avsluttOrganisering(fid, getAvsluttOrganiseringCmd()));
-        logger.info("Antall organiseringer ikke lenget mottatt fra DVH og derfor avsluttet: {} ", fidsToTerminate.size());
+        // Remove organiseringer we have already generated avslutt events for
+        fidsToTerminate.stream()
+            .filter(fid -> !organiseringerTerminatedByUpdate.contains(fid))
+            .peek(fid -> numberOfTerminatedNotFromDvh.getAndIncrement())
+            .forEach(fid -> organiseringEventCommandService.avsluttOrganisering(fid, getAvsluttOrganiseringCmd()));
+
+        logger.info("Antall organiseringer ikke lenget mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
     }
 
     public record OrganiseringIdTuple(String id, String idOver) {}
@@ -129,6 +138,7 @@ public class OrganiseringService {
         return organiseringEndret;
     }
 
+    @SuppressWarnings("unused")
     private EndreOrganiseringCmd getEndreOrganiseringCmd(IOrgenhet orgenhet, IOrgenhet orgenhetOver, DvhOrganisering dvhOrganisering) {
         return new EndreOrganiseringCmd(
             orgenhet.getId(),
@@ -155,7 +165,7 @@ public class OrganiseringService {
 
     private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd() {
         return new AvsluttOrganiseringCmd(
-            LocalDate.now().minusDays(1), // TODO Fix dates!
+            LocalDate.now(), // TODO Fix dates!
             createInputMetadata()
         );
     }
