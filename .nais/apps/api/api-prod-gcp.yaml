@@ -138,6 +138,9 @@ spec:
         - application: toi-veileder
           namespace: toi
           cluster: prod-gcp
+        - application: nom-remedy-integrasjon
+          namespace: org
+          cluster: prod-fss
     outbound:
       rules:
         - application: nav-ident

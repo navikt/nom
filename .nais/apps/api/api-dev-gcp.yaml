@@ -162,6 +162,9 @@ spec:
         - application: toi-veileder
           namespace: toi
           cluster: dev-gcp
+        - application: nom-remedy-integrasjon
+          namespace: org
+          cluster: dev-fss
     outbound:
       rules:
         - application: nav-ident

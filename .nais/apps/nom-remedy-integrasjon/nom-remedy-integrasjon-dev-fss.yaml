@@ -51,3 +51,4 @@ spec:
     outbound:
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io
+        - host: nom-api.intern.dev.nav.no
