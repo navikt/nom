@@ -127,9 +127,7 @@ public class OrganiseringService {
                 if (!eksisterendeOrg.id().equals(newOrgEnhet.getId()) ||
                     !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId()) ||
                     !eksisterendeOrg.navn().equals(newOrganiseringFromDvh.getNavnUnder()) ||
-                    !eksisterendeOrg.navnOver().equals(newOrganiseringFromDvh.getNavnOver()) ||
-                    !eksisterendeOrg.gyldigFom().equals(newOrganiseringFromDvh.getGyldigFom()) ||
-                    !eksisterendeOrg.gyldigTom().equals(Optional.ofNullable(newOrganiseringFromDvh.getGyldigTom()))
+                    !eksisterendeOrg.navnOver().equals(newOrganiseringFromDvh.getNavnOver())
                 ) {
                     organiseringEndret = true;
                 }
@@ -157,15 +155,15 @@ public class OrganiseringService {
             orgenhet.getNavn(),
             orgenhetOver.getId(),
             orgenhetOver.getNavn(),
-            dvhOrganisering.getGyldigFom(), // TODO Fix dates!
-            dvhOrganisering.getGyldigTom(),
+            LocalDate.now(),
+            Optional.empty(),
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }
 
     private AvsluttOrganiseringCmd getAvsluttOrganiseringCmd() {
         return new AvsluttOrganiseringCmd(
-            LocalDate.now(), // TODO Fix dates!
+            LocalDate.now(),
             createInputMetadata()
         );
     }

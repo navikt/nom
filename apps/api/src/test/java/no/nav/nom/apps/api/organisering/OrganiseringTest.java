@@ -148,6 +148,7 @@ public class OrganiseringTest extends TestBase {
         assertThat(eventData.navnOver()).isEqualTo(mockedOrganisering.getORGNODE_NAVN_OVER());
         assertThat(eventData.id()).isEqualTo(orgeEnhetState.id());
         assertThat(eventData.navn()).isEqualTo(mockedOrganisering.getORGNODE_NAVN());
+        assertThat(eventData.gyldigFom()).isEqualTo(LocalDate.now());
     }
 
     @Test
@@ -185,7 +186,7 @@ public class OrganiseringTest extends TestBase {
             .navn(orgeEnhetState.navn())
             .idOver(orgeEnhetStateOver.id())
             .navnOver(orgeEnhetStateOver.navn())
-            .gyldigFom(LocalDate.now().minusDays(1))
+            .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.empty())
             .build();
         organiseringStateRepository.putEventAggregate(organiseringState);
