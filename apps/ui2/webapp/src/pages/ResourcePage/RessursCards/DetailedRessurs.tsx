@@ -1,20 +1,25 @@
 import { css } from "@emotion/react";
 import {
   Buldings3Icon,
+  FloppydiskIcon,
+  PencilIcon,
   PersonIcon,
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
 import {
+  Alert,
   Button,
+  DatePicker,
   ExpansionCard,
   Heading,
   HelpText,
   Label,
   Link,
   Tag,
+  useDatepicker,
 } from "@navikt/ds-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Link as ReactRouterLink,
   useNavigate,
@@ -23,6 +28,7 @@ import {
 import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 
 import {
   getLedereForRessurs,
@@ -30,17 +36,27 @@ import {
   getOrgEnheterLedetAv,
   getOrgTilknytninger,
   getTeamcatMemberships,
+  updateOrgtilknytningDato,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
+import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { UserImage } from "~/components/UserImage";
+import { showToast } from "~/hooks/showToast";
+import { rowStyles } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
-import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
+import type {
+  EndreOrgtilknytningDatoRequest,
+  OrgtilknytningState,
+  Ressurs,
+} from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import {
+  formatDateWithoutTimezone,
   formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
@@ -137,6 +153,8 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+
   if (orgtilknytninger.length === 0) {
     return <></>;
   }
@@ -167,13 +185,20 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
         <Buldings3Icon />
         Organisatorisk tilhørighet
       </Heading>
-      {activeOrgtilknytninger.map((orgTilknytning) => (
-        <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhetId}
-          orgTilknytning={orgTilknytning}
-          ressurs={ressurs}
-        />
-      ))}
+      {activeOrgtilknytninger.map((orgTilknytning) =>
+        editOrgtilknytning === orgTilknytning.fid ? (
+          <EditOrgtilknytning
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+          />
+        ) : (
+          <OrganisationHierarchyTree
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+            ressurs={ressurs}
+          />
+        ),
+      )}
       <FutureOrgTilknytninger
         futureOrgTilknytninger={futureOrgTilknytninger}
         ressurs={ressurs}
@@ -192,6 +217,8 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
   }
@@ -201,13 +228,20 @@ function FutureOrgTilknytninger({
       <Heading level="2" size="xsmall">
         Fremtidige org.tilknytninger
       </Heading>
-      {futureOrgTilknytninger.map((orgTilknytning) => (
-        <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhetId}
-          orgTilknytning={orgTilknytning}
-          ressurs={ressurs}
-        />
-      ))}
+      {futureOrgTilknytninger.map((orgTilknytning) =>
+        editOrgtilknytning === orgTilknytning.fid ? (
+          <EditOrgtilknytning
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+          />
+        ) : (
+          <OrganisationHierarchyTree
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+            ressurs={ressurs}
+          />
+        ),
+      )}
     </>
   );
 }
@@ -288,6 +322,187 @@ function ExpiredOrgTilknytning({
   );
 }
 
+function EditOrgtilknytning({
+  orgTilknytning,
+}: {
+  orgTilknytning: OrgtilknytningState;
+}) {
+  const methods = useForm({
+    defaultValues: {
+      gyldigFom: orgTilknytning.gyldigFom,
+      gyldigTom: orgTilknytning.gyldigTom,
+    },
+  });
+
+  const { handleSubmit, setValue } = methods;
+
+  const startDatepicker = useDatepicker({
+    onDateChange: (date) =>
+      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: new Date(orgTilknytning.gyldigFom),
+  });
+
+  const sluttDatepicker = useDatepicker({
+    onDateChange: (date) =>
+      setValue("gyldigTom", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: orgTilknytning.gyldigTom
+      ? new Date(orgTilknytning.gyldigTom)
+      : undefined,
+  });
+
+  const orgEnhetQuery = useQuery({
+    queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
+    queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
+  });
+
+  const orgtilknytningDatoMutation = useMutation<
+    unknown,
+    unknown,
+    EndreOrgtilknytningDatoRequest
+  >({
+    mutationFn: async (values) =>
+      updateOrgtilknytningDato(orgTilknytning.fid, values),
+    onSuccess: () => {
+      showToast({ text: "Lagret" });
+      // TODO:
+      // Sørge for at verdier lastes på nytt ved lagring
+      //--- i toppen av komponenten
+      // const queryClient = useQueryClient();
+      //
+      // --- i onSuccess på linja før navigate()
+      // queryClient.invalidateQueries({ queryKey: orgtilknytningerKeys.navident(navident)});
+      navigate({ search: { editOrgtilknytning: undefined } });
+    },
+  });
+
+  const orgEnhet = orgEnhetQuery.data;
+
+  const navigate = useNavigate();
+
+  if (!orgEnhet) {
+    return <></>;
+  }
+
+  const orgEnhetLeder = orgEnhet.ledere[0];
+
+  return (
+    <div
+      aria-label="datoendring"
+      css={css`
+        margin-bottom: var(--a-spacing-8);
+        background-color: var(--a-surface-default);
+        border-radius: var(--a-border-radius-large);
+        border: 1px solid var(--a-border-default);
+        padding: var(--a-spacing-3) var(--a-spacing-4);
+      `}
+    >
+      <Heading
+        css={css`
+          margin-bottom: var(--a-spacing-1);
+        `}
+        level="3"
+        size="medium"
+      >
+        {orgEnhet.navn}
+      </Heading>
+      <Label size="small">
+        <span
+          css={css`
+            font-weight: var(--a-font-weight-regular);
+          `}
+        >
+          Leder:{" "}
+        </span>
+        {formatVisningsnavn(orgEnhetLeder?.visningsnavn)}
+      </Label>
+      {orgEnhet.remedyEnhetId ? (
+        <Label
+          css={css`
+            margin-left: 14px;
+          `}
+          size="small"
+        >
+          <span
+            css={css`
+              font-weight: var(--a-font-weight-regular);
+            `}
+          >
+            Enhet i Remedy:{" "}
+          </span>
+          {orgEnhet.remedyEnhetId}
+        </Label>
+      ) : undefined}
+      <form
+        onSubmit={handleSubmit((values) =>
+          orgtilknytningDatoMutation.mutate(values),
+        )}
+      >
+        <div
+          css={css`
+            display: flex;
+            margin-top: var(--a-spacing-6);
+            margin-bottom: var(--a-spacing-4);
+            ${rowStyles}
+          `}
+        >
+          <FullWidthDatePickerWrapper>
+            <DatePicker {...startDatepicker.datepickerProps}>
+              <DatePicker.Input
+                {...startDatepicker.inputProps}
+                label="Første arbeidsdag i enheten"
+              />
+            </DatePicker>
+          </FullWidthDatePickerWrapper>
+          <FullWidthDatePickerWrapper>
+            <DatePicker {...sluttDatepicker.datepickerProps}>
+              <DatePicker.Input
+                {...sluttDatepicker.inputProps}
+                label="Siste arbeidsdag i enheten"
+              />
+            </DatePicker>
+          </FullWidthDatePickerWrapper>
+        </div>
+        {orgtilknytningDatoMutation.isError ? (
+          <Alert variant="error">Noe gikk galt</Alert>
+        ) : undefined}
+        <span>
+          Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
+          med én gang.
+        </span>
+        <div
+          css={css`
+            display: flex;
+            justify-content: flex-end;
+            margin-top: var(--a-spacing-4);
+          `}
+        >
+          <Button
+            css={css`
+              margin-right: var(--a-spacing-6);
+            `}
+            onClick={() =>
+              navigate({ search: { editOrgtilknytning: undefined } })
+            }
+            size="small"
+            type="button"
+            variant="secondary"
+          >
+            Avbryt
+          </Button>
+          <Button
+            icon={<FloppydiskIcon aria-hidden />}
+            size="small"
+            type="submit"
+            variant="primary"
+          >
+            Lagre
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
@@ -302,13 +517,19 @@ function OrganisationHierarchyTree({
 
   const orgEnhet = orgEnhetQuery.data;
 
+  const navigate = useNavigate();
+
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+
+  const hasWriteAccess = useHasWriteAccess();
+
   if (!orgEnhet) {
     return <></>;
   }
 
   const orgEnhetLeder = orgEnhet.ledere[0];
 
-  const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
+  const { gyldigTom, gyldigFom, erDagligOppfolging, fid } = orgTilknytning;
 
   const startsInTheFuture =
     gyldigFom && isAfter(new Date(gyldigFom), new Date());
@@ -343,7 +564,16 @@ function OrganisationHierarchyTree({
           )}
         </ExpansionCard.Title>
         <ExpansionCard.Description>
-          Leder: {formatVisningsnavn(orgEnhetLeder.visningsnavn)}
+          <Label size="small">
+            <span
+              css={css`
+                font-weight: var(--a-font-weight-regular);
+              `}
+            >
+              Leder:{" "}
+            </span>
+            {formatVisningsnavn(orgEnhetLeder?.visningsnavn)}
+          </Label>
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
@@ -363,6 +593,28 @@ function OrganisationHierarchyTree({
         {gyldigTom && <span>Sluttdato: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: flex-end;
+            margin-top: var(--a-spacing-6);
+          `}
+        >
+          {hasWriteAccess &&
+            ressurs.sektor === Sektor.EKSTERN &&
+            editOrgtilknytning === undefined && (
+              <Button
+                icon={<PencilIcon aria-hidden />}
+                onClick={() =>
+                  navigate({ search: { editOrgtilknytning: fid } })
+                }
+                size="small"
+                variant="secondary"
+              >
+                Endre
+              </Button>
+            )}
+        </div>
       </ExpansionCard.Content>
     </ExpansionCard>
   );

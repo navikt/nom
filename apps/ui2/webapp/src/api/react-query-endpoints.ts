@@ -9,13 +9,14 @@ const CACHE_FOR = {
 };
 
 import type {
+  EndreOrgtilknytningDatoRequest,
+  GetPersonRequest,
   OrgEnhet,
+  OrgtilknytningState,
   Person,
   Ressurs,
   RessursLeder,
 } from "~/types/api-models";
-import type { OrgtilknytningState } from "~/types/api-models";
-import type { GetPersonRequest } from "~/types/api-models";
 
 export const ressurserGraphqlKeys = {
   all: ["ALLE_RESSURSER_GRAPHQL"] as const,
@@ -207,6 +208,17 @@ export const updateNavnForRessurs = async (
     await axios.post<unknown, AxiosResponse<unknown>>(
       `/nom-api/app/ressurser/${navident}/navn`,
       updateNavnForRessursRequest,
+    )
+  ).data;
+
+export const updateOrgtilknytningDato = async (
+  fid: string,
+  endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
+) =>
+  (
+    await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/orgtilknytninger/${fid}/dato`,
+      endreOrgtilknytningDatoRequest,
     )
   ).data;
 
