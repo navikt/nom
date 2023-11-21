@@ -37,33 +37,4 @@ public class DvhRessursController {
     public ResponseEntity<List<DvhRessursDTO>> nomMasteredRessurser() {
         return ResponseEntity.ok(restService.nomMasteredRessurser());
     }
-
-    @ExceptionHandler({
-        IllegalArgumentException.class,
-        NoSuchElementException.class,
-        InvalidSektorException.class
-    })
-    public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(StandardResponse.builder().message(exception.getMessage()).build());
-    }
-
-    @ExceptionHandler({
-        AccessDeniedException.class,
-    })
-    public ResponseEntity<StandardResponse> handleForbidden(RuntimeException exception) {
-        return ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(StandardResponse.builder().message(exception.getMessage()).build());
-    }
-
-    @ExceptionHandler(Exception.class)
-    private ResponseEntity<StandardResponse> handleServerError(Exception exception) {
-        log.error("Intern feil ved dvh oppslag mot nom", exception);
-
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(StandardResponse.builder().message("Server error").build());
-    }
 }

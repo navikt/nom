@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public record DvhRessursDTO(
@@ -10,5 +11,6 @@ public record DvhRessursDTO(
     Optional<String> mellomnavn,
     String etternavn,
     Optional<LocalDate> startdato,
-    Optional<LocalDate> sluttdato
+    Optional<LocalDate> sluttdato,
+    List<DvhOrgtilknytningDTO> orgtilknytninger
 ){}
