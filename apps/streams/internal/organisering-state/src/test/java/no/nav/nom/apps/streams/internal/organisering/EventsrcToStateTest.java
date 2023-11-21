@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
@@ -52,7 +53,7 @@ public class EventsrcToStateTest {
             eventData.idOver(),
             eventData.navnOver(),
             eventData.gyldigFom(),
-            Optional.of(eventData.gyldigTom())
+            eventData.gyldigTom()
         );
 
         //act
@@ -76,8 +77,8 @@ public class EventsrcToStateTest {
             eventData.idOver(),
             eventData.navnOver(),
             eventData.gyldigFom(),
-            Optional.of(eventData.gyldigTom())
-            );
+            eventData.gyldigTom()
+        );
 
         //act
         inputTopic.pipeInput(event);
@@ -100,7 +101,7 @@ public class EventsrcToStateTest {
             eventDataOpprett.idOver(),
             eventDataOpprett.navnOver(),
             eventDataOpprett.gyldigFom(),
-            Optional.of(eventDataOpprett.gyldigTom())
+            eventDataOpprett.gyldigTom()
         );
 
         // endret event
@@ -113,8 +114,8 @@ public class EventsrcToStateTest {
             eventDataEndre.idOver(),
             eventDataEndre.navnOver(),
             eventDataEndre.gyldigFom(),
-            Optional.of(eventDataEndre.gyldigTom())
-            );
+            eventDataEndre.gyldigTom()
+        );
 
         final List<OrganiseringEvent> inputList = Arrays.asList(eventOpprett, eventEndre);
         final List<OrganiseringState> expectedList = Arrays.asList(expectedOpprett, expectedEndre);
@@ -122,6 +123,31 @@ public class EventsrcToStateTest {
 
         //assert
         Assertions.assertThat(outputTopic.readValuesToList()).hasSameElementsAs(expectedList);
+        Assertions.assertThat(outputTopic.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("OrganiseringAvsluttet event setter gyldigTom i state")
+    void OrganiseringAvsluttetEvent_sets_gyldigTom_in_state_topic() {
+        final OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData eventDataOpprett = getOpprettetEventData();
+        final OrganiseringEvent eventOpprett = getOpprettetOrganiseringEvent(eventDataOpprett);
+
+        final OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData eventDataAvslutt = getAvsluttEventData(LocalDate.now());
+        final OrganiseringEvent eventAvslutt = getAvsluttOrganiseringEvent(eventOpprett.getFid(), eventDataAvslutt);
+        final OrganiseringState expectedAvslutt = new OrganiseringState(
+            eventOpprett.getFid(),
+            eventDataOpprett.id(),
+            eventDataOpprett.navn(),
+            eventDataOpprett.idOver(),
+            eventDataOpprett.navnOver(),
+            eventDataOpprett.gyldigFom(),
+            Optional.of(LocalDate.now())
+        );
+
+        final List<OrganiseringEvent> inputList = Arrays.asList(eventOpprett, eventAvslutt);
+        inputTopic.pipeValueList(inputList);
+
+        Assertions.assertThat(outputTopic.readValuesToList()).contains(expectedAvslutt);
         Assertions.assertThat(outputTopic.isEmpty()).isTrue();
     }
 
@@ -167,7 +193,7 @@ public class EventsrcToStateTest {
             "idOver",
             "navnOver",
             LocalDate.of(2021, 1, 1),
-            LocalDate.of(2099, 12, 1)
+            Optional.empty()
         );
     }
 
@@ -191,7 +217,7 @@ public class EventsrcToStateTest {
             "idOver",
             "navnOver",
             LocalDate.of(2021, 1, 1),
-            LocalDate.of(2099, 12, 1)
+            Optional.empty()
         );
     }
 
@@ -205,6 +231,20 @@ public class EventsrcToStateTest {
             eventData,
             (Event.Metadata) null,
             additionalData
+        );
+    }
+
+    private OrganiseringEvent getAvsluttOrganiseringEvent(String fid, OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData eventData) {
+        return new OrganiseringAvsluttetEventV1(
+            fid,
+            eventData,
+            (Event.Metadata) null
+        );
+    }
+
+    private OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData getAvsluttEventData(LocalDate gyldigTom) {
+        return new OrganiseringAvsluttetEventV1.OrganiseringAvsluttetEventData(
+            gyldigTom
         );
     }
 

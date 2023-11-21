@@ -21,7 +21,7 @@ public class OrganiseringEndretEventV1  extends OrganiseringEvent{
         String idOver,
         String navnOver,
         LocalDate gyldigFom,
-        LocalDate gyldigTom
+        Optional<LocalDate> gyldigTom
     ) implements Data { }
 
     public record OrganiseringEndretAdditionalAgressoData(

@@ -144,7 +144,7 @@ public class OrganiseringService {
             orgenhetOver.getId(),
             orgenhetOver.getNavn(),
             dvhOrganisering.getGyldigFom(), // TODO Fix dates!
-            dvhOrganisering.getGyldigTom(),
+            Optional.empty(),
             createInputMetadata(dvhOrganisering.getRawData())
         );
     }
