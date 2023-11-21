@@ -15,12 +15,15 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${mock-oauth2-server.baseUrl}/aad
-          audiences: nom-remedy-integrasjon
 
 UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token
+
+azure:
+  issuer-uri: ${mock-oauth2-server.baseUrl}/issuer
+
+AZURE_APP_CLIENT_ID: nom-remedy-integrasjon
+AZURE_APP_CLIENT_SECRET: nom-remedy-integrasjon-client-secret
+
+NOM_API_URL: http://localhost:${wiremock.server.port}
+NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default

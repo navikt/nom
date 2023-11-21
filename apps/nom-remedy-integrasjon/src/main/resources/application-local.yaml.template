@@ -3,6 +3,9 @@ server.port: 8087
 REMEDY_DATASOURCE_URL: jdbc:oracle:thin:@//10.52.128.42:1521/remedy_u2
 REMEDY_DB_PWD: placeholder
 
+NOM_API_URL: https://nom-api.intern.dev.nav.no
+NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default
+
 NAIS_APP_NAME: nom-remedy-integrasjon-local
 
 KAFKA_BROKERS: localhost:39092

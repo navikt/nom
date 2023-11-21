@@ -12,9 +12,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -26,11 +28,15 @@ import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitali
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 public class NomIntegrasjonServiceTest extends TestBase {
 
     @Autowired
     private NomIntegrasjonService nomIntegrasjonService;
+
+    @MockBean
+    private NomApiClient nomApiClient;
 
     @BeforeEach
     void clearRepository() {
@@ -47,6 +53,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var personident = "11111111111";
         var fornavn = "fornavn";
         var startDato = LocalDate.of(2023, 12, 12);
+        var orgEnhetId = "some-orgenhet";
+        var remedyEnhetId = "some-remedy-id";
 
         var ressursOpprettetEventV1 = new RessursOpprettetEventV1(
             UUID.randomUUID().toString(),
@@ -57,12 +65,16 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
+                .inputInterfaceMethodArguments(Map.of("orgEnhetId", orgEnhetId))
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
                 .navident(Optional.of(navident))
                 .startdato(Optional.of(startDato))
                 .build()
         );
+
+        when(nomApiClient.getOrgEnhetWithRemedyId(orgEnhetId))
+            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(orgEnhetId, remedyEnhetId)));
 
         nomIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
 
@@ -75,7 +87,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .entryBestiller(initiatedBy)
                     .entryOperasjon("Ny")
                     .entryStatus("Ubehandlet")
-                    .enhetsId("TODO")
+                    .enhetsId(remedyEnhetId)
                     .etternavn(capitalizeNavn(etternavn))
                     .fodselsnummer(personident)
                     .fornavn(capitalizeNavn(fornavn))

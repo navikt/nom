@@ -13,6 +13,10 @@ spec:
   env:
     - name: REMEDY_DATASOURCE_URL
       value: jdbc:oracle:thin:@//d26dbfl022.test.local:1521/remedy_u2
+    - name: NOM_API_URL
+      value: https://nom-api.intern.dev.nav.no
+    - name: NOM_API_SCOPE
+      value: api://dev-gcp.nom.nom-api/.default
   envFrom:
     - secret: nom-remedy-integrasjon-unleash-api-token
   vault:
