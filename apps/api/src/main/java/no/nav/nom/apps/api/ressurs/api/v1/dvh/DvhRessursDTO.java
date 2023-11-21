@@ -8,9 +8,9 @@ public record DvhRessursDTO(
     String navident,
     String sektor,
     String fornavn,
-    Optional<String> mellomnavn,
+    String mellomnavn,
     String etternavn,
-    Optional<LocalDate> startdato,
-    Optional<LocalDate> sluttdato,
+    LocalDate startdato,
+    LocalDate sluttdato,
     List<DvhOrgtilknytningDTO> orgtilknytninger
 ){}

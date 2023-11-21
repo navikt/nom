@@ -39,10 +39,10 @@ public class DvhRessursRestService {
             ressursState.navident(),
             ressursState.sektor().name(),
             ressursState.visningsnavn().fornavn(),
-            ressursState.visningsnavn().mellomnavn(),
+            ressursState.visningsnavn().mellomnavn().orElse(null),
             ressursState.visningsnavn().etternavn(),
-            ressursState.startdato(),
-            ressursState.sluttdato(),
+            ressursState.startdato().orElse(null),
+            ressursState.sluttdato().orElse(null),
             orgtilknytninger
         );
     }
@@ -51,7 +51,7 @@ public class DvhRessursRestService {
         return new DvhOrgtilknytningDTO(
             orgtilknytningState.orgEnhetId(),
             orgtilknytningState.gyldigFom(),
-            orgtilknytningState.gyldigTom(),
+            orgtilknytningState.gyldigTom().orElse(null),
             orgtilknytningState.erDagligOppfolging()
         );
     }

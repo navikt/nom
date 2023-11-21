@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RessursStateRepositoryTest {
 
-    RessursStateRepository ressursStateRepository = new RessursStateRepository();
+    RessursStateRepository ressursStateRepository = new RessursStateRepositoryImpl();
 
     @Test
     @DisplayName("Test remove RessursStateFor fid")

@@ -6,6 +6,6 @@ import java.util.Optional;
 public record DvhOrgtilknytningDTO(
     String orgenhetId,
     LocalDate startdato,
-    Optional<LocalDate> sluttdato,
+    LocalDate sluttdato,
     boolean erDagligOppfolging
 ) {}
