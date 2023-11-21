@@ -418,6 +418,94 @@ public class OrganiseringTest extends TestBase {
         assertThat(terminateNode2Message.gyldigTom()).isEqualTo(LocalDate.now());
     }
 
+    @Test
+    @DisplayName("Avslutt en eksisterende organisering og oppretter ny når id endret")
+    void avslutt_en_organisering_og_oppretter_ny() throws JsonProcessingException {
+        // node 1 som parent for node 3
+        var organisering3 = DvhOrganiseringMock.getBuilderWithDefault()
+            .ORGNODE_KODE("3")
+            .ORGNODE_NAVN("Navn_3")
+            .ORGNODE_NIVA("Niva_3")
+            .ORGNODE_KODE_OVER("1")
+            .ORGNODE_NAVN_OVER("Navn_1")
+            .ORGNODE_NIVA_OVER("Niva_1")
+            .build();
+
+        // stub organisering3 fra DVH
+        dvhOrganiseringMockUtils.addToResponse(organisering3);
+
+        // mock orgEnhetService hvor vi finner NOM id
+        var overEnhetTilOrgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_1", organisering3.getORGNODE_KODE_OVER(),
+            organisering3.getORGNODE_NIVA_OVER(), organisering3.getORGNODE_NAVN_OVER()
+        );
+        var orgEnhet3 = mockOrgenhetServiceGetEnhet("nom_id_3", organisering3.getORGNODE_KODE(),
+            organisering3.getORGNODE_NIVA(), organisering3.getORGNODE_NAVN()
+        );
+
+        // opprette organisering (1 - 3)
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // oppdatere state
+        OrganiseringState organiseringState3 = OrganiseringState.builder()
+            .fid("organisering_3")
+            .id(orgEnhet3.id())
+            .navn(organisering3.getORGNODE_NAVN())
+            .idOver(overEnhetTilOrgEnhet3.id())
+            .navnOver(organisering3.getORGNODE_NAVN_OVER())
+            .gyldigFom(LocalDate.now().minusDays(1))
+            .gyldigTom(Optional.empty())
+            .build();
+        organiseringStateRepository.putEventAggregate(organiseringState3);
+
+        dvhOrganiseringMockUtils.clearResponse();
+
+        // simulerer at id endret -  f eks navn på orgEnhet3 modifisert
+        var organisering3_modified = DvhOrganiseringMock.getBuilderWithDefault()
+            .ORGNODE_KODE("3")
+            .ORGNODE_NAVN("Navn_3_modified")
+            .ORGNODE_NIVA("Niva_3")
+            .ORGNODE_KODE_OVER("1")
+            .ORGNODE_NAVN_OVER("Navn_1")
+            .ORGNODE_NIVA_OVER("Niva_1")
+            .build();
+
+        // da kommer bare organisering3_modified fra DVH
+        dvhOrganiseringMockUtils.addToResponse(organisering3_modified);
+
+        // mock orgEnhetService hvor vi finner NOM id
+        var orgEnhet3_modified = mockOrgenhetServiceGetEnhet("nom_id_3_modified", organisering3_modified.getORGNODE_KODE(),
+            organisering3_modified.getORGNODE_NIVA(), organisering3_modified.getORGNODE_NAVN()
+        );
+
+        // hente organiseringer from DVH igjen
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // vente til meldinger
+        await()
+            .atMost(1, SECONDS)
+            .pollInterval(10, MILLISECONDS)
+            .until(() -> recordsQueue.size() == 3);
+
+        var createOrganisering3Record = recordsQueue.remove();
+        var createOrganisering3modifiedRecord = recordsQueue.remove();
+        var terminateOrganisering3Record = recordsQueue.remove();
+
+        // assert event typer
+        assertThat(createOrganisering3Record.value()).isExactlyInstanceOf(OrganiseringOpprettetEventV1.class);
+        assertThat(createOrganisering3modifiedRecord.value()).isExactlyInstanceOf(OrganiseringOpprettetEventV1.class);
+        assertThat(terminateOrganisering3Record.value()).isExactlyInstanceOf(OrganiseringAvsluttetEventV1.class);
+
+        // assert verdier
+        var organisering3Message = (OrganiseringOpprettetEventData) createOrganisering3Record.value().getData();
+        var organisering3modifiedMessage = (OrganiseringOpprettetEventData) createOrganisering3modifiedRecord.value().getData();
+        var organisering3terminateMessage = (OrganiseringAvsluttetEventData) terminateOrganisering3Record.value().getData();
+        assertThat(organisering3Message.id()).isNotEqualTo(organisering3modifiedMessage.id());
+        assertThat(organisering3Message.idOver()).isEqualTo(organisering3modifiedMessage.idOver());
+        assertThat(organisering3Message.id()).isEqualTo(orgEnhet3.id());
+        assertThat(organisering3modifiedMessage.id()).isEqualTo(orgEnhet3_modified.id());
+        assertThat(organisering3terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
+    }
+
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
         var orgEnhetState = orgEnhetStateBuilderWithDefaultValues()
             .id(id)
