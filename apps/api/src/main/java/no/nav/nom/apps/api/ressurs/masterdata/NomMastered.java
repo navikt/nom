@@ -6,6 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,22 +57,26 @@ public class NomMastered {
         return masteredNavidenter.containsKey(navident);
     }
 
-     void updateRessursAsMasteredInNomFromKafka(String navident, LocalDateTime since) {
+    public List<String> navidenter() {
+        return masteredNavidenter.keySet().stream().toList();
+    }
+
+    void updateRessursAsMasteredInNomFromKafka(String navident, LocalDateTime since) {
         var ressursState = ressursStateRepository.findByNavident(navident);
         if (ressursState.isEmpty()) {
             log.warn("RessursState for navident {} finnes ikke, kan ikke oppdateres som mastret.", navident);
             return;
         }
-         masteredNavidenter.put(navident, since);
+        masteredNavidenter.put(navident, since);
     }
 
-     void removeRessursAsMasteredInNomFromKafka(String navident) { // Tombstones
+    void removeRessursAsMasteredInNomFromKafka(String navident) { // Tombstones
         var ressursState = ressursStateRepository.findByNavident(navident);
         if (ressursState.isEmpty()) {
             log.warn("RessursState for navident {} finnes ikke, kan ikke fjernes som mastret.", navident);
             return;
         }
-         masteredNavidenter.remove(navident);
+        masteredNavidenter.remove(navident);
     }
 
     private void postMasteredMessage(String navident, LocalDateTime since) {
