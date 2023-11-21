@@ -53,6 +53,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var personident = "11111111111";
         var fornavn = "fornavn";
         var startDato = LocalDate.of(2023, 12, 12);
+        var sluttDato = LocalDate.of(2024, 12, 12);
         var orgEnhetId = "some-orgenhet";
         var remedyEnhetId = "some-remedy-id";
 
@@ -65,7 +66,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
-                .inputInterfaceMethodArguments(Map.of("orgEnhetId", orgEnhetId))
+                .inputInterfaceMethodArguments(Map.of("orgEnhetId", orgEnhetId, "sluttDato", sluttDato.toString()))
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
                 .navident(Optional.of(navident))
@@ -81,7 +82,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
 
         assertThat(nomIntegrasjonEntry)
-            .contains(
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
                 NomIntegrasjonEntity.builder()
                     .entryId(fifteenCharLengthZeroPaddedNumber(0L))
                     .entryBestiller(initiatedBy)
@@ -96,9 +98,10 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .navId(navident)
                     .sektor(2)
                     .tiltredelsesdato(epochSeconds(startDato))
-                    .utlopsdato(0L)
+                    .utlopsdato(epochSeconds(sluttDato))
                     .build()
-            );
+            ));
+
     }
 
     @Test

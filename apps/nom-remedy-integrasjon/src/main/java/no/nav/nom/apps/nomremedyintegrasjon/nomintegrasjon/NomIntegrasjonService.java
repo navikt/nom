@@ -9,11 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 
 @Service
@@ -54,6 +56,10 @@ public class NomIntegrasjonService {
             Optional.ofNullable((String) inputInterfaceMethodArguments.get("orgEnhetId")).orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"))
         );
 
+        var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
+            .map(LocalDate::parse)
+            .orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"));
+
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
             .entryId(nextId())
             .entryBestiller(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
@@ -68,12 +74,12 @@ public class NomIntegrasjonService {
             .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> new NoSuchElementException("Missing value for 'navident'")))
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato().map(Utils::epochSeconds).orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))
-            .utlopsdato(0L)
+            .utlopsdato(epochSeconds(sluttDato))
             .build();
 
         nomIntegrasjonRepository.save(newNomIntegrasjonEntity);
 
-        logger.info("Created ressurs for fid: " + ressursOpprettetEventV1);
+        logger.info("Created ressurs for fid: " + ressursOpprettetEventV1.getFid());
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {
