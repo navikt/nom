@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
@@ -21,18 +22,21 @@ public class DvhRessursRestService {
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final DvhRepository dvhRepository;
 
     public DvhRessursRestService(NomMastered nomMastered,
                                  RessursStateRepository ressursStateRepository,
                                  OrgtilknytningService orgtilknytningService,
                                  OrgenhetService orgenhetService,
-                                 RemedyEnhetIdResolver remedyEnhetIdResolver
+                                 RemedyEnhetIdResolver remedyEnhetIdResolver,
+                                 DvhRepository dvhRepository
     ) {
         this.nomMastered = nomMastered;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
         this.orgenhetService = orgenhetService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
+        this.dvhRepository = dvhRepository;
     }
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
@@ -77,17 +81,36 @@ public class DvhRessursRestService {
 
     DvhOrgenhetDTO toDTO(IOrgenhet orgenhet) {
         var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
+        var overodnet = getOverordnetEnhet(orgenhet);
         return new DvhOrgenhetDTO(
             orgenhet.getId(),
             orgenhet.getNavn(),
             orgenhet.getOrgEnhetsType().isPresent() ? orgenhet.getOrgEnhetsType().get().name() : null,
             orgenhet.getNomNivaa().isPresent() ? orgenhet.getNomNivaa().get().name() : null,
-            orgenhet.getOverordnetOrgEnhetFid().orElse(null),
+            overodnet,
             orgenhet.getGyldigFom(),
             orgenhet.getGyldigTom().orElse(null),
             orgenhet.getAgressoId(),
             orgenhet.getOrgNiv(),
             remedyEnhetId
         );
+    }
+
+    private String getOverordnetEnhet(IOrgenhet orgenhet) {
+        var overordnet = dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn())
+            .stream()
+            .filter(o ->
+                o.getAgressoIdUnder().equals(orgenhet.getAgressoId())
+                    && o.getOrgNivUnder().equals(orgenhet.getOrgNiv())
+                    && o.getNavnUnder().equals(orgenhet.getNavn()))
+            .findFirst();
+
+        if (overordnet.isPresent()) {
+            var o = overordnet.get();
+            return orgenhetService.getEnhetByAgressoIdNivaAndName(o.getAgressoIdOver(), o.getOrgNivOver(), o.getNavnOver())
+                .map(IOrgenhet::getId)
+                .orElse(null);
+        }
+        return null;
     }
 }
