@@ -58,7 +58,6 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnOver())
             .build());
 
-
         assertThat(organiseringService.hasOrganiseringChanged(fid, initialDvhOrg, orgEnhet, orgEnhetOver)).isFalse();
     }
 
@@ -203,7 +202,7 @@ class OrganiseringServiceTest {
             .gyldigFom(LocalDate.now().minusDays(5))
             .build();
 
-        when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
+        when(organiseringStateRepositoryMock.findActiveByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
 
 
         // Setup response from orgEnhet state lookup
@@ -231,7 +230,7 @@ class OrganiseringServiceTest {
             .gyldigFom(LocalDate.now())
             .build();
 
-        when(organiseringStateRepositoryMock.findByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
+        when(organiseringStateRepositoryMock.findActiveByFid(fid)).thenReturn(Optional.ofNullable(organiseringState));
     }
 
     private static DvhOrganisering initialDvhOrganisering() {
@@ -271,7 +270,7 @@ class OrganiseringServiceTest {
 
         var fidsNotFromDvh = organiseringService.fidsInStateNotInDvhOrganiseringer(organiseringerFromDvh, organiseringState);
         assertThat(fidsNotFromDvh.size()).isEqualTo(1);
-        assertThat(fidsNotFromDvh.get(0)).isEqualTo(fidNotFound);
+        assertThat(fidsNotFromDvh.get(0).fid()).isEqualTo(fidNotFound);
     }
 
 }

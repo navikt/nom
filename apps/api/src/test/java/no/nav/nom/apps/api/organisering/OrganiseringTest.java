@@ -415,7 +415,7 @@ public class OrganiseringTest extends TestBase {
         assertThat(replacementNode2Message.navnOver()).isEqualTo(organisering2_modified.getORGNODE_NAVN_OVER());
 
         // Check that the initial node 2 organisering has ended
-        assertThat(terminateNode2Message.gyldigTom()).isEqualTo(LocalDate.now());
+        assertThat(terminateNode2Message.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
     }
 
     @Test
@@ -503,7 +503,7 @@ public class OrganiseringTest extends TestBase {
         assertThat(organisering3Message.idOver()).isEqualTo(organisering3modifiedMessage.idOver());
         assertThat(organisering3Message.id()).isEqualTo(orgEnhet3.id());
         assertThat(organisering3modifiedMessage.id()).isEqualTo(orgEnhet3_modified.id());
-        assertThat(organisering3terminateMessage.gyldigTom()).isEqualTo(LocalDate.now());
+        assertThat(organisering3terminateMessage.gyldigTom()).isEqualTo(LocalDate.now().minusDays(1));
     }
 
     private OrgEnhetState mockOrgenhetServiceGetEnhet(String id, String kode, String niva, String navn) {
