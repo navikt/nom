@@ -67,21 +67,11 @@ public class NomMasteredImpl implements NomMastered {
 
     @Override
     public void updateRessursAsMasteredInNomFromKafka(String navident, LocalDateTime since) {
-        var ressursState = ressursStateRepository.findByNavident(navident);
-        if (ressursState.isEmpty()) {
-            log.warn("RessursState for navident {} finnes ikke, kan ikke oppdateres som mastret.", navident);
-            return;
-        }
         masteredNavidenter.put(navident, since);
     }
 
     @Override
     public void removeRessursAsMasteredInNomFromKafka(String navident) { // Tombstones
-        var ressursState = ressursStateRepository.findByNavident(navident);
-        if (ressursState.isEmpty()) {
-            log.warn("RessursState for navident {} finnes ikke, kan ikke fjernes som mastret.", navident);
-            return;
-        }
         masteredNavidenter.remove(navident);
     }
 
