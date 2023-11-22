@@ -2,7 +2,6 @@ package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public record DvhRessursDTO(
     String navident,

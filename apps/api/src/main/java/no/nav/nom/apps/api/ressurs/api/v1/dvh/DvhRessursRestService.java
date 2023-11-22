@@ -1,6 +1,9 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
@@ -16,11 +19,20 @@ public class DvhRessursRestService {
     private final NomMastered nomMastered;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
+    private final OrgenhetService orgenhetService;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
 
-    public DvhRessursRestService(NomMastered nomMastered, RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService) {
+    public DvhRessursRestService(NomMastered nomMastered,
+                                 RessursStateRepository ressursStateRepository,
+                                 OrgtilknytningService orgtilknytningService,
+                                 OrgenhetService orgenhetService,
+                                 RemedyEnhetIdResolver remedyEnhetIdResolver
+    ) {
         this.nomMastered = nomMastered;
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
+        this.orgenhetService = orgenhetService;
+        this.remedyEnhetIdResolver = remedyEnhetIdResolver;
     }
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
@@ -29,6 +41,13 @@ public class DvhRessursRestService {
             .map(this::toDTO)
             .toList();
     }
+
+    public List<DvhOrgenhetDTO> orgenheter() {
+        return orgenhetService.getAllEnheterMedOrganisering().stream()
+            .map(this::toDTO)
+            .toList();
+    }
+
 
     DvhRessursDTO toDTO(RessursState ressursState) {
         List<DvhOrgtilknytningDTO> orgtilknytninger = orgtilknytningService.getByNavIdent(ressursState.navident())
@@ -53,6 +72,22 @@ public class DvhRessursRestService {
             orgtilknytningState.gyldigFom(),
             orgtilknytningState.gyldigTom().orElse(null),
             orgtilknytningState.erDagligOppfolging()
+        );
+    }
+
+    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet) {
+        var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
+        return new DvhOrgenhetDTO(
+            orgenhet.getId(),
+            orgenhet.getNavn(),
+            orgenhet.getOrgEnhetsType().isPresent() ? orgenhet.getOrgEnhetsType().get().name() : null,
+            orgenhet.getNomNivaa().isPresent() ? orgenhet.getNomNivaa().get().name() : null,
+            orgenhet.getOverordnetOrgEnhetFid().orElse(null),
+            orgenhet.getGyldigFom(),
+            orgenhet.getGyldigTom().orElse(null),
+            orgenhet.getAgressoId(),
+            orgenhet.getOrgNiv(),
+            remedyEnhetId
         );
     }
 }
