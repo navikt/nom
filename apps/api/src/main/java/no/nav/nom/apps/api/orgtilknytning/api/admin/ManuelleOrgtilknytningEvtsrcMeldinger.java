@@ -12,12 +12,8 @@ import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursCommand;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import org.flywaydb.core.internal.util.HtmlUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,19 +25,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 @Slf4j
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
 @RequestMapping("/api/admin/manuelleEvtsrcMeldinger")
-public class ManuelleEvtsrcMeldinger {
+public class ManuelleOrgtilknytningEvtsrcMeldinger {
 
     private final OrgtilknytningCommandService orgtilknytningCommandService;
 
     private final OrgtilknytningService orgtilknytningService;
 
-    public ManuelleEvtsrcMeldinger(OrgtilknytningCommandService orgtilknytningCommandService, OrgtilknytningService orgtilknytningService) {
+    public ManuelleOrgtilknytningEvtsrcMeldinger(OrgtilknytningCommandService orgtilknytningCommandService, OrgtilknytningService orgtilknytningService) {
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.orgtilknytningService = orgtilknytningService;
     }
