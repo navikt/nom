@@ -27,34 +27,61 @@ public class OrganiseringStateRepositoryTest {
     }
 
     private static Stream<Arguments> getTestParameters() {
-        OrganiseringState organisering_same_fom_tom = OrganiseringState.builder()
-            .fid("organisering_1_fid")
-            .id("organisering_1_id")
-            .idOver("organisering_1_idOver")
+        OrganiseringState organisering_fom_tom_today = OrganiseringState.builder()
+            .fid("organisering_fom_tom_today" + "_fid")
+            .id("organisering_fom_tom_today" + "_id")
+            .idOver("organisering_fom_tom_today" + "_idOver")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now()))
             .build();
 
-        OrganiseringState organisering_tom_today_minus_2_dager = OrganiseringState.builder()
-            .fid("organisering_tom_today_minus_2_dager_fid")
-            .id("organisering_tom_today_minus_2_dager_id")
-            .idOver("organisering_tom_today_minus_2_dager_idOver")
+        OrganiseringState organisering_fom_todayMinus10_tom_todayMinus2_dager = OrganiseringState.builder()
+            .fid("organisering_fom_todayMinus10_tom_todayMinus2_dager" + "_fid")
+            .id("organisering_fom_todayMinus10_tom_todayMinus2_dager" + "_id")
+            .idOver("organisering_fom_todayMinus10_tom_todayMinus2_dager" + "_idOver")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
             .build();
 
-        OrganiseringState organisering_tom_today_plus_2_dager = OrganiseringState.builder()
-            .fid("organisering_tom_today_plus_2_dager_fid")
-            .id("organisering_tom_today_plus_2_dager_id")
-            .idOver("organisering_tom_today_plus_2_dager_idOver")
+        OrganiseringState organisering_fom_today_tom_todayPlus2_dager = OrganiseringState.builder()
+            .fid("organisering_fom_today_tom_todayPlus2_dager" + "_fid")
+            .id("organisering_fom_today_tom_todayPlus2_dager" + "_id")
+            .idOver("organisering_fom_today_tom_todayPlus2_dager" + "_idOver")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().plusDays(2)))
             .build();
 
+        OrganiseringState organisering_fom_todayMinus10_tom_today = OrganiseringState.builder()
+            .fid("organisering_fom_todayMinus10_tom_today" + "_fid")
+            .id("organisering_fom_todayMinus10_tom_today" + "_id")
+            .idOver("organisering_fom_todayMinus10_tom_today" + "_idOver")
+            .gyldigFom(LocalDate.now().minusDays(10))
+            .gyldigTom(Optional.of(LocalDate.now()))
+            .build();
+
+        OrganiseringState organisering_fom_today_tom_todayMinus1 = OrganiseringState.builder()
+            .fid("organisering_fom_today_tom_todayMinus1" + "_fid")
+            .id("organisering_fom_today_tom_todayMinus1" + "_id")
+            .idOver("organisering_fom_today_tom_todayMinus1" + "_idOver")
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+            .build();
+
+        OrganiseringState organisering_fom_todayMinus10_tom_todayPlus10 = OrganiseringState.builder()
+            .fid("organisering_fom_todayMinus10_tom_todayPlus10" + "_fid")
+            .id("organisering_fom_todayMinus10_tom_todayPlus10" + "_id")
+            .idOver("organisering_fom_todayMinus10_tom_todayPlus10" + "_idOver")
+            .gyldigFom(LocalDate.now().minusDays(10))
+            .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
+            .build();
+
         return Stream.of(
-            Arguments.of(organisering_same_fom_tom, 0),
-            Arguments.of(organisering_tom_today_minus_2_dager, 0),
-            Arguments.of(organisering_tom_today_plus_2_dager, 1)
+            Arguments.of(organisering_fom_tom_today, 0),
+            Arguments.of(organisering_fom_todayMinus10_tom_todayMinus2_dager, 0),
+            Arguments.of(organisering_fom_today_tom_todayMinus1, 0),
+            Arguments.of(organisering_fom_today_tom_todayPlus2_dager, 1),
+            Arguments.of(organisering_fom_todayMinus10_tom_today, 1),
+            Arguments.of(organisering_fom_todayMinus10_tom_todayPlus10, 1)
         );
     }
 }
