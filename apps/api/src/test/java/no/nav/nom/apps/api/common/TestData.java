@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.common;
 
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -18,6 +19,24 @@ public class TestData {
             "orgEnhet123",
             false,
             LocalDate.now().minusMonths(1),
+            Optional.empty()
+        );
+    }
+
+    public static OrgEnhetState orgEnhetState() {
+        return new OrgEnhetState(
+            UUID.randomUUID().toString(),
+            "orgEnhet123",
+            "Test enhet",
+            LocalDate.now().minusMonths(1),
+            null,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
             Optional.empty()
         );
     }

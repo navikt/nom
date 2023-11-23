@@ -198,6 +198,10 @@ public abstract class TestBase {
         orgtilknytningStateList.forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), o));
     }
 
+    protected void saveOrgenheter(List<OrgEnhetState> orgEnhetStateList) {
+        orgEnhetStateList.forEach(o -> orgEnhetStateRepository.putEventAggregate(o));
+    }
+
     protected void clearOrgtilknytninger() {
         orgtilknytningStateRepository.getAll()
             .forEach(o -> orgtilknytningStateRepository.putEventAggregate(o.fid(), null));

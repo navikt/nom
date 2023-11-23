@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.nom.Sektor;
@@ -12,12 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,10 +42,13 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Captor
     ArgumentCaptor<EndreOrgtilknytningDato> endreOrgtilknytningDatoArgumentCaptor;
+    @Captor
+    ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
 
     @BeforeEach
     void setInitialLoadComplete() {
         when(ressursStateListener.initloadComplete()).thenReturn(true);
+        when(unleash.isEnabled(any())).thenReturn(true);
         clearOrgtilknytninger();
         ressursStateRepository.clear();
     }
@@ -126,7 +132,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             Optional.of(LocalDate.now().plusYears(1))
         );
 
-        when(unleash.isEnabled(any())).thenReturn(true);
 
         webTestClient
             .post()
@@ -160,57 +165,10 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             );
     }
 
-    @Test
-    @DisplayName("Should verify sluttDato is after startStato")
-    void test_update_orgtilknytning_invalid_date_range() {
-
-        var orgtilknytningToUpdate = orgtilknytningState();
-        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
-
-        saveRessurser(List.of(
-            ressursState().toBuilder()
-                .navident(orgtilknytningToUpdate.navident())
-                .sektor(Sektor.EKSTERN)
-                .build()
-        ));
-
-        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
-            LocalDate.now(),
-            Optional.of(LocalDate.now().minusYears(1))
-        );
-
-        when(unleash.isEnabled(any())).thenReturn(true);
-
-        webTestClient
-            .post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/dato")
-                .build(orgtilknytningToUpdate.fid())
-            )
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(nomWriteUserToken());
-            })
-            .bodyValue(endreOrgtilknytningDatoRequest)
-            .exchange()
-            .expectStatus().isBadRequest();
-
-        verify(
-            orgtilknytningCommandService,
-            times(0)
-        ).endreOrgtilknytningDato(
-            stringArgumentCaptor.capture(),
-            endreOrgtilknytningDatoArgumentCaptor.capture()
-        );
-    }
-
 
     @Test
     @DisplayName("Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_for_ekstern_only_date() {
-
-        when(unleash.isEnabled(any())).thenReturn(true);
-
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
 
@@ -264,5 +222,188 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             .exchange()
             .expectStatus().isForbidden();
     }
+
+    @Test
+    @DisplayName("Should add new orgtilknytning")
+    void test_add_orgtilknytning() {
+        var navident = "Y654321";
+        var orgEnhet = orgEnhetState();
+
+        saveOrgenheter(List.of(orgEnhet));
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(navident)
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .build();
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+
+        var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
+            navident,
+            orgEnhet.id(),
+            LocalDate.now().plusYears(1),
+            Optional.of(LocalDate.now().plusYears(2))
+        );
+
+        webTestClient
+            .post()
+            .uri("/app/orgtilknytninger")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(leggTilOrgtilknytningRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful();
+
+        verify(
+            orgtilknytningCommandService,
+            times(1)
+        ).opprettOrgtilknytning(
+            opprettOrgtilknytningArgumentCaptor.capture()
+        );
+
+        verify(
+            orgtilknytningCommandService,
+            times(1)
+        ).opprettOrgtilknytning(
+            opprettOrgtilknytningArgumentCaptor.capture()
+        );
+
+        assertThat(opprettOrgtilknytningArgumentCaptor.getValue())
+            .matches(opprettOrgtilknytning ->
+                opprettOrgtilknytning.navident().equals(leggTilOrgtilknytningRequest.navident())
+            )
+            .matches(opprettOrgtilknytning ->
+                opprettOrgtilknytning.orgenhetId().equals(leggTilOrgtilknytningRequest.orgEnhetId())
+            );
+    }
+
+    @Test
+    @DisplayName("Verify navident in orgtilknytning exists")
+    void test_navident_for_orgtilknytning_exists() {
+        var navident = "Y654321";
+        var orgenhet = orgEnhetState();
+        saveOrgenheter(List.of(orgenhet));
+
+        var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
+            navident,
+            orgenhet.id(),
+            LocalDate.now(),
+            Optional.of(LocalDate.now().plusYears(1))
+        );
+
+        webTestClient
+            .post()
+            .uri("/app/orgtilknytninger")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(leggTilOrgtilknytningRequest)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).opprettOrgtilknytning(
+            opprettOrgtilknytningArgumentCaptor.capture()
+        );
+    }
+
+    @Test
+    @DisplayName("Verify orgEnhetId in orgtilknytning exists")
+    void test_orgEnhet_for_orgtilknytning_exists() {
+        var navident = "Y654321";
+        var orgEnhetId = "orgEnhet123";
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(navident)
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
+            navident,
+            orgEnhetId,
+            LocalDate.now(),
+            Optional.of(LocalDate.now().plusYears(1))
+        );
+
+        webTestClient
+            .post()
+            .uri("/app/orgtilknytninger")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(leggTilOrgtilknytningRequest)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).opprettOrgtilknytning(
+            opprettOrgtilknytningArgumentCaptor.capture()
+        );
+    }
+
+    @Test
+    @DisplayName("Verify no overlapping period for unique orgenhetId + navident combination")
+    void test_unique_orgenhet_navident_for_orgtilknytning() {
+        var navident = "Y654321";
+        var orgEnhet = orgEnhetState();
+
+        var existingOrgtilknytning = orgtilknytningState().toBuilder()
+            .navident(navident)
+            .orgEnhetId(orgEnhet.id())
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+
+        saveOrgtilknytninger(List.of(existingOrgtilknytning));
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(navident)
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+        saveOrgenheter(List.of(orgEnhet));
+
+
+        var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
+            navident,
+            orgEnhet.id(),
+            LocalDate.now().plusMonths(1),
+            Optional.of(LocalDate.now().plusYears(2))
+        );
+
+        webTestClient
+            .post()
+            .uri("/app/orgtilknytninger")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(leggTilOrgtilknytningRequest)
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).opprettOrgtilknytning(
+            opprettOrgtilknytningArgumentCaptor.capture()
+        );
+    }
+
 
 }

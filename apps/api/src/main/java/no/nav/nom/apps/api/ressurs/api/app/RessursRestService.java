@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 @Service
@@ -278,6 +279,7 @@ public class RessursRestService {
 
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
         if (request.sektor() == Sektor.EKSTERN) {
+            validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
             if (request.sluttDato().isEmpty()) {
                 throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
             }
