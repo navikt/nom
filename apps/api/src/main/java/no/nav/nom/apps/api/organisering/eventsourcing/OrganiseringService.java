@@ -67,7 +67,7 @@ public class OrganiseringService {
                 Optional<OrganiseringState> organiseringState = getByAgressoIdNivaAndName(dvhOrganisering);
 
                 if (organiseringState.isPresent()) {
-                    if (hasOrganiseringChanged(organiseringState.get().fid(), dvhOrganisering, orgEnhet.get(), orgEnhetOver.get())) {
+                    if (hasOrganiseringChanged(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
                         organiseringEventCommandService.avsluttOrganisering(
                             organiseringState.get().fid(),
                             getAvsluttOrganiseringCmd(organiseringState.get().gyldigFom())
@@ -107,7 +107,7 @@ public class OrganiseringService {
                 getAvsluttOrganiseringCmd(organiseringState.gyldigFom())
             ));
 
-        logger.info("Antall organiseringer ikke lenget mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
+        logger.info("Antall organiseringer ikke lenger mottatt fra DVH og derfor avsluttet: {} ", numberOfTerminatedNotFromDvh.get());
     }
 
     public record OrganiseringIdTuple(
@@ -133,7 +133,7 @@ public class OrganiseringService {
             .toList();
     }
 
-    public boolean hasOrganiseringChanged(String fid, DvhOrganisering newOrganiseringFromDvh, IOrgenhet newOrgEnhet, IOrgenhet newOrgEnhetOver) {
+    public boolean hasOrganiseringChanged(String fid, IOrgenhet newOrgEnhet, IOrgenhet newOrgEnhetOver) {
         boolean organiseringEndret = false;
 
         if (fid.startsWith("organisering")) {
@@ -143,9 +143,7 @@ public class OrganiseringService {
                 OrganiseringState eksisterendeOrg = eksisterendeOrganisering.get();
 
                 if (!eksisterendeOrg.id().equals(newOrgEnhet.getId()) ||
-                    !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId()) ||
-                    !eksisterendeOrg.navn().equals(newOrganiseringFromDvh.getNavnUnder()) ||
-                    !eksisterendeOrg.navnOver().equals(newOrganiseringFromDvh.getNavnOver())
+                    !eksisterendeOrg.idOver().equals(newOrgEnhetOver.getId())
                 ) {
                     organiseringEndret = true;
                 }

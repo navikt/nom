@@ -58,7 +58,7 @@ class OrganiseringServiceTest {
             .navn(initialDvhOrg.getNavnOver())
             .build());
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, initialDvhOrg, orgEnhet, orgEnhetOver)).isFalse();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isFalse();
     }
 
     @Test
@@ -73,11 +73,6 @@ class OrganiseringServiceTest {
 
         // Initial organisering from DVH
         DvhOrganisering initialDvhOrg = initialDvhOrganisering();
-
-        // New organisering from DVH
-        DvhOrganisering newDvhOrg = initialDvhOrganisering().toBuilder()
-            .navnOver(newNavnOver)
-            .build();
 
         // Setup response from organisering state lookup
         mockOrganiseringStateLookup(fid, initialDvhOrg, nomId, nomIdOver);
@@ -95,7 +90,7 @@ class OrganiseringServiceTest {
             .navn(newNavnOver)
             .build());
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -110,11 +105,6 @@ class OrganiseringServiceTest {
 
         // Initial organisering from DVH
         DvhOrganisering initialDvhOrg = initialDvhOrganisering();
-
-        // New organisering from DVH
-        DvhOrganisering newDvhOrg = initialDvhOrganisering().toBuilder()
-            .orgNivOver(newOrgNivOver)
-            .build();
 
         // Setup response from organisering state lookup
         mockOrganiseringStateLookup(fid, initialDvhOrg, nomId, nomIdOver);
@@ -134,7 +124,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -149,11 +139,6 @@ class OrganiseringServiceTest {
 
         // Initial organisering from DVH
         DvhOrganisering initialDvhOrg = initialDvhOrganisering();
-
-        // New organisering from DVH
-        DvhOrganisering newDvhOrg = initialDvhOrganisering().toBuilder()
-            .agressoIdOver(newAgressoIdOver)
-            .build();
 
         // Setup response from organisering state lookup
         mockOrganiseringStateLookup(fid, initialDvhOrg, nomId, nomIdOver);
@@ -173,7 +158,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, orgEnhet, orgEnhetOver)).isTrue();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgEnhetOver)).isTrue();
     }
 
     @Test
@@ -185,11 +170,6 @@ class OrganiseringServiceTest {
 
         // Initial organisering from DVH
         DvhOrganisering initialDvhOrg = initialDvhOrganisering();
-
-        // New organisering from DVH
-        DvhOrganisering newDvhOrg = initialDvhOrganisering().toBuilder()
-            .gyldigFom(LocalDate.now())
-            .build();
 
         // Organisering state contains gyldigFom from when the organisering was created
         OrganiseringState organiseringState = OrganiseringState.builder()
@@ -215,7 +195,7 @@ class OrganiseringServiceTest {
             .build());
 
 
-        assertThat(organiseringService.hasOrganiseringChanged(fid, newDvhOrg, orgEnhet, orgenhetOver)).isFalse();
+        assertThat(organiseringService.hasOrganiseringChanged(fid, orgEnhet, orgenhetOver)).isFalse();
     }
 
 
