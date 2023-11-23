@@ -6,7 +6,10 @@ import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import { format } from "date-fns";
 
-import { getOrgEnhet } from "~/api/react-query-endpoints";
+import {
+  getFysiskeBrukersteder,
+  getOrgEnhet,
+} from "~/api/react-query-endpoints";
 import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
@@ -29,6 +32,7 @@ export function ConfirmStep() {
     startDato,
     sluttDato,
     orgEnhetId,
+    fysiskBrukerstedNr,
   } = useSearch({ from: createRessursRoute.id });
 
   const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
@@ -41,8 +45,14 @@ export function ConfirmStep() {
     enabled: !!orgEnhetId,
   });
 
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+
   const selectOrgEnhet = orgEnhetQuery.data;
   const lederNavn = formatVisningsnavn(selectOrgEnhet?.ledere[0]?.visningsnavn);
+
+  const selectedFysiskBrukersted = (fysiskeBrukerstederQuery.data || []).find(
+    (fysiskBrukersted) => fysiskBrukersted.brukerstedNr === fysiskBrukerstedNr,
+  );
 
   const onClose = () =>
     navigate({
@@ -69,6 +79,7 @@ export function ConfirmStep() {
         startDato,
         sluttDato,
         orgEnhetId,
+        fysiskBrukerstedNr,
       };
       return axios.post("/nom-api/app/ressurser", opprettRessursRequest);
     },
@@ -134,6 +145,8 @@ export function ConfirmStep() {
           <b>{selectOrgEnhet?.navn}</b>
           <span>Leder:</span>
           <b>{lederNavn}</b>
+          <span>Fysisk brukersted:</span>
+          <b>{`${selectedFysiskBrukersted?.brukerstedNavn} (${selectedFysiskBrukersted?.brukerstedNr})`}</b>
           <span>Remedy-enhet:</span>
           <b>{selectOrgEnhet?.remedyEnhetId}</b>
           <span>Startdato (første arbeidsdag):</span>

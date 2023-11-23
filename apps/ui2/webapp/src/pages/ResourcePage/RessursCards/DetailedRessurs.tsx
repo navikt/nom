@@ -34,6 +34,7 @@ import {
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
 import { useHasWriteAccess } from "~/api/useGetSession";
+import { Divider } from "~/components/Divider";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
@@ -84,28 +85,6 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <TeamCatSection navident={ressurs.navident} />
       </div>
     </div>
-  );
-}
-
-function Divider({ size = "large" }: { size?: "large" | "small" }) {
-  return (
-    <div
-      css={[
-        css`
-          height: 1px;
-          margin: var(--a-spacing-8) 0;
-          background-color: var(--a-gray-400);
-        `,
-        size === "large" &&
-          css`
-            margin: var(--a-spacing-8) 0;
-          `,
-        size === "small" &&
-          css`
-            margin: var(--a-spacing-6) 0;
-          `,
-      ]}
-    />
   );
 }
 

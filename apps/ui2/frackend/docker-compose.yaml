@@ -40,6 +40,8 @@ services:
       NOM_API_URL: "https://nom-api.intern.dev.nav.no"
       TEAM_CATALOG_SCOPE: "api://dev-gcp.org.team-catalog-backend/.default"
       TEAM_CATALOG_API_URL: "https://teamkatalog-api.intern.dev.nav.no"
+      NOM_REMEDY_INTEGRASJON_API_SCOPE: "api://dev-fss.org.nom-remedy-integrasjon/.default"
+      NOM_REMEDY_INTEGRASJON_API_URL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
 
 secrets:
   npmrc:

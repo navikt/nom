@@ -60,6 +60,9 @@ public class NomIntegrasjonService {
             .map(LocalDate::parse)
             .orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"));
 
+        var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArguments.get("fysiskBrukerstedNr"))
+            .orElseThrow(() -> new NoSuchElementException("Missing value for 'fysiskBrukerstedNr'"));
+
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
             .entryId(nextId())
             .entryBestiller(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
@@ -69,8 +72,7 @@ public class NomIntegrasjonService {
             .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()))
             .fodselsnummer(ressursOpprettetEventData.personident())
             .fornavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().getFornavnMellomnavn()))
-            .fysiskBrukerstedId("TODO") // TODO
-            .mobil("TODO") // TODO
+            .fysiskBrukerstedId(fysiskBrukerstedNr)
             .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> new NoSuchElementException("Missing value for 'navident'")))
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato().map(Utils::epochSeconds).orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))

@@ -18,3 +18,11 @@ export const setupTeamcatApiProxy = (app: Express) =>
     scope: config.proxy.teamcatApiScope,
     flow: "ON_BEHALF_OF",
   });
+
+export const setupNomRemedyIntegrasjonProxy = (app: Express) =>
+  addProxyHandler(app, {
+    ingoingUrl: "/nom-remedy-integrasjon",
+    outgoingUrl: config.proxy.nomRemedyIntegrasjonApiUrl,
+    scope: config.proxy.nomRemedyIntegrasjonApiScope,
+    flow: "ON_BEHALF_OF",
+  });

@@ -7,6 +7,7 @@ import {
   RadioGroup,
   useDatepicker,
 } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
@@ -23,7 +24,10 @@ import {
   ResultLimit,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
+import { getFysiskeBrukersteder } from "~/api/react-query-endpoints";
+import { Divider } from "~/components/Divider";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
+import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -135,19 +139,23 @@ const eksternValidationSchema = yup.object().shape({
   orgEnhetId: yup.string().required("Obligatorisk"),
   startDato: yup.string().required("Obligatorisk"),
   sluttDato: yup.string().required("Obligatorisk"),
+  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
 });
 
 function CreateEksternRessurs() {
   const navigate = useNavigate();
-  const { orgEnhetId, startDato, sluttDato } = useSearch({
+  const { orgEnhetId, startDato, sluttDato, fysiskBrukerstedNr } = useSearch({
     from: createRessursRoute.to,
   });
+
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
 
   const methods = useForm({
     defaultValues: {
       orgEnhetId: orgEnhetId,
       startDato: undefined,
       sluttDato: undefined,
+      fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
     resolver: yupResolver(eksternValidationSchema),
   });
@@ -181,6 +189,8 @@ function CreateEksternRessurs() {
       setValue("sluttDato", date ? formatDateWithoutTimezone(date) : ""),
     defaultSelected: sluttDato ? new Date(sluttDato) : undefined,
   });
+
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
   return (
     <FormProvider {...methods}>
@@ -236,6 +246,10 @@ function CreateEksternRessurs() {
             </DatePicker>
           </FullWidthDatePickerWrapper>
         </div>
+        <Divider />
+        <FysiskBrukerstedSelectFormPart
+          fysiskeBrukersteder={fysiskeBrukersteder}
+        />
         <NavigationButtons />
       </form>
     </FormProvider>

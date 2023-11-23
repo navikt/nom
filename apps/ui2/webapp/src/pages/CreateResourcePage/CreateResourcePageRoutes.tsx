@@ -85,6 +85,7 @@ const commonValidationSchema = yup.object({
     .mixed<AnsettelsesType>()
     .oneOf(Object.values(AnsettelsesType))
     .required("Obligatorisk"),
+  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
 });
 
 // eslint-disable-next-line unicorn/prefer-spread
@@ -109,6 +110,7 @@ export function validateCreateRessursSearch(
     startDato: String(search.startDato ?? ""),
     sluttDato: String(search.sluttDato ?? ""),
     ansettelsesType: (search.ansettelsesType as AnsettelsesType) ?? undefined,
+    fysiskBrukerstedNr: String(search.fysiskBrukerstedNr ?? ""),
   };
 }
 

@@ -233,6 +233,16 @@ export const getUnderliggendeOrgenheter = {
     ).data,
 };
 
+export const getFysiskeBrukersteder = {
+  queryKey: ["FYSISKE_BRUKERSTEDER"],
+  queryFn: async () =>
+    (
+      await axios.get<FysiskBrukersted[]>(
+        "/nom-remedy-integrasjon/api/fysiskebrukersteder",
+      )
+    ).data,
+};
+
 type GraphqlResponseWrapper = {
   data: {
     ressurser: {
@@ -263,4 +273,9 @@ export type RessursFields = {
   sektor: string[];
   startdato: string;
   sluttdato: string;
+};
+
+export type FysiskBrukersted = {
+  brukerstedNr: string;
+  brukerstedNavn: string;
 };

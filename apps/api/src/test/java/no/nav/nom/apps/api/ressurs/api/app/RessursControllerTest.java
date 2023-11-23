@@ -75,7 +75,8 @@ public class RessursControllerTest extends RestTestBase {
                 "",
                 LocalDate.now(),
                 null,
-                AnsettelsesType.FAST
+                AnsettelsesType.FAST,
+            ""
         );
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -140,7 +141,8 @@ public class RessursControllerTest extends RestTestBase {
                 "",
                 LocalDate.now(),
                 Optional.of(LocalDate.now()),
-                null
+                null,
+            ""
         );
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -200,7 +202,8 @@ public class RessursControllerTest extends RestTestBase {
             "",
             LocalDate.now(),
             Optional.empty(),
-            null
+            null,
+            ""
         );
 
         webTestClient.post()

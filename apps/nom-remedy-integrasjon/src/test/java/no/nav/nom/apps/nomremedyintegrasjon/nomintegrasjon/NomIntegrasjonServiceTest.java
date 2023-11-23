@@ -56,6 +56,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var sluttDato = LocalDate.of(2024, 12, 12);
         var orgEnhetId = "some-orgenhet";
         var remedyEnhetId = "some-remedy-id";
+        var fysiskBrukerstedNr = "0123";
 
         var ressursOpprettetEventV1 = new RessursOpprettetEventV1(
             UUID.randomUUID().toString(),
@@ -66,7 +67,12 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build(),
             inputMetadata().toBuilder()
                 .origination(new Origination(initiatedBy, ""))
-                .inputInterfaceMethodArguments(Map.of("orgEnhetId", orgEnhetId, "sluttDato", sluttDato.toString()))
+                .inputInterfaceMethodArguments(Map.of(
+                    "orgEnhetId", orgEnhetId,
+                    "sluttDato", sluttDato.toString(),
+                    "fysiskBrukerstedNr", fysiskBrukerstedNr
+                ))
+
                 .build(),
             ressursOpprettetAdditionalData().toBuilder()
                 .navident(Optional.of(navident))
@@ -93,8 +99,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .etternavn(capitalizeNavn(etternavn))
                     .fodselsnummer(personident)
                     .fornavn(capitalizeNavn(fornavn))
-                    .fysiskBrukerstedId("TODO")
-                    .mobil("TODO")
+                    .fysiskBrukerstedId(fysiskBrukerstedNr)
                     .navId(navident)
                     .sektor(2)
                     .tiltredelsesdato(epochSeconds(startDato))
