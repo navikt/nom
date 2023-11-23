@@ -22,23 +22,15 @@ public class EksterneRessurserLoader {
     private final AppProperties appProperties;
     private EksterneRessurserProcessor eksterneRessurserProcessor;
 
-    public static final String UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE = "nom.last_orgtilknytninger_for_eksterne";
-    private final Unleash unleash;
-
     public EksterneRessurserLoader(NomProxyClient nomProxyClient, AppProperties appProperties, EksterneRessurserProcessor eksterneRessurserProcessor, Unleash unleash) {
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
         this.eksterneRessurserProcessor = eksterneRessurserProcessor;
-        this.unleash = unleash;
     }
 
     public void loadAndProcess() {
-        if (unleash.isEnabled(UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE)) {
-            List<DvhEksternRessurs> eksterneRessurser = load();
-            eksterneRessurser.forEach(eksterneRessurserProcessor::process);
-        } else {
-            log.info("Unleash {} er ikke aktivert - laster ikke eksterne ressurser", UNLEASH_LAST_ORGTILKNYTNINGER_FOR_EKSTERNE);
-        }
+        List<DvhEksternRessurs> eksterneRessurser = load();
+        eksterneRessurser.forEach(eksterneRessurserProcessor::process);
     }
 
     private List<DvhEksternRessurs> load() {
