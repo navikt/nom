@@ -63,13 +63,26 @@ public class OrganiseringStateRepositoryTest {
             .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
             .build();
 
+        OrganiseringState organisering_fom_today_tom_notset = OrganiseringState.builder()
+            .fid("organisering_fom_today_tom_notset" + "_fid")
+            .gyldigFom(LocalDate.now())
+            .build();
+
+        OrganiseringState organisering_fom_today_tom_empty = OrganiseringState.builder()
+            .fid("organisering_fom_today_tom_empty" + "_fid")
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
+
         return Stream.of(
             Arguments.of(organisering_fom_tom_today, 0),
             Arguments.of(organisering_fom_todayMinus10_tom_todayMinus2_dager, 0),
             Arguments.of(organisering_fom_today_tom_todayMinus1, 0),
             Arguments.of(organisering_fom_today_tom_todayPlus2_dager, 1),
             Arguments.of(organisering_fom_todayMinus10_tom_today, 1),
-            Arguments.of(organisering_fom_todayMinus10_tom_todayPlus10, 1)
+            Arguments.of(organisering_fom_todayMinus10_tom_todayPlus10, 1),
+            Arguments.of(organisering_fom_today_tom_notset, 1),
+            Arguments.of(organisering_fom_today_tom_empty, 1)
         );
     }
 }
