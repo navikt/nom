@@ -307,7 +307,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Listduplikate ressurser på samme navident",
+        description = "List duplikate ressurser på samme navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -338,6 +338,22 @@ public class SanityCheck {
         });
 
         return result.toString();
+    }
+
+    @Operation(
+        description = "List orgtilknytninger med negativ periode (gyldigTom < gyldigFom)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/orgtilknytningNegativPeriode")
+    public List<OrgtilknytningState> orgtilknytningNegativPeriode() {
+        return orgtilknytningService.getAll().stream()
+            .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom()))
+            .toList();
     }
 
     private String sjekkOrgEnhetStartSluttDato() {
