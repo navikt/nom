@@ -15,18 +15,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class OrganiseringStateRepositoryTest {
 
-
-    @DisplayName("Test getActiveOrganisering")
-    @ParameterizedTest
-    @MethodSource("getTestParameters")
-    void test_getActiveOrganisering(OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
+    @DisplayName("Test ActiveOrganisering method")
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("getOrganiseringStates")
+    void test_getActiveOrganisering(String ignoredDescription, OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
         OrganiseringStateRepository repository = new OrganiseringStateRepository();
         repository.put(organiseringsState.fid(), organiseringsState);
 
-        assertThat(repository.getActiveOrganisering().size()).isEqualTo(expectedNumberOfActiveOrganisering);
+        assertThat(repository.getActiveOrganisering().size())
+            .isEqualTo(expectedNumberOfActiveOrganisering);
     }
 
-    private static Stream<Arguments> getTestParameters() {
+    private static Stream<Arguments> getOrganiseringStates() {
+
+        var IS_ACTIVE = "is active";
+        var IS_NOT_ACTIVE = "is not active";
+
         OrganiseringState organisering_fom_tom_today = OrganiseringState.builder()
             .fid("organisering_fom_tom_today" + "_fid")
             .gyldigFom(LocalDate.now())
@@ -75,14 +79,14 @@ public class OrganiseringStateRepositoryTest {
             .build();
 
         return Stream.of(
-            Arguments.of(organisering_fom_tom_today, 0),
-            Arguments.of(organisering_fom_todayMinus10_tom_todayMinus2_dager, 0),
-            Arguments.of(organisering_fom_today_tom_todayMinus1, 0),
-            Arguments.of(organisering_fom_today_tom_todayPlus2_dager, 1),
-            Arguments.of(organisering_fom_todayMinus10_tom_today, 1),
-            Arguments.of(organisering_fom_todayMinus10_tom_todayPlus10, 1),
-            Arguments.of(organisering_fom_today_tom_notset, 1),
-            Arguments.of(organisering_fom_today_tom_empty, 1)
+            Arguments.of("organisering_fom_tom_today " + IS_NOT_ACTIVE, organisering_fom_tom_today, 0),
+            Arguments.of("organisering_fom_todayMinus10_tom_todayMinus2_dager is " + IS_NOT_ACTIVE, organisering_fom_todayMinus10_tom_todayMinus2_dager, 0),
+            Arguments.of("organisering_fom_today_tom_todayMinus1 " + IS_NOT_ACTIVE, organisering_fom_today_tom_todayMinus1, 0),
+            Arguments.of( "organisering_fom_today_tom_todayPlus2_dager " + IS_ACTIVE, organisering_fom_today_tom_todayPlus2_dager, 1),
+            Arguments.of("organisering_fom_todayMinus10_tom_today " + IS_ACTIVE, organisering_fom_todayMinus10_tom_today, 1),
+            Arguments.of("organisering_fom_todayMinus10_tom_todayPlus10 " + IS_ACTIVE, organisering_fom_todayMinus10_tom_todayPlus10, 1),
+            Arguments.of("organisering_fom_today_tom_notset " + IS_ACTIVE, organisering_fom_today_tom_notset, 1),
+            Arguments.of("organisering_fom_today_tom_empty " + IS_ACTIVE, organisering_fom_today_tom_empty, 1)
         );
     }
 }
