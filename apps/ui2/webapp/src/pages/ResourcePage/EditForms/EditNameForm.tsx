@@ -1,6 +1,8 @@
 import { css } from "@emotion/react";
+import { FloppydiskIcon } from "@navikt/aksel-icons";
 import { Button, TextField } from "@navikt/ds-react";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -9,6 +11,8 @@ import { showToast } from "~/hooks/showToast";
 import type { Ressurs, Visningsnavn } from "~/types/api-models";
 
 export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
+  const navigate = useNavigate();
+
   const defaultValues = {
     fornavn: ressurs.visningsnavn.fornavn,
     mellomnavn: ressurs.visningsnavn.mellomnavn,
@@ -27,7 +31,8 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
   const { mutate } = useMutation<unknown, unknown, Visningsnavn>({
     mutationFn: async (values) =>
       updateNavnForRessurs(ressurs.navident, values),
-    onSettled: () => {
+    onSuccess: () => {
+      // TODO: refresh ressurs after save
       showToast({ text: "Lagret" });
       reset({}, { keepValues: true });
     },
@@ -50,8 +55,20 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
       <TextField {...register("fornavn")} label="Fornavn" />
       <TextField {...register("mellomnavn")} label="Mellomnavn" />
       <TextField {...register("etternavn")} label="Etternavn" />
+      <Button
+        onClick={() => navigate({ search: {} })}
+        size="small"
+        type="button"
+        variant="secondary"
+      >
+        Avbryt
+      </Button>
       {isDirty && (
-        <Button size="small" type="submit">
+        <Button
+          icon={<FloppydiskIcon aria-hidden />}
+          size="small"
+          type="submit"
+        >
           Lagre
         </Button>
       )}

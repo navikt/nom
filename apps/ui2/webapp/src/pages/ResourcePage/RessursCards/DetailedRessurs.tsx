@@ -1,25 +1,21 @@
 import { css } from "@emotion/react";
 import {
   Buldings3Icon,
-  FloppydiskIcon,
   PencilIcon,
   PersonIcon,
   PersonSuitIcon,
   ReceptionIcon,
 } from "@navikt/aksel-icons";
 import {
-  Alert,
   Button,
-  DatePicker,
   ExpansionCard,
   Heading,
   HelpText,
   Label,
   Link,
   Tag,
-  useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Link as ReactRouterLink,
   useNavigate,
@@ -27,8 +23,8 @@ import {
 } from "@tanstack/react-router";
 import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
+import type { ReactNode } from "react";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 
 import {
   getLedereForRessurs,
@@ -36,27 +32,18 @@ import {
   getOrgEnheterLedetAv,
   getOrgTilknytninger,
   getTeamcatMemberships,
-  updateOrgtilknytningDato,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess, useHasWriteAccess } from "~/api/useGetSession";
-import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
+import { useHasWriteAccess } from "~/api/useGetSession";
 import { UserImage } from "~/components/UserImage";
-import { showToast } from "~/hooks/showToast";
-import { rowStyles } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
-import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
+import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
-import type {
-  EndreOrgtilknytningDatoRequest,
-  OrgtilknytningState,
-  Ressurs,
-} from "~/types/api-models";
+import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import { Sektor } from "~/types/api-models";
 import {
-  formatDateWithoutTimezone,
   formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
@@ -65,8 +52,6 @@ import {
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
-  const hasAdminAccess = useHasAdminAccess();
-
   return (
     <div
       css={css`
@@ -97,29 +82,8 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <LeaderForSection ressurs={ressurs} />
         <OrgTilknytningSection ressurs={ressurs} />
         <TeamCatSection navident={ressurs.navident} />
-        {hasAdminAccess && <ToggleEditButton />}
       </div>
     </div>
-  );
-}
-
-function ToggleEditButton() {
-  const { edit } = useSearch({ from: ressursRoute.id });
-  const navigate = useNavigate();
-  if (edit) {
-    return (
-      <Button
-        onClick={() => navigate({ search: { edit: false } })}
-        size="small"
-      >
-        Ferdig
-      </Button>
-    );
-  }
-  return (
-    <Button onClick={() => navigate({ search: { edit: true } })} size="small">
-      Endre
-    </Button>
   );
 }
 
@@ -187,7 +151,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
       </Heading>
       {activeOrgtilknytninger.map((orgTilknytning) =>
         editOrgtilknytning === orgTilknytning.fid ? (
-          <EditOrgtilknytning
+          <EditOrgtilknytningForm
             key={orgTilknytning.fid}
             orgTilknytning={orgTilknytning}
           />
@@ -230,7 +194,7 @@ function FutureOrgTilknytninger({
       </Heading>
       {futureOrgTilknytninger.map((orgTilknytning) =>
         editOrgtilknytning === orgTilknytning.fid ? (
-          <EditOrgtilknytning
+          <EditOrgtilknytningForm
             key={orgTilknytning.fid}
             orgTilknytning={orgTilknytning}
           />
@@ -322,187 +286,6 @@ function ExpiredOrgTilknytning({
   );
 }
 
-function EditOrgtilknytning({
-  orgTilknytning,
-}: {
-  orgTilknytning: OrgtilknytningState;
-}) {
-  const methods = useForm({
-    defaultValues: {
-      gyldigFom: orgTilknytning.gyldigFom,
-      gyldigTom: orgTilknytning.gyldigTom,
-    },
-  });
-
-  const { handleSubmit, setValue } = methods;
-
-  const startDatepicker = useDatepicker({
-    onDateChange: (date) =>
-      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: new Date(orgTilknytning.gyldigFom),
-  });
-
-  const sluttDatepicker = useDatepicker({
-    onDateChange: (date) =>
-      setValue("gyldigTom", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: orgTilknytning.gyldigTom
-      ? new Date(orgTilknytning.gyldigTom)
-      : undefined,
-  });
-
-  const orgEnhetQuery = useQuery({
-    queryKey: getOrgEnhet.queryKey(orgTilknytning.orgEnhetId),
-    queryFn: () => getOrgEnhet.queryFn(orgTilknytning.orgEnhetId),
-  });
-
-  const orgtilknytningDatoMutation = useMutation<
-    unknown,
-    unknown,
-    EndreOrgtilknytningDatoRequest
-  >({
-    mutationFn: async (values) =>
-      updateOrgtilknytningDato(orgTilknytning.fid, values),
-    onSuccess: () => {
-      showToast({ text: "Lagret" });
-      // TODO:
-      // Sørge for at verdier lastes på nytt ved lagring
-      //--- i toppen av komponenten
-      // const queryClient = useQueryClient();
-      //
-      // --- i onSuccess på linja før navigate()
-      // queryClient.invalidateQueries({ queryKey: orgtilknytningerKeys.navident(navident)});
-      navigate({ search: { editOrgtilknytning: undefined } });
-    },
-  });
-
-  const orgEnhet = orgEnhetQuery.data;
-
-  const navigate = useNavigate();
-
-  if (!orgEnhet) {
-    return <></>;
-  }
-
-  const orgEnhetLeder = orgEnhet.ledere[0];
-
-  return (
-    <div
-      aria-label="datoendring"
-      css={css`
-        margin-bottom: var(--a-spacing-8);
-        background-color: var(--a-surface-default);
-        border-radius: var(--a-border-radius-large);
-        border: 1px solid var(--a-border-default);
-        padding: var(--a-spacing-3) var(--a-spacing-4);
-      `}
-    >
-      <Heading
-        css={css`
-          margin-bottom: var(--a-spacing-1);
-        `}
-        level="3"
-        size="medium"
-      >
-        {orgEnhet.navn}
-      </Heading>
-      <Label size="small">
-        <span
-          css={css`
-            font-weight: var(--a-font-weight-regular);
-          `}
-        >
-          Leder:{" "}
-        </span>
-        {formatVisningsnavn(orgEnhetLeder?.visningsnavn)}
-      </Label>
-      {orgEnhet.remedyEnhetId ? (
-        <Label
-          css={css`
-            margin-left: 14px;
-          `}
-          size="small"
-        >
-          <span
-            css={css`
-              font-weight: var(--a-font-weight-regular);
-            `}
-          >
-            Enhet i Remedy:{" "}
-          </span>
-          {orgEnhet.remedyEnhetId}
-        </Label>
-      ) : undefined}
-      <form
-        onSubmit={handleSubmit((values) =>
-          orgtilknytningDatoMutation.mutate(values),
-        )}
-      >
-        <div
-          css={css`
-            display: flex;
-            margin-top: var(--a-spacing-6);
-            margin-bottom: var(--a-spacing-4);
-            ${rowStyles}
-          `}
-        >
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...startDatepicker.datepickerProps}>
-              <DatePicker.Input
-                {...startDatepicker.inputProps}
-                label="Første arbeidsdag i enheten"
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...sluttDatepicker.datepickerProps}>
-              <DatePicker.Input
-                {...sluttDatepicker.inputProps}
-                label="Siste arbeidsdag i enheten"
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-        </div>
-        {orgtilknytningDatoMutation.isError ? (
-          <Alert variant="error">Noe gikk galt</Alert>
-        ) : undefined}
-        <span>
-          Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
-          med én gang.
-        </span>
-        <div
-          css={css`
-            display: flex;
-            justify-content: flex-end;
-            margin-top: var(--a-spacing-4);
-          `}
-        >
-          <Button
-            css={css`
-              margin-right: var(--a-spacing-6);
-            `}
-            onClick={() =>
-              navigate({ search: { editOrgtilknytning: undefined } })
-            }
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-          <Button
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-            variant="primary"
-          >
-            Lagre
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
 function OrganisationHierarchyTree({
   ressurs,
   orgTilknytning,
@@ -518,10 +301,6 @@ function OrganisationHierarchyTree({
   const orgEnhet = orgEnhetQuery.data;
 
   const navigate = useNavigate();
-
-  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
-
-  const hasWriteAccess = useHasWriteAccess();
 
   if (!orgEnhet) {
     return <></>;
@@ -600,20 +379,16 @@ function OrganisationHierarchyTree({
             margin-top: var(--a-spacing-6);
           `}
         >
-          {hasWriteAccess &&
-            ressurs.sektor === Sektor.EKSTERN &&
-            editOrgtilknytning === undefined && (
-              <Button
-                icon={<PencilIcon aria-hidden />}
-                onClick={() =>
-                  navigate({ search: { editOrgtilknytning: fid } })
-                }
-                size="small"
-                variant="secondary"
-              >
-                Endre
-              </Button>
-            )}
+          <EditButtonWrapper ressurs={ressurs}>
+            <Button
+              icon={<PencilIcon aria-hidden />}
+              onClick={() => navigate({ search: { editOrgtilknytning: fid } })}
+              size="small"
+              variant="secondary"
+            >
+              Endre
+            </Button>
+          </EditButtonWrapper>
         </div>
       </ExpansionCard.Content>
     </ExpansionCard>
@@ -667,9 +442,9 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Name({ ressurs }: { ressurs: Ressurs }) {
-  const { edit } = useSearch({ from: ressursRoute.id });
+  const { editPersonopplysninger } = useSearch({ from: ressursRoute.id });
 
-  if (edit) {
+  if (editPersonopplysninger) {
     return <EditNameForm ressurs={ressurs} />;
   }
   return (
@@ -686,17 +461,20 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Telephone({ ressurs }: { ressurs: Ressurs }) {
-  const { edit } = useSearch({ from: ressursRoute.id });
+  // TODO: Edit telephone is not implemented in backend yet
+  /*
+   const { edit } = useSearch({ from: ressursRoute.id });
 
-  if (edit) {
-    return (
-      <>
-        <span>Telefon:</span>
+   if (edit) {
+     return (
+       <>
+         <span>Telefon:</span>
+         <EditPhoneNumber ressurs={ressurs} />
+       </>
+     );
+   }
+  */
 
-        <EditPhoneNumber ressurs={ressurs} />
-      </>
-    );
-  }
   return (
     <RessursInformationDetail
       label="Telefon"
@@ -708,6 +486,8 @@ function Telephone({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
+  const navigate = useNavigate();
+
   const dagligLeder = useQuery({
     queryKey: getLedereForRessurs.queryKey(ressurs.navident),
     queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
@@ -719,7 +499,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
       css={css`
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
+        align-items: stretch;
         flex-wrap: wrap-reverse;
         gap: var(--a-spacing-4);
       `}
@@ -791,13 +571,55 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           ) : undefined}
         </div>
       </div>
-      <UserImage
-        navident={ressurs.navident}
-        navn={formatVisningsnavn(ressurs.visningsnavn)}
-        size="126px"
-      />
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: var(--a-spacing-4);
+          align-items: flex-end;
+        `}
+      >
+        <UserImage
+          navident={ressurs.navident}
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          size="126px"
+        />
+        <EditButtonWrapper ressurs={ressurs}>
+          <Button
+            icon={<PencilIcon aria-hidden />}
+            onClick={() =>
+              navigate({ search: { editPersonopplysninger: true } })
+            }
+            size="small"
+          >
+            Endre personopplysninger
+          </Button>
+        </EditButtonWrapper>
+      </div>
     </div>
   );
+}
+
+function EditButtonWrapper({
+  ressurs,
+  children,
+}: {
+  ressurs: Ressurs;
+  children: ReactNode;
+}) {
+  const hasWriteAccess = useHasWriteAccess();
+  const { editPersonopplysninger, editOrgtilknytning } = useSearch({
+    from: ressursRoute.id,
+  });
+  const isEkstern = ressurs.sektor === Sektor.EKSTERN;
+  const isEditing = editPersonopplysninger || editOrgtilknytning;
+
+  if (!hasWriteAccess || !isEkstern || isEditing) {
+    return <></>;
+  }
+
+  return children;
 }
 
 function RessursInformationDetail({

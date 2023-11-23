@@ -101,13 +101,13 @@ export const ressursRoute = new Route({
     search,
   ): {
     alreadyExists?: boolean;
-    edit?: boolean;
+    editPersonopplysninger?: boolean;
     editOrgtilknytning?: string;
   } => {
     // validate and parse the search params into a typed state
     return {
       alreadyExists: Boolean(search.alreadyExists),
-      edit: Boolean(search.edit),
+      editPersonopplysninger: Boolean(search.editPersonopplysninger),
       editOrgtilknytning: search.editOrgtilknytning
         ? String(search.editOrgtilknytning)
         : undefined,
