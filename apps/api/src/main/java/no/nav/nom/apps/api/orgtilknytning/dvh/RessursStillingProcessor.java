@@ -507,6 +507,11 @@ public class RessursStillingProcessor {
             return;
         }
 
+        if (originalOrgtilknytning.gyldigFom().plusDays(1).isAfter(stillingPeriode.gyldigTom())) {
+            log.error("Endring av sluttdato på orgtilknytning for Navident {} er ikke gyldig. Sluttdato må være etter startdato", originalOrgtilknytning.navident());
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString

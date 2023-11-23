@@ -55,8 +55,15 @@ public class EksterneRessurserProcessor {
             } else {
                 log.debug("Ekstern ressurs {} er ikke aktiv - men har orgtilknytninger som må avsluttes", eksternRessurs.navident());
                 var meta = new InputMetadata("nom-api BatchJob", "Datavarehus", eksternRessurs, new Origination("nom-api", "nom-api"));
-                aktiveOrgtilkntyninger.forEach( o ->
-                    avsluttOrgtilknytning(o, eksternRessurs.remedySlutt(), meta));
+
+                // hvis aktiv orgtilknytning starter etter RemedySlutt, så fjern den i steden for å avslutte den
+                aktiveOrgtilkntyninger.forEach( o -> {
+                    if (o.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
+                        fjernEksisterendeOrgtilknytning(o, meta);
+                    } else {
+                        avsluttOrgtilknytning(o, eksternRessurs.remedySlutt(), meta);
+                    }
+                });
             }
         }
 
@@ -96,7 +103,12 @@ public class EksterneRessurserProcessor {
             } else {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
-                    endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
+                    // Hvis sluttdato er før ekstisterende startdato, fjern orgtilknytingen
+                    if (sisteEksisterendeOrgtilknytning.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
+                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, metadata);
+                    } else {
+                        endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
+                    }
                 } else {
                     // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
                     if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
