@@ -97,7 +97,6 @@ public class EksterneRessurserProcessor {
             var sisteEksisterendeOrgtilknytning = eksisterendeOrgtilknytninger.stream()
                 .max(Comparator.comparing(OrgtilknytningState::gyldigFom))
                 .get();
-
             if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) && erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                 log.debug("Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring", eksternRessurs.navident());
             } else {
@@ -110,8 +109,11 @@ public class EksterneRessurserProcessor {
                         endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
                     }
                 } else {
-                    // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
-                    if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
+                    if (LocalDate.now().isAfter(eksternRessurs.remedySlutt())) {
+                        // Hvis sluttdato er før dagens dato, avslutt eksisterende
+                        avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
+                    } else if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
+                        // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
                         avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, LocalDate.now().minusDays(1), metadata);
                         opprettOrgtilknytning(eksternRessurs, orgenhet, LocalDate.now(), metadata);
                     } else {
