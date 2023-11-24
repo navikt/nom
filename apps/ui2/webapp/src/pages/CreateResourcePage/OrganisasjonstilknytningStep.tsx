@@ -137,7 +137,6 @@ export const eksternValidationSchema = yup.object().shape({
   orgEnhetId: yup.string().required("Obligatorisk"),
   startDato: yup.string().required("Obligatorisk"),
   sluttDato: yup.string().required("Obligatorisk"),
-  fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
 });
 
 function CreateEksternRessurs() {
@@ -153,7 +152,15 @@ function CreateEksternRessurs() {
       sluttDato: undefined,
       fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
-    resolver: yupResolver(eksternValidationSchema),
+
+    resolver: yupResolver(
+      // eslint-disable-next-line unicorn/prefer-spread
+      eksternValidationSchema.concat(
+        yup.object().shape({
+          fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
+        }),
+      ),
+    ),
   });
 
   const { handleSubmit } = methods;
