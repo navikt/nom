@@ -42,7 +42,7 @@ import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyR
 @RequiredArgsConstructor
 public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
-    public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = "nom.organisasjon.enable_new_topics";
+    public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = "nom.organisering.enable_new_topics";
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;

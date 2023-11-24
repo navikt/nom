@@ -57,10 +57,10 @@ public class OrganiseringStateRepository {
     }
 
     private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {
-        return (organiseringState.gyldigTom().isPresent() &&
+        return organiseringState.gyldigTom().isPresent() &&
             organiseringState.gyldigFom() != null &&
             organiseringState.gyldigTom().get().isEqual(organiseringState.gyldigFom()) &&
-            organiseringState.gyldigTom().get().isEqual(LocalDate.now()));
+            organiseringState.gyldigTom().get().isEqual(LocalDate.now());
     }
 
     private boolean isGyldigTomTodayOrLater(OrganiseringState organiseringState) {

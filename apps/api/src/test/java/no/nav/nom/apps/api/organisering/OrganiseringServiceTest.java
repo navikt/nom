@@ -248,7 +248,7 @@ class OrganiseringServiceTest {
 
         var organiseringState = Map.of(fidFound, orgStateFound, fidNotFound, orgStateNotFound);
 
-        var fidsNotFromDvh = organiseringService.fidsInStateNotInDvhOrganiseringer(organiseringerFromDvh, organiseringState);
+        var fidsNotFromDvh = organiseringService.organiseringerInStateNotInDvhOrganiseringer(organiseringerFromDvh, organiseringState);
         assertThat(fidsNotFromDvh.size()).isEqualTo(1);
         assertThat(fidsNotFromDvh.get(0).fid()).isEqualTo(fidNotFound);
     }

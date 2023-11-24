@@ -64,7 +64,7 @@ public class OrganiseringService {
 
             // Ved første gangs innlesing mangler nomId-er over/under i OrgEnhetState, så hopp over
             if (orgEnhet.isPresent() && orgEnhetOver.isPresent()) {
-                Optional<OrganiseringState> organiseringState = getByAgressoIdNivaAndName(dvhOrganisering);
+                Optional<OrganiseringState> organiseringState = getOrganiseringState(dvhOrganisering);
 
                 if (organiseringState.isPresent()) {
                     if (hasOrganiseringChanged(organiseringState.get().fid(), orgEnhet.get(), orgEnhetOver.get())) {
@@ -87,14 +87,16 @@ public class OrganiseringService {
                 organiseringIdsFromDvh.add(new OrganiseringIdTuple(orgEnhet.get().getId(), orgEnhetOver.get().getId()));
 
             } else {
-                logger.info("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: {} orgEnhetOver: {}", orgEnhet, orgEnhetOver);
+                logger.info("orgEnhet eller orgEnhetOver ikke finnes i orgenhetStateRepository. orgEnhet: ({} {} {}) orgEnhetOver: ({} {} {})",
+                    dvhOrganisering.getAgressoIdUnder(), dvhOrganisering.getOrgNivUnder(), dvhOrganisering.getNavnUnder(),
+                    dvhOrganisering.getAgressoIdOver(), dvhOrganisering.getOrgNivOver(), dvhOrganisering.getNavnOver());
             }
         }
 
         logger.info("Antall nye organiseringer: {} Antall avsluttede: {}", numberOfNew, numberOfTerminated);
 
 
-        List<OrganiseringState> organiseringerToTerminate = fidsInStateNotInDvhOrganiseringer(
+        List<OrganiseringState> organiseringerToTerminate = organiseringerInStateNotInDvhOrganiseringer(
             organiseringIdsFromDvh,
             organiseringStateRepository.getActiveOrganisering()
         );
@@ -115,7 +117,7 @@ public class OrganiseringService {
         String idOver
     ) {}
 
-    private Optional<OrganiseringState> getByAgressoIdNivaAndName(DvhOrganisering dvhOrganisering) {
+    private Optional<OrganiseringState> getOrganiseringState(DvhOrganisering dvhOrganisering) {
         Optional<IOrgenhet> orgEnhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
             dvhOrganisering.getAgressoIdUnder(),
             dvhOrganisering.getOrgNivUnder(),
@@ -124,7 +126,7 @@ public class OrganiseringService {
         return organiseringStateRepository.findFidByAgressoIdNivaAndName(orgEnhet);
     }
 
-    public List<OrganiseringState> fidsInStateNotInDvhOrganiseringer(
+    public List<OrganiseringState> organiseringerInStateNotInDvhOrganiseringer(
         List<OrganiseringIdTuple> organiseringerFromDvh,
         Map<String, OrganiseringState> organiseringerInState
     ) {
