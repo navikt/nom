@@ -1,5 +1,6 @@
-package no.nav.nom.apps.api.ressurs;
+package no.nav.nom.apps.api.ressurs.implementations.dvh;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -11,8 +12,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterStart
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
-import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
@@ -21,7 +21,6 @@ import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +37,9 @@ import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
 public class RessursHendelseForEventsourceService {
     private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
+
+    private final NomMastered nomMastered;
+    private final Unleash unleash;
 
     public void handterRessursIderFraDvh(List<DvhRessurs> dvhRessurs) {
         log.info("Ressurser to process " + dvhRessurs.size());
@@ -74,19 +76,25 @@ public class RessursHendelseForEventsourceService {
         final var ressursByNavident = ressursStateRepository.findByNavident(ressurs.getNavIdent());
         ressursByNavident.ifPresentOrElse((r) -> {
             if (!r.personident().equals(ressurs.getPersonIdent())) {
+                if (skipDueToNomMastered(ressurs.getNavIdent())) return;
+
                 log.info(SECURE_LOGS, "Ressurs {} har fått ny personident {}", r.fid(), ressurs.getPersonIdent());
                 ressursEndretPersonident(r.fid(), ressurs);
                 // og denne kan ha andre endringer så sjekk dette i tillegg
                 createEndreHendelse(r, ressurs);
             }
         }, () -> {
+            if (skipDueToNomMastered(ressurs.getNavIdent())) return;
+
             log.info(SECURE_LOGS, "Ny personident {} fra DVH, kjenner ikke identen så oppretter ny", ressurs.getPersonIdent());
             final var taskEvent = opprettRessurs(ressurs);
             opprettetRessuser.put(taskEvent.getKey(), taskEvent.getValue());
         });
     }
 
-    public Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
+    private Map.Entry<DvhRessurs, CompletableFuture<SendResult<String, RessursEvent>>> opprettRessurs(DvhRessurs ressurs) {
+        if (skipDueToNomMastered(ressurs.getNavIdent())) return null;
+
         return Map.entry(ressurs, ressursCommadService.createRessursEvent(new OpprettRessursCommand(
             ressurs.getPersonIdent(),
             ressurs.getNavIdent(),
@@ -100,7 +108,9 @@ public class RessursHendelseForEventsourceService {
         )));
     }
 
-    public void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
+    private void createEndreHendelse(RessursState ressursState, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursState.sluttdato().ifPresentOrElse((s) -> {
             if (!s.equals(dvhRessurs.getSluttdato())) {
                 ressursSluttet(ressursState.fid(), dvhRessurs);
@@ -134,36 +144,54 @@ public class RessursHendelseForEventsourceService {
         }
     }
 
-    public void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
+    private void ressursSluttet(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursCommadService.avsluttRessursEvent(new OpphorRessursCommand(fid, dvhRessurs.getSluttdato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
-    public void ressursStartet(String fid, DvhRessurs dvhRessurs) {
+    private void ressursStartet(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursCommadService.endreStartRessursEvent(new OppdaterStartdatoCommand(fid, dvhRessurs.getStartDato()), createInputMetadata(dvhRessurs.getRawData()));
     }
 
-    public void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
+    private boolean skipDueToNomMastered(String navident) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Ressurs {} er mastret i NOM så vil ikke behandle endring fra DVH", navident);
+            return true;
+        }
+        return false;
+    }
+
+    private void ressursEndretPersonalia(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursCommadService.oppdaterPersonaliaEvent(
             new OppdaterPersonaliaCommand(fid, toVisningsnavn(dvhRessurs)),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
+    private void ressursEndretSektor(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursCommadService.oppdaterSektorEvent(
             new OppdaterSektorCommand(fid, DvhRessurs.toSektor(dvhRessurs.getRemedyAnsattType())),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public void ressursEndretPersonident(String fid, DvhRessurs dvhRessurs) {
+    private void ressursEndretPersonident(String fid, DvhRessurs dvhRessurs) {
+        if (skipDueToNomMastered(dvhRessurs.getNavIdent())) return;
+
         ressursCommadService.oppdaterPersonidentCommand(
             new OppdaterPersonidentCommand(fid, dvhRessurs.getPersonIdent()),
             createInputMetadata(dvhRessurs.getRawData())
         );
     }
 
-    public InputMetadata createInputMetadata(Object rawData) {
+    private InputMetadata createInputMetadata(Object rawData) {
         return new InputMetadata("nom-api BatchJob", "Datavarehus", rawData, new Origination("nom-api", "nom-api"));
     }
 

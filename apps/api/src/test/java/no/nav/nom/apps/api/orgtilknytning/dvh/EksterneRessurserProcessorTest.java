@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -19,7 +18,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserProcessor.UNLEASH_LAG_EVENTS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -27,8 +25,6 @@ import static org.mockito.Mockito.when;
 @DisplayName("Tester prosessering av ekstern for endring/legge til orgtilkknytninger på last fra DVH")
 public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTestBase {
     EksterneRessurserProcessor eksterneRessurserProcessor;
-    @Mock
-    Unleash unleash;
     @Mock
     RemedyEnhetMapperService remedyEnhetMapperService;
     @Mock
@@ -45,14 +41,11 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
     public void init() {
         MockitoAnnotations.openMocks(this);
         eksterneRessurserProcessor = new EksterneRessurserProcessor(
-            unleash,
             remedyEnhetMapperService,
-                orgtilknytningService,
+            orgtilknytningService,
             orgenhetService,
             orgtilknytningCommandService
         );
-
-        when(unleash.isEnabled(UNLEASH_LAG_EVENTS)).thenReturn(true);
 
         setupOrgenhetServiceDefaultResponses();
         setupRemedyEnhetMapperServiceDefaultResponses();
@@ -340,19 +333,6 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         assertOrgtilknytning(CMD.ENDRE_DAGLIG_OPPFOLGING)
             .forFid(fid)
             .erDagligOppfolging(true);
-    }
-
-    @Test
-    @DisplayName("Ikke lag events hvis Unleash flag ikke er satt")
-    public void test_999() {
-        DvhEksternRessurs ekstern =
-            new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
-
-        when(unleash.isEnabled(UNLEASH_LAG_EVENTS)).thenReturn(false);
-
-        eksterneRessurserProcessor.process(ekstern);
-
-        verifyNoInteractions(orgtilknytningCommandService);
     }
 
     static final IOrgenhet ORGENHET_A = new OrgEnhet(

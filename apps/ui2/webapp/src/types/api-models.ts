@@ -25,6 +25,21 @@ export interface FolkeregisterPerson {
   navn: RessursNavn;
 }
 
+export interface GetPersonRequest {
+  personident: string;
+}
+
+export type JsonNode = object;
+
+export interface LeggTilOrgtilknytningRequest {
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  navident: string;
+  orgEnhetId: string;
+}
+
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",
@@ -33,6 +48,7 @@ export enum NomNivaa {
 
 export interface OpprettRessursRequest {
   ansettelsesType: AnsettelsesType;
+  fysiskBrukerstedNr: string;
   orgEnhetId?: string;
   personident: string;
   sektor: Sektor;
@@ -104,6 +120,15 @@ export interface Person {
   folkeregisterPerson: FolkeregisterPerson;
   navident?: string;
   personident: string;
+}
+
+export interface ReadTopicRequest {
+  /** @format int64 */
+  fromOffset: number;
+  /** @format int32 */
+  maxRecords: number;
+  /** @format int32 */
+  partition?: number;
 }
 
 export interface Ressurs {

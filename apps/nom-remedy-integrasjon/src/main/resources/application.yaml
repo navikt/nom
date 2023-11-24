@@ -4,6 +4,9 @@ app:
     ressurs-eventsource:
       topic-name: org.nom.ressurs-eventsource
       auto-startup: true
+  clients:
+    nom-api:
+      url: ${NOM_API_URL}
 
 management:
   endpoint:
@@ -58,11 +61,25 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+          issuer-uri: ${azure.issuer-uri}
           audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
-
+      client:
+        registration:
+          nom-api:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
+        provider:
+          azure:
+            issuer-uri: ${azure.issuer-uri}
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
+
+azure:
+  issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
 
 unleash:
   endpoint:

@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.admin;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,6 +12,7 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -42,8 +42,7 @@ public class SanityCheck {
     private final OrgtilknytningService orgtilknytningService;
 
     public SanityCheck(DvhRepository dvhRepository,
-                       RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
-                       Unleash unleash) {
+                       RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService) {
         this.dvhRepository = dvhRepository;
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
@@ -204,7 +203,7 @@ public class SanityCheck {
         List<RessursState> ressurserMedAktiveTilknytninger = ressurserForNavIdenter(alleRessurser, navIdenterMedAktiveTilknytninger);
 
         List<String> enhetIderEnheterIkkeAktiveEllerUtenOrganisering = enheterIkkeAktiveEllerUtenOrganisering.stream().map(IOrgenhet::getId).toList();
-        ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingForEnhetIder(ressurserMedAktiveTilknytninger, aktiveOrgtilknytningState, enhetIderEnheterIkkeAktiveEllerUtenOrganisering);
+        ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering = ressursKoblingDagensDatoForEnhetIder(ressurserMedAktiveTilknytninger, aktiveOrgtilknytningState, enhetIderEnheterIkkeAktiveEllerUtenOrganisering);
 
         ressurserMedAktiveTilknytningerTilEnheterIkkeAktiveEllerUtenOrganisering.forEach(r ->
             {
@@ -308,7 +307,7 @@ public class SanityCheck {
     }
 
     @Operation(
-        description = "Listduplikate ressurser på samme navident",
+        description = "List duplikate ressurser på samme navident",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @ApiResponses(
@@ -339,6 +338,22 @@ public class SanityCheck {
         });
 
         return result.toString();
+    }
+
+    @Operation(
+        description = "List orgtilknytninger med negativ periode (gyldigTom < gyldigFom)",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "200", description = "Success")
+        }
+    )
+    @GetMapping(value = "/orgtilknytningNegativPeriode")
+    public List<OrgtilknytningState> orgtilknytningNegativPeriode() {
+        return orgtilknytningService.getAll().stream()
+            .filter(ot -> ot.gyldigTom().isPresent() && ot.gyldigTom().get().isBefore(ot.gyldigFom()))
+            .toList();
     }
 
     private String sjekkOrgEnhetStartSluttDato() {
@@ -543,6 +558,15 @@ public class SanityCheck {
 
     private List<RessursState> ressurserForKoblinger(List<RessursState> ressurser, List<Orgtilknytning> orgtilknytninger) {
         return ressurser.stream().filter( r -> orgtilknytninger.stream().anyMatch(ot -> r.navident().equals(ot.getNavIdent()))).toList();
+    }
+
+    private List<RessursState> ressursKoblingDagensDatoForEnhetIder(List<RessursState> ressurser, List<OrgtilknytningState> orgtilknytninger, List<String> enhetIder) {
+        List<OrgtilknytningState> orgtilknytningerForAngitteEnheter =
+            orgtilknytninger.stream()
+                .filter( ot -> enhetIder.contains(ot.orgEnhetId()))
+                .filter(PeriodeUtil::isCurrentPeriod)
+                .toList();
+        return ressurser.stream().filter( r -> orgtilknytningerForAngitteEnheter.stream().anyMatch( ot -> ot.navident().equals(r.navident()))).toList();
     }
 
     private List<RessursState> ressursKoblingForEnhetIder(List<RessursState> ressurser, List<OrgtilknytningState> orgtilknytninger, List<String> enhetIder) {

@@ -44,7 +44,7 @@ spec:
       cpu: 300m
       memory: 1024Mi
     limits:
-      memory: 8192Mi
+      memory: 10240Mi
   leaderElection: true
   prometheus:
     enabled: true
@@ -52,7 +52,7 @@ spec:
   kafka:
     pool: nav-dev
   secureLogs:
-    enabled: false
+    enabled: true
   azure:
     application:
       enabled: true
@@ -75,6 +75,9 @@ spec:
           namespace: org
         - application: org-ekstern-proxy
           namespace: org
+        - application: azure-token-generator  # For test tokens i dev-gcp laget via https://doc.nais.io/security/auth/azure-ad/usage/#token-generator
+          namespace: aura
+          cluster: dev-gcp
         - application: team-catalog-backend
           cluster: dev-gcp
           namespace: org
@@ -162,6 +165,9 @@ spec:
         - application: toi-veileder
           namespace: toi
           cluster: dev-gcp
+        - application: nom-remedy-integrasjon
+          namespace: org
+          cluster: dev-fss
     outbound:
       rules:
         - application: nav-ident

@@ -13,6 +13,12 @@ const proxy = {
   nomApiUrl: requireEnvironment("NOM_API_URL"),
   teamcatApiScope: requireEnvironment("TEAM_CATALOG_SCOPE"),
   teamcatApiUrl: requireEnvironment("TEAM_CATALOG_API_URL"),
+  nomRemedyIntegrasjonApiScope: requireEnvironment(
+    "NOM_REMEDY_INTEGRASJON_API_SCOPE",
+  ),
+  nomRemedyIntegrasjonApiUrl: requireEnvironment(
+    "NOM_REMEDY_INTEGRASJON_API_URL",
+  ),
 };
 
 const app = {

@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import {
   Buldings3Icon,
+  PencilIcon,
   PersonIcon,
   PersonSuitIcon,
   ReceptionIcon,
@@ -31,13 +32,15 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasAdminAccess } from "~/api/useGetSession";
+import { Divider } from "~/components/Divider";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
+import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
+import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
-import { EditPhoneNumber } from "~/pages/ResourcePage/EditForms/EditPhoneNumber";
+import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
@@ -49,8 +52,6 @@ import {
 } from "~/utils";
 
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
-  const hasAdminAccess = useHasAdminAccess();
-
   return (
     <div
       css={css`
@@ -62,13 +63,15 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       <HorizontalEdge />
       <div
         css={css`
-          padding: 2rem;
+          padding: var(--a-spacing-12);
+          display: flex;
+          flex-direction: column;
+          gap: var(--a-spacing-9);
 
           h1,
           h2 {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: var(--a-spacing-6);
 
             svg {
               width: 24px;
@@ -81,51 +84,8 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         <LeaderForSection ressurs={ressurs} />
         <OrgTilknytningSection ressurs={ressurs} />
         <TeamCatSection navident={ressurs.navident} />
-        {hasAdminAccess && <ToggleEditButton />}
       </div>
     </div>
-  );
-}
-
-function ToggleEditButton() {
-  const { edit } = useSearch({ from: ressursRoute.id });
-  const navigate = useNavigate();
-  if (edit) {
-    return (
-      <Button
-        onClick={() => navigate({ search: { edit: false } })}
-        size="small"
-      >
-        Ferdig
-      </Button>
-    );
-  }
-  return (
-    <Button onClick={() => navigate({ search: { edit: true } })} size="small">
-      Endre
-    </Button>
-  );
-}
-
-function Divider({ size = "large" }: { size?: "large" | "small" }) {
-  return (
-    <div
-      css={[
-        css`
-          height: 1px;
-          margin: var(--a-spacing-8) 0;
-          background-color: var(--a-gray-400);
-        `,
-        size === "large" &&
-          css`
-            margin: var(--a-spacing-8) 0;
-          `,
-        size === "small" &&
-          css`
-            margin: var(--a-spacing-6) 0;
-          `,
-      ]}
-    />
   );
 }
 
@@ -136,6 +96,8 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
   });
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
+
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
 
   if (orgtilknytninger.length === 0) {
     return <></>;
@@ -162,25 +124,41 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
-      <Divider />
+      <Divider noMargins />
       <Heading level="2" size="small">
         <Buldings3Icon />
         Organisatorisk tilhørighet
       </Heading>
-      {activeOrgtilknytninger.map((orgTilknytning) => (
-        <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhetId}
-          orgTilknytning={orgTilknytning}
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        `}
+      >
+        <AddOrgtilknytningForm ressurs={ressurs} />
+        {activeOrgtilknytninger.map((orgTilknytning) =>
+          editOrgtilknytning === orgTilknytning.fid ? (
+            <EditOrgtilknytningForm
+              key={orgTilknytning.fid}
+              orgTilknytning={orgTilknytning}
+            />
+          ) : (
+            <OrganisationHierarchyTree
+              key={orgTilknytning.fid}
+              orgTilknytning={orgTilknytning}
+              ressurs={ressurs}
+            />
+          ),
+        )}
+        <FutureOrgTilknytninger
+          futureOrgTilknytninger={futureOrgTilknytninger}
           ressurs={ressurs}
         />
-      ))}
-      <FutureOrgTilknytninger
-        futureOrgTilknytninger={futureOrgTilknytninger}
-        ressurs={ressurs}
-      />
-      <ExpiredOrgTilknytninger
-        expiredOrgTilknytninger={expiredOrgTilknytninger}
-      />
+        <ExpiredOrgTilknytninger
+          expiredOrgTilknytninger={expiredOrgTilknytninger}
+        />
+      </div>
     </>
   );
 }
@@ -192,6 +170,8 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
   }
@@ -201,13 +181,20 @@ function FutureOrgTilknytninger({
       <Heading level="2" size="xsmall">
         Fremtidige org.tilknytninger
       </Heading>
-      {futureOrgTilknytninger.map((orgTilknytning) => (
-        <OrganisationHierarchyTree
-          key={orgTilknytning.orgEnhetId}
-          orgTilknytning={orgTilknytning}
-          ressurs={ressurs}
-        />
-      ))}
+      {futureOrgTilknytninger.map((orgTilknytning) =>
+        editOrgtilknytning === orgTilknytning.fid ? (
+          <EditOrgtilknytningForm
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+          />
+        ) : (
+          <OrganisationHierarchyTree
+            key={orgTilknytning.fid}
+            orgTilknytning={orgTilknytning}
+            ressurs={ressurs}
+          />
+        ),
+      )}
     </>
   );
 }
@@ -302,13 +289,15 @@ function OrganisationHierarchyTree({
 
   const orgEnhet = orgEnhetQuery.data;
 
+  const navigate = useNavigate();
+
   if (!orgEnhet) {
     return <></>;
   }
 
   const orgEnhetLeder = orgEnhet.ledere[0];
 
-  const { gyldigTom, gyldigFom, erDagligOppfolging } = orgTilknytning;
+  const { gyldigTom, gyldigFom, erDagligOppfolging, fid } = orgTilknytning;
 
   const startsInTheFuture =
     gyldigFom && isAfter(new Date(gyldigFom), new Date());
@@ -317,8 +306,6 @@ function OrganisationHierarchyTree({
     <ExpansionCard
       aria-label="organisasjons-hierarki"
       css={css`
-        margin-bottom: 2rem;
-
         &.navds-expansioncard--open #title-start-date {
           color: blue;
           visibility: hidden;
@@ -343,7 +330,16 @@ function OrganisationHierarchyTree({
           )}
         </ExpansionCard.Title>
         <ExpansionCard.Description>
-          Leder: {formatVisningsnavn(orgEnhetLeder.visningsnavn)}
+          <Label size="small">
+            <span
+              css={css`
+                font-weight: var(--a-font-weight-regular);
+              `}
+            >
+              Leder:{" "}
+            </span>
+            {formatVisningsnavn(orgEnhetLeder?.visningsnavn)}
+          </Label>
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
@@ -363,6 +359,24 @@ function OrganisationHierarchyTree({
         {gyldigTom && <span>Sluttdato: {formatDisplayDate(gyldigTom)}</span>}
         <Divider size="small" />
         <CompactOrganisasjonHierarki orgEnhet={orgEnhet} ressurs={ressurs} />
+        <div
+          css={css`
+            display: flex;
+            justify-content: flex-end;
+            margin-top: var(--a-spacing-6);
+          `}
+        >
+          <EditButtonWrapper ressurs={ressurs}>
+            <Button
+              icon={<PencilIcon aria-hidden />}
+              onClick={() => navigate({ search: { editOrgtilknytning: fid } })}
+              size="small"
+              variant="secondary"
+            >
+              Endre
+            </Button>
+          </EditButtonWrapper>
+        </div>
       </ExpansionCard.Content>
     </ExpansionCard>
   );
@@ -388,7 +402,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
-      <Divider />
+      <Divider noMargins />
       <Heading level="2" size="small">
         <PersonSuitIcon />
         Leder for
@@ -415,9 +429,9 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Name({ ressurs }: { ressurs: Ressurs }) {
-  const { edit } = useSearch({ from: ressursRoute.id });
+  const { editPersonopplysninger } = useSearch({ from: ressursRoute.id });
 
-  if (edit) {
+  if (editPersonopplysninger) {
     return <EditNameForm ressurs={ressurs} />;
   }
   return (
@@ -434,17 +448,20 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Telephone({ ressurs }: { ressurs: Ressurs }) {
-  const { edit } = useSearch({ from: ressursRoute.id });
+  // TODO: Edit telephone is not implemented in backend yet
+  /*
+   const { edit } = useSearch({ from: ressursRoute.id });
 
-  if (edit) {
-    return (
-      <>
-        <span>Telefon:</span>
+   if (edit) {
+     return (
+       <>
+         <span>Telefon:</span>
+         <EditPhoneNumber ressurs={ressurs} />
+       </>
+     );
+   }
+  */
 
-        <EditPhoneNumber ressurs={ressurs} />
-      </>
-    );
-  }
   return (
     <RessursInformationDetail
       label="Telefon"
@@ -456,6 +473,8 @@ function Telephone({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function SummarySection({ ressurs }: { ressurs: Ressurs }) {
+  const navigate = useNavigate();
+
   const dagligLeder = useQuery({
     queryKey: getLedereForRessurs.queryKey(ressurs.navident),
     queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
@@ -467,7 +486,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
       css={css`
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
+        align-items: stretch;
         flex-wrap: wrap-reverse;
         gap: var(--a-spacing-4);
       `}
@@ -539,11 +558,33 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           ) : undefined}
         </div>
       </div>
-      <UserImage
-        navident={ressurs.navident}
-        navn={formatVisningsnavn(ressurs.visningsnavn)}
-        size="126px"
-      />
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: var(--a-spacing-4);
+          align-items: flex-end;
+        `}
+      >
+        <UserImage
+          navident={ressurs.navident}
+          navn={formatVisningsnavn(ressurs.visningsnavn)}
+          size="126px"
+        />
+        <EditButtonWrapper ressurs={ressurs}>
+          <Button
+            icon={<PencilIcon aria-hidden />}
+            onClick={() =>
+              navigate({ search: { editPersonopplysninger: true } })
+            }
+            size="small"
+            variant="secondary"
+          >
+            Endre personopplysninger
+          </Button>
+        </EditButtonWrapper>
+      </div>
     </div>
   );
 }
@@ -593,7 +634,7 @@ function TeamCatSection({ navident }: { navident: string }) {
 
   return (
     <>
-      <Divider />
+      <Divider noMargins />
       <Heading level="2" size="small">
         <ReceptionIcon />
         Tilhørighet til team, område og klynge

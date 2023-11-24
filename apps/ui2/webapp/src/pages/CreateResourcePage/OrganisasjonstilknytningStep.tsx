@@ -23,7 +23,9 @@ import {
   ResultLimit,
   useSearchOrgenheterQuery,
 } from "~/api/generated/graphql_generated";
+import { Divider } from "~/components/Divider";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
+import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBrukerstedSelect";
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
@@ -131,7 +133,7 @@ const statligValidationSchema = yup.object({
     .required("Obligatorisk"),
 });
 
-const eksternValidationSchema = yup.object().shape({
+export const eksternValidationSchema = yup.object().shape({
   orgEnhetId: yup.string().required("Obligatorisk"),
   startDato: yup.string().required("Obligatorisk"),
   sluttDato: yup.string().required("Obligatorisk"),
@@ -139,7 +141,7 @@ const eksternValidationSchema = yup.object().shape({
 
 function CreateEksternRessurs() {
   const navigate = useNavigate();
-  const { orgEnhetId, startDato, sluttDato } = useSearch({
+  const { orgEnhetId, startDato, sluttDato, fysiskBrukerstedNr } = useSearch({
     from: createRessursRoute.to,
   });
 
@@ -148,39 +150,20 @@ function CreateEksternRessurs() {
       orgEnhetId: orgEnhetId,
       startDato: undefined,
       sluttDato: undefined,
+      fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
-    resolver: yupResolver(eksternValidationSchema),
+
+    resolver: yupResolver(
+      // eslint-disable-next-line unicorn/prefer-spread
+      eksternValidationSchema.concat(
+        yup.object().shape({
+          fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
+        }),
+      ),
+    ),
   });
 
-  const {
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = methods;
-
-  useEffect(() => {
-    if (startDato) {
-      setValue("startDato", startDato);
-    }
-  }, [startDato]);
-
-  useEffect(() => {
-    if (sluttDato) {
-      setValue("sluttDato", sluttDato);
-    }
-  }, [sluttDato]);
-
-  const startDatePicker = useDatepicker({
-    onDateChange: (date) =>
-      setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: startDato ? new Date(startDato) : undefined,
-  });
-
-  const sluttDatePicker = useDatepicker({
-    onDateChange: (date) =>
-      setValue("sluttDato", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: sluttDato ? new Date(sluttDato) : undefined,
-  });
+  const { handleSubmit } = methods;
 
   return (
     <FormProvider {...methods}>
@@ -194,51 +177,99 @@ function CreateEksternRessurs() {
           }),
         )}
       >
-        <InnerOrgEnhetSelect />
-        <div css={rowStyles}>
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...startDatePicker.datepickerProps}>
-              <DatePicker.Input
-                {...startDatePicker.inputProps}
-                error={errors.startDato?.message?.toString()}
-                label={
-                  <span
-                    css={css`
-                      height: 24px;
-                    `}
-                  >
-                    Startdato (første arbeidsdag)
-                  </span>
-                }
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-          <FullWidthDatePickerWrapper>
-            <DatePicker {...sluttDatePicker.datepickerProps}>
-              <DatePicker.Input
-                {...sluttDatePicker.inputProps}
-                error={errors.sluttDato?.message?.toString()}
-                label={
-                  <span
-                    css={css`
-                      display: inline-flex;
-                      gap: var(--a-spacing-2);
-                    `}
-                  >
-                    Sluttdato
-                    <HelpText strategy="fixed">
-                      Bruk datoen for normal avvikling av avtalen. Opsjoner skal
-                      ikke beregnes med her
-                    </HelpText>
-                  </span>
-                }
-              />
-            </DatePicker>
-          </FullWidthDatePickerWrapper>
-        </div>
+        <OrganisasjonstilknytningInnerForm
+          defaultSluttDato={sluttDato}
+          defaultStartDato={startDato}
+        />
+        <Divider />
+        <FysiskBrukerstedSelectFormPart />
         <NavigationButtons />
       </form>
     </FormProvider>
+  );
+}
+
+export function OrganisasjonstilknytningInnerForm({
+  defaultStartDato,
+  defaultSluttDato,
+}: {
+  defaultStartDato?: string;
+  defaultSluttDato?: string;
+}) {
+  const {
+    setValue,
+    formState: { errors },
+  } = useFormContext();
+
+  useEffect(() => {
+    if (defaultStartDato) {
+      setValue("startDato", defaultStartDato);
+    }
+  }, [defaultStartDato]);
+
+  useEffect(() => {
+    if (defaultSluttDato) {
+      setValue("sluttDato", defaultSluttDato);
+    }
+  }, [defaultSluttDato]);
+
+  const startDatePicker = useDatepicker({
+    onDateChange: (date) =>
+      setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: defaultStartDato ? new Date(defaultStartDato) : undefined,
+  });
+
+  const sluttDatePicker = useDatepicker({
+    onDateChange: (date) =>
+      setValue("sluttDato", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: defaultSluttDato ? new Date(defaultSluttDato) : undefined,
+  });
+
+  return (
+    <>
+      <InnerOrgEnhetSelect />
+      <div css={rowStyles}>
+        <FullWidthDatePickerWrapper>
+          <DatePicker {...startDatePicker.datepickerProps}>
+            <DatePicker.Input
+              {...startDatePicker.inputProps}
+              error={errors.startDato?.message?.toString()}
+              label={
+                <span
+                  css={css`
+                    height: 24px;
+                  `}
+                >
+                  Startdato (første arbeidsdag)
+                </span>
+              }
+            />
+          </DatePicker>
+        </FullWidthDatePickerWrapper>
+        <FullWidthDatePickerWrapper>
+          <DatePicker {...sluttDatePicker.datepickerProps}>
+            <DatePicker.Input
+              {...sluttDatePicker.inputProps}
+              error={errors.sluttDato?.message?.toString()}
+              label={
+                <span
+                  css={css`
+                    display: inline-flex;
+                    gap: var(--a-spacing-2);
+                  `}
+                >
+                  Sluttdato
+                  <HelpText strategy="fixed">
+                    Bruk datoen for normal avvikling av avtalen. Opsjoner skal
+                    ikke beregnes med her
+                  </HelpText>
+                </span>
+              }
+            />
+          </DatePicker>
+        </FullWidthDatePickerWrapper>
+      </div>
+    </>
   );
 }
 
@@ -284,7 +315,7 @@ function InnerOrgEnhetSelect() {
   );
 }
 
-const formStyle = css`
+export const formStyle = css`
   display: flex;
   flex-direction: column;
   margin-top: var(--a-spacing-8);

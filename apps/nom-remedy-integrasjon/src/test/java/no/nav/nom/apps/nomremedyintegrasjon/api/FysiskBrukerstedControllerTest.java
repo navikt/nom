@@ -59,7 +59,7 @@ public class FysiskBrukerstedControllerTest extends TestBase {
 
     private String generateToken(String audience) {
         return mockOAuth2Server.issueToken(
-            "aad",
+            "issuer",
             "clientId",
             new DefaultOAuth2TokenCallback(
                 "aad",

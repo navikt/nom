@@ -75,7 +75,8 @@ public class RessursControllerTest extends RestTestBase {
                 "",
                 LocalDate.now(),
                 null,
-                AnsettelsesType.FAST
+                AnsettelsesType.FAST,
+            ""
         );
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
@@ -84,9 +85,9 @@ public class RessursControllerTest extends RestTestBase {
                     "fid",
                     personident,
                     navident,
-                    request.getSektor(),
+                    request.sektor(),
                     new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                    Optional.ofNullable(request.getSluttDato()),
+                    request.sluttDato(),
                     Optional.empty()
                 ));
 
@@ -107,9 +108,8 @@ public class RessursControllerTest extends RestTestBase {
                 navident,
                 navn.getFornavn() + " " + navn.getMellomnavn(),
                 navn.getEtternavn(),
-                request.getSektor()
+                request.sektor()
             ));
-        ;
     }
 
     @Test
@@ -140,19 +140,20 @@ public class RessursControllerTest extends RestTestBase {
                 Sektor.EKSTERN,
                 "",
                 LocalDate.now(),
-                LocalDate.now(),
-                null
+                Optional.of(LocalDate.now()),
+                null,
+            ""
         );
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
                 .thenReturn(
                         new RessursState(
                                 "fid",
-                                request.getPersonident(),
+                                request.personident(),
                                 navident,
-                                request.getSektor(),
+                                request.sektor(),
                                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                                Optional.of(request.getSluttDato()),
+                                request.sluttDato(),
                             Optional.empty()
                         ));
 
@@ -173,7 +174,7 @@ public class RessursControllerTest extends RestTestBase {
                         navident,
                         navn.getFornavn() + " " + navn.getMellomnavn(),
                         navn.getEtternavn(),
-                        request.getSektor()
+                        request.sektor()
                 ));
 
         verify(ressursCommadService, times(1)).createRessursSync(any());
@@ -182,6 +183,46 @@ public class RessursControllerTest extends RestTestBase {
         verify(orgtilknytningCommandService, times(1)).opprettOrgtilknytning(any());
         verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
         verify(orgtilknytningCommandService, times(1)).endreDagligOppfolgingOrgtilknytning(any(), any());
+    }
+
+    @Test
+    @SneakyThrows
+    void skal_ikke_opprette_ekstern_ressurs_uten_sluttDato() {
+        String personident = "12345678910";
+        val navn = pdlUtils.mockSinglePersonResponse();
+
+        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
+
+        var request = new OpprettRessursRequest(
+            personident,
+            navn.getFornavn(),
+            navn.getMellomnavn(),
+            navn.getEtternavn(),
+            Sektor.EKSTERN,
+            "",
+            LocalDate.now(),
+            Optional.empty(),
+            null,
+            ""
+        );
+
+        webTestClient.post()
+            .uri("/app/ressurser")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+
+        verify(ressursCommadService, times(0)).createRessursSync(any());
+        verify(ressursCommadService, times(0)).avsluttRessursEvent(any(), any());
+
+        verify(orgtilknytningCommandService, times(0)).opprettOrgtilknytning(any());
+        verify(orgtilknytningCommandService, times(0)).avvikleOrgtilknytning(any(), any());
+        verify(orgtilknytningCommandService, times(0)).endreDagligOppfolgingOrgtilknytning(any(), any());
     }
 
     @Test

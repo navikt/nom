@@ -34,12 +34,12 @@ import java.util.Optional;
 @Tag(name = "Admin for å lage manuelle Evtsrc meldinger")
 @RestController
 @RequestMapping("/api/admin/manuelleEvtsrcMeldinger")
-public class ManuelleEvtsrcMeldinger {
+public class ManuelleRessursEvtsrcMeldinger {
 
     private final RessursCommadService ressursCommadService;
     private final RessursStateRepository ressursStateRepository;
 
-    public ManuelleEvtsrcMeldinger(RessursCommadService ressursCommadService, RessursStateRepository ressursStateRepository) {
+    public ManuelleRessursEvtsrcMeldinger(RessursCommadService ressursCommadService, RessursStateRepository ressursStateRepository) {
         this.ressursCommadService = ressursCommadService;
         this.ressursStateRepository = ressursStateRepository;
     }

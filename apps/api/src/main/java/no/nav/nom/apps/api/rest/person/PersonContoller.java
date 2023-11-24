@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.rest.person;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -8,11 +7,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.pdl.PdlClient;
-import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RemedyController;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
+import no.nav.nom.apps.api.rest.dto.NavnDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,17 +1,29 @@
 spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;Mode=Oracle
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+
   kafka:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
     properties:
       security.protocol: PLAINTEXT
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${mock-oauth2-server.baseUrl}/aad
-          audiences: nom-remedy-integrasjon
-
-REMEDY_DATASOURCE_URL: jdbc:oracle:thin:@//host:1521/ehatevs
-REMEDY_DB_PWD: whatevs
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 UNLEASH_SERVER_API_URL: https://unleash.nais.io/api
 UNLEASH_SERVER_API_TOKEN: some-token
+
+azure:
+  issuer-uri: ${mock-oauth2-server.baseUrl}/issuer
+
+AZURE_APP_CLIENT_ID: nom-remedy-integrasjon
+AZURE_APP_CLIENT_SECRET: nom-remedy-integrasjon-client-secret
+
+NOM_API_URL: http://localhost:${wiremock.server.port}
+NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default

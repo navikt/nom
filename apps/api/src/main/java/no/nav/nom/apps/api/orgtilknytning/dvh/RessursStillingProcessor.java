@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -10,6 +11,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -42,18 +44,24 @@ public class RessursStillingProcessor {
     private final OrgtilknytningCommandService orgtilknytningCommandService;
     private final RessursStillingLoadStatus ressursStillingLoadStatus;
     private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
     private ProcessCmdResult processCmdResult = new ProcessCmdResult();
     private HashMap<String, List<String>> evtsrcCommandsPerNavident = new HashMap<>();
     private List<String> manglerSammeEnhetPaStillingOgRessurs = new ArrayList<>();
+    private final Unleash unleash;
 
     public RessursStillingProcessor(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService, OrgtilknytningCommandService orgtilknytningCommandService,
-                                    RessursStillingLoadStatus ressursStillingLoadStatus, RessursStateRepository ressursStateRepository
+                                    RessursStillingLoadStatus ressursStillingLoadStatus, RessursStateRepository ressursStateRepository,
+                                    NomMastered nomMastered,
+                                    Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
         this.ressursStillingLoadStatus = ressursStillingLoadStatus;
         this.ressursStateRepository = ressursStateRepository;
+        this.nomMastered = nomMastered;
+        this.unleash = unleash;
     }
 
     public void process(Map<String, List<StillingPeriode>> stillingPerioderPerNavident) {
@@ -434,6 +442,11 @@ public class RessursStillingProcessor {
     }
 
     public String lagNyOrgtilknytning(String navident, String orgenhetId, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi lager ikke orgtilknytning for denne", navident);
+            return null;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -454,6 +467,11 @@ public class RessursStillingProcessor {
     }
 
     public void endreOrgtilknytningGyldigFOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -484,6 +502,16 @@ public class RessursStillingProcessor {
     }
 
     public void endreOrgtilknytningGyldigTOM(OrgtilknytningState originalOrgtilknytning, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
+            return;
+        }
+
+        if (originalOrgtilknytning.gyldigFom().plusDays(1).isAfter(stillingPeriode.gyldigTom())) {
+            log.error("Endring av sluttdato på orgtilknytning for Navident {} er ikke gyldig. Sluttdato må være etter startdato", originalOrgtilknytning.navident());
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -527,6 +555,11 @@ public class RessursStillingProcessor {
     }
 
     public void settOrgtilknytningSluttDato(String fid, String navident, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", navident);
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -548,6 +581,11 @@ public class RessursStillingProcessor {
     }
 
     private void endreOrgtilknytningDagligOppfolging(String fid, String navident, boolean erDagligOppfolging, StillingPeriode stillingPeriode, String stillingPerioderAsString) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(navident)) {
+            log.info("Navident {} er mastered. Vi endrer ikke Daglig oppfølging for denne", navident);
+            return;
+        }
+
         OrgtilknytningEvent.AdditionalAgressoData additionalData = new OrgtilknytningEvent.AdditionalAgressoData(
             stillingPeriode.stilling().toString(),
             stillingPerioderAsString
@@ -571,6 +609,11 @@ public class RessursStillingProcessor {
     }
 
     public void fjernOrgtilknytning(OrgtilknytningState originalOrgtilknytning) {
+        if (unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS) && nomMastered.isMastered(originalOrgtilknytning.navident())) {
+            log.info("Navident {} er mastered. Vi endrer ikke orgtilknytning for denne", originalOrgtilknytning.navident());
+            return;
+        }
+
         InputMetadata metadata = new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"));
 
         var command = new FjernOrgtilknytning(

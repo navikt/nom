@@ -9,12 +9,15 @@ const CACHE_FOR = {
 };
 
 import type {
+  EndreOrgtilknytningDatoRequest,
+  GetPersonRequest,
+  LeggTilOrgtilknytningRequest,
   OrgEnhet,
+  OrgtilknytningState,
   Person,
   Ressurs,
   RessursLeder,
 } from "~/types/api-models";
-import type { OrgtilknytningState } from "~/types/api-models";
 
 export const ressurserGraphqlKeys = {
   all: ["ALLE_RESSURSER_GRAPHQL"] as const,
@@ -159,9 +162,10 @@ export const getPerson = {
   queryKey: (personident: string) => personKeys.id(personident),
   queryFn: async (personident: string) =>
     (
-      await axios.get<Person>("/nom-api/app/person", {
-        headers: { personident },
-      })
+      await axios.post<GetPersonRequest, AxiosResponse<Person>>(
+        "/nom-api/app/person",
+        { personident },
+      )
     ).data,
 };
 
@@ -208,6 +212,27 @@ export const updateNavnForRessurs = async (
     )
   ).data;
 
+export const updateOrgtilknytningDato = async (
+  fid: string,
+  endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
+) =>
+  (
+    await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/orgtilknytninger/${fid}/dato`,
+      endreOrgtilknytningDatoRequest,
+    )
+  ).data;
+
+export const leggTilOrgtilknytning = async (
+  leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequest,
+) =>
+  (
+    await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/orgtilknytninger`,
+      leggTilOrgtilknytningRequest,
+    )
+  ).data;
+
 export const getUnderliggendeOrgenheter = {
   queryKey: (parentId: string) =>
     underliggendeOrgEnheterKeys.childOrgEnheter(parentId),
@@ -215,6 +240,16 @@ export const getUnderliggendeOrgenheter = {
     (
       await axios.get<string[]>(
         `/nom-api/app/orgenhet/underLiggende/${parentId}`,
+      )
+    ).data,
+};
+
+export const getFysiskeBrukersteder = {
+  queryKey: ["FYSISKE_BRUKERSTEDER"],
+  queryFn: async () =>
+    (
+      await axios.get<FysiskBrukersted[]>(
+        "/nom-remedy-integrasjon/api/fysiskebrukersteder",
       )
     ).data,
 };
@@ -249,4 +284,9 @@ export type RessursFields = {
   sektor: string[];
   startdato: string;
   sluttdato: string;
+};
+
+export type FysiskBrukersted = {
+  brukerstedNr: string;
+  brukerstedNavn: string;
 };

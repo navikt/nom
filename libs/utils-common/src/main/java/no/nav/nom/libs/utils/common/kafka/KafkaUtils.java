@@ -1,5 +1,6 @@
 package no.nav.nom.libs.utils.common.kafka;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.common.TopicPartition;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 public class KafkaUtils {
 
     public static void assignRandomTransactionIdPrefix() {
@@ -23,7 +25,7 @@ public class KafkaUtils {
             val endOffset = findEndOffsetForPartition(consumer, topic, 0);
             val complete = isAtOrAfterOffsetForPartition(consumer, topic, 0, endOffset);
 
-            if (complete) {
+            if (endOffset == 0 || complete) {
                 initialLoadComplete.set(true);
                 if (callback != null) {
                     callback.run();

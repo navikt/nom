@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.dvh;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -9,6 +10,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,12 +56,17 @@ class RessursStillingProcessorTestUtilityMetoder {
 
     @Captor
     ArgumentCaptor<FjernOrgtilknytning> fjernOrgtilknytningArgumentCaptor;
-
+    @Mock
+    NomMastered nomMastered;
+    @Mock
+    Unleash unleash;
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
-        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursStateRepository);
+        ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, null, orgtilknytningCommandService, ressursStillingLoadStatus, ressursStateRepository, nomMastered,
+            unleash
+        );
     }
 
     @Test

@@ -2,14 +2,19 @@ package no.nav.nom.libs.utils.common.platform;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
 
 import java.net.InetAddress;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -20,8 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(
     classes = LeaderElectionTest.TestApplication.class,
     properties = {
-        "unleash.enabled=false",
-        "ELECTOR_PATH=localhost:9797/elect"
+        "unleash.enabled=false"
     }
 )
 public class LeaderElectionTest {
@@ -29,17 +33,29 @@ public class LeaderElectionTest {
     @SpringBootApplication
     static class TestApplication {}
 
-
     @RegisterExtension
     static LeaderElectionStub electionStub = new LeaderElectionStub(WireMockExtension.extensionOptions()
-        .options(wireMockConfig().port(9797))
+        .options(wireMockConfig().dynamicPort())
         .configureStaticDsl(true));
 
-    @Autowired
     LeaderElection leaderElection;
 
     @Autowired
     ObjectMapper mapper;
+
+    @Autowired
+    ConfigurableEnvironment environment;
+
+    @BeforeEach
+    void setElectorPathWithDynamicPort() {
+        int port = electionStub.getPort();
+        MutablePropertySources propertySources = environment.getPropertySources();
+        Map<String, Object> prop = new HashMap<>();
+        prop.put("ELECTOR_PATH", "localhost:" + port + "/elect");
+        propertySources.addFirst(new MapPropertySource("testProperty", prop));
+
+        leaderElection = new LeaderElection(environment);
+    }
 
     @Test
     void contextLoads() {}

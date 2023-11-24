@@ -1,6 +1,8 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 
@@ -18,12 +20,24 @@ public class RessursOpprettetEventV1 extends RessursEvent {
         this(fid, data, Metadata.from(inputMetadata), additionalData);
     }
 
+    @JsonIgnore
+    public RessursOpprettetEventData getRessursOpprettetEventData() {
+        return (RessursOpprettetEventData) getData();
+    }
+
+    @JsonIgnore
+    public RessursOpprettetAdditionalData getRessursOpprettetAdditionalData() {
+        return (RessursOpprettetAdditionalData) getAdditionalData();
+    }
+
+    @Builder(toBuilder = true)
     public record RessursOpprettetEventData(
             String personident,
             Sektor sektor,
             Visningsnavn visningsnavn
     ) implements Data{ }
 
+    @Builder(toBuilder = true)
     public record RessursOpprettetAdditionalData(
             Optional<String> navident,
             Optional<String> kjoenn,

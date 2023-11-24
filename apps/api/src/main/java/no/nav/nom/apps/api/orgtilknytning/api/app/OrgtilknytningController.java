@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
@@ -63,6 +64,29 @@ public class OrgtilknytningController {
         );
     }
 
+    @PostMapping
+    @Operation(
+        description = "Oppretter orgtilknytning",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS')"
+    )
+    public ResponseEntity<StandardResponse> addOrgtilknytning(
+        @RequestBody LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest
+    ) {
+        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
+            orgtilknytningRestService.addOrgtilknyting(leggTilOrgtilknytningRequest);
+
+            return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
+        }
+
+        throw new AccessDeniedException("Opprettelse av orgtilknytning er blokkert");
+    }
+
     @PostMapping("/{fid}/dato")
     @Operation(
         description = "Endrer dato for en orgtilknytning",
@@ -116,6 +140,15 @@ public class OrgtilknytningController {
     public ResponseEntity<StandardResponse> handleForbidden(RuntimeException exception) {
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
+            .body(StandardResponse.builder().message(exception.getMessage()).build());
+    }
+
+    @ExceptionHandler({
+        OrgtilknytningPeriodeOverlapException.class,
+    })
+    public ResponseEntity<StandardResponse> handleConflict(RuntimeException exception) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
             .body(StandardResponse.builder().message(exception.getMessage()).build());
     }
 

@@ -9,7 +9,10 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.Immutable;
+
 @Entity
+@Immutable
 @Table(name = "NOM_INTEGRASJON")
 @AllArgsConstructor
 @NoArgsConstructor

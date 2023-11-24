@@ -1,4 +1,4 @@
-name: 'verify: api'
+name: 'verify: nom-remedy-integrasjon'
 
 on:
   pull_request:

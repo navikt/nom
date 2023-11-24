@@ -17,9 +17,10 @@ import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
 import no.nav.nom.apps.api.orgtilknytning.dvh.EksterneRessurserLoader;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoader;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateListener;
-import no.nav.nom.apps.api.ressurs.RessursHendelseForEventsourceService;
+import no.nav.nom.apps.api.ressurs.implementations.dvh.RessursHendelseForEventsourceService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -50,6 +51,7 @@ public class DvhRestConsumer {
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
+    private final NomMasteredRessursListener nomMasteredRessursListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhOrgenhetsLast dvhOrgenhetsLast;
@@ -78,8 +80,8 @@ public class DvhRestConsumer {
                     orgtilknytningStateListener.initloadComplete(),
                     orgEnhetStateListener.initloadComplete()
                 );
-            } catch (Exception ignored) {
-                log.error("Waiting for initialState last feilet", ignored);
+            } catch (Exception logMe) {
+                log.error("Waiting for initialState last feilet", logMe);
             }
         }
 
@@ -280,7 +282,8 @@ public class DvhRestConsumer {
     }
 
     private boolean isInitialStateReady() {
-        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete() && orgEnhetStateListener.initloadComplete();
+        return ressursStateListener.initloadComplete() && orgtilknytningStateListener.initloadComplete()
+            && orgEnhetStateListener.initloadComplete();
     }
 
     private String durationAsH24(LocalDateTime start) {
