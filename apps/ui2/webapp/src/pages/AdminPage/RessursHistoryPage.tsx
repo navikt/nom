@@ -1,12 +1,14 @@
 import { css } from "@emotion/react";
 import { Button, Table } from "@navikt/ds-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 
 import {
   eventSourceForRessursKeys,
   getRessursEvents,
 } from "~/api/react-query-endpoints";
 import { JsonModal } from "~/pages/AdminPage/components/JsonModal";
+import { ressursRoute } from "~/reactRouterRoutes";
 import { formatDisplayDatetime, formatVisningsnavn } from "~/utils";
 
 export function RessursHistoryPage() {
@@ -51,7 +53,12 @@ export function RessursHistoryPage() {
             return (
               <Table.Row key={index}>
                 <Table.DataCell>
-                  {ressursEvent.additionalData?.navident}
+                  <Link
+                    params={{ id: ressursEvent.additionalData?.navident }}
+                    to={ressursRoute.id}
+                  >
+                    {ressursEvent.additionalData?.navident}
+                  </Link>
                 </Table.DataCell>
                 <Table.DataCell scope="row">
                   {formatVisningsnavn(ressursEvent.data?.visningsnavn)}

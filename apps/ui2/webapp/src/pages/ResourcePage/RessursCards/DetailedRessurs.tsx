@@ -81,7 +81,6 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         <SummarySection ressurs={ressurs} />
-        <Divider noMargins />
         <LeaderForSection ressurs={ressurs} />
         <OrgTilknytningSection ressurs={ressurs} />
         <TeamCatSection navident={ressurs.navident} />
@@ -125,6 +124,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
+      <Divider noMargins />
       <Heading level="2" size="small">
         <Buldings3Icon />
         Organisatorisk tilhørighet
@@ -402,6 +402,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
+      <Divider noMargins />
       <Heading level="2" size="small">
         <PersonSuitIcon />
         Leder for
@@ -423,7 +424,6 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           </ReactRouterLink>
         ))}
       </div>
-      <Divider noMargins />
     </>
   );
 }
