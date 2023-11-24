@@ -1,0 +1,31 @@
+name: 'deploy: nom-intern-organisering-state'
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/streams/internal/organisering-state/**'
+      - 'libs/contract-nom-dto/**'
+      - '.nais/streams/intern-organisering-state.yaml'
+      - '.github/*/deploy-streams-intern-organisering-state.yaml'
+  workflow_dispatch:
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: organisering-state
+      jar-path: apps/streams/internal/organisering-state/target/app.jar
+      image-suffix: nom-intern-organisering-state
+      nais-config-file-path-dev: .nais/streams/intern-organisering-state.yaml
+      nais-config-file-path-prod: .nais/streams/intern-organisering-state.yaml
+      additional-nais-vars-dev: ',kafka-pool=nav-dev'
+      additional-nais-vars-prod: ',kafka-pool=nav-prod'
+    secrets:
+      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

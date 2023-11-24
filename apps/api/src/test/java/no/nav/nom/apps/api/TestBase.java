@@ -4,6 +4,8 @@ import com.nimbusds.jose.JOSEObjectType;
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.organisering.DvhOrganiseringMockUtils;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.pdlutils.PdlUtils;
@@ -52,7 +54,7 @@ import static org.mockito.Mockito.when;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @Testcontainers
-@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"nom-state-v1", "org.nom.ressurs-state-v1", "org.nom.orgenhet-state-v1", "org.nom.nom-mastered-ressurs", "org.nom.organisering-eventsource"}, controlledShutdown = true)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
 @AutoConfigureWireMock(port = 0)
 public abstract class TestBase {
@@ -73,6 +75,9 @@ public abstract class TestBase {
     public DvhOrgEnhetMockUtils dvhOrgenhetMockUtils;
 
     @Autowired
+    public DvhOrganiseringMockUtils dvhOrganiseringMockUtils;
+
+    @Autowired
     public DvhRessursUtils dvhRessursUtils;
 
     @Autowired
@@ -91,6 +96,9 @@ public abstract class TestBase {
     protected OrgEnhetStateRepository orgEnhetStateRepository;
 
     @Autowired
+    protected OrganiseringStateRepository organiseringStateRepository;
+
+    @Autowired
     protected OrgtilknytningStateRepository orgtilknytningStateRepository;
 
     @MockBean
@@ -104,6 +112,7 @@ public abstract class TestBase {
     void reset() {
         dvhRepository.clearRepository();
         orgEnhetStateRepository.clear();
+        organiseringStateRepository.clear();
         genericStorage.deleteAll();
         dvhOrgenhetMockUtils.createEmptyResponse();
         pdlUtils.reset();

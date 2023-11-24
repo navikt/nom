@@ -1,12 +1,18 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Getter
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@ToString
 public class DvhOrganisering {
 
     String agressoIdOver;
@@ -17,6 +23,7 @@ public class DvhOrganisering {
     String navnUnder;
     LocalDate gyldigFom;
     LocalDate gyldigTom;
+    JsonNode rawData;
 
     public DvhOrganisering(
             String agressoIdOver,
@@ -50,6 +57,7 @@ public class DvhOrganisering {
         gyldigTom = null;
         //gyldigFom = LocalDate.parse(node.get("GYLDIG_FRA_ORG").asText());
         //gyldigTom = LocalDate.parse(node.get("GYLDIG_TIL_ORG").asText());
+        this.rawData = node;
     }
 
     public boolean containsEnhet(String agressoId, String orgNiv, String navn) {
