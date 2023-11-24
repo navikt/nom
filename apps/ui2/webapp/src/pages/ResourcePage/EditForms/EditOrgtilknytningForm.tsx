@@ -1,25 +1,25 @@
 import { css } from "@emotion/react";
-import { FloppydiskIcon } from "@navikt/aksel-icons";
 import {
   Alert,
-  Button,
   DatePicker,
   Heading,
   Label,
   useDatepicker,
 } from "@navikt/ds-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { useForm } from "react-hook-form";
 
 import {
   getOrgEnhet,
+  orgtilknytningerKeys,
   updateOrgtilknytningDato,
 } from "~/api/react-query-endpoints";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { showToast } from "~/hooks/showToast";
 import { rowStyles } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
+import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import type {
   EndreOrgtilknytningDatoRequest,
   OrgtilknytningState,
@@ -31,6 +31,7 @@ export function EditOrgtilknytningForm({
 }: {
   orgTilknytning: OrgtilknytningState;
 }) {
+  const queryClient = useQueryClient();
   const methods = useForm({
     defaultValues: {
       gyldigFom: orgTilknytning.gyldigFom,
@@ -68,13 +69,9 @@ export function EditOrgtilknytningForm({
       updateOrgtilknytningDato(orgTilknytning.fid, values),
     onSuccess: () => {
       showToast({ text: "Lagret" });
-      // TODO:
-      // Sørge for at verdier lastes på nytt ved lagring
-      //--- i toppen av komponenten
-      // const queryClient = useQueryClient();
-      //
-      // --- i onSuccess på linja før navigate()
-      // queryClient.invalidateQueries({ queryKey: orgtilknytningerKeys.navident(navident)});
+      queryClient.invalidateQueries({
+        queryKey: orgtilknytningerKeys.navident(orgTilknytning.navident),
+      });
       navigate({ search: { editOrgtilknytning: undefined } });
     },
   });
@@ -173,35 +170,7 @@ export function EditOrgtilknytningForm({
           Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
           med én gang.
         </span>
-        <div
-          css={css`
-            display: flex;
-            justify-content: flex-end;
-            margin-top: var(--a-spacing-4);
-          `}
-        >
-          <Button
-            css={css`
-              margin-right: var(--a-spacing-6);
-            `}
-            onClick={() =>
-              navigate({ search: { editOrgtilknytning: undefined } })
-            }
-            size="small"
-            type="button"
-            variant="secondary"
-          >
-            Avbryt
-          </Button>
-          <Button
-            icon={<FloppydiskIcon aria-hidden />}
-            size="small"
-            type="submit"
-            variant="primary"
-          >
-            Lagre
-          </Button>
-        </div>
+        <SaveOrAbortButtons isLoading={orgtilknytningDatoMutation.isPending} />
       </form>
     </div>
   );

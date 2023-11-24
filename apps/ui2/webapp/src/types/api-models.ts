@@ -31,6 +31,15 @@ export interface GetPersonRequest {
 
 export type JsonNode = object;
 
+export interface LeggTilOrgtilknytningRequest {
+  /** @format date */
+  gyldigFom: string;
+  /** @format date */
+  gyldigTom?: string;
+  navident: string;
+  orgEnhetId: string;
+}
+
 export enum NomNivaa {
   LINJEENHET = "LINJEENHET",
   DRIFTSENHET = "DRIFTSENHET",

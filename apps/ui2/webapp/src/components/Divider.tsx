@@ -1,7 +1,13 @@
 import { css } from "@emotion/react";
 import React from "react";
 
-export function Divider({ size = "large" }: { size?: "large" | "small" }) {
+export function Divider({
+  size = "large",
+  noMargins = false,
+}: {
+  size?: "large" | "small";
+  noMargins?: boolean;
+}) {
   return (
     <div
       css={[
@@ -17,6 +23,10 @@ export function Divider({ size = "large" }: { size?: "large" | "small" }) {
         size === "small" &&
           css`
             margin: var(--a-spacing-6) 0;
+          `,
+        noMargins &&
+          css`
+            margin: 0;
           `,
       ]}
     />

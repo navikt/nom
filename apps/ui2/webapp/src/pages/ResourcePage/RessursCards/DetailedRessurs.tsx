@@ -23,7 +23,6 @@ import {
 } from "@tanstack/react-router";
 import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
-import type { ReactNode } from "react";
 import React, { useState } from "react";
 
 import {
@@ -33,17 +32,17 @@ import {
   getOrgTilknytninger,
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
-import { useHasWriteAccess } from "~/api/useGetSession";
 import { Divider } from "~/components/Divider";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
+import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
+import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
 import {
   formatDisplayDate,
   formatTlf,
@@ -64,13 +63,15 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
       <HorizontalEdge />
       <div
         css={css`
-          padding: 2rem;
+          padding: var(--a-spacing-12);
+          display: flex;
+          flex-direction: column;
+          gap: var(--a-spacing-9);
 
           h1,
           h2 {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: var(--a-spacing-6);
 
             svg {
               width: 24px;
@@ -80,6 +81,7 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         <SummarySection ressurs={ressurs} />
+        <Divider noMargins />
         <LeaderForSection ressurs={ressurs} />
         <OrgTilknytningSection ressurs={ressurs} />
         <TeamCatSection navident={ressurs.navident} />
@@ -123,32 +125,40 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
-      <Divider />
       <Heading level="2" size="small">
         <Buldings3Icon />
         Organisatorisk tilhørighet
       </Heading>
-      {activeOrgtilknytninger.map((orgTilknytning) =>
-        editOrgtilknytning === orgTilknytning.fid ? (
-          <EditOrgtilknytningForm
-            key={orgTilknytning.fid}
-            orgTilknytning={orgTilknytning}
-          />
-        ) : (
-          <OrganisationHierarchyTree
-            key={orgTilknytning.fid}
-            orgTilknytning={orgTilknytning}
-            ressurs={ressurs}
-          />
-        ),
-      )}
-      <FutureOrgTilknytninger
-        futureOrgTilknytninger={futureOrgTilknytninger}
-        ressurs={ressurs}
-      />
-      <ExpiredOrgTilknytninger
-        expiredOrgTilknytninger={expiredOrgTilknytninger}
-      />
+      <div
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        `}
+      >
+        <AddOrgtilknytningForm ressurs={ressurs} />
+        {activeOrgtilknytninger.map((orgTilknytning) =>
+          editOrgtilknytning === orgTilknytning.fid ? (
+            <EditOrgtilknytningForm
+              key={orgTilknytning.fid}
+              orgTilknytning={orgTilknytning}
+            />
+          ) : (
+            <OrganisationHierarchyTree
+              key={orgTilknytning.fid}
+              orgTilknytning={orgTilknytning}
+              ressurs={ressurs}
+            />
+          ),
+        )}
+        <FutureOrgTilknytninger
+          futureOrgTilknytninger={futureOrgTilknytninger}
+          ressurs={ressurs}
+        />
+        <ExpiredOrgTilknytninger
+          expiredOrgTilknytninger={expiredOrgTilknytninger}
+        />
+      </div>
     </>
   );
 }
@@ -296,8 +306,6 @@ function OrganisationHierarchyTree({
     <ExpansionCard
       aria-label="organisasjons-hierarki"
       css={css`
-        margin-bottom: 2rem;
-
         &.navds-expansioncard--open #title-start-date {
           color: blue;
           visibility: hidden;
@@ -394,7 +402,6 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 
   return (
     <>
-      <Divider />
       <Heading level="2" size="small">
         <PersonSuitIcon />
         Leder for
@@ -416,6 +423,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           </ReactRouterLink>
         ))}
       </div>
+      <Divider noMargins />
     </>
   );
 }
@@ -571,6 +579,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               navigate({ search: { editPersonopplysninger: true } })
             }
             size="small"
+            variant="secondary"
           >
             Endre personopplysninger
           </Button>
@@ -578,27 +587,6 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
       </div>
     </div>
   );
-}
-
-function EditButtonWrapper({
-  ressurs,
-  children,
-}: {
-  ressurs: Ressurs;
-  children: ReactNode;
-}) {
-  const hasWriteAccess = useHasWriteAccess();
-  const { editPersonopplysninger, editOrgtilknytning } = useSearch({
-    from: ressursRoute.id,
-  });
-  const isEkstern = ressurs.sektor === Sektor.EKSTERN;
-  const isEditing = editPersonopplysninger || editOrgtilknytning;
-
-  if (!hasWriteAccess || !isEkstern || isEditing) {
-    return <></>;
-  }
-
-  return children;
 }
 
 function RessursInformationDetail({
@@ -646,7 +634,7 @@ function TeamCatSection({ navident }: { navident: string }) {
 
   return (
     <>
-      <Divider />
+      <Divider noMargins />
       <Heading level="2" size="small">
         <ReceptionIcon />
         Tilhørighet til team, område og klynge

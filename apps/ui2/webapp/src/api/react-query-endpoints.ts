@@ -11,6 +11,7 @@ const CACHE_FOR = {
 import type {
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
+  LeggTilOrgtilknytningRequest,
   OrgEnhet,
   OrgtilknytningState,
   Person,
@@ -219,6 +220,16 @@ export const updateOrgtilknytningDato = async (
     await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
       `/nom-api/app/orgtilknytninger/${fid}/dato`,
       endreOrgtilknytningDatoRequest,
+    )
+  ).data;
+
+export const leggTilOrgtilknytning = async (
+  leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequest,
+) =>
+  (
+    await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/orgtilknytninger`,
+      leggTilOrgtilknytningRequest,
     )
   ).data;
 

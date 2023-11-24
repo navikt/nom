@@ -1,18 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 
 import type { FysiskBrukersted } from "~/api/react-query-endpoints";
+import { getFysiskeBrukersteder } from "~/api/react-query-endpoints";
 import {
   BasicSelect,
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 
-export function FysiskBrukerstedSelectFormPart({
-  fysiskeBrukersteder,
-}: {
-  fysiskeBrukersteder: FysiskBrukersted[];
-}) {
+export function FysiskBrukerstedSelectFormPart() {
   const { control } = useFormContext();
+  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
+  const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
 
   return (
     <Controller
