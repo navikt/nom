@@ -28,7 +28,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
-        <spring-boot.version>3.1.5</spring-boot.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <gcp.libraries-bom.version>26.27.0</gcp.libraries-bom.version>
