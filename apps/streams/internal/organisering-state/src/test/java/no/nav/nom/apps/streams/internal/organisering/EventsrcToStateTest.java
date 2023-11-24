@@ -198,15 +198,10 @@ public class EventsrcToStateTest {
     }
 
     private OrganiseringEvent getOpprettetOrganiseringEvent(OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData eventData) {
-        final OrganiseringOpprettetEventV1.OrganiseringOpprettetAdditionalAgressoData additionalData = new OrganiseringOpprettetEventV1.OrganiseringOpprettetAdditionalAgressoData(
-            Optional.of("agressoOrgnodeType"),
-            "lederNavident"
-        );
         return new OrganiseringOpprettetEventV1(
             UUID.randomUUID().toString(),
             eventData,
-            (Event.Metadata) null,
-            additionalData
+            (Event.Metadata) null
         );
     }
 
@@ -222,15 +217,10 @@ public class EventsrcToStateTest {
     }
 
     private OrganiseringEvent getEndretOrganiseringEvent(OrganiseringEndretEventV1.OrganiseringEndretEventData eventData) {
-        final OrganiseringEndretEventV1.OrganiseringEndretAdditionalAgressoData additionalData = new OrganiseringEndretEventV1.OrganiseringEndretAdditionalAgressoData(
-            Optional.of("agressoOrgnodeType"),
-            "lederNavident"
-        );
         return new OrganiseringEndretEventV1(
             UUID.randomUUID().toString(),
             eventData,
-            (Event.Metadata) null,
-            additionalData
+            (Event.Metadata) null
         );
     }
 

@@ -49,8 +49,7 @@ public class OrganiseringEventCommandService {
                 opprettOrganiseringCmd.gyldigFom(),
                 opprettOrganiseringCmd.gyldigTom()
             ),
-            opprettOrganiseringCmd.inputMetadata(),
-            null
+            opprettOrganiseringCmd.inputMetadata()
         );
     }
 
@@ -65,9 +64,7 @@ public class OrganiseringEventCommandService {
                 endreOrganiseringCmd.gyldigFom(),
                 endreOrganiseringCmd.gyldigTom()
             ),
-            endreOrganiseringCmd.inputMetadata(),
-            null
-        );
+            endreOrganiseringCmd.inputMetadata());
     }
 
     private OrganiseringEvent getAvsluttEvent(String fid, AvsluttOrganiseringCmd avsluttOrganiseringCmd) {

@@ -7,12 +7,12 @@ import java.util.Optional;
 
 public class OrganiseringEndretEventV1  extends OrganiseringEvent{
     @JsonCreator
-    public OrganiseringEndretEventV1(String fid, OrganiseringEndretEventData data, Metadata metadata, OrganiseringEndretAdditionalAgressoData additionalData) {
-        super(fid, data, metadata, additionalData);
+    public OrganiseringEndretEventV1(String fid, OrganiseringEndretEventData data, Metadata metadata) {
+        super(fid, data, metadata, null);
     }
 
-    public OrganiseringEndretEventV1(String fid, OrganiseringEndretEventData data, InputMetadata metadata, OrganiseringEndretAdditionalAgressoData additionalData) {
-        super(fid, data, Metadata.from(metadata), additionalData);
+    public OrganiseringEndretEventV1(String fid, OrganiseringEndretEventData data, InputMetadata metadata) {
+        super(fid, data, Metadata.from(metadata), null);
     }
 
     public record OrganiseringEndretEventData(
@@ -24,8 +24,4 @@ public class OrganiseringEndretEventV1  extends OrganiseringEvent{
         Optional<LocalDate> gyldigTom
     ) implements Data { }
 
-    public record OrganiseringEndretAdditionalAgressoData(
-        Optional<String> agressoOrgnodeType,
-        String lederNavident
-    ) implements OrganiseringEvent.Data {}
 }
