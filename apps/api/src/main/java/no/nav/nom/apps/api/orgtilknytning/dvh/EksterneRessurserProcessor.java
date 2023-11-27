@@ -58,7 +58,7 @@ public class EksterneRessurserProcessor {
 
                 // hvis aktiv orgtilknytning starter etter RemedySlutt, så fjern den i steden for å avslutte den
                 aktiveOrgtilkntyninger.forEach( o -> {
-                    if (o.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
+                    if (eksternRessurs.remedySlutt() != null && o.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
                         fjernEksisterendeOrgtilknytning(o, meta);
                     } else {
                         avsluttOrgtilknytning(o, eksternRessurs.remedySlutt(), meta);
@@ -103,13 +103,13 @@ public class EksterneRessurserProcessor {
                 if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {
                     // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
                     // Hvis sluttdato er før ekstisterende startdato, fjern orgtilknytingen
-                    if (sisteEksisterendeOrgtilknytning.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
+                    if (eksternRessurs.remedySlutt() != null && sisteEksisterendeOrgtilknytning.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {
                         fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, metadata);
                     } else {
                         endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
                     }
                 } else {
-                    if (LocalDate.now().isAfter(eksternRessurs.remedySlutt())) {
+                    if (eksternRessurs.remedySlutt() != null && LocalDate.now().isAfter(eksternRessurs.remedySlutt())) {
                         // Hvis sluttdato er før dagens dato, avslutt eksisterende
                         avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);
                     } else if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {
