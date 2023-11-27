@@ -10,7 +10,7 @@ import {
   getFysiskeBrukersteder,
   getOrgEnhet,
 } from "~/api/react-query-endpoints";
-import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
@@ -162,7 +162,7 @@ export function ConfirmStep() {
           Du kan ikke endre opplysningene i NOM når ressursen er opprettet.
           Dette må gjøres i Unit4 og Identrutina i Remedy.
         </Alert>
-        <ReactQueryErrorAlert error={opprettRessursMutation.error} />
+        <ApiResponseError error={opprettRessursMutation.error} />
       </Modal.Body>
       <Modal.Footer>
         <Button

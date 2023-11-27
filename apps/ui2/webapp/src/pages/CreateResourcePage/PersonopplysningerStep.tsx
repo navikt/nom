@@ -11,8 +11,8 @@ import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/componen
 import { FolkeregisterPersonInfo } from "~/pages/CreateResourcePage/components/FolkeregisterPersonInfo";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchForPerson";
-import { rowStyles } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { createRessursRoute, ressursRoute } from "~/reactRouterRoutes";
+import { fullwidthRow } from "~/resources/NomStyles";
 import type { FolkeregisterPerson } from "~/types/api-models";
 import { capitalizeName } from "~/utils";
 
@@ -126,7 +126,7 @@ function VisningsnavnForm({
           Navnet under vil bli brukt i alle NAVs applikasjoner. Medarbeideren må
           ha minst ett fornavn og minst ett etternavn.
         </BodyShort>
-        <div css={rowStyles}>
+        <div css={fullwidthRow}>
           <TextField
             autoComplete="off"
             error={errors.visningsfornavn?.message}

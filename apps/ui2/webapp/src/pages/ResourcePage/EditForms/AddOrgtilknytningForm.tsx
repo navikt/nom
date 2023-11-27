@@ -12,15 +12,16 @@ import {
   leggTilOrgtilknytning,
   orgtilknytningerKeys,
 } from "~/api/react-query-endpoints";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import { showToast } from "~/hooks/showToast";
 import {
   eksternValidationSchema,
-  formStyle,
   OrganisasjonstilknytningInnerForm,
 } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { ressursRoute } from "~/reactRouterRoutes";
+import { defaultFormStyle } from "~/resources/NomStyles";
 import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
 
@@ -59,7 +60,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
     return (
       <FormProvider {...methods}>
         <form
-          css={formStyle}
+          css={defaultFormStyle}
           onSubmit={handleSubmit((values) =>
             leggTilOrgtilknytningMutation.mutate({
               ...values,
@@ -70,11 +71,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
           )}
         >
           <OrganisasjonstilknytningInnerForm />
-          {leggTilOrgtilknytningMutation.isError && (
-            <Alert variant="error">
-              {leggTilOrgtilknytningMutation.error.response?.data.message}
-            </Alert>
-          )}
+          <ApiResponseError error={leggTilOrgtilknytningMutation.error} />
           <SaveOrAbortButtons
             isLoading={leggTilOrgtilknytningMutation.isPending}
           />

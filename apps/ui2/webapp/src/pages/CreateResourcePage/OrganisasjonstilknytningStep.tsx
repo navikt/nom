@@ -29,11 +29,9 @@ import { FysiskBrukerstedSelectFormPart } from "~/components/select/FysiskBruker
 import { OrgEnhetSelectFormPart } from "~/components/select/OrgEnhetSelect";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
-import {
-  AnsettelsesTypeNameMapping,
-  rowStyles,
-} from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
+import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
@@ -86,7 +84,7 @@ function CreateStatligRessurs() {
   return (
     <FormProvider {...methods}>
       <form
-        css={formStyle}
+        css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
             to: createRessursRoute.to,
@@ -168,7 +166,7 @@ function CreateEksternRessurs() {
   return (
     <FormProvider {...methods}>
       <form
-        css={formStyle}
+        css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
             to: createRessursRoute.to,
@@ -228,7 +226,7 @@ export function OrganisasjonstilknytningInnerForm({
   return (
     <>
       <InnerOrgEnhetSelect />
-      <div css={rowStyles}>
+      <div css={fullwidthRow}>
         <FullWidthDatePickerWrapper>
           <DatePicker {...startDatePicker.datepickerProps}>
             <DatePicker.Input
@@ -314,13 +312,3 @@ function InnerOrgEnhetSelect() {
     </>
   );
 }
-
-export const formStyle = css`
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--a-spacing-8);
-
-  > div {
-    margin-bottom: var(--a-spacing-6);
-  }
-`;

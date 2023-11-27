@@ -116,16 +116,6 @@ export function validateCreateRessursSearch(
 
 export type StatligFormValues = yup.InferType<typeof statligValidationSchema>;
 
-export const rowStyles = css`
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-
-  & > * {
-    flex: 1;
-  }
-`;
-
 export const AnsettelsesTypeNameMapping = {
   [AnsettelsesType.FAST]: "Fast",
   [AnsettelsesType.MIDLERTIDIG]: "Midlertidig",

@@ -1,13 +1,8 @@
 import { css } from "@emotion/react";
-import {
-  Alert,
-  DatePicker,
-  Heading,
-  Label,
-  useDatepicker,
-} from "@navikt/ds-react";
+import { DatePicker, Heading, Label, useDatepicker } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import type { AxiosError } from "axios";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -16,13 +11,15 @@ import {
   orgtilknytningerKeys,
   updateOrgtilknytningDato,
 } from "~/api/react-query-endpoints";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { showToast } from "~/hooks/showToast";
-import { rowStyles } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
+import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import type {
   EndreOrgtilknytningDatoRequest,
   OrgtilknytningState,
+  StandardResponse,
 } from "~/types/api-models";
 import { formatDateWithoutTimezone, formatVisningsnavn } from "~/utils";
 
@@ -62,7 +59,7 @@ export function EditOrgtilknytningForm({
 
   const orgtilknytningDatoMutation = useMutation<
     unknown,
-    unknown,
+    AxiosError<StandardResponse>,
     EndreOrgtilknytningDatoRequest
   >({
     mutationFn: async (values) =>
@@ -134,16 +131,14 @@ export function EditOrgtilknytningForm({
         </Label>
       ) : undefined}
       <form
+        css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           orgtilknytningDatoMutation.mutate(values),
         )}
       >
         <div
           css={css`
-            display: flex;
-            margin-top: var(--a-spacing-6);
-            margin-bottom: var(--a-spacing-4);
-            ${rowStyles}
+            ${fullwidthRow}
           `}
         >
           <FullWidthDatePickerWrapper>
@@ -163,9 +158,7 @@ export function EditOrgtilknytningForm({
             </DatePicker>
           </FullWidthDatePickerWrapper>
         </div>
-        {orgtilknytningDatoMutation.isError ? (
-          <Alert variant="error">Noe gikk galt</Alert>
-        ) : undefined}
+        <ApiResponseError error={orgtilknytningDatoMutation.error} />
         <span>
           Sluttdato på dagens dato eller tidligere vil avslutte tilknytningen
           med én gang.

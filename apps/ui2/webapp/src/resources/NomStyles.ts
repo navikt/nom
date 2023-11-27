@@ -25,3 +25,23 @@ export const mediaQueryContentWidth = css`
     width: ${contentWidthByBreakpoint.bp3};
   }
 `;
+
+export const defaultFormStyle = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--a-spacing-8);
+
+  > div {
+    margin-bottom: var(--a-spacing-6);
+  }
+`;
+
+export const fullwidthRow = css`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+
+  & > * {
+    flex: 1;
+  }
+`;
