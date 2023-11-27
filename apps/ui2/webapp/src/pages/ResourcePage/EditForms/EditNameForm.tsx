@@ -1,17 +1,21 @@
 import { css } from "@emotion/react";
-import { FloppydiskIcon } from "@navikt/aksel-icons";
-import { Button, TextField } from "@navikt/ds-react";
-import { useMutation } from "@tanstack/react-query";
+import { TextField } from "@navikt/ds-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-import { updateNavnForRessurs } from "~/api/react-query-endpoints";
+import {
+  ressurserKeys,
+  updateNavnForRessurs,
+} from "~/api/react-query-endpoints";
 import { showToast } from "~/hooks/showToast";
+import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import type { Ressurs, Visningsnavn } from "~/types/api-models";
 
 export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const defaultValues = {
     fornavn: ressurs.visningsnavn.fornavn,
@@ -19,22 +23,19 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
     etternavn: ressurs.visningsnavn.etternavn,
   };
 
-  const {
-    handleSubmit,
-    register,
-    reset,
-    formState: { isDirty },
-  } = useForm({
+  const { handleSubmit, register } = useForm({
     defaultValues,
   });
 
-  const { mutate } = useMutation<unknown, unknown, Visningsnavn>({
+  const { mutate, isPending } = useMutation<unknown, unknown, Visningsnavn>({
     mutationFn: async (values) =>
       updateNavnForRessurs(ressurs.navident, values),
     onSuccess: () => {
-      // TODO: refresh ressurs after save
       showToast({ text: "Lagret" });
-      reset({}, { keepValues: true });
+      queryClient.invalidateQueries({
+        queryKey: ressurserKeys.id(ressurs.navident),
+      });
+      navigate({ search: {} });
     },
   });
 
@@ -55,23 +56,7 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
       <TextField {...register("fornavn")} label="Fornavn" />
       <TextField {...register("mellomnavn")} label="Mellomnavn" />
       <TextField {...register("etternavn")} label="Etternavn" />
-      <Button
-        onClick={() => navigate({ search: {} })}
-        size="small"
-        type="button"
-        variant="secondary"
-      >
-        Avbryt
-      </Button>
-      {isDirty && (
-        <Button
-          icon={<FloppydiskIcon aria-hidden />}
-          size="small"
-          type="submit"
-        >
-          Lagre
-        </Button>
-      )}
+      <SaveOrAbortButtons isLoading={isPending} />
     </form>
   );
 }
