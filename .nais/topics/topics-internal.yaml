@@ -197,6 +197,9 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+    - team: org
+      application: nom-remedy-integrasjon
+      access: read
 
 ---
 
