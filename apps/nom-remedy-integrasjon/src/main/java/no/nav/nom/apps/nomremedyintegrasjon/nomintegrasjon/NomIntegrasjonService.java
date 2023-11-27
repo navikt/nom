@@ -2,7 +2,10 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.slf4j.Logger;
@@ -42,6 +45,58 @@ public class NomIntegrasjonService {
         }
     }
 
+    public void handleOrgtilknytningEvent(OrgtilknytningEvent orgtilknytningEvent) {
+
+
+        if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
+            && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
+            && isEkstern(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
+
+            updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
+        }
+    }
+
+    public void updateOrgtilknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+        logger.info("Updating remedy data for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+
+        var orgtilknytningDagligOppfolgingEndretEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
+
+        var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
+
+        var maybeLatestNomRemedyIntegrationEntryForNavident = nomIntegrasjonRepository
+            .findTopByNavIdEqualsOrderByEntryIdDesc(orgtilknytningDagligOppfolgingEndretEventData.navident());
+
+        maybeLatestNomRemedyIntegrationEntryForNavident
+            .ifPresentOrElse(
+                latestNomIntegrasjonEntityForNavident -> {
+                    var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
+                        .orElseThrow(() -> new NoSuchElementException("Missing value for 'sluttDato'"));
+
+                    var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
+                        .enhetsId(newRemedyEnhetId)
+                        .tiltredelsesdato(epochSeconds(orgtilknytningDagligOppfolgingEndretEventData.gyldigFom()))
+                        .utlopsdato(epochSeconds(gyldigTom))
+                        .build();
+
+                    if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
+                        saveNewNomIntegrasjonEntity(
+                            newNomIntegrasjonEntity,
+                            orgtilknytningDagligOppfolgingEndretEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                        );
+                        logger.info("Finished updating remedy data for event with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+                    }
+
+                    else {
+                        logger.info("No new data in event with fid {}. Skipping update", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
+                    }
+                },
+                () -> logger.info(
+                    "No existing entry found for navident associated with event with fid {}. No data written to remedy",
+                    orgtilknytningDagligOppfolgingEndretEventV1.getFid()
+                )
+            );
+    }
+
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {
         var ressursOpprettetEventData = ressursOpprettetEventV1.getRessursOpprettetEventData();
         var ressursOpprettetAdditionalData = ressursOpprettetEventV1.getRessursOpprettetAdditionalData();
@@ -50,24 +105,21 @@ public class NomIntegrasjonService {
             new TypeReference<>() {}
         );
 
-        logger.info("Creating ressurs for fid: " + ressursOpprettetEventV1.getFid());
+        logger.info("Creating ressurs for RessursOpprettetEventV1 with fid: " + ressursOpprettetEventV1.getFid());
 
         var remedyEnhetsId = getRemedyEnhetId(
-            Optional.ofNullable((String) inputInterfaceMethodArguments.get("orgEnhetId")).orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"))
+            Optional.ofNullable((String) inputInterfaceMethodArguments.get("orgEnhetId"))
+                .orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"))
         );
 
         var sluttDato = Optional.ofNullable((String) inputInterfaceMethodArguments.get("sluttDato"))
             .map(LocalDate::parse)
-            .orElseThrow(() -> new NoSuchElementException("Missing value for 'orgEnhetId'"));
+            .orElseThrow(() -> new NoSuchElementException("Missing value for 'sluttDato'"));
 
         var fysiskBrukerstedNr = Optional.ofNullable((String) inputInterfaceMethodArguments.get("fysiskBrukerstedNr"))
             .orElseThrow(() -> new NoSuchElementException("Missing value for 'fysiskBrukerstedNr'"));
 
         NomIntegrasjonEntity newNomIntegrasjonEntity = NomIntegrasjonEntity.builder()
-            .entryId(nextId())
-            .entryBestiller(ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
-            .entryOperasjon("Ny")
-            .entryStatus("Ubehandlet")
             .enhetsId(remedyEnhetsId)
             .etternavn(capitalizeNavn(ressursOpprettetEventData.visningsnavn().etternavn()))
             .fodselsnummer(ressursOpprettetEventData.personident())
@@ -75,13 +127,37 @@ public class NomIntegrasjonService {
             .fysiskBrukerstedId(fysiskBrukerstedNr)
             .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> new NoSuchElementException("Missing value for 'navident'")))
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
-            .tiltredelsesdato(ressursOpprettetAdditionalData.startdato().map(Utils::epochSeconds).orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))
+            .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
+                .map(Utils::epochSeconds)
+                .orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))
             .utlopsdato(epochSeconds(sluttDato))
             .build();
 
-        nomIntegrasjonRepository.save(newNomIntegrasjonEntity);
+        saveNewNomIntegrasjonEntity(
+            newNomIntegrasjonEntity,
+            ressursOpprettetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+        );
 
         logger.info("Created ressurs for fid: " + ressursOpprettetEventV1.getFid());
+    }
+
+    private boolean isEkstern(String navident) {
+        return nomApiClient.getRessurs(navident)
+            .map(ressurs -> ressurs.sektor().contains(Sektor.EKSTERN))
+            .orElseThrow(() -> new NoSuchElementException(
+                String.format("Could not find ressurs with navident %s in nom", navident)
+            ));
+    }
+
+    private void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
+        nomIntegrasjonRepository.save(
+            newNomIntegrasjonEntity.toBuilder()
+                .entryId(nextId())
+                .entryOperasjon("Ny")
+                .entryStatus("Ubehandlet")
+                .entryBestiller(initiatedByNavident)
+                .build()
+        );
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {

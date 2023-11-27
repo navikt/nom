@@ -1,6 +1,7 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
+import no.nav.nom.contract.nom.Sektor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -42,7 +44,7 @@ public class NomApiClientTest extends TestBase {
     }
 
     @Test
-    @DisplayName("getOrgEnhet should perform requests as expected")
+    @DisplayName("getOrgEnhet should perform request as expected")
     void testGetOrgEnhet(){
 
         var orgEnhetId = "some-orgenhet";
@@ -84,6 +86,60 @@ public class NomApiClientTest extends TestBase {
             }
             """,
             orgEnhetId
+        );
+
+        verify(
+            postRequestedFor(urlEqualTo("/graphql"))
+                .withRequestBody(equalToJson(expectedRequestBody))
+                .withHeader("authorization", matching("Bearer tokenValue"))
+        );
+    }
+
+    @Test
+    @DisplayName("getRessurs should perform request as expected")
+    void testGetRessurs(){
+
+        var navident = "X123456";
+        var sektor = Sektor.EKSTERN;
+
+        String responseBody = String.format("""
+            {
+              "data": {
+                "ressurs": {
+                  "navident": "%s",
+                  "sektor": [
+                    "%s"
+                  ]
+                }
+              }
+            }
+            """, navident, sektor);
+
+
+        stubFor(
+            post(urlEqualTo("/graphql"))
+                .willReturn(
+                    aResponse()
+                        .withBody(responseBody)
+                        .withHeader("Content-Type", "application/json")
+                )
+        );
+
+        assertThat(nomApiClient.getRessurs(navident))
+            .isEqualTo(Optional.of(new RessursWithSektor(navident, List.of(sektor))));
+
+
+        String expectedRequestBody = String.format(
+            """
+            {
+              "query" : "query getRessurs($navident: String!){\\n    ressurs(where: {navident: $navident}){\\n        navident\\n        sektor\\n    }\\n}",
+              "variables" : {
+                "navident" : "%s"
+              },
+              "operationName" : "getRessurs"
+            }
+            """,
+            navident
         );
 
         verify(

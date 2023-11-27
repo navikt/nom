@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 public record OrgEnhetWithRemedyId(
     String id,

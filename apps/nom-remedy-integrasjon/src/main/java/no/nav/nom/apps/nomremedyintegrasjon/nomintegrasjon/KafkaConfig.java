@@ -1,6 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -18,16 +19,32 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 public class KafkaConfig {
 
     @Bean
-    public ConsumerFactory<String, RessursEvent> consumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+    public ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
         JsonDeserializer<RessursEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
         return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
     }
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, RessursEvent>>
-    kafkaListenerContainerFactory(ConsumerFactory<String, RessursEvent> consumerFactory) {
+    ressursEventKafkaListenerContainerFactory(ConsumerFactory<String, RessursEvent> ressursEventConsumerFactory) {
         var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, RessursEvent>();
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(consumerFactory);
+        concurrentKafkaListenerContainerFactory.setConsumerFactory(ressursEventConsumerFactory);
+        concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
+        return concurrentKafkaListenerContainerFactory;
+    }
+
+    @Bean
+    public ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEventConsumerFactory(KafkaProperties properties, ObjectMapper objectMapper) {
+        JsonDeserializer<OrgtilknytningEvent> jsonEventDeserializer = new JsonDeserializer<>(objectMapper);
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties(), new StringDeserializer(), jsonEventDeserializer);
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OrgtilknytningEvent>>
+    orgtilknytningEventKafkaListenerContainerFactory(ConsumerFactory<String, OrgtilknytningEvent> orgtilknytningEventConsumerFactory) {
+        var concurrentKafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<String, OrgtilknytningEvent>();
+        concurrentKafkaListenerContainerFactory.setConsumerFactory(orgtilknytningEventConsumerFactory);
         concurrentKafkaListenerContainerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 
         return concurrentKafkaListenerContainerFactory;

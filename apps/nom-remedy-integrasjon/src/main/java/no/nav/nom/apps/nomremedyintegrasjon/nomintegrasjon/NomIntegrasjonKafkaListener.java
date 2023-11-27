@@ -1,10 +1,9 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import io.getunleash.Unleash;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,11 +19,23 @@ public class NomIntegrasjonKafkaListener {
 
     @KafkaListener(
         topics = "${app.kafka-topics.ressurs-eventsource.topic-name}",
-        autoStartup = "${app.kafka-topics.ressurs-eventsource.auto-startup}"
+        autoStartup = "${app.kafka-topics.ressurs-eventsource.auto-startup}",
+        containerFactory = "ressursEventKafkaListenerContainerFactory"
     )
-    public void listener(RessursEvent ressursEvent, @Header(KafkaHeaders.RECEIVED_KEY) String recordId) {
+    public void ressursEventListener(RessursEvent ressursEvent) {
         if (isWriteToRemedyEnabled()) {
             nomIntegrasjonService.handleRessursEvent(ressursEvent);
+        }
+    }
+
+    @KafkaListener(
+        topics = "${app.kafka-topics.orgtilknytning-eventsource.topic-name}",
+        autoStartup = "${app.kafka-topics.orgtilknytning-eventsource.auto-startup}",
+        containerFactory = "orgtilknytningEventKafkaListenerContainerFactory"
+    )
+    public void orgtilknytningEventListener(OrgtilknytningEvent orgtilknytningEvent) {
+        if (isWriteToRemedyEnabled()) {
+            nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
         }
     }
 
