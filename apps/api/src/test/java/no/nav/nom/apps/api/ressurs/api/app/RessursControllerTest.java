@@ -21,8 +21,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
+import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.ressurs.api.app.RessursController.UNLEASH_EDIT_RESSURS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -250,6 +253,42 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isOk();
 
         verify(ressursCommadService, times(1)).oppdaterPersonaliaEvent(any(), any());
+    }
+
+    @Test
+    void skal_kunne_avvikle_ressurs() {
+
+        var ressurs = ressursState().toBuilder().fid("FID_1").navident("A123456").sektor(Sektor.EKSTERN).build();
+        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
+        when(ressursStateRepository.findByFid(ressurs.fid()))
+            .thenReturn(Optional.of(ressurs));
+
+        var existingOrgtilknytninger = List.of(
+            orgtilknytningState().toBuilder().navident(ressurs.navident()).build(),
+            orgtilknytningState().toBuilder()
+                .navident(ressurs.navident())
+                .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
+                .build()
+        );
+
+        saveOrgtilknytninger(existingOrgtilknytninger);
+
+        var request = new AvvikleRessursRequest(
+            LocalDate.now().plusMonths(1)
+        );
+
+        webTestClient.post()
+            .uri("/app/ressurser/" + ressurs.fid() + "/avvikle")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isOk();
+
+        verify(ressursCommadService, times(1)).avsluttRessursEvent(any(), any());
+        verify(orgtilknytningCommandService, times(1)).avvikleOrgtilknytning(any(), any());
     }
 
     @Test

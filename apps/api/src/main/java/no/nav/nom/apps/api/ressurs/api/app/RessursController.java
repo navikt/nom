@@ -70,6 +70,27 @@ public class RessursController {
         return ResponseEntity.ok(toResponse(ressursRestService.createRessursAndNotify(request)));
     }
 
+    @PostMapping("/{fid}/avvikle")
+    @Operation(
+        description = "Avvikler en ressurs ved å sette sluttdato",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS')"
+    )
+    public ResponseEntity<StandardResponse> avvikleRessurs(
+        @PathVariable String fid,
+        @RequestBody AvvikleRessursRequest request) {
+        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
+            throw new AccessDeniedException("Endring av ressurs er blokkert");
+        }
+        ressursRestService.avvikleRessurs(fid, request);
+        return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
+    }
+
     @PostMapping("/{navident}/navn")
     @Operation(
         description = "Endrer navn for en ressurs",
