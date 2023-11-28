@@ -204,34 +204,34 @@ export const getOrgEnhetEvents = {
 export const updateNavnForRessurs = async (
   navident: string,
   updateNavnForRessursRequest: unknown,
-) =>
-  (
-    await axios.post<unknown, AxiosResponse<unknown>>(
-      `/nom-api/app/ressurser/${navident}/navn`,
-      updateNavnForRessursRequest,
-    )
-  ).data;
+) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `/nom-api/app/ressurser/${navident}/navn`,
+    updateNavnForRessursRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
 
 export const updateOrgtilknytningDato = async (
   fid: string,
   endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
-) =>
-  (
-    await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
-      `/nom-api/app/orgtilknytninger/${fid}/dato`,
-      endreOrgtilknytningDatoRequest,
-    )
-  ).data;
+) => {
+  await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
+    `/nom-api/app/orgtilknytninger/${fid}/dato`,
+    endreOrgtilknytningDatoRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
 
 export const leggTilOrgtilknytning = async (
   leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequest,
-) =>
-  (
-    await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
-      `/nom-api/app/orgtilknytninger`,
-      leggTilOrgtilknytningRequest,
-    )
-  ).data;
+) => {
+  await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
+    `/nom-api/app/orgtilknytninger`,
+    leggTilOrgtilknytningRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
 
 export const getUnderliggendeOrgenheter = {
   queryKey: (parentId: string) =>
@@ -253,6 +253,10 @@ export const getFysiskeBrukersteder = {
       )
     ).data,
 };
+
+async function hopeForKafkaStateToUpdate() {
+  await new Promise((r) => setTimeout(r, 1000));
+}
 
 type GraphqlResponseWrapper = {
   data: {
