@@ -10,6 +10,8 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.ad.AdRessurs;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
@@ -43,6 +45,7 @@ public class TeamcatRessursController {
     private final OrgtilknytningService orgtilknytningService;
     private final RessursStateRepository ressursStateRepository;
     private final OrgEnhetOverordnetResolver overordnetResolver;
+    private final RessursLedereResolver ressursLedereResolver;
     private final String IT_AVDELING_ID;
 
     public TeamcatRessursController(
@@ -52,7 +55,8 @@ public class TeamcatRessursController {
         OrgtilknytningService orgtilknytningService,
         OrgenhetService orgenhetService,
         Environment env,
-        OrgEnhetOverordnetResolver overordnetResolver
+        OrgEnhetOverordnetResolver overordnetResolver,
+        RessursLedereResolver ressursLedereResolver
     ) {
         this.adclient = adclient;
         this.dvhRepository = dvhRepository;
@@ -60,6 +64,7 @@ public class TeamcatRessursController {
         this.orgtilknytningService = orgtilknytningService;
         this.ressursStateRepository = ressursStateRepository;
         this.overordnetResolver = overordnetResolver;
+        this.ressursLedereResolver = ressursLedereResolver;
         var isDev = "dev-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
         this.IT_AVDELING_ID = isDev ? "hu357k" : "ve673e";
     }
@@ -159,6 +164,17 @@ public class TeamcatRessursController {
     }
 
     private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map<String, AdRessurs> adResource, PerRequestCache perRequestCache) {
+
+        var oeId = orgtilknytningService.getByNavIdent(navident).stream().filter(OrgtilknytningState::erDagligOppfolging).findFirst().map(OrgtilknytningState::orgEnhetId).orElse(null);
+        var lederNavident = ressursLedereResolver.ledere(navident)
+            .stream()
+            .filter(RessursLeder::erDagligOppfolging)
+            .findFirst()
+            .map(RessursLeder::leder)
+            .map(RessursState::navident)
+            .orElse(null);
+
+
         return new TeamcatRessursDTO(
             ressurs.startdato().orElse(null),
             ressurs.sluttdato().orElse(null),
@@ -166,7 +182,9 @@ public class TeamcatRessursController {
             navident,
             TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
             ressurs.visningsnavn().getFormattedVisningsnavn(),
-            determineAvdelingNavn(navident, perRequestCache)
+            determineAvdelingNavn(navident, perRequestCache),
+            oeId,
+            lederNavident
         );
     }
 

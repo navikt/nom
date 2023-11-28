@@ -7,6 +7,8 @@ import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.v1.teamcat.TeamcatRessursDTO;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
@@ -25,7 +27,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.Assert.isTrue;
@@ -44,6 +49,9 @@ public class TeamcatRessursControllerTest extends RestTestBase {
 
     @MockBean
     private AdClient adClient;
+
+    @MockBean
+    private RessursLedereResolver ressursLedereResolver;
 
 
     private Optional<RessursState> createRessursState(String navident) {
@@ -136,6 +144,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
         when(adClient.fetchInAdRessursInBatches(anyList())).thenReturn(Map.of(resId, createAdRessurs(resId)));
         when(orgtilknytningService.getByNavIdent(resId)).thenReturn(List.of(createOtks(resId, oeId)));
         when(orgenhetService.getById(oeId)).thenReturn(Optional.of(createOes(oeId, oeNavn,null)));
+        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
@@ -174,6 +183,7 @@ public class TeamcatRessursControllerTest extends RestTestBase {
         when(orgenhetService.getByFid(oe2.getFid())).thenReturn(Optional.of(oe2));
         when(orgenhetService.getByFid(oe3.getFid())).thenReturn(Optional.of(oe3));
         when(orgenhetService.getById(oe4.getId())).thenReturn(Optional.of(oe4));
+        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
 
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
