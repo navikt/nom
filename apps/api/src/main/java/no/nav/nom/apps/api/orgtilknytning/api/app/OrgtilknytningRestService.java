@@ -19,6 +19,7 @@ import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +70,22 @@ public class OrgtilknytningRestService {
                     if (!tilknyttetRessurs.sektor().equals(Sektor.EKSTERN)) {
                         throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
                     }
+
+                    // If gyldigTom is set to before today, verify there are other active tilknytninger
+                    if (LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN))) {
+                        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(tilknyttetRessurs.navident())).stream().anyMatch(orgtilknytningState -> {
+                            if (orgtilknytningState.fid().equals(fid)) {
+                                return false;
+                            }
+
+                            return orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now());
+                        });
+
+                        if (!activeOrgtilknytningExists) {
+                            throw new IllegalArgumentException("Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
+                        }
+                    }
+
                 },
                 () -> {
                     throw RessursNotFoundException.navident(orgtilknytning.navident());

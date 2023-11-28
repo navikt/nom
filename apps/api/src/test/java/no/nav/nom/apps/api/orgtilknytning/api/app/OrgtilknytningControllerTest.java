@@ -167,6 +167,49 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
 
     @Test
+    @DisplayName("Should not be able to update dato if it leads to no active orgtilknytninger")
+    void test_disallow_update_if_no_remaining_active() {
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.gyldigFom(),
+            Optional.of(LocalDate.now().minusDays(1))
+        );
+
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(orgtilknytningToUpdate.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).endreOrgtilknytningDato(
+            stringArgumentCaptor.capture(),
+            endreOrgtilknytningDatoArgumentCaptor.capture()
+        );
+    }
+
+    @Test
     @DisplayName("Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_for_ekstern_only_date() {
         var orgtilknytningToUpdate = orgtilknytningState();
