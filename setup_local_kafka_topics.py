@@ -67,6 +67,11 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
             event_source_topic="org.nom.organisering-eventsource",
             state_topic="org.nom.intern-organisering-state",
             streams_application_id="organisering-state"
+        ),
+        "hendelser": EntityTopics(
+            event_source_topic="none",
+            state_topic="org.nom.api-hendelser-v1",
+            streams_application_id="api-hendelser-v1"
         )
     }
 

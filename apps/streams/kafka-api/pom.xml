@@ -16,5 +16,6 @@
     <modules>
         <module>api-ressurs-state</module>
         <module>api-orgenhet-state</module>
+        <module>api-hendelser</module>
     </modules>
 </project>
