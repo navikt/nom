@@ -11,8 +11,9 @@ public record TeamcatRessursDTO(
     String navident,
     ResourceType ressurstype,
     String visningsnavn,
-
-    String avdelingnavn
+    String avdelingnavn,
+    String enhetId,
+    String lederNavident
 ) {
     public enum ResourceType {
         ANNEN_STAT("ANNEN_STAT"),
