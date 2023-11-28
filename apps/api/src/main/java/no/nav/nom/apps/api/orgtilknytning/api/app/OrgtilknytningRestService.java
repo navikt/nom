@@ -58,6 +58,11 @@ public class OrgtilknytningRestService {
             );
     }
 
+    public OrgtilknytningState getOrgtilknytning(String fid) {
+        return orgtilknytningStateRepository.findByFid(fid)
+            .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
+    }
+
     public void updateOrgtilknyting(String fid, EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest) {
         validateChronologicalDates(endreOrgtilknytningDatoRequest.gyldigFom(), endreOrgtilknytningDatoRequest.gyldigTom().orElse(null));
 

@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
@@ -448,5 +449,51 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         );
     }
 
+    @Test
+    @DisplayName("Should get orgtilknytning for fid")
+    void test_get_orgtilknytning() {
+        var orgtilknytningStateToGet = orgtilknytningState();
+
+        saveOrgtilknytninger(List.of(orgtilknytningStateToGet, orgtilknytningState()));
+
+        var responseBody =  webTestClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}")
+                .build(orgtilknytningStateToGet.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesUserToken());
+            })
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OrgtilknytningState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(responseBody)
+            .usingRecursiveComparison()
+            .isEqualTo(orgtilknytningStateToGet);
+    }
+
+    @Test
+    @DisplayName("Should get 404 if orgtilknytning with fid is not found")
+    void test_get_orgtilknytning_not_found() {
+        saveOrgtilknytninger(List.of(orgtilknytningState()));
+
+        webTestClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}")
+                .build(UUID.randomUUID().toString())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesUserToken());
+            })
+            .exchange()
+            .expectStatus().is4xxClientError();
+
+    }
 
 }
