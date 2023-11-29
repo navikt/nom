@@ -49,6 +49,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
     mutationFn: async (values) => leggTilOrgtilknytning(values),
     onSuccess: () => {
       showToast({ text: "Lagret" });
+      methods.reset();
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
