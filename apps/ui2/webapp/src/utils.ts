@@ -93,10 +93,14 @@ export function isGyldighetsPeriodeActive(
 
   const endOfToday = endOfDay(new Date());
 
-  return isWithinInterval(endOfToday, {
-    start: gyldigFomAsDate,
-    end: gyldigTomAsDate,
-  });
+  try {
+    return isWithinInterval(endOfToday, {
+      start: gyldigFomAsDate,
+      end: gyldigTomAsDate,
+    });
+  } catch {
+    return false;
+  }
 }
 
 export function isBeforePresent(date: Date) {
