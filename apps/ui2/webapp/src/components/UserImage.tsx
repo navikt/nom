@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { Link, Tooltip } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
@@ -38,7 +39,16 @@ export function UserImage(properties: UserImageProperties) {
     );
   }
 
-  return <img alt="" css={STYLE} src={person} />;
+  return (
+    <Link
+      href="https://navno.sharepoint.com/sites/intranett-it/SitePages/oppdatere%20profilen%20din%20i%20medarbeiders%C3%B8ket.aspx"
+      target="_blank"
+    >
+      <Tooltip content="Åpne instruks for å endre bilde">
+        <img alt="" css={STYLE} src={person} />
+      </Tooltip>
+    </Link>
+  );
 }
 
 export const getPhotoQuery = {
