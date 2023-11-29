@@ -36,7 +36,7 @@ import java.util.Optional;
 @Tag(name = "Teamkatalog")
 @RestController
 @RequestMapping("/api/v1/teamcat")
-public class TeamcatRessursController {
+public class TeamcatController {
 
 
     private final AdClient adclient;
@@ -48,7 +48,7 @@ public class TeamcatRessursController {
     private final RessursLedereResolver ressursLedereResolver;
     private final String IT_AVDELING_ID;
 
-    public TeamcatRessursController(
+    public TeamcatController(
         RessursStateRepository ressursStateRepository,
         AdClient adclient,
         DvhRepository dvhRepository,

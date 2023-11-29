@@ -3,7 +3,6 @@ package no.nav.nom.apps.api.teamcat;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
-import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
@@ -35,7 +34,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.Assert.isTrue;
 
-public class TeamcatRessursControllerTest extends RestTestBase {
+public class TeamcatControllerTest extends RestTestBase {
 
     @MockBean
     protected RessursStateRepository ressursStateRepository;
