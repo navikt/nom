@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.api.teamcat;
+package no.nav.nom.apps.api.teamcat;
 
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.clients.ad.AdClient;
@@ -9,7 +9,7 @@ import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
-import no.nav.nom.apps.api.ressurs.api.v1.teamcat.TeamcatRessursDTO;
+import no.nav.nom.apps.api.teamcat.TeamcatRessursDTO;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.contract.ad.AdRessurs;

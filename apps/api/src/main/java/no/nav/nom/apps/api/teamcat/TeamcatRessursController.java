@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.api.v1.teamcat;
+package no.nav.nom.apps.api.teamcat;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
