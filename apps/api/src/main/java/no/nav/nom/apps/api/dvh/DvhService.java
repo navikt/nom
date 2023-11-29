@@ -125,6 +125,11 @@ public class DvhService {
             })
             .toList();
 
+        if (unleash.isEnabled(OrgenhetService.UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
+            log.info("saveOrganisering m/UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID");
+            log.info("Found fe408t: {}", cachedEnheter.get("1246001-Øygarden Ungdom-ORGENHET"));
+        }
+
         dvhRepository.saveOrganiseringer(organiseringerToSave);
 
         var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
