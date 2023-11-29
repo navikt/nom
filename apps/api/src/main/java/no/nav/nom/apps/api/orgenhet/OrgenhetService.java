@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
@@ -8,7 +9,6 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandServic
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
-import no.nav.nom.apps.api.ressurs.api.app.RessursRestService;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.apps.api.topicreader.KafkaTopicReader;
 import no.nav.nom.apps.api.topicreader.ReadTopicRequest;
@@ -41,13 +41,15 @@ public class OrgenhetService {
     private final DvhRepository dvhRepository;
     private final KafkaTopicReader kafkaTopicReader;
     private List<IOrgenhet> organiserteEnheter = emptyList();
+    public static final String UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID = "nom.bruk_ny_korreksjon_for_oppslag_av_enhet_basert_paa_agresso_id";
+    private final Unleash unleash;
 
-
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader) {
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader, Unleash unleash) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
+        this.unleash = unleash;
     }
 
 
@@ -63,21 +65,38 @@ public class OrgenhetService {
 
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
-            return map(
-                orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
-                    .stream()
-                    .max(comparing(OrgEnhetState::gyldigFom))
-            );
+            if (unleash.isEnabled(UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
+                return map(
+                    orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
+                        .stream()
+                        .filter(o -> o.gyldigTom().isEmpty() || !o.gyldigFom().isEqual(o.gyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                        .max(comparing(OrgEnhetState::gyldigFom))
+                );
+            } else {
+                return map(
+                    orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
+                        .stream()
+                        .max(comparing(OrgEnhetState::gyldigFom))
+                );
+            }
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
-            .stream()
-            .max(comparing(OrgEnhetState::gyldigFom))
-        );
+        if (unleash.isEnabled(UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
+            return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
+                .stream()
+                .filter(o -> o.gyldigTom().isEmpty() || !o.gyldigFom().isEqual(o.gyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                .max(comparing(OrgEnhetState::gyldigFom))
+            );
+        } else {
+            return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
+                .stream()
+                .max(comparing(OrgEnhetState::gyldigFom))
+            );
+        }
     }
 
 

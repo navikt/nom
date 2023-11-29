@@ -55,7 +55,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     public void init() {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
-        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader);
+        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader, unleash);
         ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
             ressursStateRepository,
@@ -68,6 +68,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         // Default mock svar på nomMastered ressurs og Unleash flag
         when(nomMastered.isMastered(any())).thenReturn(false);
         when(unleash.isEnabled(NomMastered.UNLEASH_DO_NOT_UPDATE_MASTERED_RESSURS)).thenReturn(false);
+        when(unleash.isEnabled(OrgenhetService.UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)).thenReturn(true);
 
         settOppStandardEnheter();
     }
