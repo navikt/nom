@@ -282,16 +282,16 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(3)))
             .build();
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
         var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
             navident,
             orgEnhet.id(),
-            LocalDate.now().plusYears(1),
-            Optional.of(LocalDate.now().plusYears(2))
+            LocalDate.now(),
+            Optional.of(LocalDate.now().plusMonths(5))
         );
 
         webTestClient
@@ -427,7 +427,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             navident,
             orgEnhet.id(),
             LocalDate.now().plusMonths(1),
-            Optional.of(LocalDate.now().plusYears(2))
+            Optional.of(LocalDate.now().plusMonths(6))
         );
 
         webTestClient

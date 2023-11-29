@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { DatePicker, Heading, Label, useDatepicker } from "@navikt/ds-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -14,6 +15,7 @@ import {
 import { ApiResponseError } from "~/components/ApiResponseError";
 import { FullWidthDatePickerWrapper } from "~/components/FullWidthDatePickerWrapper";
 import { showToast } from "~/hooks/showToast";
+import { eksternPeriodeValidationSchema } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
 import type {
@@ -34,9 +36,15 @@ export function EditOrgtilknytningForm({
       gyldigFom: orgTilknytning.gyldigFom,
       gyldigTom: orgTilknytning.gyldigTom,
     },
+    // @ts-expect-error -- For some strange reason yupResolver requires defaultValues to be either both string, or both undefined, but not a mix of both, which is our case
+    resolver: yupResolver(eksternPeriodeValidationSchema),
   });
 
-  const { handleSubmit, setValue } = methods;
+  const {
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = methods;
 
   const startDatepicker = useDatepicker({
     onDateChange: (date) =>
@@ -145,6 +153,7 @@ export function EditOrgtilknytningForm({
             <DatePicker {...startDatepicker.datepickerProps}>
               <DatePicker.Input
                 {...startDatepicker.inputProps}
+                error={errors.gyldigFom?.message?.toString()}
                 label="Første arbeidsdag i enheten"
               />
             </DatePicker>
@@ -153,6 +162,7 @@ export function EditOrgtilknytningForm({
             <DatePicker {...sluttDatepicker.datepickerProps}>
               <DatePicker.Input
                 {...sluttDatepicker.inputProps}
+                error={errors.gyldigTom?.message?.toString()}
                 label="Siste arbeidsdag i enheten"
               />
             </DatePicker>

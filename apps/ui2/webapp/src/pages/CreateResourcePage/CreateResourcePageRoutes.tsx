@@ -80,7 +80,7 @@ const commonValidationSchema = yup.object({
     .oneOf(Object.values(Sektor))
     .required("Obligatorisk"),
   orgEnhetId: yup.string().required("Obligatorisk"),
-  startDato: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
   ansettelsesType: yup
     .mixed<AnsettelsesType>()
     .oneOf(Object.values(AnsettelsesType))
@@ -91,7 +91,7 @@ const commonValidationSchema = yup.object({
 // eslint-disable-next-line unicorn/prefer-spread
 const statligValidationSchema = commonValidationSchema.concat(
   yup.object({
-    sluttDato: yup.string().optional(),
+    gyldigTom: yup.string().optional(),
   }),
 );
 
@@ -107,8 +107,8 @@ export function validateCreateRessursSearch(
     visningsetternavn: String(search.visningsetternavn ?? ""),
     sektor: (search.sektor as Sektor) ?? undefined,
     orgEnhetId: String(search.orgEnhetId ?? ""),
-    startDato: String(search.startDato ?? ""),
-    sluttDato: String(search.sluttDato ?? ""),
+    gyldigFom: String(search.gyldigFom ?? ""),
+    gyldigTom: String(search.gyldigTom ?? ""),
     ansettelsesType: (search.ansettelsesType as AnsettelsesType) ?? undefined,
     fysiskBrukerstedNr: String(search.fysiskBrukerstedNr ?? ""),
   };
