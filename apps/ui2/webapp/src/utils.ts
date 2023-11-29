@@ -84,12 +84,12 @@ export function isGyldighetsPeriodeActive(
   gyldigFom: string | undefined,
   gyldigTom: string | undefined,
 ) {
-  const gyldigFomAsDate = endOfDay(
-    gyldigFom ? new Date(gyldigFom) : new Date(minTime),
-  );
-  const gyldigTomAsDate = endOfDay(
-    gyldigTom ? new Date(gyldigTom) : new Date(maxTime),
-  );
+  const gyldigFomAsDate = gyldigFom
+    ? endOfDay(new Date(gyldigFom))
+    : new Date(minTime);
+  const gyldigTomAsDate = gyldigTom
+    ? endOfDay(new Date(gyldigTom))
+    : new Date(maxTime);
 
   const endOfToday = endOfDay(new Date());
 
