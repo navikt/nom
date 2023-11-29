@@ -2,12 +2,12 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.OrgEnhetWithRemedyId;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.RessursWithSektor;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.generated.model.OrgEnhet;
+import no.nav.nom.generated.model.Ressurs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
     void mockNomApiClientDefault() {
         when(nomApiClient.getRessurs(anyString()))
             .thenReturn(
-                Optional.of(new RessursWithSektor("", List.of(Sektor.EKSTERN)))
+                new Ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN)
             );
     }
 
@@ -97,8 +97,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(orgEnhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(orgEnhetId, remedyEnhetId)));
+        when(nomApiClient.getOrgEnhet(orgEnhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
 
         nomIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
 
@@ -172,8 +172,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(newOrgenhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(newOrgenhetId, newRemedyEnhetId)));
+        when(nomApiClient.getOrgEnhet(newOrgenhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(newRemedyEnhetId));
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
@@ -224,8 +224,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(newOrgenhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(newOrgenhetId, initialLatestNomIntegrasjonEntityForNavident.enhetsId)));
+        when(nomApiClient.getOrgEnhet(newOrgenhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(initialLatestNomIntegrasjonEntityForNavident.enhetsId));
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
@@ -253,7 +253,9 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getRessurs(navident)).thenReturn(Optional.of(new RessursWithSektor(navident, List.of(Sektor.NAV_STATLIG))));
+        when(nomApiClient.getRessurs(navident)).thenReturn(
+            new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
+        );
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 

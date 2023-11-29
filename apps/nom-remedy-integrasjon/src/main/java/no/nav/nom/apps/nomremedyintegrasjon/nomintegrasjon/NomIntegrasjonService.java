@@ -142,11 +142,8 @@ public class NomIntegrasjonService {
     }
 
     private boolean isEkstern(String navident) {
-        return nomApiClient.getRessurs(navident)
-            .map(ressurs -> ressurs.sektor().contains(Sektor.EKSTERN))
-            .orElseThrow(() -> new NoSuchElementException(
-                String.format("Could not find ressurs with navident %s in nom", navident)
-            ));
+        return nomApiClient.getRessurs(navident).getSektor()
+            .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
     }
 
     private void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
@@ -161,9 +158,8 @@ public class NomIntegrasjonService {
     }
 
     private String getRemedyEnhetId(String orgEnhetId) {
-        return nomApiClient.getOrgEnhetWithRemedyId(orgEnhetId)
-            .flatMap(orgEnhetWithRemedyId -> Optional.ofNullable(orgEnhetWithRemedyId.remedyEnhetId()))
-            .orElseThrow(() -> new NoSuchElementException(String.format("Could not find remedyEnhetId for orgEnhet with id %s", orgEnhetId)));
+        return Optional.ofNullable(nomApiClient.getOrgEnhet(orgEnhetId).getRemedyEnhetId())
+            .orElseThrow(() -> new NoSuchElementException(String.format("No remedyEnhetId set for orgEnhet with id %s", orgEnhetId)));
     }
 
     // https://nav-it.slack.com/archives/C040RV7KCH5/p1696498426739059

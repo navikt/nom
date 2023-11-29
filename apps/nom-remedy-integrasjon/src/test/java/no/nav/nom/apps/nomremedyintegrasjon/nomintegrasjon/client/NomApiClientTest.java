@@ -1,27 +1,31 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
-import no.nav.nom.contract.nom.Sektor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.util.FileCopyUtils;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,32 +42,21 @@ public class NomApiClientTest extends TestBase {
     );
 
     @BeforeEach
-    void mockOauth(){
+    void mockOauth() {
         when(oAuth2AuthorizedClientManager.authorize(ArgumentMatchers.any())).thenReturn(oAuth2AuthorizedClient);
         when(oAuth2AuthorizedClient.getAccessToken()).thenReturn(accessToken);
     }
 
     @Test
     @DisplayName("getOrgEnhet should perform request as expected")
-    void testGetOrgEnhet(){
+    void testGetOrgEnhet() {
 
         var orgEnhetId = "some-orgenhet";
-        var remedyId = "some-remedy-id";
 
-        String responseBody = String.format("""
-            {
-              "data": {
-                "orgEnhet": {
-                  "id": "%s",
-                  "remedyEnhetId": "%s"
-                }
-              }
-            }
-            """, orgEnhetId, remedyId);
-
+        String responseBody = readResourceFile("nom-api/orgenhet_response.json");
 
         stubFor(
-            post(urlEqualTo("/graphql"))
+            get(anyUrl())
                 .willReturn(
                     aResponse()
                         .withBody(responseBody)
@@ -71,82 +64,65 @@ public class NomApiClientTest extends TestBase {
                 )
         );
 
-        assertThat(nomApiClient.getOrgEnhetWithRemedyId(orgEnhetId))
-            .isEqualTo(Optional.of(new OrgEnhetWithRemedyId(orgEnhetId, remedyId)));
-
-
-        String expectedRequestBody = String.format(
-            """
-            {
-              "query": "query getOrgEnhet($id: String!) {\\n    orgEnhet(where: {id: $id}) {\\n        id\\n        remedyEnhetId\\n    }\\n}",
-              "variables": {
-                "id": "%s"
-              },
-              "operationName": "getOrgEnhet"
-            }
-            """,
-            orgEnhetId
-        );
+        assertThat(nomApiClient.getOrgEnhet(orgEnhetId))
+            .isNotNull();
 
         verify(
-            postRequestedFor(urlEqualTo("/graphql"))
-                .withRequestBody(equalToJson(expectedRequestBody))
-                .withHeader("authorization", matching("Bearer tokenValue"))
+            getRequestedFor(
+                urlEqualTo(
+                    String.format(
+                        "/app/orgenheter/%s",
+                        orgEnhetId
+                    )
+                )
+            ).withHeader("authorization", matching("Bearer tokenValue"))
         );
     }
 
     @Test
     @DisplayName("getRessurs should perform request as expected")
-    void testGetRessurs(){
+    void testGetRessurs() {
 
         var navident = "X123456";
-        var sektor = Sektor.EKSTERN;
 
-        String responseBody = String.format("""
-            {
-              "data": {
-                "ressurs": {
-                  "navident": "%s",
-                  "sektor": [
-                    "%s"
-                  ]
-                }
-              }
-            }
-            """, navident, sektor);
+        stubResponse(
+            readResourceFile("nom-api/ressurs_response.json")
+        );
 
+        assertThat(nomApiClient.getRessurs(navident))
+            .isNotNull();
 
+        verify(
+            getRequestedFor(
+                urlEqualTo(
+                    String.format(
+                        "/app/ressurser/byNavident/%s",
+                        navident
+                    )
+                )
+            ).withHeader("authorization", matching("Bearer tokenValue"))
+        );
+
+    }
+
+    private void stubResponse(String responseBody) {
         stubFor(
-            post(urlEqualTo("/graphql"))
+            get(anyUrl())
                 .willReturn(
                     aResponse()
                         .withBody(responseBody)
                         .withHeader("Content-Type", "application/json")
                 )
         );
+    }
 
-        assertThat(nomApiClient.getRessurs(navident))
-            .isEqualTo(Optional.of(new RessursWithSektor(navident, List.of(sektor))));
-
-
-        String expectedRequestBody = String.format(
-            """
-            {
-              "query" : "query getRessurs($navident: String!){\\n    ressurs(where: {navident: $navident}){\\n        navident\\n        sektor\\n    }\\n}",
-              "variables" : {
-                "navident" : "%s"
-              },
-              "operationName" : "getRessurs"
-            }
-            """,
-            navident
-        );
-
-        verify(
-            postRequestedFor(urlEqualTo("/graphql"))
-                .withRequestBody(equalToJson(expectedRequestBody))
-                .withHeader("authorization", matching("Bearer tokenValue"))
-        );
-
+    private static String readResourceFile(String resourceFilePath) {
+        Resource resource = new ClassPathResource(resourceFilePath);
+        try {
+            Reader reader = new InputStreamReader(resource.getInputStream(), UTF_8);
+            return FileCopyUtils.copyToString(reader);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 }

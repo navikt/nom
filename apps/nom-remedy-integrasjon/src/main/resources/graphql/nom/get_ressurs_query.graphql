@@ -1,6 +1,0 @@
-query getRessurs($navident: String!){
-    ressurs(where: {navident: $navident}){
-        navident
-        sektor
-    }
-}

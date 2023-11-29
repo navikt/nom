@@ -1,4 +1,4 @@
-package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
+package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -1,0 +1,1304 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "description": "REST API for NOM",
+    "title": "NOM API"
+  },
+  "servers": [
+    {
+      "url": "https://nom-api.intern.nav.no",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/app/orgenheter": {
+      "get": {
+        "description": "Henter alle orgenheter",
+        "operationId": "hentOrgEnheter",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgEnhet"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/ledetAv/{navident}": {
+      "get": {
+        "description": "Henter alle orgenheter som er ledet av en gitt leder",
+        "operationId": "hentOrgEnheterByLeder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgEnhet"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/orgEnhetsType": {
+      "post": {
+        "description": "Sett orgEnhetsType for en organisasjonsenhet",
+        "operationId": "setOrgEnhetsType",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetOrgEnhetsTypeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/read-topic": {
+      "get": {
+        "description": "Henter records fra ressurs event-source",
+        "operationId": "readRessursTopic_1",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ReadTopicRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JsonNode"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/underLiggende/{parentId}": {
+      "get": {
+        "description": "Henter ut id for alle underliggende organisasjonsenheter",
+        "operationId": "getUnderliggendeOrgEnheter",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "parentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgenheter/{orgenhetId}": {
+      "get": {
+        "description": "Henter orgenhet med gitt id",
+        "operationId": "hentOrgenhet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orgenhetId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgEnhet"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "OrgEnheter"
+        ]
+      }
+    },
+    "/app/orgtilknytninger": {
+      "get": {
+        "description": "Henter orgtilknytninger",
+        "operationId": "getOrgtilknytninger",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "navident",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrgtilknytningState"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      },
+      "post": {
+        "description": "Oppretter orgtilknytning",
+        "operationId": "addOrgtilknytning",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeggTilOrgtilknytningRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
+    "/app/orgtilknytninger/{fid}": {
+      "get": {
+        "description": "Direkte oppslag på orgtilknytning med fid",
+        "operationId": "getOrgtilknytning",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgtilknytningState"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
+    "/app/orgtilknytninger/{fid}/dato": {
+      "post": {
+        "description": "Endrer dato for en orgtilknytning",
+        "operationId": "updateDato",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndreOrgtilknytningDatoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Orgtilknytning"
+        ]
+      }
+    },
+    "/app/person": {
+      "post": {
+        "description": "Henter person med gitt personident",
+        "operationId": "findPerson",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPersonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            },
+            "description": "Returnerer en instanse av Person"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Person"
+        ]
+      }
+    },
+    "/app/ressurser": {
+      "post": {
+        "description": "Oppretter ressurs eller returnerer det som allerede eksisterer",
+        "operationId": "opprettRessurs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpprettRessursRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpprettRessursResponse"
+                }
+              }
+            },
+            "description": "Returns existing"
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpprettRessursResponse"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/byFid/{fid}": {
+      "get": {
+        "description": "Henter ressurs med fid",
+        "operationId": "getRessursByFid",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ressurs"
+                }
+              }
+            },
+            "description": "Ressurs"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/byNavident/{navident}": {
+      "get": {
+        "description": "Henter ressurs med navident",
+        "operationId": "getRessursByNavident",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ressurs"
+                }
+              }
+            },
+            "description": "Ressurs"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/lederFor/{navident}": {
+      "get": {
+        "description": "Henter ledere for en ressurs med navident",
+        "operationId": "getRessursLedere",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RessursLeder"
+                  }
+                }
+              }
+            },
+            "description": "List of Ressurs if found or empty list"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/read-topic": {
+      "get": {
+        "description": "Henter records fra ressurs event-source",
+        "operationId": "readRessursTopic",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "request",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ReadTopicRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JsonNode"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/{fid}/avvikle": {
+      "post": {
+        "description": "Avvikler en ressurs ved å sette sluttdato",
+        "operationId": "avvikleRessurs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvvikleRessursRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/ressurser/{navident}/navn": {
+      "post": {
+        "description": "Endrer navn for en ressurs",
+        "operationId": "updateVisningsnavn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "navident",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVisningsnavnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
+    "/app/sessioninfo": {
+      "get": {
+        "operationId": "sessioninfo",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfoResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "sessioninfo-controller"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnsettelsesType": {
+        "type": "string",
+        "enum": [
+          "FAST",
+          "MIDLERTIDIG"
+        ]
+      },
+      "AvvikleRessursRequest": {
+        "required": [
+          "sluttDato"
+        ],
+        "type": "object",
+        "properties": {
+          "sluttDato": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "EndreOrgtilknytningDatoRequest": {
+        "type": "object",
+        "properties": {
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "FolkeregisterPerson": {
+        "required": [
+          "navn"
+        ],
+        "type": "object",
+        "properties": {
+          "navn": {
+            "$ref": "#/components/schemas/RessursNavn"
+          }
+        }
+      },
+      "GetPersonRequest": {
+        "required": [
+          "personident"
+        ],
+        "type": "object",
+        "properties": {
+          "personident": {
+            "type": "string"
+          }
+        }
+      },
+      "JsonNode": {
+        "type": "object"
+      },
+      "LeggTilOrgtilknytningRequest": {
+        "required": [
+          "gyldigFom",
+          "navident",
+          "orgEnhetId"
+        ],
+        "type": "object",
+        "properties": {
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "orgEnhetId": {
+            "type": "string"
+          }
+        }
+      },
+      "NomNivaa": {
+        "type": "string",
+        "enum": [
+          "LINJEENHET",
+          "DRIFTSENHET",
+          "ARBEIDSOMRAADE"
+        ]
+      },
+      "OpprettRessursRequest": {
+        "required": [
+          "ansettelsesType",
+          "fysiskBrukerstedNr",
+          "personident",
+          "sektor",
+          "startDato",
+          "visningsetternavn",
+          "visningsfornavn"
+        ],
+        "type": "object",
+        "properties": {
+          "ansettelsesType": {
+            "$ref": "#/components/schemas/AnsettelsesType"
+          },
+          "fysiskBrukerstedNr": {
+            "type": "string"
+          },
+          "orgEnhetId": {
+            "type": "string"
+          },
+          "personident": {
+            "type": "string"
+          },
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
+          "sluttDato": {
+            "type": "string",
+            "format": "date"
+          },
+          "startDato": {
+            "type": "string",
+            "format": "date"
+          },
+          "visningsetternavn": {
+            "type": "string"
+          },
+          "visningsfornavn": {
+            "type": "string"
+          },
+          "visningsmellomnavn": {
+            "type": "string"
+          }
+        }
+      },
+      "OpprettRessursResponse": {
+        "required": [
+          "navident",
+          "personident",
+          "sektor",
+          "visningsetternavn",
+          "visningsfornavn"
+        ],
+        "type": "object",
+        "properties": {
+          "navident": {
+            "type": "string"
+          },
+          "personident": {
+            "type": "string"
+          },
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
+          "visningsetternavn": {
+            "type": "string"
+          },
+          "visningsfornavn": {
+            "type": "string"
+          }
+        }
+      },
+      "OrgEnhet": {
+        "required": [
+          "agressoId",
+          "agressoOrgenhetType",
+          "gyldigFom",
+          "id",
+          "ledere",
+          "navn",
+          "orgNiv",
+          "ressursKoblinger",
+          "underordnedeOrgEnhetId"
+        ],
+        "type": "object",
+        "properties": {
+          "agressoId": {
+            "type": "string"
+          },
+          "agressoOrgenhetType": {
+            "type": "string"
+          },
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ledere": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RessursState"
+            }
+          },
+          "navn": {
+            "type": "string"
+          },
+          "nomNivaa": {
+            "$ref": "#/components/schemas/NomNivaa"
+          },
+          "orgEnhetsType": {
+            "$ref": "#/components/schemas/OrgEnhetsType"
+          },
+          "orgNiv": {
+            "type": "string"
+          },
+          "overordnetEnhetId": {
+            "type": "string"
+          },
+          "remedyEnhetId": {
+            "type": "string"
+          },
+          "ressursKoblinger": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgtilknytningState"
+            }
+          },
+          "underordnedeOrgEnhetId": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrgEnhetsType": {
+        "type": "string",
+        "enum": [
+          "ARBEIDSLIVSSENTER",
+          "NAV_ARBEID_OG_YTELSER",
+          "ARBEIDSRAADGIVNING",
+          "DIREKTORAT",
+          "DIR",
+          "FYLKE",
+          "NAV_FAMILIE_OG_PENSJONSYTELSER",
+          "HJELPEMIDLER_OG_TILRETTELEGGING",
+          "KLAGEINSTANS",
+          "NAV_KONTAKTSENTER",
+          "KONTROLL_KONTROLLENHET",
+          "NAV_KONTOR",
+          "TILTAK",
+          "NAV_OKONOMITJENESTE"
+        ]
+      },
+      "OrgtilknytningState": {
+        "required": [
+          "erDagligOppfolging",
+          "fid",
+          "gyldigFom",
+          "navident",
+          "orgEnhetId"
+        ],
+        "type": "object",
+        "properties": {
+          "erDagligOppfolging": {
+            "type": "boolean"
+          },
+          "fid": {
+            "type": "string"
+          },
+          "gyldigFom": {
+            "type": "string",
+            "format": "date"
+          },
+          "gyldigTom": {
+            "type": "string",
+            "format": "date"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "orgEnhetId": {
+            "type": "string"
+          }
+        }
+      },
+      "Person": {
+        "required": [
+          "folkeregisterPerson",
+          "personident"
+        ],
+        "type": "object",
+        "properties": {
+          "folkeregisterPerson": {
+            "$ref": "#/components/schemas/FolkeregisterPerson"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "personident": {
+            "type": "string"
+          }
+        }
+      },
+      "ReadTopicRequest": {
+        "required": [
+          "fromOffset",
+          "maxRecords"
+        ],
+        "type": "object",
+        "properties": {
+          "fromOffset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "partition": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Ressurs": {
+        "required": [
+          "fid",
+          "navident",
+          "personident",
+          "sektor",
+          "telefoner",
+          "visningsnavn"
+        ],
+        "type": "object",
+        "properties": {
+          "epost": {
+            "type": "string"
+          },
+          "fid": {
+            "type": "string"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "personident": {
+            "type": "string"
+          },
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
+          "sluttdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "startdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "telefoner": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Telefon"
+            }
+          },
+          "visningsnavn": {
+            "$ref": "#/components/schemas/Visningsnavn"
+          }
+        }
+      },
+      "RessursLeder": {
+        "required": [
+          "erDagligOppfolging",
+          "leder",
+          "lederForNavident"
+        ],
+        "type": "object",
+        "properties": {
+          "erDagligOppfolging": {
+            "type": "boolean"
+          },
+          "leder": {
+            "$ref": "#/components/schemas/RessursState"
+          },
+          "lederForNavident": {
+            "type": "string"
+          }
+        }
+      },
+      "RessursNavn": {
+        "required": [
+          "etternavn",
+          "fornavn"
+        ],
+        "type": "object",
+        "properties": {
+          "etternavn": {
+            "type": "string"
+          },
+          "fornavn": {
+            "type": "string"
+          },
+          "mellomnavn": {
+            "type": "string"
+          }
+        }
+      },
+      "RessursState": {
+        "required": [
+          "fid",
+          "navident",
+          "personident",
+          "sektor",
+          "visningsnavn"
+        ],
+        "type": "object",
+        "properties": {
+          "fid": {
+            "type": "string"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "personident": {
+            "type": "string"
+          },
+          "sektor": {
+            "$ref": "#/components/schemas/Sektor"
+          },
+          "sluttdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "startdato": {
+            "type": "string",
+            "format": "date"
+          },
+          "visningsnavn": {
+            "$ref": "#/components/schemas/Visningsnavn"
+          }
+        }
+      },
+      "Sektor": {
+        "type": "string",
+        "enum": [
+          "NAV_STATLIG",
+          "NAV_KOMMUNAL",
+          "EKSTERN"
+        ]
+      },
+      "SessionInfoResponse": {
+        "required": [
+          "name",
+          "navident",
+          "roles"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "navident": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRoles"
+            }
+          }
+        }
+      },
+      "SetOrgEnhetsTypeRequest": {
+        "required": [
+          "nomId"
+        ],
+        "type": "object",
+        "properties": {
+          "nomId": {
+            "type": "string"
+          },
+          "orgEnhetsType": {
+            "$ref": "#/components/schemas/OrgEnhetsType"
+          }
+        }
+      },
+      "StandardResponse": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Telefon": {
+        "required": [
+          "nummer",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "nummer": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TelefonType"
+          }
+        }
+      },
+      "TelefonType": {
+        "type": "string",
+        "enum": [
+          "NAV_TJENESTE_TELEFON",
+          "NAV_KONTOR_TELEFON",
+          "PRIVAT_TELEFON"
+        ]
+      },
+      "UpdateVisningsnavnRequest": {
+        "type": "object",
+        "properties": {
+          "etternavn": {
+            "type": "string"
+          },
+          "fornavn": {
+            "type": "string"
+          },
+          "mellomnavn": {
+            "type": "string"
+          }
+        }
+      },
+      "UserRoles": {
+        "type": "string",
+        "enum": [
+          "ROLE_WRITE",
+          "ROLE_ADMIN"
+        ]
+      },
+      "Visningsnavn": {
+        "required": [
+          "etternavn",
+          "fornavn"
+        ],
+        "type": "object",
+        "properties": {
+          "etternavn": {
+            "type": "string"
+          },
+          "fornavn": {
+            "type": "string"
+          },
+          "mellomnavn": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Bearer token",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  }
+}
