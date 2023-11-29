@@ -11,7 +11,6 @@ public record TeamcatRessursDTO(
     String navident,
     ResourceType ressurstype,
     String visningsnavn,
-    String avdelingnavn,
     String enhetId,
     String lederNavident
 ) {

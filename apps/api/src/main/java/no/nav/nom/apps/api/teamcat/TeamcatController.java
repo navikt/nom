@@ -9,6 +9,7 @@ import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
@@ -47,6 +48,7 @@ public class TeamcatController {
     private final OrgEnhetOverordnetResolver overordnetResolver;
     private final RessursLedereResolver ressursLedereResolver;
     private final String IT_AVDELING_ID;
+    private final OrgEnhetMapper orgEnhetMapper;
 
     public TeamcatController(
         RessursStateRepository ressursStateRepository,
@@ -56,7 +58,8 @@ public class TeamcatController {
         OrgenhetService orgenhetService,
         Environment env,
         OrgEnhetOverordnetResolver overordnetResolver,
-        RessursLedereResolver ressursLedereResolver
+        RessursLedereResolver ressursLedereResolver,
+        OrgEnhetMapper orgEnhetMapper
     ) {
         this.adclient = adclient;
         this.dvhRepository = dvhRepository;
@@ -65,6 +68,7 @@ public class TeamcatController {
         this.ressursStateRepository = ressursStateRepository;
         this.overordnetResolver = overordnetResolver;
         this.ressursLedereResolver = ressursLedereResolver;
+        this.orgEnhetMapper = orgEnhetMapper;
         var isDev = "dev-gcp".equals(env.getProperty("NAIS_CLUSTER_NAME"));
         this.IT_AVDELING_ID = isDev ? "hu357k" : "ve673e";
     }
@@ -182,7 +186,6 @@ public class TeamcatController {
             navident,
             TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),
             ressurs.visningsnavn().getFormattedVisningsnavn(),
-            determineAvdelingNavn(navident, perRequestCache),
             oeId,
             lederNavident
         );
@@ -229,7 +232,6 @@ public class TeamcatController {
     )
     @GetMapping("/alleRessurser")
     public ResponseEntity<Map<String, TeamcatRessursDTO>> alleRessurser() {
-        System.out.println("Timing - Start: " + 0);
         var alleressurser = ressursStateRepository.getAll();
         var adResources = adclient.fetchInAdRessursInBatches(alleressurser.stream()
             // only active resources are available in ad
@@ -243,6 +245,49 @@ public class TeamcatController {
             out.put(r.navident(), tmp);
         }
         return ResponseEntity.ok(out);
+    }
+
+    @Operation(
+        description = "Hent alle teamkatalog enheter",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("/alleEnheter")
+    public ResponseEntity<Map<String, TeamcatOrgenhetDTO>> alleEnheter() {
+        var alleEnheter = this.orgenhetService.getAllEnheter();
+
+        var perRequestCache = new PerRequestCache();
+        var out = new HashMap<String, TeamcatOrgenhetDTO>(alleEnheter.size());
+        for (var r : alleEnheter) {
+            var mapped = orgEnhetMapper.mapFrom(r);
+            var lederNavident = mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null);
+            var enhetOverId = mapped.overordnetEnhetId();
+            var tmp = new TeamcatOrgenhetDTO(r.getId(), r.getNavn(), enhetOverId, determineAvdelingNavnByEnhet(r, perRequestCache), lederNavident);
+            out.put(r.getId(), tmp);
+        }
+        return ResponseEntity.ok(out);
+    }
+
+    @Operation(
+        description = "Hent teamkatalog enhet",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping("enhet/{id}")
+    public ResponseEntity<TeamcatOrgenhetDTO> enhet(@PathVariable("id") String id) {
+        var enhetMaybe = this.orgenhetService.getById(id);
+
+        if(enhetMaybe.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        var enhet = enhetMaybe.get();
+        var mapped = orgEnhetMapper.mapFrom(enhet);
+        return ResponseEntity.ok(new TeamcatOrgenhetDTO(
+            enhet.getId(),
+            enhet.getNavn(),
+            enhet.getOverordnetOrgEnhetFid().orElse(null),
+            determineAvdelingNavnByEnhet(enhet, new PerRequestCache()),
+            mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null)
+        ));
+
     }
 
     private static class PerRequestCache{
