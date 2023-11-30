@@ -14,6 +14,7 @@ import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEn
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -60,45 +61,68 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
         ObjectMapper mapper = new ObjectMapper();
         StringBuffer str = new StringBuffer();
         aktiveTilknytningerUtoverEnhetPeriode.forEach( ot -> {
-            var orgenhet = orgenhetService.getById(ot.orgEnhetId()).get();
-            String otDescription =  "Orgtilknytning %s for %s/%s med periode %s - %s".formatted(
-                ot.fid(),
-                ot.navident(),
-                ot.orgEnhetId(),
-                ot.gyldigFom(),
-                ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : " "
-            );
-            String orgenhetDescription = "Orgenhet %s %s med periode %s - %s".formatted(
-                orgenhet.getId(),
-                orgenhet.getNavn(),
-                orgenhet.getGyldigFom(),
-                orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom().get() : " "
-            );
-
-            ObjectNode node = mapper.createObjectNode();
-            node.put("Orgiltknytning", otDescription);
-            node.put("Orgenhet", orgenhetDescription);
-
-            AvvikleOrgtilknytning avvikleOrgtilknytning =
-                new AvvikleOrgtilknytning(
+                var orgenhet = orgenhetService.getById(ot.orgEnhetId()).get();
+                String otDescription = "Orgtilknytning %s for %s/%s med periode %s - %s".formatted(
+                    ot.fid(),
                     ot.navident(),
                     ot.orgEnhetId(),
-                    orgenhet.getGyldigTom().get(),
-                    new InputMetadata(
-                        "Swagger",
-                        "Korriger orgtilknytinger som går utover orgenhetens periode",
-                        node,
-                        new Origination("nom-api", "nom-api")
-                    ),
-                    null
+                    ot.gyldigFom(),
+                    ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : " "
+                );
+                String orgenhetDescription = "Orgenhet %s %s med periode %s - %s".formatted(
+                    orgenhet.getId(),
+                    orgenhet.getNavn(),
+                    orgenhet.getGyldigFom(),
+                    orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom().get() : " "
                 );
 
-            str.append("Avvikler orgtilknytning på dato %s".formatted(avvikleOrgtilknytning.gyldigTom())).append("\n");
-            str.append("\t").append(String.join(" og ", otDescription, orgenhetDescription)).append("\n");
+                ObjectNode node = mapper.createObjectNode();
+                node.put("Orgiltknytning", otDescription);
+                node.put("Orgenhet", orgenhetDescription);
 
-            log.info("Avvikler orgtilknytning på dato {} for\n\t{} og {}", avvikleOrgtilknytning.gyldigTom(), otDescription, orgenhetDescription);
+                if (ot.gyldigFom().isAfter(orgenhet.getGyldigTom().get())) {
+                    // Vi må fjerne orgtilknytningen, dne starteretter orgenheten slutter
+                    FjernOrgtilknytning fjernOrgtilknytning =
+                        new FjernOrgtilknytning(
+                            ot.navident(),
+                            ot.orgEnhetId(),
+                            ot.gyldigFom(),
+                            ot.gyldigTom(),
+                            new InputMetadata(
+                                "Swagger",
+                                "Fjerner orgtilknytinger som går utover orgenhetens periode",
+                                node,
+                                new Origination("nom-api", "nom-api")
+                            ),
+                            null
+                        );
+                    str.append("Fjerner orgtilknytning %s".formatted(ot.fid())).append("\n");
+                    str.append("\t").append(String.join(" og ", otDescription, orgenhetDescription)).append("\n");
 
-            if (performUpdate) orgtilknytningCommandService.avvikleOrgtilknytning(ot.fid(), avvikleOrgtilknytning);
+                    log.info("Fjerner orgtilknytning for\n\t{} og {}", otDescription, orgenhetDescription);
+
+                    if (performUpdate) orgtilknytningCommandService.fjernOrgtilknytning(ot.fid(), fjernOrgtilknytning);
+                } else {
+                    AvvikleOrgtilknytning avvikleOrgtilknytning =
+                        new AvvikleOrgtilknytning(
+                            ot.navident(),
+                            ot.orgEnhetId(),
+                            orgenhet.getGyldigTom().get(),
+                            new InputMetadata(
+                                "Swagger",
+                                "Korriger orgtilknytinger som går utover orgenhetens periode",
+                                node,
+                                new Origination("nom-api", "nom-api")
+                            ),
+                            null
+                        );
+                    str.append("Avvikler orgtilknytning på dato %s".formatted(avvikleOrgtilknytning.gyldigTom())).append("\n");
+                    str.append("\t").append(String.join(" og ", otDescription, orgenhetDescription)).append("\n");
+
+                    log.info("Avvikler orgtilknytning på dato {} for\n\t{} og {}", avvikleOrgtilknytning.gyldigTom(), otDescription, orgenhetDescription);
+
+                    if (performUpdate) orgtilknytningCommandService.avvikleOrgtilknytning(ot.fid(), avvikleOrgtilknytning);
+                }
         });
         return str.toString();
     }
