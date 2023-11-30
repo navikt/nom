@@ -1,6 +1,7 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client;
 
 import no.nav.nom.generated.model.OrgEnhet;
+import no.nav.nom.generated.model.OrgtilknytningState;
 import no.nav.nom.generated.model.Ressurs;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,6 +37,18 @@ public class NomApiClient {
             )
             .retrieve()
             .bodyToMono(OrgEnhet.class)
+            .retryWhen(defaultRetry)
+            .block();
+    }
+
+    public OrgtilknytningState getOrgtilknytning(String fid) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}")
+                .build(fid)
+            )
+            .retrieve()
+            .bodyToMono(OrgtilknytningState.class)
             .retryWhen(defaultRetry)
             .block();
     }

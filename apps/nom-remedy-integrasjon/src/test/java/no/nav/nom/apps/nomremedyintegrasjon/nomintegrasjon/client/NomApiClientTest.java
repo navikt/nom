@@ -102,7 +102,31 @@ public class NomApiClientTest extends TestBase {
                 )
             ).withHeader("authorization", matching("Bearer tokenValue"))
         );
+    }
 
+    @Test
+    @DisplayName("getOrgtilknytning should perform request as expected")
+    void testGetOrgtilknytning() {
+
+        var fid = "fid-uuid";
+
+        stubResponse(
+            readResourceFile("nom-api/orgtilknytning_response.json")
+        );
+
+        assertThat(nomApiClient.getOrgtilknytning(fid))
+            .isNotNull();
+
+        verify(
+            getRequestedFor(
+                urlEqualTo(
+                    String.format(
+                        "/app/orgtilknytninger/%s",
+                        fid
+                    )
+                )
+            ).withHeader("authorization", matching("Bearer tokenValue"))
+        );
     }
 
     private void stubResponse(String responseBody) {

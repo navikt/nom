@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -54,19 +55,58 @@ public class NomIntegrasjonService {
 
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
         }
+
+        else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
+            && isOrgtilknytningEksternAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
+
+            updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
+        }
     }
 
-    public void updateOrgtilknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
+    private void updateOrgtilknytning(OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2) {
+        logger.info("Updating remedy data for OrgtilknytningDatoEndretEventV2 with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+
+        var orgtilknytningDatoEndretEventData = orgtilknytningDatoEndretEventV2.getOrgtilknytningDatoEndretEventData();
+        var coherentOrgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid());
+
+        nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(coherentOrgtilknytning.getNavident())
+            .ifPresentOrElse(
+                latestNomIntegrasjonEntityForNavident -> {
+                    var gyldigTom = orgtilknytningDatoEndretEventData.gyldigTom()
+                        .orElseThrow(() -> new NoSuchElementException("Missing value for 'sluttDato'"));
+
+                    var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
+                        .tiltredelsesdato(epochSeconds(orgtilknytningDatoEndretEventData.gyldigFom()))
+                        .utlopsdato(epochSeconds(gyldigTom))
+                        .build();
+
+                    if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
+                        saveNewNomIntegrasjonEntity(
+                            newNomIntegrasjonEntity,
+                            orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy()
+                        );
+                        logger.info("Finished updating remedy data for event with fid {}", orgtilknytningDatoEndretEventV2.getFid());
+                    }
+                    else {
+                        logger.info("No new data in event with fid {}. Skipping update", orgtilknytningDatoEndretEventV2.getFid());
+                    }
+
+                },
+                () -> logger.info(
+                    "No existing entry found for navident associated with event with fid {}. No data written to remedy",
+                    orgtilknytningDatoEndretEventV2.getFid()
+                )
+            );
+    }
+
+    private void updateOrgtilknytning(OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1) {
         logger.info("Updating remedy data for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
 
         var orgtilknytningDagligOppfolgingEndretEventData = orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData();
 
         var newRemedyEnhetId = getRemedyEnhetId(orgtilknytningDagligOppfolgingEndretEventData.orgEnhetId());
 
-        var maybeLatestNomRemedyIntegrationEntryForNavident = nomIntegrasjonRepository
-            .findTopByNavIdEqualsOrderByEntryIdDesc(orgtilknytningDagligOppfolgingEndretEventData.navident());
-
-        maybeLatestNomRemedyIntegrationEntryForNavident
+        nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(orgtilknytningDagligOppfolgingEndretEventData.navident())
             .ifPresentOrElse(
                 latestNomIntegrasjonEntityForNavident -> {
                     var gyldigTom = orgtilknytningDagligOppfolgingEndretEventData.gyldigTom()
@@ -144,6 +184,12 @@ public class NomIntegrasjonService {
     private boolean isEkstern(String navident) {
         return nomApiClient.getRessurs(navident).getSektor()
             .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
+    }
+
+    private boolean isOrgtilknytningEksternAndDagligOppfolgning(String orgtilknytningFid) {
+        var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningFid);
+
+        return orgtilknytning.getErDagligOppfolging() && isEkstern(orgtilknytning.getNavident());
     }
 
     private void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
