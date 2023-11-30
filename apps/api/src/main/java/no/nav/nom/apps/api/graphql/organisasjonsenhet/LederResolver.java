@@ -27,7 +27,7 @@ public class LederResolver {
     }
 
     public List<OrgEnhetsLeder> leder(OrgEnhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
                 .stream()
                 .map(leder -> tilOrgEnhetsLeder(ressursStateRepository.findByNavident(leder.getNavIdent(), MappingUtils::toRessurs)
                                                         .orElseThrow(LederNotFoundException::new)))

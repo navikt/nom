@@ -35,8 +35,8 @@ public class DvhRepository {
         return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
     }
 
-    public List<DvhLeder> getLederByAgressoIdAndNiv(String agressoId, String orgNiv) {
-        return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv)).toList();
+    public List<DvhLeder> getLederByAgressoIdAndNivAndNavn(String agressoId, String orgNiv, String navn) {
+        return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv) && l.getOrgenhetNavn().equals(navn)).toList();
     }
 
     public void saveLedere(List<DvhLeder> ledere) {
