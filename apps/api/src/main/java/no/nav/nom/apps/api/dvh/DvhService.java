@@ -37,7 +37,7 @@ public class DvhService {
                 orgenhetService.getAllEnheter().stream()
                         .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
                         .map(orgenheter -> orgenheter.stream()
-                                .filter(o -> o.getGyldigTom().isEmpty() || !o.getGyldigFom().isEqual(o.getGyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                                .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
                                 .max(Comparator.comparing(IOrgenhet::getGyldigFom))
                             )
                         .filter(Optional::isPresent)
@@ -86,7 +86,7 @@ public class DvhService {
                     .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
                     .values().stream()
                     .map(orgenheter -> orgenheter.stream()
-                            .filter(o -> o.getGyldigTom().isEmpty() || !o.getGyldigFom().isEqual(o.getGyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
                             .max(Comparator.comparing(IOrgenhet::getGyldigFom))
                         )
                     .filter(Optional::isPresent)
@@ -124,11 +124,6 @@ public class DvhService {
                 return false;
             })
             .toList();
-
-        if (unleash.isEnabled(OrgenhetService.UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
-            log.info("saveOrganisering m/UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID");
-            log.info("Found 1246001-Øygarden Ungdom-ORGENHET?: {}", cachedEnheter.containsKey("1246001-Øygarden Ungdom-ORGENHET") ? cachedEnheter.get("1246001-Øygarden Ungdom-ORGENHET").getId() : "Nope");
-        }
 
         dvhRepository.saveOrganiseringer(organiseringerToSave);
 
