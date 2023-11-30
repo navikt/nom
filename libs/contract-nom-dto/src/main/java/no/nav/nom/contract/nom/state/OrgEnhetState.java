@@ -22,4 +22,11 @@ public record OrgEnhetState (
     Optional<String> agressoId,
     Optional<String> agressoOrgNivaa,
     Optional<String> agressoOrgenhetType
-) {}
+
+
+) {
+    // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
+    public boolean endedOnStartDate() {
+        return gyldigTom().isPresent() && gyldigFom().isEqual(gyldigTom().get());
+    }
+}

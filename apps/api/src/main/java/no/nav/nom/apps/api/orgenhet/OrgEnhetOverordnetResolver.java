@@ -21,6 +21,9 @@ public class OrgEnhetOverordnetResolver {
     }
 
     public Optional<OrgEnhetState> findOverordnetOrgEnhet(OrgEnhetState orgEnhetState) {
+        // Ikke returner overordnet/organisering for enheter som er opprettet og avsluttet samme dag
+        if (orgEnhetState.endedOnStartDate()) { return Optional.empty(); }
+
         final var agressoId = orgEnhetState.agressoId();
         final var orgNiv = orgEnhetState.agressoOrgNivaa();
         final var navn = orgEnhetState.navn();

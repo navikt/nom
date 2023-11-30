@@ -65,16 +65,10 @@ public class OrgEnhetStateRepository {
         return orgEnheter;
     }
 
-/*    public List<OrgEnhetState> findByAgressoIdAndNivIn(Set<String> agressoIsAndNivs) {
-        return orgEnheterByAgressoIdAndNiv.entrySet().stream()
-            .filter( e -> agressoIsAndNivs.contains(e.getKey()))
-            .map(Map.Entry::getValue)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-    }*/
-
     public Optional<OrgEnhetState> findNewestUniqueAgressoId(String id) {
-        return findAllByUniqueAgressoId(id).stream().max(comparing(OrgEnhetState::gyldigFom));
+        return findAllByUniqueAgressoId(id).stream()
+            .filter( orgEnhetState -> !orgEnhetState.endedOnStartDate())
+            .max(comparing(OrgEnhetState::gyldigFom));
     }
 
     public Collection<OrgEnhetState> getAll() {
