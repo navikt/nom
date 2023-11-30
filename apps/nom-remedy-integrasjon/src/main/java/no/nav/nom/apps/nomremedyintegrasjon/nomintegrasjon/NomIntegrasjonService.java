@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,10 @@ public class NomIntegrasjonService {
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
             && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN)) {
             createRessurs(ressursOpprettetEventV1);
+        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
+            && isFidEksternRessurs(ressursEvent.getFid())
+        ) {
+            avsluttRessurs(ressursSluttetEventV1);
         }
     }
 
@@ -51,12 +56,10 @@ public class NomIntegrasjonService {
 
         if (orgtilknytningEvent instanceof OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1
             && orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().dagligOppfolging()
-            && isEkstern(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
+            && isNavidentEksternRessurs(orgtilknytningDagligOppfolgingEndretEventV1.getOrgtilknytningDagligOppfolgingEndretEventData().navident())) {
 
             updateOrgtilknytning(orgtilknytningDagligOppfolgingEndretEventV1);
-        }
-
-        else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
+        } else if (orgtilknytningEvent instanceof OrgtilknytningDatoEndretEventV2 orgtilknytningDatoEndretEventV2
             && isOrgtilknytningEksternAndDagligOppfolgning(orgtilknytningDatoEndretEventV2.getFid())) {
 
             updateOrgtilknytning(orgtilknytningDatoEndretEventV2);
@@ -86,8 +89,7 @@ public class NomIntegrasjonService {
                             orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy()
                         );
                         logger.info("Finished updating remedy data for event with fid {}", orgtilknytningDatoEndretEventV2.getFid());
-                    }
-                    else {
+                    } else {
                         logger.info("No new data in event with fid {}. Skipping update", orgtilknytningDatoEndretEventV2.getFid());
                     }
 
@@ -124,9 +126,7 @@ public class NomIntegrasjonService {
                             orgtilknytningDagligOppfolgingEndretEventV1.getMetadata().inputMetadata().origination().initiatedBy()
                         );
                         logger.info("Finished updating remedy data for event with fid {}", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
-                    }
-
-                    else {
+                    } else {
                         logger.info("No new data in event with fid {}. Skipping update", orgtilknytningDagligOppfolgingEndretEventV1.getFid());
                     }
                 },
@@ -135,6 +135,34 @@ public class NomIntegrasjonService {
                     orgtilknytningDagligOppfolgingEndretEventV1.getFid()
                 )
             );
+    }
+
+    private void avsluttRessurs(RessursSluttetEventV1 ressursSluttetEventV1) {
+        logger.info("Updating remedy data for RessursSluttetEventV1 with fid {}", ressursSluttetEventV1.getFid());
+
+        var coherentRessurs = nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid());
+
+        nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(coherentRessurs.getNavident()).ifPresentOrElse(
+            latestNomIntegrasjonEntityForNavident -> {
+
+                if (!latestNomIntegrasjonEntityForNavident.getEntryStatus().equals("Slette")) {
+                    saveNomIntegrasjonEntityForDeletion(
+                        latestNomIntegrasjonEntityForNavident.toBuilder()
+                            .utlopsdato(epochSeconds(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                            .build(),
+                        ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
+                    );
+                }
+                else {
+                    logger.info("Resource associated with event with fid {} is already tagged for deletion. Skipping update", ressursSluttetEventV1.getFid());
+                }
+            },
+            () -> logger.info(
+                "No existing entry found for navident associated with event with fid {}. No data written to remedy",
+                ressursSluttetEventV1.getFid()
+            )
+        );
+
     }
 
     private void createRessurs(RessursOpprettetEventV1 ressursOpprettetEventV1) {
@@ -181,15 +209,20 @@ public class NomIntegrasjonService {
         logger.info("Created ressurs for fid: " + ressursOpprettetEventV1.getFid());
     }
 
-    private boolean isEkstern(String navident) {
-        return nomApiClient.getRessurs(navident).getSektor()
+    private boolean isNavidentEksternRessurs(String navident) {
+        return nomApiClient.getRessursByNavident(navident).getSektor()
+            .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
+    }
+
+    private boolean isFidEksternRessurs(String fid) {
+        return nomApiClient.getRessursByFid(fid).getSektor()
             .equals(no.nav.nom.generated.model.Sektor.EKSTERN);
     }
 
     private boolean isOrgtilknytningEksternAndDagligOppfolgning(String orgtilknytningFid) {
         var orgtilknytning = nomApiClient.getOrgtilknytning(orgtilknytningFid);
 
-        return orgtilknytning.getErDagligOppfolging() && isEkstern(orgtilknytning.getNavident());
+        return orgtilknytning.getErDagligOppfolging() && isNavidentEksternRessurs(orgtilknytning.getNavident());
     }
 
     private void saveNewNomIntegrasjonEntity(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
@@ -197,6 +230,17 @@ public class NomIntegrasjonService {
             newNomIntegrasjonEntity.toBuilder()
                 .entryId(nextId())
                 .entryOperasjon("Ny")
+                .entryStatus("Ubehandlet")
+                .entryBestiller(initiatedByNavident)
+                .build()
+        );
+    }
+
+    private void saveNomIntegrasjonEntityForDeletion(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
+        nomIntegrasjonRepository.save(
+            newNomIntegrasjonEntity.toBuilder()
+                .entryId(nextId())
+                .entryOperasjon("Slette")
                 .entryStatus("Ubehandlet")
                 .entryBestiller(initiatedByNavident)
                 .build()
@@ -211,7 +255,7 @@ public class NomIntegrasjonService {
     // https://nav-it.slack.com/archives/C040RV7KCH5/p1696498426739059
     protected String nextId() {
         return nomIntegrasjonRepository.findTopByOrderByEntryIdDesc()
-            .map(latestEntry -> Long.parseLong(latestEntry.entryId))
+            .map(latestEntry -> Long.parseLong(latestEntry.getEntryId()))
             .map(latestId -> fifteenCharLengthZeroPaddedNumber(latestId + 1))
             .orElse(fifteenCharLengthZeroPaddedNumber(0L));
     }

@@ -17,11 +17,23 @@ public class NomApiClient {
         this.nomApiAuthorizedWebClient = nomApiAuthorizedWebClient;
     }
 
-    public Ressurs getRessurs(String navident) {
+    public Ressurs getRessursByNavident(String navident) {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byNavident/{navident}")
                 .build(navident)
+            )
+            .retrieve()
+            .bodyToMono(Ressurs.class)
+            .retryWhen(defaultRetry)
+            .block();
+    }
+
+    public Ressurs getRessursByFid(String fid) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/ressurser/byFid/{fid}")
+                .build(fid)
             )
             .retrieve()
             .bodyToMono(Ressurs.class)

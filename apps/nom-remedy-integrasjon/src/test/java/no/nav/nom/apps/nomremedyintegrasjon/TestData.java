@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
@@ -34,6 +35,14 @@ public class TestData {
             new Visningsnavn(
                 "Fornavn", Optional.empty(), "Etternavn"
             )
+        );
+    }
+
+    public static RessursSluttetEventV1 ressursSluttetEventV1() {
+        return new RessursSluttetEventV1(
+            UUID.randomUUID().toString(),
+            new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now()),
+            inputMetadata()
         );
     }
 

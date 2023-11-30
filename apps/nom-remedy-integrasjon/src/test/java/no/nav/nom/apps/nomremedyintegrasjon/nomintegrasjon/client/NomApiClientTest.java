@@ -80,8 +80,8 @@ public class NomApiClientTest extends TestBase {
     }
 
     @Test
-    @DisplayName("getRessurs should perform request as expected")
-    void testGetRessurs() {
+    @DisplayName("getRessursByNavident should perform request as expected")
+    void testGetRessursByNavident() {
 
         var navident = "X123456";
 
@@ -89,7 +89,7 @@ public class NomApiClientTest extends TestBase {
             readResourceFile("nom-api/ressurs_response.json")
         );
 
-        assertThat(nomApiClient.getRessurs(navident))
+        assertThat(nomApiClient.getRessursByNavident(navident))
             .isNotNull();
 
         verify(
@@ -105,10 +105,36 @@ public class NomApiClientTest extends TestBase {
     }
 
     @Test
+    @DisplayName("getRessursByFid should perform request as expected")
+    void testGetRessursByFid() {
+
+        var fid = "ressurs-uuid";
+
+        stubResponse(
+            readResourceFile("nom-api/ressurs_response.json")
+        );
+
+        assertThat(nomApiClient.getRessursByFid(fid))
+            .isNotNull();
+
+        verify(
+            getRequestedFor(
+                urlEqualTo(
+                    String.format(
+                        "/app/ressurser/byFid/%s",
+                        fid
+                    )
+                )
+            ).withHeader("authorization", matching("Bearer tokenValue"))
+        );
+    }
+
+
+    @Test
     @DisplayName("getOrgtilknytning should perform request as expected")
     void testGetOrgtilknytning() {
 
-        var fid = "fid-uuid";
+        var fid = "orgtilknytning-uuid";
 
         stubResponse(
             readResourceFile("nom-api/orgtilknytning_response.json")
