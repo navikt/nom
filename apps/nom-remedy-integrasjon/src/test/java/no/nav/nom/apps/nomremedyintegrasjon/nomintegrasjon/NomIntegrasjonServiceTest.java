@@ -5,6 +5,7 @@ import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.generated.model.OrgEnhet;
 import no.nav.nom.generated.model.OrgtilknytningState;
@@ -35,6 +36,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEn
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventV2;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetAdditionalData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventData;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
@@ -206,6 +208,80 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .usingRecursiveComparison()
             .isEqualTo(Optional.of(existingEntryForRessurs));
 
+    }
+
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for RessursPersonaliaOppdatertV1")
+    void testShouldUpdateForRessursPersonaliaOppdatertV1() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident).build()
+        );
+
+        var newFornavn = "Charles";
+        var newEtternavn = "Torgrimsson";
+
+        var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                new Visningsnavn(newFornavn, Optional.empty(), newEtternavn)
+            )
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN));
+
+        nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                latestNomIntegrasjonEntityForNavident.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryBestiller(ressursPersonaliaOppdatertV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .fornavn(capitalizeNavn(newFornavn))
+                    .etternavn(capitalizeNavn(newEtternavn))
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for RessursPersonaliaOppdatertV1 if ressurs is not EKSTERN")
+    void testShouldSkipUpdateForRessursPersonaliaOppdatertV1IfRessursIsNotEkstern() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident).build()
+        );
+
+        var newFornavn = "Charles";
+        var newEtternavn = "Torgrimsson";
+
+        var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                new Visningsnavn(newFornavn, Optional.empty(), newEtternavn)
+            )
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
+
+        nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(latestNomIntegrasjonEntityForNavident));
     }
 
     @Test

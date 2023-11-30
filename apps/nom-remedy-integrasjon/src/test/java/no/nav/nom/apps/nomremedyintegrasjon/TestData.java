@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretE
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
@@ -42,6 +43,22 @@ public class TestData {
         return new RessursSluttetEventV1(
             UUID.randomUUID().toString(),
             new RessursSluttetEventV1.RessursSluttetEventData(LocalDate.now()),
+            inputMetadata()
+        );
+    }
+
+    public static RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1() {
+        return ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(new Visningsnavn(
+                "Fornavn", Optional.empty(), "Etternavn"
+            ))
+        );
+    }
+
+    public static RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1(RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData personaliaOppdatertEventData) {
+        return new RessursPersonaliaOppdatertV1(
+            UUID.randomUUID().toString(),
+            personaliaOppdatertEventData,
             inputMetadata()
         );
     }

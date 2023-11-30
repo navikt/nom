@@ -9,6 +9,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,10 @@ public class NomIntegrasjonService {
             && isFidEksternRessurs(ressursEvent.getFid())
         ) {
             avsluttRessurs(ressursSluttetEventV1);
+        } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
+            && isFidEksternRessurs(ressursEvent.getFid())
+        ) {
+            updateRessurs(ressursPersonaliaOppdatertV1);
         }
     }
 
@@ -173,7 +178,7 @@ public class NomIntegrasjonService {
             new TypeReference<>() {}
         );
 
-        logger.info("Creating ressurs for RessursOpprettetEventV1 with fid: " + ressursOpprettetEventV1.getFid());
+        logger.info("Creating ressurs for RessursOpprettetEventV1 with fid: {}", ressursOpprettetEventV1.getFid());
 
         var remedyEnhetsId = getRemedyEnhetId(
             Optional.ofNullable((String) inputInterfaceMethodArguments.get("orgEnhetId"))
@@ -207,6 +212,41 @@ public class NomIntegrasjonService {
         );
 
         logger.info("Created ressurs for fid: " + ressursOpprettetEventV1.getFid());
+    }
+
+    private void updateRessurs(RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1) {
+        logger.info("Updating remedy data for OrgtilknytningDagligOppfolgingEndretEventV1 with fid {}", ressursPersonaliaOppdatertV1.getFid());
+
+        var coherentRessurs = nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid());
+
+        nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(coherentRessurs.getNavident())
+            .ifPresentOrElse(
+                latestNomIntegrasjonEntityForNavident -> {
+                    var newVisningsnavn = ressursPersonaliaOppdatertV1.getPersonaliaOppdatertEventData().visningsnavn();
+
+                    var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
+                        .fornavn(capitalizeNavn(newVisningsnavn.getFornavnMellomnavn()))
+                        .etternavn(capitalizeNavn(newVisningsnavn.etternavn()))
+                        .build();
+
+                    if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
+
+                        saveNewNomIntegrasjonEntity(
+                            newNomIntegrasjonEntity,
+                            ressursPersonaliaOppdatertV1.getMetadata().inputMetadata().origination().initiatedBy()
+                        );
+
+                        logger.info("Finished updating remedy data for event with fid {}", ressursPersonaliaOppdatertV1.getFid());
+                    } else {
+
+                        logger.info("No new data in event with fid {}. Skipping update", ressursPersonaliaOppdatertV1.getFid());
+                    }
+                },
+                () -> logger.info(
+                    "No existing entry found for navident associated with event with fid {}. No data written to remedy",
+                    ressursPersonaliaOppdatertV1.getFid()
+                )
+            );
     }
 
     private boolean isNavidentEksternRessurs(String navident) {
