@@ -568,6 +568,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         <UserImage
+          includeInstructionsWhenNotFound
           navident={ressurs.navident}
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="126px"
