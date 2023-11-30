@@ -29,12 +29,6 @@ public class NomIntegrasjonEntity {
 
     String entryBestiller;
 
-    String tempChar1;
-
-    String tempChar2;
-
-    String tempInteger;
-
     String fornavn;
 
     String etternavn;
@@ -47,16 +41,10 @@ public class NomIntegrasjonEntity {
 
     String enhetsId;
 
-    String enhetsnavn;
-
     String fysiskBrukerstedId;
-
-    String fysiskBrukerstedNavn;
 
     Long tiltredelsesdato;
 
     Long utlopsdato;
-
-    String mobil;
 
 }
