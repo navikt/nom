@@ -30,29 +30,18 @@ public class DvhService {
     private final DvhRepository dvhRepository;
     private final RessursStateRepository ressursStateRepository;
     private final OrgenhetService orgenhetService;
-    private final Unleash unleash;
 
     public void saveLedere(List<DvhLeder> ledere) {
-        val cachedEnheter = unleash.isEnabled(OrgenhetService.UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID) ?
-                orgenhetService.getAllEnheter().stream()
-                        .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
-                        .map(orgenheter -> orgenheter.stream()
-                                .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                                .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                            )
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()))
-           :
-                orgenhetService.getAllEnheter().stream()
+        val cachedEnheter =
+            orgenhetService.getAllEnheter().stream()
                     .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
                     .map(orgenheter -> orgenheter.stream()
+                            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
                             .max(Comparator.comparing(IOrgenhet::getGyldigFom))
                         )
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
-
 
         final var enhetAndRessursMissing = new LinkedList<DvhLeder>();
         final var enhetMissing = new LinkedList<DvhLeder>();
@@ -81,27 +70,17 @@ public class DvhService {
     }
 
     public void saveOrganiseringerAndSetOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
-        val cachedEnheter = unleash.isEnabled(OrgenhetService.UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID) ?
-                orgenhetService.getAllEnheter().stream()
-                    .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
-                    .values().stream()
-                    .map(orgenheter -> orgenheter.stream()
-                            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                            .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                        )
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()))
-            :
-                orgenhetService.getAllEnheter().stream()
-                    .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
-                    .values().stream()
-                    .map(orgenheter -> orgenheter.stream()
-                            .max(Comparator.comparing(IOrgenhet::getGyldigFom))
-                        )
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+        val cachedEnheter =
+            orgenhetService.getAllEnheter().stream()
+                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
+                .values().stream()
+                .map(orgenheter -> orgenheter.stream()
+                        .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                        .max(Comparator.comparing(IOrgenhet::getGyldigFom))
+                    )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
         var organiseringerToSave = organiseringer.stream()
             .distinct()

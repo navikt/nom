@@ -41,15 +41,12 @@ public class OrgenhetService {
     private final DvhRepository dvhRepository;
     private final KafkaTopicReader kafkaTopicReader;
     private List<IOrgenhet> organiserteEnheter = emptyList();
-    public static final String UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID = "nom.bruk_ny_korreksjon_for_oppslag_av_enhet_basert_paa_agresso_id";
-    private final Unleash unleash;
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader, Unleash unleash) {
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
-        this.unleash = unleash;
     }
 
 
@@ -65,43 +62,30 @@ public class OrgenhetService {
 
     public Optional<IOrgenhet> getEnhetByAgressoIdNivaAndName(String agressoId, String orgNiv, String name) {
         if (name != null) {
-            if (unleash.isEnabled(UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
-                return map(
-                    orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
-                        .stream()
-                        .filter(o -> o.gyldigTom().isEmpty() || !o.gyldigFom().isEqual(o.gyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                        .max(comparing(OrgEnhetState::gyldigFom))
-                );
-            } else {
-                return map(
-                    orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
-                        .stream()
-                        .max(comparing(OrgEnhetState::gyldigFom))
-                );
-            }
+            return map(
+                orgEnhetStateRepository.findAllByUniqueAgressoId(agressoId + "-" + name + "-" + orgNiv)
+                    .stream()
+                    .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                    .max(comparing(OrgEnhetState::gyldigFom))
+            );
         }
         return getEnhetByAgressoIdAndOrgniv(agressoId, orgNiv);
     }
 
 
     public Optional<IOrgenhet> getEnhetByAgressoIdAndOrgniv(String agressoId, String orgNiv) {
-        if (unleash.isEnabled(UNLEASH_BRUK_NY_KORREKSJON_FOR_OPPSLAG_AV_ENHET_BASERT_PAA_AGRESSO_ID)) {
-            return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
-                .stream()
-                .filter(o -> o.gyldigTom().isEmpty() || !o.gyldigFom().isEqual(o.gyldigTom().get())) // Ikke returner enheter som er opprettet og avsluttet samme dag
-                .max(comparing(OrgEnhetState::gyldigFom))
-            );
-        } else {
-            return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
-                .stream()
-                .max(comparing(OrgEnhetState::gyldigFom))
-            );
-        }
+        return map(orgEnhetStateRepository.findAllByAgressoIdAndNiv(agressoId + "--" + orgNiv)
+            .stream()
+            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+            .max(comparing(OrgEnhetState::gyldigFom))
+        );
     }
 
 
     public List<IOrgenhet> findEnheterByAgressoIdIn(Set<String> agressoIds) {
-        return orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds).stream().map(this::map).toList();
+        return orgEnhetStateRepository.findAllByAgressoIdIn(agressoIds).stream()
+            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+            .map(this::map).toList();
     }
 
 
@@ -117,7 +101,7 @@ public class OrgenhetService {
 
     public List<IOrgenhet> matchByAgressoId(String agressoId) {
         return orgEnhetStateRepository.getAll().stream()
-            .filter(orgEnhetState -> orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().contains(agressoId))
+            .filter(orgEnhetState -> !orgEnhetState.endedOnStartDate() && orgEnhetState.agressoId().isPresent() && orgEnhetState.agressoId().get().contains(agressoId))
             .map(this::map)
             .toList();
     }
