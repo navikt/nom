@@ -25,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +96,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -116,7 +117,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().isNotFound();
@@ -154,7 +155,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -194,7 +195,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -208,7 +209,7 @@ public class TeamcatControllerTest extends RestTestBase {
         var w = webTestClient.get().uri("/api/v1/teamcat/enhet/" + oe4.getId())
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -246,7 +247,7 @@ public class TeamcatControllerTest extends RestTestBase {
             .bodyValue(List.of(resid1,resid2))
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -273,7 +274,7 @@ public class TeamcatControllerTest extends RestTestBase {
         var w = webTestClient.get().uri("/api/v1/teamcat/alleEnheter")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
+                httpHeaders.setBearerAuth(teamcatClientToken());
             })
             .exchange()
             .expectStatus().is2xxSuccessful()
@@ -313,5 +314,10 @@ public class TeamcatControllerTest extends RestTestBase {
         }
     }
 
+    private String teamcatClientToken() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("azp_name", "teamcatClient");
+        return validToken(claims);
+    }
 
 }

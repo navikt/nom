@@ -20,6 +20,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,7 @@ import java.util.Optional;
 @Tag(name = "Teamkatalog")
 @RestController
 @RequestMapping("/api/v1/teamcat")
+@PreAuthorize("hasAuthority(\"TEAMCAT\")")
 public class TeamcatController {
 
 
@@ -122,27 +124,6 @@ public class TeamcatController {
         }
         perRequestCache.putEnhetToName(inputEnhet.getId(),out);
         return out;
-    }
-
-    private String determineAvdelingNavn(String navident, PerRequestCache perRequestCache) {
-
-        var orgtilknytningStates = orgtilknytningService.getByNavIdent(navident);
-        if (orgtilknytningStates.isEmpty()) {
-            return null;
-        }
-
-        var dagligOppfoelgingOrgtilknytning = orgtilknytningStates.stream()
-            .filter(OrgtilknytningState::erDagligOppfolging)
-            .findFirst();
-
-        var orgTilknytning = dagligOppfoelgingOrgtilknytning.orElseGet(() -> orgtilknytningStates.stream().findFirst().get());
-        var enhet = orgenhetService.getById(orgTilknytning.orgEnhetId());
-
-        if (enhet.isEmpty()) {
-            return null;
-        }
-
-        return determineAvdelingNavnByEnhet(enhet.get(), perRequestCache);
     }
 
     @Operation(
