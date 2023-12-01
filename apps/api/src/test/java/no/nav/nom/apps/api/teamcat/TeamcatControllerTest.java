@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.SneakyThrows;
 import no.nav.nom.apps.api.clients.ad.AdClient;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
 import no.nav.nom.apps.api.orgenhet.implementations.OrgEnhet;
@@ -24,7 +25,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -183,12 +183,13 @@ public class TeamcatControllerTest extends RestTestBase {
         when(ressursStateRepository.findByNavident(resId)).thenReturn(createRessursState(resId));
         when(adClient.fetchInAdRessursInBatches(anyList())).thenReturn(Map.of(resId, createAdRessurs(resId)));
         when(orgtilknytningService.getByNavIdent(resId)).thenReturn(List.of(createOtks(resId, oeId)));
-        when(orgenhetService.getByFid(oe1.getFid())).thenReturn(Optional.of(oe1));
-        when(orgenhetService.getByFid(oe2.getFid())).thenReturn(Optional.of(oe2));
-        when(orgenhetService.getByFid(oe3.getFid())).thenReturn(Optional.of(oe3));
-        when(orgenhetService.getById(oe4.getId())).thenReturn(Optional.of(oe4));
-        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
 
+        mockEnheterAsHierarchy(List.of(oe1,oe2,oe3,oe4));
+        
+        
+        when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
+        
+        
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {
@@ -238,10 +239,7 @@ public class TeamcatControllerTest extends RestTestBase {
         when(ressursStateRepository.findByNavidentBulk(List.of(resid1,resid2))).thenReturn(Map.of(resid1,res1.get(),resid2,res2.get()));
         when(adClient.fetchInAdRessursInBatches(anyList())).thenReturn(Map.of(resid1, createAdRessurs(resid1),resid2,createAdRessurs(resid2)));
         when(orgtilknytningService.getByNavIdent(resid1)).thenReturn(List.of(createOtks(resid1, oe1.getId())));
-        when(orgenhetService.getByFid(oe1.getFid())).thenReturn(Optional.of(oe1));
-        when(orgenhetService.getByFid(oe2.getFid())).thenReturn(Optional.of(oe2));
-        when(orgenhetService.getByFid(oe3.getFid())).thenReturn(Optional.of(oe3));
-        when(orgenhetService.getByFid(oe4.getFid())).thenReturn(Optional.of(oe4));
+        mockEnheterAsHierarchy(List.of(oe1,oe2,oe3,oe4));
 
         var y = webTestClient.post()
             .uri("/api/v1/teamcat/ressurser")
@@ -268,11 +266,34 @@ public class TeamcatControllerTest extends RestTestBase {
         var oe3 = createOes("oe3","name3",oe2.getId());
         var oe4 = createOes("oe4","name4",oe3.getId());
 
-        when(orgenhetService.getAllEnheter()).thenReturn(List.of(oe1,oe2,oe3,oe4));
+
+
+        mockEnheterAsHierarchy(List.of(oe1,oe2,oe3,oe4));
+
+        var w = webTestClient.get().uri("/api/v1/teamcat/alleEnheter")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesClientToken());
+            })
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(JsonNode.class)
+            .returnResult().getResponseBody();
+
+
+        assert w != null;
+        Assertions.assertEquals(4,w.size());
+        Assertions.assertTrue(w.has("oe1"));
+//        Assertions.assertTrue(w.values().stream().anyMatch(it -> it.id().equals(oe2.getId())));
+    }
+
+    private void mockEnheterAsHierarchy(List<OrgEnhet> toMock) {
+        when(orgenhetService.getAllEnheter()).thenReturn(toMock.stream().map(it -> (IOrgenhet) it).toList());
 
         OrgEnhet prev = null;
-        for(var oe : List.of(oe1,oe2,oe3,oe4)){
+        for(var oe : toMock){
             when(orgenhetService.getByFid(oe.getFid())).thenReturn(Optional.of(oe));
+            when(orgenhetService.getById(oe.getFid())).thenReturn(Optional.of(oe));
             when(orgEnhetMapper.mapFrom(oe)).thenReturn(new no.nav.nom.apps.api.orgenhet.api.app.dto.OrgEnhet(oe.getId(),
                 oe.getAgressoId(),
                 "abc",
@@ -290,27 +311,6 @@ public class TeamcatControllerTest extends RestTestBase {
             ));
             prev = oe;
         }
-//        when(orgenhetService.getByFid(oe1.getFid())).thenReturn(Optional.of(oe1));
-//        when(orgenhetService.getByFid(oe2.getFid())).thenReturn(Optional.of(oe2));
-//        when(orgenhetService.getByFid(oe3.getFid())).thenReturn(Optional.of(oe3));
-//        when(orgenhetService.getByFid(oe4.getFid())).thenReturn(Optional.of(oe4));
-//        when(orgEnhetMapper.mapFrom(oe1)).thenReturn(oe1);
-
-        var w = webTestClient.get().uri("/api/v1/teamcat/alleEnheter")
-            .headers(httpHeaders -> {
-                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                httpHeaders.setBearerAuth(noScopesClientToken());
-            })
-            .exchange()
-            .expectStatus().is2xxSuccessful()
-            .expectBody(JsonNode.class)
-            .returnResult().getResponseBody();
-
-
-        assert w != null;
-        Assertions.assertEquals(4,w.size());
-        Assertions.assertTrue(w.has("oe1"));
-//        Assertions.assertTrue(w.values().stream().anyMatch(it -> it.id().equals(oe2.getId())));
     }
 
 
