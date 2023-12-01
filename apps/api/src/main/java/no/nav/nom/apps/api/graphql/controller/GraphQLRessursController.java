@@ -17,6 +17,7 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursLeder;
 import no.nav.nom.contract.nom.api.graphql.RessursOrgTilknytning;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
+import no.nav.nom.contract.nom.api.graphql.RessursWithMedatadaResult;
 import no.nav.nom.contract.nom.api.graphql.Telefon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -85,6 +86,18 @@ public class GraphQLRessursController {
     public List<RessursResult> ressurser(@Argument("where") RessurserSearch search, DataFetchingEnvironment dataFetchingEnvironment) {
         graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
         return ressursResolver.ressurser(search);
+    }
+
+    @PreAuthorize(
+            """
+            @securityUtil.checkAuth(authentication) &&
+            @securityUtil.hasPersonIdentAccess(authentication, #dataFetchingEnvironment.selectionSet)
+            """
+    )
+    @QueryMapping("ressurserWithMetadata")
+    public List<RessursWithMedatadaResult> ressurserWithMetadata(DataFetchingEnvironment dataFetchingEnvironment) {
+        graphQLFieldConsumptionCounter.count(dataFetchingEnvironment);
+        return ressursResolver.ressurserWithMetadata();
     }
 
     @Deprecated
