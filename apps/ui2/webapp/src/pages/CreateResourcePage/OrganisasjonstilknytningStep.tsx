@@ -8,6 +8,7 @@ import {
   useDatepicker,
 } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { addYears, isBefore } from "date-fns";
 import { useEffect } from "react";
 import {
   Controller,
@@ -50,14 +51,14 @@ export function OrganisasjonstilknytningStep() {
 
 function CreateStatligRessurs() {
   const navigate = useNavigate({ from: createRessursRoute.id });
-  const { ansettelsesType, orgEnhetId, startDato } = useSearch({
+  const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
     from: createRessursRoute.to,
   });
   const methods = useForm({
     defaultValues: {
       ansettelsesType: ansettelsesType ?? AnsettelsesType.FAST,
       orgEnhetId,
-      startDato: undefined,
+      gyldigFom: undefined,
     },
     resolver: yupResolver(statligValidationSchema),
   });
@@ -70,15 +71,15 @@ function CreateStatligRessurs() {
   } = methods;
 
   useEffect(() => {
-    if (startDato) {
-      setValue("startDato", startDato);
+    if (gyldigFom) {
+      setValue("gyldigFom", gyldigFom);
     }
-  }, [startDato]);
+  }, [gyldigFom]);
 
   const startDatePicker = useDatepicker({
     onDateChange: (date) =>
-      setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
-    defaultSelected: startDato ? new Date(startDato) : undefined,
+      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
+    defaultSelected: gyldigFom ? new Date(gyldigFom) : undefined,
   });
 
   return (
@@ -112,7 +113,7 @@ function CreateStatligRessurs() {
         <DatePicker {...startDatePicker.datepickerProps}>
           <DatePicker.Input
             {...startDatePicker.inputProps}
-            error={errors.startDato?.message?.toString()}
+            error={errors.gyldigFom?.message?.toString()}
             label="Startdato (første arbeidsdag)"
           />
         </DatePicker>
@@ -124,30 +125,41 @@ function CreateStatligRessurs() {
 
 const statligValidationSchema = yup.object({
   orgEnhetId: yup.string().required("Obligatorisk"),
-  startDato: yup.string().required("Obligatorisk"),
+  gyldigFom: yup.string().required("Obligatorisk"),
   ansettelsesType: yup
     .mixed<AnsettelsesType>()
     .oneOf(Object.values(AnsettelsesType))
     .required("Obligatorisk"),
 });
 
-export const eksternValidationSchema = yup.object().shape({
-  orgEnhetId: yup.string().required("Obligatorisk"),
-  startDato: yup.string().required("Obligatorisk"),
-  sluttDato: yup.string().required("Obligatorisk"),
+export const eksternPeriodeValidationSchema = yup.object().shape({
+  gyldigFom: yup.string().required("Obligatorisk"),
+  gyldigTom: yup
+    .string()
+    .required("Obligatorisk")
+    .test("ensure-max-1-year", "Kan maks være 1 år frem i tid", (v) =>
+      isBefore(new Date(v), addYears(new Date(), 1)),
+    ),
 });
+
+// eslint-disable-next-line unicorn/prefer-spread
+export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
+  yup.object().shape({
+    orgEnhetId: yup.string().required("Obligatorisk"),
+  }),
+);
 
 function CreateEksternRessurs() {
   const navigate = useNavigate();
-  const { orgEnhetId, startDato, sluttDato, fysiskBrukerstedNr } = useSearch({
+  const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr } = useSearch({
     from: createRessursRoute.to,
   });
 
   const methods = useForm({
     defaultValues: {
       orgEnhetId: orgEnhetId,
-      startDato: undefined,
-      sluttDato: undefined,
+      gyldigFom: undefined,
+      gyldigTom: undefined,
       fysiskBrukerstedNr: fysiskBrukerstedNr,
     },
 
@@ -176,8 +188,10 @@ function CreateEksternRessurs() {
         )}
       >
         <OrganisasjonstilknytningInnerForm
-          defaultSluttDato={sluttDato}
-          defaultStartDato={startDato}
+          defaultSluttDato={
+            gyldigTom || formatDateWithoutTimezone(addYears(new Date(), 1))
+          }
+          defaultStartDato={gyldigFom}
         />
         <Divider />
         <FysiskBrukerstedSelectFormPart />
@@ -201,25 +215,25 @@ export function OrganisasjonstilknytningInnerForm({
 
   useEffect(() => {
     if (defaultStartDato) {
-      setValue("startDato", defaultStartDato);
+      setValue("gyldigFom", defaultStartDato);
     }
   }, [defaultStartDato]);
 
   useEffect(() => {
     if (defaultSluttDato) {
-      setValue("sluttDato", defaultSluttDato);
+      setValue("gyldigTom", defaultSluttDato);
     }
   }, [defaultSluttDato]);
 
   const startDatePicker = useDatepicker({
     onDateChange: (date) =>
-      setValue("startDato", date ? formatDateWithoutTimezone(date) : ""),
+      setValue("gyldigFom", date ? formatDateWithoutTimezone(date) : ""),
     defaultSelected: defaultStartDato ? new Date(defaultStartDato) : undefined,
   });
 
   const sluttDatePicker = useDatepicker({
     onDateChange: (date) =>
-      setValue("sluttDato", date ? formatDateWithoutTimezone(date) : ""),
+      setValue("gyldigTom", date ? formatDateWithoutTimezone(date) : ""),
     defaultSelected: defaultSluttDato ? new Date(defaultSluttDato) : undefined,
   });
 
@@ -231,7 +245,7 @@ export function OrganisasjonstilknytningInnerForm({
           <DatePicker {...startDatePicker.datepickerProps}>
             <DatePicker.Input
               {...startDatePicker.inputProps}
-              error={errors.startDato?.message?.toString()}
+              error={errors.gyldigFom?.message?.toString()}
               label={
                 <span
                   css={css`
@@ -248,7 +262,7 @@ export function OrganisasjonstilknytningInnerForm({
           <DatePicker {...sluttDatePicker.datepickerProps}>
             <DatePicker.Input
               {...sluttDatePicker.inputProps}
-              error={errors.sluttDato?.message?.toString()}
+              error={errors.gyldigTom?.message?.toString()}
               label={
                 <span
                   css={css`

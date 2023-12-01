@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { Link, Tooltip } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
@@ -8,10 +9,11 @@ type UserImageProperties = {
   navident?: string;
   navn?: string;
   size?: string;
+  includeInstructionsWhenNotFound?: boolean;
 };
 
 export function UserImage(properties: UserImageProperties) {
-  const { navident, size, navn } = properties;
+  const { navident, size, navn, includeInstructionsWhenNotFound } = properties;
 
   const imageQuery = useQuery({
     queryKey: getPhotoQuery.queryKey(navident as string),
@@ -38,6 +40,18 @@ export function UserImage(properties: UserImageProperties) {
     );
   }
 
+  if (includeInstructionsWhenNotFound) {
+    return (
+      <Link
+        href="https://navno.sharepoint.com/sites/intranett-it/SitePages/oppdatere%20profilen%20din%20i%20medarbeiders%C3%B8ket.aspx"
+        target="_blank"
+      >
+        <Tooltip content="Åpne instruks for å endre bilde">
+          <img alt="" css={STYLE} src={person} />
+        </Tooltip>
+      </Link>
+    );
+  }
   return <img alt="" css={STYLE} src={person} />;
 }
 

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.dvh;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -31,12 +32,16 @@ public class DvhService {
     private final OrgenhetService orgenhetService;
 
     public void saveLedere(List<DvhLeder> ledere) {
-        val cachedEnheter = orgenhetService.getAllEnheter().stream()
-                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
-                .map(l -> l.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+        val cachedEnheter =
+            orgenhetService.getAllEnheter().stream()
+                    .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()
+                    .map(orgenheter -> orgenheter.stream()
+                            .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                            .max(Comparator.comparing(IOrgenhet::getGyldigFom))
+                        )
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
         final var enhetAndRessursMissing = new LinkedList<DvhLeder>();
         final var enhetMissing = new LinkedList<DvhLeder>();
@@ -65,30 +70,33 @@ public class DvhService {
     }
 
     public void saveOrganiseringerAndSetOrganiserteOrgenheter(List<DvhOrganisering> organiseringer) {
-        val cachedEnheter = orgenhetService.getAllEnheter().stream()
-            .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
-            .values().stream()
-            .map(orgenheter -> orgenheter.stream().max(Comparator.comparing(IOrgenhet::getGyldigFom)))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
+        val cachedEnheter =
+            orgenhetService.getAllEnheter().stream()
+                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))
+                .values().stream()
+                .map(orgenheter -> orgenheter.stream()
+                        .filter(o -> !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag
+                        .max(Comparator.comparing(IOrgenhet::getGyldigFom))
+                    )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));
 
         var organiseringerToSave = organiseringer.stream()
             .distinct()
             .filter(o -> {
-
-                final var overEnhet = cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver());
-                final var underEnhet = cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder());
+                final var overEnhet = cachedEnheter.get(o.uniqueAgressoIdOver());
+                final var underEnhet = cachedEnheter.get(o.uniqueAgressoIdUnder());
                 if (overEnhet == null && underEnhet == null) {
                     log.info(
                         "Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Over- og Underenhet mangler",
-                        o.getAgressoIdOver(),
-                        o.getAgressoIdUnder()
+                        o.uniqueAgressoIdOver(),
+                        o.uniqueAgressoIdUnder()
                     );
                 } else if (overEnhet == null) {
-                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler", o.getAgressoIdOver(), o.getAgressoIdUnder());
+                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler", o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
                 } else if (underEnhet == null) {
-                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler", o.getAgressoIdOver(), o.getAgressoIdUnder());
+                    log.info("Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler", o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());
                 } else {
                     return true;
                 }
@@ -98,8 +106,8 @@ public class DvhService {
 
         dvhRepository.saveOrganiseringer(organiseringerToSave);
 
-        var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.getAgressoIdOver() + "-" + o.getNavnOver() + "-" + o.getOrgNivOver())).toList();
-        var underEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.getAgressoIdUnder() + "-" + o.getNavnUnder() + "-" + o.getOrgNivUnder())).toList();
+        var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.uniqueAgressoIdOver())).toList();
+        var underEnheter = dvhRepository.getOrganiseringer().stream().map( o -> cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();
 
         // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
         var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())

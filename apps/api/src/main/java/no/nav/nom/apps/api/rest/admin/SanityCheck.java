@@ -502,6 +502,9 @@ public class SanityCheck {
                 if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigFom().isAfter(t.gyldigTom().get())) {
                     return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                 }
+                if (t.gyldigTom().isEmpty() && orgEnhet.get().getGyldigTom().isPresent()) {
+                    return true; // orgEnhet avsluttet > tilknytning ikke avsluttet
+                }
                 return false;
             } ).toList();
     }

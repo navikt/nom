@@ -40,4 +40,9 @@ public interface IOrgenhet {
             return orgNiv + "--" + agressoId;
         }
     }
+
+    // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
+    default boolean endedOnStartDate() {
+        return getGyldigTom().isPresent() && getGyldigFom().isEqual(getGyldigTom().get());
+    }
 }

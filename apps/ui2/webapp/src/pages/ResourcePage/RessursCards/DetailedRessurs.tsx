@@ -21,7 +21,6 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import { isAfter, isBefore } from "date-fns";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
@@ -47,6 +46,8 @@ import {
   formatDisplayDate,
   formatTlf,
   formatVisningsnavn,
+  isAfterPresent,
+  isBeforePresent,
   isGyldighetsPeriodeActive,
   isInDevelopment,
 } from "~/utils";
@@ -113,13 +114,13 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
   const expiredOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigTom &&
-      isBefore(new Date(orgTilknytning.gyldigTom), new Date()),
+      isBeforePresent(new Date(orgTilknytning.gyldigTom)),
   );
 
   const futureOrgTilknytninger = orgtilknytninger.filter(
     (orgTilknytning) =>
       orgTilknytning.gyldigFom &&
-      isAfter(new Date(orgTilknytning.gyldigFom), new Date()),
+      isAfterPresent(new Date(orgTilknytning.gyldigFom)),
   );
 
   return (
@@ -299,8 +300,7 @@ function OrganisationHierarchyTree({
 
   const { gyldigTom, gyldigFom, erDagligOppfolging, fid } = orgTilknytning;
 
-  const startsInTheFuture =
-    gyldigFom && isAfter(new Date(gyldigFom), new Date());
+  const startsInTheFuture = gyldigFom && isAfterPresent(new Date(gyldigFom));
 
   return (
     <ExpansionCard
@@ -568,6 +568,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
         `}
       >
         <UserImage
+          includeInstructionsWhenNotFound
           navident={ressurs.navident}
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="126px"

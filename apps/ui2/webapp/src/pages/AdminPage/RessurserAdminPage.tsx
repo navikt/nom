@@ -9,7 +9,6 @@ import {
   Checkbox,
   Chips,
   DatePicker,
-  Link,
   Loader,
   Pagination,
   Popover,
@@ -272,7 +271,7 @@ function OrgEnhetLink({
 }) {
   return orgenhet ? (
     <ReactRouterLink params={{ id: orgenhet.id }} to={orgRoute.to}>
-      <Link>{orgenhet.navn}</Link>
+      {orgenhet.navn}
     </ReactRouterLink>
   ) : undefined;
 }
@@ -328,7 +327,7 @@ function RessursLink({
 }) {
   return ressurs ? (
     <ReactRouterLink params={{ id: ressurs.navident }} to={ressursRoute.to}>
-      <Link>{`${ressurs.visningsnavn} (${ressurs.navident})`}</Link>
+      {`${ressurs.visningsnavn} (${ressurs.navident})`}
     </ReactRouterLink>
   ) : undefined;
 }

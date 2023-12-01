@@ -17,7 +17,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
-import { isBefore } from "date-fns";
 // eslint-disable-next-line you-dont-need-lodash-underscore/is-string
 import isString from "lodash/isString";
 import sortBy from "lodash/sortBy";
@@ -30,6 +29,7 @@ import { showToast } from "~/hooks/showToast";
 import { orgEnheterAdminRoute } from "~/reactRouterRoutes";
 import type { OrgEnhet, SetOrgEnhetsTypeRequest } from "~/types/api-models";
 import { NomNivaa, OrgEnhetsType } from "~/types/api-models";
+import { isAfterPresent } from "~/utils";
 
 type AdminFilter = {
   id?: string;
@@ -76,8 +76,7 @@ export function OrgEnheterAdminPage() {
       ?.filter((oe) => oe.ledere.length > 0)
       .filter(
         (oe) =>
-          oe.gyldigTom === undefined ||
-          isBefore(new Date(), new Date(oe.gyldigTom)),
+          oe.gyldigTom === undefined || isAfterPresent(new Date(oe.gyldigTom)),
       ) ?? [];
 
   if (getAllOrgEnheterQuery.isLoading) {

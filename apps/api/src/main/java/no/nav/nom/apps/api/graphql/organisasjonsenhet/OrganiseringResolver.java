@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.api.graphql.Organisering;
 import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -19,6 +20,7 @@ public class OrganiseringResolver {
     }
 
     public List<Organisering> organiseringer(OrgEnhet orgEnhet, OrganiseringRetning retning) {
+        if (orgEnhet.endedOnStartDate()) return Collections.emptyList();
         return dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
                 .stream()
                 .map(organisering -> convert(organisering, orgEnhet))

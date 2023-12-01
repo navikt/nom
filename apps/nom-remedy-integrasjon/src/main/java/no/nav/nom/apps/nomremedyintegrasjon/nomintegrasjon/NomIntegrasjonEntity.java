@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.Immutable;
@@ -18,45 +19,34 @@ import org.hibernate.annotations.Immutable;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode
+@Getter
 public class NomIntegrasjonEntity {
 
     @Id
-    String entryId;
+    private String entryId;
 
-    String entryStatus;
+    private String entryStatus;
 
-    String entryOperasjon;
+    private String entryOperasjon;
 
-    String entryBestiller;
+    private String entryBestiller;
 
-    String tempChar1;
+    private String fornavn;
 
-    String tempChar2;
+    private String etternavn;
 
-    String tempInteger;
+    private String navId;
 
-    String fornavn;
+    private String fodselsnummer;
 
-    String etternavn;
+    private Integer sektor;
 
-    String navId;
+    private String enhetsId;
 
-    String fodselsnummer;
+    private String fysiskBrukerstedId;
 
-    Integer sektor;
+    private Long tiltredelsesdato;
 
-    String enhetsId;
-
-    String enhetsnavn;
-
-    String fysiskBrukerstedId;
-
-    String fysiskBrukerstedNavn;
-
-    Long tiltredelsesdato;
-
-    Long utlopsdato;
-
-    String mobil;
+    private Long utlopsdato;
 
 }

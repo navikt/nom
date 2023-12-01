@@ -92,6 +92,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
           </div>
         </div>
         <UserImage
+          includeInstructionsWhenNotFound
           navident={ressurs.navident}
           navn={formatVisningsnavn(ressurs.visningsnavn)}
           size="126px"

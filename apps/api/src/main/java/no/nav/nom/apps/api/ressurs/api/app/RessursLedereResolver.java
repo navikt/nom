@@ -65,7 +65,7 @@ public class RessursLedereResolver {
                 var orgenhet = orgenhetService.getById(orgenhetId);
 
                 if (orgenhet.isPresent()) {
-                    var ledere = lederFor(orgenhet.get().getAgressoId(), orgenhet.get().getOrgNiv(), navident);
+                    var ledere = lederFor(orgenhet.get().getAgressoId(), orgenhet.get().getOrgNiv(), orgenhet.get().getNavn(), navident);
 
                     if (ledere.isEmpty()) {
                         // Om ressurs er leder for sin enhet henter vi leder fra nivå over
@@ -89,7 +89,7 @@ public class RessursLedereResolver {
             .map(Optional::get)
             .findFirst()
             .map(o -> {
-                var ledere = lederFor(o.getAgressoId(), o.getOrgNiv(), excludeNavIdent);
+                var ledere = lederFor(o.getAgressoId(), o.getOrgNiv(), o.getNavn(), excludeNavIdent);
                 if (!ledere.isEmpty() || agressoId.equals(o.getAgressoId())) {
                     return ledere;
                 }
@@ -98,8 +98,8 @@ public class RessursLedereResolver {
             .orElse(List.of());
     }
 
-    private List<RessursState> lederFor(String agressoId, String orgNiv, String excludeNavIdent) {
-        return dvhRepository.getLederByAgressoIdAndNiv(agressoId, orgNiv)
+    private List<RessursState> lederFor(String agressoId, String orgNiv, String orgNavn, String excludeNavIdent) {
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(agressoId, orgNiv, orgNavn)
             .stream()
             .map(DvhLeder::getNavIdent)
             .map(ressursStateRepository::findByNavident)

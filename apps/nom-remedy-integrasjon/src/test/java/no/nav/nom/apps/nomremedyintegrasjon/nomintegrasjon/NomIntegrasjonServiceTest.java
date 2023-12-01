@@ -2,12 +2,14 @@ package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import no.nav.nom.apps.nomremedyintegrasjon.TestBase;
 import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.NomApiClient;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.OrgEnhetWithRemedyId;
-import no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.RessursWithSektor;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.generated.model.OrgEnhet;
+import no.nav.nom.generated.model.OrgtilknytningState;
+import no.nav.nom.generated.model.Ressurs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,8 +32,12 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.inputMetadata;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.nomIntegrasjonEntity;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDagligOppfolgingEndretEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDagligOppfolgingEndretEventV1;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventData;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventV2;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetAdditionalData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventData;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
@@ -54,9 +60,9 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
     @BeforeEach
     void mockNomApiClientDefault() {
-        when(nomApiClient.getRessurs(anyString()))
+        when(nomApiClient.getRessursByNavident(anyString()))
             .thenReturn(
-                Optional.of(new RessursWithSektor("", List.of(Sektor.EKSTERN)))
+                new Ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN)
             );
     }
 
@@ -97,8 +103,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(orgEnhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(orgEnhetId, remedyEnhetId)));
+        when(nomApiClient.getOrgEnhet(orgEnhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(remedyEnhetId));
 
         nomIntegrasjonService.handleRessursEvent(ressursOpprettetEventV1);
 
@@ -127,8 +133,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Should skip write to remedy_integrasjon table if sektor is NOT EKSTERN")
-    void testShouldSkipIfNotEkstern() {
+    @DisplayName("Should skip write to remedy_integrasjon table if sektor is NOT EKSTERN for RessursOpprettetEventV1")
+    void testShouldSkipNotEksternForRessursOpprettetEventV1() {
 
         List.of(Sektor.NAV_KOMMUNAL, Sektor.NAV_STATLIG).forEach(
             sektor -> nomIntegrasjonService.handleRessursEvent(
@@ -144,6 +150,138 @@ public class NomIntegrasjonServiceTest extends TestBase {
         var nomIntegrasjonEntries = nomIntegrasjonRepository.findAll();
 
         assertThat(nomIntegrasjonEntries).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should create new entry marked for deletion for RessursSluttetEventV1")
+    void testShouldMarkForDeletionForRessursSluttetEventV1() {
+
+        var navident = "X123456";
+        var existingEntryForRessurs = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder().navId(navident).build()
+        );
+
+        var ressursSluttetEventV1 = ressursSluttetEventV1();
+
+        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(
+            new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN)
+        );
+
+        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+
+        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingEntryForRessurs.getNavId());
+
+        assertThat(nomIntegrasjonEntry)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                existingEntryForRessurs.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryOperasjon("Slette")
+                    .entryStatus("Ubehandlet")
+                    .utlopsdato(epochSeconds(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                    .entryBestiller(ressursSluttetEventV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .build()
+            ));
+
+    }
+
+    @Test
+    @DisplayName("Should skip creating new entry marked for deletion for RessursSluttetEventV1")
+    void testShouldSkipMarkForDeletionForRessursSluttetEventV1IfNotEkstern() {
+
+        var navident = "X123456";
+        var existingEntryForRessurs = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder().navId(navident).build()
+        );
+
+        var ressursSluttetEventV1 = ressursSluttetEventV1();
+
+        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(
+            new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
+        );
+
+        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+
+        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingEntryForRessurs.getNavId());
+
+        assertThat(nomIntegrasjonEntry)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(existingEntryForRessurs));
+
+    }
+
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for RessursPersonaliaOppdatertV1")
+    void testShouldUpdateForRessursPersonaliaOppdatertV1() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident).build()
+        );
+
+        var newFornavn = "Charles";
+        var newEtternavn = "Torgrimsson";
+
+        var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                new Visningsnavn(newFornavn, Optional.empty(), newEtternavn)
+            )
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN));
+
+        nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                latestNomIntegrasjonEntityForNavident.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryBestiller(ressursPersonaliaOppdatertV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .fornavn(capitalizeNavn(newFornavn))
+                    .etternavn(capitalizeNavn(newEtternavn))
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for RessursPersonaliaOppdatertV1 if ressurs is not EKSTERN")
+    void testShouldSkipUpdateForRessursPersonaliaOppdatertV1IfRessursIsNotEkstern() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident).build()
+        );
+
+        var newFornavn = "Charles";
+        var newEtternavn = "Torgrimsson";
+
+        var ressursPersonaliaOppdatertV1 = ressursPersonaliaOppdatertV1(
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                new Visningsnavn(newFornavn, Optional.empty(), newEtternavn)
+            )
+        );
+
+        when(nomApiClient.getRessursByFid(ressursPersonaliaOppdatertV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
+
+        nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(latestNomIntegrasjonEntityForNavident));
     }
 
     @Test
@@ -164,7 +302,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
-                .navident(latestNomIntegrasjonEntityForNavident.navId)
+                .navident(latestNomIntegrasjonEntityForNavident.getNavId())
                 .dagligOppfolging(true)
                 .gyldigFom(newGyldigFom)
                 .gyldigTom(Optional.of(newGyldigTom))
@@ -172,8 +310,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(newOrgenhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(newOrgenhetId, newRemedyEnhetId)));
+        when(nomApiClient.getOrgEnhet(newOrgenhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(newRemedyEnhetId));
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
@@ -208,15 +346,15 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .navId(navident).build()
         );
 
-        var newGyldigFomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.tiltredelsesdato)
+        var newGyldigFomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.getTiltredelsesdato())
             .atZone(ZoneOffset.UTC).toLocalDate();
-        var newGyldigTomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.utlopsdato)
+        var newGyldigTomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.getUtlopsdato())
             .atZone(ZoneOffset.UTC).toLocalDate();
         var newOrgenhetId = "new-orgenhet";
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
-                .navident(initialLatestNomIntegrasjonEntityForNavident.navId)
+                .navident(initialLatestNomIntegrasjonEntityForNavident.getNavId())
                 .dagligOppfolging(true)
                 .gyldigFom(newGyldigFomSameAsOld)
                 .gyldigTom(Optional.of(newGyldigTomSameAsOld))
@@ -224,8 +362,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 .build()
         );
 
-        when(nomApiClient.getOrgEnhetWithRemedyId(newOrgenhetId))
-            .thenReturn(Optional.of(new OrgEnhetWithRemedyId(newOrgenhetId, initialLatestNomIntegrasjonEntityForNavident.enhetsId)));
+        when(nomApiClient.getOrgEnhet(newOrgenhetId))
+            .thenReturn(new OrgEnhet().remedyEnhetId(initialLatestNomIntegrasjonEntityForNavident.getEnhetsId()));
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
@@ -247,13 +385,15 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
-                .navident(initialLatestNomIntegrasjonEntityForNavident.navId)
+                .navident(initialLatestNomIntegrasjonEntityForNavident.getNavId())
                 .dagligOppfolging(true)
                 .gyldigFom(LocalDate.now().plusDays(1))
                 .build()
         );
 
-        when(nomApiClient.getRessurs(navident)).thenReturn(Optional.of(new RessursWithSektor(navident, List.of(Sektor.NAV_STATLIG))));
+        when(nomApiClient.getRessursByNavident(navident)).thenReturn(
+            new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
+        );
 
         nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDagligOppfolgingEndretEventV1);
 
@@ -275,7 +415,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(
             orgtilknytningDagligOppfolgingEndretEventData().toBuilder()
-                .navident(initialLatestNomIntegrasjonEntityForNavident.navId)
+                .navident(initialLatestNomIntegrasjonEntityForNavident.getNavId())
                 .dagligOppfolging(false)
                 .gyldigFom(LocalDate.now().plusDays(1))
                 .build()
@@ -288,6 +428,148 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .isEqualTo(Optional.of(initialLatestNomIntegrasjonEntityForNavident));
     }
 
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for OrgtilknytningDatoEndretEventV2")
+    void testShouldUpdateForOrgtilknytningDatoEndretEventV2() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(nomIntegrasjonService.nextId())
+                .navId(navident)
+                .build()
+        );
+
+        var newGyldigFom = LocalDate.now().plusDays(1);
+        var newGyldigTom = newGyldigFom.plusMonths(1);
+
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigFom(newGyldigFom)
+                .gyldigTom(Optional.of(newGyldigTom))
+                .build()
+        );
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
+            .thenReturn(new OrgtilknytningState().navident(navident).erDagligOppfolging(true));
+
+        when(nomApiClient.getRessursByNavident(navident))
+            .thenReturn(new Ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN));
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                latestNomIntegrasjonEntityForNavident.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryBestiller(
+                        orgtilknytningDatoEndretEventV2().getMetadata().inputMetadata().origination().initiatedBy()
+                    )
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .tiltredelsesdato(epochSeconds(newGyldigFom))
+                    .utlopsdato(epochSeconds(newGyldigTom))
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should NOT write new entity with updated values for OrgtilknytningDatoEndretEventV2 if new data are same as old")
+    void testShouldNotUpdateForOrgtilknytningDatoEndretEventV2IfNoChanges() {
+        var navident = "X123456";
+
+        var initialLatestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(nomIntegrasjonService.nextId())
+                .navId(navident).build()
+        );
+
+        var newGyldigFomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.getTiltredelsesdato())
+            .atZone(ZoneOffset.UTC).toLocalDate();
+        var newGyldigTomSameAsOld = Instant.ofEpochSecond(initialLatestNomIntegrasjonEntityForNavident.getUtlopsdato())
+            .atZone(ZoneOffset.UTC).toLocalDate();
+
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigFom(newGyldigFomSameAsOld)
+                .gyldigTom(Optional.of(newGyldigTomSameAsOld))
+                .build()
+        );
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
+            .thenReturn(new OrgtilknytningState().navident(navident).erDagligOppfolging(true));
+
+        when(nomApiClient.getRessursByNavident(navident))
+            .thenReturn(new Ressurs().sektor(no.nav.nom.generated.model.Sektor.EKSTERN));
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident))
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(initialLatestNomIntegrasjonEntityForNavident));
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for OrgtilknytningDatoEndretEventV2 if ressurs is not EKSTERN")
+    void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotEkstern() {
+        var navident = "X123456";
+
+        var initialLatestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(nomIntegrasjonService.nextId())
+                .navId(navident).build()
+        );
+
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigFom(LocalDate.now().plusDays(1))
+                .build()
+        );
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
+            .thenReturn(new OrgtilknytningState().navident(navident).erDagligOppfolging(true));
+
+        when(nomApiClient.getRessursByNavident(navident)).thenReturn(
+            new Ressurs().sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG)
+        );
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident))
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(initialLatestNomIntegrasjonEntityForNavident));
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for OrgtilknytningDatoEndretEventV2 if orgtilknytning is not dagligOppfolgning")
+    void testSkipUpdateForOrgtilknytningDatoEndretEventV2IfRessursIsNotDagligOppfolgning() {
+        var navident = "X123456";
+
+        var initialLatestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(nomIntegrasjonService.nextId())
+                .navId(navident).build()
+        );
+
+        var orgtilknytningDatoEndretEventV2 = orgtilknytningDatoEndretEventV2(
+            orgtilknytningDatoEndretEventData().toBuilder()
+                .gyldigFom(LocalDate.now().plusDays(1))
+                .build()
+        );
+
+        when(nomApiClient.getOrgtilknytning(orgtilknytningDatoEndretEventV2.getFid()))
+            .thenReturn(new OrgtilknytningState().navident(navident).erDagligOppfolging(false));
+
+        nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningDatoEndretEventV2);
+
+        assertThat(nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident))
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(initialLatestNomIntegrasjonEntityForNavident));
+    }
 
     @ParameterizedTest(name = "latestId: {0} expectedNextId: {1}")
     @MethodSource("testNextIdArguments")

@@ -76,18 +76,22 @@ public class OrgtilknytningRestService {
                         throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
                     }
 
+                    validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());
+
                     // If gyldigTom is set to before today, verify there are other active tilknytninger
                     if (LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN))) {
-                        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(tilknyttetRessurs.navident())).stream().anyMatch(orgtilknytningState -> {
-                            if (orgtilknytningState.fid().equals(fid)) {
-                                return false;
-                            }
+                        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(tilknyttetRessurs.navident())).stream()
+                            .anyMatch(orgtilknytningState -> {
+                                if (orgtilknytningState.fid().equals(fid)) {
+                                    return false;
+                                }
 
-                            return orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now());
-                        });
+                                return orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now());
+                            });
 
                         if (!activeOrgtilknytningExists) {
-                            throw new IllegalArgumentException("Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
+                            throw new IllegalArgumentException(
+                                "Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.");
                         }
                     }
 
@@ -159,12 +163,18 @@ public class OrgtilknytningRestService {
     }
 
     private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
-        if (ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).isEmpty()) {
-            throw new IllegalArgumentException("Finner ikke ressurs med navident %s".formatted(leggTilOrgtilknytningRequest.navident()));
+        var ressursState = ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).orElseThrow(
+            () -> new IllegalArgumentException("Finner ikke ressurs med navident %s".formatted(leggTilOrgtilknytningRequest.navident()))
+        );
+
+        if (ressursState.sektor() == Sektor.EKSTERN) {
+            validateEksternOrgtilknytningPeriode(leggTilOrgtilknytningRequest.gyldigTom());
         }
+
         if (orgEnhetStateRepository.findById(leggTilOrgtilknytningRequest.orgEnhetId()).isEmpty()) {
             throw new IllegalArgumentException("Finner ikke orgenhet med id %s".formatted(leggTilOrgtilknytningRequest.orgEnhetId()));
         }
+
         validateChronologicalDates(leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom().orElse(null));
 
         var orgtilknytninger = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())
@@ -173,10 +183,22 @@ public class OrgtilknytningRestService {
             .toList();
 
         orgtilknytninger.forEach(orgtilknytningState -> {
-            if (isPeriodsOverlapping(orgtilknytningState.gyldigFom(), orgtilknytningState.gyldigTom(), leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom())) {
+            if (isPeriodsOverlapping(
+                orgtilknytningState.gyldigFom(),
+                orgtilknytningState.gyldigTom(),
+                leggTilOrgtilknytningRequest.gyldigFom(),
+                leggTilOrgtilknytningRequest.gyldigTom()
+            )) {
                 throw new OrgtilknytningPeriodeOverlapException("Det finnes allerede en orgtilknytning innenfor forespurt periode");
 
             }
         });
+    }
+
+    private void validateEksternOrgtilknytningPeriode(Optional<LocalDate> gyldigTom) {
+        var requestedGyldigTomIsMoreThan1YearFromNow = gyldigTom.orElse(LocalDate.MAX).isAfter(LocalDate.now().plusYears(1));
+        if (requestedGyldigTomIsMoreThan1YearFromNow) {
+            throw new IllegalArgumentException("Sluttdato kan være maks 1 år frem i tid");
+        }
     }
 }

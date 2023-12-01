@@ -207,7 +207,7 @@ public class RessursStillingProcessor {
                                 ot.gyldigFom().equals(stillingPeriode.gyldigFom()) &&
                                 ot.gyldigTom().orElse(NO_END_DATE).equals(stillingPeriode.gyldigTom())
                             ).toList();
-                        log.debug("For navident {} fant vi følgende orgtilknytnng(er)\n {}\nsom er duplikat på aktiv periode, men for annen enhet enn DVH stillingPeriode\n {}\n. Denne/disse vil fjernes",
+                        log.debug("For navident {} fant vi følgende orgtilknytning(er)\n {}\nsom er duplikat på aktiv periode, men for annen enhet enn DVH stillingPeriode\n {}\n. Denne/disse vil fjernes",
                             navident,
                             fjerne,
                             stillingPeriode);

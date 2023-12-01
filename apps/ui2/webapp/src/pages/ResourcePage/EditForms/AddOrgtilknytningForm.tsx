@@ -5,6 +5,7 @@ import { Alert, Button } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { addYears } from "date-fns";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -24,6 +25,7 @@ import { ressursRoute } from "~/reactRouterRoutes";
 import { defaultFormStyle } from "~/resources/NomStyles";
 import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
+import { formatDateWithoutTimezone } from "~/utils";
 
 export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
@@ -33,8 +35,8 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const methods = useForm({
     defaultValues: {
       orgEnhetId: undefined,
-      startDato: undefined,
-      sluttDato: undefined,
+      gyldigFom: undefined,
+      gyldigTom: undefined,
     },
     resolver: yupResolver(eksternValidationSchema),
   });
@@ -47,6 +49,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
     mutationFn: async (values) => leggTilOrgtilknytning(values),
     onSuccess: () => {
       showToast({ text: "Lagret" });
+      methods.reset();
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
@@ -65,12 +68,14 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
             leggTilOrgtilknytningMutation.mutate({
               ...values,
               navident: ressurs.navident,
-              gyldigFom: values.startDato,
-              gyldigTom: values.sluttDato,
             }),
           )}
         >
-          <OrganisasjonstilknytningInnerForm />
+          <OrganisasjonstilknytningInnerForm
+            defaultSluttDato={formatDateWithoutTimezone(
+              addYears(new Date(), 1),
+            )}
+          />
           <ApiResponseError error={leggTilOrgtilknytningMutation.error} />
           <SaveOrAbortButtons
             isLoading={leggTilOrgtilknytningMutation.isPending}

@@ -225,19 +225,20 @@ public class OmadaUttrekk {
                             .orElse(""),
                         orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
                         orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
-                        dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-                            .filter(organisering ->
-                                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
-                                    organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
-                                    organisering.getNavnUnder().equals(orgenhet.getNavn())
-                            )
-                            .findAny()
-                            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
-                                organisering.getAgressoIdOver(),
-                                organisering.getOrgNivOver(),
-                                organisering.getNavnOver()
-                            ).map(IOrgenhet::getId).orElse(null))
-                            .orElse(""),
+                        orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
+                            dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
+                                .filter(organisering ->
+                                    organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
+                                        organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
+                                        organisering.getNavnUnder().equals(orgenhet.getNavn())
+                                )
+                                .findAny()
+                                .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
+                                    organisering.getAgressoIdOver(),
+                                    organisering.getOrgNivOver(),
+                                    organisering.getNavnOver()
+                                ).map(IOrgenhet::getId).orElse(null))
+                                .orElse(""),
                         remedyEnhetIdResolver.remedyEnhetId(orgenhet)
                     );
                     writer.close();

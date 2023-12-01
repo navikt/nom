@@ -1,0 +1,152 @@
+package no.nav.nom.apps.api.orgtilknytning.api.admin;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.AvvikleOrgEnhet;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Tag(name = "Admin for korrigeringer")
+@RestController
+@RequestMapping("/api/admin/korrigerreOrgtilknytingMedPeriodeUtoverEnhetensPeriode")
+public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
+
+    private final OrgenhetService orgenhetService;
+    private final OrgtilknytningService orgtilknytningService;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+
+    public KorrigerOrgtilknytningerUtoverOrgenhetensPeriode(OrgenhetService orgenhetService, OrgtilknytningService orgtilknytningService,
+                                                            OrgtilknytningCommandService orgtilknytningCommandService
+    ) {
+        this.orgenhetService = orgenhetService;
+        this.orgtilknytningService = orgtilknytningService;
+        this.orgtilknytningCommandService = orgtilknytningCommandService;
+    }
+
+    @Operation(
+        description = "Lag avvikle eventer for orgtilknytinger som går utover orgenhetens periode. Kjør med False for kun dry-run",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping()
+    public String korrigere(@RequestParam(defaultValue = "false") boolean performUpdate) {
+        var alleOrgtilknytningState = orgtilknytningService.getAll();
+        var aktiveOrgtilknytningState = aktiveOrgtilknytninger(alleOrgtilknytningState);
+        var aktiveTilknytningerUtoverEnhetPeriode = orgtilknytningerUtoverEnhetPeriode(aktiveOrgtilknytningState);
+
+        ObjectMapper mapper = new ObjectMapper();
+        StringBuffer str = new StringBuffer();
+        aktiveTilknytningerUtoverEnhetPeriode.forEach( ot -> {
+                var orgenhet = orgenhetService.getById(ot.orgEnhetId()).get();
+                String otDescription = "Orgtilknytning %s for %s/%s med periode %s - %s".formatted(
+                    ot.fid(),
+                    ot.navident(),
+                    ot.orgEnhetId(),
+                    ot.gyldigFom(),
+                    ot.gyldigTom().isPresent() ? ot.gyldigTom().get() : " "
+                );
+                String orgenhetDescription = "Orgenhet %s %s med periode %s - %s".formatted(
+                    orgenhet.getId(),
+                    orgenhet.getNavn(),
+                    orgenhet.getGyldigFom(),
+                    orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom().get() : " "
+                );
+
+                ObjectNode node = mapper.createObjectNode();
+                node.put("Orgiltknytning", otDescription);
+                node.put("Orgenhet", orgenhetDescription);
+
+                if (ot.gyldigFom().isAfter(orgenhet.getGyldigTom().get())) {
+                    // Vi må fjerne orgtilknytningen, dne starteretter orgenheten slutter
+                    FjernOrgtilknytning fjernOrgtilknytning =
+                        new FjernOrgtilknytning(
+                            ot.navident(),
+                            ot.orgEnhetId(),
+                            ot.gyldigFom(),
+                            ot.gyldigTom(),
+                            new InputMetadata(
+                                "Swagger",
+                                "Fjerner orgtilknytinger som går utover orgenhetens periode",
+                                node,
+                                new Origination("nom-api", "nom-api")
+                            ),
+                            null
+                        );
+                    str.append("Fjerner orgtilknytning %s".formatted(ot.fid())).append("\n");
+                    str.append("\t").append(String.join(" og ", otDescription, orgenhetDescription)).append("\n");
+
+                    log.info("Fjerner orgtilknytning for\n\t{} og {}", otDescription, orgenhetDescription);
+
+                    if (performUpdate) orgtilknytningCommandService.fjernOrgtilknytning(ot.fid(), fjernOrgtilknytning);
+                } else {
+                    AvvikleOrgtilknytning avvikleOrgtilknytning =
+                        new AvvikleOrgtilknytning(
+                            ot.navident(),
+                            ot.orgEnhetId(),
+                            orgenhet.getGyldigTom().get(),
+                            new InputMetadata(
+                                "Swagger",
+                                "Korriger orgtilknytinger som går utover orgenhetens periode",
+                                node,
+                                new Origination("nom-api", "nom-api")
+                            ),
+                            null
+                        );
+                    str.append("Avvikler orgtilknytning på dato %s".formatted(avvikleOrgtilknytning.gyldigTom())).append("\n");
+                    str.append("\t").append(String.join(" og ", otDescription, orgenhetDescription)).append("\n");
+
+                    log.info("Avvikler orgtilknytning på dato {} for\n\t{} og {}", avvikleOrgtilknytning.gyldigTom(), otDescription, orgenhetDescription);
+
+                    if (performUpdate) orgtilknytningCommandService.avvikleOrgtilknytning(ot.fid(), avvikleOrgtilknytning);
+                }
+        });
+        return str.toString();
+    }
+
+    private List<OrgtilknytningState> aktiveOrgtilknytninger(Collection<OrgtilknytningState> orgtilknytninger) {
+        return orgtilknytninger.stream().filter( ot ->
+            ot.gyldigFom().isBefore(LocalDate.now().plusDays(1)) &&
+                (!ot.gyldigTom().isPresent() || ot.gyldigTom().get().isAfter(LocalDate.now()))
+        ).toList();
+    }
+    private List<OrgtilknytningState> orgtilknytningerUtoverEnhetPeriode(List<OrgtilknytningState> orgtilknytninger) {
+        return orgtilknytninger.stream()
+            .filter( t -> {
+                var orgEnhet = orgenhetService.getById(t.orgEnhetId());
+                if (orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigFom())) {
+                    return true; // orgEnhet.gyldigTom < tilknytning.gyldigFom
+                }
+                if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigFom().isAfter(t.gyldigTom().get())) {
+                    return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
+                }
+                if (t.gyldigTom().isEmpty() && orgEnhet.get().getGyldigTom().isPresent()) {
+                    return true; // orgEnhet avsluttet > tilknytning ikke avsluttet
+                }
+                return false;
+            } ).toList();
+    }
+}
