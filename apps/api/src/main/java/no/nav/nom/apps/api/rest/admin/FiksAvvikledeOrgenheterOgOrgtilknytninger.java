@@ -60,6 +60,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         List<OrgtilknytningState> aktiveOrgtilknytningerTilIkkeAktiveEnheter = orgtilknytningService.getAll().stream()
             .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktiveNavidenter.contains(ot.navident()))
             .toList();
+        List<String> aktiveOrgtilknytningerTilIkkeAktiveEnheterFids = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::fid).toList();
 
         List<String> aktuelleNavidenter = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::navident).toList();
 
@@ -73,10 +74,11 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         // Finn alle orgtilknytninger til alle Ansatte som har har OT til ikke-aktiv Enhet
         aktuelleNavidenter.forEach(navident -> {
             output.append("%s\n".formatted(navident));
-            aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream()
+            orgtilknytningService.getByNavIdent(navident).stream()
                 .filter(ot -> ot.navident().equals(navident))
                 .forEach(ot -> {
-                    output.append("  %s -> %s - %s\n".formatted(getEnhetText(ot.orgEnhetId()), ot.gyldigFom(), ot.gyldigTom()));
+                    output.append(aktiveOrgtilknytningerTilIkkeAktiveEnheterFids.contains(ot.fid()) ? "  *" : "   ");
+                    output.append("    %s  =>  %s - %s\n".formatted(getEnhetText(ot.orgEnhetId()), ot.gyldigFom(), ot.gyldigTom().isEmpty() ? " " : ot.gyldigTom().get()));
                 });
         });
 
@@ -94,7 +96,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
             .append("], (")
             .append(enhet.getGyldigFom())
             .append(" - ")
-            .append(enhet.getGyldigTom().isPresent() ? enhet.getGyldigTom().get() : " ");
+            .append(enhet.getGyldigTom().isPresent() ? enhet.getGyldigTom().get() : ")");
         return enhetStr.toString();
     }
 }
