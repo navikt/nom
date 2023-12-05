@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,9 +57,28 @@ class RessursStillingStrukturererTest extends TestBase {
     @BeforeEach
     public void beforeEach() {
         when(ressursStateRepository.findByNavident(navident_A001001))
-            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident_A001001, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+            .thenReturn(Optional.of(new RessursState("FID_1",
+                "01010154321",
+                navident_A001001,
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            )));
         when(ressursStateRepository.findByNavident(navident_B002002))
-            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", navident_B002002, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_2",
+                "02020254321",
+                navident_B002002,
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            )));
     }
 
     @NotNull
@@ -200,7 +220,7 @@ class RessursStillingStrukturererTest extends TestBase {
         );
 
         List<IOrgenhet> agrid_1_enheter = List.of(
-            getNomEnhet("FID_1", "a123bc", "SAMME NAVN", LocalDate.of(2000, 1, 1), LocalDate.of(2020, 5,31), "AGRID_1"),
+            getNomEnhet("FID_1", "a123bc", "SAMME NAVN", LocalDate.of(2000, 1, 1), LocalDate.of(2020, 5, 31), "AGRID_1"),
             getNomEnhet("FID_2", "x987yz", "SAMME NAVN", LocalDate.of(2000, 6, 1), null, "AGRID_1")
         );
 
@@ -251,7 +271,9 @@ class RessursStillingStrukturererTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test å strukturere en aktiv dvh stilling hvor stillingen periode feilaktige Orgenheter som er like med overlapp på dato (dette er en feil i orgenhet i såfall)")
+    @DisplayName(
+        "Test å strukturere en aktiv dvh stilling hvor stillingen periode feilaktige Orgenheter som er like med overlapp på dato (dette er en feil i orgenhet i såfall)"
+    )
     // Dette vil gå igjennom, men blir error melding på enhets feil, og kobling blir gjort mot første treff
     public void test_010() {
         List<DvhRessursStilling> ressursStillinger = List.of(
@@ -283,7 +305,17 @@ class RessursStillingStrukturererTest extends TestBase {
         LocalDate ressursSluttdato = LocalDate.of(2022, 1, 31);
 
         when(ressursStateRepository.findByNavident(navid_3))
-            .thenReturn(Optional.of(new RessursState("FID_3", "03030354321", navid_3, Sektor.NAV_STATLIG, null, Optional.of(ressursSluttdato), Optional.empty())));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_3",
+                "03030354321",
+                navid_3,
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.of(ressursSluttdato),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            )));
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2));
 
@@ -312,13 +344,13 @@ class RessursStillingStrukturererTest extends TestBase {
         var stillingPeriode_1 = stillingPerioderFor_A001001.get(0);
         var stillingPeriode_2 = stillingPerioderFor_A001001.get(1);
 
-        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_1.gyldigFom());
         assertEquals(LocalDate.of(2020, 8, 31), stillingPeriode_1.gyldigTom());
-        assertEquals(DagligOppfolging.JA,       stillingPeriode_1.dagligOppfolging());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_1.dagligOppfolging());
 
         assertEquals(LocalDate.of(2020, 11, 1), stillingPeriode_2.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_2.gyldigTom());
-        assertEquals(DagligOppfolging.JA,       stillingPeriode_2.dagligOppfolging());
+        assertEquals(MAX_DATE, stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_2.dagligOppfolging());
     }
 
     @Test
@@ -326,7 +358,7 @@ class RessursStillingStrukturererTest extends TestBase {
     public void test_013() {
         List<DvhRessursStilling> ressursStillinger = List.of(
             getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), LocalDate.of(2022, 8, 31)),
-            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2020,11, 1), LocalDate.of(2021,12, 31)),
+            getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2020, 11, 1), LocalDate.of(2021, 12, 31)),
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_2", LocalDate.of(2022, 1, 1), MAX_DATE)
         );
 
@@ -342,21 +374,21 @@ class RessursStillingStrukturererTest extends TestBase {
         var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
         var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
 
-        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
-        assertEquals(LocalDate.of(2020,10,31),  stillingPeriode_1.gyldigTom());
-        assertEquals(DagligOppfolging.JA,       stillingPeriode_1.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020, 10, 31), stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_1.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,11, 1),  stillingPeriode_2.gyldigFom());
-        assertEquals(LocalDate.of(2022, 8,31),  stillingPeriode_2.gyldigTom());
-        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_2.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 11, 1), stillingPeriode_2.gyldigFom());
+        assertEquals(LocalDate.of(2022, 8, 31), stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_2.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,11, 1),  stillingPeriode_3.gyldigFom());
-        assertEquals(LocalDate.of(2022, 8,31),  stillingPeriode_3.gyldigTom());
-        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_3.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 11, 1), stillingPeriode_3.gyldigFom());
+        assertEquals(LocalDate.of(2022, 8, 31), stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_3.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2022, 9, 1),  stillingPeriode_4.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_4.gyldigTom());
-        assertEquals(DagligOppfolging.JA,       stillingPeriode_4.dagligOppfolging());
+        assertEquals(LocalDate.of(2022, 9, 1), stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_4.dagligOppfolging());
     }
 
     @Test
@@ -381,21 +413,21 @@ class RessursStillingStrukturererTest extends TestBase {
         var stillingPeriode_3 = stillingPerioderFor_A001001.get(2);
         var stillingPeriode_4 = stillingPerioderFor_A001001.get(3);
 
-        assertEquals(LocalDate.of(2020, 1, 1),                 stillingPeriode_1.gyldigFom());
-        assertEquals(startOfThreeMonthBeforeNow.minusDays(1),  stillingPeriode_1.gyldigTom());
-        assertEquals(DagligOppfolging.JA,                      stillingPeriode_1.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_1.gyldigFom());
+        assertEquals(startOfThreeMonthBeforeNow.minusDays(1), stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_1.dagligOppfolging());
 
-        assertEquals(startOfThreeMonthBeforeNow,    stillingPeriode_2.gyldigFom());
-        assertEquals(endOfThreeMonthsAfterNow,      stillingPeriode_2.gyldigTom());
-        assertEquals(DagligOppfolging.NEI,          stillingPeriode_2.dagligOppfolging());
+        assertEquals(startOfThreeMonthBeforeNow, stillingPeriode_2.gyldigFom());
+        assertEquals(endOfThreeMonthsAfterNow, stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.NEI, stillingPeriode_2.dagligOppfolging());
 
-        assertEquals(startOfThreeMonthBeforeNow,    stillingPeriode_3.gyldigFom());
-        assertEquals(endOfThreeMonthsAfterNow,      stillingPeriode_3.gyldigTom());
-        assertEquals(DagligOppfolging.JA ,          stillingPeriode_3.dagligOppfolging());
+        assertEquals(startOfThreeMonthBeforeNow, stillingPeriode_3.gyldigFom());
+        assertEquals(endOfThreeMonthsAfterNow, stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_3.dagligOppfolging());
 
-        assertEquals(endOfThreeMonthsAfterNow.plusDays(1),  stillingPeriode_4.gyldigFom());
-        assertEquals(MAX_DATE,                              stillingPeriode_4.gyldigTom());
-        assertEquals(DagligOppfolging.JA,                   stillingPeriode_4.dagligOppfolging());
+        assertEquals(endOfThreeMonthsAfterNow.plusDays(1), stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_4.dagligOppfolging());
     }
 
     @Test
@@ -404,8 +436,8 @@ class RessursStillingStrukturererTest extends TestBase {
         List<DvhRessursStilling> ressursStillinger = List.of(
             getTestRessursStilling(navident_A001001, "AGRID_1", "Enhet_1", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE),
             getTestRessursStilling(navident_A001001, "AGRID_2", "Enhet_2", "AGRID_1", LocalDate.of(2020, 1, 1), MAX_DATE),
-            getTestRessursStilling(navident_A001001, "AGRID_3", "Enhet_3", "AGRID_1", LocalDate.of(2020,10, 1), MAX_DATE),
-            getTestRessursStilling(navident_A001001, "AGRID_4", "Enhet_4", "AGRID_1", LocalDate.of(2020,10, 1), MAX_DATE)
+            getTestRessursStilling(navident_A001001, "AGRID_3", "Enhet_3", "AGRID_1", LocalDate.of(2020, 10, 1), MAX_DATE),
+            getTestRessursStilling(navident_A001001, "AGRID_4", "Enhet_4", "AGRID_1", LocalDate.of(2020, 10, 1), MAX_DATE)
         );
 
         when(orgenhetService.matchByAgressoId(any())).thenReturn(List.of(dummyEnhet_1, dummyEnhet_2, dummyEnhet_3, dummyEnhet_4));
@@ -422,36 +454,43 @@ class RessursStillingStrukturererTest extends TestBase {
         var stillingPeriode_5 = stillingPerioderFor_A001001.get(4);
         var stillingPeriode_6 = stillingPerioderFor_A001001.get(5);
 
-        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_1.gyldigFom());
-        assertEquals(LocalDate.of(2020, 9,30),  stillingPeriode_1.gyldigTom());
-        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_1.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_1.gyldigFom());
+        assertEquals(LocalDate.of(2020, 9, 30), stillingPeriode_1.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_1.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020, 1, 1),  stillingPeriode_2.gyldigFom());
-        assertEquals(LocalDate.of(2020, 9,30),  stillingPeriode_2.gyldigTom());
-        assertEquals(DagligOppfolging.UKJENT,   stillingPeriode_2.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 1, 1), stillingPeriode_2.gyldigFom());
+        assertEquals(LocalDate.of(2020, 9, 30), stillingPeriode_2.gyldigTom());
+        assertEquals(DagligOppfolging.UKJENT, stillingPeriode_2.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_3.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_3.gyldigTom());
-        assertEquals(DagligOppfolging.JA,       stillingPeriode_3.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_3.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_3.gyldigTom());
+        assertEquals(DagligOppfolging.JA, stillingPeriode_3.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_4.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_4.gyldigTom());
-        assertEquals(DagligOppfolging.NEI,      stillingPeriode_4.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_4.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_4.gyldigTom());
+        assertEquals(DagligOppfolging.NEI, stillingPeriode_4.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_5.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_5.gyldigTom());
-        assertEquals(DagligOppfolging.NEI,      stillingPeriode_5.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_5.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_5.gyldigTom());
+        assertEquals(DagligOppfolging.NEI, stillingPeriode_5.dagligOppfolging());
 
-        assertEquals(LocalDate.of(2020,10, 1),  stillingPeriode_6.gyldigFom());
-        assertEquals(MAX_DATE,                  stillingPeriode_6.gyldigTom());
-        assertEquals(DagligOppfolging.NEI,      stillingPeriode_6.dagligOppfolging());
+        assertEquals(LocalDate.of(2020, 10, 1), stillingPeriode_6.gyldigFom());
+        assertEquals(MAX_DATE, stillingPeriode_6.gyldigTom());
+        assertEquals(DagligOppfolging.NEI, stillingPeriode_6.dagligOppfolging());
     }
 
     private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, LocalDate from, LocalDate to) {
         return getTestRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, from, to);
     }
 
-    private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String ressursAgressoId, LocalDate from, LocalDate to) {
+    private DvhRessursStilling getTestRessursStilling(
+        String navid,
+        String stillingAgressoId,
+        String stillingOrgenhetNavn,
+        String ressursAgressoId,
+        LocalDate from,
+        LocalDate to
+    ) {
         return DvhRessursStilling.builder()
             .navident(Optional.of(navid))
             .stillingAgressoId(Optional.of(stillingAgressoId))

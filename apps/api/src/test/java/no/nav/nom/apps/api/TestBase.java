@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +166,9 @@ public abstract class TestBase {
                 "etternavn" + suffix
             ),
             null,
-                Optional.of(LocalDate.now())
+                Optional.of(LocalDate.now()),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursState);

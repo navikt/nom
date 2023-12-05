@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,15 +71,15 @@ public class RessursControllerTest extends RestTestBase {
         when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
 
         var request = new OpprettRessursRequest(
-                personident,
-                navn.getFornavn(),
-                navn.getMellomnavn(),
-                navn.getEtternavn(),
-                Sektor.NAV_STATLIG,
-                "",
-                LocalDate.now(),
-                null,
-                AnsettelsesType.FAST,
+            personident,
+            navn.getFornavn(),
+            navn.getMellomnavn(),
+            navn.getEtternavn(),
+            Sektor.NAV_STATLIG,
+            "",
+            LocalDate.now(),
+            null,
+            AnsettelsesType.FAST,
             ""
         );
 
@@ -91,9 +92,10 @@ public class RessursControllerTest extends RestTestBase {
                     request.sektor(),
                     new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
                     request.sluttDato(),
-                    Optional.empty()
+                    Optional.empty(),
+                    null,
+                    Collections.emptyList()
                 ));
-
 
 
         webTestClient.post()
@@ -123,62 +125,63 @@ public class RessursControllerTest extends RestTestBase {
         val navn = pdlUtils.mockSinglePersonResponse();
 
         when(nikClient.opprettNavidentOnBehalfOfUser(
-                eq(OpprettNavidentRequest.builder()
-                        .personid(personident)
-                        .identPrefix(navn.getEtternavn().substring(0, 1))
-                        .identType("STANDARD")
-                        .build())
+            eq(OpprettNavidentRequest.builder()
+                .personid(personident)
+                .identPrefix(navn.getEtternavn().substring(0, 1))
+                .identType("STANDARD")
+                .build())
         )).thenReturn(ResponseEntity.ok(
-                OpprettNavidentResponse.builder()
-                        .navident(navident)
-                        .build()));
+            OpprettNavidentResponse.builder()
+                .navident(navident)
+                .build()));
 
         when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
 
         var request = new OpprettRessursRequest(
-                personident,
-                navn.getFornavn(),
-                navn.getMellomnavn(),
-                navn.getEtternavn(),
-                Sektor.EKSTERN,
-                "",
-                LocalDate.now(),
-                Optional.of(LocalDate.now()),
-                null,
+            personident,
+            navn.getFornavn(),
+            navn.getMellomnavn(),
+            navn.getEtternavn(),
+            Sektor.EKSTERN,
+            "",
+            LocalDate.now(),
+            Optional.of(LocalDate.now()),
+            null,
             ""
         );
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
-                .thenReturn(
-                        new RessursState(
-                                "fid",
-                                request.personident(),
-                                navident,
-                                request.sektor(),
-                                new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                                request.sluttDato(),
-                            Optional.empty()
-                        ));
-
+            .thenReturn(
+                new RessursState(
+                    "fid",
+                    request.personident(),
+                    navident,
+                    request.sektor(),
+                    new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
+                    request.sluttDato(),
+                    Optional.empty(),
+                    null,
+                    Collections.emptyList()
+                ));
 
 
         webTestClient.post()
-                .uri("/app/ressurser")
-                .headers(httpHeaders -> {
-                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                    httpHeaders.setBearerAuth(nomWriteUserToken());
-                })
-                .bodyValue(request)
-                .exchange()
-                .expectStatus().is2xxSuccessful()
-                .expectBody(OpprettRessursResponse.class)
-                .isEqualTo(new OpprettRessursResponse(
-                        personident,
-                        navident,
-                        navn.getFornavn() + " " + navn.getMellomnavn(),
-                        navn.getEtternavn(),
-                        request.sektor()
-                ));
+            .uri("/app/ressurser")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OpprettRessursResponse.class)
+            .isEqualTo(new OpprettRessursResponse(
+                personident,
+                navident,
+                navn.getFornavn() + " " + navn.getMellomnavn(),
+                navn.getEtternavn(),
+                request.sektor()
+            ));
 
         verify(ressursCommadService, times(1)).createRessursSync(any());
         verify(ressursCommadService, times(1)).avsluttRessursEvent(any(), any());
@@ -233,7 +236,17 @@ public class RessursControllerTest extends RestTestBase {
         var navident = "A123456";
         when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
         when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident, Sektor.EKSTERN, null, Optional.empty(), Optional.empty())));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_1",
+                "01010154321",
+                navident,
+                Sektor.EKSTERN,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            )));
 
 
         var request = new UpdateVisningsnavnRequest(
@@ -296,7 +309,17 @@ public class RessursControllerTest extends RestTestBase {
         var navident = "A123456";
         when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
         when(ressursStateRepository.findByNavident(navident))
-            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_1",
+                "01010154321",
+                navident,
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            )));
 
 
         var request = new UpdateVisningsnavnRequest(

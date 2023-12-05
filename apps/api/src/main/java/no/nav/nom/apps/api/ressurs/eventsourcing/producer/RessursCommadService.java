@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -56,9 +58,9 @@ public class RessursCommadService {
         final var response = ressursStateListener.waitForAggregate(fid);
         createRessurs(fid, opprettRessursCommand);
 
-        try{
+        try {
             return response.get(10, TimeUnit.SECONDS);
-        } catch (Exception e){
+        } catch (Exception e) {
             ressursStateListener.removeWait(fid);
             log.error("Error waiting for ressurs to be created ", e);
             throw e;
@@ -68,20 +70,23 @@ public class RessursCommadService {
     public CompletableFuture<SendResult<String, RessursEvent>> avsluttRessursEvent(OpphorRessursCommand opphorRessursCommand, InputMetadata inputMetadata) {
         // TODO validate command
         return eventProducer.sendMessage(new RessursSluttetEventV1(
-                opphorRessursCommand.fid(),
-                new RessursSluttetEventV1.RessursSluttetEventData(opphorRessursCommand.sluttdato()),
-                inputMetadata
+            opphorRessursCommand.fid(),
+            new RessursSluttetEventV1.RessursSluttetEventData(opphorRessursCommand.sluttdato()),
+            inputMetadata
         ));
     }
 
-    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(OppdaterPersonaliaCommand oppdaterPersonaliaCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonaliaEvent(
+        OppdaterPersonaliaCommand oppdaterPersonaliaCommand,
+        InputMetadata inputMetadata
+    ) {
         // TODO validate command
         return eventProducer.sendMessage(new RessursPersonaliaOppdatertV1(
-                oppdaterPersonaliaCommand.fid(),
-                new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
-                        oppdaterPersonaliaCommand.visningsnavn()
-                ),
-                inputMetadata
+            oppdaterPersonaliaCommand.fid(),
+            new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
+                oppdaterPersonaliaCommand.visningsnavn()
+            ),
+            inputMetadata
         ));
     }
 
@@ -102,27 +107,32 @@ public class RessursCommadService {
             new RessursOpprettetEventV1.RessursOpprettetEventData(
                 opprettRessursCommand.personident(),
                 opprettRessursCommand.sektor(),
-                opprettRessursCommand.visningsnavn()
-                ),
-                opprettRessursCommand.inputMetadata(),
-                new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
-                        Optional.ofNullable(opprettRessursCommand.navident()),
-                        opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
-                        opprettRessursCommand.pdlPerson()
-                                .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
-                                        pdlPerson.getFornavn(),
-                                        pdlPerson.getMellomnavn(),
-                                        pdlPerson.getEtternavn()
-                                )),
-                        opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
-                        Optional.ofNullable(opprettRessursCommand.startdato()),
-                        Optional.ofNullable(opprettRessursCommand.orgEnhetId()),
-                        Optional.ofNullable(opprettRessursCommand.ansettelsesType())
-                )
+                opprettRessursCommand.visningsnavn(),
+                opprettRessursCommand.fysiskbrukerStedNr() == null ? Collections.emptyList() : List.of(opprettRessursCommand.fysiskbrukerStedNr()),
+                opprettRessursCommand.fysiskbrukerStedNr()
+            ),
+            opprettRessursCommand.inputMetadata(),
+            new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+                Optional.ofNullable(opprettRessursCommand.navident()),
+                opprettRessursCommand.pdlPerson().map(r -> r.getKjonn().name()),
+                opprettRessursCommand.pdlPerson()
+                    .map(pdlPerson -> new RessursOpprettetEventV1.RessursOpprettetAdditionalData.FolkeregistrertNavn(
+                        pdlPerson.getFornavn(),
+                        pdlPerson.getMellomnavn(),
+                        pdlPerson.getEtternavn()
+                    )),
+                opprettRessursCommand.pdlPerson().map(Person::getFoedselsdato),
+                Optional.ofNullable(opprettRessursCommand.startdato()),
+                Optional.ofNullable(opprettRessursCommand.orgEnhetId()),
+                Optional.ofNullable(opprettRessursCommand.ansettelsesType())
+            )
         ));
     }
 
-    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonidentCommand(OppdaterPersonidentCommand oppdaterPersonidentCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterPersonidentCommand(
+        OppdaterPersonidentCommand oppdaterPersonidentCommand,
+        InputMetadata inputMetadata
+    ) {
         return eventProducer.sendMessage(new RessursPersonidentOppdatertV1(
             oppdaterPersonidentCommand.fid(),
             new RessursPersonidentOppdatertV1.PersonidentOppdatertEventData(
@@ -142,7 +152,10 @@ public class RessursCommadService {
         ));
     }
 
-    public CompletableFuture<SendResult<String, RessursEvent>> endreStartRessursEvent(OppdaterStartdatoCommand oppdaterStartdatoCommand, InputMetadata inputMetadata) {
+    public CompletableFuture<SendResult<String, RessursEvent>> endreStartRessursEvent(
+        OppdaterStartdatoCommand oppdaterStartdatoCommand,
+        InputMetadata inputMetadata
+    ) {
         return eventProducer.sendMessage(new RessursStartDatoOppdatertV1(
             oppdaterStartdatoCommand.fid(),
             new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato()),

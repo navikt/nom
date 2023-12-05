@@ -12,6 +12,7 @@ import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +36,9 @@ public class TestData {
             Sektor.EKSTERN,
             new Visningsnavn(
                 "Fornavn", Optional.empty(), "Etternavn"
-            )
+            ),
+            List.of("2021"),
+            "2021"
         );
     }
 

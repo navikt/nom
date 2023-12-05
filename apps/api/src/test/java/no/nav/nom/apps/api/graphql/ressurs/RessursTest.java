@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -166,7 +167,9 @@ class RessursTest extends RessursTestBase {
                 "etternavn"
             ),
             Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursState);
@@ -193,7 +196,9 @@ class RessursTest extends RessursTestBase {
                 "etternavn"
             ),
             Optional.of(LocalDate.now().plusDays(10)),
-            Optional.of(LocalDate.now().minusDays(10))
+            Optional.of(LocalDate.now().minusDays(10)),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursState);

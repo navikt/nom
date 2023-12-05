@@ -230,7 +230,8 @@ public class RessursRestService {
                 .flatMap(orgEnhetStateRepository::findById)
                 .flatMap(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
-            request.ansettelsesType()
+            request.ansettelsesType(),
+            request.fysiskBrukerstedNr()
         );
 
 

@@ -85,7 +85,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -127,7 +128,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 start,                          // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -159,7 +161,16 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     private void svarAtAlleNavidenterErStatlig(String navident) {
-        when(ressursStateRepository.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1", "FNR00000", navident, Sektor.NAV_STATLIG, null, Optional.empty(), Optional.empty())));
+        when(ressursStateRepository.findByNavident(any())).thenReturn(Optional.of(new RessursState("FID_1",
+            "FNR00000",
+            navident,
+            Sektor.NAV_STATLIG,
+            null,
+            Optional.empty(),
+            Optional.empty(),
+            null,
+            Collections.emptyList()
+        )));
     }
 
     @Test
@@ -176,7 +187,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                          // Gyldig Fom for den strukturerte stillingen
                 endDate,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -221,7 +233,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -232,7 +245,17 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         // Ingen ekststerende orgtilknytninger
         when(orgtilknytningService.getAll()).thenReturn(Collections.emptyList());
         when(ressursStateRepository.findByNavident(any())).thenReturn(
-            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.of(ressursSluttDato), Optional.empty()))
+            Optional.of(new RessursState(
+                "FID_1",
+                "FNR000",
+                navident,
+                Sektor.NAV_STATLIG,
+                new Visningsnavn("Ola", Optional.empty(), "Normann"),
+                Optional.of(ressursSluttDato),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            ))
         );
 
         ressursStillingProcessor.process(navident, stillingPerioder);
@@ -266,7 +289,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_3"),     // DVH stillingens enhets agressoId
                     "ENHET_3_NYTT_NAVN",        // DVH stillingens enhets navn
                     Optional.of("AGRID_3"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_4").get(),
@@ -280,7 +304,17 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
         when(orgtilknytningService.getByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
         when(ressursStateRepository.findByNavident(any())).thenReturn(
-            Optional.of(new RessursState("FID_1", "FNR000", navident, Sektor.NAV_STATLIG, new Visningsnavn("Ola", Optional.empty(), "Normann"), Optional.empty(), Optional.empty()))
+            Optional.of(new RessursState(
+                "FID_1",
+                "FNR000",
+                navident,
+                Sektor.NAV_STATLIG,
+                new Visningsnavn("Ola", Optional.empty(), "Normann"),
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
+            ))
         );
         ressursStillingProcessor.process(navident, stillingPerioder);
 
@@ -311,7 +345,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -332,7 +367,9 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag ikke er satt og navident er markert som mastret")
+    @DisplayName(
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag ikke er satt og navident er markert som mastret"
+    )
     public void test_101b() {
         String navident = "A000001";
 
@@ -344,7 +381,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -378,7 +416,9 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag er satt og navident ikke er markert som mastret")
+    @DisplayName(
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende orgtilknytning - når NomMasterd unleash flag er satt og navident ikke er markert som mastret"
+    )
     public void test_101c() {
         String navident = "A000001";
 
@@ -390,7 +430,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                      // Gyldig Fom for den strukturerte stillingen
                 MAX_DATE,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -436,7 +477,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                          // Gyldig Fom for den strukturerte stillingen
                 endDate,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -457,7 +499,9 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag ikke er satt og navident er markert")
+    @DisplayName(
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag ikke er satt og navident er markert"
+    )
     public void test_103b() {
         String navident = "A000001";
 
@@ -470,7 +514,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                          // Gyldig Fom for den strukturerte stillingen
                 endDate,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -507,7 +552,9 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     }
 
     @Test
-    @DisplayName("Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag er satt og navident ikke er markert")
+    @DisplayName(
+        "Sjekk at OrgtilknytningOpprett CMD blir kalt for manglende enhet med sluttdato- når NomMasterd unleash flag er satt og navident ikke er markert"
+    )
     public void test_103c() {
         String navident = "A000001";
 
@@ -520,7 +567,8 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
                     Optional.of("AGRID_1"),     // DVH stillingens enhets agressoId
                     "ENHET_1",                  // DVH stillingens enhets navn
                     Optional.of("AGRID_1"),     // DVH ressursens enhets agressoId
-                    Optional.of("ORGENHET")),   // DVH ressursens agresso orgenhets nivå
+                    Optional.of("ORGENHET")
+                ),   // DVH ressursens agresso orgenhets nivå
                 startDate,                          // Gyldig Fom for den strukturerte stillingen
                 endDate,                       // Gyldig Tom for den strukturerte stillingen
                 orgenhetService.getByFid("FID_1").get(),
@@ -566,10 +614,24 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     private void settOppStandardEnheter() {
         final Optional<LocalDate> EMPTY_DATE = Optional.empty();
         orgEnhetStateRepository.clear();
-        orgEnhetStateRepository.putEventAggregate( lagEnhet("FID_1", "a001bc", "ENHET_1",           LocalDate.of(2020, 1, 1), EMPTY_DATE,                 "AGRID_1" ));
-        orgEnhetStateRepository.putEventAggregate( lagEnhet("FID_2", "a002bc", "ENHET_2",           LocalDate.of(2020, 1, 1), EMPTY_DATE,                 "AGRID_2" ));
-        orgEnhetStateRepository.putEventAggregate( lagEnhet("FID_3", "a003bc", "ENHET_3_AVSLUTTET", LocalDate.of(2020, 1, 1), LocalDate.of(2022, 12, 31), "AGRID_3" ));
-        orgEnhetStateRepository.putEventAggregate( lagEnhet("FID_4", "a004bc", "ENHET_3_NYTT_NAVN", LocalDate.of(2023, 1, 1), LocalDate.of(2022, 12, 31), "AGRID_3" ));
+        orgEnhetStateRepository.putEventAggregate(lagEnhet("FID_1", "a001bc", "ENHET_1", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_1"));
+        orgEnhetStateRepository.putEventAggregate(lagEnhet("FID_2", "a002bc", "ENHET_2", LocalDate.of(2020, 1, 1), EMPTY_DATE, "AGRID_2"));
+        orgEnhetStateRepository.putEventAggregate(lagEnhet(
+            "FID_3",
+            "a003bc",
+            "ENHET_3_AVSLUTTET",
+            LocalDate.of(2020, 1, 1),
+            LocalDate.of(2022, 12, 31),
+            "AGRID_3"
+        ));
+        orgEnhetStateRepository.putEventAggregate(lagEnhet(
+            "FID_4",
+            "a004bc",
+            "ENHET_3_NYTT_NAVN",
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2022, 12, 31),
+            "AGRID_3"
+        ));
     }
 
     private OrgEnhetState lagEnhet(String fid, String id, String navn, LocalDate gyldigFom, LocalDate gyldigTom, String agressoId) {
@@ -578,6 +640,7 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
 
     private OrgEnhetState lagEnhet(String fid, String id, String navn, LocalDate gyldigFom, Optional<LocalDate> gyldigTom, String agressoId) {
         return new OrgEnhetState(fid, id, navn, gyldigFom, gyldigTom, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of(agressoId), Optional.of("ORGENHET"), Optional.empty());
+            Optional.of(agressoId), Optional.of("ORGENHET"), Optional.empty()
+        );
     }
 }

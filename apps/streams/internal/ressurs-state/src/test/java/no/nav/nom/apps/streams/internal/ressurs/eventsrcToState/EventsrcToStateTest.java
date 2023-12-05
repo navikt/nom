@@ -28,6 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
@@ -55,7 +56,9 @@ public class EventsrcToStateTest {
                 "fornavn",
                 null,
                 "etternavn"
-            )
+            ),
+            List.of("2011"),
+            "2011"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -87,7 +90,9 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.empty(),
-            Optional.of(mockToday)
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
         inputTopic.pipeInput(UUID.randomUUID().toString(), event);
@@ -110,7 +115,9 @@ public class EventsrcToStateTest {
                 "fornavn",
                 null,
                 "etternavn"
-            )
+            ),
+            List.of("2011"),
+            "2011"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -150,8 +157,9 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.empty(),
-            Optional.of(mockToday)
-
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
         final RessursState expectedSluttet = new RessursState(
@@ -165,8 +173,9 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.of(sluttetEventData.sluttdato()),
-            Optional.of(mockToday)
-
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
 
@@ -191,7 +200,9 @@ public class EventsrcToStateTest {
                 "fornavn",
                 null,
                 "etternavn"
-            )
+            ),
+            List.of("2011"),
+            "2011"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -237,8 +248,9 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.empty(),
-            Optional.of(mockToday)
-
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
         final RessursState expectedEndret = new RessursState(
@@ -248,8 +260,9 @@ public class EventsrcToStateTest {
             eventData.sektor(),
             personaliaOppdatertEventData.visningsnavn(),
             Optional.empty(),
-            Optional.of(mockToday)
-
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
 
@@ -276,7 +289,9 @@ public class EventsrcToStateTest {
                 "fornavn",
                 null,
                 "etternavn"
-            )
+            ),
+            List.of("2011"),
+            "2011"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
@@ -307,8 +322,9 @@ public class EventsrcToStateTest {
                 "etternavn"
             ),
             Optional.empty(),
-            Optional.of(mockToday)
-
+            Optional.of(mockToday),
+            eventData.primaryFysiskBrukersted(),
+            eventData.fysiskeBrukersteder()
         );
 
         final RessursEvent slettEvent = new RessursTekniskSlettetEventV1(

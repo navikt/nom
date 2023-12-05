@@ -7,6 +7,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,7 +50,9 @@ public class TestData {
             Sektor.NAV_STATLIG,
             new Visningsnavn("Nav", Optional.empty(), "Navesen"),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
     }
 }

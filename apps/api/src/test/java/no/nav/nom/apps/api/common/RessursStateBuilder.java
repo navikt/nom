@@ -5,6 +5,8 @@ import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class RessursStateBuilder {
@@ -16,6 +18,9 @@ public class RessursStateBuilder {
     private Optional<LocalDate> sluttdato;
 
     private Optional<LocalDate> startdato;
+
+    private String primaryFysiskBrukersted;
+    private List<String> fysiskeBrukersteder;
 
     public RessursStateBuilder fid(String fid) {
         this.fid = fid;
@@ -59,6 +64,16 @@ public class RessursStateBuilder {
         return this;
     }
 
+    public RessursStateBuilder primaryFysiskBrukersted(String primaryFysiskBrukersted) {
+        this.primaryFysiskBrukersted = primaryFysiskBrukersted;
+        return this;
+    }
+
+    public RessursStateBuilder fysiskeBrukersteder(List<String> fysiskeBrukersteder) {
+        this.fysiskeBrukersteder = fysiskeBrukersteder;
+        return this;
+    }
+
     public RessursStateBuilder(int suffix) {
         this.fid = "fid" + suffix;
         this.personident = "pid" + suffix;
@@ -71,11 +86,13 @@ public class RessursStateBuilder {
         );
         this.sluttdato = Optional.empty();
         this.startdato = Optional.empty();
+        this.primaryFysiskBrukersted = null;
+        this.fysiskeBrukersteder = Collections.emptyList();
 
     }
 
     public RessursState build() {
-        return new RessursState(fid, personident, navident, sektor, visningsnavn, sluttdato, startdato);
+        return new RessursState(fid, personident, navident, sektor, visningsnavn, sluttdato, startdato, primaryFysiskBrukersted, fysiskeBrukersteder);
     }
 
 }

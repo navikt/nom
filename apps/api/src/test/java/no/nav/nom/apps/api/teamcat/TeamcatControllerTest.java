@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,7 +72,9 @@ public class TeamcatControllerTest extends RestTestBase {
                 "e" + navident
             ),
             Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
         return  Optional.of(ressursState);
     }
@@ -186,11 +189,11 @@ public class TeamcatControllerTest extends RestTestBase {
         when(orgtilknytningService.getByNavIdent(resId)).thenReturn(List.of(createOtks(resId, oeId)));
 
         mockEnheterAsHierarchy(List.of(oe1,oe2,oe3,oe4));
-        
-        
+
+
         when(ressursLedereResolver.ledere(any())).thenReturn(Stream.of("B321321").map(it -> new RessursLeder(null,it,true)).collect(Collectors.toList()));
-        
-        
+
+
         var y = webTestClient.get()
             .uri("/api/v1/teamcat/ressurs/" + resId)
             .headers(httpHeaders -> {

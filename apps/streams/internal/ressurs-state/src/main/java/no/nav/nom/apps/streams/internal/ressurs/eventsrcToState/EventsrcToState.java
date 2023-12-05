@@ -22,6 +22,7 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -31,48 +32,45 @@ class EventsrcToState {
     private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
 
     public EventsrcToState(
-            @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
-            @Value("${app.kafka.stateTopic}") String stateTopic,
-            ObjectMapper objectMapper,
-            JsonSerde<Object> objectSerde,
-            StreamsBuilder streamsBuilder
-    ){
+        @Value("${app.kafka.eventsourceTopic}") String eventsourceTopic,
+        @Value("${app.kafka.stateTopic}") String stateTopic,
+        ObjectMapper objectMapper,
+        JsonSerde<Object> objectSerde,
+        StreamsBuilder streamsBuilder
+    ) {
         final var stringSerde = Serdes.String();
         final var eventSerde = objectSerde.copyWithType(RessursEvent.class);
 
         streamsBuilder.stream(eventsourceTopic, Consumed.with(stringSerde, eventSerde))
-                .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
-                .aggregate(
-                        objectMapper::createObjectNode,
-                        (key, event, state) -> {
-                            if (event instanceof RessursTekniskSlettetEventV1) {
-                                state.put("TOMBSTONE", true);
-                                // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
-                                // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
-                                // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
-                            } else {
-                                if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
-                                    if (data.navident().isPresent()) {
-                                        state.put("navident", data.navident().get());
-                                        if(data.startdato().isPresent()) {
-                                            state.put("startdato", data.startdato().get().toString());
-                                        }
-                                    }
-                                    if(data.startdato().isPresent()){
-                                        state.put("startdato", data.startdato().get().toString());
-                                    }
-                                }
-                                state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+            .groupBy((k, v) -> v.getFid(), Grouped.with(stringSerde, eventSerde))
+            .aggregate(
+                objectMapper::createObjectNode,
+                (key, event, state) -> {
+                    if (event instanceof RessursTekniskSlettetEventV1) {
+                        state.put("TOMBSTONE", true);
+                        // return null; // Create TOMBSTONE - should skip mapValues and get forwarded directly to output stream. -
+                        // (See https://cwiki.apache.org/confluence/display/KAFKA/Kafka+Stream+Usage+Patterns#KafkaStreamUsagePatterns-Howtomanagethesizeofstatestoresusingtombstones?)
+                        // NOPE ! Does not work. If multiple input event at once, it works, but null event alone will be 'reduced' away
+                    } else {
+                        state.setAll(objectMapper.convertValue(event.getData(), ObjectNode.class));
+                        if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
+                            if (data.navident().isPresent()) {
+                                state.put("navident", data.navident().get());
                             }
-                            return state;
-                        },
-                        Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
-                )
-                .mapValues(this::toRessursState)
-                .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
+                            if (data.startdato().isPresent()) {
+                                state.put("startdato", data.startdato().get().toString());
+                            }
+                        }
+                    }
+                    return state;
+                },
+                Materialized.with(stringSerde, objectSerde.copyWithType(ObjectNode.class))
+            )
+            .mapValues(this::toRessursState)
+            .toStream().to(stateTopic, Produced.with(stringSerde, objectSerde.copyWithType(RessursState.class)));
     }
 
-    public RessursState toRessursState(String fid, JsonNode eventStateAggregate){
+    public RessursState toRessursState(String fid, JsonNode eventStateAggregate) {
         try {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 log.info("SlettRessursEvent for fid {} received - create TOMBSTONE in StateTopic", fid);
@@ -81,20 +79,25 @@ class EventsrcToState {
 
             final var visningsnavn = eventStateAggregate.get("visningsnavn");
 
+            var fysiskBrukerstedList = new ArrayList<String>();
+            eventStateAggregate.withArray("fysiskeBrukersteder").elements().forEachRemaining(e -> fysiskBrukerstedList.add(e.asText()));
+
             return new RessursState(
-                    fid,
-                    eventStateAggregate.get("personident").asText(),
-                    eventStateAggregate.get("navident").asText(),
-                    Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
-                    new Visningsnavn(
-                            visningsnavn.get("fornavn").asText(),
-                            Optional.ofNullable(parseNullableFromJson(visningsnavn,"mellomnavn")),
-                            visningsnavn.get("etternavn").asText()
-                    ),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate,"sluttdato", LocalDate::parse)),
-                    Optional.ofNullable(parseNullableFromJson(eventStateAggregate,"startdato", LocalDate::parse))
+                fid,
+                eventStateAggregate.get("personident").asText(),
+                eventStateAggregate.get("navident").asText(),
+                Sektor.valueOf(eventStateAggregate.get("sektor").asText()),
+                new Visningsnavn(
+                    visningsnavn.get("fornavn").asText(),
+                    Optional.ofNullable(parseNullableFromJson(visningsnavn, "mellomnavn")),
+                    visningsnavn.get("etternavn").asText()
+                ),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "sluttdato", LocalDate::parse)),
+                Optional.ofNullable(parseNullableFromJson(eventStateAggregate, "startdato", LocalDate::parse)),
+                eventStateAggregate.get("primaryFysiskBrukersted").asText(),
+                fysiskBrukerstedList
             );
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Error mapping to RessursState", e);
             throw e;
         }

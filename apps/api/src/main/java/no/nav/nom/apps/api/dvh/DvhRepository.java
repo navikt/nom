@@ -27,7 +27,7 @@ public class DvhRepository {
     private List<DvhLeder> ledere = Collections.emptyList();
     private List<DvhOrganisering> organiseringer = Collections.emptyList();
     private Collection<String> annenStatNavIdenter = Collections.emptyList();
-    private List<DvhTelefon> navidentTelefonNrMap;
+    private List<DvhTelefon> navidentTelefonNrMap = Collections.emptyList();
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 

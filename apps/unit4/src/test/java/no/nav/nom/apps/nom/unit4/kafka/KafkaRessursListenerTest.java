@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -145,7 +146,9 @@ class KafkaRessursListenerTest {
                                 "VisningsFornavn",
                                 Optional.empty(),
                                 "VisningsEtternavn"
-                        )
+                        ),
+                    List.of("2021"),
+                    "2021"
                 ),
                 new Event.Metadata(
                         new InputMetadata("Test", "test", null,

@@ -104,6 +104,7 @@ public class RessursHendelseForEventsourceService {
             createInputMetadata(ressurs.getRawData()),
             null,
             null,
+            null,
             null
         )));
     }
