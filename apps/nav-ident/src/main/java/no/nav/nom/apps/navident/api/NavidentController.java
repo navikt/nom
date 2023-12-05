@@ -77,7 +77,7 @@ public class NavidentController {
     @PostMapping(value = "/create")
     public ResponseEntity<NavidentResponseDTO> createNavident(@RequestBody NavidentRequestDTO request) {
         logger.info(LogConfig.SECURE_LOGS, "Navident bestilt for: {}", request);
-        val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), request.getIdentPrefix().charAt(0));
+        val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), request.getIdentPrefix().toUpperCase().charAt(0));
         val response = NavidentResponseDTO.builder()
                 .navident(bestilling.getBody().getNavident())
                 .feilmelding(bestilling.getBody().getFeilmelding())
