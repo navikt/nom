@@ -96,7 +96,8 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
             .append("], (")
             .append(enhet.getGyldigFom())
             .append(" - ")
-            .append(enhet.getGyldigTom().isPresent() ? enhet.getGyldigTom().get() : ")");
+            .append(enhet.getGyldigTom().isPresent() ? enhet.getGyldigTom().get() : " ")
+            .append(")");
         return enhetStr.toString();
     }
 }

@@ -144,7 +144,10 @@ public class KorrigerOrgtilknytningerUtoverOrgenhetensPeriode {
                     return true; // orgEnhet.gyldigFom > tilknytning.gyldigTom
                 }
                 if (t.gyldigTom().isEmpty() && orgEnhet.get().getGyldigTom().isPresent()) {
-                    return true; // orgEnhet avsluttet > tilknytning ikke avsluttet
+                    return true; // orgEnhet avsluttet < tilknytning ikke avsluttet
+                }
+                if (t.gyldigTom().isPresent() && orgEnhet.get().getGyldigTom().isPresent() && orgEnhet.get().getGyldigTom().get().isBefore(t.gyldigTom().get())) {
+                    return true; // orgEnhet avsluttet < tilknytning avsluttet
                 }
                 return false;
             } ).toList();
