@@ -40,7 +40,9 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
     )
     @GetMapping()
-    public String dataSanityCheckEnheter(@RequestParam(defaultValue = "false") boolean performUpdate, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
+    public String korrigereAvvikledeEnheterOgOrgtilknytninger(@RequestParam(defaultValue = "false") boolean performUpdate, @RequestParam(defaultValue = "false") boolean inkluderEksterne) {
+        StringBuffer output = new StringBuffer();
+
         // Finn alle orgtilknytninger til orgenhet som er avsluttet eller ikke er i hierarkiet
         Collection<IOrgenhet> aktiveEnheter = orgenhetService.getAllEnheterMedOrganisering();
         List<String> aktiveEnheterIds = aktiveEnheter.stream().map(IOrgenhet::getId).toList();
@@ -57,12 +59,16 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
             .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktuelleNavidenter.contains(ot.navident()))
             .toList();
 
+        output.append("Antall aktive enheter: %s\n".formatted(aktiveEnheter.size()));
+        output.append("Antall ikke aktive enheter: %s\n".formatted(ikkeAktiveEnheter.size()));
+        output.append("Antall aktive orgtilknytninger til ikke aktive enheter: %s\n".formatted(aktiveOrgtilknytningerTilIkkeAktiveEnheter.size()));
+        output.append("Antall aktive ansatte: %s\n".formatted(aktuelleAnsatte.size()));
+
         // Finn alle orgtilknytninger til alle Ansatte som har har OT til ikke-aktiv Enhet
-        StringBuffer output = new StringBuffer();
-        aktuelleNavidenter.forEach(r -> {
-            output.append("%s\n".formatted(r));
+        aktuelleNavidenter.forEach(navident -> {
+            output.append("%s\n".formatted(navident));
             aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream()
-                .filter(ot -> ot.navident().equals(r))
+                .filter(ot -> ot.navident().equals(navident))
                 .forEach(ot -> {
                     output.append("  %s -> %s - %s\n".formatted(getEnhetText(ot.orgEnhetId()), ot.gyldigFom(), ot.gyldigTom()));
                 });
