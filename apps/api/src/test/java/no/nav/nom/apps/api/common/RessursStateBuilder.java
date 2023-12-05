@@ -19,7 +19,7 @@ public class RessursStateBuilder {
 
     private Optional<LocalDate> startdato;
 
-    private String primaryFysiskBrukersted;
+    private Optional<String> primaryFysiskBrukersted;
     private List<String> fysiskeBrukersteder;
 
     public RessursStateBuilder fid(String fid) {
@@ -64,7 +64,7 @@ public class RessursStateBuilder {
         return this;
     }
 
-    public RessursStateBuilder primaryFysiskBrukersted(String primaryFysiskBrukersted) {
+    public RessursStateBuilder primaryFysiskBrukersted(Optional<String> primaryFysiskBrukersted) {
         this.primaryFysiskBrukersted = primaryFysiskBrukersted;
         return this;
     }
@@ -86,7 +86,7 @@ public class RessursStateBuilder {
         );
         this.sluttdato = Optional.empty();
         this.startdato = Optional.empty();
-        this.primaryFysiskBrukersted = null;
+        this.primaryFysiskBrukersted = Optional.empty();
         this.fysiskeBrukersteder = Collections.emptyList();
 
     }

@@ -20,6 +20,6 @@ public record RessursState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Visningsnavn visningsnavn,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttdato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> startdato,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String primaryFysiskBrukersted,
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<String> primaryFysiskBrukersted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<String> fysiskeBrukersteder
 ) {}
