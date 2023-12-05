@@ -14,12 +14,14 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.contract.Orgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -178,10 +180,13 @@ public class SanityCheck {
         }
     )
     @GetMapping(value = "/listRessurserTilIkkeAktivEnhet")
-    public String listRessurserTilIkkeAktivEnhet() {
+    public String listRessurserTilIkkeAktivEnhet(@RequestParam(defaultValue = "false") boolean inkluderEksterne) {
         StringBuffer result = new StringBuffer();
 
-        List<RessursState> alleRessurser = ressursStateRepository.getAll().stream().toList();
+        List<RessursState> alleRessurser = inkluderEksterne
+            ? ressursStateRepository.getAll().stream().toList()
+            : ressursStateRepository.getAll().stream().filter(r -> !r.sektor().equals(Sektor.EKSTERN)).toList();
+
         List<IOrgenhet> alleEnheter = (List<IOrgenhet>) orgenhetService.getAllEnheter();
         List<DvhOrganisering> alleOrganiseringer = dvhRepository.getOrganiseringer();
 
@@ -221,12 +226,6 @@ public class SanityCheck {
                                 .append("], ");
                         }
                     );
-
-                if (enheter.length() == 0) {
-                    result.append(" What? - ingen orgenhet i tilknytninger?\n");
-                } else {
-                    result.append(enheter.substring(0, enheter.length() - 2)).append("\n");
-                }
             }
         );
 
