@@ -226,11 +226,16 @@ public class SanityCheck {
                                 .append("], ");
                         }
                     );
+                if (enheter.isEmpty()) {
+                    result.append(" What? - ingen orgenhet i tilknytninger?\n");
+                } else {
+                    result.append(enheter.substring(0, enheter.length() - 2)).append("\n");
+                }
             }
         );
 
         result.append("\n");
-        uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.forEach(s -> result.append(s).append("\n"));
+//        uniqueAgressoIderEnheterIkkeAktiveEllerUtenOrganisering.forEach(s -> result.append(s).append("\n"));
 
         return result.toString();
     }
