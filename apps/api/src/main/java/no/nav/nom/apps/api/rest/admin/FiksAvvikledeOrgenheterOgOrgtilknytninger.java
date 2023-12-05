@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -49,20 +50,25 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
         List<IOrgenhet> ikkeAktiveEnheter = orgenhetService.getAllEnheter().stream().filter(o -> !aktiveEnheterIds.contains(o.getId())).toList();
         List<String> ikkeAktiveEnheterIds = ikkeAktiveEnheter.stream().map(IOrgenhet::getId).toList();
 
-        List<RessursState> aktuelleAnsatte = ressursStateRepository.getAll().stream()
+        List<RessursState> aktuellaktive= ressursStateRepository.getAll().stream()
             .filter(r -> inkluderEksterne || !r.sektor().equals(Sektor.EKSTERN))
+            .filter(r -> r.sluttdato().isEmpty() || r.sluttdato().get().isAfter(LocalDate.now().minusYears(1)))
             .toList();
 
-        List<String> aktuelleNavidenter = aktuelleAnsatte.stream().map(RessursState::navident).toList();
+        List<String> aktiveNavidenter = aktuellaktive.stream().map(RessursState::navident).toList();
 
         List<OrgtilknytningState> aktiveOrgtilknytningerTilIkkeAktiveEnheter = orgtilknytningService.getAll().stream()
-            .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktuelleNavidenter.contains(ot.navident()))
+            .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktiveNavidenter.contains(ot.navident()))
             .toList();
+
+        List<String> aktuelleNavidenter = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::navident).toList();
 
         output.append("Antall aktive enheter: %s\n".formatted(aktiveEnheter.size()));
         output.append("Antall ikke aktive enheter: %s\n".formatted(ikkeAktiveEnheter.size()));
         output.append("Antall aktive orgtilknytninger til ikke aktive enheter: %s\n".formatted(aktiveOrgtilknytningerTilIkkeAktiveEnheter.size()));
-        output.append("Antall aktive ansatte: %s\n".formatted(aktuelleAnsatte.size()));
+        output.append("Antall aktive ansatte: %s\n".formatted(aktuellaktive.size()));
+        output.append("Antall aktuelle ansatte: %s\n".formatted(aktuellaktive.size()));
+        output.append("\n");
 
         // Finn alle orgtilknytninger til alle Ansatte som har har OT til ikke-aktiv Enhet
         aktuelleNavidenter.forEach(navident -> {
