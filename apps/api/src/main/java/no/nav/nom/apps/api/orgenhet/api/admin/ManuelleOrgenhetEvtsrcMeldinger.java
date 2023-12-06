@@ -16,6 +16,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernO
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import org.flywaydb.core.internal.util.HtmlUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -59,7 +60,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> avvikleOrgenhet(
         @Parameter(description = "Orgenhet Id") @RequestParam String orgenhetId,
-        @Parameter(description = "Gyldig til og med") @RequestParam LocalDate gylidgTom,
+        @Parameter(description = "Gyldig til og med") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate gylidgTom,
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
     ) {
