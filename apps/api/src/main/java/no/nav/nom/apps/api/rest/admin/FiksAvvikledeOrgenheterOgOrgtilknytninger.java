@@ -59,6 +59,7 @@ public class FiksAvvikledeOrgenheterOgOrgtilknytninger {
 
         List<OrgtilknytningState> aktiveOrgtilknytningerTilIkkeAktiveEnheter = orgtilknytningService.getAll().stream()
             .filter(ot -> ikkeAktiveEnheterIds.contains(ot.orgEnhetId()) && aktiveNavidenter.contains(ot.navident()))
+            .filter(ot -> ot.gyldigTom().isEmpty() || ot.gyldigTom().get().isAfter(LocalDate.now()))
             .toList();
         List<String> aktiveOrgtilknytningerTilIkkeAktiveEnheterFids = aktiveOrgtilknytningerTilIkkeAktiveEnheter.stream().map(OrgtilknytningState::fid).toList();
 
