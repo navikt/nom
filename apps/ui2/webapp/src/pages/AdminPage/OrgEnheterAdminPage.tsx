@@ -280,7 +280,7 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   const updateOrgEnhetsTypeMutation = useMutation({
     mutationFn: (newOrgEnhetsType: OrgEnhetsType | null) =>
       axios.post<void, unknown, SetOrgEnhetsTypeRequest>(
-        "/nom-api/app/orgenhet/orgEnhetsType",
+        "/nom-api/app/orgenheter/orgEnhetsType",
         {
           nomId: orgEnhet.id,
           orgEnhetsType: newOrgEnhetsType ?? undefined,
