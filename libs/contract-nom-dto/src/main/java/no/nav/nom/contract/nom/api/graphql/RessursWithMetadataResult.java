@@ -2,7 +2,7 @@ package no.nav.nom.contract.nom.api.graphql;
 
 import java.time.LocalDateTime;
 
-public class RessursWithMedatadaResult  {
+public class RessursWithMetadataResult {
 
     private String id;
     private Ressurs ressurs;
@@ -10,7 +10,7 @@ public class RessursWithMedatadaResult  {
     private LocalDateTime opprettetDato;
     private ResultCode code;
 
-    public RessursWithMedatadaResult(String id, Ressurs ressurs, String opprettetAv, LocalDateTime opprettetDato) {
+    public RessursWithMetadataResult(String id, Ressurs ressurs, String opprettetAv, LocalDateTime opprettetDato) {
         this.id = id;
         this.ressurs = ressurs;
         this.opprettetAv = opprettetAv;

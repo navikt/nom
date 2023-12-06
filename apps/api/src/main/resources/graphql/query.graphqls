@@ -12,7 +12,7 @@ type Query {
     orgEnheter(where: OrgEnheterSearch): [OrgEnhetResult!]!
     ressurs(where: RessursSearch!): Ressurs
     ressurser(where: RessurserSearch): [RessursResult!]!
-    ressurserWithMetadata: [RessursWithMedatadaResult!]!
+    ressurserWithMetadata: [RessursWithMetadataResult!]!
     person(where: PersonSearch): PersonResult
 }
 
@@ -89,7 +89,7 @@ type RessursResult {
     ressurs: Ressurs
 }
 
-type RessursWithMedatadaResult {
+type RessursWithMetadataResult {
     code: ResultCode!
     id: String!
     ressurs: Ressurs

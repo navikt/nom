@@ -13,14 +13,12 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.metadata.RessursMetadataReposit
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
-import no.nav.nom.contract.nom.api.graphql.RessursWithMedatadaResult;
+import no.nav.nom.contract.nom.api.graphql.RessursWithMetadataResult;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -76,11 +74,11 @@ public class RessursResolver {
                 .toList();
     }
 
-    public List<RessursWithMedatadaResult> ressurserWithMetadata() {
+    public List<RessursWithMetadataResult> ressurserWithMetadata() {
         Stream<Result> result = ressursStateRepository.getAll().stream().map(Result::from);
 
         return result.map(res ->
-            new RessursWithMedatadaResult(
+            new RessursWithMetadataResult(
                 res.id, MappingUtils.toRessurs(res.ressurs),
                 ressursMetadataRepository.findOpprettetAvById(res.id),
                 ressursMetadataRepository.findOpprettetDatoById(res.id)
