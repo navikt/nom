@@ -21,13 +21,13 @@ const bannerStyles = css`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: var(--a-spacing-2);
 `;
 
 const iconStyles = css`
   height: 25px;
   width: 25px;
-  margin-right: 0.5rem;
+  margin-right: var(--a-spacing-2);
 `;
 
 const textDivStyles = css`
@@ -40,7 +40,7 @@ const textDivStyles = css`
 const buttonDivStyles = css`
   display: flex;
   align-items: center;
-  margin-left: 0.5rem;
+  margin-left: var(--a-spacing-2);
 `;
 
 const PilotBanner = () => {

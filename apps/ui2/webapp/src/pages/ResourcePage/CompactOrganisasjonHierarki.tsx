@@ -79,7 +79,7 @@ function CompactOrgEnhet({
           border: 1px solid var(--a-gray-400);
           display: grid;
           grid-template-columns: min-content 1fr;
-          gap: 1rem;
+          gap: var(--a-spacing-4);
         `,
         selected
           ? css`
@@ -95,7 +95,7 @@ function CompactOrgEnhet({
       </VerticalEdge>
       <div
         css={css`
-          padding: 0.5rem 0;
+          padding: var(--a-spacing-2) 0;
           display: flex;
           flex-direction: column;
         `}
@@ -123,7 +123,7 @@ function SelectedResource({ ressurs }: { ressurs: Ressurs }) {
     <div
       css={css`
         display: flex;
-        gap: 1rem;
+        gap: var(--a-spacing-4);
         border-radius: 5px;
         border: 1px solid var(--a-gray-400);
         align-items: center;

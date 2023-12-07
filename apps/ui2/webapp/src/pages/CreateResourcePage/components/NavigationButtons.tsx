@@ -7,7 +7,7 @@ import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
 export const navigationButtonCss = css`
   display: grid;
   grid-template-columns: repeat(2, 150px);
-  gap: 1rem;
+  gap: var(--a-spacing-4);
   justify-content: center;
   margin-top: var(--a-spacing-10);
 

@@ -114,14 +114,14 @@ export function OrgEnheterAdminPage() {
   return (
     <div
       css={css`
-        padding: 2rem;
+        padding: var(--a-spacing-8);
         background: white;
       `}
     >
       <div
         css={css`
           display: grid;
-          gap: 1rem;
+          gap: var(--a-spacing-4);
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         `}
       >
@@ -192,10 +192,10 @@ export function OrgEnheterAdminPage() {
 
       <div
         css={css`
-          padding: 1rem 0;
+          padding: var(--a-spacing-4) 0;
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: var(--a-spacing-4);
         `}
       >
         <ToggleEditMode />
@@ -263,7 +263,7 @@ export function OrgEnheterAdminPage() {
       <Pagination
         count={Math.ceil(filteredOrgEnheter.length / rowsPerPage)}
         css={css`
-          padding: 2rem;
+          padding: var(--a-spacing-8);
         `}
         hidden={filteredOrgEnheter.length <= rowsPerPage}
         onPageChange={setPage}

@@ -13,6 +13,7 @@ import { NavigationButtons } from "~/pages/CreateResourcePage/components/Navigat
 import { SearchForPerson } from "~/pages/CreateResourcePage/components/SearchForPerson";
 import { createRessursRoute, ressursRoute } from "~/reactRouterRoutes";
 import { fullwidthRow } from "~/resources/NomStyles";
+import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { FolkeregisterPerson } from "~/types/api-models";
 import { capitalizeName } from "~/utils";
 
@@ -22,7 +23,10 @@ export function PersonopplysningerStep() {
   });
 
   return (
-    <ContainerWithHighlightedTop title="Personopplysninger">
+    <ContainerWithHighlightedTop
+      icon={opprettRessursIcon}
+      title="Personopplysninger"
+    >
       <SearchForPerson />
       {!!personident && <CreateResourceForm personident={personident} />}
     </ContainerWithHighlightedTop>

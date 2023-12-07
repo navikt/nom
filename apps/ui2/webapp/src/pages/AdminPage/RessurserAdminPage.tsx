@@ -141,7 +141,7 @@ export function RessurserAdminPage() {
   return (
     <div
       css={css`
-        padding: 2rem;
+        padding: var(--a-spacing-8);
         background: white;
         display: flex;
         flex-direction: column;
@@ -202,7 +202,7 @@ export function RessurserAdminPage() {
       <Pagination
         count={Math.ceil(filteredRessurser.length / rowsPerPage)}
         css={css`
-          padding: 2rem;
+          padding: var(--a-spacing-8);
         `}
         hidden={filteredRessurser.length <= rowsPerPage}
         onPageChange={setPage}

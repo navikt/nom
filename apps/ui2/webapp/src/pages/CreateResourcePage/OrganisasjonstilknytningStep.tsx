@@ -33,13 +33,17 @@ import { NavigationButtons } from "~/pages/CreateResourcePage/components/Navigat
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { createRessursRoute } from "~/reactRouterRoutes";
 import { defaultFormStyle, fullwidthRow } from "~/resources/NomStyles";
+import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
   const { sektor } = useSearch({ from: createRessursRoute.id });
   return (
-    <ContainerWithHighlightedTop title="Organisasjonstilknytninger">
+    <ContainerWithHighlightedTop
+      icon={opprettRessursIcon}
+      title="Organisasjonstilknytninger"
+    >
       {sektor === Sektor.NAV_STATLIG ? (
         <CreateStatligRessurs />
       ) : (

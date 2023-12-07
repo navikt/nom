@@ -5,6 +5,7 @@ import {
   PersonIcon,
   PersonSuitIcon,
   ReceptionIcon,
+  XMarkIcon,
 } from "@navikt/aksel-icons";
 import {
   Button,
@@ -34,13 +35,17 @@ import {
 import { Divider } from "~/components/Divider";
 import { UserImage } from "~/components/UserImage";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
-import { HorizontalEdge } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
-import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
+import {
+  orgRoute,
+  ressursRoute,
+  terminateRessursRoute,
+} from "~/reactRouterRoutes";
+import { blueTopBorder } from "~/resources/NomStyles";
 import type { OrgtilknytningState, Ressurs } from "~/types/api-models";
 import {
   formatDisplayDate,
@@ -55,15 +60,8 @@ import {
 export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
   return (
     <div
-      css={css`
-        border-radius: 5px;
-        background-color: var(--nom-secondary-hover);
-        border: 1px solid var(--a-gray-400);
-      `}
-    >
-      <HorizontalEdge />
-      <div
-        css={css`
+      css={[
+        css`
           padding: var(--a-spacing-12);
           display: flex;
           flex-direction: column;
@@ -72,20 +70,22 @@ export function DetailedRessurs({ ressurs }: { ressurs: Ressurs }) {
           h1,
           h2 {
             display: flex;
-            gap: 0.5rem;
+            gap: var(--a-spacing-2);
 
             svg {
               width: 24px;
               height: 24px;
             }
           }
-        `}
-      >
-        <SummarySection ressurs={ressurs} />
-        <LeaderForSection ressurs={ressurs} />
-        <OrgTilknytningSection ressurs={ressurs} />
-        <TeamCatSection navident={ressurs.navident} />
-      </div>
+        `,
+        blueTopBorder,
+      ]}
+    >
+      <SummarySection ressurs={ressurs} />
+      <LeaderForSection ressurs={ressurs} />
+      <OrgTilknytningSection ressurs={ressurs} />
+      <TeamCatSection navident={ressurs.navident} />
+      <TerminateButton ressurs={ressurs} />
     </div>
   );
 }
@@ -134,7 +134,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: var(--a-spacing-4);
         `}
       >
         <AddOrgtilknytningForm ressurs={ressurs} />
@@ -256,10 +256,10 @@ function ExpiredOrgTilknytning({
     <div
       css={css`
         display: flex;
-        gap: 1rem;
+        gap: var(--a-spacing-4);
         align-items: center;
         background: white;
-        padding: 1.5rem;
+        padding: var(--a-spacing-6);
         border: 1px solid var(--a-border-default);
         border-radius: var(--a-border-radius-large);
       `}
@@ -343,7 +343,7 @@ function OrganisationHierarchyTree({
           {erDagligOppfolging && !startsInTheFuture ? (
             <Tag
               css={css`
-                margin-left: 1rem;
+                margin-left: var(--a-spacing-4);
               `}
               size="xsmall"
               variant="info"
@@ -411,7 +411,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
         css={css`
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: var(--a-spacing-2);
         `}
       >
         {uniqLederFor.map((orgEnhet) => (
@@ -507,7 +507,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           css={css`
             display: grid;
             grid-template-columns: max-content 1fr;
-            gap: 0.5rem 1rem;
+            gap: var(--a-spacing-2) var(--a-spacing-4);
           `}
         >
           <RessursInformationDetail
@@ -530,7 +530,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               <div
                 css={css`
                   display: flex;
-                  gap: 0.5rem;
+                  gap: var(--a-spacing-2);
                 `}
               >
                 <ReactRouterLink
@@ -647,5 +647,38 @@ function TeamCatSection({ navident }: { navident: string }) {
         </Link>
       </div>
     </>
+  );
+}
+
+function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
+  return (
+    <EditButtonWrapper ressurs={ressurs}>
+      <Divider noMargins />
+      <Button
+        // @ts-expect-error -- css-emotion clashes with overrideable components: https://aksel.nav.no/grunnleggende/kode/overridablecomponent
+        as={ReactRouterLink}
+        css={css`
+          --ac-button-secondary-border: var(--a-red-500);
+          --ac-button-secondary-text: var(--a-red-500);
+          --ac-button-secondary-hover-text: var(--a-red-500);
+          --ac-button-secondary-hover-bg: var(--a-red-50);
+          width: fit-content;
+          align-self: flex-end;
+
+          :active {
+            --ac-button-secondary-active-bg: var(--a-red-500);
+          }
+        `}
+        icon={<XMarkIcon aria-hidden />}
+        params={{ id: ressurs.navident }}
+        search={{}}
+        size="small"
+        to={terminateRessursRoute.id}
+        type="button"
+        variant="secondary"
+      >
+        Medarbeider slutter
+      </Button>
+    </EditButtonWrapper>
   );
 }

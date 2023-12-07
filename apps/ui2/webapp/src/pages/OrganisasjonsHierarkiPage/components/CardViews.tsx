@@ -122,7 +122,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
         display: grid;
         grid-template-columns: min-content 1fr 40px;
         align-items: center;
-        gap: 1rem;
+        gap: var(--a-spacing-4);
         cursor: pointer;
 
         &:hover {
@@ -131,7 +131,7 @@ function UnitContainerLink({ children }: { children: ReactNode }) {
       `}
     >
       {children}
-      <ChevronRightIcon fontSize="2rem" />
+      <ChevronRightIcon fontSize="var(--a-spacing-8)" />
     </div>
   );
 }
@@ -161,19 +161,6 @@ export function VerticalEdge({
     >
       {children}
     </div>
-  );
-}
-
-export function HorizontalEdge() {
-  return (
-    <div
-      css={css`
-        background-color: var(--a-lightblue-800);
-        height: var(--a-spacing-2);
-        width: 100%;
-        border-radius: 4px 4px 0 0;
-      `}
-    />
   );
 }
 

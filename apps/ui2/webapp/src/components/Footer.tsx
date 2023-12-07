@@ -4,7 +4,7 @@ import { Link } from "@navikt/ds-react";
 import type { Ref, SVGProps } from "react";
 import { forwardRef } from "react";
 
-import { mediaQueryContentWidth } from "~/resources/NomStyles";
+import { defaultWidth } from "~/resources/NomStyles";
 
 export const footerHeight = "180px";
 
@@ -16,7 +16,7 @@ export function Footer() {
         height: ${footerHeight};
         background: var(--a-lightblue-900);
         color: var(--a-white);
-        padding: 1rem 0;
+        padding: var(--a-spacing-4) 0;
         display: flex;
         justify-content: center;
       `}
@@ -25,7 +25,7 @@ export function Footer() {
         css={css(
           css`
             align-self: center;
-            gap: 1rem 3rem;
+            gap: var(--a-spacing-4) 3rem;
             display: grid;
             grid-template-columns: max-content 1fr;
 
@@ -39,7 +39,7 @@ export function Footer() {
               height: 24px;
             }
           `,
-          mediaQueryContentWidth,
+          defaultWidth,
         )}
       >
         <Link

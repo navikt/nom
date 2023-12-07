@@ -5,8 +5,8 @@ import { useParams, useSearch } from "@tanstack/react-router";
 import React from "react";
 
 import { getRessurs } from "~/api/react-query-endpoints";
-import { DetailedRessurs } from "~/pages/ResourcePage/RessursCards/DetailedRessurs";
-import { RessursHasQuit } from "~/pages/ResourcePage/RessursCards/RessursHasQuit";
+import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
+import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import { ressursRoute } from "~/reactRouterRoutes";
 import { isBeforePresent } from "~/utils";
 
@@ -17,9 +17,8 @@ export const ResourcePage = () => {
   const { alreadyExists } = useSearch({ from: ressursRoute.id });
 
   const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(id as string),
-    queryFn: () => getRessurs.queryFn(id as string),
-    enabled: !!id,
+    queryKey: getRessurs.queryKey(id),
+    queryFn: () => getRessurs.queryFn(id),
   });
 
   const ressurs = ressursQuery.data;
@@ -47,7 +46,7 @@ export const ResourcePage = () => {
             </Alert>
           ) : undefined}
           {hasQuit ? (
-            <RessursHasQuit ressurs={ressurs} />
+            <RessursCard hasQuit ressurs={ressurs} />
           ) : (
             <DetailedRessurs ressurs={ressurs} />
           )}

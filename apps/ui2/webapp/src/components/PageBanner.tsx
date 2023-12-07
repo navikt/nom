@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 
-import { mediaQueryContentWidth } from "~/resources/NomStyles";
+import { defaultWidth } from "~/resources/NomStyles";
 
 export function PageBanner({ text }: { text: string }) {
   return (
@@ -16,7 +16,7 @@ export function PageBanner({ text }: { text: string }) {
     >
       <Heading
         css={css(
-          mediaQueryContentWidth,
+          defaultWidth,
           css`
             align-self: center;
             margin: auto;

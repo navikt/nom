@@ -9,6 +9,7 @@ const CACHE_FOR = {
 };
 
 import type {
+  AvvikleRessursRequest,
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
   LeggTilOrgtilknytningRequest,
@@ -232,6 +233,17 @@ export const leggTilOrgtilknytning = async (
   );
   await hopeForKafkaStateToUpdate();
 };
+
+export const avvikleRessurs = async (
+  fid: string,
+  avvikleRessursRequest: AvvikleRessursRequest,
+) =>
+  (
+    await axios.post<AvvikleRessursRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/ressurser/${fid}/avvikle`,
+      avvikleRessursRequest,
+    )
+  ).data;
 
 export const getUnderliggendeOrgenheter = {
   queryKey: (parentId: string) =>
