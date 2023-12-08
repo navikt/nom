@@ -59,7 +59,7 @@ export function formatTlf(nr: string) {
 
 export const DATE_FORMATS = {
   no: "dd.MM.yyyy",
-  noLong: "dd.MM.yyyy hh:MM",
+  noLong: "dd.MM.yyyy HH:MM",
 };
 
 export function formatDateWithoutTimezone(date: Date) {
