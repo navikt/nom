@@ -176,9 +176,10 @@ public class DvhOrgenhetsLast {
                         .stream()
                         .filter(orgEnhetState -> orgEnhetState.gyldigTom().map(gyldigTom -> gyldigTom.isBefore(LocalDate.now())).orElse(false))
                         .forEach(orgEnhetState -> {
-
                             LocalDate gyldigTom = orgenhetV2.getGyldigTom().orElse(LocalDate.now());
-                            avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                            if (!orgEnhetState.gyldigTom().get().equals(gyldigTom)) {
+                                avvikleOrgEnhet(orgEnhetState.fid(), orgenhetV2, gyldigTom);
+                            }
                         });
                 }
             );
