@@ -45,10 +45,11 @@ public class NomIntegrasjonService {
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
             && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN)) {
             createRessurs(ressursOpprettetEventV1);
-        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
-            && isFidEksternRessurs(ressursEvent.getFid())
-        ) {
-            avsluttRessurs(ressursSluttetEventV1);
+            // TODO: Finn ut hvordan dette her kan håndteres
+//        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
+//            && isFidEksternRessurs(ressursEvent.getFid())
+//        ) {
+//            avsluttRessurs(ressursSluttetEventV1);
         } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
             && isFidEksternRessurs(ressursEvent.getFid())
         ) {

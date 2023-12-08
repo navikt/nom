@@ -12,7 +12,7 @@ spec:
     - https://nom-remedy-integrasjon.dev-fss-pub.nais.io
   env:
     - name: REMEDY_DATASOURCE_URL
-      value: jdbc:oracle:thin:@//d26dbfl022.test.local:1521/remedy_u2
+      value: jdbc:oracle:thin:@//a01dbfl042.adeo.no:1521/remedy_q2
     - name: NOM_API_URL
       value: https://nom-api.intern.dev.nav.no
     - name: NOM_API_SCOPE
