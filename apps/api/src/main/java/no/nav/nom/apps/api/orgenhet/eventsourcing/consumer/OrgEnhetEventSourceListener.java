@@ -42,7 +42,7 @@ public class OrgEnhetEventSourceListener {
             var orgEnhetEvent = consumerRecord.value();
             if (orgEnhetEvent instanceof OrgEnhetTypeEndretEventV1 orgEnhetEndretEvent) {
                 orgEnhetTypeHandler.orgEnhetsTypeChanged(orgEnhetEndretEvent);
-                orgEnhetNomNivaaHandler.updateNomNivaaWhenOrgEnhetsTypeIsSet(orgEnhetEndretEvent);
+                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetEndretEvent);
 
                 logger.debug(
                     "Listener received message with fid {} and orgEnhetsType {}", orgEnhetEvent.getFid(),

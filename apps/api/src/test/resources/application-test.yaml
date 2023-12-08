@@ -37,6 +37,8 @@ app:
       nomAdminGroup:
         group-id: nomAdminGroup
         scopes: ["ADMIN", "QUERY_PERSON"]
+  orgenhet:
+    linjeenhetene: linje-enhet,en-annen-linjeenhet
 
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}

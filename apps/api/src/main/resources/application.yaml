@@ -206,6 +206,8 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN", "QUERY_PERSON"]
+  orgenhet:
+    linjeenhetene: me177r,su645c,hu797w,tu734a
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
@@ -249,6 +251,8 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN"]
+  orgenhet:
+    linjeenhetene: ry630r,ky110z,se232x,ne994m
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default

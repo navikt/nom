@@ -94,6 +94,7 @@ export const getAlleRessurserGraphql = {
                             ressurs {
                                 navident
                                 visningsnavn
+                                
                             }
                             gyldigFom
                             gyldigTom
