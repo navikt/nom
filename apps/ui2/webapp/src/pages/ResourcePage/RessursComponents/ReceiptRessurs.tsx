@@ -45,7 +45,7 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
     >
       <div>
         <Heading level="1" size="large" spacing>
-          {formatVisningsnavn(ressurs.visningsnavn)} 2321
+          {formatVisningsnavn(ressurs.visningsnavn)}
         </Heading>
         <div
           css={css`
