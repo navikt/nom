@@ -176,6 +176,12 @@ export function RessurserAdminPage() {
             <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
               Sluttdato
             </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="opprettetAv" sortable>
+              Oprettet av
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="opprettetDato" sortable>
+              Oprettet dato
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -195,6 +201,8 @@ export function RessurserAdminPage() {
               <LedereDataCell ledere={ressurs.ledere} />
               <Table.DataCell>{ressurs.startdato}</Table.DataCell>
               <Table.DataCell>{ressurs.sluttdato}</Table.DataCell>
+              <Table.DataCell>{ressurs.opprettetAv}</Table.DataCell>
+              <Table.DataCell>{ressurs.opprettetDato}</Table.DataCell>
             </Table.ExpandableRow>
           ))}
         </Table.Body>
@@ -595,7 +603,14 @@ function sortRessurser({
 
 function sortRessurserAscending(ressurser: RessursFields[], orderBy: string) {
   if (
-    ["navident", "visningsnavn", "startdato", "sluttdato"].includes(orderBy)
+    [
+      "navident",
+      "visningsnavn",
+      "startdato",
+      "sluttdato",
+      "opprettetAv",
+      "opprettetDato",
+    ].includes(orderBy)
   ) {
     return sortBy(ressurser, orderBy);
   }

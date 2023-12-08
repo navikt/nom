@@ -75,11 +75,13 @@ export const getAlleRessurserGraphql = {
   queryKey: ressurserGraphqlKeys.all,
   queryFn: async () =>
     (
-      await axios.post<GraphqlResponseWrapper>("/nom-api/graphql", {
-        operationName: "HentAlleRessurser",
-        query: `
+      await axios.post<RessurserWithMetadataGraphqlResponseWrapper>(
+        "/nom-api/graphql",
+        {
+          operationName: "HentAlleRessurser",
+          query: `
             query HentAlleRessurser {
-                ressurser(where: {}) {
+                ressurserWithMetadata {
                     ressurs {
                         navident,
                         orgTilknytning{
@@ -104,12 +106,19 @@ export const getAlleRessurserGraphql = {
                         sluttdato
                         startdato
                     }
+                    opprettetAv
+                    opprettetDato
                 }
             }
             `,
-        variables: {},
-      })
-    ).data.data.ressurser.map((ressurs) => ressurs.ressurs),
+          variables: {},
+        },
+      )
+    ).data.data.ressurserWithMetadata.map((ressursWithMetadata) => ({
+      ...ressursWithMetadata.ressurs,
+      opprettetAv: ressursWithMetadata.opprettetAv,
+      opprettetDato: ressursWithMetadata.opprettetDato,
+    })),
 };
 
 export const getRessurs = {
@@ -271,12 +280,16 @@ async function hopeForKafkaStateToUpdate() {
   await new Promise((r) => setTimeout(r, 1000));
 }
 
-type GraphqlResponseWrapper = {
+type RessurserWithMetadataGraphqlResponseWrapper = {
   data: {
-    ressurser: {
-      ressurs: RessursFields;
-    }[];
+    ressurserWithMetadata: RessursWithMetadata[];
   };
+};
+
+export type RessursWithMetadata = {
+  ressurs: RessursFields;
+  opprettetAv?: string;
+  opprettetDato?: string;
 };
 
 export type RessursFields = {
@@ -301,6 +314,8 @@ export type RessursFields = {
   sektor: string[];
   startdato: string;
   sluttdato: string;
+  opprettetAv?: string;
+  opprettetDato?: string;
 };
 
 export type FysiskBrukersted = {
