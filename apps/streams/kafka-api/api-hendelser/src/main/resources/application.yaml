@@ -3,6 +3,8 @@ app:
     state-topic.v1: org.nom.api-hendelser-v1
     ressurs-evtsrc-topic: org.nom.ressurs-eventsource
     orgenhet-evtsrc-topic: org.nom.orgenhet-eventsource
+    orgtilknytning-evtsrc-topic: org.nom.orgtilknytning-eventsource
+    organisering-evtsrc-topic: org.nom.organisering-eventsource
 
 spring:
   kafka:

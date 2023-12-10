@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.HendelserState;
+import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
+import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -17,10 +19,12 @@ import java.util.Properties;
 
 public class EventsrcToStateTestTopology {
     ObjectMapper objectMapper = configureObjectMapper();
+
     TestInputTopic<String, OrgEnhetEvent> orgEnhetInputTopic;
     TestInputTopic<String, RessursEvent> resursInputTopic;
+    TestInputTopic<String, OrganiseringEvent> organiseringInputTopic;
 
-    TestOutputTopic<String, HendelserState> outputTopic;
+    TestOutputTopic<String, Hendelser> outputTopic;
 
     @BeforeEach
     public void setup() {
@@ -32,10 +36,11 @@ public class EventsrcToStateTestTopology {
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
 
-
         new EventsrcToState(
             "orgEnhetInputTopic",
             "resursInputTopic",
+            "organiseringInputTopic",
+            "orgtilknytningInputTopic",
             "outputTopic",
             objectMapper,
             objectSerde,
@@ -50,9 +55,11 @@ public class EventsrcToStateTestTopology {
             .createInputTopic("orgEnhetInputTopic", new StringSerializer(), objectSerde.copyWithType(OrgEnhetEvent.class).serializer());
         resursInputTopic = topologyTestDriver
             .createInputTopic("resursInputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
+        organiseringInputTopic = topologyTestDriver
+            .createInputTopic("organiseringInputTopic", new StringSerializer(), objectSerde.copyWithType(OrganiseringEvent.class).serializer());
 
-        final var hendelserStateSerde = objectSerde.copyWithType(HendelserState.class);
-        hendelserStateSerde.deserializer().addTrustedPackages(HendelserState.class.getPackageName());
+        final var hendelserStateSerde = objectSerde.copyWithType(Hendelser.class);
+        hendelserStateSerde.deserializer().addTrustedPackages(Hendelser.class.getPackageName());
 
         outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), hendelserStateSerde.deserializer());
     }
