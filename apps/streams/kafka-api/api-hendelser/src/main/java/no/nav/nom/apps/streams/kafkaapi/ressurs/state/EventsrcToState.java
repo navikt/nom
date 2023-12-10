@@ -1,7 +1,5 @@
 package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelserType;
@@ -33,7 +31,6 @@ import java.util.Set;
 public class EventsrcToState {
     private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
     public static final String NOM_HENDELSER_STATE_STORE = "nom-hendelser-state-store";
-    public static final String NOM_HENDELSER_STATE_STORE_1 = "nom-hendelser-state-store_1";
 
     public EventsrcToState(
         @Value("${app.kafka.orgenhet-evtsrc-topic}") String orgenhetEvtsrcTopic,
@@ -41,17 +38,11 @@ public class EventsrcToState {
         @Value("${app.kafka.organisering-evtsrc-topic}") String organiseringEvtsrcTopic,
         @Value("${app.kafka.orgtilknytning-evtsrc-topic}") String orgtilknytningEvtsrcTopic,
         @Value("${app.kafka.state-topic.v1}") String stateTopic,
-        ObjectMapper objectMapper,
         JsonSerde<Object> objectSerde,
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
-        final var jsonSerde = objectSerde.copyWithType(ObjectNode.class);
-        final var orgenhetEventSerde = objectSerde.copyWithType(OrgEnhetEvent.class);
-        final var ressursEventSerde = objectSerde.copyWithType(RessursEvent.class);
         final var hendelserSerde = objectSerde.copyWithType(Hendelser.class);
-        final var organiseringEventSerde = objectSerde.copyWithType(OrganiseringEvent.class);
-        final var orgtilknytningEventSerde = objectSerde.copyWithType(OrgtilknytningEvent.class);
         final var eventSerde = objectSerde.copyWithType(Event.class);
 
         KStream<String, Hendelser> hendelserStream = streamsBuilder
@@ -59,12 +50,15 @@ public class EventsrcToState {
                 Stores.keyValueStoreBuilder(
                     Stores.persistentKeyValueStore(NOM_HENDELSER_STATE_STORE),
                     Serdes.String(),
-                    hendelserSerde
+                    Serdes.String()
                 )
             )
-            .stream(Arrays.asList(orgenhetEvtsrcTopic, organiseringEvtsrcTopic, ressursEvtsrcTopic), Consumed.with(stringSerde, eventSerde))
+            .stream(
+                Arrays.asList(orgenhetEvtsrcTopic, organiseringEvtsrcTopic, ressursEvtsrcTopic, orgtilknytningEvtsrcTopic),
+                Consumed.with(stringSerde, eventSerde)
+            )
             .map((k, v) -> KeyValue.pair(v.getFid(), toHendelser(v)))
-            .process(new ProcessorSupplier<String, Hendelser, String, Hendelser>() {
+            .process(new ProcessorSupplier<>() {
                 @Override
                 public Set<StoreBuilder<?>> stores() {
                     return ProcessorSupplier.super.stores();
@@ -72,8 +66,8 @@ public class EventsrcToState {
 
                 @Override
                 public Processor<String, Hendelser, String, Hendelser> get() {
-                    return new Processor<String, Hendelser, String, Hendelser>() {
-                        private KeyValueStore<String, Hendelser> hendelserStore;
+                    return new Processor<>() {
+                        private KeyValueStore<String, String> hendelserStore;
                         private ProcessorContext<String, Hendelser> context;
 
                         @Override
@@ -91,19 +85,22 @@ public class EventsrcToState {
                         @Override
                         public void process(Record<String, Hendelser> record) {
                             Hendelser incomingHendelser = record.value();
-                            Hendelser hendelserInStoreForGivenFid = hendelserStore.get(record.key());
-
-                            if (hendelserInStoreForGivenFid != null && hendelserInStoreForGivenFid.id() != null &&
-                                (incomingHendelser.id() == null || incomingHendelser.id().isBlank())) {
-                                incomingHendelser = incomingHendelser.toBuilder().id(hendelserInStoreForGivenFid.id()).build();
+                            if (incomingHendelser.timestamp() == null) {
+                                log.warn("Incoming hendelser timestamp is null for " + record.key());
                             }
 
-                            hendelserStore.put(record.key(), incomingHendelser);
+                            String hendelserIdInStoreForGivenFid = hendelserStore.get(record.key());
+
+                            if (hendelserIdInStoreForGivenFid != null && (incomingHendelser.id() == null || incomingHendelser.id().isBlank())) {
+                                incomingHendelser = incomingHendelser.toBuilder().id(hendelserIdInStoreForGivenFid).build();
+                            }
+
+                            hendelserStore.put(record.key(), incomingHendelser.id());
                             context.forward(new Record<>(record.key(), incomingHendelser, record.timestamp()));
                         }
                     };
                 }
-            }, new String[]{NOM_HENDELSER_STATE_STORE});
+            }, NOM_HENDELSER_STATE_STORE);
 
         hendelserStream.to(stateTopic, Produced.with(stringSerde, hendelserSerde));
     }
@@ -112,9 +109,9 @@ public class EventsrcToState {
         try {
             return
                 event instanceof OrgEnhetEvent ? convert((OrgEnhetEvent) event) :
-                event instanceof RessursEvent ? convert((RessursEvent) event) :
-                event instanceof OrganiseringEvent ? convert((OrganiseringEvent) event) :
-                event instanceof OrgtilknytningEvent ? convert((OrgtilknytningEvent) event) : null;
+                    event instanceof RessursEvent ? convert((RessursEvent) event) :
+                        event instanceof OrganiseringEvent ? convert((OrganiseringEvent) event) :
+                            event instanceof OrgtilknytningEvent ? convert((OrgtilknytningEvent) event) : null;
         } catch (Exception e) {
             log.error("Error mapping to Hendelser. ", e);
             throw e;
@@ -224,8 +221,7 @@ public class EventsrcToState {
                 hendelserStateBuilder
                     .id(data.navident())
                     .hendelserType(HendelserType.ENDRET);
-            }
-            else {
+            } else {
                 hendelserStateBuilder
                     .hendelserType(HendelserType.ENDRET);
             }

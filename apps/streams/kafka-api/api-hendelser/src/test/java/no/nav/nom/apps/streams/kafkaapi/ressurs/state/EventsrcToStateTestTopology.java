@@ -6,9 +6,9 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
-import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -23,6 +23,7 @@ public class EventsrcToStateTestTopology {
     TestInputTopic<String, OrgEnhetEvent> orgEnhetInputTopic;
     TestInputTopic<String, RessursEvent> resursInputTopic;
     TestInputTopic<String, OrganiseringEvent> organiseringInputTopic;
+    TestInputTopic<String, OrgtilknytningEvent> orgtilknytningInputTopic;
 
     TestOutputTopic<String, Hendelser> outputTopic;
 
@@ -42,7 +43,6 @@ public class EventsrcToStateTestTopology {
             "organiseringInputTopic",
             "orgtilknytningInputTopic",
             "outputTopic",
-            objectMapper,
             objectSerde,
             streamsBuilder
         );
@@ -57,6 +57,8 @@ public class EventsrcToStateTestTopology {
             .createInputTopic("resursInputTopic", new StringSerializer(), objectSerde.copyWithType(RessursEvent.class).serializer());
         organiseringInputTopic = topologyTestDriver
             .createInputTopic("organiseringInputTopic", new StringSerializer(), objectSerde.copyWithType(OrganiseringEvent.class).serializer());
+        orgtilknytningInputTopic = topologyTestDriver
+            .createInputTopic("orgtilknytningInputTopic", new StringSerializer(), objectSerde.copyWithType(OrgtilknytningEvent.class).serializer());
 
         final var hendelserStateSerde = objectSerde.copyWithType(Hendelser.class);
         hendelserStateSerde.deserializer().addTrustedPackages(Hendelser.class.getPackageName());
