@@ -9,6 +9,8 @@ export function FullWidthDatePickerWrapper({
   return (
     <div
       css={css`
+        width: 100%;
+
         .navds-date__wrapper {
           width: 100%;
         }

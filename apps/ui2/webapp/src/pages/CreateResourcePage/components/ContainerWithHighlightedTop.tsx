@@ -2,27 +2,30 @@ import { css } from "@emotion/react";
 import { Heading } from "@navikt/ds-react";
 import type { ReactNode } from "react";
 
-import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
+import { blueTopBorder } from "~/resources/NomStyles";
 
 export function ContainerWithHighlightedTop({
   children,
   title,
+  icon,
 }: {
   children: ReactNode;
   title: string;
+  icon: string;
 }) {
   return (
     <div
-      css={css`
-        min-height: 300px;
-        padding: var(--a-spacing-8);
-        border: 1px solid var(--a-gray-400);
-        border-top: 5px solid var(--a-lightblue-800);
-        display: flex;
-        flex-direction: column;
-        background: white;
-        gap: var(--a-spacing-9);
-      `}
+      css={[
+        blueTopBorder,
+        css`
+          min-height: 300px;
+          padding: var(--a-spacing-8);
+          display: flex;
+          flex-direction: column;
+          background: white;
+          gap: var(--a-spacing-9);
+        `,
+      ]}
     >
       <div
         css={css`
@@ -38,7 +41,7 @@ export function ContainerWithHighlightedTop({
             width: 65px;
             align-self: center;
           `}
-          src={opprettRessursIcon}
+          src={icon}
         />
         <Heading
           css={css`

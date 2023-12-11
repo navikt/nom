@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class OrgEnhetUnderordnetResolver {
@@ -23,6 +24,9 @@ public class OrgEnhetUnderordnetResolver {
     }
 
     public List<OrgEnhetState> findUnderordnedeOrgEnheter(OrgEnhetState orgEnhetState) {
+        // Ikke returner overordnet/organisering for enheter som er opprettet og avsluttet samme dag
+        if (orgEnhetState.endedOnStartDate()) { return Collections.emptyList(); }
+
         final var agressoId = orgEnhetState.agressoId();
         final var orgNiv = orgEnhetState.agressoOrgNivaa();
         final var navn = orgEnhetState.navn();

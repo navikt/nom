@@ -5,6 +5,7 @@ import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +55,16 @@ public class OrganiseringStateRepository {
         return organiseringByFid.entrySet().stream()
             .filter(e -> isGyldigTomNull(e.getValue()) || (!isCreatedAndDeletedToday(e.getValue()) && (isGyldigTomTodayOrLater(e.getValue()))))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public List<OrganiseringState> getOrganiseringer() {
+        return getActiveOrganisering().values().stream().toList();
+    }
+
+    public List<OrganiseringState> getOrganiseringerContainingId(String id) {
+        return getActiveOrganisering().values().stream()
+            .filter(o -> o.containsOrgEnhet(id))
+            .toList();
     }
 
     private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {

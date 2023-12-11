@@ -31,7 +31,7 @@ export function HierarkiFrontPage({ orgEnhet }: { orgEnhet: OrgEnhet }) {
           margin-right: var(--a-spacing-12);
 
           h1 {
-            margin-bottom: -0.5rem;
+            margin-bottom: --var(--a-spacing-2);
           }
         `}
       >

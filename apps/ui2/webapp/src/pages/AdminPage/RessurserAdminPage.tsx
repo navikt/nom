@@ -9,7 +9,6 @@ import {
   Checkbox,
   Chips,
   DatePicker,
-  Link,
   Loader,
   Pagination,
   Popover,
@@ -142,7 +141,7 @@ export function RessurserAdminPage() {
   return (
     <div
       css={css`
-        padding: 2rem;
+        padding: var(--a-spacing-8);
         background: white;
         display: flex;
         flex-direction: column;
@@ -177,6 +176,12 @@ export function RessurserAdminPage() {
             <Table.ColumnHeader scope="col" sortKey="sluttdato" sortable>
               Sluttdato
             </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="opprettetAv" sortable>
+              Oprettet av
+            </Table.ColumnHeader>
+            <Table.ColumnHeader scope="col" sortKey="opprettetDato" sortable>
+              Oprettet dato
+            </Table.ColumnHeader>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -196,6 +201,8 @@ export function RessurserAdminPage() {
               <LedereDataCell ledere={ressurs.ledere} />
               <Table.DataCell>{ressurs.startdato}</Table.DataCell>
               <Table.DataCell>{ressurs.sluttdato}</Table.DataCell>
+              <Table.DataCell>{ressurs.opprettetAv}</Table.DataCell>
+              <Table.DataCell>{ressurs.opprettetDato}</Table.DataCell>
             </Table.ExpandableRow>
           ))}
         </Table.Body>
@@ -203,7 +210,7 @@ export function RessurserAdminPage() {
       <Pagination
         count={Math.ceil(filteredRessurser.length / rowsPerPage)}
         css={css`
-          padding: 2rem;
+          padding: var(--a-spacing-8);
         `}
         hidden={filteredRessurser.length <= rowsPerPage}
         onPageChange={setPage}
@@ -272,7 +279,7 @@ function OrgEnhetLink({
 }) {
   return orgenhet ? (
     <ReactRouterLink params={{ id: orgenhet.id }} to={orgRoute.to}>
-      <Link>{orgenhet.navn}</Link>
+      {orgenhet.navn}
     </ReactRouterLink>
   ) : undefined;
 }
@@ -328,7 +335,7 @@ function RessursLink({
 }) {
   return ressurs ? (
     <ReactRouterLink params={{ id: ressurs.navident }} to={ressursRoute.to}>
-      <Link>{`${ressurs.visningsnavn} (${ressurs.navident})`}</Link>
+      {`${ressurs.visningsnavn} (${ressurs.navident})`}
     </ReactRouterLink>
   ) : undefined;
 }
@@ -596,7 +603,14 @@ function sortRessurser({
 
 function sortRessurserAscending(ressurser: RessursFields[], orderBy: string) {
   if (
-    ["navident", "visningsnavn", "startdato", "sluttdato"].includes(orderBy)
+    [
+      "navident",
+      "visningsnavn",
+      "startdato",
+      "sluttdato",
+      "opprettetAv",
+      "opprettetDato",
+    ].includes(orderBy)
   ) {
     return sortBy(ressurser, orderBy);
   }

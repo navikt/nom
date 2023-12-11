@@ -59,8 +59,6 @@ public class ManuelleOrgtilknytningEvtsrcMeldinger {
         @Parameter(description = "Skriv CONFIRM for å bekrefte!") @RequestParam String confirm,
         @NonNull JwtAuthenticationToken token
     ) {
-        log.debug("fjernOrgtilknytning : " + token.getName());
-
         if (!validFid(fid)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("FID er ikke gyldig");
         }

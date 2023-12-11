@@ -27,6 +27,7 @@ import {
 } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { OrganisasjonHierarkiPage } from "~/pages/OrganisasjonsHierarkiPage/OrganisasjonHierarkiPage";
 import { ResourcePage } from "~/pages/ResourcePage/ResourcePage";
+import { TerminateResourcePage } from "~/pages/ResourcePage/TerminateResourcePage";
 import { isInDevelopment } from "~/utils";
 
 const TanStackRouterDevtools =
@@ -129,6 +130,17 @@ export const createRessursRoute = new Route({
   validateSearch: validateCreateRessursSearch,
 });
 
+export const terminateRessursRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "ressurs/$id/terminate",
+  component: () => {
+    const hasWriteAccess = useHasWriteAccess();
+    if (hasWriteAccess) {
+      return <TerminateResourcePage />;
+    }
+  },
+});
+
 export const orgRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "org/$id",
@@ -218,6 +230,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   ressursRoute,
   createRessursRoute,
+  terminateRessursRoute,
   orgRoute,
   adminRoute.addChildren([
     orgEnheterAdminRoute,

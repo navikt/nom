@@ -4,6 +4,9 @@ app:
     ressurs-eventsource:
       topic-name: org.nom.ressurs-eventsource
       auto-startup: true
+    orgtilknytning-eventsource:
+      topic-name: org.nom.orgtilknytning-eventsource
+      auto-startup: true
   clients:
     nom-api:
       url: ${NOM_API_URL}

@@ -141,6 +141,9 @@ spec:
         - application: nom-remedy-integrasjon
           namespace: org
           cluster: prod-fss
+        - application: oppgavebehandling-api
+          namespace: oppgavehandtering
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident

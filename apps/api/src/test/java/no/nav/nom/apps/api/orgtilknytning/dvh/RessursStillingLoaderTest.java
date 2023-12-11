@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -36,21 +37,83 @@ class RessursStillingLoaderTest extends TestBase {
     @MockBean
     RessursStateRepository ressursStateRepository;
 
-    private static IOrgenhet agr_8620005,agr_8552106,agr_0807001;
+    private static IOrgenhet agr_8620005, agr_8552106, agr_0807001;
 
     @BeforeAll
     public static void init() {
-        agr_8620005 = new OrgEnhet(new OrgEnhetState("FID_1", "x111yz", "Data og innsikt gruppe 5", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("8620005-ORGENHET-Data og innsikt gruppe 5"), Optional.of("8620005"), Optional.of("ORGENHET"), Optional.empty() ) );
-        agr_8552106 = new OrgEnhet(new OrgEnhetState("FID_2", "z222xy", "IT utvikling 6", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("8552106-ORGENHET-IT utvikling 6"), Optional.of("8552106"), Optional.of("ORGENHET"), Optional.empty() ) );
-        agr_0807001 = new OrgEnhet(new OrgEnhetState("FID_3", "z999xy", "Notodden lagene", LocalDate.of(2000, 1, 1), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of("0807001-ORGENHET-Notodden lagene"), Optional.of("0807001"), Optional.of("ORGENHET"), Optional.empty() ) );
+        agr_8620005 = new OrgEnhet(new OrgEnhetState(
+            "FID_1",
+            "x111yz",
+            "Data og innsikt gruppe 5",
+            LocalDate.of(2000, 1, 1),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("8620005-ORGENHET-Data og innsikt gruppe 5"),
+            Optional.of("8620005"),
+            Optional.of("ORGENHET"),
+            Optional.empty()
+        ));
+        agr_8552106 = new OrgEnhet(new OrgEnhetState(
+            "FID_2",
+            "z222xy",
+            "IT utvikling 6",
+            LocalDate.of(2000, 1, 1),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("8552106-ORGENHET-IT utvikling 6"),
+            Optional.of("8552106"),
+            Optional.of("ORGENHET"),
+            Optional.empty()
+        ));
+        agr_0807001 = new OrgEnhet(new OrgEnhetState(
+            "FID_3",
+            "z999xy",
+            "Notodden lagene",
+            LocalDate.of(2000, 1, 1),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("0807001-ORGENHET-Notodden lagene"),
+            Optional.of("0807001"),
+            Optional.of("ORGENHET"),
+            Optional.empty()
+        ));
     }
 
     @BeforeEach
     public void beforeEach() {
         when(ressursStateRepository.findByNavident("G123321"))
-            .thenReturn(Optional.of(new RessursState("FID_1", "01010154321", "G123321", Sektor.NAV_STATLIG, null, Optional.empty(), null)));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_1",
+                "01010154321",
+                "G123321",
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.empty(),
+                null,
+                null,
+                Collections.emptyList()
+            )));
         when(ressursStateRepository.findByNavident("H554433"))
-            .thenReturn(Optional.of(new RessursState("FID_2", "02020254321", "H554433", Sektor.NAV_STATLIG, null, Optional.empty(), null)));
+            .thenReturn(Optional.of(new RessursState(
+                "FID_2",
+                "02020254321",
+                "H554433",
+                Sektor.NAV_STATLIG,
+                null,
+                Optional.empty(),
+                null,
+                null,
+                Collections.emptyList()
+            )));
     }
 
     @Test
@@ -61,12 +124,44 @@ class RessursStillingLoaderTest extends TestBase {
         var result = ressursStillingLoader.load();
 
         assertEquals(21, result.size());
-        assertEquals(12, result.stream().filter( rs -> rs.getNavident().equals(Optional.of("G123321"))).count());
-        assertEquals(LocalDate.of(2020, 1, 01), result.stream().filter( rs -> rs.getNavident().equals(Optional.of("G123321"))).sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).findFirst().get().getStillingDatoFom());
-        assertEquals(LocalDate.of(2021, 10, 01), result.stream().filter( rs -> rs.getNavident().equals(Optional.of("G123321"))).sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom).reversed()).findFirst().get().getStillingDatoFom());
-        assertEquals(9, result.stream().filter( rs -> rs.getNavident().equals(Optional.of("H554433"))).count());
-        assertEquals(LocalDate.of(2020, 8, 15), result.stream().filter( rs -> rs.getNavident().equals(Optional.of("H554433"))).sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom)).findFirst().get().getStillingDatoFom());
-        assertEquals(LocalDate.of(2021, 9, 01), result.stream().filter( rs -> rs.getNavident().equals(Optional.of("H554433"))).sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom).reversed()).findFirst().get().getStillingDatoFom());
+        assertEquals(12, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("G123321"))).count());
+        assertEquals(
+            LocalDate.of(2020, 1, 01),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("G123321")))
+                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
+                .findFirst()
+                .get()
+                .getStillingDatoFom()
+        );
+        assertEquals(
+            LocalDate.of(2021, 10, 01),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("G123321")))
+                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom).reversed())
+                .findFirst()
+                .get()
+                .getStillingDatoFom()
+        );
+        assertEquals(9, result.stream().filter(rs -> rs.getNavident().equals(Optional.of("H554433"))).count());
+        assertEquals(
+            LocalDate.of(2020, 8, 15),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("H554433")))
+                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom))
+                .findFirst()
+                .get()
+                .getStillingDatoFom()
+        );
+        assertEquals(
+            LocalDate.of(2021, 9, 01),
+            result.stream()
+                .filter(rs -> rs.getNavident().equals(Optional.of("H554433")))
+                .sorted(Comparator.comparing(DvhRessursStilling::getStillingDatoFom).reversed())
+                .findFirst()
+                .get()
+                .getStillingDatoFom()
+        );
     }
 
     @Test
@@ -78,11 +173,26 @@ class RessursStillingLoaderTest extends TestBase {
         ressursStillingLoader.loadAndProcess();
     }
 
-    private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String ressursOrgenhetNiv, LocalDate from, LocalDate to) {
+    private DvhRessursStilling getTestRessursStilling(
+        String navid,
+        String stillingAgressoId,
+        String stillingOrgenhetNavn,
+        String ressursOrgenhetNiv,
+        LocalDate from,
+        LocalDate to
+    ) {
         return getTestRessursStilling(navid, stillingAgressoId, stillingOrgenhetNavn, stillingAgressoId, ressursOrgenhetNiv, from, to);
     }
 
-    private DvhRessursStilling getTestRessursStilling(String navid, String stillingAgressoId, String stillingOrgenhetNavn, String ressursAgressoId, String ressursOrgenhetNiv, LocalDate from, LocalDate to) {
+    private DvhRessursStilling getTestRessursStilling(
+        String navid,
+        String stillingAgressoId,
+        String stillingOrgenhetNavn,
+        String ressursAgressoId,
+        String ressursOrgenhetNiv,
+        LocalDate from,
+        LocalDate to
+    ) {
         return DvhRessursStilling.builder()
             .navident(Optional.of(navid))
             .stillingAgressoId(Optional.of(stillingAgressoId))

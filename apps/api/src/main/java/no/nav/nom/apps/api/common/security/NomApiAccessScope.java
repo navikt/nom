@@ -6,7 +6,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public enum NomApiAccessScope {
     QUERY_PERSON("QUERY_PERSON"),
     MUTATE_RESSURS("MUTATE_RESSURS"),
-    ADMIN("ADMIN");
+    ADMIN("ADMIN"),
+    TEAMCAT("TEAMCAT");
 
     private final String scope;
 

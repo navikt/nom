@@ -18,5 +18,6 @@ public record OpprettRessursCommand(
     InputMetadata inputMetadata,
     LocalDate startdato,
     String orgEnhetId,
-    AnsettelsesType ansettelsesType
+    AnsettelsesType ansettelsesType,
+    String fysiskbrukerStedNr
 ) implements RessursCommand {}

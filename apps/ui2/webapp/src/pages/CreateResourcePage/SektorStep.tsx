@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import { Sektor } from "~/types/api-models";
 
 export const SektorNameMapping = {
@@ -18,7 +19,7 @@ export function SektorStep() {
   const navigate = useNavigate();
 
   return (
-    <ContainerWithHighlightedTop title="Sektor">
+    <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
       <Alert variant="info">
         For øyeblikket kan du kun bruke NOM til å opprette eksterne konsulenter.
         Statlig og kommunalt ansatte opprettes i Remedy. Dette gjelder også

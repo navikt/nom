@@ -1,6 +1,5 @@
 package no.nav.nom.apps.api.ressurs.api.v1.navident;
 
-import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -8,22 +7,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.SwaggerConfig;
-import no.nav.nom.apps.api.graphql.common.SecurityUtil;
-import no.nav.nom.apps.api.nik.NIKClient;
-import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
-import no.nav.nom.apps.api.pdl.PdlClient;
-import no.nav.nom.apps.api.pdl.Person;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
-import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.OpprettRessursRequest;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RemedyController;
 import no.nav.nom.apps.api.ressurs.api.v1.remedy.RessursDTO;
-import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
-import no.nav.nom.contract.nom.Sektor;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.Origination;
-import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.RessursState;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 import static no.nav.nom.apps.api.common.AppConfig.SECURE_LOGS;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Tag(name = "Navident")

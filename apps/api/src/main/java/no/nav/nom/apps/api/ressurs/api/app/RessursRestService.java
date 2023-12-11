@@ -6,6 +6,7 @@ import no.nav.nom.apps.api.nik.NIKClient;
 import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +54,7 @@ public class RessursRestService {
     private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
     private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final OrgtilknytningRestService orgtilknytningRestService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
@@ -65,6 +68,7 @@ public class RessursRestService {
         RessursStateRepository ressursStateRepository,
         RessursCommadService ressursCommadService,
         OrgtilknytningCommandService orgtilknytningCommandService,
+        OrgtilknytningRestService orgtilknytningRestService,
         NIKClient nikClient,
         PdlClient pdlClient,
         OrgEnhetStateRepository orgEnhetStateRepository,
@@ -77,6 +81,7 @@ public class RessursRestService {
         this.ressursStateRepository = ressursStateRepository;
         this.ressursCommadService = ressursCommadService;
         this.orgtilknytningCommandService = orgtilknytningCommandService;
+        this.orgtilknytningRestService = orgtilknytningRestService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
@@ -96,8 +101,12 @@ public class RessursRestService {
         return ressursStateRepository.findByNavident(navident).orElseThrow(() -> RessursNotFoundException.navident(navident));
     }
 
+    private RessursState findRessursStateByFid(String fid) {
+        return ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
+    }
+
     public Ressurs findRessursByFid(String fid) {
-        var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
+        var ressursState = findRessursStateByFid(fid);
         return enrichRessursStateWithDvhData(ressursState);
     }
 
@@ -115,7 +124,7 @@ public class RessursRestService {
     public void updateRessursNavn(String navident, UpdateVisningsnavnRequest updateVisningsnavnRequest) {
         var ressursState = findRessursStateByNavident(navident);
 
-        if (ressursState.sektor() != Sektor.EKSTERN){
+        if (ressursState.sektor() != Sektor.EKSTERN) {
             throw new InvalidSektorException("Kun eksterne ressurser kan endres");
         }
 
@@ -221,7 +230,8 @@ public class RessursRestService {
                 .flatMap(orgEnhetStateRepository::findById)
                 .flatMap(OrgEnhetState::agressoId)
                 .orElse(null), // TODO: Validate not null in RessursCommandService
-            request.ansettelsesType()
+            request.ansettelsesType(),
+            request.fysiskBrukerstedNr()
         );
 
 
@@ -275,6 +285,44 @@ public class RessursRestService {
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void avvikleRessurs(String fid, AvvikleRessursRequest request) {
+        var ressursState = findRessursStateByFid(fid);
+        var metaData = new InputMetadata(
+            "REST",
+            "avvikleRessurs",
+            request,
+            new Origination(
+                getAuthenticatedNavIdent(),
+                SecurityUtil.getAuthenticatedAzpName()
+            )
+        );
+
+        ressursCommadService.avsluttRessursEvent(
+            new OpphorRessursCommand(fid, request.sluttDato()),
+            metaData
+        );
+
+        var orgtilknytninger = orgtilknytningRestService.getOrgtilknytninger(Optional.of(ressursState.navident()));
+
+        orgtilknytninger.forEach(orgtilknytningState -> {
+            var gyldigTomIsAfterAvvikletDato = orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(request.sluttDato());
+            if (gyldigTomIsAfterAvvikletDato) {
+                orgtilknytningCommandService.avvikleOrgtilknytning(
+                    orgtilknytningState.fid(),
+                    new AvvikleOrgtilknytning(
+                        ressursState.navident(),
+                        orgtilknytningState.orgEnhetId(),
+                        request.sluttDato(),
+                        metaData,
+                        null
+                    )
+                );
+            }
+        });
+
+        nomMastered.markRessursAsMasteredInNom(ressursState.navident());
     }
 
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {

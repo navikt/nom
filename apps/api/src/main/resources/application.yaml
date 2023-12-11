@@ -196,6 +196,9 @@ app:
       fullmaktsregister-web:
         client-id: "6f1992f0-f425-4512-b1f6-97a7e840414c"
         scopes: ["QUERY_PERSON"]
+      teamcat:
+        client-id: "16bf0ab5-d09b-4c38-ad6d-71f8d93ff7e4"
+        scopes: ["TEAMCAT"]
     groups:
       nom-write:
         group-id: "${NOM_WRITE_GROUPID}"
@@ -203,6 +206,8 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN", "QUERY_PERSON"]
+  orgenhet:
+    linjeenhetene: me177r,su645c,hu797w,tu734a
   proxy:
     enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
 
@@ -236,6 +241,9 @@ app:
       remedy:
         client-id: "407c569a-a2e9-4530-9d9d-0270f4db8cf3"
         scopes: ["QUERY_PERSON", "MUTATE_RESSURS"]
+      teamcat:
+        client-id: "f1931989-7a09-496c-8e2d-111b56faa242"
+        scopes: ["TEAMCAT"]
     groups:
       write:
         group-id: "${NOM_WRITE_GROUPID}"
@@ -243,6 +251,8 @@ app:
       nom-admin:
         group-id: "${NOM_ADMIN_GROUPID}"
         scopes: ["ADMIN"]
+  orgenhet:
+    linjeenhetene: ry630r,ky110z,se232x,ne994m
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://prod-gcp.org.nav-ident/.default

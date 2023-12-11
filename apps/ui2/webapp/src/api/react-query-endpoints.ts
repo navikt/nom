@@ -9,6 +9,7 @@ const CACHE_FOR = {
 };
 
 import type {
+  AvvikleRessursRequest,
   EndreOrgtilknytningDatoRequest,
   GetPersonRequest,
   LeggTilOrgtilknytningRequest,
@@ -74,11 +75,13 @@ export const getAlleRessurserGraphql = {
   queryKey: ressurserGraphqlKeys.all,
   queryFn: async () =>
     (
-      await axios.post<GraphqlResponseWrapper>("/nom-api/graphql", {
-        operationName: "HentAlleRessurser",
-        query: `
+      await axios.post<RessurserWithMetadataGraphqlResponseWrapper>(
+        "/nom-api/graphql",
+        {
+          operationName: "HentAlleRessurser",
+          query: `
             query HentAlleRessurser {
-                ressurser(where: {}) {
+                ressurserWithMetadata {
                     ressurs {
                         navident,
                         orgTilknytning{
@@ -93,6 +96,7 @@ export const getAlleRessurserGraphql = {
                             ressurs {
                                 navident
                                 visningsnavn
+                                
                             }
                             gyldigFom
                             gyldigTom
@@ -102,12 +106,19 @@ export const getAlleRessurserGraphql = {
                         sluttdato
                         startdato
                     }
+                    opprettetAv
+                    opprettetDato
                 }
             }
             `,
-        variables: {},
-      })
-    ).data.data.ressurser.map((ressurs) => ressurs.ressurs),
+          variables: {},
+        },
+      )
+    ).data.data.ressurserWithMetadata.map((ressursWithMetadata) => ({
+      ...ressursWithMetadata.ressurs,
+      opprettetAv: ressursWithMetadata.opprettetAv,
+      opprettetDato: ressursWithMetadata.opprettetDato,
+    })),
 };
 
 export const getRessurs = {
@@ -204,32 +215,43 @@ export const getOrgEnhetEvents = {
 export const updateNavnForRessurs = async (
   navident: string,
   updateNavnForRessursRequest: unknown,
-) =>
-  (
-    await axios.post<unknown, AxiosResponse<unknown>>(
-      `/nom-api/app/ressurser/${navident}/navn`,
-      updateNavnForRessursRequest,
-    )
-  ).data;
+) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `/nom-api/app/ressurser/${navident}/navn`,
+    updateNavnForRessursRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
 
 export const updateOrgtilknytningDato = async (
   fid: string,
   endreOrgtilknytningDatoRequest: EndreOrgtilknytningDatoRequest,
-) =>
-  (
-    await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
-      `/nom-api/app/orgtilknytninger/${fid}/dato`,
-      endreOrgtilknytningDatoRequest,
-    )
-  ).data;
+) => {
+  await axios.post<EndreOrgtilknytningDatoRequest, AxiosResponse<unknown>>(
+    `/nom-api/app/orgtilknytninger/${fid}/dato`,
+    endreOrgtilknytningDatoRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
 
 export const leggTilOrgtilknytning = async (
   leggTilOrgtilknytningRequest: LeggTilOrgtilknytningRequest,
+) => {
+  await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
+    `/nom-api/app/orgtilknytninger`,
+    leggTilOrgtilknytningRequest,
+  );
+  await hopeForKafkaStateToUpdate();
+};
+
+export const avvikleRessurs = async (
+  fid: string,
+  avvikleRessursRequest: AvvikleRessursRequest,
 ) =>
   (
-    await axios.post<LeggTilOrgtilknytningRequest, AxiosResponse<unknown>>(
-      `/nom-api/app/orgtilknytninger`,
-      leggTilOrgtilknytningRequest,
+    await axios.post<AvvikleRessursRequest, AxiosResponse<unknown>>(
+      `/nom-api/app/ressurser/${fid}/avvikle`,
+      avvikleRessursRequest,
     )
   ).data;
 
@@ -254,12 +276,20 @@ export const getFysiskeBrukersteder = {
     ).data,
 };
 
-type GraphqlResponseWrapper = {
+async function hopeForKafkaStateToUpdate() {
+  await new Promise((r) => setTimeout(r, 1000));
+}
+
+type RessurserWithMetadataGraphqlResponseWrapper = {
   data: {
-    ressurser: {
-      ressurs: RessursFields;
-    }[];
+    ressurserWithMetadata: RessursWithMetadata[];
   };
+};
+
+export type RessursWithMetadata = {
+  ressurs: RessursFields;
+  opprettetAv?: string;
+  opprettetDato?: string;
 };
 
 export type RessursFields = {
@@ -284,6 +314,8 @@ export type RessursFields = {
   sektor: string[];
   startdato: string;
   sluttdato: string;
+  opprettetAv?: string;
+  opprettetDato?: string;
 };
 
 export type FysiskBrukersted = {

@@ -26,6 +26,10 @@ app:
         client-id: queryPersonClient
         scopes:
           - QUERY_PERSON
+      teamcatClient:
+        client-id: teamcatClient
+        scopes:
+          - TEAMCAT
     groups:
       nomWriteGroup:
         group-id: nomWriteGroup
@@ -33,6 +37,8 @@ app:
       nomAdminGroup:
         group-id: nomAdminGroup
         scopes: ["ADMIN", "QUERY_PERSON"]
+  orgenhet:
+    linjeenhetene: linje-enhet,en-annen-linjeenhet
 
 
 KAFKA_BROKERS: ${spring.embedded.kafka.brokers}

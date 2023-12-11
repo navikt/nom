@@ -1,6 +1,0 @@
-query getOrgEnhet($id: String!) {
-    orgEnhet(where: {id: $id}) {
-        id
-        remedyEnhetId
-    }
-}

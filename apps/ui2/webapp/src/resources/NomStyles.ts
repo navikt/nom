@@ -1,27 +1,36 @@
 import { css } from "@emotion/react";
 
-export const widthBreakpoints = {
-  bp0: "0rem",
-  bp1: "21.5rem",
-  bp2: "100rem",
-  bp3: "120rem",
-};
-export const contentWidthByBreakpoint = {
-  bp0: "90%",
-  bp1: "60%",
-  bp2: "50%",
-  bp3: "60rem",
-};
+export const defaultWidth = css`
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--a-spacing-6);
+  width: 100%;
+  max-width: 1008px;
+`;
 
-export const mediaQueryContentWidth = css`
-  width: ${contentWidthByBreakpoint.bp0};
-  @media (min-width: ${widthBreakpoints.bp1}) {
-    width: ${contentWidthByBreakpoint.bp1};
+export const defaultFormStyle = css`
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--a-spacing-8);
+
+  > div {
+    margin-bottom: var(--a-spacing-6);
   }
-  @media (min-width: ${widthBreakpoints.bp2}) {
-    width: ${contentWidthByBreakpoint.bp2};
+`;
+
+export const fullwidthRow = css`
+  display: flex;
+  gap: var(--a-spacing-4);
+  align-items: flex-start;
+
+  & > * {
+    flex: 1;
   }
-  @media (min-width: ${widthBreakpoints.bp3}) {
-    width: ${contentWidthByBreakpoint.bp3};
-  }
+`;
+
+export const blueTopBorder = css`
+  border: 1px solid var(--a-lightblue-800);
+  border-top: 7px solid var(--a-lightblue-800);
+  border-radius: 5px;
+  background-color: var(--nom-secondary-hover);
 `;

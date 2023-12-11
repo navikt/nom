@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -69,6 +70,13 @@ class NavidentControllerWebMvcTest {
                 .andDo(result -> log.debug("Response body: %s".formatted(result.getResponse().getContentAsString())))
                 .andDo(MockMvcResultHandlers.print())
         ;
+    }
+
+    @Test
+    public void createNavidentWithIllegalPrefix() throws Exception {
+        mvc.perform(
+            getValidRequest("01019012345", IdentType.STANDARD, "Ö")
+        ).andExpect(status().isBadRequest());
     }
 
     private MockHttpServletRequestBuilder getValidRequest(String personId, IdentType type, String prefix) {

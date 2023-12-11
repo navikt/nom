@@ -77,7 +77,7 @@ public class OrgEnhetMapper {
     }
 
     private List<RessursState> hentOrgEnhetsLedere(IOrgenhet orgEnhet) {
-        return dvhRepository.getLederByAgressoIdAndNiv(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv())
+        return dvhRepository.getLederByAgressoIdAndNivAndNavn(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
             .stream()
             .map(leder -> ressursStateRepository.findByNavident(leder.getNavIdent()).orElse(null))
             .filter(Objects::nonNull)

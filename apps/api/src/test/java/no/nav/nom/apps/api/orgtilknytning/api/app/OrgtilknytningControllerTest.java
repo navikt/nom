@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static no.nav.nom.apps.api.common.TestData.orgEnhetState;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
@@ -167,6 +168,49 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
 
     @Test
+    @DisplayName("Should not be able to update dato if it leads to no active orgtilknytninger")
+    void test_disallow_update_if_no_remaining_active() {
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var endreOrgtilknytningDatoRequest = new EndreOrgtilknytningDatoRequest(
+            orgtilknytningToUpdate.gyldigFom(),
+            Optional.of(LocalDate.now().minusDays(1))
+        );
+
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/dato")
+                .build(orgtilknytningToUpdate.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningDatoRequest)
+            .exchange()
+            .expectStatus().isBadRequest();
+
+        verify(
+            orgtilknytningCommandService,
+            times(0)
+        ).endreOrgtilknytningDato(
+            stringArgumentCaptor.capture(),
+            endreOrgtilknytningDatoArgumentCaptor.capture()
+        );
+    }
+
+    @Test
     @DisplayName("Should block update dato for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_for_ekstern_only_date() {
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -238,16 +282,16 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         ));
 
         var existingOrgtilknytning = orgtilknytningState().toBuilder()
-            .gyldigFom(LocalDate.now())
-            .gyldigTom(Optional.of(LocalDate.now().plusYears(1)))
+            .gyldigFom(LocalDate.now().minusMonths(3))
+            .gyldigTom(Optional.of(LocalDate.now().plusMonths(3)))
             .build();
         saveOrgtilknytninger(List.of(existingOrgtilknytning));
 
         var leggTilOrgtilknytningRequest = new LeggTilOrgtilknytningRequest(
             navident,
             orgEnhet.id(),
-            LocalDate.now().plusYears(1),
-            Optional.of(LocalDate.now().plusYears(2))
+            LocalDate.now(),
+            Optional.of(LocalDate.now().plusMonths(5))
         );
 
         webTestClient
@@ -383,7 +427,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             navident,
             orgEnhet.id(),
             LocalDate.now().plusMonths(1),
-            Optional.of(LocalDate.now().plusYears(2))
+            Optional.of(LocalDate.now().plusMonths(6))
         );
 
         webTestClient
@@ -405,5 +449,51 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         );
     }
 
+    @Test
+    @DisplayName("Should get orgtilknytning for fid")
+    void test_get_orgtilknytning() {
+        var orgtilknytningStateToGet = orgtilknytningState();
+
+        saveOrgtilknytninger(List.of(orgtilknytningStateToGet, orgtilknytningState()));
+
+        var responseBody =  webTestClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}")
+                .build(orgtilknytningStateToGet.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesUserToken());
+            })
+            .exchange()
+            .expectStatus().is2xxSuccessful()
+            .expectBody(OrgtilknytningState.class)
+            .returnResult().getResponseBody();
+
+        assertThat(responseBody)
+            .usingRecursiveComparison()
+            .isEqualTo(orgtilknytningStateToGet);
+    }
+
+    @Test
+    @DisplayName("Should get 404 if orgtilknytning with fid is not found")
+    void test_get_orgtilknytning_not_found() {
+        saveOrgtilknytninger(List.of(orgtilknytningState()));
+
+        webTestClient
+            .get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}")
+                .build(UUID.randomUUID().toString())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesUserToken());
+            })
+            .exchange()
+            .expectStatus().is4xxClientError();
+
+    }
 
 }

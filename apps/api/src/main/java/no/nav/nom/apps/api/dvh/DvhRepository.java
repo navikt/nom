@@ -27,7 +27,7 @@ public class DvhRepository {
     private List<DvhLeder> ledere = Collections.emptyList();
     private List<DvhOrganisering> organiseringer = Collections.emptyList();
     private Collection<String> annenStatNavIdenter = Collections.emptyList();
-    private List<DvhTelefon> navidentTelefonNrMap;
+    private List<DvhTelefon> navidentTelefonNrMap = Collections.emptyList();
 
     private final List<Supplier<Boolean>> listeners = new ArrayList<>();
 
@@ -35,8 +35,8 @@ public class DvhRepository {
         return organiseringer.stream().filter(e -> e.containsEnhet(agressoId, orgNiv, navn)).toList();
     }
 
-    public List<DvhLeder> getLederByAgressoIdAndNiv(String agressoId, String orgNiv) {
-        return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv)).toList();
+    public List<DvhLeder> getLederByAgressoIdAndNivAndNavn(String agressoId, String orgNiv, String navn) {
+        return ledere.stream().filter(l -> l.getOrgEnhetNr().equals(agressoId) && l.getOrgNiv().equals(orgNiv) && l.getOrgenhetNavn().equals(navn)).toList();
     }
 
     public void saveLedere(List<DvhLeder> ledere) {

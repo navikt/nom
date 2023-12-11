@@ -1,6 +1,9 @@
 import {
+  endOfDay,
   format,
   formatISO,
+  isAfter,
+  isBefore,
   isWithinInterval,
   maxTime,
   minTime,
@@ -56,7 +59,7 @@ export function formatTlf(nr: string) {
 
 export const DATE_FORMATS = {
   no: "dd.MM.yyyy",
-  noLong: "dd.MM.yyyy hh:MM",
+  noLong: "dd.MM.yyyy HH:MM",
 };
 
 export function formatDateWithoutTimezone(date: Date) {
@@ -81,11 +84,35 @@ export function isGyldighetsPeriodeActive(
   gyldigFom: string | undefined,
   gyldigTom: string | undefined,
 ) {
-  const gyldigFomAsDate = gyldigFom ? new Date(gyldigFom) : new Date(minTime);
-  const gyldigTomAsDate = gyldigTom ? new Date(gyldigTom) : new Date(maxTime);
+  const gyldigFomAsDate = gyldigFom
+    ? endOfDay(new Date(gyldigFom))
+    : new Date(minTime);
+  const gyldigTomAsDate = gyldigTom
+    ? endOfDay(new Date(gyldigTom))
+    : new Date(maxTime);
 
-  return isWithinInterval(new Date(), {
-    start: gyldigFomAsDate,
-    end: gyldigTomAsDate,
-  });
+  const endOfToday = endOfDay(new Date());
+
+  try {
+    return isWithinInterval(endOfToday, {
+      start: gyldigFomAsDate,
+      end: gyldigTomAsDate,
+    });
+  } catch {
+    return false;
+  }
+}
+
+export function isBeforePresent(date: Date) {
+  const endOfDate = endOfDay(date);
+  const endOfToday = endOfDay(new Date());
+
+  return isBefore(endOfDate, endOfToday);
+}
+
+export function isAfterPresent(date: Date) {
+  const endOfDate = endOfDay(date);
+  const endOfToday = endOfDay(new Date());
+
+  return isAfter(endOfDate, endOfToday);
 }

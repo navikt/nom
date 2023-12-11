@@ -10,7 +10,7 @@ import {
   getFysiskeBrukersteder,
   getOrgEnhet,
 } from "~/api/react-query-endpoints";
-import { ReactQueryErrorAlert } from "~/components/ReactQueryErrorAlert";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
@@ -29,8 +29,8 @@ export function ConfirmStep() {
     visningsmellomnavn,
     sektor,
     ansettelsesType,
-    startDato,
-    sluttDato,
+    gyldigFom,
+    gyldigTom,
     orgEnhetId,
     fysiskBrukerstedNr,
   } = useSearch({ from: createRessursRoute.id });
@@ -76,8 +76,8 @@ export function ConfirmStep() {
         visningsmellomnavn,
         sektor,
         ansettelsesType,
-        startDato,
-        sluttDato,
+        startDato: gyldigFom,
+        sluttDato: gyldigTom,
         orgEnhetId,
         fysiskBrukerstedNr,
       };
@@ -150,11 +150,11 @@ export function ConfirmStep() {
           <span>Remedy-enhet:</span>
           <b>{selectOrgEnhet?.remedyEnhetId}</b>
           <span>Startdato (første arbeidsdag):</span>
-          <b>{startDato && format(new Date(startDato), DATE_FORMATS.no)}</b>
-          {sluttDato && (
+          <b>{gyldigFom && format(new Date(gyldigFom), DATE_FORMATS.no)}</b>
+          {gyldigTom && (
             <>
               <span>Sluttdato:</span>
-              <b>{format(new Date(sluttDato), DATE_FORMATS.no)}</b>
+              <b>{format(new Date(gyldigTom), DATE_FORMATS.no)}</b>
             </>
           )}
         </div>
@@ -162,7 +162,7 @@ export function ConfirmStep() {
           Du kan ikke endre opplysningene i NOM når ressursen er opprettet.
           Dette må gjøres i Unit4 og Identrutina i Remedy.
         </Alert>
-        <ReactQueryErrorAlert error={opprettRessursMutation.error} />
+        <ApiResponseError error={opprettRessursMutation.error} />
       </Modal.Body>
       <Modal.Footer>
         <Button

@@ -26,4 +26,9 @@ public class OrgEnhet {
 
     OrgEnhetsType orgEnhetsType;
     String remedyEnhetId;
+
+    // Enheter som er opprettet og avsluttet samme dag er ikke gyldige
+    public boolean endedOnStartDate() {
+        return getGyldigTom() != null && getGyldigFom().isEqual(getGyldigTom());
+    }
 }

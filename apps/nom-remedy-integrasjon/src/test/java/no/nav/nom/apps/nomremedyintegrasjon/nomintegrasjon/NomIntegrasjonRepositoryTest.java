@@ -23,13 +23,13 @@ public class NomIntegrasjonRepositoryTest extends TestBase {
             NomIntegrasjonEntity.builder()
                 .entryId(entryId)
                 .navId("Z654321")
-                .enhetsnavn("some enhet").build()
+                .enhetsId("some-enhet").build()
         );
 
         var entityWithUpdatedValues = NomIntegrasjonEntity.builder()
             .entryId(entryId)
             .navId("X123456")
-            .enhetsnavn("Some other enhet")
+            .enhetsId("Some-other-enhet")
             .fornavn("Donald").build();
 
         nomIntegrasjonRepository.save(entityWithUpdatedValues);

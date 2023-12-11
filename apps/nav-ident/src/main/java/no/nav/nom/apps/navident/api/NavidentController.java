@@ -77,13 +77,28 @@ public class NavidentController {
     @PostMapping(value = "/create")
     public ResponseEntity<NavidentResponseDTO> createNavident(@RequestBody NavidentRequestDTO request) {
         logger.info(LogConfig.SECURE_LOGS, "Navident bestilt for: {}", request);
-        val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), request.getIdentPrefix().charAt(0));
+        val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), prefixValidator(request.getIdentPrefix()));
         val response = NavidentResponseDTO.builder()
                 .navident(bestilling.getBody().getNavident())
                 .feilmelding(bestilling.getBody().getFeilmelding())
                 .build();
 
         return ResponseEntity.status(bestilling.getHttpStatus()).body(response);
+    }
+
+    private char prefixValidator(String identPrefix) {
+        char prefixChar = identPrefix.toUpperCase().charAt(0);
+        switch (prefixChar) {
+            case 'Æ': return 'A';
+            case 'Ø': return 'O';
+            case 'Å': return 'A';
+        }
+        if ( prefixChar < 'A' || prefixChar > 'Z' ) {
+            String msg = "Ugyldig ident prefix: %s".formatted(identPrefix);
+            logger.error(msg);
+            throw new BadRequestException(msg);
+        }
+        return prefixChar;
     }
 
     @Operation(

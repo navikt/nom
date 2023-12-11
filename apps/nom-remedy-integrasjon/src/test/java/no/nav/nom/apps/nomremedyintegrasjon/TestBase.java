@@ -20,7 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @AutoConfigureWireMock(port = 0)
 @ContextConfiguration(initializers = {MockOAuth2ServerInitializer.class})
-@EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource"}, controlledShutdown = true)
+@EmbeddedKafka(partitions = 1, topics = {"org.nom.ressurs-eventsource", "org.nom.orgtilknytning-eventsource"}, controlledShutdown = true)
 public abstract class TestBase {
 
     @MockBean
@@ -36,5 +36,6 @@ public abstract class TestBase {
     protected FysiskBrukerstedReadOnlyRepository fysiskBrukerstedReadOnlyRepository;
 
     protected final String ressursEventSourceTopic = "org.nom.ressurs-eventsource";
+    protected final String orgtilknytningEventSourceTopic = "org.nom.orgtilknytning-eventsource";
 
 }

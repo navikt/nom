@@ -1,4 +1,4 @@
-package no.nav.nom.apps.api.ressurs.api.v1.teamcat;
+package no.nav.nom.apps.api.teamcat;
 
 import no.nav.nom.contract.nom.Sektor;
 
@@ -11,8 +11,8 @@ public record TeamcatRessursDTO(
     String navident,
     ResourceType ressurstype,
     String visningsnavn,
-
-    String avdelingnavn
+    String enhetId,
+    String lederNavident
 ) {
     public enum ResourceType {
         ANNEN_STAT("ANNEN_STAT"),

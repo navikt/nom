@@ -14,6 +14,11 @@ export enum AnsettelsesType {
   MIDLERTIDIG = "MIDLERTIDIG",
 }
 
+export interface AvvikleRessursRequest {
+  /** @format date */
+  sluttDato: string;
+}
+
 export interface EndreOrgtilknytningDatoRequest {
   /** @format date */
   gyldigFom?: string;

@@ -6,8 +6,9 @@ import { Link as ReactRouterLink, useSearch } from "@tanstack/react-router";
 
 import { getRessurs } from "~/api/react-query-endpoints";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
-import { ReceiptRessurs } from "~/pages/ResourcePage/RessursCards/ReceiptRessurs";
+import { ReceiptRessurs } from "~/pages/ResourcePage/RessursComponents/ReceiptRessurs";
 import { createRessursRoute, indexRoute } from "~/reactRouterRoutes";
+import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
 import type { Ressurs } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatVisningsnavn, isInDevelopment } from "~/utils";
@@ -48,7 +49,10 @@ export function SummaryStep() {
 
 function Receipt({ ressurs }: { ressurs: Ressurs }) {
   return (
-    <ContainerWithHighlightedTop title="Medarbeideren er nå registrert i NOM">
+    <ContainerWithHighlightedTop
+      icon={opprettRessursIcon}
+      title="Medarbeideren er nå registrert i NOM"
+    >
       <ReceiptRessurs ressurs={ressurs} />
       {ressurs.sektor === Sektor.NAV_STATLIG ? (
         <StatligInstructions ressurs={ressurs} />

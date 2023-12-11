@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 
 import nomLogoCircle from "~/resources/nomLogoCircle.svg";
-import { mediaQueryContentWidth } from "~/resources/NomStyles";
+import { defaultWidth } from "~/resources/NomStyles";
 
 import { BurgerMenu } from "./BurgerMenu";
 import { SearchBar } from "./select/Searchbar";
@@ -22,17 +22,10 @@ const innerDiv = css(
     display: grid;
     justify-self: center;
     grid-template-columns: auto 1fr auto;
-    column-gap: 2rem;
+    column-gap: var(--a-spacing-8);
     align-items: center;
-
-    @media (width <= 60rem) {
-      grid-template-columns: 1fr;
-      justify-items: left;
-      row-gap: 1rem;
-      padding: 1rem 0;
-    }
   `,
-  mediaQueryContentWidth,
+  defaultWidth,
 );
 
 export const NavHeader = () => {

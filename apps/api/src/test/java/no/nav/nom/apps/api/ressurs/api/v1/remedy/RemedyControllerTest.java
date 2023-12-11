@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -53,9 +54,11 @@ public class RemedyControllerTest extends RestTestBase {
                 navn.getEtternavn()
             ),
             Optional.of(LocalDate.now().plusDays(10)),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
-        return  Optional.of(ressursState);
+        return Optional.of(ressursState);
     }
 
     @Test
@@ -172,10 +175,15 @@ public class RemedyControllerTest extends RestTestBase {
                     .build()));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
-            .thenReturn(new RessursState("fid", personident, navident,
+            .thenReturn(new RessursState(
+                "fid",
+                personident,
+                navident,
                 Sektor.EKSTERN,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                Optional.empty(), Optional.empty()
+                Optional.empty(), Optional.empty(),
+                null,
+                Collections.emptyList()
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()
@@ -233,17 +241,30 @@ public class RemedyControllerTest extends RestTestBase {
         when(unleash.isEnabled(RemedyController.UNLEASH_HANDLE_PERSONIDENT_CHANGE)).thenReturn(true);
 
         when(ressursStateRepository.findByPersonident(ny_personident)).thenReturn(Optional.empty()); // Nom har ikke ressurs på ny personident
-        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(new RessursState(  // Men har eksisterende ressurs for navidenten returnert av nik
-            eksisterendeFid, gml_personident, navident, Sektor.NAV_STATLIG,
+        when(ressursStateRepository.findByNavident(navident)).thenReturn(Optional.of(new RessursState(
+            // Men har eksisterende ressurs for navidenten returnert av nik
+            eksisterendeFid,
+            gml_personident,
+            navident,
+            Sektor.NAV_STATLIG,
             new Visningsnavn("Opprinnelig_fornavn", Optional.empty(), "Opprinnelig_etternavn"),
-            Optional.empty(), Optional.empty()
+            Optional.empty(),
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         )));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
-            .thenReturn(new RessursState("fid", gml_personident, navident,
+            .thenReturn(new RessursState(
+                "fid",
+                gml_personident,
+                navident,
                 Sektor.NAV_STATLIG,
                 new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                Optional.empty(), Optional.empty()
+                Optional.empty(),
+                Optional.empty(),
+                null,
+                Collections.emptyList()
             ));
 
         OpprettRessursRequest request = OpprettRessursRequest.builder()

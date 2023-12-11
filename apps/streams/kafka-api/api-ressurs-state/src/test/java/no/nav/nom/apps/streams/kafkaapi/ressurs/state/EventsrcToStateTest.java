@@ -317,7 +317,9 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
                 "fornavn",
                 Optional.empty(),
                 "etternavn"
-            )
+            ),
+            List.of("2021"),
+            "2021"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(

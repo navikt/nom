@@ -14,4 +14,8 @@ public record OrganiseringState(
     String navnOver,
     LocalDate gyldigFom,
     Optional<LocalDate> gyldigTom
-) {}
+) {
+    public boolean containsOrgEnhet(String id) {
+        return this.id.equals(id) || this.idOver.equals(id);
+    }
+}

@@ -1,6 +1,7 @@
 package no.nav.nom.contract.nom.eventsource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +15,11 @@ public class RessursSluttetEventV1 extends RessursEvent {
 
     public RessursSluttetEventV1(String fid, RessursSluttetEventData data, InputMetadata inputMetadata) {
         super(fid, data, new Metadata(inputMetadata, LocalDateTime.now()), null);
+    }
+
+    @JsonIgnore
+    public RessursSluttetEventData getRessursSluttetEventData() {
+        return (RessursSluttetEventData) getData();
     }
 
     public record RessursSluttetEventData(

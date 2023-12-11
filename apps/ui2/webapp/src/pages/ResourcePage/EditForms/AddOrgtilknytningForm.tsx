@@ -5,6 +5,7 @@ import { Alert, Button } from "@navikt/ds-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { addYears } from "date-fns";
 import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -12,17 +13,19 @@ import {
   leggTilOrgtilknytning,
   orgtilknytningerKeys,
 } from "~/api/react-query-endpoints";
+import { ApiResponseError } from "~/components/ApiResponseError";
 import { showToast } from "~/hooks/showToast";
 import {
   eksternValidationSchema,
-  formStyle,
   OrganisasjonstilknytningInnerForm,
 } from "~/pages/CreateResourcePage/OrganisasjonstilknytningStep";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
 import { SaveOrAbortButtons } from "~/pages/ResourcePage/EditForms/SaveOrAbortButtons";
 import { ressursRoute } from "~/reactRouterRoutes";
+import { defaultFormStyle } from "~/resources/NomStyles";
 import type { LeggTilOrgtilknytningRequest, Ressurs } from "~/types/api-models";
 import type { StandardResponse } from "~/types/api-models";
+import { formatDateWithoutTimezone } from "~/utils";
 
 export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
@@ -32,8 +35,8 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const methods = useForm({
     defaultValues: {
       orgEnhetId: undefined,
-      startDato: undefined,
-      sluttDato: undefined,
+      gyldigFom: undefined,
+      gyldigTom: undefined,
     },
     resolver: yupResolver(eksternValidationSchema),
   });
@@ -46,6 +49,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
     mutationFn: async (values) => leggTilOrgtilknytning(values),
     onSuccess: () => {
       showToast({ text: "Lagret" });
+      methods.reset();
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
@@ -59,22 +63,20 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
     return (
       <FormProvider {...methods}>
         <form
-          css={formStyle}
+          css={defaultFormStyle}
           onSubmit={handleSubmit((values) =>
             leggTilOrgtilknytningMutation.mutate({
               ...values,
               navident: ressurs.navident,
-              gyldigFom: values.startDato,
-              gyldigTom: values.sluttDato,
             }),
           )}
         >
-          <OrganisasjonstilknytningInnerForm />
-          {leggTilOrgtilknytningMutation.isError && (
-            <Alert variant="error">
-              {leggTilOrgtilknytningMutation.error.response?.data.message}
-            </Alert>
-          )}
+          <OrganisasjonstilknytningInnerForm
+            defaultSluttDato={formatDateWithoutTimezone(
+              addYears(new Date(), 1),
+            )}
+          />
+          <ApiResponseError error={leggTilOrgtilknytningMutation.error} />
           <SaveOrAbortButtons
             isLoading={leggTilOrgtilknytningMutation.isPending}
           />

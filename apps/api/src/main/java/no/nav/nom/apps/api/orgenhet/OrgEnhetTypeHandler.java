@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -112,13 +111,16 @@ public class OrgEnhetTypeHandler {
         orgenhetsTyperTilBarna.ifPresent(orgEnhetsTyperTilBarna -> {
 
             if (orgEnhetsTyperTilBarna.size() == 1) {
-                var orgEnhetsType = orgEnhetsTyperTilBarna.stream().toList().get(0);
-                final var endreType = new EndreOrgEnhetsType(
-                    orgEnhetsType,
-                    new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
-                );
-                orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.get().fid(), endreType);
-                logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.get().fid(), orgEnhetsType);
+                var newOrgEnhetsType = orgEnhetsTyperTilBarna.stream().toList().get(0);
+                if (!overordnetOrgEnhet.get().orgEnhetsType().equals(newOrgEnhetsType )){
+
+                    var endreType = new EndreOrgEnhetsType(
+                        newOrgEnhetsType,
+                        new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
+                    );
+                    orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.get().fid(), endreType);
+                    logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.get().fid(), newOrgEnhetsType);
+                }
             } else {
                 // Log id til overordnet orgenhet sammen med hvilke orgtyper barna dens har. Så lenge alle barna ikke har samme så må det bestemmes manuelt.
                 logger.debug(

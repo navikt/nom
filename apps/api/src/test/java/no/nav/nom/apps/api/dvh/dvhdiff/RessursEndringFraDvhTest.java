@@ -24,6 +24,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -158,7 +159,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                                 "ENavn 1"
                         ),
                         Optional.empty(),
-                        Optional.empty()
+                        Optional.empty(),
+                    null,
+                    Collections.emptyList()
                 )
         );
 
@@ -213,7 +216,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         "ENavn 1"
                 ),
                 Optional.empty(),
-                Optional.empty()
+                Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);
@@ -269,7 +274,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                         "ENavn 1"
                 ),
                 Optional.empty(),
-                Optional.empty()
+                Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);
@@ -357,7 +364,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                     "ENavn 1"
                 ),
                 Optional.empty(),
-                Optional.empty()
+                Optional.empty(),
+                null,
+                Collections.emptyList()
             )
         );
 
@@ -417,7 +426,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                     "ENavn 1"
                 ),
                 Optional.empty(),
-                Optional.empty()
+                Optional.empty(),
+                null,
+                Collections.emptyList()
             )
         );
 
@@ -472,7 +483,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);
@@ -531,7 +544,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);
@@ -592,7 +607,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);
@@ -671,7 +688,9 @@ public class RessursEndringFraDvhTest extends DvhTestBase {
                 "ENavn 1"
             ),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            null,
+            Collections.emptyList()
         );
 
         createRessursHendelseEventSource(ressursv1);

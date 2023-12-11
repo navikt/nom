@@ -17,6 +17,7 @@
 
     <properties>
         <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
+        <openapi-generator-maven-plugin.version>7.1.0</openapi-generator-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -164,6 +165,67 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-nom-api-response-models</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Kan ikke bruke url https://nom-api.intern.nav.no/v3/api-docs/internal direkte
+                                 da den ikke kan nåes fra github actions -->
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/nom-api.json</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <library>spring-boot</library>
+                            <!-- Disable generation of API interfaces -->
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <!-- Disable generating of readme, util file, etc. -->
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <!-- Må være enabled inntil nom-api sin spec får en verdi for info.version -->
+                            <skipValidateSpec>true</skipValidateSpec>
+
+                            <configOptions>
+                                <!-- Packages for interface and DTO classes -->
+                                <modelPackage>no.nav.nom.generated.model</modelPackage>
+
+                                <!-- Don't generate controllers -->
+                                <interfaceOnly>true</interfaceOnly>
+                                <!-- Don't generate default implementation in interfaces -->
+                                <skipDefaultInterface>true</skipDefaultInterface>
+
+                                <!-- Source folder for generated code -->
+                                <sourceFolder>src/gen/java/main</sourceFolder>
+
+                                <!-- Disable annotations for Swagger/OpenAPI on generated classes -->
+                                <documentationProvider>none</documentationProvider>
+                                <annotationLibrary>none</annotationLibrary>
+
+                                <!-- Disable use of OpenAPI Jackson Nullable library -->
+                                <openApiNullable>false</openApiNullable>
+
+                                <useSpringBoot3>true</useSpringBoot3>
+
+                                <!-- Don't generate default constructor with required args -->
+                                <generatedConstructorWithRequiredArgs>false</generatedConstructorWithRequiredArgs>
+                            </configOptions>
+
+                            <!-- Use LocalDateTime for timestamps -->
+                            <typeMappings>
+                                <typeMapping>OffsetDateTime=java.time.LocalDateTime</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping>java.time.OffsetDateTime=java.time.LocalDateTime</importMapping>
+                            </importMappings>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

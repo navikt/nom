@@ -111,6 +111,22 @@ public class OrgtilknytningController {
         throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 
+    @GetMapping("/{fid}")
+    @Operation(
+        description = "Direkte oppslag på orgtilknytning med fid",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    public ResponseEntity<OrgtilknytningState> getOrgtilknytning(
+        @PathVariable String fid
+    ) {
+        return ResponseEntity.ok(
+            orgtilknytningRestService.getOrgtilknytning(fid)
+        );
+    }
+
 
     // TODO: Lage global ControllerAdvice
     @ExceptionHandler({

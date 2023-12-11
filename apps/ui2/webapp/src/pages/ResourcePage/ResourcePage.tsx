@@ -2,13 +2,13 @@ import { css } from "@emotion/react";
 import { Alert, Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearch } from "@tanstack/react-router";
-import { isBefore } from "date-fns";
 import React from "react";
 
 import { getRessurs } from "~/api/react-query-endpoints";
-import { DetailedRessurs } from "~/pages/ResourcePage/RessursCards/DetailedRessurs";
-import { RessursHasQuit } from "~/pages/ResourcePage/RessursCards/RessursHasQuit";
+import { DetailedRessurs } from "~/pages/ResourcePage/RessursComponents/DetailedRessurs";
+import { RessursCard } from "~/pages/ResourcePage/RessursComponents/RessursCard";
 import { ressursRoute } from "~/reactRouterRoutes";
+import { isBeforePresent } from "~/utils";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
@@ -17,15 +17,14 @@ export const ResourcePage = () => {
   const { alreadyExists } = useSearch({ from: ressursRoute.id });
 
   const ressursQuery = useQuery({
-    queryKey: getRessurs.queryKey(id as string),
-    queryFn: () => getRessurs.queryFn(id as string),
-    enabled: !!id,
+    queryKey: getRessurs.queryKey(id),
+    queryFn: () => getRessurs.queryFn(id),
   });
 
   const ressurs = ressursQuery.data;
 
   const hasQuit =
-    ressurs?.sluttdato && isBefore(new Date(ressurs.sluttdato), new Date());
+    ressurs?.sluttdato && isBeforePresent(new Date(ressurs.sluttdato));
 
   return (
     <ContentWrapper>
@@ -47,7 +46,7 @@ export const ResourcePage = () => {
             </Alert>
           ) : undefined}
           {hasQuit ? (
-            <RessursHasQuit ressurs={ressurs} />
+            <RessursCard hasQuit ressurs={ressurs} />
           ) : (
             <DetailedRessurs ressurs={ressurs} />
           )}

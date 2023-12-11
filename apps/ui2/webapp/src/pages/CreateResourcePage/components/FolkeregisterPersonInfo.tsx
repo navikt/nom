@@ -7,7 +7,7 @@ const backgroundBox = css`
   background-color: var(--nom-secondary-hover);
   border: 1px solid var(--a-gray-400);
   border-radius: 4px;
-  padding: 1rem;
+  padding: var(--a-spacing-4);
 `;
 
 export function FolkeregisterPersonInfo({
