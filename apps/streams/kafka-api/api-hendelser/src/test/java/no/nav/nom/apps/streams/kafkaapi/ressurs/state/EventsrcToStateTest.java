@@ -73,6 +73,8 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final RessursEvent ressursSektorOppdatertEvent = HendelserTestUtils.getRessursSektorOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
+        final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
+
         final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.NY);
         final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
         final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
@@ -114,7 +116,8 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             Arguments.of("personident oppdatert resurs event oppretter endret Hendelser", ressursPersonidentOppdatertEvent, endretResursHendelserWithNullId),
             Arguments.of("sektor oppdatert resurs event oppretter endret Hendelser", ressursSektorOppdatertEvent, endretResursHendelserWithNullId),
             Arguments.of("startdato opdatert resurs event oppretter endret Hendelser", ressursStartDatoOppdatertEvent, endretResursHendelserWithNullId),
-            Arguments.of("sluttet resurs event oppretter fjernet Hendelser", ressursSluttetEvent, slettResursHendelserWithNullId),
+            Arguments.of("sluttet resurs event oppretter endret Hendelser", ressursSluttetEvent, endretResursHendelserWithNullId),
+            Arguments.of("fjernet resurs event oppretter fjernet Hendelser", ressursFjernetEvent, slettResursHendelserWithNullId),
             // organisering events
             Arguments.of("opprett organisering event oppretter endret Hendelser  ", opprettOrganiseringEvent, endreOrgenhetHendelser),
             Arguments.of("endre organisering event oppretter endret Hendelser  ", endreOrganiseringEvent, endreOrgenhetHendelser),
@@ -192,6 +195,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final RessursEvent ressursSektorOppdatertEvent = HendelserTestUtils.getRessursSektorOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
+        final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
         final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.NY);
         final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
         final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
@@ -253,19 +257,24 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
                 )
             ),
             Arguments.of(
-                "avslutt -> opprett resurs event oppretter fjernet Hendelser uten id",
+                "avslutt -> opprett resurs event oppretter endret Hendelser uten id",
                 Arrays.asList(ressursSluttetEvent, opprettRessursEvent),
+                Arrays.asList(endretResursHendelserWithNullId, opprettResursHendelser)
+            ),
+            Arguments.of(
+                "fjernet -> opprett resurs event oppretter fjernet Hendelser uten id",
+                Arrays.asList(ressursFjernetEvent, opprettRessursEvent),
                 Arrays.asList(slettResursHendelserWithNullId, opprettResursHendelser)
             ),
             Arguments.of(
                 "avslutt -> opprett -> endre resurs event oppretter endret Hendelser med id",
                 Arrays.asList(ressursSluttetEvent, opprettRessursEvent, ressursPersonaliaOppdatertEvent),
-                Arrays.asList(slettResursHendelserWithNullId, opprettResursHendelser, endretResursHendelserWithId)
+                Arrays.asList(endretResursHendelserWithNullId, opprettResursHendelser, endretResursHendelserWithId)
             ),
             Arguments.of(
                 "endre -> avslutt resurs event oppretter endret Hendelser uten id",
                 Arrays.asList(ressursPersonaliaOppdatertEvent, ressursSluttetEvent),
-                Arrays.asList(endretResursHendelserWithNullId, slettResursHendelserWithNullId)
+                Arrays.asList(endretResursHendelserWithNullId, endretResursHendelserWithNullId)
             ),
             // orgtilknytning events
             Arguments.of(

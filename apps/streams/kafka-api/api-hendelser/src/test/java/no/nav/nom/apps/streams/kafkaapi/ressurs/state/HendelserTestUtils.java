@@ -23,6 +23,7 @@ import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSektorOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
+import no.nav.nom.contract.nom.eventsource.RessursTekniskSlettetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
@@ -215,6 +216,17 @@ public class HendelserTestUtils {
         );
 
         return new RessursSluttetEventV1(
+            fid,
+            eventData,
+            eventMetadata
+        );
+    }
+
+    static RessursEvent getRessursTekniskSlettetEvent(String fid, Event.Metadata eventMetadata) {
+        final RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData eventData = new RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData(
+        );
+
+        return new RessursTekniskSlettetEventV1(
             fid,
             eventData,
             eventMetadata

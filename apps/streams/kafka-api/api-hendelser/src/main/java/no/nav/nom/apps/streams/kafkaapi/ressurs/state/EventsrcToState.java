@@ -96,7 +96,11 @@ public class EventsrcToState {
                             }
 
                             hendelserStore.put(record.key(), incomingHendelser.id());
-                            context.forward(new Record<>(record.key(), incomingHendelser, record.timestamp()));
+
+                            // do not the forward if hendelserType is unknown
+                            if(incomingHendelser.hendelserType() != null){
+                                context.forward(new Record<>(record.key(), incomingHendelser, record.timestamp()));
+                            }
                         }
                     };
                 }
@@ -132,12 +136,12 @@ public class EventsrcToState {
                 hendelserStateBuilder
                     .id(data.id())
                     .hendelserType(HendelserType.ENDRET);
-            } else if (event.getData() instanceof OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData) {
-                hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
             } else if (event.getData() instanceof OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData) {
                 hendelserStateBuilder
                     .hendelserType(HendelserType.FJERNET);
+            } else {
+                hendelserStateBuilder
+                    .hendelserType(HendelserType.ENDRET);
             }
             return hendelserStateBuilder.build();
         } catch (Exception e) {
@@ -158,8 +162,11 @@ public class EventsrcToState {
                     .hendelserType(HendelserType.NY);
             } else if (event.getData() instanceof RessursSluttetEventV1.RessursSluttetEventData) {
                 hendelserStateBuilder
+                    .hendelserType(HendelserType.ENDRET);
+            } else if (event.getData() instanceof RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData) {
+                hendelserStateBuilder
                     .hendelserType(HendelserType.FJERNET);
-            } else {
+            }else {
                 hendelserStateBuilder
                     .hendelserType(HendelserType.ENDRET);
             }
