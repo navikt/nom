@@ -648,6 +648,9 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
     <EditButtonWrapper ressurs={ressurs}>
       <Divider noMargins />
       <ReactRouterLink
+        css={css`
+          align-self: flex-end;
+        `}
         params={{ id: ressurs.navident }}
         search={{}}
         to={terminateRessursRoute.id}
@@ -658,8 +661,6 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
             --ac-button-secondary-text: var(--a-red-500);
             --ac-button-secondary-hover-text: var(--a-red-500);
             --ac-button-secondary-hover-bg: var(--a-red-50);
-            width: fit-content;
-            align-self: flex-end;
 
             :active {
               --ac-button-secondary-active-bg: var(--a-red-500);
