@@ -79,9 +79,13 @@ public class RessursResolver {
 
         return result.map(res ->
             new RessursWithMetadataResult(
-                res.id, MappingUtils.toRessurs(res.ressurs),
-                ressursMetadataRepository.findOpprettetAvById(res.id),
-                ressursMetadataRepository.findOpprettetDatoById(res.id)
+                res.id,
+                MappingUtils.toRessurs(res.ressurs),
+                ressursMetadataRepository.findOpprettetAvByNavident(res.id),
+                ressursMetadataRepository.findOpprettetDatoByNavident(res.id),
+                ressursMetadataRepository.findEndretAvByNavident(res.id),
+                ressursMetadataRepository.findEndretDatoByNavident(res.id),
+                ressursMetadataRepository.findEndringEventByNavident(res.id)
             )
         ).collect(Collectors.toList());
     }

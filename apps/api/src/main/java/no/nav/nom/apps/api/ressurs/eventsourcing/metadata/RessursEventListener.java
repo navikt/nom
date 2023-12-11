@@ -1,6 +1,7 @@
 package no.nav.nom.apps.api.ressurs.eventsourcing.metadata;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.libs.utils.common.kafka.KafkaUtils;
@@ -24,12 +25,15 @@ public class RessursEventListener {
     private final AtomicBoolean initialLoadComplete = new AtomicBoolean(false);
     private final String eventSourceTopic;
     private final RessursMetadataRepository ressursMetadataRepository;
+    private final RessursStateRepository ressursStateRepository;
 
     public RessursEventListener(
         @Value("${app.kafka.ressurs.eventsourceTopic}") String eventSourceTopic,
-        RessursMetadataRepository ressursMetadataRepository
+        RessursMetadataRepository ressursMetadataRepository,
+        RessursStateRepository ressursStateRepository
     ) {
         this.ressursMetadataRepository = ressursMetadataRepository;
+        this.ressursStateRepository = ressursStateRepository;
         this.eventSourceTopic = eventSourceTopic;
     }
 
@@ -44,7 +48,7 @@ public class RessursEventListener {
         StreamSupport.stream(records.spliterator(), false).forEachOrdered(this::process);
 
         KafkaUtils.verifyUpToDate(consumer, eventSourceTopic, initialLoadComplete,
-            () -> log.info("Kafka RessursEvent listener initial load finished. Metadata for {} ressurser retrieved", ressursMetadataRepository.count())
+            () -> log.info("Kafka RessursEvent listener initial load finished. Metadata for {} ressurser retrieved", ressursMetadataRepository.countOpprettelseMetadata())
         );
     }
 
@@ -52,7 +56,11 @@ public class RessursEventListener {
         if (RessursOpprettetEventV1.class.isInstance(record.value())) {
             var key = ((RessursOpprettetEventV1)record.value()).getRessursOpprettetAdditionalData().navident().get();
 
-            ressursMetadataRepository.save(key, record.value().getMetadata());
+            ressursMetadataRepository.saveOpprettelseMetadata(key, record.value().getMetadata());
         }
+
+        ressursStateRepository.findByFid(record.value().getFid()).ifPresent(
+            ressurs -> ressursMetadataRepository.saveEndringMetadata(ressurs.navident(), record.value().getMetadata(), record.value().getClass().getSimpleName())
+        );
     }
 }

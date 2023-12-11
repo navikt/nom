@@ -205,7 +205,7 @@ public class RessursRestService {
         log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         var metaData = new InputMetadata(
-            "GraphQL",
+            "REST-API",
             "opprettRessurs",
             request,
             new Origination(

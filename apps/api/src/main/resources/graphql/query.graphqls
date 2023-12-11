@@ -95,6 +95,9 @@ type RessursWithMetadataResult {
     ressurs: Ressurs
     opprettetAv: String
     opprettetDato: Date
+    endretAv: String
+    endretDato: Date
+    endringEvent: String
 }
 
 enum ResultCode {
