@@ -10,6 +10,9 @@ import no.nav.nom.contract.nom.eventsource.OrganiseringAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
@@ -151,7 +154,7 @@ public class HendelserTestUtils {
         );
     }
 
-    static RessursEvent getRessursPersonaliaOppdatert(String fid, String navident, Event.Metadata eventMetadata) {
+    static RessursEvent getRessursPersonaliaOppdatert(String fid, Event.Metadata eventMetadata) {
         final RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData eventData = new RessursPersonaliaOppdatertV1.PersonaliaOppdatertEventData(
             new Visningsnavn(
                 "fornavn",
@@ -251,4 +254,56 @@ public class HendelserTestUtils {
             )
         );
     }
+
+    static OrgtilknytningEvent getOrgtilknytningAvsluttetEvent(String fid, String navident, Event.Metadata eventMetadata) {
+        return new OrgtilknytningAvsluttetEventV1(
+            fid,
+            new OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData(
+                navident,
+                "orgEnhetId",
+                LocalDate.now()
+            ),
+            eventMetadata,
+            new OrgtilknytningEvent.AdditionalAgressoData(
+                "hrresStillingRessursEnhet",
+                "hrresStillingerPerioderFormatert"
+            )
+        );
+    }
+
+    static OrgtilknytningEvent getOrgtilknytningDatoEndretEvent(String fid, String navident, Event.Metadata eventMetadata) {
+        return new OrgtilknytningDatoEndretEventV1(
+            fid,
+            new OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData(
+                navident,
+                "orgEnhetId",
+                LocalDate.now(),
+                Optional.of(LocalDate.now())
+            ),
+            eventMetadata,
+            new OrgtilknytningEvent.AdditionalAgressoData(
+                "hrresStillingRessursEnhet",
+                "hrresStillingerPerioderFormatert"
+            )
+        );
+    }
+
+    static OrgtilknytningEvent getOrgtilknytningDagligOppfolgingEndretEvent(String fid, String navident, Event.Metadata eventMetadata) {
+        return new OrgtilknytningDagligOppfolgingEndretEventV1(
+            fid,
+            new OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData(
+                navident,
+                "orgEnhetId",
+                LocalDate.now(),
+                Optional.of(LocalDate.now()),
+                true
+            ),
+            eventMetadata,
+            new OrgtilknytningEvent.AdditionalAgressoData(
+                "hrresStillingRessursEnhet",
+                "hrresStillingerPerioderFormatert"
+            )
+        );
+    }
+
 }

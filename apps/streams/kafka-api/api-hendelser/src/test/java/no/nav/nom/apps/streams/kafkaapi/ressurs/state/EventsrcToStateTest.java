@@ -68,7 +68,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
 
         //arrange resurs events og hendelser
         final RessursEvent opprettRessursEvent = HendelserTestUtils.getRessursOpprettetEvent(resursFid, navident, eventMetadata);
-        final RessursEvent ressursPersonaliaOppdatertEvent = HendelserTestUtils.getRessursPersonaliaOppdatert(resursFid, navident, eventMetadata);
+        final RessursEvent ressursPersonaliaOppdatertEvent = HendelserTestUtils.getRessursPersonaliaOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursPersonidentOppdatertEvent = HendelserTestUtils.getRessursPersonidentOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSektorOppdatertEvent = HendelserTestUtils.getRessursSektorOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
@@ -85,6 +85,23 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
 
         // orgtilknytning events
         final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);
+        final OrgtilknytningEvent getOrgtilknytningFjernetEvent = HendelserTestUtils.getOrgtilknytningFjernetEvent(orgTilknytningFid, navident, eventMetadata);
+        final OrgtilknytningEvent getOrgtilknytningAvsluttetEvent = HendelserTestUtils.getOrgtilknytningAvsluttetEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
+        final OrgtilknytningEvent getOrgtilknytningDatoEndretEvent = HendelserTestUtils.getOrgtilknytningDatoEndretEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
+        final OrgtilknytningEvent getOrgtilknytningDagligOppfolgingEndretEvent = HendelserTestUtils.getOrgtilknytningDagligOppfolgingEndretEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
+
 
         return Stream.of(
             // orgeEnhet events
@@ -103,7 +120,15 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             Arguments.of("endre organisering event oppretter endret Hendelser  ", endreOrganiseringEvent, endreOrgenhetHendelser),
             Arguments.of("avslutt organisering event oppretter endret Hendelser  ", avsluttOrganiseringEvent, endreOrgenhetHendelserWithNulId),
             // orgtilknytning events
-            Arguments.of("opprett tilknyting event oppretter endret Hendelser  ", orgtilknytningOpprettetEvent, endretResursHendelserWithId)
+            Arguments.of("opprett tilknyting event oppretter endret Hendelser  ", orgtilknytningOpprettetEvent, endretResursHendelserWithId),
+            Arguments.of("avslutt tilknyting event oppretter endret Hendelser  ", getOrgtilknytningAvsluttetEvent, endretResursHendelserWithId),
+            Arguments.of("fjernet tilknyting event oppretter endret Hendelser  ", getOrgtilknytningFjernetEvent, endretResursHendelserWithId),
+            Arguments.of("datoendret tilknyting event oppretter endret Hendelser  ", getOrgtilknytningDatoEndretEvent, endretResursHendelserWithId),
+            Arguments.of(
+                "dagligoppfolgingendret tilknyting event oppretter endret Hendelser  ",
+                getOrgtilknytningDagligOppfolgingEndretEvent,
+                endretResursHendelserWithId
+            )
         );
     }
 
@@ -112,7 +137,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
     @MethodSource("getMultipleEventsInStream")
     void test_multiple_events_Hendelser(String ignoredDescription, List<Event> events, List<Hendelser> expectedHendelser) {
         // arrange
-        events.stream().forEach(event -> {
+        events.forEach(event -> {
             if (event instanceof OrgEnhetEvent) {
                 orgEnhetInputTopic.pipeInput(new TestRecord<>(UUID.randomUUID().toString(), (OrgEnhetEvent) event));
             } else if (event instanceof RessursEvent) {
@@ -162,7 +187,7 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
 
         // resurs events and hendelser
         final RessursEvent opprettRessursEvent = HendelserTestUtils.getRessursOpprettetEvent(resursFid, navident, eventMetadata);
-        final RessursEvent ressursPersonaliaOppdatertEvent = HendelserTestUtils.getRessursPersonaliaOppdatert(resursFid, navident, eventMetadata);
+        final RessursEvent ressursPersonaliaOppdatertEvent = HendelserTestUtils.getRessursPersonaliaOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursPersonidentOppdatertEvent = HendelserTestUtils.getRessursPersonidentOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSektorOppdatertEvent = HendelserTestUtils.getRessursSektorOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
@@ -175,6 +200,21 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         // orgtilknytning events and hendelser
         final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);
         final OrgtilknytningEvent getOrgtilknytningFjernetEvent = HendelserTestUtils.getOrgtilknytningFjernetEvent(orgTilknytningFid, navident, eventMetadata);
+        final OrgtilknytningEvent getOrgtilknytningAvsluttetEvent = HendelserTestUtils.getOrgtilknytningAvsluttetEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
+        final OrgtilknytningEvent getOrgtilknytningDatoEndretEvent = HendelserTestUtils.getOrgtilknytningDatoEndretEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
+        final OrgtilknytningEvent getOrgtilknytningDagligOppfolgingEndretEvent = HendelserTestUtils.getOrgtilknytningDagligOppfolgingEndretEvent(
+            orgTilknytningFid,
+            navident,
+            eventMetadata
+        );
 
         // streams
         return Stream.of(
@@ -229,9 +269,17 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
             ),
             // orgtilknytning events
             Arguments.of(
-                "opprett orgtilknytning -> fjern orgtilknytning events oppretter Hendelser med id",
+                "opprett orgtilknytning -> dato endret -> oppfolging endret -> fjern orgtilknytning events oppretter Hendelser med id",
                 Arrays.asList(
-                    orgtilknytningOpprettetEvent, getOrgtilknytningFjernetEvent
+                    orgtilknytningOpprettetEvent, getOrgtilknytningDatoEndretEvent, getOrgtilknytningDagligOppfolgingEndretEvent, getOrgtilknytningFjernetEvent
+                ),
+                Arrays.asList(
+                    endretResursHendelserWithId, endretResursHendelserWithId, endretResursHendelserWithId, endretResursHendelserWithId)
+            ),
+            Arguments.of(
+                "avslutt orgtilknytning -> fjern orgtilknytning events oppretter Hendelser med id",
+                Arrays.asList(
+                    getOrgtilknytningAvsluttetEvent, getOrgtilknytningFjernetEvent
                 ),
                 Arrays.asList(
                     endretResursHendelserWithId, endretResursHendelserWithId)
