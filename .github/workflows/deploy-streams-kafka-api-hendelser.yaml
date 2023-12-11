@@ -1,0 +1,31 @@
+name: 'deploy: nom-kafka-api-hendelser'
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'apps/streams/kafka-api/api-hendelser/**'
+      - 'libs/contract-nom-dto/**'
+      - '.nais/streams/kafka-api-hendelser.yaml'
+      - '.github/*/deploy-streams-kafka-api-hendelser.yaml'
+  workflow_dispatch:
+
+jobs:
+  deploy-spring-app:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    uses: ./.github/workflows/deploy-spring-app.yaml
+    with:
+      maven-project: api-hendelser
+      jar-path: apps/streams/kafka-api/api-hendelser/target/app.jar
+      image-suffix: nom-kafka-api-hendelser
+      nais-config-file-path-dev: .nais/streams/kafka-api-hendelser.yaml
+      nais-config-file-path-prod: .nais/streams/kafka-api-hendelser.yaml
+      additional-nais-vars-dev: ',kafka-pool=nav-dev'
+      additional-nais-vars-prod: ',kafka-pool=nav-prod'
+    secrets:
+      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
+      GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+      NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
