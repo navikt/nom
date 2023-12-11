@@ -22,6 +22,7 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
+import capitalize from "lodash/capitalize";
 import uniqBy from "lodash/uniqBy";
 import React, { useState } from "react";
 
@@ -33,7 +34,9 @@ import {
   getTeamcatMemberships,
 } from "~/api/react-query-endpoints";
 import { Divider } from "~/components/Divider";
+import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
+import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
@@ -418,6 +421,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
           <ReactRouterLink
             key={orgEnhet.id}
             params={{ id: orgEnhet.id }}
+            search={{}}
             to={orgRoute.to}
           >
             <Link as="span">{orgEnhet.navn}</Link>
@@ -463,7 +467,7 @@ function Telephone({ ressurs }: { ressurs: Ressurs }) {
   */
 
   return (
-    <RessursInformationDetail
+    <LabelWithValue
       label="Telefon"
       value={ressurs.telefoner
         .map(({ nummer }) => formatTlf(nummer))
@@ -480,6 +484,8 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getLedereForRessurs.queryFn(ressurs.navident),
     select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
   }).data;
+
+  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   return (
     <div
@@ -510,19 +516,16 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
             gap: var(--a-spacing-2) var(--a-spacing-4);
           `}
         >
-          <RessursInformationDetail
-            label="NAV-ident"
-            value={ressurs.navident}
-          />
-          <RessursInformationDetail
+          <LabelWithValue label="NAV-ident" value={ressurs.navident} />
+          <LabelWithValue
             label="Startdato"
             value={formatDisplayDate(ressurs.startdato)}
           />
-          <RessursInformationDetail
+          <LabelWithValue
             label="Sektor"
             value={SektorNameMapping[ressurs.sektor]}
           />
-          <RessursInformationDetail label="E-post" value={ressurs.epost} />
+          <LabelWithValue label="E-post" value={ressurs.epost} />
           <Telephone ressurs={ressurs} />
           {dagligLeder ? (
             <>
@@ -535,6 +538,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               >
                 <ReactRouterLink
                   params={{ id: dagligLeder.navident }}
+                  search={{}}
                   to={ressursRoute.to}
                 >
                   <Link as="span">
@@ -556,6 +560,14 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               </div>
             </>
           ) : undefined}
+          <LabelWithValue
+            label="Fysisk brukersted"
+            value={
+              fysiskBrukersted
+                ? capitalize(fysiskBrukersted.brukerstedNavn)
+                : "-"
+            }
+          />
         </div>
       </div>
       <div
@@ -587,25 +599,6 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
         </EditButtonWrapper>
       </div>
     </div>
-  );
-}
-
-function RessursInformationDetail({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null | undefined;
-}) {
-  if (!value) {
-    return <></>;
-  }
-
-  return (
-    <>
-      <span>{label}:</span>
-      <Label as="span">{value}</Label>
-    </>
   );
 }
 
@@ -654,31 +647,33 @@ function TerminateButton({ ressurs }: { ressurs: Ressurs }) {
   return (
     <EditButtonWrapper ressurs={ressurs}>
       <Divider noMargins />
-      <Button
-        // @ts-expect-error -- css-emotion clashes with overrideable components: https://aksel.nav.no/grunnleggende/kode/overridablecomponent
-        as={ReactRouterLink}
+      <ReactRouterLink
         css={css`
-          --ac-button-secondary-border: var(--a-red-500);
-          --ac-button-secondary-text: var(--a-red-500);
-          --ac-button-secondary-hover-text: var(--a-red-500);
-          --ac-button-secondary-hover-bg: var(--a-red-50);
-          width: fit-content;
           align-self: flex-end;
-
-          :active {
-            --ac-button-secondary-active-bg: var(--a-red-500);
-          }
         `}
-        icon={<XMarkIcon aria-hidden />}
         params={{ id: ressurs.navident }}
         search={{}}
-        size="small"
         to={terminateRessursRoute.id}
-        type="button"
-        variant="secondary"
       >
-        Medarbeider slutter
-      </Button>
+        <Button
+          css={css`
+            --ac-button-secondary-border: var(--a-red-500);
+            --ac-button-secondary-text: var(--a-red-500);
+            --ac-button-secondary-hover-text: var(--a-red-500);
+            --ac-button-secondary-hover-bg: var(--a-red-50);
+
+            :active {
+              --ac-button-secondary-active-bg: var(--a-red-500);
+            }
+          `}
+          icon={<XMarkIcon aria-hidden />}
+          size="small"
+          type="button"
+          variant="secondary"
+        >
+          Medarbeider slutter
+        </Button>
+      </ReactRouterLink>
     </EditButtonWrapper>
   );
 }

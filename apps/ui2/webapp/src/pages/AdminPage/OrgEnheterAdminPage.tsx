@@ -17,10 +17,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import axios from "axios";
-// eslint-disable-next-line you-dont-need-lodash-underscore/is-string
 import isString from "lodash/isString";
 import sortBy from "lodash/sortBy";
-// eslint-disable-next-line you-dont-need-lodash-underscore/uniq
 import uniq from "lodash/uniq";
 import { useEffect, useState } from "react";
 

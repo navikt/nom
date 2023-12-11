@@ -12,7 +12,6 @@ module.exports = {
     },
     extends: [
         "eslint:recommended",
-        "plugin:you-dont-need-lodash-underscore/all",
         "plugin:@typescript-eslint/recommended",
         "prettier",
         "plugin:unicorn/recommended",

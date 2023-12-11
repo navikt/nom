@@ -19,7 +19,7 @@ export function OrgEnhetSearch() {
   const [selectedOrgEnhet, setSelectedOrgEnhet] = useState<
     OrgEnhetSearchResult | undefined
   >();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: ressurserAdminRoute.id });
 
   const includeUnderliggendeOrgEnheter = search.includeUnderliggendeOrgEnheter;
 
@@ -54,7 +54,10 @@ export function OrgEnhetSearch() {
           }
           onChange={(selectedOrgEnhet) => {
             navigate({
-              search: { ...search, orgEnhet: selectedOrgEnhet?.id },
+              search: (previousSearch) => ({
+                ...previousSearch,
+                orgEnhet: selectedOrgEnhet?.id,
+              }),
             });
             setSelectedOrgEnhet(selectedOrgEnhet ?? undefined);
           }}
@@ -66,10 +69,10 @@ export function OrgEnhetSearch() {
         checked={includeUnderliggendeOrgEnheter}
         onChange={() =>
           navigate({
-            search: {
-              ...search,
+            search: (previousSearch) => ({
+              ...previousSearch,
               includeUnderliggendeOrgEnheter: !includeUnderliggendeOrgEnheter,
-            },
+            }),
           })
         }
       >

@@ -59,10 +59,13 @@ function Receipt({ ressurs }: { ressurs: Ressurs }) {
       ) : (
         <EksternInstructions ressurs={ressurs} />
       )}
+
       <ReactRouterLink
         css={css`
           align-self: center;
         `}
+        params={{}}
+        search={{}}
         to={indexRoute.to}
       >
         <Link as="span">Gå tilbake til forsiden</Link>

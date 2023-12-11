@@ -1,8 +1,8 @@
 import type { SerializedStyles } from "@emotion/react";
 import { css } from "@emotion/react";
 import { Tag } from "@navikt/ds-react";
+import type { NavigateOptions } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
-import type { NavigateOptions } from "@tanstack/router-core";
 import axios from "axios";
 import type { OptionProps } from "react-select";
 import { components } from "react-select";
