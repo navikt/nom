@@ -10,7 +10,7 @@
         <relativePath />
     </parent>
 
-    <name>NOM :: Apps :: Streams :: Kafka-api :: Api-hendelser-state</name>
+    <name>NOM :: Apps :: Streams :: Kafka-api :: Api-hendelser</name>
     <groupId>no.nav.nom</groupId>
     <artifactId>api-hendelser</artifactId>
     <version>1.1.0</version>
