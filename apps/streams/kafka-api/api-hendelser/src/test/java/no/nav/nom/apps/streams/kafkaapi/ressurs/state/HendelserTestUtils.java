@@ -26,6 +26,7 @@ import no.nav.nom.contract.nom.eventsource.RessursStartDatoOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class HendelserTestUtils {
@@ -133,7 +134,9 @@ public class HendelserTestUtils {
                 "fornavn",
                 Optional.empty(),
                 "etternavn"
-            )
+            ),
+            List.of("fysiskBrukersted1", "fysiskBrukersted2"),
+            "fysiskBrukersted1"
         );
 
         final RessursOpprettetEventV1.RessursOpprettetAdditionalData additionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
