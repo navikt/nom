@@ -143,7 +143,11 @@ function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
   return (
     <span>
       Leder:{" "}
-      <ReactRouterLink params={{ id: navident }} to={ressursRoute.to}>
+      <ReactRouterLink
+        params={{ id: navident }}
+        search={{}}
+        to={ressursRoute.to}
+      >
         <Link as="span">{formatVisningsnavn(visningsnavn)}</Link>
       </ReactRouterLink>
     </span>

@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { PersonFillIcon } from "@navikt/aksel-icons";
-import { Heading, Label, Link } from "@navikt/ds-react";
+import { Heading, Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
 import React from "react";
@@ -100,13 +100,18 @@ function CompactOrgEnhet({
           flex-direction: column;
         `}
       >
-        <ReactRouterLink params={{ id: orgEnhet.id }} to={orgRoute.to}>
+        <ReactRouterLink
+          params={{ id: orgEnhet.id }}
+          search={{}}
+          to={orgRoute.to}
+        >
           <Link as={Heading} level="3" size="small">
             {orgEnhet.navn}
           </Link>
         </ReactRouterLink>
         <ReactRouterLink
           params={{ id: orgEnhet.ledere[0]?.navident }}
+          search={{}}
           to={ressursRoute.to}
         >
           <Link as="span">
@@ -134,7 +139,7 @@ function SelectedResource({ ressurs }: { ressurs: Ressurs }) {
       <VerticalEdge>
         <PersonFillIcon color="white" />
       </VerticalEdge>
-      <Label as="span">{formatVisningsnavn(ressurs.visningsnavn)}</Label>
+      <b>{formatVisningsnavn(ressurs.visningsnavn)}</b>
     </div>
   );
 }

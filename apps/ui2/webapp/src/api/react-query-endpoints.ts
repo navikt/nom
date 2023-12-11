@@ -267,6 +267,7 @@ export const getUnderliggendeOrgenheter = {
 };
 
 export const getFysiskeBrukersteder = {
+  gcTime: CACHE_FOR.anHour,
   queryKey: ["FYSISKE_BRUKERSTEDER"],
   queryFn: async () =>
     (

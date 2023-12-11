@@ -2,10 +2,13 @@ import { css } from "@emotion/react";
 import { Heading, Link } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
+import capitalize from "lodash/capitalize";
 import React from "react";
 
 import { getOrgEnhet, getOrgTilknytninger } from "~/api/react-query-endpoints";
+import { LabelWithValue } from "~/components/LabelWithValue";
 import { UserImage } from "~/components/UserImage";
+import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { ressursRoute } from "~/reactRouterRoutes";
 import { blueTopBorder } from "~/resources/NomStyles";
@@ -25,6 +28,8 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
     queryFn: () => getOrgEnhet.queryFn(firstOrgtilknytningOrgEnhetId as string),
     enabled: !!firstOrgtilknytningOrgEnhetId,
   });
+
+  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   const orgEnhet = orgEnhetQuery.data;
   const leder = orgEnhet?.ledere[0];
@@ -54,34 +59,39 @@ export function ReceiptRessurs({ ressurs }: { ressurs: Ressurs }) {
             grid-template-columns: 1fr 1fr;
           `}
         >
-          <span>
-            Sektor:
-            <b>{SektorNameMapping[ressurs.sektor]}</b>
-          </span>
-          <span>
-            Navident: <b>{ressurs.navident}</b>
-          </span>
-          {orgEnhet && (
-            <span>
-              Org.enhet: <b>{orgEnhet.navn}</b>
-            </span>
-          )}
-          {orgEnhet && (
-            <span>
-              Enhetsnummer: <b>{orgEnhet.remedyEnhetId}</b>
-            </span>
-          )}
+          <LabelWithValue
+            label="Sektor"
+            value={SektorNameMapping[ressurs.sektor]}
+            wrapped
+          />
+          <LabelWithValue label="NAV-ident" value={ressurs.navident} wrapped />
+          <LabelWithValue label="Org.enhet" value={orgEnhet?.navn} wrapped />
+          <LabelWithValue
+            label="Enhetsnummer"
+            value={orgEnhet?.remedyEnhetId}
+            wrapped
+          />
           {leder && (
             <span>
               Leder:{" "}
               <ReactRouterLink
                 params={{ id: leder.navident }}
+                search={{}}
                 to={ressursRoute.to}
               >
                 <Link as="span">{formatVisningsnavn(leder.visningsnavn)}</Link>
               </ReactRouterLink>
             </span>
           )}
+          <LabelWithValue
+            label="Fysisk brukersted"
+            value={
+              fysiskBrukersted
+                ? capitalize(fysiskBrukersted.brukerstedNavn)
+                : "-"
+            }
+            wrapped
+          />
         </div>
       </div>
       <UserImage

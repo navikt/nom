@@ -139,8 +139,10 @@ export interface ReadTopicRequest {
 export interface Ressurs {
   epost?: string;
   fid: string;
+  fysiskeBrukersteder: string[];
   navident: string;
   personident: string;
+  primaryFysiskBrukersted?: string;
   sektor: Sektor;
   /** @format date */
   sluttdato?: string;
@@ -164,8 +166,10 @@ export interface RessursNavn {
 
 export interface RessursState {
   fid: string;
+  fysiskeBrukersteder: string[];
   navident: string;
   personident: string;
+  primaryFysiskBrukersted?: string;
   sektor: Sektor;
   /** @format date */
   sluttdato?: string;

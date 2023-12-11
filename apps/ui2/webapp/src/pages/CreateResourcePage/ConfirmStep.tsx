@@ -6,11 +6,10 @@ import type { AxiosError, AxiosResponse } from "axios";
 import axios from "axios";
 import { format } from "date-fns";
 
-import {
-  getFysiskeBrukersteder,
-  getOrgEnhet,
-} from "~/api/react-query-endpoints";
+import { getOrgEnhet } from "~/api/react-query-endpoints";
 import { ApiResponseError } from "~/components/ApiResponseError";
+import { LabelWithValue } from "~/components/LabelWithValue";
+import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
 import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
@@ -45,13 +44,11 @@ export function ConfirmStep() {
     enabled: !!orgEnhetId,
   });
 
-  const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
-
   const selectOrgEnhet = orgEnhetQuery.data;
   const lederNavn = formatVisningsnavn(selectOrgEnhet?.ledere[0]?.visningsnavn);
 
-  const selectedFysiskBrukersted = (fysiskeBrukerstederQuery.data || []).find(
-    (fysiskBrukersted) => fysiskBrukersted.brukerstedNr === fysiskBrukerstedNr,
+  const selectedFysiskBrukersted = useFysiskBrukersted(
+    fysiskBrukerstedNr ?? "",
   );
 
   const onClose = () =>
@@ -131,32 +128,39 @@ export function ConfirmStep() {
             gap: var(--a-spacing-4);
           `}
         >
-          <span>Navn:</span>
-          <b>{formattedName}</b>
-          <span>Sektor:</span>
-          <b>{sektor && SektorNameMapping[sektor]}</b>
-          {ansettelsesType && (
-            <>
-              <span>Ansettelsestype:</span>
-              <b>{AnsettelsesTypeNameMapping[ansettelsesType]}</b>
-            </>
-          )}
-          <span>Org enhet:</span>
-          <b>{selectOrgEnhet?.navn}</b>
-          <span>Leder:</span>
-          <b>{lederNavn}</b>
-          <span>Fysisk brukersted:</span>
-          <b>{`${selectedFysiskBrukersted?.brukerstedNavn} (${selectedFysiskBrukersted?.brukerstedNr})`}</b>
-          <span>Remedy-enhet:</span>
-          <b>{selectOrgEnhet?.remedyEnhetId}</b>
-          <span>Startdato (første arbeidsdag):</span>
-          <b>{gyldigFom && format(new Date(gyldigFom), DATE_FORMATS.no)}</b>
-          {gyldigTom && (
-            <>
-              <span>Sluttdato:</span>
-              <b>{format(new Date(gyldigTom), DATE_FORMATS.no)}</b>
-            </>
-          )}
+          <LabelWithValue label="Navn" value={formattedName} />
+          <LabelWithValue
+            label="Sektor"
+            value={sektor && SektorNameMapping[sektor]}
+          />
+          <LabelWithValue
+            label="Ansettelsestype"
+            value={
+              ansettelsesType && AnsettelsesTypeNameMapping[ansettelsesType]
+            }
+          />
+          <LabelWithValue label="Org.enhet" value={selectOrgEnhet?.navn} />
+          <LabelWithValue label="Leder" value={lederNavn} />
+
+          <LabelWithValue
+            label="Fysisk brukersted"
+            value={
+              selectedFysiskBrukersted &&
+              `${selectedFysiskBrukersted.brukerstedNavn} (${selectedFysiskBrukersted.brukerstedNr})`
+            }
+          />
+          <LabelWithValue
+            label="Remedy-enhet"
+            value={selectOrgEnhet?.remedyEnhetId}
+          />
+          <LabelWithValue
+            label="Startdato (første arbeidsdag)"
+            value={gyldigFom && format(new Date(gyldigFom), DATE_FORMATS.no)}
+          />
+          <LabelWithValue
+            label="Sluttdato"
+            value={gyldigTom && format(new Date(gyldigTom), DATE_FORMATS.no)}
+          />
         </div>
         <Alert variant="info">
           Du kan ikke endre opplysningene i NOM når ressursen er opprettet.

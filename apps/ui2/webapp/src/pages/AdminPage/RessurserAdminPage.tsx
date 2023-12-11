@@ -401,10 +401,10 @@ function RessursFilter() {
         checked={ressursFilterValues.includeInactive}
         onChange={() =>
           navigate({
-            search: {
-              ...ressursFilterValues,
+            search: (previousSearch) => ({
+              ...previousSearch,
               includeInactive: !ressursFilterValues.includeInactive,
-            },
+            }),
           })
         }
       >
@@ -430,10 +430,10 @@ function DateSelect({
     defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
     onDateChange: (date) =>
       navigate({
-        search: {
-          ...ressursFilterValues,
+        search: (previousSearch) => ({
+          ...previousSearch,
           [filterKey]: date ? formatDateWithoutTimezone(date) : undefined,
-        },
+        }),
       }),
   });
 
@@ -498,7 +498,12 @@ function FilterChips() {
           <Chips.Removable
             key={key}
             onClick={() =>
-              navigate({ search: { ...ressursFilterValues, [key]: undefined } })
+              navigate({
+                search: (previousSearch) => ({
+                  ...previousSearch,
+                  [key]: undefined,
+                }),
+              })
             }
           >{`${key}: ${value}`}</Chips.Removable>
         );

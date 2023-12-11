@@ -43,8 +43,6 @@ export function NavigationButtons() {
             navigate({
               to: createRessursRoute.to,
               params: { step: String(Number(step) - 1) },
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore https://github.com/TanStack/router/issues/730
               search: (o) => o,
             })
           }
