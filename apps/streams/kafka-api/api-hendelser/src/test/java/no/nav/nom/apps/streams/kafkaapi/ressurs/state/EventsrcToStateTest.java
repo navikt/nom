@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
 import no.nav.nom.contract.nom.EntityType;
-import no.nav.nom.contract.nom.HendelserType;
+import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.test.TestRecord;
@@ -60,10 +60,10 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
-        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.NY);
-        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.ENDRET);
-        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.FJERNET);
-        final Hendelser endreOrgenhetHendelserWithNulId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.ENDRET);
+        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
+        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
+        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
+        final Hendelser endreOrgenhetHendelserWithNulId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
 
 
         //arrange resurs events og hendelser
@@ -75,10 +75,10 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
         final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
 
-        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.NY);
-        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
-        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
-        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.FJERNET);
+        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
+        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
 
         //arrange organisering events
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
@@ -174,15 +174,15 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
-        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.NY);
-        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.ENDRET);
+        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
+        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
         final Hendelser avvikleOrgenhetHendelserWithId = new Hendelser(
             orgEnhetId,
             eventMetadata.createdTimestamp(),
             EntityType.ORGENHET,
-            HendelserType.FJERNET
+            HendelseType.FJERNET
         );
-        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelserType.FJERNET);
+        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
 
         // organisering events and hendelser
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
@@ -196,10 +196,10 @@ public class EventsrcToStateTest extends EventsrcToStateTestTopology {
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
         final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
-        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.NY);
-        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
-        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.ENDRET);
-        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelserType.FJERNET);
+        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
+        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
 
         // orgtilknytning events and hendelser
         final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);

@@ -2,7 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
 
 import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
 import no.nav.nom.contract.nom.EntityType;
-import no.nav.nom.contract.nom.HendelserType;
+import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
@@ -98,7 +98,7 @@ public class EventsrcToState {
                             hendelserStore.put(record.key(), incomingHendelser.id());
 
                             // do not the forward if hendelserType is unknown
-                            if(incomingHendelser.hendelserType() != null){
+                            if(incomingHendelser.hendelseType() != null){
                                 context.forward(new Record<>(record.key(), incomingHendelser, record.timestamp()));
                             }
                         }
@@ -131,17 +131,17 @@ public class EventsrcToState {
             if (event.getData() instanceof OrgEnhetOpprettetEventV1.OrgEnhetOpprettetEventData data) {
                 hendelserStateBuilder
                     .id(data.id())
-                    .hendelserType(HendelserType.NY);
+                    .hendelseType(HendelseType.NY);
             } else if (event.getData() instanceof OrgEnhetKorrigertEventV1.OrgEnhetKorrigertEventData data) {
                 hendelserStateBuilder
                     .id(data.id())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrgEnhetAvvikletEventV1.OrgEnhetAvvikletEventData) {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.FJERNET);
+                    .hendelseType(HendelseType.FJERNET);
             } else {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             }
             return hendelserStateBuilder.build();
         } catch (Exception e) {
@@ -159,16 +159,16 @@ public class EventsrcToState {
             if (event.getAdditionalData() instanceof RessursOpprettetEventV1.RessursOpprettetAdditionalData data) {
                 hendelserStateBuilder
                     .id(data.navident().orElse(null))
-                    .hendelserType(HendelserType.NY);
+                    .hendelseType(HendelseType.NY);
             } else if (event.getData() instanceof RessursSluttetEventV1.RessursSluttetEventData) {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof RessursTekniskSlettetEventV1.RessursTekniskSlettetEventData) {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.FJERNET);
+                    .hendelseType(HendelseType.FJERNET);
             }else {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             }
             return hendelserStateBuilder.build();
         } catch (Exception e) {
@@ -186,14 +186,14 @@ public class EventsrcToState {
             if (event.getData() instanceof OrganiseringOpprettetEventV1.OrganiseringOpprettetEventData data) {
                 hendelserStateBuilder
                     .id(data.id())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrganiseringEndretEventV1.OrganiseringEndretEventData data) {
                 hendelserStateBuilder
                     .id(data.id())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             }
             return hendelserStateBuilder.build();
         } catch (Exception e) {
@@ -211,26 +211,26 @@ public class EventsrcToState {
             if (event.getData() instanceof OrgtilknytningOpprettetEventV1.OrgtilknytningOpprettetEventData data) {
                 hendelserStateBuilder
                     .id(data.navident())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrgtilknytningAvsluttetEventV1.OrgtilknytningAvsluttetEventData data) {
                 hendelserStateBuilder
                     .id(data.navident())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrgtilknytningFjernetEventV1.OrgtilknytningFjernetEventData data) {
                 hendelserStateBuilder
                     .id(data.navident())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrgtilknytningDatoEndretEventV1.OrgtilknytningDatoEndretEventData data) {
                 hendelserStateBuilder
                     .id(data.navident())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else if (event.getData() instanceof OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData data) {
                 hendelserStateBuilder
                     .id(data.navident())
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             } else {
                 hendelserStateBuilder
-                    .hendelserType(HendelserType.ENDRET);
+                    .hendelseType(HendelseType.ENDRET);
             }
             return hendelserStateBuilder.build();
         } catch (Exception e) {

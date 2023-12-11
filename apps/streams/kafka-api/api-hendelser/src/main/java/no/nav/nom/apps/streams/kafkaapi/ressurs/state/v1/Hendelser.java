@@ -2,7 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1;
 
 import lombok.Builder;
 import no.nav.nom.contract.nom.EntityType;
-import no.nav.nom.contract.nom.HendelserType;
+import no.nav.nom.contract.nom.HendelseType;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +11,6 @@ public record Hendelser(
     String id,
     LocalDateTime timestamp,
     EntityType entityType,
-    HendelserType hendelserType
+    HendelseType hendelseType
 ) {
 }
