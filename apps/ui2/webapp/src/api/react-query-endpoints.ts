@@ -108,6 +108,9 @@ export const getAlleRessurserGraphql = {
                     }
                     opprettetAv
                     opprettetDato
+                    endretAv
+                    endretDato
+                    endringEvent
                 }
             }
             `,
@@ -118,6 +121,9 @@ export const getAlleRessurserGraphql = {
       ...ressursWithMetadata.ressurs,
       opprettetAv: ressursWithMetadata.opprettetAv,
       opprettetDato: ressursWithMetadata.opprettetDato,
+      endretAv: ressursWithMetadata.endretAv,
+      endretDato: ressursWithMetadata.endretDato,
+      endringEvent: ressursWithMetadata.endringEvent,
     })),
 };
 
@@ -291,6 +297,9 @@ export type RessursWithMetadata = {
   ressurs: RessursFields;
   opprettetAv?: string;
   opprettetDato?: string;
+  endretAv?: string;
+  endretDato?: string;
+  endringEvent?: string;
 };
 
 export type RessursFields = {
@@ -317,6 +326,9 @@ export type RessursFields = {
   sluttdato: string;
   opprettetAv?: string;
   opprettetDato?: string;
+  endretAv?: string;
+  endretDato?: string;
+  endringEvent?: string;
 };
 
 export type FysiskBrukersted = {
