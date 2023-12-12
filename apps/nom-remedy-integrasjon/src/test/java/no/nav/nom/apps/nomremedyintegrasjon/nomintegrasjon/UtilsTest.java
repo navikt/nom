@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +30,7 @@ public class UtilsTest {
     @DisplayName("Ensure that Utils.epochSeconds works as expected")
     void testEpochSeconds(){
 
-        assertThat(epochSeconds(LocalDate.of(2023, 12, 12)))
-            .isEqualTo(1702382400L);
+        assertThat(epochSecondsNorwegianTimeNoon(LocalDate.of(2023, 12, 12)))
+            .isEqualTo(1702378800L);
     }
 }

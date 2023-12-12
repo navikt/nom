@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 
 public class TestData {
@@ -142,8 +143,8 @@ public class TestData {
             .fysiskBrukerstedId("4321")
             .navId("X654321")
             .sektor(2)
-            .tiltredelsesdato(epochSeconds(LocalDate.now()))
-            .utlopsdato(epochSeconds(LocalDate.now().plusMonths(1)))
+            .tiltredelsesdato(epochSecondsNorwegianTimeNoon(LocalDate.now()))
+            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(LocalDate.now().plusMonths(1)))
             .build();
     }
 }
