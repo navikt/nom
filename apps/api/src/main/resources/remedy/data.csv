@@ -304,15 +304,10 @@ AgressoId;RemedyEnhet;OrgNiv;Navn;Status;Ny agressoId;Ny nomId;Tas med Videre?;F
 8102000;2811;AGRESSOORGENHET;Internrevisjon;Opp til ORGNIV2;812;vu140n;JA;812;ORGNIV2;vu140n;Flere orgEnheter i bunn, men alle deler 2811 ved oppslag på trygdeident, så flytter til øverste Internrev.node
 820300;2820;ORGNIV3;HR-avdelingen;Opp til ORGNIV2;821;ra316y;JA;821;ORGNIV2;ra316y;Burde vært mappet til ORGNIV2
 820200;2821;ORGNIV3;Økonomi- og styringsavdelingen;Opp til ORGNIV2;8202;ke338b;JA;8202;ORGNIV2;ke338b;
-8554;2822;ORGNIV25;IT design arkitektur og agile coaching;TODO, ITAVD;;;Avklar, ITAVD;855420;ORGNIV3;vu223a;13.07.23: Lagt inn mapping til vu223a.
 8105000;2823;AGRESSOORGENHET;Kommunikasjonsavdelingen;Opp til ORGNIV2;815;bu613r;JA;815;ORGNIV2;bu613r;
 8106000;2826;AGRESSOORGENHET;Kunnskapsavdelingen;Opp til ORGNIV2;816;pa885p;JA;816;ORGNIV2;pa885p;
 8320000;2830;AGRESSOORGENHET;Ytelsesavdelingen;Opp til ORGNIV2;830;su430w;JA;830;ORGNIV2;su430w;
 8430000;2840;AGRESSOORGENHET;Arbeids- og tjenesteavdelingen;Opp til ORGNIV2;840;ja556h;JA;840;ORGNIV2;ja556h;
-855310;2910;ORGNIV3;IT forretningsplattformer og standardprodukter;TODO, ITAVD;;;Avklar, ITAVD;8553;ORGNIV25;pe167m;13.07.23: Lagt inn mapping til pe167m.
-855220;2920;ORGNIV3;Data;TODO, ITAVD;;;Avklar, ITAVD;855220;;leggInn;Snakk med Bjørnar og A. Palerud
-855330;2930;ORGNIV3;Funksjonell brukerstøtte;TODO, ITAVD;;;Avklar, ITAVD;855330;ORGNIV3;ta911v;13.07.23: Lagt inn mapping til ta911v.
-854100;2940;ORGNIV3;IT virksomhetsstyring;TODO, ITAVD;;;Avklar, ITAVD;8541;ORGNIV25;pe876j;13.07.23: Lagt inn mapping til pe876j.
 5224000;2960;AGRESSOORGENHET;Felles;Opp til ORGNIV2;53;gy118b;JA;53;ORGNIV2;gy118b;
 855110;2970;ORGNIV3;Digital arbeidsplass;TODO, ITAVD;;;Avklar, ITAVD;8551;ORGNIV25;ne808e;13.07.23: Lagt inn mapping til ne808e.
 855210;2990;ORGNIV3;IT utvikling 1;TODO, ITAVD;;;Avklar, ITAVD;854;ORGNIV2;bu878z;13.07.23: Lagt inn mapping til bu878z.
@@ -402,7 +397,6 @@ RIKSREVISJON;9504;ORGNIV0;;TODO, se kommentar;;;Avventer;RIKSREVISJON;;leggInn;"
 ;4291;;Klageinstans Oslo/Akershus;Manglet i uttrekket;721030;sa137m;JA;721030;ORGNIV3;sa137m;
 ;4294;;Klageinstans Vest;Manglet i uttrekket;721140;tu974w;JA;721140;ORGNIV3;tu974w;
 ;4293;;Klageinstans Øst;Manglet i uttrekket;721070;pe947d;JA;721070;ORGNIV3;pe947d;
-;2980;;;TODO, ITAVD;;;Avklar, ITAVD;0;;leggInn;Snakk med Bjørnar og A. Palerud
 ;0293;;NAV Dokumentsenter Øst-Viken;Hentet fra Norg-uttrekk;029300;re831r;JA;029300;ORGNIV4;re831r;Bør nok inn i mappingen. Det finnes folk på 0293 i DVH. Skal antagelig mappes til 029300, men må også ryddes litt under da 0293010 også burde ligge under 029300, men har fått feil parent. Sendt til ØT for opprydding, avventer.
 ;0692;;NAV Rådgivende overleger Vest-Viken;Hentet fra Norg-uttrekk;0692500;my567d;JA;0692500;ORGENHET;my567d;Har aktive navIdenter i HRRES_RESSURS. Skal nok mappes til 0692500 (my567d) utfra at alle ansatte i DVH tilhørte denne enheten, og navnet samsvarer.
 ;1034;;NAV Hægebostad;Hentet fra Norg-uttrekk;;;Avventer;0;;leggInn;Har aktive navIdenter i HRRES_RESSURS. Disse to personene har orgEnhet 103700 som er NAV Lister, som har sin egen remedyEnhet 1037. Mulig 1034 da kan avvikles? Sjekk med RemedyOversikt. Antagelig kan 1034 fjernes siden orgEnheten for Hægebosstad er nedlagt i Unit4, og fysiske arbeidsstedet er 1037.
