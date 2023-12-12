@@ -84,22 +84,21 @@ public class EventsrcToState {
 
                         @Override
                         public void process(Record<String, Hendelser> record) {
-                            Hendelser incomingHendelser = record.value();
-                            if (incomingHendelser.timestamp() == null) {
+                            Hendelser incomingHendelse = record.value();
+                            if (incomingHendelse.timestamp() == null) {
                                 log.warn("Incoming hendelser timestamp is null for " + record.key());
                             }
 
-                            String hendelserIdInStoreForGivenFid = hendelserStore.get(record.key());
-
-                            if (hendelserIdInStoreForGivenFid != null && (incomingHendelser.id() == null || incomingHendelser.id().isBlank())) {
-                                incomingHendelser = incomingHendelser.toBuilder().id(hendelserIdInStoreForGivenFid).build();
+                            String hendelseIdInStoreForGivenFid = hendelserStore.get(record.key());
+                            if (hendelseIdInStoreForGivenFid != null && (incomingHendelse.id() == null || incomingHendelse.id().isBlank())) {
+                                incomingHendelse = incomingHendelse.toBuilder().id(hendelseIdInStoreForGivenFid).build();
                             }
 
-                            hendelserStore.put(record.key(), incomingHendelser.id());
+                            hendelserStore.put(record.key(), incomingHendelse.id());
 
                             // do not the forward if hendelserType is unknown
-                            if(incomingHendelser.hendelseType() != null){
-                                context.forward(new Record<>(record.key(), incomingHendelser, record.timestamp()));
+                            if(incomingHendelse.hendelseType() != null){
+                                context.forward(new Record<>(record.key(), incomingHendelse, record.timestamp()));
                             }
                         }
                     };
