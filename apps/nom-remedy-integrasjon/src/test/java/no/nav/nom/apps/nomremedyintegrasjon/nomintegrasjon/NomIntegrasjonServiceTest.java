@@ -39,7 +39,8 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEven
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursSluttetEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -125,8 +126,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .fysiskBrukerstedId(fysiskBrukerstedNr)
                     .navId(navident)
                     .sektor(2)
-                    .tiltredelsesdato(epochSeconds(startDato))
-                    .utlopsdato(epochSeconds(sluttDato))
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(startDato))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
                     .build()
             ));
 
@@ -152,39 +153,37 @@ public class NomIntegrasjonServiceTest extends TestBase {
         assertThat(nomIntegrasjonEntries).isEmpty();
     }
 
-    // TODO: Kommentere inn test når vi har funnet ut av hvordan sletting fungerer
-//    @Test
-//    @DisplayName("Should create new entry marked for deletion for RessursSluttetEventV1")
-//    void testShouldMarkForDeletionForRessursSluttetEventV1() {
-//
-//        var navident = "X123456";
-//        var existingEntryForRessurs = nomIntegrasjonRepository.save(
-//            nomIntegrasjonEntity().toBuilder().navId(navident).build()
-//        );
-//
-//        var ressursSluttetEventV1 = ressursSluttetEventV1();
-//
-//        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(
-//            new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN)
-//        );
-//
-//        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
-//
-//        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingEntryForRessurs.getNavId());
-//
-//        assertThat(nomIntegrasjonEntry)
-//            .usingRecursiveComparison()
-//            .isEqualTo(Optional.of(
-//                existingEntryForRessurs.toBuilder()
-//                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
-//                    .entryOperasjon("Slette")
-//                    .entryStatus("Ubehandlet")
-//                    .utlopsdato(epochSeconds(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
-//                    .entryBestiller(ressursSluttetEventV1().getMetadata().inputMetadata().origination().initiatedBy())
-//                    .build()
-//            ));
-//
-//    }
+    @Test
+    @DisplayName("Should create new entry marked for deletion for RessursSluttetEventV1")
+    void testShouldMarkForDeletionForRessursSluttetEventV1() {
+
+        var navident = "X123456";
+        var existingEntryForRessurs = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder().navId(navident).build()
+        );
+
+        var ressursSluttetEventV1 = ressursSluttetEventV1();
+
+        when(nomApiClient.getRessursByFid(ressursSluttetEventV1.getFid())).thenReturn(
+            new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN)
+        );
+
+        nomIntegrasjonService.handleRessursEvent(ressursSluttetEventV1);
+
+        var nomIntegrasjonEntry = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(existingEntryForRessurs.getNavId());
+
+        assertThat(nomIntegrasjonEntry)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                existingEntryForRessurs.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryStatus("Ubehandlet")
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                    .entryBestiller(ressursSluttetEventV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .build()
+            ));
+
+    }
 
     @Test
     @DisplayName("Should skip creating new entry marked for deletion for RessursSluttetEventV1")
@@ -328,8 +327,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     )
                     .entryOperasjon("Ny")
                     .entryStatus("Ubehandlet")
-                    .tiltredelsesdato(epochSeconds(newGyldigFom))
-                    .utlopsdato(epochSeconds(newGyldigTom))
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(newGyldigFom))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(newGyldigTom))
                     .enhetsId(newRemedyEnhetId)
                     .build()
 
@@ -471,8 +470,8 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     )
                     .entryOperasjon("Ny")
                     .entryStatus("Ubehandlet")
-                    .tiltredelsesdato(epochSeconds(newGyldigFom))
-                    .utlopsdato(epochSeconds(newGyldigTom))
+                    .tiltredelsesdato(epochSecondsNorwegianTimeNoon(newGyldigFom))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(newGyldigTom))
                     .build()
 
             ));

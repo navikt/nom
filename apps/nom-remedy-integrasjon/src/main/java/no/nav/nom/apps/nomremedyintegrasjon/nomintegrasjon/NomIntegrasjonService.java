@@ -21,7 +21,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.capitalizeNavn;
-import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSeconds;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeEndOfDay;
+import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.epochSecondsNorwegianTimeNoon;
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.Utils.fifteenCharLengthZeroPaddedNumber;
 
 @Service
@@ -45,11 +46,10 @@ public class NomIntegrasjonService {
         if (ressursEvent instanceof RessursOpprettetEventV1 ressursOpprettetEventV1
             && ressursOpprettetEventV1.getRessursOpprettetEventData().sektor().equals(Sektor.EKSTERN)) {
             createRessurs(ressursOpprettetEventV1);
-            // TODO: Finn ut hvordan dette her kan håndteres
-//        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
-//            && isFidEksternRessurs(ressursEvent.getFid())
-//        ) {
-//            avsluttRessurs(ressursSluttetEventV1);
+        } else if (ressursEvent instanceof RessursSluttetEventV1 ressursSluttetEventV1
+            && isFidEksternRessurs(ressursEvent.getFid())
+        ) {
+            avsluttRessurs(ressursSluttetEventV1);
         } else if (ressursEvent instanceof RessursPersonaliaOppdatertV1 ressursPersonaliaOppdatertV1
             && isFidEksternRessurs(ressursEvent.getFid())
         ) {
@@ -85,8 +85,8 @@ public class NomIntegrasjonService {
                         .orElseThrow(() -> new NoSuchElementException("Missing value for 'sluttDato'"));
 
                     var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
-                        .tiltredelsesdato(epochSeconds(orgtilknytningDatoEndretEventData.gyldigFom()))
-                        .utlopsdato(epochSeconds(gyldigTom))
+                        .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDatoEndretEventData.gyldigFom()))
+                        .utlopsdato(epochSecondsNorwegianTimeEndOfDay(gyldigTom))
                         .build();
 
                     if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
@@ -122,8 +122,8 @@ public class NomIntegrasjonService {
 
                     var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
                         .enhetsId(newRemedyEnhetId)
-                        .tiltredelsesdato(epochSeconds(orgtilknytningDagligOppfolgingEndretEventData.gyldigFom()))
-                        .utlopsdato(epochSeconds(gyldigTom))
+                        .tiltredelsesdato(epochSecondsNorwegianTimeNoon(orgtilknytningDagligOppfolgingEndretEventData.gyldigFom()))
+                        .utlopsdato(epochSecondsNorwegianTimeEndOfDay(gyldigTom))
                         .build();
 
                     if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
@@ -151,10 +151,14 @@ public class NomIntegrasjonService {
         nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(coherentRessurs.getNavident()).ifPresentOrElse(
             latestNomIntegrasjonEntityForNavident -> {
 
-                if (!latestNomIntegrasjonEntityForNavident.getEntryStatus().equals("Slette")) {
-                    saveNomIntegrasjonEntityForDeletion(
-                        latestNomIntegrasjonEntityForNavident.toBuilder()
-                            .utlopsdato(epochSeconds(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                var newNomIntegrasjonEntity = latestNomIntegrasjonEntityForNavident.toBuilder()
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
+                    .build();
+
+                if (!newNomIntegrasjonEntity.equals(latestNomIntegrasjonEntityForNavident)) {
+                    saveNewNomIntegrasjonEntity(
+                        newNomIntegrasjonEntity.toBuilder()
+                            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
                             .build(),
                         ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy()
                     );
@@ -202,9 +206,9 @@ public class NomIntegrasjonService {
             .navId(ressursOpprettetAdditionalData.navident().orElseThrow(() -> new NoSuchElementException("Missing value for 'navident'")))
             .sektor(nomSektorToRemedyCode(ressursOpprettetEventData.sektor()))
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
-                .map(Utils::epochSeconds)
+                .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))
-            .utlopsdato(epochSeconds(sluttDato))
+            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
             .build();
 
         saveNewNomIntegrasjonEntity(
@@ -271,17 +275,6 @@ public class NomIntegrasjonService {
             newNomIntegrasjonEntity.toBuilder()
                 .entryId(nextId())
                 .entryOperasjon("Ny")
-                .entryStatus("Ubehandlet")
-                .entryBestiller(initiatedByNavident)
-                .build()
-        );
-    }
-
-    private void saveNomIntegrasjonEntityForDeletion(NomIntegrasjonEntity newNomIntegrasjonEntity, String initiatedByNavident) {
-        nomIntegrasjonRepository.save(
-            newNomIntegrasjonEntity.toBuilder()
-                .entryId(nextId())
-                .entryOperasjon("Slette")
                 .entryStatus("Ubehandlet")
                 .entryBestiller(initiatedByNavident)
                 .build()

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.Normalizer;
 import java.util.Map;
 
 
@@ -50,53 +51,54 @@ public class NavidentController {
     }
 
     @Operation(
-            description = "Bestill en nav-ident",
-            security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
+        description = "Bestill en nav-ident",
+        security = @SecurityRequirement(name = SwaggerConfig.SECURITY_SCHEME_CONFIGURATION_NAME)
     )
     @Parameters(
-            {
-                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CALL_ID_KEY),
-                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_X_REQUEST_ID_KEY),
-                    @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CONSUMER_ID_KEY)
-            }
+        {
+            @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CALL_ID_KEY),
+            @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_X_REQUEST_ID_KEY),
+            @Parameter(ref = "#/components/parameters/" + MdcConfig.HEADER_CONSUMER_ID_KEY)
+        }
     )
     @ApiResponses(
-            {
-                    @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
-                    @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter"),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized, bearer token not supplied or invalid",
-                            content = @Content, // Empty response
-                            headers = {
-                                    @Header(name = "www-authenticate", description = "Error message from bearer/jwt authentication process")
-                            }
-                    )
-            }
+        {
+            @ApiResponse(responseCode = "200", description = "Success", useReturnTypeSchema = true),
+            @ApiResponse(responseCode = "400", description = "Bad request, failure to supply a required parameter"),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized, bearer token not supplied or invalid",
+                content = @Content, // Empty response
+                headers = {
+                    @Header(name = "www-authenticate", description = "Error message from bearer/jwt authentication process")
+                }
+            )
+        }
     )
     @PostMapping(value = "/create")
     public ResponseEntity<NavidentResponseDTO> createNavident(@RequestBody NavidentRequestDTO request) {
         logger.info(LogConfig.SECURE_LOGS, "Navident bestilt for: {}", request);
         val bestilling = identService.bestillIdent(request.getPersonid(), request.getIdentType(), prefixValidator(request.getIdentPrefix()));
         val response = NavidentResponseDTO.builder()
-                .navident(bestilling.getBody().getNavident())
-                .feilmelding(bestilling.getBody().getFeilmelding())
-                .build();
+            .navident(bestilling.getBody().getNavident())
+            .feilmelding(bestilling.getBody().getFeilmelding())
+            .build();
 
         return ResponseEntity.status(bestilling.getHttpStatus()).body(response);
     }
 
-    private char prefixValidator(String identPrefix) {
-        char prefixChar = identPrefix.toUpperCase().charAt(0);
+    char prefixValidator(String identPrefix) {
+        char prefixChar = Normalizer.normalize(identPrefix.toUpperCase(), Normalizer.Form.NFKD).charAt(0);
         switch (prefixChar) {
-            case 'Æ': return 'A';
-            case 'Ø': return 'O';
-            case 'Å': return 'A';
+            case 'Æ':
+                return 'A';
+            case 'Ø':
+                return 'O';
+            case 'Å':
+                return 'A';
         }
         if ( prefixChar < 'A' || prefixChar > 'Z' ) {
-            String msg = "Ugyldig ident prefix: %s".formatted(identPrefix);
-            logger.error(msg);
-            throw new BadRequestException(msg);
+            return 'W';
         }
         return prefixChar;
     }
