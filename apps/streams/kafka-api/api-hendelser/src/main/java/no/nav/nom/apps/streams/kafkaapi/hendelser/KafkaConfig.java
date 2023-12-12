@@ -1,7 +1,7 @@
 package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -25,7 +25,7 @@ public class KafkaConfig {
         objectSerde.deserializer().addTrustedPackages(Event.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(OrgEnhetState.class.getPackageName());
-        objectSerde.deserializer().addTrustedPackages(Hendelser.class.getPackageName());
+        objectSerde.deserializer().addTrustedPackages(Hendelse.class.getPackageName());
         objectSerde.deserializer().addTrustedPackages(com.fasterxml.jackson.databind.node.ObjectNode.class.getPackageName());
         return objectSerde;
     }

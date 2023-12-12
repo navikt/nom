@@ -1,6 +1,6 @@
 package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
-import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
@@ -42,10 +42,10 @@ public class EventsrcToHendelser {
         StreamsBuilder streamsBuilder
     ) {
         final var stringSerde = Serdes.String();
-        final var hendelserSerde = objectSerde.copyWithType(Hendelser.class);
+        final var hendelserSerde = objectSerde.copyWithType(Hendelse.class);
         final var eventSerde = objectSerde.copyWithType(Event.class);
 
-        KStream<String, Hendelser> hendelserStream = streamsBuilder
+        KStream<String, Hendelse> hendelserStream = streamsBuilder
             .addStateStore(
                 Stores.keyValueStoreBuilder(
                     Stores.persistentKeyValueStore(NOM_HENDELSER_STATE_STORE),
@@ -65,13 +65,13 @@ public class EventsrcToHendelser {
                 }
 
                 @Override
-                public Processor<String, Hendelser, String, Hendelser> get() {
+                public Processor<String, Hendelse, String, Hendelse> get() {
                     return new Processor<>() {
                         private KeyValueStore<String, String> hendelserStore;
-                        private ProcessorContext<String, Hendelser> context;
+                        private ProcessorContext<String, Hendelse> context;
 
                         @Override
-                        public void init(ProcessorContext<String, Hendelser> context) {
+                        public void init(ProcessorContext<String, Hendelse> context) {
                             Processor.super.init(context);
                             this.hendelserStore = context.getStateStore(NOM_HENDELSER_STATE_STORE);
                             this.context = context;
@@ -83,8 +83,8 @@ public class EventsrcToHendelser {
                         }
 
                         @Override
-                        public void process(Record<String, Hendelser> record) {
-                            Hendelser incomingHendelse = record.value();
+                        public void process(Record<String, Hendelse> record) {
+                            Hendelse incomingHendelse = record.value();
                             if (incomingHendelse.timestamp() == null) {
                                 log.warn("Incoming hendelser timestamp is null for " + record.key());
                             }
@@ -108,7 +108,7 @@ public class EventsrcToHendelser {
         hendelserStream.to(stateTopic, Produced.with(stringSerde, hendelserSerde));
     }
 
-    private Hendelser toHendelser(Event event) {
+    private Hendelse toHendelser(Event event) {
         try {
             return
                 event instanceof OrgEnhetEvent ? convert((OrgEnhetEvent) event) :
@@ -121,9 +121,9 @@ public class EventsrcToHendelser {
         }
     }
 
-    private Hendelser convert(OrgEnhetEvent event) {
+    private Hendelse convert(OrgEnhetEvent event) {
         try {
-            var hendelserStateBuilder = Hendelser.builder()
+            var hendelserStateBuilder = Hendelse.builder()
                 .entityType(EntityType.ORGENHET)
                 .timestamp(event.getMetadata() != null ? event.getMetadata().createdTimestamp() : null);
 
@@ -149,9 +149,9 @@ public class EventsrcToHendelser {
         }
     }
 
-    private Hendelser convert(RessursEvent event) {
+    private Hendelse convert(RessursEvent event) {
         try {
-            var hendelserStateBuilder = Hendelser.builder()
+            var hendelserStateBuilder = Hendelse.builder()
                 .entityType(EntityType.RESSURS)
                 .timestamp(event.getMetadata() != null ? event.getMetadata().createdTimestamp() : null);
 
@@ -176,9 +176,9 @@ public class EventsrcToHendelser {
         }
     }
 
-    private Hendelser convert(OrganiseringEvent event) {
+    private Hendelse convert(OrganiseringEvent event) {
         try {
-            var hendelserStateBuilder = Hendelser.builder()
+            var hendelserStateBuilder = Hendelse.builder()
                 .entityType(EntityType.ORGENHET)
                 .timestamp(event.getMetadata() != null ? event.getMetadata().createdTimestamp() : null);
 
@@ -201,9 +201,9 @@ public class EventsrcToHendelser {
         }
     }
 
-    private Hendelser convert(OrgtilknytningEvent event) {
+    private Hendelse convert(OrgtilknytningEvent event) {
         try {
-            var hendelserStateBuilder = Hendelser.builder()
+            var hendelserStateBuilder = Hendelse.builder()
                 .entityType(EntityType.RESSURS)
                 .timestamp(event.getMetadata() != null ? event.getMetadata().createdTimestamp() : null);
 

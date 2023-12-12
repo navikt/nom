@@ -7,7 +7,7 @@ import no.nav.nom.contract.nom.HendelseType;
 import java.time.LocalDateTime;
 
 @Builder(toBuilder = true)
-public record Hendelser(
+public record Hendelse(
     String id,
     LocalDateTime timestamp,
     EntityType entityType,

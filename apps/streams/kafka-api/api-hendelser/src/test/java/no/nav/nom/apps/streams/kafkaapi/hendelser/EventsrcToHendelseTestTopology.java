@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Properties;
 
-public class EventsrcToHendelserTestTopology {
+public class EventsrcToHendelseTestTopology {
     ObjectMapper objectMapper = configureObjectMapper();
 
     TestInputTopic<String, OrgEnhetEvent> orgEnhetInputTopic;
@@ -25,7 +25,7 @@ public class EventsrcToHendelserTestTopology {
     TestInputTopic<String, OrganiseringEvent> organiseringInputTopic;
     TestInputTopic<String, OrgtilknytningEvent> orgtilknytningInputTopic;
 
-    TestOutputTopic<String, Hendelser> outputTopic;
+    TestOutputTopic<String, Hendelse> outputTopic;
 
     @BeforeEach
     public void setup() {
@@ -60,8 +60,8 @@ public class EventsrcToHendelserTestTopology {
         orgtilknytningInputTopic = topologyTestDriver
             .createInputTopic("orgtilknytningInputTopic", new StringSerializer(), objectSerde.copyWithType(OrgtilknytningEvent.class).serializer());
 
-        final var hendelserStateSerde = objectSerde.copyWithType(Hendelser.class);
-        hendelserStateSerde.deserializer().addTrustedPackages(Hendelser.class.getPackageName());
+        final var hendelserStateSerde = objectSerde.copyWithType(Hendelse.class);
+        hendelserStateSerde.deserializer().addTrustedPackages(Hendelse.class.getPackageName());
 
         outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), hendelserStateSerde.deserializer());
     }

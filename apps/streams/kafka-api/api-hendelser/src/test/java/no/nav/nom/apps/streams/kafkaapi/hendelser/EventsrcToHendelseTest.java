@@ -2,7 +2,7 @@ package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelse;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
@@ -21,12 +21,12 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Slf4j
-public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
+public class EventsrcToHendelseTest extends EventsrcToHendelseTestTopology {
 
     @DisplayName("Test individual event in a stream")
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("getIndividualEventInStream")
-    void test_individual_event_Hendelser(String ignoredDescription, Event event, Hendelser expectedHendelser) {
+    void test_individual_event_Hendelser(String ignoredDescription, Event event, Hendelse expectedHendelse) {
         if (event instanceof OrgEnhetEvent) {
             orgEnhetInputTopic.pipeInput(new TestRecord<>(UUID.randomUUID().toString(), (OrgEnhetEvent) event));
         } else if (event instanceof RessursEvent) {
@@ -42,7 +42,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         // assert
         Assertions.assertThat(outputTopic.readKeyValuesToList())
             .containsExactly(
-                KeyValue.pair(event.getFid(), expectedHendelser)
+                KeyValue.pair(event.getFid(), expectedHendelse)
             );
     }
 
@@ -60,10 +60,10 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
-        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
-        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
-        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
-        final Hendelser endreOrgenhetHendelserWithNulId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
+        final Hendelse opprettOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
+        final Hendelse endreOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
+        final Hendelse avvikleOrgenhetHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
+        final Hendelse endreOrgenhetHendelseWithNulId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
 
 
         //arrange resurs events og hendelser
@@ -75,10 +75,10 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
         final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
 
-        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
-        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
-        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
-        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
+        final Hendelse opprettResursHendelse = new Hendelse(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
+        final Hendelse endretResursHendelseWithId = new Hendelse(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelse endretResursHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelse slettResursHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
 
         //arrange organisering events
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
@@ -107,30 +107,30 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
 
         return Stream.of(
             // orgeEnhet events
-            Arguments.of("opprett orgEnhet event oppretter ny Hendelser  ", opprettOrgenhetEvent, opprettOrgenhetHendelser),
-            Arguments.of("endre orgEnhet event oppretter endret Hendelser  ", endreOrgenhetEvent, endreOrgenhetHendelser),
-            Arguments.of("avvikle orgEnhet event oppretter fjernet Hendelser  ", avvikleOrgenhetEvent, avvikleOrgenhetHendelserWithNullId),
+            Arguments.of("opprett orgEnhet event oppretter ny Hendelser  ", opprettOrgenhetEvent, opprettOrgenhetHendelse),
+            Arguments.of("endre orgEnhet event oppretter endret Hendelser  ", endreOrgenhetEvent, endreOrgenhetHendelse),
+            Arguments.of("avvikle orgEnhet event oppretter fjernet Hendelser  ", avvikleOrgenhetEvent, avvikleOrgenhetHendelseWithNullId),
             // ressurs events
-            Arguments.of("opprett resurs event oppretter ny Hendelser", opprettRessursEvent, opprettResursHendelser),
-            Arguments.of("personalia oppdatert resurs event oppretter endret Hendelser", ressursPersonaliaOppdatertEvent, endretResursHendelserWithNullId),
-            Arguments.of("personident oppdatert resurs event oppretter endret Hendelser", ressursPersonidentOppdatertEvent, endretResursHendelserWithNullId),
-            Arguments.of("sektor oppdatert resurs event oppretter endret Hendelser", ressursSektorOppdatertEvent, endretResursHendelserWithNullId),
-            Arguments.of("startdato opdatert resurs event oppretter endret Hendelser", ressursStartDatoOppdatertEvent, endretResursHendelserWithNullId),
-            Arguments.of("sluttet resurs event oppretter endret Hendelser", ressursSluttetEvent, endretResursHendelserWithNullId),
-            Arguments.of("fjernet resurs event oppretter fjernet Hendelser", ressursFjernetEvent, slettResursHendelserWithNullId),
+            Arguments.of("opprett resurs event oppretter ny Hendelser", opprettRessursEvent, opprettResursHendelse),
+            Arguments.of("personalia oppdatert resurs event oppretter endret Hendelser", ressursPersonaliaOppdatertEvent, endretResursHendelseWithNullId),
+            Arguments.of("personident oppdatert resurs event oppretter endret Hendelser", ressursPersonidentOppdatertEvent, endretResursHendelseWithNullId),
+            Arguments.of("sektor oppdatert resurs event oppretter endret Hendelser", ressursSektorOppdatertEvent, endretResursHendelseWithNullId),
+            Arguments.of("startdato opdatert resurs event oppretter endret Hendelser", ressursStartDatoOppdatertEvent, endretResursHendelseWithNullId),
+            Arguments.of("sluttet resurs event oppretter endret Hendelser", ressursSluttetEvent, endretResursHendelseWithNullId),
+            Arguments.of("fjernet resurs event oppretter fjernet Hendelser", ressursFjernetEvent, slettResursHendelseWithNullId),
             // organisering events
-            Arguments.of("opprett organisering event oppretter endret Hendelser  ", opprettOrganiseringEvent, endreOrgenhetHendelser),
-            Arguments.of("endre organisering event oppretter endret Hendelser  ", endreOrganiseringEvent, endreOrgenhetHendelser),
-            Arguments.of("avslutt organisering event oppretter endret Hendelser  ", avsluttOrganiseringEvent, endreOrgenhetHendelserWithNulId),
+            Arguments.of("opprett organisering event oppretter endret Hendelser  ", opprettOrganiseringEvent, endreOrgenhetHendelse),
+            Arguments.of("endre organisering event oppretter endret Hendelser  ", endreOrganiseringEvent, endreOrgenhetHendelse),
+            Arguments.of("avslutt organisering event oppretter endret Hendelser  ", avsluttOrganiseringEvent, endreOrgenhetHendelseWithNulId),
             // orgtilknytning events
-            Arguments.of("opprett tilknyting event oppretter endret Hendelser  ", orgtilknytningOpprettetEvent, endretResursHendelserWithId),
-            Arguments.of("avslutt tilknyting event oppretter endret Hendelser  ", getOrgtilknytningAvsluttetEvent, endretResursHendelserWithId),
-            Arguments.of("fjernet tilknyting event oppretter endret Hendelser  ", getOrgtilknytningFjernetEvent, endretResursHendelserWithId),
-            Arguments.of("datoendret tilknyting event oppretter endret Hendelser  ", getOrgtilknytningDatoEndretEvent, endretResursHendelserWithId),
+            Arguments.of("opprett tilknyting event oppretter endret Hendelser  ", orgtilknytningOpprettetEvent, endretResursHendelseWithId),
+            Arguments.of("avslutt tilknyting event oppretter endret Hendelser  ", getOrgtilknytningAvsluttetEvent, endretResursHendelseWithId),
+            Arguments.of("fjernet tilknyting event oppretter endret Hendelser  ", getOrgtilknytningFjernetEvent, endretResursHendelseWithId),
+            Arguments.of("datoendret tilknyting event oppretter endret Hendelser  ", getOrgtilknytningDatoEndretEvent, endretResursHendelseWithId),
             Arguments.of(
                 "dagligoppfolgingendret tilknyting event oppretter endret Hendelser  ",
                 getOrgtilknytningDagligOppfolgingEndretEvent,
-                endretResursHendelserWithId
+                endretResursHendelseWithId
             )
         );
     }
@@ -138,7 +138,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
     @DisplayName("Test multiple events in a stream")
     @ParameterizedTest(name = "{index} {0}")
     @MethodSource("getMultipleEventsInStream")
-    void test_multiple_events_Hendelser(String ignoredDescription, List<Event> events, List<Hendelser> expectedHendelser) {
+    void test_multiple_events_Hendelser(String ignoredDescription, List<Event> events, List<Hendelse> expectedHendelse) {
         // arrange
         events.forEach(event -> {
             if (event instanceof OrgEnhetEvent) {
@@ -157,7 +157,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         // assert
         val result = outputTopic.readValuesToList();
         Assertions.assertThat(result.size()).isEqualTo(events.size());
-        Assertions.assertThat(result).containsAll(expectedHendelser);
+        Assertions.assertThat(result).containsAll(expectedHendelse);
     }
 
     private static Stream<Arguments> getMultipleEventsInStream() {
@@ -174,15 +174,15 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         final OrgEnhetEvent opprettOrgenhetEvent = HendelserTestUtils.getOrgEnhetOpprettetEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent endreOrgenhetEvent = HendelserTestUtils.getOrgEnhetKorrigertEvent(orgEnhetFid, orgEnhetId, eventMetadata);
         final OrgEnhetEvent avvikleOrgenhetEvent = HendelserTestUtils.getOrgEnhetAvvikletEvent(orgEnhetFid, eventMetadata);
-        final Hendelser opprettOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
-        final Hendelser endreOrgenhetHendelser = new Hendelser(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
-        final Hendelser avvikleOrgenhetHendelserWithId = new Hendelser(
+        final Hendelse opprettOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.NY);
+        final Hendelse endreOrgenhetHendelse = new Hendelse(orgEnhetId, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.ENDRET);
+        final Hendelse avvikleOrgenhetHendelseWithId = new Hendelse(
             orgEnhetId,
             eventMetadata.createdTimestamp(),
             EntityType.ORGENHET,
             HendelseType.FJERNET
         );
-        final Hendelser avvikleOrgenhetHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
+        final Hendelse avvikleOrgenhetHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.ORGENHET, HendelseType.FJERNET);
 
         // organisering events and hendelser
         final OrganiseringEvent opprettOrganiseringEvent = HendelserTestUtils.getOpprettetOrganiseringEvent(organiseringFid, orgEnhetId, eventMetadata);
@@ -196,10 +196,10 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
         final RessursEvent ressursStartDatoOppdatertEvent = HendelserTestUtils.getRessursStartDatoOppdatert(resursFid, eventMetadata);
         final RessursEvent ressursSluttetEvent = HendelserTestUtils.getRessursSluttetEvent(resursFid, eventMetadata);
         final RessursEvent ressursFjernetEvent = HendelserTestUtils.getRessursTekniskSlettetEvent(resursFid, eventMetadata);
-        final Hendelser opprettResursHendelser = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
-        final Hendelser endretResursHendelserWithId = new Hendelser(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
-        final Hendelser endretResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
-        final Hendelser slettResursHendelserWithNullId = new Hendelser(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
+        final Hendelse opprettResursHendelse = new Hendelse(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.NY);
+        final Hendelse endretResursHendelseWithId = new Hendelse(navident, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelse endretResursHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.ENDRET);
+        final Hendelse slettResursHendelseWithNullId = new Hendelse(null, eventMetadata.createdTimestamp(), EntityType.RESSURS, HendelseType.FJERNET);
 
         // orgtilknytning events and hendelser
         final OrgtilknytningEvent orgtilknytningOpprettetEvent = HendelserTestUtils.getOrgtilknytningOpprettetEvent(orgTilknytningFid, navident, eventMetadata);
@@ -226,23 +226,23 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
             Arguments.of(
                 "opprett -> endre -> avslutt orgenhet event oppretter fjernet Hendelser med id",
                 Arrays.asList(opprettOrgenhetEvent, endreOrgenhetEvent, avvikleOrgenhetEvent),
-                Arrays.asList(opprettOrgenhetHendelser, endreOrgenhetHendelser, avvikleOrgenhetHendelserWithId)
+                Arrays.asList(opprettOrgenhetHendelse, endreOrgenhetHendelse, avvikleOrgenhetHendelseWithId)
             ),
             Arguments.of(
                 "avslutt -> opprett -> endre ->  orgenhet events oppretter fjernet Hendelser uten id",
                 Arrays.asList(avvikleOrgenhetEvent, opprettOrgenhetEvent, endreOrgenhetEvent),
-                Arrays.asList(avvikleOrgenhetHendelserWithNullId, opprettOrgenhetHendelser, endreOrgenhetHendelser)
+                Arrays.asList(avvikleOrgenhetHendelseWithNullId, opprettOrgenhetHendelse, endreOrgenhetHendelse)
             ),
             // organisering events
             Arguments.of(
                 "opprett -> avslutt organisering events oppretter endret Hendelser med id",
                 Arrays.asList(opprettOrganiseringEvent, avsluttOrganiseringEvent),
-                Arrays.asList(endreOrgenhetHendelser, endreOrgenhetHendelser)
+                Arrays.asList(endreOrgenhetHendelse, endreOrgenhetHendelse)
             ),
             Arguments.of(
                 "avslutt -> opprett organisering events oppretter endret Hendelser med id",
                 Arrays.asList(opprettOrganiseringEvent, avsluttOrganiseringEvent),
-                Arrays.asList(endreOrgenhetHendelser, endreOrgenhetHendelser)
+                Arrays.asList(endreOrgenhetHendelse, endreOrgenhetHendelse)
             ),
             // ressurs events
             Arguments.of(
@@ -252,29 +252,29 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
                     ressursSektorOppdatertEvent, ressursStartDatoOppdatertEvent, ressursSluttetEvent
                 ),
                 Arrays.asList(
-                    opprettResursHendelser, endretResursHendelserWithId, endretResursHendelserWithId,
-                    endretResursHendelserWithId, endretResursHendelserWithId, endretResursHendelserWithId
+                    opprettResursHendelse, endretResursHendelseWithId, endretResursHendelseWithId,
+                    endretResursHendelseWithId, endretResursHendelseWithId, endretResursHendelseWithId
                 )
             ),
             Arguments.of(
                 "avslutt -> opprett resurs event oppretter endret Hendelser uten id",
                 Arrays.asList(ressursSluttetEvent, opprettRessursEvent),
-                Arrays.asList(endretResursHendelserWithNullId, opprettResursHendelser)
+                Arrays.asList(endretResursHendelseWithNullId, opprettResursHendelse)
             ),
             Arguments.of(
                 "fjernet -> opprett resurs event oppretter fjernet Hendelser uten id",
                 Arrays.asList(ressursFjernetEvent, opprettRessursEvent),
-                Arrays.asList(slettResursHendelserWithNullId, opprettResursHendelser)
+                Arrays.asList(slettResursHendelseWithNullId, opprettResursHendelse)
             ),
             Arguments.of(
                 "avslutt -> opprett -> endre resurs event oppretter endret Hendelser med id",
                 Arrays.asList(ressursSluttetEvent, opprettRessursEvent, ressursPersonaliaOppdatertEvent),
-                Arrays.asList(endretResursHendelserWithNullId, opprettResursHendelser, endretResursHendelserWithId)
+                Arrays.asList(endretResursHendelseWithNullId, opprettResursHendelse, endretResursHendelseWithId)
             ),
             Arguments.of(
                 "endre -> avslutt resurs event oppretter endret Hendelser uten id",
                 Arrays.asList(ressursPersonaliaOppdatertEvent, ressursSluttetEvent),
-                Arrays.asList(endretResursHendelserWithNullId, endretResursHendelserWithNullId)
+                Arrays.asList(endretResursHendelseWithNullId, endretResursHendelseWithNullId)
             ),
             // orgtilknytning events
             Arguments.of(
@@ -283,7 +283,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
                     orgtilknytningOpprettetEvent, getOrgtilknytningDatoEndretEvent, getOrgtilknytningDagligOppfolgingEndretEvent, getOrgtilknytningFjernetEvent
                 ),
                 Arrays.asList(
-                    endretResursHendelserWithId, endretResursHendelserWithId, endretResursHendelserWithId, endretResursHendelserWithId)
+                    endretResursHendelseWithId, endretResursHendelseWithId, endretResursHendelseWithId, endretResursHendelseWithId)
             ),
             Arguments.of(
                 "avslutt orgtilknytning -> fjern orgtilknytning events oppretter Hendelser med id",
@@ -291,7 +291,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
                     getOrgtilknytningAvsluttetEvent, getOrgtilknytningFjernetEvent
                 ),
                 Arrays.asList(
-                    endretResursHendelserWithId, endretResursHendelserWithId)
+                    endretResursHendelseWithId, endretResursHendelseWithId)
             ),
             // mixed event types
             Arguments.of(
@@ -300,7 +300,7 @@ public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
                     opprettOrgenhetEvent, opprettRessursEvent, opprettOrganiseringEvent
                 ),
                 Arrays.asList(
-                    opprettOrgenhetHendelser, opprettResursHendelser, endreOrgenhetHendelser)
+                    opprettOrgenhetHendelse, opprettResursHendelse, endreOrgenhetHendelse)
             )
         );
     }
