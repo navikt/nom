@@ -1,15 +1,17 @@
 import subprocess as sp
 from dataclasses import dataclass
 import argparse
+from typing import Optional
+
 
 kafka_bootstrap_server = "localhost:39092"
 
 
 @dataclass
 class EntityTopics:
-    event_source_topic: str
-    state_topic: str
-    streams_application_id: str
+    event_source_topic: Optional[str] = None
+    state_topic: Optional[str] = None
+    streams_application_id: Optional[str] = None
 
 
 def run_command(command: str):
@@ -29,10 +31,14 @@ def reset_streams_application(streams_application_id):
 
 
 def create_topic(topic: str):
-    print(f"Creating local topic {topic}")
-    run_command(
-        f"kafka-topics --bootstrap-server {kafka_bootstrap_server} --create --topic {topic}  --partitions 1 --replication-factor 1"
-    )
+    if(not topic):
+        print(f"Invalid topic {topic} will not be created")
+        return
+    else:
+        print(f"Creating local topic {topic}")
+        run_command(
+            f"kafka-topics --bootstrap-server {kafka_bootstrap_server} --create --topic {topic}  --partitions 1 --replication-factor 1"
+        )
 
 
 def create_topics(entity_topics: EntityTopics, recreate: bool):
@@ -67,6 +73,10 @@ def create_topics_for_nom_entities(nom_entity_filter: list, recreate: bool):
             event_source_topic="org.nom.organisering-eventsource",
             state_topic="org.nom.intern-organisering-state",
             streams_application_id="organisering-state"
+        ),
+        "hendelser": EntityTopics(
+            state_topic="org.nom.api-hendelser-v1",
+            streams_application_id="api-hendelser-v1"
         )
     }
 

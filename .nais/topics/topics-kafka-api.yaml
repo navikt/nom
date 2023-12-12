@@ -47,3 +47,29 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+
+
+---
+
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: nom.api-hendelser-v1
+  namespace: org
+  labels:
+    team: org
+spec:
+  pool: {{kafka-pool}}
+  config:
+    minimumInSyncReplicas: 1
+    partitions: 1
+    replication: 3
+    retentionBytes: -1
+    retentionHours: -1
+  acl:
+    - team: org
+      application: nom-kafka-api-hendelser
+      access: readwrite
+    - team: org
+      application: org-kafka-manager
+      access: read
