@@ -208,7 +208,7 @@ public class NomIntegrasjonService {
             .tiltredelsesdato(ressursOpprettetAdditionalData.startdato()
                 .map(Utils::epochSecondsNorwegianTimeNoon)
                 .orElseThrow(() -> new NoSuchElementException("Missing value for 'startDato'")))
-            .utlopsdato(epochSecondsNorwegianTimeNoon(sluttDato))
+            .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
             .build();
 
         saveNewNomIntegrasjonEntity(

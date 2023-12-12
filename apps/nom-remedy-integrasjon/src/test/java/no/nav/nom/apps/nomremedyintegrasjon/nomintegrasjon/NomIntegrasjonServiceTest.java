@@ -127,7 +127,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .navId(navident)
                     .sektor(2)
                     .tiltredelsesdato(epochSecondsNorwegianTimeNoon(startDato))
-                    .utlopsdato(epochSecondsNorwegianTimeNoon(sluttDato))
+                    .utlopsdato(epochSecondsNorwegianTimeEndOfDay(sluttDato))
                     .build()
             ));
 
