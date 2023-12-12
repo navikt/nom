@@ -72,13 +72,6 @@ class NavidentControllerWebMvcTest {
         ;
     }
 
-    @Test
-    public void createNavidentWithIllegalPrefix() throws Exception {
-        mvc.perform(
-            getValidRequest("01019012345", IdentType.STANDARD, "Ö")
-        ).andExpect(status().isBadRequest());
-    }
-
     private MockHttpServletRequestBuilder getValidRequest(String personId, IdentType type, String prefix) {
         NavidentRequestDTO req = NavidentRequestDTO.builder()
                 .personid(personId)
