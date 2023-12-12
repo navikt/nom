@@ -1,11 +1,11 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
+package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetEvent;
 import no.nav.nom.contract.nom.eventsource.OrganiseringEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.util.Properties;
 
-public class EventsrcToStateTestTopology {
+public class EventsrcToHendelserTestTopology {
     ObjectMapper objectMapper = configureObjectMapper();
 
     TestInputTopic<String, OrgEnhetEvent> orgEnhetInputTopic;
@@ -37,7 +37,7 @@ public class EventsrcToStateTestTopology {
         final StreamsBuilder streamsBuilder = new StreamsBuilder();
         final var objectSerde = kafkaConfig.objectSerde(objectMapper);
 
-        new EventsrcToState(
+        new EventsrcToHendelser(
             "orgEnhetInputTopic",
             "resursInputTopic",
             "organiseringInputTopic",

@@ -1,8 +1,8 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
+package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
@@ -21,7 +21,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Slf4j
-public class EventsrcToStateTest extends EventsrcToStateTestTopology {
+public class EventsrcToHendelserTest extends EventsrcToHendelserTestTopology {
 
     @DisplayName("Test individual event in a stream")
     @ParameterizedTest(name = "{index} {0}")

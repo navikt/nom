@@ -1,4 +1,4 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1;
+package no.nav.nom.apps.streams.kafkaapi.hendelser.v1;
 
 import lombok.Builder;
 import no.nav.nom.contract.nom.EntityType;

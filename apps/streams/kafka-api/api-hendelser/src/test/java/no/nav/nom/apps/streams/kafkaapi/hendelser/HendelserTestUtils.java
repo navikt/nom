@@ -1,4 +1,4 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
+package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;

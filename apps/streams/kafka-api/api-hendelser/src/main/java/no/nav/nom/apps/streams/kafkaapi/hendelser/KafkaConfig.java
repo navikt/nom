@@ -1,7 +1,7 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
+package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;

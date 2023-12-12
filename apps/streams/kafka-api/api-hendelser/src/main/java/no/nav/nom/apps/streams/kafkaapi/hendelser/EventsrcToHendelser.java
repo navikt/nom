@@ -1,6 +1,6 @@
-package no.nav.nom.apps.streams.kafkaapi.ressurs.state;
+package no.nav.nom.apps.streams.kafkaapi.hendelser;
 
-import no.nav.nom.apps.streams.kafkaapi.ressurs.state.v1.Hendelser;
+import no.nav.nom.apps.streams.kafkaapi.hendelser.v1.Hendelser;
 import no.nav.nom.contract.nom.EntityType;
 import no.nav.nom.contract.nom.HendelseType;
 import no.nav.nom.contract.nom.eventsource.*;
@@ -28,11 +28,11 @@ import java.util.Set;
 
 
 @Component
-public class EventsrcToState {
-    private final static Logger log = LoggerFactory.getLogger(EventsrcToState.class);
+public class EventsrcToHendelser {
+    private final static Logger log = LoggerFactory.getLogger(EventsrcToHendelser.class);
     public static final String NOM_HENDELSER_STATE_STORE = "nom-hendelser-state-store";
 
-    public EventsrcToState(
+    public EventsrcToHendelser(
         @Value("${app.kafka.orgenhet-evtsrc-topic}") String orgenhetEvtsrcTopic,
         @Value("${app.kafka.ressurs-evtsrc-topic}") String ressursEvtsrcTopic,
         @Value("${app.kafka.organisering-evtsrc-topic}") String organiseringEvtsrcTopic,
