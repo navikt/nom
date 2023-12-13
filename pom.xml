@@ -31,7 +31,7 @@
         <spring-boot.version>3.2.0</spring-boot.version>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
-        <gcp.libraries-bom.version>26.28.0</gcp.libraries-bom.version>
+        <gcp.libraries-bom.version>26.29.0</gcp.libraries-bom.version>
         <springdoc.version>2.3.0</springdoc.version>
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
         <hypersistence-utils-hibernate-62.version>3.6.1</hypersistence-utils-hibernate-62.version>
