@@ -144,6 +144,9 @@ spec:
         - application: oppgavebehandling-api
           namespace: oppgavehandtering
           cluster: prod-gcp
+        - application: saas-proxy
+          namespace: teamcrm
+          cluster: prod-gcp
     outbound:
       rules:
         - application: nav-ident
