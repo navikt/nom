@@ -34,6 +34,8 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDaglig
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDagligOppfolgingEndretEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDatoEndretEventV2;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursFysiskeBrukerstederOppdatertEventData;
+import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursFysiskeBrukerstederOppdatertEventV1;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetAdditionalData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventData;
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursPersonaliaOppdatertV1;
@@ -179,7 +181,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                     .entryId(fifteenCharLengthZeroPaddedNumber(1L))
                     .entryStatus("Ubehandlet")
                     .utlopsdato(epochSecondsNorwegianTimeEndOfDay(ressursSluttetEventV1.getRessursSluttetEventData().sluttdato()))
-                    .entryBestiller(ressursSluttetEventV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryBestiller(ressursSluttetEventV1.getMetadata().inputMetadata().origination().initiatedBy())
                     .build()
             ));
 
@@ -217,7 +219,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
             nomIntegrasjonEntity().toBuilder()
-                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .entryId(fifteenCharLengthZeroPaddedNumber(0L))
                 .navId(navident).build()
         );
 
@@ -242,7 +244,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .isEqualTo(Optional.of(
                 latestNomIntegrasjonEntityForNavident.toBuilder()
                     .entryId(fifteenCharLengthZeroPaddedNumber(1L))
-                    .entryBestiller(ressursPersonaliaOppdatertV1().getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryBestiller(ressursPersonaliaOppdatertV1.getMetadata().inputMetadata().origination().initiatedBy())
                     .entryOperasjon("Ny")
                     .entryStatus("Ubehandlet")
                     .fornavn(capitalizeNavn(newFornavn))
@@ -259,7 +261,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
 
         var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
             nomIntegrasjonEntity().toBuilder()
-                .navId(fifteenCharLengthZeroPaddedNumber(0L))
+                .entryId(fifteenCharLengthZeroPaddedNumber(0L))
                 .navId(navident).build()
         );
 
@@ -276,6 +278,75 @@ public class NomIntegrasjonServiceTest extends TestBase {
             .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
 
         nomIntegrasjonService.handleRessursEvent(ressursPersonaliaOppdatertV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(latestNomIntegrasjonEntityForNavident));
+    }
+
+    @Test
+    @DisplayName("Should write new entity with correctly updated values for RessursFysiskeBrukerstederOppdatertEventV1")
+    void testShouldUpdateForRessursFysiskeBrukerstederOppdatertEventV1() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident)
+                .fysiskBrukerstedId("gotham").build()
+        );
+
+        var newPrimaryFysiskBrukersted = "finse";
+
+        var ressursFysiskeBrukerstederOppdatertEventV1 = ressursFysiskeBrukerstederOppdatertEventV1(
+            ressursFysiskeBrukerstederOppdatertEventData().toBuilder()
+                .primaryFysiskBrukersted(newPrimaryFysiskBrukersted)
+                .build()
+        );
+
+        when(nomApiClient.getRessursByFid(ressursFysiskeBrukerstederOppdatertEventV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.EKSTERN));
+
+        nomIntegrasjonService.handleRessursEvent(ressursFysiskeBrukerstederOppdatertEventV1);
+
+        var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
+
+        assertThat(newNomIntegrasjonEntityForNavident)
+            .usingRecursiveComparison()
+            .isEqualTo(Optional.of(
+                latestNomIntegrasjonEntityForNavident.toBuilder()
+                    .entryId(fifteenCharLengthZeroPaddedNumber(1L))
+                    .entryBestiller(ressursFysiskeBrukerstederOppdatertEventV1.getMetadata().inputMetadata().origination().initiatedBy())
+                    .entryOperasjon("Ny")
+                    .entryStatus("Ubehandlet")
+                    .fysiskBrukerstedId(newPrimaryFysiskBrukersted)
+                    .build()
+
+            ));
+    }
+
+    @Test
+    @DisplayName("Should skip updating values for RessursFysiskeBrukerstederOppdatertEventV1 if ressurs is not EKSTERN")
+    void testShouldSkipUpdateForRessursFysiskeBrukerstederOppdatertEventV1IfRessursIsNotEkstern() {
+        var navident = "X123456";
+
+        var latestNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.save(
+            nomIntegrasjonEntity().toBuilder()
+                .entryId(fifteenCharLengthZeroPaddedNumber(0L))
+                .navId(navident)
+                .fysiskBrukerstedId("dsjakdeada").build()
+        );
+
+        var ressursFysiskeBrukerstederOppdatertEventV1 = ressursFysiskeBrukerstederOppdatertEventV1(
+
+        );
+
+        when(nomApiClient.getRessursByFid(ressursFysiskeBrukerstederOppdatertEventV1.getFid()))
+            .thenReturn(new Ressurs().navident(navident).sektor(no.nav.nom.generated.model.Sektor.NAV_STATLIG));
+
+        nomIntegrasjonService.handleRessursEvent(ressursFysiskeBrukerstederOppdatertEventV1);
 
         var newNomIntegrasjonEntityForNavident = nomIntegrasjonRepository.findTopByNavIdEqualsOrderByEntryIdDesc(navident);
 
@@ -466,7 +537,7 @@ public class NomIntegrasjonServiceTest extends TestBase {
                 latestNomIntegrasjonEntityForNavident.toBuilder()
                     .entryId(fifteenCharLengthZeroPaddedNumber(1L))
                     .entryBestiller(
-                        orgtilknytningDatoEndretEventV2().getMetadata().inputMetadata().origination().initiatedBy()
+                        orgtilknytningDatoEndretEventV2.getMetadata().inputMetadata().origination().initiatedBy()
                     )
                     .entryOperasjon("Ny")
                     .entryStatus("Ubehandlet")

@@ -8,14 +8,21 @@ import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +31,14 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static java.util.Collections.emptySet;
 import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.common.TestData.ressursState;
 import static no.nav.nom.apps.api.ressurs.api.app.RessursController.UNLEASH_EDIT_RESSURS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -49,6 +60,10 @@ public class RessursControllerTest extends RestTestBase {
     @MockBean
     private RessursStateRepository ressursStateRepository;
 
+    @BeforeEach
+    void enableFeatureFlag(){
+        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
+    }
 
     @Test
     @SneakyThrows
@@ -234,7 +249,6 @@ public class RessursControllerTest extends RestTestBase {
     @Test
     void skal_kunne_endre_navn_for_eksterne() {
         var navident = "A123456";
-        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
         when(ressursStateRepository.findByNavident(navident))
             .thenReturn(Optional.of(new RessursState(
                 "FID_1",
@@ -272,7 +286,6 @@ public class RessursControllerTest extends RestTestBase {
     void skal_kunne_avvikle_ressurs() {
 
         var ressurs = ressursState().toBuilder().fid("FID_1").navident("A123456").sektor(Sektor.EKSTERN).build();
-        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
         when(ressursStateRepository.findByFid(ressurs.fid()))
             .thenReturn(Optional.of(ressurs));
 
@@ -307,7 +320,6 @@ public class RessursControllerTest extends RestTestBase {
     @Test
     void skal_ikke_kunne_endre_navn_for_statlig() {
         var navident = "A123456";
-        when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
         when(ressursStateRepository.findByNavident(navident))
             .thenReturn(Optional.of(new RessursState(
                 "FID_1",
@@ -339,5 +351,78 @@ public class RessursControllerTest extends RestTestBase {
             .expectStatus().isBadRequest();
 
         verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
+    }
+
+    @Test
+    void skal_oppdatere_fysiske_brukersteder(){
+
+        var fid = "FID-uuid";
+        var existingRessurs = ressursState();
+        var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
+            .primaryFysiskBrukersted("fyrstikken-id")
+            .fysiskeBrukersteder(Set.of("fyrstikken-id"))
+            .build();
+
+        when(ressursStateRepository.findByFid(fid)).thenReturn(Optional.of(existingRessurs));
+
+        webTestClient.post()
+            .uri(uriBuilder ->
+                uriBuilder.path("/app/ressurser/{fid}/fysiskebrukersteder").build(fid)
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(updateFysiskeBrukerstederRequest)
+            .exchange()
+            .expectStatus().isOk();
+
+        var oppdaterFysiskeBrukerstederCommandArgumentCaptor = ArgumentCaptor.forClass(OppdaterFysiskeBrukerstederCommand.class);
+        verify(ressursCommadService, times(1))
+            .oppdaterFysiskeBrukerstederCommand(oppdaterFysiskeBrukerstederCommandArgumentCaptor.capture(), any());
+
+        assertThat(oppdaterFysiskeBrukerstederCommandArgumentCaptor.getValue())
+            .usingRecursiveComparison()
+            .isEqualTo(OppdaterFysiskeBrukerstederCommand.builder()
+                .fid(existingRessurs.fid())
+                .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
+                .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+                .build()
+            );
+    }
+
+    @ParameterizedTest(name = "updateFysiskeBrukersteder should give 400 with message '{1}'")
+    @MethodSource("testUpdateFysiskeBrukerstederBadRequestInput")
+    void testUpdateFysiskeBrukerstederBadRequest(UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest, String expectedMessage){
+        webTestClient.post()
+            .uri("/app/ressurser/fid-whatever/fysiskebrukersteder")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(updateFysiskeBrukerstederRequest)
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody(StandardResponse.class)
+            .isEqualTo(StandardResponse.builder().message(expectedMessage).build());
+    }
+
+    static Stream<Arguments> testUpdateFysiskeBrukerstederBadRequestInput() {
+        return Stream.of(
+            Arguments.of(
+                UpdateFysiskeBrukerstederRequest.builder()
+                    .primaryFysiskBrukersted(null)
+                    .fysiskeBrukersteder(emptySet())
+                    .build(),
+                "primaryFysiskBrukersted cannot be blank or null"
+                ),
+            Arguments.of(
+                UpdateFysiskeBrukerstederRequest.builder()
+                    .primaryFysiskBrukersted("oslo")
+                    .fysiskeBrukersteder(Set.of("bergen"))
+                    .build(),
+                "Value for primaryFysiskBrukersted must be included in fysiske brukersteder"
+            )
+        );
     }
 }

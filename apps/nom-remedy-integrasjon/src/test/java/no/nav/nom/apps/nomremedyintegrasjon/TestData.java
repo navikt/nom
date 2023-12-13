@@ -6,6 +6,7 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
@@ -65,6 +66,27 @@ public class TestData {
             personaliaOppdatertEventData,
             inputMetadata()
         );
+    }
+
+    public static RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1() {
+        return ressursFysiskeBrukerstederOppdatertEventV1(ressursFysiskeBrukerstederOppdatertEventData());
+    }
+
+    public static RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1(
+        RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData
+    ) {
+        return new RessursFysiskeBrukerstederOppdatertEventV1(
+            UUID.randomUUID().toString(),
+            ressursFysiskeBrukerstederOppdatertEventData,
+            inputMetadata()
+        );
+    }
+
+    public static RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData() {
+        return RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
+            .primaryFysiskBrukersted("leikanger")
+            .fysiskeBrukersteder(List.of("leikanger"))
+            .build();
     }
 
     public static OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1() {

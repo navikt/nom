@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -39,7 +40,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -49,7 +52,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 @Service
 public class RessursRestService {
 
-    private final static Logger log = LoggerFactory.getLogger(RessursRestService.class);
+    private final static Logger logger = LoggerFactory.getLogger(RessursRestService.class);
 
     private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
@@ -142,6 +145,44 @@ public class RessursRestService {
         nomMastered.markRessursAsMasteredInNom(navident);
     }
 
+    public void updateFysiskeBrukersteder(String fid, UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest) {
+        if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted() == null || updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().isBlank()){
+            throw new IllegalArgumentException("primaryFysiskBrukersted cannot be blank or null");
+        }
+        if (!updateFysiskeBrukerstederRequest.fysiskeBrukersteder().contains(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())) {
+            throw new IllegalArgumentException("Value for primaryFysiskBrukersted must be included in fysiske brukersteder");
+        }
+
+        var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
+
+        var requestContainsNewValues = !Set.copyOf(ressursState.fysiskeBrukersteder()).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+            || !ressursState.primaryFysiskBrukersted().equals(Optional.of(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted()));
+
+        if (requestContainsNewValues) {
+
+            ressursCommadService.oppdaterFysiskeBrukerstederCommand(
+                OppdaterFysiskeBrukerstederCommand.builder()
+                    .fid(ressursState.fid())
+                    .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
+                    .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+                    .build(),
+                new InputMetadata(
+                    "REST-API",
+                    "updateFysiskeBrukersteder",
+                    Map.of("navident", ressursState.navident()),
+                    new Origination(
+                        getAuthenticatedNavIdent(),
+                        SecurityUtil.getAuthenticatedAzpName()
+                    )
+                )
+            );
+        } else {
+            logger.info("UpdateFysiskeBrukerstederRequest contained no new values, skipping update on ressurs with fid {}", fid);
+        }
+
+
+    }
+
     public List<JsonNode> getRessursEvents(ReadTopicRequest readTopicRequest) {
         return kafkaTopicReader.getRessursEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
@@ -161,7 +202,7 @@ public class RessursRestService {
                 ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.orgEnhetId());
             } catch (RessursOpprettetEmailException exception) {
                 //TODO: consider handling exception if email sending is important
-                log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
+                logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
             }
 
             return createRessursResponse;
@@ -202,7 +243,7 @@ public class RessursRestService {
             request = request.toBuilder().visningsmellomnavn(null).build();
         }
 
-        log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
+        logger.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         var metaData = new InputMetadata(
             "REST-API",

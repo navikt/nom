@@ -180,6 +180,35 @@ public class RessursController {
             .build();
     }
 
+    @PostMapping("/{fid}/fysiskebrukersteder")
+    @Operation(
+        description = "Overskriver fysiske brukersteder for en ressurs med navident.",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS')"
+    )
+    public ResponseEntity<StandardResponse> updateFysiskeBrukersteder(
+        @PathVariable String fid,
+        @RequestBody UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest
+    ) {
+        if (!unleash.isEnabled(UNLEASH_EDIT_RESSURS)) {
+            throw new AccessDeniedException("Endring av ressurs er blokkert");
+        }
+
+        ressursRestService.updateFysiskeBrukersteder(fid, updateFysiskeBrukerstederRequest);
+
+        return ResponseEntity.ok(
+            StandardResponse.builder()
+                .message(("Successfully changed fysiske brukersteder"))
+                .build()
+        );
+    }
+
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,
