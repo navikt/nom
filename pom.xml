@@ -53,7 +53,6 @@
         <ojdbc.version>23.3.0.23.09</ojdbc.version>
 
         <!-- Override spring-boot-dependencies version -->
-        <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
             <!-- note - local precedence import in utils-common, api, proxy, nom-ressurser, Unit4, nav-ident, og streams appene -->
         <netty.version>4.1.102.Final</netty.version> <!-- https://github.com/navikt/nom/security/dependabot/90 + https://github.com/navikt/nom/security/dependabot/89 -->
         <zookeeper.version>3.9.1</zookeeper.version> <!-- https://github.com/navikt/nom/security/dependabot/91 -->
@@ -130,24 +129,12 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc.version}</version>
-                <exclusions> <!-- https://github.com/navikt/nom/security/dependabot/85 -->
-                    <exclusion>
-                        <groupId>org.yaml</groupId>
-                        <artifactId>snakeyaml</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-security</artifactId>
                 <version>${springdoc-openapi-security.version}</version>
-                <exclusions> <!-- https://github.com/navikt/nom/security/dependabot/85 -->
-                    <exclusion>
-                        <groupId>org.yaml</groupId>
-                        <artifactId>snakeyaml</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
@@ -240,10 +227,6 @@
                     <exclusion> <!-- org.json:json conflict -->
                         <groupId>com.vaadin.external.google</groupId>
                         <artifactId>android-json</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.yaml</groupId>
-                        <artifactId>snakeyaml</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
