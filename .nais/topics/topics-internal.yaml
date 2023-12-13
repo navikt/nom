@@ -32,6 +32,9 @@ spec:
     - team: org
       application: nom-remedy-integrasjon
       access: read
+    - team: org
+      application: nom-kafka-api-hendelser
+      access: read
 
 ---
 
@@ -137,6 +140,9 @@ spec:
     - team: org
       application: org-kafka-manager
       access: read
+    - team: org
+      application: nom-kafka-api-hendelser
+      access: read
 
 ---
 
@@ -200,6 +206,9 @@ spec:
     - team: org
       application: nom-remedy-integrasjon
       access: read
+    - team: org
+      application: nom-kafka-api-hendelser
+      access: read
 
 ---
 
@@ -256,6 +265,9 @@ spec:
       access: readwrite
     - team: org
       application: org-kafka-manager
+      access: read
+    - team: org
+      application: nom-kafka-api-hendelser
       access: read
 
 ---
