@@ -1,0 +1,73 @@
+app:
+  name: ${NAIS_APP_NAME:nom-admin}
+  kafka-topics:
+#    ressurs-eventsource:
+#      topic-name: org.nom.ressurs-eventsource
+#      auto-startup: true
+#    orgtilknytning-eventsource:
+#      topic-name: org.nom.orgtilknytning-eventsource
+#      auto-startup: true
+  clients:
+    nom-api:
+      url: ${NOM_API_URL}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      base-path: /internal
+      exposure:
+        include: prometheus, info, health, metrics, loggers, mappings
+spring:
+  kafka:
+    client-id: ${HOSTNAME}
+    bootstrap-servers: ${KAFKA_BROKERS}
+    security:
+      protocol: SSL
+    properties:
+      security.protocol: SSL
+      ssl:
+        keystore:
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        truststore:
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+#      properties:
+#        spring.json.trusted.packages: 'no.nav.nom.contract.nom.eventsource'
+      group-id: ${HOSTNAME}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${azure.issuer-uri}
+          audiences: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
+      client:
+        registration:
+          nom-api:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_API_SCOPE}
+        provider:
+          azure:
+            issuer-uri: ${azure.issuer-uri}
+
+azure:
+  issuer-uri: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/v2.0
+
+unleash:
+  endpoint:
+    url: ${UNLEASH_SERVER_API_URL}/api
+  api-key: ${UNLEASH_SERVER_API_TOKEN}

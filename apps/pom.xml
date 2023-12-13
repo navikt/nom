@@ -22,5 +22,6 @@
         <module>nav-ident</module>
         <module>streams</module>
         <module>nom-remedy-integrasjon</module>
+        <module>admin</module>
     </modules>
 </project>
