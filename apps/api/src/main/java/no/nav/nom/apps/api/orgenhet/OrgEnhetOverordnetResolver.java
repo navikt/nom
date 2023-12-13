@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.slf4j.Logger;
@@ -9,14 +11,26 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
+
 @Component
 public class OrgEnhetOverordnetResolver {
     private final Logger logger = LoggerFactory.getLogger(OrgEnhetOverordnetResolver.class);
     private final DvhRepository dvhRepository;
+    private final Unleash unleash;
+
+    private final OrganiseringStateRepository organiseringStateRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
 
-    public OrgEnhetOverordnetResolver(DvhRepository dvhRepository, OrgEnhetStateRepository orgEnhetStateRepository) {
+    public OrgEnhetOverordnetResolver(
+        DvhRepository dvhRepository,
+        Unleash unleash,
+        OrganiseringStateRepository organiseringStateRepository, OrgEnhetStateRepository orgEnhetStateRepository
+    ) {
         this.dvhRepository = dvhRepository;
+        this.unleash = unleash;
+        this.organiseringStateRepository = organiseringStateRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
     }
 
@@ -24,31 +38,39 @@ public class OrgEnhetOverordnetResolver {
         // Ikke returner overordnet/organisering for enheter som er opprettet og avsluttet samme dag
         if (orgEnhetState.endedOnStartDate()) { return Optional.empty(); }
 
-        final var agressoId = orgEnhetState.agressoId();
-        final var orgNiv = orgEnhetState.agressoOrgNivaa();
-        final var navn = orgEnhetState.navn();
+        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
+            return organiseringStateRepository
+                .findActiveById(orgEnhetState.id())
+                .flatMap(o -> orgEnhetStateRepository.findById(o.idOver()));
+        } else {
 
-        if (agressoId.isPresent() && orgNiv.isPresent() && !navn.isBlank()) {
-            var overordnet = dvhRepository.getOrganiseringer(agressoId.get(), orgNiv.get(), navn)
-                .stream()
-                .filter(o ->
-                    o.getAgressoIdUnder().equals(agressoId.get())
-                        && o.getOrgNivUnder().equals(orgNiv.get())
-                        && o.getNavnUnder().equals(navn))
-                .findFirst();
+            final var agressoId = orgEnhetState.agressoId();
+            final var orgNiv = orgEnhetState.agressoOrgNivaa();
+            final var navn = orgEnhetState.navn();
 
-            var uniqueId = overordnet.map(o ->
-                String.join("-", o.getAgressoIdOver(), o.getNavnOver(), o.getOrgNivOver())
-            );
+            if (agressoId.isPresent() && orgNiv.isPresent() && !navn.isBlank()) {
+                var overordnet = dvhRepository.getOrganiseringer(agressoId.get(), orgNiv.get(), navn)
+                    .stream()
+                    .filter(o ->
+                        o.getAgressoIdUnder().equals(agressoId.get())
+                            && o.getOrgNivUnder().equals(orgNiv.get())
+                            && o.getNavnUnder().equals(navn))
+                    .findFirst();
 
-            if (uniqueId.isPresent()) {
-                return orgEnhetStateRepository.findNewestUniqueAgressoId(uniqueId.get());
+                var uniqueId = overordnet.map(o ->
+                    String.join("-", o.getAgressoIdOver(), o.getNavnOver(), o.getOrgNivOver())
+                );
+
+                if (uniqueId.isPresent()) {
+                    return orgEnhetStateRepository.findNewestUniqueAgressoId(uniqueId.get());
+                }
             }
-        }
 
-        logger.debug("Kunne ikke finne overordnet for orgenhet {}", orgEnhetState.id());
-        return Optional.empty();
+            logger.debug("Kunne ikke finne overordnet for orgenhet {}", orgEnhetState.id());
+            return Optional.empty();
+        }
     }
+
 
     public Optional<OrgEnhetState> findOverordnetOrgEnhet(String fid) {
         return orgEnhetStateRepository.findByFid(fid)

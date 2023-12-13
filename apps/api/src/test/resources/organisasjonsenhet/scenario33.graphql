@@ -5,6 +5,7 @@ query {
         organiseringer(retning: over){
             retning
             organisasjonsenhet{
+                id
                 agressoId
             }
         }

@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.graphql.organisasjonsenhet;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.graphql.MappingUtils;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
 import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
@@ -8,6 +9,8 @@ import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.Organisering;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,16 +18,22 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Component
 public class OrgEnhetResolver {
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final OrgenhetService orgenhetService;
+    private final Unleash unleash;
 
     OrgEnhetResolver(
-        OrgenhetService orgenhetService
+        OrgenhetService orgenhetService,
+        Unleash unleash
     ) {
         this.orgenhetService = orgenhetService;
+        this.unleash = unleash;
     }
 
     public Optional<OrgEnhet> orgEnhet(OrgEnhetSearch search) {
@@ -33,7 +42,7 @@ public class OrgEnhetResolver {
         }
         if (search.getAgressoId() != null && search.getOrgNiv() != null) {
             return orgenhetService.getEnhetByAgressoIdNivaAndName(search.getAgressoId(), search.getOrgNiv(), search.getNavn())
-                    .map(MappingUtils::toOrgEnhet);
+                .map(MappingUtils::toOrgEnhet);
         }
         return Optional.empty();
     }
@@ -55,9 +64,17 @@ public class OrgEnhetResolver {
     }
 
     public OrgEnhet orgEnhet(Organisering organisering) {
-        return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
+        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
+            logger.trace("Ny implementasjon henter orgEnhet for {}", organisering);
+            return orgenhetService.getById(organisering.getId())
                 .map(MappingUtils::toOrgEnhet)
                 .orElseThrow();
+        } else {
+            logger.trace("Gammel implementasjon henter orgEnhet for {}", organisering);
+            return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
+                .map(MappingUtils::toOrgEnhet)
+                .orElseThrow();
+        }
     }
 
     private List<OrgEnhetResult> orgenheterByAgressoData(OrgEnheterSearch search){

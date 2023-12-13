@@ -5,6 +5,7 @@ query {
         organiseringer{
             retning
             organisasjonsenhet{
+                id
                 agressoId
                 navn
                 gyldigFom

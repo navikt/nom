@@ -1,6 +1,8 @@
 package no.nav.nom.apps.api.orgenhet;
 
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import org.slf4j.Logger;
@@ -12,40 +14,59 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
+
 @Component
 public class OrgEnhetUnderordnetResolver {
     private final Logger logger = LoggerFactory.getLogger(OrgEnhetUnderordnetResolver.class);
     private final DvhRepository dvhRepository;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
 
-    public OrgEnhetUnderordnetResolver(DvhRepository dvhRepository, OrgEnhetStateRepository orgEnhetStateRepository) {
+    public OrgEnhetUnderordnetResolver(
+        DvhRepository dvhRepository, OrgEnhetStateRepository orgEnhetStateRepository,
+        OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+    ) {
         this.dvhRepository = dvhRepository;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
+        this.organiseringStateRepository = organiseringStateRepository;
+        this.unleash = unleash;
     }
 
     public List<OrgEnhetState> findUnderordnedeOrgEnheter(OrgEnhetState orgEnhetState) {
         // Ikke returner overordnet/organisering for enheter som er opprettet og avsluttet samme dag
         if (orgEnhetState.endedOnStartDate()) { return Collections.emptyList(); }
 
-        final var agressoId = orgEnhetState.agressoId();
-        final var orgNiv = orgEnhetState.agressoOrgNivaa();
-        final var navn = orgEnhetState.navn();
-
-        if (agressoId.isPresent() && orgNiv.isPresent() && !navn.isBlank()) {
-            return dvhRepository.getOrganiseringer(agressoId.get(), orgNiv.get(), navn)
-                .stream()
-                .filter(o ->
-                    o.getAgressoIdOver().equals(agressoId.get())
-                        && o.getOrgNivOver().equals(orgNiv.get())
-                        && o.getNavnOver().equals(navn))
-                .map(o -> String.join("-", o.getAgressoIdUnder(), o.getNavnUnder(), o.getOrgNivUnder()))
-                .map(uniqueId -> orgEnhetStateRepository.findNewestUniqueAgressoId(uniqueId).orElse(null))
-                .filter(Objects::nonNull)
+        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
+            return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
+                .filter(organiseringState -> organiseringState.idOver().equals(organiseringState.id()))
+                .map(organiseringState -> orgEnhetStateRepository.findById(organiseringState.id()))
+                .flatMap(Optional::stream)
                 .toList();
-        }
+        } else {
 
-        logger.debug("Kunne ikke finne underordnede for orgenhet {}", orgEnhetState.id());
-        return Collections.emptyList();
+            final var agressoId = orgEnhetState.agressoId();
+            final var orgNiv = orgEnhetState.agressoOrgNivaa();
+            final var navn = orgEnhetState.navn();
+
+            if (agressoId.isPresent() && orgNiv.isPresent() && !navn.isBlank()) {
+                return dvhRepository.getOrganiseringer(agressoId.get(), orgNiv.get(), navn)
+                    .stream()
+                    .filter(o ->
+                        o.getAgressoIdOver().equals(agressoId.get())
+                            && o.getOrgNivOver().equals(orgNiv.get())
+                            && o.getNavnOver().equals(navn))
+                    .map(o -> String.join("-", o.getAgressoIdUnder(), o.getNavnUnder(), o.getOrgNivUnder()))
+                    .map(uniqueId -> orgEnhetStateRepository.findNewestUniqueAgressoId(uniqueId).orElse(null))
+                    .filter(Objects::nonNull)
+                    .toList();
+            }
+
+            logger.debug("Kunne ikke finne underordnede for orgenhet {}", orgEnhetState.id());
+            return Collections.emptyList();
+        }
     }
 
     public List<OrgEnhetState> findUnderordnedeOrgEnheter(String fid) {

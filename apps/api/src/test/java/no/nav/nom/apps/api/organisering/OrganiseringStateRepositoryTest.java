@@ -26,6 +26,22 @@ public class OrganiseringStateRepositoryTest {
             .isEqualTo(expectedNumberOfActiveOrganisering);
     }
 
+    @DisplayName("findActiveById should return OrganiseringState when the organisering is active")
+    @ParameterizedTest(name = "{index} {0}")
+    @MethodSource("getOrganiseringStates")
+    void shouldGetActiveOrganiseringById(String ignoredDescription, OrganiseringState organiseringsState, int expectedNumberOfActiveOrganisering) {
+        OrganiseringStateRepository repository = new OrganiseringStateRepository();
+        repository.putEventAggregate(organiseringsState);
+
+        if (expectedNumberOfActiveOrganisering == 0) {
+            assertThat(repository.findActiveById(organiseringsState.id()))
+                .isEqualTo(Optional.empty());
+        } else {
+            assertThat(repository.findActiveById(organiseringsState.id()))
+                .isEqualTo(Optional.of(organiseringsState));
+        }
+    }
+
     private static Stream<Arguments> getOrganiseringStates() {
 
         var IS_ACTIVE = "is active";
@@ -33,47 +49,55 @@ public class OrganiseringStateRepositoryTest {
 
         OrganiseringState organisering_fom_tom_today = OrganiseringState.builder()
             .fid("organisering_fom_tom_today" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now()))
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_todayMinus2_dager = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_todayMinus2_dager" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now().minusDays(2)))
             .build();
 
         OrganiseringState organisering_fom_today_tom_todayPlus2_dager = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_todayPlus2_dager" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().plusDays(2)))
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_today = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_today" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now()))
             .build();
 
         OrganiseringState organisering_fom_today_tom_todayMinus1 = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_todayMinus1" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.of(LocalDate.now().minusDays(1)))
             .build();
 
         OrganiseringState organisering_fom_todayMinus10_tom_todayPlus10 = OrganiseringState.builder()
             .fid("organisering_fom_todayMinus10_tom_todayPlus10" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now().minusDays(10))
             .gyldigTom(Optional.of(LocalDate.now().plusDays(10)))
             .build();
 
         OrganiseringState organisering_fom_today_tom_notset = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_notset" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now())
             .build();
 
         OrganiseringState organisering_fom_today_tom_empty = OrganiseringState.builder()
             .fid("organisering_fom_today_tom_empty" + "_fid")
+            .id("the_id")
             .gyldigFom(LocalDate.now())
             .gyldigTom(Optional.empty())
             .build();

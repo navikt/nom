@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.nom.apps.api.DvhOrgEnhetMock;
 import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @DisplayName("GraphQL.HentEnhet")
 class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
@@ -38,12 +42,11 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     @Autowired
     private DvhRestConsumer dvhRestConsumer;
 
-
     @Test
     @DisplayName("Laster organisasjonsenhet inn fra dvh og leser fra graphql med id parameter")
     void scenario11() {
         final var mockedEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET")
-                .ENHETTYPE_NAVN("TYPEEE").build();
+            .ENHETTYPE_NAVN("TYPEEE").build();
         dvhOrgenhetMockUtils.addToResponse(mockedEnhet);
 
         dvhRestConsumer.loadRessurserOgOrgEnheter();
@@ -213,6 +216,53 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
     }
 
     @Test
+    @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, leser og validerer organiseringene")
+    void scenario21_new_organisering() {
+        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
+
+        final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdOver").ORGNODE_NIV("ORGNIV2").ORGENHET_NAVN("testNavnOver").build();
+        final var mockEnhetUnder = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testIdUnder").ORGNODE_NIV("ORGENHET").ORGENHET_NAVN("testNavnUnder").build();
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGNODE_NIV("ORGNIV3").ORGENHET_NAVN("testNavn").build();
+        dvhOrgenhetMockUtils.addToResponse(mockEnhetOver, mockEnhetUnder, mockEnhet);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        // Since stream infrastructure is not up, the streams pipeline has not created state so it has to be done manually
+        // dvhMockToState() sets IDs to "ID_" + nr
+        var orgStateOver = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetOver, 1, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE())));
+        var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetUnder, 2, String.valueOf(mockEnhetUnder.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetUnder.getORGENHET_TIL_PERIODE())));
+        var orgState = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 3, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+
+        orgEnhetStateRepository.putEventAggregate(orgStateOver);
+        orgEnhetStateRepository.putEventAggregate(orgStateUnder);
+        orgEnhetStateRepository.putEventAggregate(orgState);
+
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // Same as above - need to create state manually
+        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(2, orgStateUnder, orgState));
+
+
+        final var response = postForResource("organisasjonsenhet/scenario3.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+            .collect(
+                toMap(
+                    o -> o.get("retning").asText(),
+                    o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+                )
+            );
+
+        assertThat(organiserteEnheter.get("over").getId()).isEqualTo("ID_1");
+        assertThat(organiserteEnheter.get("over").getAgressoId()).isEqualTo(mockEnhetOver.getORGENHET_KODE());
+
+        assertThat(organiserteEnheter.get("under").getId()).isEqualTo("ID_2");
+        assertThat(organiserteEnheter.get("under").getAgressoId()).isEqualTo(mockEnhetUnder.getORGENHET_KODE());
+    }
+
+
+    @Test
     @DisplayName("Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
     void scenario33() {
         final var mockEnhet1 = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
@@ -239,6 +289,49 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         assertThat(organiserteEnheter).hasSize(1);
         assertEquals(mockEnhet2.getORGENHET_KODE(), organiserteEnheter.get("over").getAgressoId());
+    }
+
+    @Test
+    @DisplayName("Ny organisering: Laster inn organisasjonsenheter organisert i hierarki fra dvh, filtrerer på retning")
+    void scenario33_new_organisering() {
+        when(unleash.isEnabled(OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE)).thenReturn(true);
+
+        final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId2").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+        final var mockEnhetOver = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId3").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGNIV3").build();
+
+        dvhOrgenhetMockUtils.addToResponse(mockEnhet, mockEnhetOver);
+        dvhRestConsumer.loadRessurserOgOrgEnheter();
+
+        // Since stream infrastructure is not up, the streams pipeline has not created state.
+        // Lets do it manually, to test getmethods below.
+
+        var orgState = dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE())));
+        var orgStateOver = dvhOrgenhetMockUtils.dvhMockToState(mockEnhetOver, 2, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE())));
+        var orgStateUnder = dvhOrgenhetMockUtils.dvhMockToState(DvhOrgEnhetMock.getBuilderWithDefault().build(), 3, String.valueOf(mockEnhetOver.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhetOver.getORGENHET_TIL_PERIODE())));
+
+        orgEnhetStateRepository.putEventAggregate(orgState);
+        orgEnhetStateRepository.putEventAggregate(orgStateOver);
+
+        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
+
+        // Same as above - need to create state manually
+        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(1, orgState, orgStateOver));
+        organiseringStateRepository.putEventAggregate(orgEnhetStatesToOrganiseringState(2, orgStateUnder, orgState));
+
+
+        final var response = postForResource("organisasjonsenhet/scenario33.graphql");
+        final var enhetResponse = response.path("organisasjonsenhet").entity(JsonNode.class).get();
+
+        final var organiserteEnheter = StreamSupport.stream(enhetResponse.get("organiseringer").spliterator(), false)
+            .collect(toMap(
+                o -> o.get("retning").asText(),
+                o -> objectMapper.convertValue(o.get("organisasjonsenhet"), OrgEnhet.class)
+            ));
+
+        assertThat(organiserteEnheter).hasSize(1);
+
+        assertThat(organiserteEnheter.get("over").getId()).isEqualTo("ID_2");
+        assertThat(organiserteEnheter.get("over").getAgressoId()).isEqualTo(mockEnhetOver.getORGENHET_KODE());
     }
 
     @Test
@@ -329,7 +422,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
         orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressurs.navident(), "ID_1", true, LocalDate.of(2020, 1, 1), Optional.empty()));
 
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario41.graphql");
 
@@ -358,7 +451,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 42, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario42.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -380,7 +473,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-//        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
+        //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 
         final var response = postForResource("organisasjonsenhet/scenario34.graphql");
         final var outputEnhetJson = response.path("organisasjonsenhet").entity(JsonNode.class).get();
@@ -397,8 +490,19 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
 
     private Optional<OrgEnhetResult> getEnhetInList(String id, List<OrgEnhetResult> organisasjonsenhetResult) {
         return organisasjonsenhetResult.stream()
-                .filter(e -> e.getId().equals(id))
-                .findFirst();
+            .filter(e -> e.getId().equals(id))
+            .findFirst();
+    }
+
+    private OrganiseringState orgEnhetStatesToOrganiseringState(int id, OrgEnhetState orgEnhet, OrgEnhetState orgEnhetOver) {
+        return new OrganiseringState(
+            "FID_" + id,
+            orgEnhet.id(),
+            orgEnhet.navn(),
+            orgEnhetOver.id(),
+            orgEnhetOver.navn(),
+            LocalDate.now(),
+            Optional.empty()
+        );
     }
 }
-
