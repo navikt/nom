@@ -1,6 +1,5 @@
 import { Search } from "@navikt/ds-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { encode } from "js-base64";
 import { Controller, useForm } from "react-hook-form";
 
 import { createRessursRoute } from "~/reactRouterRoutes";
@@ -18,11 +17,9 @@ export function SearchForPerson() {
     <form
       onSubmit={handleSubmit((values) =>
         navigate({
-          // Using this mask the encoded personindent is not shown in the url
-          mask: { search: {} },
           search: (oldSearch) => ({
             ...oldSearch,
-            personident: encode(values.personident ?? ""),
+            personident: values.personident,
           }),
         }),
       )}
