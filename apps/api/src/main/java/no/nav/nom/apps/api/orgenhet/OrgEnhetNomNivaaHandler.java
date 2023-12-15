@@ -9,6 +9,8 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,8 @@ import java.util.Set;
 
 @Component
 public class OrgEnhetNomNivaaHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(OrgEnhetNomNivaaHandler.class);
 
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
@@ -84,7 +88,15 @@ public class OrgEnhetNomNivaaHandler {
 
     public void updateNomNivaaIfNewValue(OrgEnhetState orgEnhetState, Optional<NomNivaa> newNomNivaa, String levelWithinOrgenhetstype) {
 
-        if (!orgEnhetState.nomNivaa().equals(newNomNivaa)) {
+        var orgenheterOver = findAllOrgenheterOver(orgEnhetState, new ArrayList<>());
+
+        if (orgenheterOver.isEmpty()){
+            logger.info(
+                "Orgenhet {} got no overordnet orgenheter from dvh. Assuming incorrect data from dvh. Skipping new NomNivaaEndretEventV1",
+                orgEnhetState.id()
+            );
+
+        } else if (!orgEnhetState.nomNivaa().equals(newNomNivaa)) {
                 orgEnhetCommandService.endreNomNivaa(
                     orgEnhetState.fid(),
                     new EndreNomNivaa(
@@ -97,7 +109,7 @@ public class OrgEnhetNomNivaaHandler {
                                 "newValue", newNomNivaa,
                                 "levelWithinOrgenhetstype", levelWithinOrgenhetstype,
                                 "orgEnhetId", orgEnhetState.id(),
-                                "orgenheterOver", findAllOrgenheterOver(orgEnhetState, new ArrayList<>())
+                                "orgenheterOver", orgenheterOver
                                     .stream().map(o -> Map.of(
                                         "ordEnhetId", o.id(),
                                         "orgEnhetsType", o.orgEnhetsType()
