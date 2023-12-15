@@ -18,6 +18,7 @@ import type {
   Person,
   Ressurs,
   RessursLeder,
+  UpdateFysiskeBrukerstederRequest,
 } from "~/types/api-models";
 
 export const ressurserGraphqlKeys = {
@@ -281,6 +282,17 @@ export const getFysiskeBrukersteder = {
         "/nom-remedy-integrasjon/api/fysiskebrukersteder",
       )
     ).data,
+};
+
+export const updateFysiskeBrukersteder = async (
+  fid: string,
+  updateFysiskeBrukerstederRequest: UpdateFysiskeBrukerstederRequest,
+) => {
+  await axios.post<unknown, AxiosResponse<unknown>>(
+    `/nom-api/app/ressurser/${fid}/fysiskebrukersteder`,
+    updateFysiskeBrukerstederRequest,
+  );
+  await hopeForKafkaStateToUpdate();
 };
 
 async function hopeForKafkaStateToUpdate() {

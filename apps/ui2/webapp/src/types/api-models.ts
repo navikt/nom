@@ -210,6 +210,12 @@ export enum TelefonType {
   PRIVAT_TELEFON = "PRIVAT_TELEFON",
 }
 
+export interface UpdateFysiskeBrukerstederRequest {
+  /** @uniqueItems true */
+  fysiskeBrukersteder: string[];
+  primaryFysiskBrukersted: string;
+}
+
 export interface UpdateVisningsnavnRequest {
   etternavn?: string;
   fornavn?: string;

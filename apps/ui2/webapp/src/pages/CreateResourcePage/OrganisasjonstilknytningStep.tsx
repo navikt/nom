@@ -198,7 +198,7 @@ function CreateEksternRessurs() {
           defaultStartDato={gyldigFom}
         />
         <Divider />
-        <FysiskBrukerstedSelectFormPart />
+        <FysiskBrukerstedSelectFormPart description="Med fysisk brukersted menes hvor(kontor/lokasjon) medarbeideren skal arbeide." />
         <NavigationButtons />
       </form>
     </FormProvider>
