@@ -16,7 +16,7 @@ spec:
   envFrom:
     - secret: nom-sluttdato-override-json
     - secret: nom-api-unleash-api-token
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-api.intern.nav.no

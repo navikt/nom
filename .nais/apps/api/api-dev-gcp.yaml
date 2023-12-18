@@ -15,7 +15,7 @@ spec:
       value: "-Xms1024m -Xmx8192m"
   envFrom:
     - secret: nom-api-unleash-api-token
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-api.intern.dev.nav.no
