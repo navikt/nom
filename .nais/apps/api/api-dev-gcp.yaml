@@ -159,6 +159,9 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: dev-gcp
+        - application: kabal-api
+          namespace: klage
+          cluster: dev-gcp
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: dev-gcp

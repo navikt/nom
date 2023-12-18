@@ -132,6 +132,9 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: prod-gcp
+        - application: kabal-api
+          namespace: klage
+          cluster: prod-gcp
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: prod-gcp
