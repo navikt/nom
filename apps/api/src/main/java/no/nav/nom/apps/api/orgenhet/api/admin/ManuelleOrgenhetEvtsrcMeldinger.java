@@ -69,14 +69,14 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Finner ingen orgenhet med ID: " +  HtmlUtils.htmlEncode(orgenhetId));
         }
         if (orgenhet.getGyldigFom().isAfter(gylidgTom)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enhetens gyldigFom (" + orgenhet.getGyldigFom() + ") er etter ny gyldigTOM (" + gylidgTom + ") dato");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enhetens gyldigFom (" + orgenhet.getGyldigFom() + ") er etter ny gyldigTOM (" + HtmlUtils.htmlEncode(gylidgTom.toString()) + ") dato");
         }
 
         if (!"CONFIRM".equals(confirm)) {
             return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body("Orgenhet %s - %s [%s - %s] kan avsluttes på dato %s. Men vil ikke utføres da handling ikke er bekreftet".formatted(
                     HtmlUtils.htmlEncode(orgenhetId), HtmlUtils.htmlEncode(orgenhet.getNavn()),
-                    orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", gylidgTom));
+                    orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gylidgTom.toString())));
         }
 
         orgEnhetCommandService.avikleOrgEnhet(
@@ -97,7 +97,7 @@ public class ManuelleOrgenhetEvtsrcMeldinger {
         return ResponseEntity.ok()
             .body("Orgenhet %s - %s [%s - %s] avsluttes på dato %s.".formatted(
                 HtmlUtils.htmlEncode(orgenhetId), HtmlUtils.htmlEncode(orgenhet.getNavn()),
-                orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", gylidgTom));
+                orgenhet.getGyldigFom(), orgenhet.getGyldigTom().isPresent() ? orgenhet.getGyldigTom() : "", HtmlUtils.htmlEncode(gylidgTom.toString())));
     }
 
 }
