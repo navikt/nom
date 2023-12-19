@@ -8,4 +8,5 @@ public abstract class RestTestBase extends TestBase {
 
     @Autowired
     protected WebTestClient webTestClient;
+
 }

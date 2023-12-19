@@ -52,6 +52,9 @@ spec:
         - application: org-token-tool
           namespace: org
           cluster: prod-gcp
+        - application: nom-api
+          namespace: nom
+          cluster: prod-gcp
     outbound:
       external:
         - host: teamorg-unleash-api.nav.cloud.nais.io

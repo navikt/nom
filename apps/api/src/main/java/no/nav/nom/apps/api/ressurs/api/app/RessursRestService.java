@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -60,6 +61,7 @@ public class RessursRestService {
     private final OrgtilknytningRestService orgtilknytningRestService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
+    private final NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
@@ -74,7 +76,7 @@ public class RessursRestService {
         OrgtilknytningRestService orgtilknytningRestService,
         NIKClient nikClient,
         PdlClient pdlClient,
-        OrgEnhetStateRepository orgEnhetStateRepository,
+        NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient, OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
         RessursLedereResolver ressursLedereResolver,
@@ -87,6 +89,7 @@ public class RessursRestService {
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
+        this.nomRemedyIntegrasjonClient = nomRemedyIntegrasjonClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
         this.kafkaTopicReader = kafkaTopicReader;
@@ -153,6 +156,8 @@ public class RessursRestService {
             throw new IllegalArgumentException("Value for primaryFysiskBrukersted must be included in fysiske brukersteder");
         }
 
+        validateFysiskeBrukerstederExists(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+
         var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
 
         var requestContainsNewValues = !Set.copyOf(ressursState.fysiskeBrukersteder()).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
@@ -179,8 +184,20 @@ public class RessursRestService {
         } else {
             logger.info("UpdateFysiskeBrukerstederRequest contained no new values, skipping update on ressurs with fid {}", fid);
         }
+    }
 
+    private void validateFysiskeBrukerstederExists(Set<String> brukerstedNrs) {
+        var existingBrukerstedNrs = nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(brukerstedNrs.stream().toList());
 
+        if (!existingBrukerstedNrs.equals(brukerstedNrs)) {
+            var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(existingBrukerstedNrs::contains)
+                .collect(Collectors.toSet());
+
+            throw new IllegalArgumentException(String.format(
+                "Fysiske brukersteder with brukerstedNr %s does not exist",
+                nonExistingBrukerstedNrs
+            ));
+        }
     }
 
     public List<JsonNode> getRessursEvents(ReadTopicRequest readTopicRequest) {
@@ -196,16 +213,16 @@ public class RessursRestService {
     ) {
 
         return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -> {
-            final var createRessursResponse = createRessurs(request);
+            final var createdRessurs = createRessurs(request);
 
             try {
-                ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.orgEnhetId());
+                ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
             } catch (RessursOpprettetEmailException exception) {
                 //TODO: consider handling exception if email sending is important
                 logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
             }
 
-            return createRessursResponse;
+            return createdRessurs;
         });
 
     }
@@ -372,6 +389,7 @@ public class RessursRestService {
             if (request.sluttDato().isEmpty()) {
                 throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
             }
+            validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         }
     }
 }

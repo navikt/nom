@@ -10,6 +10,8 @@ app:
     email:
       url: http://localhost:${wiremock.server.port}
       max-attempts: 1
+    nom-remedy-integrasjon:
+      base-url: http://localhost:${wiremock.server.port}
 
   granted-authorities:
     clients:

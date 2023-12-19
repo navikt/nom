@@ -16,7 +16,8 @@ public record AppProperties(
         NomProxy nomProxy,
         Nik nik,
         Pdl pdl,
-        Email email
+        Email email,
+        NomRemedyIntegrasjon nomRemedyIntegrasjon
     ) {}
 
     public record NomProxy(
@@ -44,5 +45,9 @@ public record AppProperties(
         Integer maxAttempts,
         Integer backoffDurationMillis,
         Boolean isEnabled
+    ) {}
+
+    public record NomRemedyIntegrasjon(
+        String baseUrl
     ) {}
 }

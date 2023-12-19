@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +51,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private PdlClient pdlClient;
+
+    @MockBean
+    private NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
     @MockBean
     private RessursCommadService ressursCommadService;
@@ -164,6 +168,9 @@ public class RessursControllerTest extends RestTestBase {
             null,
             ""
         );
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(
@@ -364,6 +371,10 @@ public class RessursControllerTest extends RestTestBase {
             .build();
 
         when(ressursStateRepository.findByFid(fid)).thenReturn(Optional.of(existingRessurs));
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
+                new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+            )
+        )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
         webTestClient.post()
             .uri(uriBuilder ->
