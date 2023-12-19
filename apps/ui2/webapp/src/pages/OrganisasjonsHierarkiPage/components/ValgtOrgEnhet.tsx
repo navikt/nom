@@ -155,11 +155,13 @@ function MedarbeidereList({
         <ReadMore
           css={css`
             margin-top: var(--a-spacing-4);
+
             .navds-read-more__button {
               color: var(--a-text-default);
               font-size: var(--a-font-size-heading-small);
               font-weight: var(--a-font-weight-bold);
             }
+
             .navds-read-more__content {
               margin-left: 0;
               padding-left: 0;
