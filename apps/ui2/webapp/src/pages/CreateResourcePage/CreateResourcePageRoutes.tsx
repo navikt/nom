@@ -24,7 +24,7 @@ export function CreateRessursPage() {
     "Sektor",
     "Personopplysninger",
     "Organisasjonstilknytning",
-    "Oppsummering og veien videre",
+    "Oppsummering",
   ];
 
   let StepComponent;
