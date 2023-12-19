@@ -141,8 +141,10 @@ export const eksternPeriodeValidationSchema = yup.object().shape({
   gyldigTom: yup
     .string()
     .required("Obligatorisk")
-    .test("ensure-max-1-year", "Kan maks være 1 år frem i tid", (v) =>
-      isBefore(new Date(v), addYears(new Date(), 1)),
+    .test(
+      "ensure-max-1-year",
+      "Kan maks være 1 år frem i tid fra dagens dato",
+      (v) => isBefore(new Date(v), addYears(new Date(), 1)),
     ),
 });
 
