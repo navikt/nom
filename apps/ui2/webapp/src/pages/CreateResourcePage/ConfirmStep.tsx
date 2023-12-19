@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Alert, Button, Heading, Modal } from "@navikt/ds-react";
+import { Button, Heading, Modal } from "@navikt/ds-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AxiosError, AxiosResponse } from "axios";
@@ -162,10 +162,6 @@ export function ConfirmStep() {
             value={gyldigTom && format(new Date(gyldigTom), DATE_FORMATS.no)}
           />
         </div>
-        <Alert variant="info">
-          Du kan ikke endre opplysningene i NOM når ressursen er opprettet.
-          Dette må gjøres i Unit4 og Identrutina i Remedy.
-        </Alert>
         <ApiResponseError error={opprettRessursMutation.error} />
       </Modal.Body>
       <Modal.Footer>
