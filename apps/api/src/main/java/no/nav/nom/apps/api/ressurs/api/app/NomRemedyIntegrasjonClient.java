@@ -30,7 +30,7 @@ public class NomRemedyIntegrasjonClient {
         return webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/api/fysiskebrukersteder")
-                .queryParam("fysiskeBrukerstedNrs", fysiskeBrukerstedNrs)
+                .queryParam("brukerstedNrs", fysiskeBrukerstedNrs)
                 .build()
             )
             .retrieve()

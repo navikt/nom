@@ -189,7 +189,7 @@ public class RessursRestService {
     private void validateFysiskeBrukerstederExists(Set<String> brukerstedNrs) {
         var existingBrukerstedNrs = nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(brukerstedNrs.stream().toList());
 
-        if (!existingBrukerstedNrs.equals(brukerstedNrs)) {
+        if (!existingBrukerstedNrs.containsAll(brukerstedNrs)) {
             var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(existingBrukerstedNrs::contains)
                 .collect(Collectors.toSet());
 
