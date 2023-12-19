@@ -1,55 +1,47 @@
 package no.nav.nom.apps.api.rest.admin;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
 import no.nav.nom.apps.api.common.AppProperties;
-import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.dto.DvhRessursStilling;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
-import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingStrukturerer;
 import no.nav.nom.apps.api.orgtilknytning.dvh.StillingPeriode;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
-import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrganiseringState;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import no.nav.nom.libs.utils.common.platform.LeaderElection;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Slf4j
-@Tag(name = "Admin for datagrunnlag og sammenstilling")
-@RestController
-@RequestMapping("/api/admin/RessursSammenstillingAvInformasjon")
+@Component
 public class RessursSammenstillingAvInformasjon {
     public static final String DVH_RESSURSER_URL = "/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2";
+    public static final String RESSURS_SAMMENSTILLING = "RessursSammenstillingAvInformasjon";
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
     private final OrgenhetService orgenhetService;
@@ -60,6 +52,8 @@ public class RessursSammenstillingAvInformasjon {
     private final String ressursStillingerResponseNode;
     private final RessursStillingStrukturerer ressursStillingStrukturerer;
     private final NomMastered nomMastered;
+    private final AsyncAdminRunStatus asyncAdminRunStatus;
+    private List<RessursSammenstilling> runResult;
 
     private Map<String, NomOrgenhet> mapAvNomOrgenhetPerOrgenhetId = new HashMap<>();
 
@@ -67,7 +61,7 @@ public class RessursSammenstillingAvInformasjon {
             RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService, OrgenhetService orgenhetService,
             RemedyEnhetIdResolver remedyEnhetIdResolver, OrganiseringStateRepository organiseringStateRepository, NomProxyClient nomProxyClient, AppProperties appProperties,
             @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode, RessursStillingStrukturerer ressursStillingStrukturerer,
-            NomMastered nomMastered
+            NomMastered nomMastered, AsyncAdminRunStatus asyncAdminRunStatus, LeaderElection leaderElection
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgtilknytningService = orgtilknytningService;
@@ -79,24 +73,11 @@ public class RessursSammenstillingAvInformasjon {
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.nomMastered = nomMastered;
+        this.asyncAdminRunStatus = asyncAdminRunStatus;
     }
 
-    @Operation(
-        description = "Sammenstiller informasjon fra NOM og DVH (U4/Remedy)",
-        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "200", description = "Success")
-        }
-    )
-    @GetMapping
-    public List<RessursSammenstilling> lagSammenstilling(
-        @Parameter(description = "Begrense informasjonen til Sektor (NAV_STATLIG, NAV_KOMMUNAL, EKSTERN). For alle, la stå tom") @RequestParam(required = false) String sektor,
-        @Parameter(description = "Begrense til angitte navidenter - kommaseparert. Las stå tom for alle") @RequestParam(required = false) String navidenter,
-        @Parameter(description = "Kun aktive? default false") @RequestParam(defaultValue = "true") boolean bareAktive,
-        @NonNull JwtAuthenticationToken token
-    ) {
+    @Async
+    public void runSammenstilling(String sektor, String navidenter, boolean bareAktive) {
         var sammenstilling = getNomRessursInfo(sektor, navidenter, bareAktive);
 
         var navidenterINom = sammenstilling.stream().map(RessursSammenstilling::getNavident).toList();
@@ -113,8 +94,11 @@ public class RessursSammenstillingAvInformasjon {
 
         sammenstilling.forEach(r -> r.setErMastretINom(nomMastered.isMastered(r.getNavident())));
 
-        return sammenstilling;
+        runResult = sammenstilling;
+        asyncAdminRunStatus.runEnded(RESSURS_SAMMENSTILLING);
     }
+
+    public List<RessursSammenstilling> runResult() { return runResult; }
 
     private List<RessursSammenstilling> getNomRessursInfo(String sektor, String navidenter, boolean bareAktive) {
         var ressursStream = bareAktive ?
@@ -255,7 +239,7 @@ public class RessursSammenstillingAvInformasjon {
 
     @Data
     @AllArgsConstructor
-    static class RessursSammenstilling {
+    public static class RessursSammenstilling {
         String navident;
         Visningsnavn visningsnavn;
         Sektor nomSektor;
