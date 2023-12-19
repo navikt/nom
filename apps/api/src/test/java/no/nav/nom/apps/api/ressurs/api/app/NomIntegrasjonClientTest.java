@@ -40,7 +40,7 @@ public class NomIntegrasjonClientTest extends TestBase {
         verify(
             getRequestedFor(
                 urlEqualTo(
-                    "/fysiskebrukersteder?fysiskeBrukerstedNrs=1234&fysiskeBrukerstedNrs=4321"
+                    "/api/fysiskebrukersteder?fysiskeBrukerstedNrs=1234&fysiskeBrukerstedNrs=4321"
                 )
             )
         );
