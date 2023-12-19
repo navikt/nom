@@ -201,10 +201,15 @@ public class RessursSammenstillingAvInformasjon {
 
 
     private NomOrgenhet getOrgenhetPaaRessurs(DvhRessursStilling dvhRessursStilling) {
-        var orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
-            dvhRessursStilling.getRessursAgressoId().orElse(null),
-            dvhRessursStilling.getRessursOrgenhetNiv().orElse(null),
-            dvhRessursStilling.getStillingOrgenhetNavn());
+        // Uten navn - slå opp på kun AgressoId og Nivå
+        var orgenhet = dvhRessursStilling.getStillingOrgenhetNavn() == null
+            ? orgenhetService.getEnhetByAgressoIdAndOrgniv(
+                dvhRessursStilling.getRessursAgressoId().orElse(null),
+                dvhRessursStilling.getRessursOrgenhetNiv().orElse(null))
+            : orgenhetService.getEnhetByAgressoIdNivaAndName(
+                dvhRessursStilling.getRessursAgressoId().orElse(null),
+                dvhRessursStilling.getRessursOrgenhetNiv().orElse(null),
+                dvhRessursStilling.getStillingOrgenhetNavn());
         return orgenhet.map(this::getNomOrgenhet).orElse(null);
     }
 
