@@ -58,7 +58,13 @@ export function OrgEnhetView({
           </Heading>
           <BodyShort size="small">
             Leder:{" "}
-            {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
+            <span
+              css={css`
+                font-weight: var(--a-font-weight-bold);
+              `}
+            >
+              {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
+            </span>
           </BodyShort>
         </div>
       </UnitContainerLink>
@@ -101,9 +107,24 @@ export function ResourceLink({ navident }: { navident: string }) {
           <Heading level="2" size="small">
             {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
-          <span>
-            {ressurs.sektor.includes(Sektor.EKSTERN) ? "(Ekstern)" : ""}
-          </span>
+          <BodyShort size="small">
+            {(() => {
+              switch (ressurs.sektor) {
+                case Sektor.EKSTERN: {
+                  return "Ekstern";
+                }
+                case Sektor.NAV_STATLIG: {
+                  return "Statlig";
+                }
+                case Sektor.NAV_KOMMUNAL: {
+                  return "Kommunal";
+                }
+                default: {
+                  return "";
+                }
+              }
+            })()}
+          </BodyShort>
         </div>
       </UnitContainerLink>
     </ReactRouterLink>
