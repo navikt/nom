@@ -119,7 +119,7 @@ export function ConfirmStep() {
       >
         <span>
           Ved å bekrefte disse detaljene oppretter du en NAV-ident, og personen
-          blir registrert som medarbeider i NOM.
+          blir registrert som medarbeider i NAV.
         </span>
         <div
           css={css`
