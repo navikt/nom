@@ -9,7 +9,7 @@ import no.nav.nom.contract.nom.state.RessursState;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record Ressurs (
+public record Ressurs(
     @JsonUnwrapped RessursState state,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List<Telefon> telefoner,
     String epost

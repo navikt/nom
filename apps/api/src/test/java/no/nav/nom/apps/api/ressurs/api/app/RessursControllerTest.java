@@ -360,6 +360,40 @@ public class RessursControllerTest extends RestTestBase {
         verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
     }
 
+
+    @ParameterizedTest(name = "Obfuskerer personident for respons i GET {0}")
+    @MethodSource("skalObfuskerePersonidentInput")
+    void skalObfuskerePersonident(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident).build();
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"));
+
+    }
+
+    static Stream<Arguments> skalObfuskerePersonidentInput(){
+        return Stream.of(
+            Arguments.of("/app/ressurser/byNavident/whatever"),
+            Arguments.of("/app/ressurser/byFid/whatever")
+        );
+    }
+
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
 

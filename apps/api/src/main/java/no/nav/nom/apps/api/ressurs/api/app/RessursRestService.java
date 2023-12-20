@@ -100,7 +100,7 @@ public class RessursRestService {
 
     public Ressurs findRessursByNavident(String navident) {
         var ressursState = findRessursStateByNavident(navident);
-        return enrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState);
     }
 
     private RessursState findRessursStateByNavident(String navident) {
@@ -113,15 +113,18 @@ public class RessursRestService {
 
     public Ressurs findRessursByFid(String fid) {
         var ressursState = findRessursStateByFid(fid);
-        return enrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState);
     }
 
-    private Ressurs enrichRessursStateWithDvhData(RessursState ressursState) {
+    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState) {
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
 
         return new Ressurs(
-            ressursState,
+            ressursState.toBuilder()
+                .personident(
+                    ressursState.personident().replaceFirst(".{5}$", "*****")
+                ).build(),
             telefoner,
             epost.orElse(null)
         );
