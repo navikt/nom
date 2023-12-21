@@ -11,8 +11,6 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
-import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
+import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStatesToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -494,15 +493,4 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
             .findFirst();
     }
 
-    private OrganiseringState orgEnhetStatesToOrganiseringState(int id, OrgEnhetState orgEnhet, OrgEnhetState orgEnhetOver) {
-        return new OrganiseringState(
-            "FID_" + id,
-            orgEnhet.id(),
-            orgEnhet.navn(),
-            orgEnhetOver.id(),
-            orgEnhetOver.navn(),
-            LocalDate.now(),
-            Optional.empty()
-        );
-    }
 }
