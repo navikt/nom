@@ -63,7 +63,7 @@ public class DvhRessursRestService {
 
     public List<DvhOrgenhetDTO> orgenheter() {
         boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);
-                logger.debug("Henter orgenheter. Bruke ny organisering: {}", useNewOrganisering);
+        logger.debug("Henter orgenheter. Bruke ny organisering: {}", useNewOrganisering);
 
         return orgenhetService.getAllEnheterMedOrganisering().stream()
             .map(oe -> toDTO(oe, useNewOrganisering))
