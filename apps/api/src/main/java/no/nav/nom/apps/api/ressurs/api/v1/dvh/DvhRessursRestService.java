@@ -1,22 +1,32 @@
 package no.nav.nom.apps.api.ressurs.api.v1.dvh;
 
+import io.getunleash.Unleash;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
 @Service
 @Slf4j
 public class DvhRessursRestService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final NomMastered nomMastered;
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
@@ -24,12 +34,15 @@ public class DvhRessursRestService {
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final DvhRepository dvhRepository;
 
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
+
     public DvhRessursRestService(NomMastered nomMastered,
                                  RessursStateRepository ressursStateRepository,
                                  OrgtilknytningService orgtilknytningService,
                                  OrgenhetService orgenhetService,
                                  RemedyEnhetIdResolver remedyEnhetIdResolver,
-                                 DvhRepository dvhRepository
+                                 DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.nomMastered = nomMastered;
         this.ressursStateRepository = ressursStateRepository;
@@ -37,6 +50,8 @@ public class DvhRessursRestService {
         this.orgenhetService = orgenhetService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
+        this.organiseringStateRepository = organiseringStateRepository;
+        this.unleash = unleash;
     }
 
     public List<DvhRessursDTO> nomMasteredRessurser() {
@@ -47,8 +62,11 @@ public class DvhRessursRestService {
     }
 
     public List<DvhOrgenhetDTO> orgenheter() {
+        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);
+                logger.debug("Henter orgenheter. Bruke ny organisering: {}", useNewOrganisering);
+
         return orgenhetService.getAllEnheterMedOrganisering().stream()
-            .map(this::toDTO)
+            .map(oe -> toDTO(oe, useNewOrganisering))
             .toList();
     }
 
@@ -79,15 +97,17 @@ public class DvhRessursRestService {
         );
     }
 
-    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet) {
+    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet, boolean useNewOrganisering) {
         var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);
-        var overodnet = getOverordnetEnhet(orgenhet);
+
+        String overordnet = useNewOrganisering ? getOverordnetEnhetUsingNewOrganisering(orgenhet) : getOverordnetEnhet(orgenhet);
+
         return new DvhOrgenhetDTO(
             orgenhet.getId(),
             orgenhet.getNavn(),
             orgenhet.getOrgEnhetsType().isPresent() ? orgenhet.getOrgEnhetsType().get().name() : null,
             orgenhet.getNomNivaa().isPresent() ? orgenhet.getNomNivaa().get().name() : null,
-            overodnet,
+            overordnet,
             orgenhet.getGyldigFom(),
             orgenhet.getGyldigTom().orElse(null),
             orgenhet.getAgressoId(),
@@ -112,5 +132,11 @@ public class DvhRessursRestService {
                 .orElse(null);
         }
         return null;
+    }
+
+    private String getOverordnetEnhetUsingNewOrganisering(IOrgenhet orgenhet) {
+        return organiseringStateRepository.findActiveById(orgenhet.getId())
+            .map(OrganiseringState::idOver)
+            .orElse(null);
     }
 }
