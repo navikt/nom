@@ -8,6 +8,7 @@ import React, { useEffect, useRef } from "react";
 
 import { getOrgEnhet, getRessurs } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
+import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import { Sektor } from "~/types/api-models";
@@ -111,13 +112,13 @@ export function ResourceLink({ navident }: { navident: string }) {
             {(() => {
               switch (ressurs.sektor) {
                 case Sektor.EKSTERN: {
-                  return "Ekstern";
+                  return SektorNameMapping[Sektor.EKSTERN];
                 }
                 case Sektor.NAV_STATLIG: {
-                  return "Statlig";
+                  return SektorNameMapping[Sektor.NAV_STATLIG];
                 }
                 case Sektor.NAV_KOMMUNAL: {
-                  return "Kommunal";
+                  return SektorNameMapping[Sektor.NAV_KOMMUNAL];
                 }
                 default: {
                   return "";
