@@ -37,14 +37,14 @@ public class OrganiseringResolver {
         if (orgEnhet.endedOnStartDate()) return Collections.emptyList();
 
         if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            logger.trace("Henter organiseringer for {} retning '{}' med ny implementasjon", orgEnhet.getId(), retning);
+            logger.debug("Henter organiseringer for {} retning '{}' med ny implementasjon", orgEnhet.getId(), retning);
             return organiseringStateRepository.getOrganiseringerContainingId(orgEnhet.getId()).stream()
                 .map(organiseringState -> convert(organiseringState, orgEnhet))
                 .filter(organisering -> retning == null || organisering.getRetning() == retning)
                 .toList();
 
         } else {
-            logger.trace("Henter organiseringer for {} retning '{}' med gammel implementasjon", orgEnhet.getId(), retning);
+            logger.debug("Henter organiseringer for {} retning '{}' med gammel implementasjon", orgEnhet.getId(), retning);
             return dvhRepository.getOrganiseringer(orgEnhet.getAgressoId(), orgEnhet.getOrgNiv(), orgEnhet.getNavn())
                 .stream()
                 .map(organisering -> convert(organisering, orgEnhet))

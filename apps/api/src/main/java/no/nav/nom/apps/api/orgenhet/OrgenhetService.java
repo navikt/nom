@@ -170,7 +170,7 @@ public class OrgenhetService {
 
     public List<String> findAllUnderliggendeOrgenheter(String id) {
         if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            logger.trace("Finner underliggende org.enheter for {} med ny implementasjon", id);
+            logger.debug("Finner underliggende org.enheter for {} med ny implementasjon", id);
 
             Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
 
@@ -191,7 +191,7 @@ public class OrgenhetService {
             return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(OrgEnhetState::id).toList();
 
         } else {
-            logger.trace("Finner underliggende org.enheter for {} med gammel implementasjon", id);
+            logger.debug("Finner underliggende org.enheter for {} med gammel implementasjon", id);
 
             Set<String> underliggendeAgressoIds = orgEnhetStateRepository.findById(id).map(parent -> {
                 if (parent.agressoId().isEmpty() | parent.agressoOrgNivaa().isEmpty()) {

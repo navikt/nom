@@ -65,12 +65,12 @@ public class OrgEnhetResolver {
 
     public OrgEnhet orgEnhet(Organisering organisering) {
         if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
-            logger.trace("Ny implementasjon henter orgEnhet for {}", organisering);
+            logger.debug("Ny implementasjon henter orgEnhet for {}", organisering);
             return orgenhetService.getById(organisering.getId())
                 .map(MappingUtils::toOrgEnhet)
                 .orElseThrow();
         } else {
-            logger.trace("Gammel implementasjon henter orgEnhet for {}", organisering);
+            logger.debug("Gammel implementasjon henter orgEnhet for {}", organisering);
             return orgenhetService.getEnhetByAgressoIdNivaAndName(organisering.getOrgEnhetNr(), organisering.getOrgNiv(), organisering.getOrgEnhetNavn())
                 .map(MappingUtils::toOrgEnhet)
                 .orElseThrow();
