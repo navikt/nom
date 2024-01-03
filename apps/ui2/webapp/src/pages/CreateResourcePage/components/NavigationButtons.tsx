@@ -41,9 +41,9 @@ export function NavigationButtons() {
         <Button
           onClick={() =>
             navigate({
-              to: createRessursRoute.to,
+              to: createRessursRoute.id,
               params: { step: String(Number(step) - 1) },
-              search: (o) => o,
+              search: (oldSearch) => oldSearch,
             })
           }
           size="small"

@@ -642,7 +642,7 @@ function sortRessurserAscending(ressurser: RessursFields[], orderBy: string) {
 
 export type RessursFilterValues = {
   orgEnhet?: string;
-  sektor?: string;
+  sektor?: Sektor;
   includeUnderliggendeOrgEnheter?: boolean;
   includeInactive?: boolean;
   startDato?: string;
