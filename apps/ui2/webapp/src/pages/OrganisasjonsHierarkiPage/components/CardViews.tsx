@@ -59,13 +59,9 @@ export function OrgEnhetView({
           </Heading>
           <BodyShort size="small">
             Leder:{" "}
-            <span
-              css={css`
-                font-weight: var(--a-font-weight-bold);
-              `}
-            >
+            <b>
               {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
-            </span>
+            </b>
           </BodyShort>
         </div>
       </UnitContainerLink>
