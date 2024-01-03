@@ -32,8 +32,7 @@ public class OrganiseringStateRepository {
         var organisering = organiseringById.get(id);
 
         if (organisering != null) {
-            return isGyldigTomNull(organisering) || (!isCreatedAndDeletedToday(organisering) && isGyldigTomTodayOrLater(organisering))
-                ? Optional.of(organisering) : Optional.empty();
+            return isActive(organisering) ? Optional.of(organisering) : Optional.empty();
         } else {
             return Optional.empty();
         }
@@ -67,7 +66,7 @@ public class OrganiseringStateRepository {
     public Map<String, OrganiseringState> getActiveOrganisering() {
         // either terminating date is not present of it is today or later
         return organiseringByFid.entrySet().stream()
-            .filter(e -> isGyldigTomNull(e.getValue()) || (!isCreatedAndDeletedToday(e.getValue()) && (isGyldigTomTodayOrLater(e.getValue()))))
+            .filter(e -> isActive(e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -79,6 +78,10 @@ public class OrganiseringStateRepository {
         return getActiveOrganisering().values().stream()
             .filter(o -> o.containsOrgEnhet(id))
             .toList();
+    }
+
+    private boolean isActive(OrganiseringState organiseringState) {
+        return isGyldigTomNull(organiseringState) || (!isCreatedAndDeletedToday(organiseringState) && isGyldigTomTodayOrLater(organiseringState));
     }
 
     private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {
