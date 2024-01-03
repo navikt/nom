@@ -32,6 +32,15 @@ public class TestData {
         );
     }
 
+    public static RessursOpprettetEventV1 ressursOpprettetEventV1(Origination origination) {
+        return new RessursOpprettetEventV1(
+            UUID.randomUUID().toString(),
+            ressursOpprettetEventData(),
+            inputMetadata(origination),
+            ressursOpprettetAdditionalData()
+        );
+    }
+
     public static RessursOpprettetEventV1.RessursOpprettetEventData ressursOpprettetEventData() {
         return new RessursOpprettetEventV1.RessursOpprettetEventData(
             "11111111111",
@@ -104,6 +113,17 @@ public class TestData {
         );
     }
 
+    public static OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1(
+        Origination origination
+    ) {
+        return new OrgtilknytningDagligOppfolgingEndretEventV1(
+            UUID.randomUUID().toString(),
+            orgtilknytningDagligOppfolgingEndretEventData(),
+            inputMetadata(origination),
+            null
+        );
+    }
+
     public static OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData orgtilknytningDagligOppfolgingEndretEventData() {
         return OrgtilknytningDagligOppfolgingEndretEventV1.OrgtilknytningDagligOppfolgingEndretEventData.builder()
             .navident("Z654321")
@@ -137,7 +157,11 @@ public class TestData {
     }
 
     public static InputMetadata inputMetadata(){
-        return new InputMetadata("", "", "", origination());
+        return inputMetadata(origination());
+    }
+
+    public static InputMetadata inputMetadata(Origination origination){
+        return new InputMetadata("", "", "", origination);
     }
 
     public static Origination origination() {
