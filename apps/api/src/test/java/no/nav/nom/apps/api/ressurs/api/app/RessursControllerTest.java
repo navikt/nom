@@ -362,7 +362,7 @@ public class RessursControllerTest extends RestTestBase {
 
 
     @ParameterizedTest(name = "Obfuskerer personident for respons i GET {0}")
-    @MethodSource("skalObfuskerePersonidentInput")
+    @MethodSource("getRessursPathsTestInput")
     void skalObfuskerePersonident(String endpointPath) {
 
         var personident = "01010154321";
@@ -387,12 +387,44 @@ public class RessursControllerTest extends RestTestBase {
 
     }
 
-    static Stream<Arguments> skalObfuskerePersonidentInput(){
+
+    @ParameterizedTest(name = "Overstyrer obfuskering av personident for respons i GET {0}")
+    @MethodSource("getRessursPathsTestInput")
+    void skalOverstyreObfuskeringAvPersonident(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident).build();
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(endpointPath)
+                .queryParam("obfuscatePersonident", false)
+                .build()
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident);
+
+    }
+
+    static Stream<Arguments> getRessursPathsTestInput(){
         return Stream.of(
             Arguments.of("/app/ressurser/byNavident/whatever"),
             Arguments.of("/app/ressurser/byFid/whatever")
         );
     }
+
 
     @Test
     void skal_oppdatere_fysiske_brukersteder(){

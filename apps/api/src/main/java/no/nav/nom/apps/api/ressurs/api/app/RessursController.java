@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -123,8 +124,10 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<Ressurs> getRessursByNavident(@PathVariable String navident){
-        var ressurs = ressursRestService.findRessursByNavident(navident);
+    public ResponseEntity<Ressurs> getRessursByNavident(
+        @PathVariable String navident, @RequestParam(defaultValue = "true") Boolean obfuscatePersonident
+    ){
+        var ressurs = ressursRestService.findRessursByNavident(navident, obfuscatePersonident);
 
         return ResponseEntity.ok(ressurs);
     }
@@ -137,8 +140,9 @@ public class RessursController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Ressurs"),
     })
-    public ResponseEntity<Ressurs> getRessursByFid(@PathVariable String fid){
-        var ressurs = ressursRestService.findRessursByFid(fid);
+    public ResponseEntity<Ressurs> getRessursByFid(
+        @PathVariable String fid, @RequestParam(defaultValue = "true") Boolean obfuscatePersonident) {
+        var ressurs = ressursRestService.findRessursByFid(fid, obfuscatePersonident);
 
         return ResponseEntity.ok(ressurs);
     }

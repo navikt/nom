@@ -98,9 +98,9 @@ public class RessursRestService {
         this.nomMastered = nomMastered;
     }
 
-    public Ressurs findRessursByNavident(String navident) {
+    public Ressurs findRessursByNavident(String navident, Boolean obfuscatePersonident) {
         var ressursState = findRessursStateByNavident(navident);
-        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
     }
 
     private RessursState findRessursStateByNavident(String navident) {
@@ -111,20 +111,21 @@ public class RessursRestService {
         return ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
     }
 
-    public Ressurs findRessursByFid(String fid) {
+    public Ressurs findRessursByFid(String fid, Boolean obfuscatePersonident) {
         var ressursState = findRessursStateByFid(fid);
-        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
     }
 
-    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState) {
+    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState, Boolean obfuscatePersonident) {
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
+        var personident = obfuscatePersonident
+            ? ressursState.personident().replaceFirst(".{5}$", "*****")
+            : ressursState.personident();
 
         return new Ressurs(
             ressursState.toBuilder()
-                .personident(
-                    ressursState.personident().replaceFirst(".{5}$", "*****")
-                ).build(),
+                .personident(personident).build(),
             telefoner,
             epost.orElse(null)
         );
