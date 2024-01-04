@@ -64,7 +64,6 @@
         <httpclient.version>4.5.14</httpclient.version> <!-- https://github.com/navikt/nom/security/dependabot/94 -->
         <bcpkix-jdk18on.version>1.77</bcpkix-jdk18on.version> <!-- https://github.com/navikt/nom/security/dependabot/95 -->
         <reactor-netty-http.version>1.1.14</reactor-netty-http.version>
-        <cyclonedx-maven-plugin.version>2.7.10</cyclonedx-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -317,15 +316,6 @@
     </dependencyManagement>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.cyclonedx</groupId>
-                    <artifactId>cyclonedx-maven-plugin</artifactId>
-                    <version>${cyclonedx-maven-plugin.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
