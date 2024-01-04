@@ -22,7 +22,7 @@ public class DvhStartupLoadMonitor {
     public void awaitInitialLoadComplete() {
         while ( !hasCompleted() ) { // Wait on initial DVH load to complete
             try {
-                wait(1000L);
+                Thread.sleep(1000L);
             } catch (Exception ignored) {
                 log.error("Waiting for initial DVH last feilet", ignored);
             }

@@ -50,17 +50,19 @@ public class RessursSammenstillingAvInformasjon {
     private final NomProxyClient nomProxyClient;
     private final AppProperties appProperties;
     private final String ressursStillingerResponseNode;
+    public static String kommunaleRessurserResponseNode;
     private final RessursStillingStrukturerer ressursStillingStrukturerer;
     private final NomMastered nomMastered;
     private final AsyncAdminRunStatus asyncAdminRunStatus;
     private List<RessursSammenstilling> runResult;
-
     private Map<String, NomOrgenhet> mapAvNomOrgenhetPerOrgenhetId = new HashMap<>();
 
     public RessursSammenstillingAvInformasjon(
             RessursStateRepository ressursStateRepository, OrgtilknytningService orgtilknytningService, OrgenhetService orgenhetService,
             RemedyEnhetIdResolver remedyEnhetIdResolver, OrganiseringStateRepository organiseringStateRepository, NomProxyClient nomProxyClient, AppProperties appProperties,
-            @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode, RessursStillingStrukturerer ressursStillingStrukturerer,
+            @Value("${app.dvh-load.nom-ressurser-stillinger-respons-navn}") String ressursStillingerResponseNode,
+            @Value("${app.dvh-load.nom-kommunale-ressurser-respons-navn}") String kommunaleRessurserResponseNode,
+            RessursStillingStrukturerer ressursStillingStrukturerer,
             NomMastered nomMastered, AsyncAdminRunStatus asyncAdminRunStatus, LeaderElection leaderElection
     ) {
         this.ressursStateRepository = ressursStateRepository;
@@ -71,6 +73,7 @@ public class RessursSammenstillingAvInformasjon {
         this.nomProxyClient = nomProxyClient;
         this.appProperties = appProperties;
         this.ressursStillingerResponseNode = ressursStillingerResponseNode;
+        this.kommunaleRessurserResponseNode = kommunaleRessurserResponseNode;
         this.ressursStillingStrukturerer = ressursStillingStrukturerer;
         this.nomMastered = nomMastered;
         this.asyncAdminRunStatus = asyncAdminRunStatus;
@@ -83,7 +86,7 @@ public class RessursSammenstillingAvInformasjon {
         var navidenterINom = sammenstilling.stream().map(RessursSammenstilling::getNavident).toList();
         log.info("Laget sammenstilling av ressursinformasjon fra NOM for {} ressurser", sammenstilling.size());
 
-        var dvhRessurserData = getDvhRessursInfo(navidenterINom);
+        var dvhRessurserData = getDvhRessursInfo(navidenterINom, sektor.equals(Sektor.NAV_KOMMUNAL.name()));
         sammenstilling.forEach(r -> r.setDvhRessursData(dvhRessurserData.get(r.getNavident())));
 
         var dvhRessurserStillinger = getDvhRessursStillingInfo(navidenterINom);
@@ -121,12 +124,12 @@ public class RessursSammenstillingAvInformasjon {
         return sammenstilling;
     }
 
-    private Map<String, DvhRessursData> getDvhRessursInfo(List<String> navidenterINom) {
-        var dvhRessurserData = getDvhRessurser().stream()
+    private Map<String, DvhRessursData> getDvhRessursInfo(List<String> navidenterINom, boolean isKommunale) {
+        var dvhRessurserData = getDvhRessurser(isKommunale).stream()
             .filter(dvhRessurs -> navidenterINom.contains(dvhRessurs.getNavIdent()))
-            .collect(Collectors.toMap(DvhRessurs::getNavIdent, DvhRessursData::new));
+            .collect(Collectors.toMap(DvhRessurs::getNavIdent, r -> new DvhRessursData(r, getOrgenhetPaaRessurs(r))));
 
-        log.info("Lastet {} ressurser fra DVH [{}]", dvhRessurserData.size(), DVH_RESSURSER_URL);
+        log.info("Lastet {} ressurser fra DVH [{}]", dvhRessurserData.size(), isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : DVH_RESSURSER_URL);
         return dvhRessurserData;
     }
 
@@ -182,10 +185,10 @@ public class RessursSammenstillingAvInformasjon {
         return dvhRessursStillinger;
     }
 
-    private List<DvhRessurs> getDvhRessurser() {
-        var jsonRessurser = dvhExchange(DVH_RESSURSER_URL);
-        var dvhRessurser = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), true)
-            .map(DvhRessurs::new)
+    private List<DvhRessurs> getDvhRessurser(boolean isKommunale) {
+        var jsonRessurser = dvhExchange(isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : DVH_RESSURSER_URL);
+        var dvhRessurser = StreamSupport.stream(jsonRessurser.get(isKommunale ? kommunaleRessurserResponseNode : "NOM_ANSATTE_BUCKETS_v2Response").spliterator(), true)
+            .map( r -> new DvhRessurs(r, isKommunale))
             .distinct()
             .toList();
         return dvhRessurser;
@@ -199,6 +202,14 @@ public class RessursSammenstillingAvInformasjon {
             .block();
     }
 
+    private NomOrgenhet getOrgenhetPaaRessurs(DvhRessurs dvhRessurs) {
+        var orgenhet = orgenhetService.getEnhetByAgressoIdNivaAndName(
+            dvhRessurs.getOrgenhetPaaRessurs(),
+            dvhRessurs.getOrgenhetPaaRessursNiva(),
+            dvhRessurs.getOrgenhetPaaRessursBeskrivelse ()
+        );
+        return orgenhet.map(this::getNomOrgenhet).orElse(null);
+    }
 
     private NomOrgenhet getOrgenhetPaaRessurs(DvhRessursStilling dvhRessursStilling) {
         // Uten navn - slå opp på kun AgressoId og Nivå
@@ -278,10 +289,11 @@ public class RessursSammenstillingAvInformasjon {
         LocalDate remedySluttDato,
         LocalDate u4StartDato,
         LocalDate u4Sluttdato,
+        NomOrgenhet nomOrgenhetPaaRessurs,
         boolean remedyPermisjon,
         String remedyIdentType
     ) {
-        DvhRessursData(DvhRessurs dvhRessurs) {
+        DvhRessursData(DvhRessurs dvhRessurs, NomOrgenhet nomOrgenhetPaaRessurs) {
             this(
                 dvhRessurs.getRemedyAktiv(),
                 dvhRessurs.getRemedyAnsattType(),
@@ -290,6 +302,7 @@ public class RessursSammenstillingAvInformasjon {
                 dvhRessurs.getRemedySluttdato(),
                 dvhRessurs.getAgressoStartDato(),
                 dvhRessurs.getAgressoSluttdato(),
+                nomOrgenhetPaaRessurs,
                 dvhRessurs.isRemedyPermisjon(),
                 dvhRessurs.getIdentType()
             );

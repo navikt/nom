@@ -25,7 +25,8 @@ public record AppProperties(
             String enhetPath,
             String orgtilknytningPath,
             String ressursStillingerPath,
-            String eksterneRessurserPath
+            String eksterneRessurserPath,
+            String kommunaleRessurserPath
     ) {}
 
     public record Pdl(

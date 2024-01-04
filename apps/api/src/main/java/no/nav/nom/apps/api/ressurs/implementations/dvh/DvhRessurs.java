@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.IdentType;
+import no.nav.nom.contract.nom.Sektor;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -20,10 +20,7 @@ import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyR
 @Builder
 @RequiredArgsConstructor
 public class DvhRessurs {
-
     private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);
-
-
     String navIdent;
     String personIdent;
     String fornavn;
@@ -39,24 +36,58 @@ public class DvhRessurs {
     boolean remedyPermisjon;
     String identType;
     String epost;
+    String orgenhetPaaRessurs;
+    String orgenhetPaaRessursBeskrivelse;
+    String orgenhetPaaRessursNiva;
 
     public DvhRessurs(JsonNode node) {
-        navIdent = node.get("NAV_IDENT").asText();
-        personIdent = node.get("FNR").asText();
-        fornavn = node.get("FORNAVN").asText();
-        etternavn = node.get("ETTERNAVN").asText();
-        remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
-        remedyAnsattType = node.get("ANSATT_TYPE").asText();
-        this.rawData = node;
-        ansattRessursKode = node.get("ANSATT_RESSURS_KODE").asText();
-        remedyStartDato = parseNullableDateFromJson(node, "REMEDY_START_DATO");
-        remedySluttdato = parseNullableDateFromJson(node, "REMEDY_SLUTT_DATO");
-        agressoStartDato = parseNullableDateFromJson(node, "AGRESSO_START_DATO");
-        agressoSluttdato = parseNullableDateFromJson(node, "AGRESSO_SLUTT_DATO");
-        remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
-        identType = node.get("IDENT_TYPE").asText();
-        epost = node.get("EPOST").asText();
+        this(node, false);
+    }
 
+    public DvhRessurs(JsonNode node, boolean fromNomKommunaleView) {
+        if (!fromNomKommunaleView) { // Good old Json fra NOM_ANSATTE_BUCKETS
+            navIdent = node.get("NAV_IDENT").asText();
+            personIdent = node.get("FNR").asText();
+            fornavn = node.get("FORNAVN").asText();
+            etternavn = node.get("ETTERNAVN").asText();
+            remedyAktiv = node.hasNonNull("REMEDY_AKTIV") && node.get("REMEDY_AKTIV").asText().equals("JA");
+            remedyAnsattType = node.get("ANSATT_TYPE").asText();
+            this.rawData = node;
+            ansattRessursKode = node.get("ANSATT_RESSURS_KODE").asText();
+            remedyStartDato = parseNullableDateFromJson(node, "REMEDY_START_DATO");
+            remedySluttdato = parseNullableDateFromJson(node, "REMEDY_SLUTT_DATO");
+            agressoStartDato = parseNullableDateFromJson(node, "AGRESSO_START_DATO");
+            agressoSluttdato = parseNullableDateFromJson(node, "AGRESSO_SLUTT_DATO");
+            remedyPermisjon = node.get("REMEDY_PERMISJON").asText("NEI").equals("JA");
+            identType = node.get("IDENT_TYPE").asText();
+            epost = node.get("EPOST").asText();
+
+            orgenhetPaaRessurs = null;
+            orgenhetPaaRessursBeskrivelse = null;
+            orgenhetPaaRessursNiva = null;
+
+        } else { // Ny JSON fra NOM_KOMMUNALE_V1
+            navIdent = node.get("NAVID").asText();
+            personIdent = node.get("FNR").asText();
+            fornavn = node.get("NAVN").asText();
+            etternavn = node.get("ETTERNAVN").asText();
+            remedyAktiv = node.hasNonNull("AKTIV") && node.get("AKTIV").asText().equals("JA");
+            remedyAnsattType = node.get("ANSATT_TYPE").asText();
+            this.rawData = node;
+            ansattRessursKode = node.get("TYPE").asText();
+            remedyStartDato = parseNullableDateFromJson(node, "START_DATO");
+            remedySluttdato = parseNullableDateFromJson(node, "SLUTT_DATO");
+            agressoStartDato = parseNullableDateFromJson(node, "DATE_FROM");
+            agressoSluttdato = parseNullableDateFromJson(node, "DATE_TO");
+            remedyPermisjon = node.get("PERMISJON").asText("NEI").equals("JA");
+            identType = node.get("IDENTTYPE").asText();
+            epost = node.get("EPOST").asText();
+
+            // Kommer med i spørring på kommunale (Hr/NOM3/NOM_KOMMUNALE_V1)
+            orgenhetPaaRessurs = parseNullableFromJson(node, "ORGENHET_PAA_RESSURS");
+            orgenhetPaaRessursBeskrivelse = parseNullableFromJson(node, "ORGENHET_PAA_RESSURS_BESKRIVELSE");
+            orgenhetPaaRessursNiva = parseNullableFromJson(node, "ORGENHET_PAA_RESSURS_NIVA");
+        }
     }
 
     public enum RemedyRessursType {
@@ -145,4 +176,9 @@ public class DvhRessurs {
     private static LocalDate parseNullableDateFromJson(JsonNode jsonNode, String s){
         return jsonNode.hasNonNull(s) ? LocalDate.parse(jsonNode.get(s).asText()) : null;
     }
+
+    private static String parseNullableFromJson(JsonNode jsonNode, String s){
+        return jsonNode.hasNonNull(s) ? jsonNode.get(s).asText() : null;
+    }
+
 }

@@ -21,6 +21,7 @@ app:
       orgtilknytning-path: /proxy/dvh/json/Hr/NOM2/stilling2nom
       ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
       eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_EKSTERNE_V1
+      kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_KOMMUNALE_V1
     nik:
       base-url: ${NIK_BASEURL}
       aad-scope: ${NIK_API_SCOPE}
@@ -38,6 +39,7 @@ app:
 
   dvh-load:
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
+    nom-kommunale-ressurser-respons-navn: "NOM_KOMMUNALE_V1Response"
 
 authentication:
   aad:
