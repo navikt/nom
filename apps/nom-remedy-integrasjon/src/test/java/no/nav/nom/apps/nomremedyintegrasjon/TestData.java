@@ -11,6 +11,9 @@ import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.generated.model.OrgEnhet;
+import no.nav.nom.generated.model.OrgtilknytningState;
+import no.nav.nom.generated.model.Ressurs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -192,5 +195,31 @@ public class TestData {
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(LocalDate.now()))
             .utlopsdato(epochSecondsNorwegianTimeEndOfDay(LocalDate.now().plusMonths(1)))
             .build();
+    }
+
+    public static OrgEnhet orgenhet() {
+        return new OrgEnhet()
+            .remedyEnhetId("0123");
+    }
+
+    public static Ressurs ressurs() {
+        return new Ressurs()
+            .navident("X123456")
+            .personident("12345678912")
+            .visningsnavn(new no.nav.nom.generated.model.Visningsnavn()
+                .fornavn("fornavn")
+                .etternavn("etternavn")
+            )
+            .primaryFysiskBrukersted("1234")
+            .sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    }
+
+    public static OrgtilknytningState orgtilknytningState() {
+        return new OrgtilknytningState()
+            .navident("X123456")
+            .orgEnhetId("orgenhetId")
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusMonths(10))
+            .erDagligOppfolging(true);
     }
 }

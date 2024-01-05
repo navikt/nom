@@ -1,0 +1,10 @@
+[
+  {
+    "erDagligOppfolging": true,
+    "fid": "string",
+    "gyldigFom": "2023-11-29",
+    "gyldigTom": "2023-11-29",
+    "navident": "string",
+    "orgEnhetId": "string"
+  }
+]
