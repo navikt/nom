@@ -60,6 +60,7 @@ public class OrgEnhetMapper {
 
         return new OrgEnhet(
             orgEnhet.getId(),
+            orgEnhet.getFid(),
             orgEnhet.getAgressoId(),
             orgEnhet.getOrgNiv(),
             orgEnhet.getAgressoOrgenhetType(),
