@@ -105,22 +105,7 @@ export function ResourceLink({ navident }: { navident: string }) {
             {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
           <BodyShort size="small">
-            {(() => {
-              switch (ressurs.sektor) {
-                case Sektor.EKSTERN: {
-                  return SektorNameMapping[Sektor.EKSTERN];
-                }
-                case Sektor.NAV_STATLIG: {
-                  return SektorNameMapping[Sektor.NAV_STATLIG];
-                }
-                case Sektor.NAV_KOMMUNAL: {
-                  return SektorNameMapping[Sektor.NAV_KOMMUNAL];
-                }
-                default: {
-                  return "";
-                }
-              }
-            })()}
+            {SektorNameMapping[ressurs.sektor]}
           </BodyShort>
         </div>
       </UnitContainerLink>
