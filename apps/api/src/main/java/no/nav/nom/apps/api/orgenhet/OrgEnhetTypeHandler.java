@@ -54,7 +54,7 @@ public class OrgEnhetTypeHandler {
                             // Send kafka melding om å oppdatere orgEnhetsType. Antar at type fra agresso er sannheten.
                             final var endreType = new EndreOrgEnhetsType(
                                 Optional.of(nomOrgenhetType),
-                                new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
+                                new InputMetadata("nom-api BatchJob", "updateOrgEnhetsTypeForLeafs", null, new Origination("nom-api", "nom-api"))
                             );
                             orgEnhetCommandService.endreOrgEnhetsType(leafOrgEnhet.fid(), endreType);
                         }
@@ -116,7 +116,7 @@ public class OrgEnhetTypeHandler {
 
                     var endreType = new EndreOrgEnhetsType(
                         newOrgEnhetsType,
-                        new InputMetadata("nom-api BatchJob", "Datavarehus", null, new Origination("nom-api", "nom-api"))
+                        new InputMetadata("kafka: org.nom.orgenhet-eventsource", "orgEnhetsTypeChanged", null, new Origination("nom-api", "nom-api"))
                     );
                     orgEnhetCommandService.endreOrgEnhetsType(overordnetOrgEnhet.get().fid(), endreType);
                     logger.debug("Changed orgenhet {} because all its children are of orgEnhetsType {}", overordnetOrgEnhet.get().fid(), newOrgEnhetsType);

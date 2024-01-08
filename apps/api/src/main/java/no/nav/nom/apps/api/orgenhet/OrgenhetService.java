@@ -1,7 +1,6 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
@@ -33,6 +32,8 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
 
 @Service
 public class OrgenhetService {
@@ -220,7 +221,7 @@ public class OrgenhetService {
                         "nom-api REST",
                         "setOrgEnhetsType",
                         null,
-                        new Origination("nom-api", "nom-api"))
+                        new Origination(getAuthenticatedNavIdent(), getAuthenticatedAzpName()))
                 )
             );
         }
