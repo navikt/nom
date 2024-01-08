@@ -430,7 +430,11 @@ public class RessursControllerTest extends RestTestBase {
     void skal_oppdatere_fysiske_brukersteder(){
 
         var fid = "FID-uuid";
-        var existingRessurs = ressursState();
+        var existingRessurs = ressursState()
+            .toBuilder()
+            .fysiskeBrukersteder(null)
+            .build();
+
         var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
             .primaryFysiskBrukersted("fyrstikken-id")
             .fysiskeBrukersteder(Set.of("fyrstikken-id"))
