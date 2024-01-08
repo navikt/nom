@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { BodyShort, Heading, Link, ReadMore } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
+import partition from "lodash/partition";
 import React from "react";
 
 import { getRessurserForOrgenhet } from "~/api/react-query-endpoints";
@@ -103,12 +104,15 @@ function MedarbeidereList({
     return <></>;
   }
 
+  const [eksterneRessurser, interneRessurser] = partition(
+    hentedeRessurser,
+    (ressurs) => ressurs.sektor.includes(Sektor.EKSTERN),
+  );
+
   return (
     <div>
-      {hentedeRessurser.some((ressurs) => {
-        return ressurs && !ressurs.sektor.includes(Sektor.EKSTERN);
-      }) && (
-        <>
+      {interneRessurser.length > 0 && (
+        <div>
           <Heading level="3" size="small" spacing>
             Medarbeidere i {orgEnhet.navn}
           </Heading>
@@ -119,22 +123,19 @@ function MedarbeidereList({
               gap: var(--a-spacing-4);
             `}
           >
-            {hentedeRessurser.map((ressurs) => {
-              if (ressurs && !ressurs.sektor.includes(Sektor.EKSTERN)) {
-                return (
-                  <ResourceLink
-                    key={ressurs.navident}
-                    navident={ressurs.navident}
-                  />
-                );
-              }
+            {interneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
             })}
           </div>
-        </>
+        </div>
       )}
-      {hentedeRessurser.some((ressurs) => {
-        return ressurs && ressurs.sektor.includes(Sektor.EKSTERN);
-      }) && (
+
+      {eksterneRessurser.length > 0 && (
         <ReadMore
           css={css`
             margin-top: var(--a-spacing-4);
@@ -162,15 +163,13 @@ function MedarbeidereList({
               gap: var(--a-spacing-4);
             `}
           >
-            {hentedeRessurser.map((ressurs) => {
-              if (ressurs && ressurs.sektor.includes(Sektor.EKSTERN)) {
-                return (
-                  <ResourceLink
-                    key={ressurs.navident}
-                    navident={ressurs.navident}
-                  />
-                );
-              }
+            {eksterneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
             })}
           </div>
         </ReadMore>
