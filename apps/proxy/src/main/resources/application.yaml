@@ -84,7 +84,7 @@ spring:
     activate:
       on-profile: dev & !prod
 
-DVH_BASE_URL: https://tdv-u.adeo.no
+DVH_BASE_URL: https://tdv-p.adeo.no
 APP_TEL_BASE_URL: http://jiraint-q1.adeo.no/si/telenor/
 STS_BASEURL: https://security-token-service.dev.adeo.no
 LDAP_URL: ldaps://ldapgw.preprod.local:636
@@ -92,6 +92,22 @@ LDAP_BASE: DC=preprod,DC=local
 UNIT4_BASE_URL: https://agresso.test.local
 UNIT4_EMPLOYEES_PATH: '/agrt01-web-api/v1/employees'
 UNIT4_API_PATH: '/agrt01-web-api/v1'
+
+app:
+  dvh:
+    ressurs:
+      url: ${DVH_BASE_URL}/json/Hr/Nom_Dev/Nom_Ansatte
+      chunkSize: 5000
+    stilling:
+      url: ${DVH_BASE_URL}/json/Hr/NOM2_Dev/stilling2nom
+    ressurser:
+      url: ${DVH_BASE_URL}/json/Hr/NOM2_Dev/NOM_ANSATTE_BUCKETS_v1
+      bucketCount: 32
+    enheter:
+      url: ${DVH_BASE_URL}/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI_v1
+      urlV2: ${DVH_BASE_URL}/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
+    telDvh:
+      url: ${DVH_BASE_URL}/json/Hr/NOM2_Dev/NOM_TLF_v1
 
 ---
 spring:
