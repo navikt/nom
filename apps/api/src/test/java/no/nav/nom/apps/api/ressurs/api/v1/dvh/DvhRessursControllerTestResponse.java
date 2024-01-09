@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("DvhRessursControllerTest-FAKES")
-public class DvhRessursControllerTest extends RestTestBase {
+public class DvhRessursControllerTestResponse extends RestTestBase {
 
     @Autowired
     OrgtilknytningStateRepository orgtilknytningStateRepository;

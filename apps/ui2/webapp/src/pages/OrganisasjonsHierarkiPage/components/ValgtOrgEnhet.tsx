@@ -2,9 +2,10 @@ import { css } from "@emotion/react";
 import { BodyShort, Heading, Link, ReadMore } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
+import partition from "lodash/partition";
 import React from "react";
 
-import { getRessurs } from "~/api/react-query-endpoints";
+import { getRessurserForOrgenhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { ressursRoute } from "~/reactRouterRoutes";
@@ -55,25 +56,11 @@ export const ValgtOrgEnhet = ({
             `}
           >
             <BodyShort size="small">
-              ID:{" "}
-              <span
-                css={css`
-                  font-weight: var(--a-font-weight-bold);
-                `}
-              >
-                {orgEnhet.id}
-              </span>
+              ID: <b>{orgEnhet.id}</b>
             </BodyShort>
             {orgEnhet.remedyEnhetId && (
               <BodyShort size="small">
-                Remedy-enhet:{" "}
-                <span
-                  css={css`
-                    font-weight: var(--a-font-weight-bold);
-                  `}
-                >
-                  {orgEnhet.remedyEnhetId}
-                </span>
+                Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
               </BodyShort>
             )}
           </div>
@@ -95,37 +82,37 @@ export const ValgtOrgEnhet = ({
           <OrgenhetLederLink orgEnhet={orgEnhet} />
         </div>
       </div>
-      <MedarbeidereList orgEnhet={orgEnhet} ressurser={ressurser} />
+      <MedarbeidereList navidenter={ressurser} orgEnhet={orgEnhet} />
     </div>
   </div>
 );
 
 function MedarbeidereList({
   orgEnhet,
-  ressurser,
+  navidenter,
 }: {
   orgEnhet: OrgEnhet;
-  ressurser: string[];
+  navidenter: string[];
 }) {
-  if (ressurser.length === 0) {
+  const hentedeRessurser =
+    useQuery({
+      queryKey: getRessurserForOrgenhet.queryKey(orgEnhet.id),
+      queryFn: () => getRessurserForOrgenhet.queryFn(navidenter),
+    }).data ?? [];
+
+  if (hentedeRessurser.length === 0) {
     return <></>;
   }
 
-  const hentedeRessurser = ressurser.map((ressurs) => {
-    const ressursQuery = useQuery({
-      queryKey: getRessurs.queryKey(ressurs),
-      queryFn: () => getRessurs.queryFn(ressurs),
-    });
-
-    return ressursQuery.data;
-  });
+  const [eksterneRessurser, interneRessurser] = partition(
+    hentedeRessurser,
+    (ressurs) => ressurs.sektor.includes(Sektor.EKSTERN),
+  );
 
   return (
     <div>
-      {hentedeRessurser.some((ressurs) => {
-        return ressurs && !ressurs.sektor.includes(Sektor.EKSTERN);
-      }) && (
-        <>
+      {interneRessurser.length > 0 && (
+        <div>
           <Heading level="3" size="small" spacing>
             Medarbeidere i {orgEnhet.navn}
           </Heading>
@@ -136,22 +123,19 @@ function MedarbeidereList({
               gap: var(--a-spacing-4);
             `}
           >
-            {hentedeRessurser.map((ressurs) => {
-              if (ressurs && !ressurs.sektor.includes(Sektor.EKSTERN)) {
-                return (
-                  <ResourceLink
-                    key={ressurs.navident}
-                    navident={ressurs.navident}
-                  />
-                );
-              }
+            {interneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
             })}
           </div>
-        </>
+        </div>
       )}
-      {hentedeRessurser.some((ressurs) => {
-        return ressurs && ressurs.sektor.includes(Sektor.EKSTERN);
-      }) && (
+
+      {eksterneRessurser.length > 0 && (
         <ReadMore
           css={css`
             margin-top: var(--a-spacing-4);
@@ -179,15 +163,13 @@ function MedarbeidereList({
               gap: var(--a-spacing-4);
             `}
           >
-            {hentedeRessurser.map((ressurs) => {
-              if (ressurs && ressurs.sektor.includes(Sektor.EKSTERN)) {
-                return (
-                  <ResourceLink
-                    key={ressurs.navident}
-                    navident={ressurs.navident}
-                  />
-                );
-              }
+            {eksterneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
             })}
           </div>
         </ReadMore>

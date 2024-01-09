@@ -8,14 +8,15 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhStartupLoadMonitor;
 import no.nav.nom.apps.api.orgenhet.OrgEnhetNomNivaaHandler;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
-import no.nav.nom.contract.nom.eventsource.InputMetadata;
-import no.nav.nom.contract.nom.eventsource.OrgEnhetTypeEndretEventV1;
+import no.nav.nom.contract.nom.NomNivaa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @Tag(name = "Admin for å utlede nom nivåer på nytt.")
 @RestController
@@ -50,15 +51,18 @@ public class TriggerUtledNomNivaaPaaNytt {
         dvhStartupLoadMonitor.awaitInitialLoadComplete();
 
         orgenheterToProcess
-            .forEach(orgEnhetState -> orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(
-                new OrgEnhetTypeEndretEventV1(
-                    orgEnhetState.fid(),
-                    new OrgEnhetTypeEndretEventV1.OrgEnhetTypeEndretEventData(orgEnhetState.orgEnhetsType()),
-                    new InputMetadata(null,null,null,null)
-                )
-            )
+            .forEach(orgEnhetState ->
+                orgEnhetNomNivaaHandler.mapOrgEnhetTypeToNewNomNivaaAndUpdate(orgEnhetState, orgEnhetState.orgEnhetsType())
+            );
 
-        );
+        if (orgEnhetId != null) {
+            orgenheterToProcess.forEach(orgEnhetNomNivaaHandler::mapOrgEnhetTypeToNewNomNivaaForChildren);
+        }
+
+        orgenheterToProcess.stream()
+            .filter(orgEnhetState -> orgEnhetState.nomNivaa().equals(Optional.of(NomNivaa.DRIFTSENHET)))
+            .forEach(orgEnhetNomNivaaHandler::addArbeidsomraadeInAllSubPathsIfMissing);
+
 
         var message = String.format("Utledet nivå på nytt for %s enhet", orgenheterToProcess.size());
 

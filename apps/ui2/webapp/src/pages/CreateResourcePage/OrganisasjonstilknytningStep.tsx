@@ -56,7 +56,7 @@ export function OrganisasjonstilknytningStep() {
 function CreateStatligRessurs() {
   const navigate = useNavigate({ from: createRessursRoute.id });
   const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
-    from: createRessursRoute.to,
+    from: createRessursRoute.id,
   });
   const methods = useForm({
     defaultValues: {
@@ -92,7 +92,7 @@ function CreateStatligRessurs() {
         css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.to,
+            to: createRessursRoute.id,
             params: { step: "9" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),
@@ -156,9 +156,9 @@ export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
 );
 
 function CreateEksternRessurs() {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: createRessursRoute.id });
   const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr } = useSearch({
-    from: createRessursRoute.to,
+    from: createRessursRoute.id,
   });
 
   const methods = useForm({
@@ -187,7 +187,7 @@ function CreateEksternRessurs() {
         css={defaultFormStyle}
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.to,
+            to: createRessursRoute.id,
             params: { step: "9" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),

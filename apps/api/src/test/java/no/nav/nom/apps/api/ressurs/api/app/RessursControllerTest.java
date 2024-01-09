@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +51,9 @@ public class RessursControllerTest extends RestTestBase {
 
     @MockBean
     private PdlClient pdlClient;
+
+    @MockBean
+    private NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
 
     @MockBean
     private RessursCommadService ressursCommadService;
@@ -164,6 +168,9 @@ public class RessursControllerTest extends RestTestBase {
             null,
             ""
         );
+
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
+            .thenReturn(Set.of(request.fysiskBrukerstedNr()));
 
         when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
             .thenReturn(
@@ -353,17 +360,91 @@ public class RessursControllerTest extends RestTestBase {
         verify(ressursCommadService, times(0)).oppdaterPersonaliaEvent(any(), any());
     }
 
+
+    @ParameterizedTest(name = "Obfuskerer personident for respons i GET {0}")
+    @MethodSource("getRessursPathsTestInput")
+    void skalObfuskerePersonident(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident).build();
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(endpointPath)
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident.replaceFirst(".{5}$", "*****"));
+
+    }
+
+
+    @ParameterizedTest(name = "Overstyrer obfuskering av personident for respons i GET {0}")
+    @MethodSource("getRessursPathsTestInput")
+    void skalOverstyreObfuskeringAvPersonident(String endpointPath) {
+
+        var personident = "01010154321";
+
+        var ressursState = ressursState().toBuilder()
+            .personident(personident).build();
+
+        when(ressursStateRepository.findByNavident(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        when(ressursStateRepository.findByFid(anyString()))
+            .thenReturn(Optional.of(ressursState));
+
+        webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(endpointPath)
+                .queryParam("obfuscatePersonident", false)
+                .build()
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(nomWriteUserToken()))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("personident")
+            .isEqualTo(personident);
+
+    }
+
+    static Stream<Arguments> getRessursPathsTestInput(){
+        return Stream.of(
+            Arguments.of("/app/ressurser/byNavident/whatever"),
+            Arguments.of("/app/ressurser/byFid/whatever")
+        );
+    }
+
+
     @Test
     void skal_oppdatere_fysiske_brukersteder(){
 
         var fid = "FID-uuid";
-        var existingRessurs = ressursState();
+        var existingRessurs = ressursState()
+            .toBuilder()
+            .fysiskeBrukersteder(null)
+            .build();
+
         var updateFysiskeBrukerstederRequest = UpdateFysiskeBrukerstederRequest.builder()
             .primaryFysiskBrukersted("fyrstikken-id")
             .fysiskeBrukersteder(Set.of("fyrstikken-id"))
             .build();
 
         when(ressursStateRepository.findByFid(fid)).thenReturn(Optional.of(existingRessurs));
+        when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(argThat(l ->
+                new HashSet<>(l).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+            )
+        )).thenReturn(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
 
         webTestClient.post()
             .uri(uriBuilder ->

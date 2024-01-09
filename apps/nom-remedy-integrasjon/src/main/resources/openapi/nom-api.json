@@ -662,6 +662,52 @@
         ]
       }
     },
+    "/app/ressurser/{fid}/fysiskebrukersteder": {
+      "post": {
+        "description": "Overskriver fysiske brukersteder for en ressurs med navident.",
+        "operationId": "updateFysiskeBrukersteder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFysiskeBrukerstederRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "Ressurs"
+        ]
+      }
+    },
     "/app/ressurser/{navident}/navn": {
       "post": {
         "description": "Endrer navn for en ressurs",
@@ -1060,6 +1106,7 @@
       "Ressurs": {
         "required": [
           "fid",
+          "fysiskeBrukersteder",
           "navident",
           "personident",
           "sektor",
@@ -1074,10 +1121,19 @@
           "fid": {
             "type": "string"
           },
+          "fysiskeBrukersteder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "navident": {
             "type": "string"
           },
           "personident": {
+            "type": "string"
+          },
+          "primaryFysiskBrukersted": {
             "type": "string"
           },
           "sektor": {
@@ -1142,6 +1198,7 @@
       "RessursState": {
         "required": [
           "fid",
+          "fysiskeBrukersteder",
           "navident",
           "personident",
           "sektor",
@@ -1152,10 +1209,19 @@
           "fid": {
             "type": "string"
           },
+          "fysiskeBrukersteder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "navident": {
             "type": "string"
           },
           "personident": {
+            "type": "string"
+          },
+          "primaryFysiskBrukersted": {
             "type": "string"
           },
           "sektor": {
@@ -1251,6 +1317,25 @@
           "NAV_KONTOR_TELEFON",
           "PRIVAT_TELEFON"
         ]
+      },
+      "UpdateFysiskeBrukerstederRequest": {
+        "required": [
+          "fysiskeBrukersteder",
+          "primaryFysiskBrukersted"
+        ],
+        "type": "object",
+        "properties": {
+          "fysiskeBrukersteder": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "primaryFysiskBrukersted": {
+            "type": "string"
+          }
+        }
       },
       "UpdateVisningsnavnRequest": {
         "type": "object",

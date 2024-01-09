@@ -6,6 +6,8 @@ import no.nav.nom.generated.model.Ressurs;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+
 import static no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon.client.WebClientUtils.defaultRetry;
 
 @Service
@@ -21,6 +23,7 @@ public class NomApiClient {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byNavident/{navident}")
+                .queryParam("obfuscatePersonident", false)
                 .build(navident)
             )
             .retrieve()
@@ -33,6 +36,7 @@ public class NomApiClient {
         return nomApiAuthorizedWebClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/app/ressurser/byFid/{fid}")
+                .queryParam("obfuscatePersonident", false)
                 .build(fid)
             )
             .retrieve()
@@ -51,6 +55,19 @@ public class NomApiClient {
             .bodyToMono(OrgEnhet.class)
             .retryWhen(defaultRetry)
             .block();
+    }
+
+    public List<OrgtilknytningState> getOrgtilknytningerForNavident(String navident) {
+        return nomApiAuthorizedWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger")
+                .queryParam("navident", navident)
+                .build()
+            )
+            .retrieve()
+            .toEntityList(OrgtilknytningState.class)
+            .retryWhen(defaultRetry)
+            .block().getBody();
     }
 
     public OrgtilknytningState getOrgtilknytning(String fid) {

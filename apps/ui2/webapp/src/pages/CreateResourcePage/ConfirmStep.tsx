@@ -53,10 +53,9 @@ export function ConfirmStep() {
 
   const onClose = () =>
     navigate({
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore https://github.com/TanStack/router/issues/730
-      search: (o) => o,
+      to: createRessursRoute.id,
       params: { step: "3" },
+      search: (oldSearch) => oldSearch,
     });
 
   const opprettRessursMutation = useMutation<
@@ -84,7 +83,7 @@ export function ConfirmStep() {
     onSuccess: (opprettRessursResponse) => {
       // Because ansettelsesType is not yet persisted in NOM we must retrieve it from the form.
       navigate({
-        to: createRessursRoute.to,
+        to: createRessursRoute.id,
         search: (old) => ({
           ...old,
           navident: opprettRessursResponse.data.navident,

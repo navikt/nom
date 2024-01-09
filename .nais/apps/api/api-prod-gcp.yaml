@@ -162,6 +162,7 @@ spec:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
+        - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_12

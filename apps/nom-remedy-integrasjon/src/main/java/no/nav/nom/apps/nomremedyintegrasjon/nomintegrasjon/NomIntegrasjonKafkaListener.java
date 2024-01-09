@@ -1,8 +1,11 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
 import io.getunleash.Unleash;
+import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -14,6 +17,8 @@ public class NomIntegrasjonKafkaListener {
 
     private final Unleash unleash;
     private final NomIntegrasjonService nomIntegrasjonService;
+
+    private final Logger logger = LoggerFactory.getLogger(NomIntegrasjonKafkaListener.class);
 
     public NomIntegrasjonKafkaListener(Unleash unleash, NomIntegrasjonService nomIntegrasjonService) {
         this.unleash = unleash;
@@ -30,7 +35,13 @@ public class NomIntegrasjonKafkaListener {
 
             putMDCContext(recordId, ressursEvent.getClass().getSimpleName());
 
-            nomIntegrasjonService.handleRessursEvent(ressursEvent);
+            if (isNomOrigination(ressursEvent)) {
+                nomIntegrasjonService.handleRessursEvent(ressursEvent);
+            } else {
+                logger.info("Skipping event with fid {} since it is not originated from nom", ressursEvent.getFid());
+            }
+
+            MDC.clear();
         }
     }
 
@@ -44,13 +55,23 @@ public class NomIntegrasjonKafkaListener {
 
             putMDCContext(recordId, orgtilknytningEvent.getClass().getSimpleName());
 
-            nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+            if (isNomOrigination(orgtilknytningEvent)) {
+                nomIntegrasjonService.handleOrgtilknytningEvent(orgtilknytningEvent);
+            } else {
+                logger.info("Skipping event with fid {} since it is not originated from nom", orgtilknytningEvent.getFid());
+            }
+
+            MDC.clear();
         }
     }
 
     private void putMDCContext(String recordId, String eventType) {
         MDC.put("record_id", recordId);
         MDC.put("event_type", eventType);
+    }
+
+    private Boolean isNomOrigination(Event event) {
+        return event.getMetadata().inputMetadata().origination().initiatedFrom().contains(":nom-ui2");
     }
 
     private boolean isWriteToRemedyEnabled() {

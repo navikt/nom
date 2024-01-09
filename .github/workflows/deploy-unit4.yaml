@@ -28,6 +28,5 @@ jobs:
       nais-config-file-path-prod: .nais/apps/unit4/unit4-prod-gcp.yaml
       unleash-vars-file-path: .nais/apps/unit4/unleash-vars.yaml
     secrets:
-      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_ORG_APIKEY }}
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}

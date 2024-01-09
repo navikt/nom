@@ -48,8 +48,6 @@ on:
         default: false
         description: Skip tests. This makes build faster.
     secrets:
-      NAIS_DEPLOY_APIKEY:
-        required: true
       GITHUB_PAT:
         required: true
       NAIS_WORKLOAD_IDENTITY_PROVIDER:
@@ -101,18 +99,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.dev-cluster }}
           RESOURCE: .nais/unleash/unleash-token.yaml
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=development
           VARS: ${{ inputs.unleash-vars-file-path }}
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.dev-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-dev }}
           TIMEOUT: ${{ inputs.deploy-timeout }}
@@ -125,18 +121,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         if: ${{ inputs.unleash-vars-file-path != 'skip' }}
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.prod-cluster }}
           RESOURCE: .nais/unleash/unleash-token.yaml
           TIMEOUT: ${{ inputs.deploy-timeout }}
           VAR: env=production
           VARS: ${{ inputs.unleash-vars-file-path }}
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ inputs.prod-cluster }}
           RESOURCE: ${{ inputs.nais-config-file-path-prod }}
           TIMEOUT: ${{ inputs.deploy-timeout }}

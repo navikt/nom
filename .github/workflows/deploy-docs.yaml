@@ -40,9 +40,9 @@ jobs:
           mv docs/target/intern/index.html public/index-intern.html
           mv docs/target/intern/images public/images
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
       - name: Deploy to Github Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4

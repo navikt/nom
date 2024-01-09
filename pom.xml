@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
+        <version>3.2.1</version> <!-- Ved oppdatering av Spring - sjekk changelog for nye versjoner, og om man da kan ta bort overstyrte versjoner under -->
         <relativePath/>
     </parent>
 
@@ -28,21 +28,21 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
 
-        <spring-boot.version>3.2.0</spring-boot.version>
+        <spring-boot.version>3.2.1</spring-boot.version>
 
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <gcp.libraries-bom.version>26.29.0</gcp.libraries-bom.version>
         <springdoc.version>2.3.0</springdoc.version>
         <springdoc-openapi-security.version>1.7.0</springdoc-openapi-security.version>
-        <hypersistence-utils-hibernate-62.version>3.6.1</hypersistence-utils-hibernate-62.version>
+        <hypersistence-utils-hibernate-62.version>3.7.0</hypersistence-utils-hibernate-62.version>
         <graphql-extended-scalars.version>21.0</graphql-extended-scalars.version>
         <unleash.version>9.2.0</unleash.version>
         <opencsv.version>5.9</opencsv.version>
         <apache.common.csv.version>1.10.0</apache.common.csv.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
-        <ulid-creator.version>5.2.2</ulid-creator.version>
+        <ulid-creator.version>5.2.3</ulid-creator.version>
         <vault-jdbc.version>1.3.10</vault-jdbc.version>
-        <swagger-annotations-jakarta.version>2.2.19</swagger-annotations-jakarta.version>
+        <swagger-annotations-jakarta.version>2.2.20</swagger-annotations-jakarta.version>
         <wiremock.version>2.35.1</wiremock.version>
         <org.wiremock.version>3.3.1</org.wiremock.version>
         <wiremock-extension.version>1.0.2.RELEASE</wiremock-extension.version>
@@ -311,6 +311,7 @@
                 <classifier>osx-x86_64</classifier>
                 <version>${netty.version}</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
