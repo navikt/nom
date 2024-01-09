@@ -8,9 +8,9 @@ import React, { useEffect, useRef } from "react";
 
 import { getOrgEnhet, getRessurs } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
+import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { orgRoute, ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
-import { Sektor } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export function OrgEnhetView({
@@ -58,7 +58,9 @@ export function OrgEnhetView({
           </Heading>
           <BodyShort size="small">
             Leder:{" "}
-            {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
+            <b>
+              {formatVisningsnavn(orgEnhetQuery.data?.ledere[0]?.visningsnavn)}
+            </b>
           </BodyShort>
         </div>
       </UnitContainerLink>
@@ -101,9 +103,9 @@ export function ResourceLink({ navident }: { navident: string }) {
           <Heading level="2" size="small">
             {formatVisningsnavn(ressurs.visningsnavn)}
           </Heading>
-          <span>
-            {ressurs.sektor.includes(Sektor.EKSTERN) ? "(Ekstern)" : ""}
-          </span>
+          <BodyShort size="small">
+            {SektorNameMapping[ressurs.sektor]}
+          </BodyShort>
         </div>
       </UnitContainerLink>
     </ReactRouterLink>
