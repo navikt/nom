@@ -30,8 +30,6 @@ export const ressurserKeys = {
   id: (id: string) => [...ressurserKeys.all, id] as const,
   ledereTil: (navident: string) =>
     [...ressurserKeys.all, "LEDERE_Til", navident] as const,
-  ressurserForOrgenhet: (orgenhetId: string) =>
-    [...ressurserKeys.all, "FOR_ORGENHET", orgenhetId] as const,
 };
 
 export const orgEnheterKeys = {
@@ -135,15 +133,6 @@ export const getRessurs = {
   queryFn: async (navident: string) =>
     (await axios.get<Ressurs>(`/nom-api/app/ressurser/byNavident/${navident}`))
       .data,
-};
-
-export const getRessurserForOrgenhet = {
-  queryKey: (orgenhetId: string) =>
-    ressurserKeys.ressurserForOrgenhet(orgenhetId),
-  queryFn: async (navidenter: string[]) =>
-    await Promise.all(
-      navidenter.map((navident) => getRessurs.queryFn(navident)),
-    ),
 };
 
 export const getLedereForRessurs = {
