@@ -87,9 +87,6 @@ spec:
         - application: henvendelse-migrering # midlertidig behov ifm en-gangs migrering
           namespace: oppgavehandtering
           cluster: prod-fss
-        - application: sparkel-vilkarsproving
-          namespace: tbd
-          cluster: prod-fss
         - application: sparkel-egenansatt
           namespace: tbd
           cluster: prod-gcp

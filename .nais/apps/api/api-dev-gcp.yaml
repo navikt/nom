@@ -111,9 +111,6 @@ spec:
         - application: oppgavestyring-backend
           namespace: oppgavehandtering
           cluster: dev-gcp
-        - application: sparkel-vilkarsproving
-          namespace: tbd
-          cluster: dev-fss
         - application: sparkel-egenansatt
           namespace: tbd
           cluster: dev-gcp
