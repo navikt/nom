@@ -5,9 +5,8 @@ import {
   isAfter,
   isBefore,
   isWithinInterval,
-  maxTime,
-  minTime,
 } from "date-fns";
+import { maxTime, minTime } from "date-fns/constants";
 
 import type { Visningsnavn } from "~/types/api-models";
 

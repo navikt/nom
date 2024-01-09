@@ -21,7 +21,8 @@ import {
   useNavigate,
   useSearch,
 } from "@tanstack/react-router";
-import { isAfter, isBefore, maxTime } from "date-fns";
+import { isAfter, isBefore } from "date-fns";
+import { maxTime } from "date-fns/constants";
 import sortBy from "lodash/sortBy";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
