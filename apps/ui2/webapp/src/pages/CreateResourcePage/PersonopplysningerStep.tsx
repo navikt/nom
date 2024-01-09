@@ -87,9 +87,9 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: createRessursRoute.id });
   const { visningsfornavn, visningsmellomnavn, visningsetternavn } = useSearch({
-    from: createRessursRoute.to,
+    from: createRessursRoute.id,
   });
 
   const methods = useForm({
@@ -109,7 +109,6 @@ function VisningsnavnForm({
 
   const {
     handleSubmit,
-
     register,
     formState: { errors },
   } = methods;
@@ -119,7 +118,7 @@ function VisningsnavnForm({
       <form
         onSubmit={handleSubmit((values) =>
           navigate({
-            to: createRessursRoute.to,
+            to: createRessursRoute.id,
             params: { step: "3" },
             search: (oldSearch) => ({ ...oldSearch, ...values }),
           }),

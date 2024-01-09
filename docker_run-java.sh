@@ -19,7 +19,7 @@ then
     exec java \
     ${DEFAULT_JVM_OPTS} \
     ${JAVA_OPTS} \
-    "org.springframework.boot.loader.JarLauncher" \
+    "org.springframework.boot.loader.launch.JarLauncher" \
     ${RUNTIME_OPTS} \
     $@
 else

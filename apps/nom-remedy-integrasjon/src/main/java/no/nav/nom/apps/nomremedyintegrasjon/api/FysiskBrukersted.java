@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.kafka.common.protocol.types.Field;
 
 @Entity
 @AllArgsConstructor
@@ -21,4 +22,5 @@ public class FysiskBrukersted {
     private String brukerstedNr;
 
     private String brukerstedNavn;
+
 }

@@ -15,7 +15,7 @@ spec:
       value: '1334a91a-c4e0-409e-a497-3c4453869874'
   secureLogs:
     enabled: true
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nav-ident.intern.nav.no

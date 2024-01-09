@@ -13,7 +13,7 @@ spec:
       value: prod
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-ressurser.nais.adeo.no

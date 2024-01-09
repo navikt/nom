@@ -1,7 +1,6 @@
 import { css } from "@emotion/react";
 import { Stepper } from "@navikt/ds-react";
 import { useParams } from "@tanstack/react-router";
-import { decode } from "js-base64";
 import React from "react";
 import * as yup from "yup";
 
@@ -100,7 +99,7 @@ export function validateCreateRessursSearch(
 ): Partial<StatligFormValues> & { navident?: string } {
   // validate and parse the search params into a typed state
   return {
-    personident: decode(String(search.personident ?? "")) || undefined,
+    personident: String(search.personident ?? ""),
     navident: String(search.navident ?? ""),
     visningsfornavn: String(search.visningsfornavn ?? ""),
     visningsmellomnavn: String(search.visningsmellomnavn ?? ""),

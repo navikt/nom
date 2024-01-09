@@ -19,11 +19,13 @@ import java.time.Instant;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,14 +95,9 @@ public class NomApiClientTest extends TestBase {
             .isNotNull();
 
         verify(
-            getRequestedFor(
-                urlEqualTo(
-                    String.format(
-                        "/app/ressurser/byNavident/%s",
-                        navident
-                    )
-                )
-            ).withHeader("authorization", matching("Bearer tokenValue"))
+            getRequestedFor(urlPathEqualTo(String.format("/app/ressurser/byNavident/%s", navident)))
+                .withQueryParam("obfuscatePersonident", equalTo("false"))
+                .withHeader("authorization", matching("Bearer tokenValue"))
         );
     }
 
@@ -118,14 +115,29 @@ public class NomApiClientTest extends TestBase {
             .isNotNull();
 
         verify(
-            getRequestedFor(
-                urlEqualTo(
-                    String.format(
-                        "/app/ressurser/byFid/%s",
-                        fid
-                    )
-                )
-            ).withHeader("authorization", matching("Bearer tokenValue"))
+            getRequestedFor(urlPathEqualTo(String.format("/app/ressurser/byFid/%s", fid)))
+                .withQueryParam("obfuscatePersonident", equalTo("false"))
+                .withHeader("authorization", matching("Bearer tokenValue"))
+        );
+    }
+
+    @Test
+    @DisplayName("getOrgtilknytningerForNavident should perform request as expected")
+    void testGetOrgtilknytningerForNavident() {
+
+        var navident = "X654321";
+
+        stubResponse(
+            readResourceFile("nom-api/orgtilknytning_list_response.json")
+        );
+
+        assertThat(nomApiClient.getOrgtilknytningerForNavident(navident))
+            .isNotNull();
+
+        verify(
+            getRequestedFor(urlPathEqualTo("/app/orgtilknytninger"))
+                .withQueryParam("navident", equalTo(navident))
+                .withHeader("authorization", matching("Bearer tokenValue"))
         );
     }
 

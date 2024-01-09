@@ -12,6 +12,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.Collections;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FysiskBrukerstedControllerTest extends TestBase {
@@ -43,6 +47,36 @@ public class FysiskBrukerstedControllerTest extends TestBase {
             .expectStatus().isOk()
             .expectBodyList(FysiskBrukersted.class)
             .isEqualTo(fysiskeBrukersteder);
+    }
+
+    @Test
+    @DisplayName("Should filter fysiske brukersteder")
+    public void testFilterFysiskeBrukerstederOk() {
+
+        var fysiskeBrukersteder = List.of(
+            new FysiskBrukersted("", "", "")
+        );
+
+        var brukerstedNrsFilter = List.of("a", "b");
+
+        when(fysiskBrukerstedReadOnlyRepository.findByBrukerstedNrIn(anyList())).thenReturn(fysiskeBrukersteder);
+
+        webTestClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path(apiPath)
+                .queryParam("brukerstedNrs", brukerstedNrsFilter)
+                .build()
+            )
+            .headers(httpHeaders -> httpHeaders.setBearerAuth(
+                generateToken("nom-remedy-integrasjon")
+            ))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(FysiskBrukersted.class)
+            .isEqualTo(fysiskeBrukersteder);
+
+        verify(fysiskBrukerstedReadOnlyRepository, times(1))
+            .findByBrukerstedNrIn(eq(brukerstedNrsFilter));
     }
 
     @Test

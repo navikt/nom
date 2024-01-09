@@ -1,0 +1,12 @@
+server.port: 8091
+
+NOM_API_URL: https://nom-api.intern.dev.nav.no
+NOM_API_SCOPE: api://dev-gcp.nom.nom-api/.default
+
+NAIS_APP_NAME: nom-admin-local
+
+KAFKA_BROKERS: localhost:39092
+spring.kafka.properties.security.protocol: PLAINTEXT
+
+logging:
+  config: classpath:logback-local.xml

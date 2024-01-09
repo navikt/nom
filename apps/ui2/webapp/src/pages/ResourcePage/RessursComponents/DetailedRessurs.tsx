@@ -41,6 +41,7 @@ import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
 import { CompactOrganisasjonHierarki } from "~/pages/ResourcePage/CompactOrganisasjonHierarki";
 import { AddOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/AddOrgtilknytningForm";
 import { EditButtonWrapper } from "~/pages/ResourcePage/EditForms/EditButtonWrapper";
+import { EditFysiskeBrukerstederForm } from "~/pages/ResourcePage/EditForms/EditFysiskeBrukerstederForm";
 import { EditNameForm } from "~/pages/ResourcePage/EditForms/EditNameForm";
 import { EditOrgtilknytningForm } from "~/pages/ResourcePage/EditForms/EditOrgtilknytningForm";
 import {
@@ -485,8 +486,6 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
     select: (ledere) => ledere.find((leder) => leder.erDagligOppfolging)?.leder,
   }).data;
 
-  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
-
   return (
     <div
       css={css`
@@ -560,14 +559,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
               </div>
             </>
           ) : undefined}
-          <LabelWithValue
-            label="Fysisk brukersted"
-            value={
-              fysiskBrukersted
-                ? capitalize(fysiskBrukersted.brukerstedNavn)
-                : "-"
-            }
-          />
+          <FysiskBrukersted ressurs={ressurs} />
         </div>
       </div>
       <div
@@ -599,6 +591,24 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
         </EditButtonWrapper>
       </div>
     </div>
+  );
+}
+
+function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
+  const { editPersonopplysninger } = useSearch({ from: ressursRoute.id });
+  const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
+
+  if (editPersonopplysninger) {
+    return <EditFysiskeBrukerstederForm ressurs={ressurs} />;
+  }
+
+  return (
+    <LabelWithValue
+      label="Fysisk brukersted"
+      value={
+        fysiskBrukersted ? capitalize(fysiskBrukersted.brukerstedNavn) : "-"
+      }
+    />
   );
 }
 

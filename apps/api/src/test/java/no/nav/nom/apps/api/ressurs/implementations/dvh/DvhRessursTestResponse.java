@@ -8,10 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Tester basic parsing av Json objekter fra DVH")
-class DvhRessursTest {
+class DvhRessursTestResponse {
 
     private final ObjectMapper mapper = new ObjectMapper();
 

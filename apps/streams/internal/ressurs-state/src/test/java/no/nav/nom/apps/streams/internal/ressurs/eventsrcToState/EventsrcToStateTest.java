@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Event;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
@@ -421,6 +422,87 @@ public class EventsrcToStateTest {
         final var ressursStateSerde = objectSerde.copyWithType(RessursState.class);
         ressursStateSerde.deserializer().addTrustedPackages(RessursState.class.getPackageName());
         outputTopic = topologyTestDriver.createOutputTopic("outputTopic", new StringDeserializer(), ressursStateSerde.deserializer());
+    }
+
+    @Test
+    @DisplayName("Merger RessursFysiskeBrukerstederOppdatertEventV1 event merges sammen inn i state")
+    public void testRessursFysiskeBrukerstederOppdatertEventV1() {
+        final RessursOpprettetEventV1.RessursOpprettetEventData ressursOpprettetEventData = new RessursOpprettetEventV1.RessursOpprettetEventData(
+            "personident",
+            Sektor.NAV_STATLIG,
+            new Visningsnavn(
+                "fornavn",
+                Optional.empty(),
+                "etternavn"
+            ),
+            List.of("2011"),
+            "2011"
+        );
+
+        final RessursOpprettetEventV1.RessursOpprettetAdditionalData ressursOpprettetAdditionalData = new RessursOpprettetEventV1.RessursOpprettetAdditionalData(
+            Optional.of("navident"),
+            null,
+            null,
+            null,
+            Optional.of(mockToday),
+            Optional.empty(),
+            Optional.empty()
+        );
+
+        final RessursEvent event = new RessursOpprettetEventV1(
+            UUID.randomUUID().toString(),
+            ressursOpprettetEventData,
+            (Event.Metadata) null,
+            ressursOpprettetAdditionalData
+
+        );
+
+        final RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData =
+            RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
+                .primaryFysiskBrukersted("oslo")
+                .fysiskeBrukersteder(List.of("oslo", "bergen"))
+                .build();
+
+        final RessursEvent ressursFysiskeBrukerstederOppdatertEventV1 = new RessursFysiskeBrukerstederOppdatertEventV1(
+            event.getFid(),
+            ressursFysiskeBrukerstederOppdatertEventData,
+            (Event.Metadata) null
+        );
+
+
+        final RessursState expectedOpprettet = new RessursState(
+            event.getFid(),
+            ressursOpprettetEventData.personident(),
+            ressursOpprettetAdditionalData.navident().get(),
+            ressursOpprettetEventData.sektor(),
+            ressursOpprettetEventData.visningsnavn(),
+            Optional.empty(),
+            Optional.of(mockToday),
+            Optional.ofNullable(ressursOpprettetEventData.primaryFysiskBrukersted()),
+            ressursOpprettetEventData.fysiskeBrukersteder()
+        );
+
+        final RessursState expectedEndret = new RessursState(
+            event.getFid(),
+            ressursOpprettetEventData.personident(),
+            ressursOpprettetAdditionalData.navident().get(),
+            ressursOpprettetEventData.sektor(),
+            ressursOpprettetEventData.visningsnavn(),
+            Optional.empty(),
+            Optional.of(mockToday),
+            Optional.ofNullable(ressursFysiskeBrukerstederOppdatertEventData.primaryFysiskBrukersted()),
+            ressursFysiskeBrukerstederOppdatertEventData.fysiskeBrukersteder()
+        );
+
+        inputTopic.pipeInput(UUID.randomUUID().toString(), event);
+        inputTopic.pipeInput(UUID.randomUUID().toString(), ressursFysiskeBrukerstederOppdatertEventV1);
+
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .containsExactly(
+                KeyValue.pair(event.getFid(), expectedOpprettet),
+                KeyValue.pair(event.getFid(), expectedEndret)
+            );
     }
 
     private static ObjectMapper configureObjectMapper() {

@@ -21,6 +21,7 @@ app:
       orgtilknytning-path: /proxy/dvh/json/Hr/NOM2/stilling2nom
       ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
       eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_EKSTERNE_V1
+      kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_KOMMUNALE_V1
     nik:
       base-url: ${NIK_BASEURL}
       aad-scope: ${NIK_API_SCOPE}
@@ -33,8 +34,12 @@ app:
       is-enabled: false
       max-attempts: 3
       backoff-duration-millis: 2000
+    nom-remedy-integrasjon:
+      base-url: ${NOM_REMEDY_INTEGRASJON_BASEURL}
+
   dvh-load:
     nom-ressurser-stillinger-respons-navn: "NOM_RESSURS_STILLINGERResponse"
+    nom-kommunale-ressurser-respons-navn: "NOM_KOMMUNALE_V1Response"
 
 authentication:
   aad:
@@ -97,6 +102,13 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - ${PDL_API_SCOPE}
+          nom-remedy-integrasjon:
+            provider: azure
+            client-id: ${AZURE_APP_CLIENT_ID}
+            client-secret: ${AZURE_APP_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
+              - ${NOM_REMEDY_INTEGRASJON_API_SCOPE}
         provider:
           azure:
             issuer-uri: ${authentication.aad.issuerBaseUrl}/v2.0
@@ -220,6 +232,9 @@ PDL_API_SCOPE: api://dev-fss.pdl.pdl-api/.default
 NOM_PROXY_BASEURL: "https://nom-proxy.dev-fss-pub.nais.io"
 NOM_PROXY_API_SCOPE: api://dev-fss.nom.nom-proxy/.default
 
+NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.dev-fss-pub.nais.io"
+NOM_REMEDY_INTEGRASJON_API_SCOPE: api://dev-fss.org.nom-remedy-integrasjon/.default
+
 NOM_WRITE_GROUPID: "c5752f26-105a-460f-a538-1859273f5057"
 NOM_ADMIN_GROUPID: "9e0e2958-df7a-4376-83f3-9bcbec1f2650"
 
@@ -266,3 +281,5 @@ NOM_PROXY_API_SCOPE: api://prod-fss.nom.nom-proxy/.default
 NOM_WRITE_GROUPID: "1334a91a-c4e0-409e-a497-3c4453869874"
 NOM_ADMIN_GROUPID: "2d91b26c-d412-440b-9122-0fafc594db89"
 
+NOM_REMEDY_INTEGRASJON_BASEURL: "https://nom-remedy-integrasjon.prod-fss-pub.nais.io"
+NOM_REMEDY_INTEGRASJON_API_SCOPE: api://prod-fss.org.nom-remedy-integrasjon/.default

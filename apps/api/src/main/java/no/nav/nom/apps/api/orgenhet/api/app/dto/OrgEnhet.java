@@ -13,6 +13,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OrgEnhet(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String id,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fid,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String agressoId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String orgNiv,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String agressoOrgenhetType,

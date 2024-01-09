@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-record StillingPeriode(
+public record StillingPeriode(
     StillingAgressoOrgIdOgNavn stilling,
     LocalDate gyldigFom,
     LocalDate gyldigTom,  // Aldri null. Open ended er 2099-12-31
@@ -46,7 +46,7 @@ record StillingPeriode(
             && this.stilling.agressoId.get().equals(this.stilling.ressursAgressoId.get());
     }
 
-    record StillingAgressoOrgIdOgNavn(
+    public record StillingAgressoOrgIdOgNavn(
         Optional<String> agressoId,
         String enhetNavn,
         Optional<String> ressursAgressoId,

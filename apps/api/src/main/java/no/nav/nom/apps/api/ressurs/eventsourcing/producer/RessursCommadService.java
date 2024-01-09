@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.ressurs.eventsourcing.producer;
 
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.pdl.Person;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonidentCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterSektorCommand;
@@ -12,6 +13,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.SlettRessursC
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonidentOppdatertV1;
@@ -159,6 +161,19 @@ public class RessursCommadService {
         return eventProducer.sendMessage(new RessursStartDatoOppdatertV1(
             oppdaterStartdatoCommand.fid(),
             new RessursStartDatoOppdatertV1.StartDatoOppdatertEventData(oppdaterStartdatoCommand.startdato()),
+            inputMetadata
+        ));
+    }
+
+    public CompletableFuture<SendResult<String, RessursEvent>> oppdaterFysiskeBrukerstederCommand(
+        OppdaterFysiskeBrukerstederCommand oppdaterFysiskeBrukerstederCommand, InputMetadata inputMetadata
+    ) {
+        return eventProducer.sendMessage(new RessursFysiskeBrukerstederOppdatertEventV1(
+            oppdaterFysiskeBrukerstederCommand.fid(),
+            RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
+                .primaryFysiskBrukersted(oppdaterFysiskeBrukerstederCommand.primaryFysiskBrukersted())
+                .fysiskeBrukersteder(oppdaterFysiskeBrukerstederCommand.fysiskeBrukersteder().stream().toList())
+                .build(),
             inputMetadata
         ));
     }

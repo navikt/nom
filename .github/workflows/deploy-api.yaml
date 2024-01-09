@@ -36,7 +36,6 @@ jobs:
       deploy-timeout: 20m
       skip-tests: ${{ github.event.inputs.skip-tests == 'true'}}
     secrets:
-      NAIS_DEPLOY_APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
       GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
       NAIS_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 

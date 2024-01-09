@@ -9,7 +9,15 @@ import {
   SelectLayoutWrapper,
 } from "~/components/select/CustomSelectComponents";
 
-export function FysiskBrukerstedSelectFormPart() {
+export function FysiskBrukerstedSelectFormPart({
+  name = "fysiskBrukerstedNr",
+  description,
+  defaultValue,
+}: {
+  name?: string;
+  description?: string;
+  defaultValue?: FysiskBrukersted;
+}) {
   const { control } = useFormContext();
   const fysiskeBrukerstederQuery = useQuery(getFysiskeBrukersteder);
   const fysiskeBrukersteder = fysiskeBrukerstederQuery.data || [];
@@ -17,10 +25,11 @@ export function FysiskBrukerstedSelectFormPart() {
   return (
     <Controller
       control={control}
-      name="fysiskBrukerstedNr"
+      name={name}
       render={({ field, fieldState }) => (
         <FysiskBrukerstedSelect
-          description="Med fysisk brukersted menes hvor(kontor/lokasjon) medarbeideren skal arbeide. "
+          defaultValue={defaultValue}
+          description={description}
           error={fieldState.error}
           fysiskeBrukersteder={fysiskeBrukersteder}
           onChange={field.onChange}
@@ -37,20 +46,24 @@ function FysiskBrukerstedSelect({
   onChange,
   error,
   value,
+  defaultValue,
 }: {
   fysiskeBrukersteder: FysiskBrukersted[];
   onChange: (s: string | undefined) => void;
-  description: string;
-
+  description?: string;
   error?: FieldError;
   value?: string;
+  defaultValue?: FysiskBrukersted;
 }) {
-  const options = fysiskeBrukersteder.map((fysiskBrukersted) => ({
-    label: `${fysiskBrukersted.brukerstedNr}: ${fysiskBrukersted.brukerstedNavn}`,
-    value: fysiskBrukersted.brukerstedNr,
-  }));
+  const options = fysiskeBrukersteder.map((fysiskBrukersted) =>
+    fysiskBrukerstedOption(fysiskBrukersted),
+  );
 
-  const currentValue = options.find((option) => option.value === value);
+  const defaultOption = defaultValue
+    ? fysiskBrukerstedOption(defaultValue)
+    : null;
+
+  const currentOption = options.find((option) => option.value === value);
 
   return (
     <SelectLayoutWrapper
@@ -63,8 +76,15 @@ function FysiskBrukerstedSelect({
         inputId="Fysisk brukersted"
         onChange={(option) => onChange(option?.value)}
         options={options}
-        value={currentValue ?? null}
+        value={currentOption ?? defaultOption}
       />
     </SelectLayoutWrapper>
   );
+}
+
+function fysiskBrukerstedOption(fysiskBrukersted: FysiskBrukersted) {
+  return {
+    label: `${fysiskBrukersted.brukerstedNr}: ${fysiskBrukersted.brukerstedNavn}`,
+    value: fysiskBrukersted.brukerstedNr,
+  };
 }

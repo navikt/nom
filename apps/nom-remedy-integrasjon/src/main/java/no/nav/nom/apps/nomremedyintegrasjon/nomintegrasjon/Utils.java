@@ -1,8 +1,11 @@
 package no.nav.nom.apps.nomremedyintegrasjon.nomintegrasjon;
 
+import no.nav.nom.generated.model.Visningsnavn;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Optional;
 
 public class Utils {
 
@@ -26,5 +29,9 @@ public class Utils {
         var localDateTime = localDate.atTime(LocalTime.MAX);
 
         return localDateTime.toEpochSecond(norwegianTimeZone.getRules().getOffset(localDateTime));
+    }
+
+    public static String formatFornavnWithMellomnavn(Visningsnavn visningsnavn) {
+        return visningsnavn.getFornavn() + Optional.ofNullable(visningsnavn.getMellomnavn()).map(it -> " " + it).orElse("");
     }
 }

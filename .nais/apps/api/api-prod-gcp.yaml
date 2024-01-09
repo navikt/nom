@@ -16,7 +16,7 @@ spec:
   envFrom:
     - secret: nom-sluttdato-override-json
     - secret: nom-api-unleash-api-token
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-api.intern.nav.no
@@ -132,6 +132,9 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: prod-gcp
+        - application: kabal-api
+          namespace: klage
+          cluster: prod-gcp
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: prod-gcp
@@ -144,6 +147,12 @@ spec:
         - application: oppgavebehandling-api
           namespace: oppgavehandtering
           cluster: prod-gcp
+        - application: saas-proxy
+          namespace: teamcrm
+          cluster: prod-gcp
+        - application: salesforce
+          namespace: teamcrm
+          cluster: prod-external
     outbound:
       rules:
         - application: nav-ident
@@ -153,6 +162,7 @@ spec:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.prod-fss-pub.nais.io
         - host: pdl-api.prod-fss-pub.nais.io
+        - host: nom-remedy-integrasjon.prod-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_12

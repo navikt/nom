@@ -6,10 +6,14 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV2;
 import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.eventsource.RessursFysiskeBrukerstederOppdatertEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.RessursPersonaliaOppdatertV1;
 import no.nav.nom.contract.nom.eventsource.RessursSluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
+import no.nav.nom.generated.model.OrgEnhet;
+import no.nav.nom.generated.model.OrgtilknytningState;
+import no.nav.nom.generated.model.Ressurs;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +31,15 @@ public class TestData {
             UUID.randomUUID().toString(),
             ressursOpprettetEventData(),
             inputMetadata(),
+            ressursOpprettetAdditionalData()
+        );
+    }
+
+    public static RessursOpprettetEventV1 ressursOpprettetEventV1(Origination origination) {
+        return new RessursOpprettetEventV1(
+            UUID.randomUUID().toString(),
+            ressursOpprettetEventData(),
+            inputMetadata(origination),
             ressursOpprettetAdditionalData()
         );
     }
@@ -67,6 +80,27 @@ public class TestData {
         );
     }
 
+    public static RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1() {
+        return ressursFysiskeBrukerstederOppdatertEventV1(ressursFysiskeBrukerstederOppdatertEventData());
+    }
+
+    public static RessursFysiskeBrukerstederOppdatertEventV1 ressursFysiskeBrukerstederOppdatertEventV1(
+        RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData
+    ) {
+        return new RessursFysiskeBrukerstederOppdatertEventV1(
+            UUID.randomUUID().toString(),
+            ressursFysiskeBrukerstederOppdatertEventData,
+            inputMetadata()
+        );
+    }
+
+    public static RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData ressursFysiskeBrukerstederOppdatertEventData() {
+        return RessursFysiskeBrukerstederOppdatertEventV1.RessursFysiskeBrukerstederOppdatertEventData.builder()
+            .primaryFysiskBrukersted("leikanger")
+            .fysiskeBrukersteder(List.of("leikanger"))
+            .build();
+    }
+
     public static OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1() {
         return orgtilknytningDagligOppfolgingEndretEventV1(orgtilknytningDagligOppfolgingEndretEventData());
     }
@@ -78,6 +112,17 @@ public class TestData {
             UUID.randomUUID().toString(),
             orgtilknytningDagligOppfolgingEndretEventData,
             inputMetadata(),
+            null
+        );
+    }
+
+    public static OrgtilknytningDagligOppfolgingEndretEventV1 orgtilknytningDagligOppfolgingEndretEventV1(
+        Origination origination
+    ) {
+        return new OrgtilknytningDagligOppfolgingEndretEventV1(
+            UUID.randomUUID().toString(),
+            orgtilknytningDagligOppfolgingEndretEventData(),
+            inputMetadata(origination),
             null
         );
     }
@@ -115,7 +160,11 @@ public class TestData {
     }
 
     public static InputMetadata inputMetadata(){
-        return new InputMetadata("", "", "", origination());
+        return inputMetadata(origination());
+    }
+
+    public static InputMetadata inputMetadata(Origination origination){
+        return new InputMetadata("", "", "", origination);
     }
 
     public static Origination origination() {
@@ -146,5 +195,31 @@ public class TestData {
             .tiltredelsesdato(epochSecondsNorwegianTimeNoon(LocalDate.now()))
             .utlopsdato(epochSecondsNorwegianTimeEndOfDay(LocalDate.now().plusMonths(1)))
             .build();
+    }
+
+    public static OrgEnhet orgenhet() {
+        return new OrgEnhet()
+            .remedyEnhetId("0123");
+    }
+
+    public static Ressurs ressurs() {
+        return new Ressurs()
+            .navident("X123456")
+            .personident("12345678912")
+            .visningsnavn(new no.nav.nom.generated.model.Visningsnavn()
+                .fornavn("fornavn")
+                .etternavn("etternavn")
+            )
+            .primaryFysiskBrukersted("1234")
+            .sektor(no.nav.nom.generated.model.Sektor.EKSTERN);
+    }
+
+    public static OrgtilknytningState orgtilknytningState() {
+        return new OrgtilknytningState()
+            .navident("X123456")
+            .orgEnhetId("orgenhetId")
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(LocalDate.now().plusMonths(10))
+            .erDagligOppfolging(true);
     }
 }

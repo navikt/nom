@@ -19,7 +19,7 @@ spec:
     - secret: nom-tdv-cred
     - secret: nom-api-serviceuser
     - secret: nom-unit4-cred
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   azure:
     application:

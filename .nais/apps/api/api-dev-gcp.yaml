@@ -15,7 +15,7 @@ spec:
       value: "-Xms1024m -Xmx8192m"
   envFrom:
     - secret: nom-api-unleash-api-token
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-api.intern.dev.nav.no
@@ -159,6 +159,9 @@ spec:
         - application: kabal-innstillinger
           namespace: klage
           cluster: dev-gcp
+        - application: kabal-api
+          namespace: klage
+          cluster: dev-gcp
         - application: etterlevelse-backend
           namespace: teamdatajegerne
           cluster: dev-gcp
@@ -177,6 +180,7 @@ spec:
         - host: teamorg-unleash-api.nav.cloud.nais.io
         - host: nom-proxy.dev-fss-pub.nais.io
         - host: pdl-api.dev-fss-pub.nais.io
+        - host: nom-remedy-integrasjon.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_12

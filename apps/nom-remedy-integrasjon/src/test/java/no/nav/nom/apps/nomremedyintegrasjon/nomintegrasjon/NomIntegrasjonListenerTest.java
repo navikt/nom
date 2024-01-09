@@ -6,6 +6,7 @@ import static no.nav.nom.apps.nomremedyintegrasjon.TestData.orgtilknytningDaglig
 import static no.nav.nom.apps.nomremedyintegrasjon.TestData.ressursOpprettetEventV1;
 
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
+import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.eventsource.RessursEvent;
 import no.nav.nom.contract.nom.eventsource.RessursOpprettetEventV1;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 public class NomIntegrasjonListenerTest extends TestBase {
 
@@ -42,9 +44,9 @@ public class NomIntegrasjonListenerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Should listen to ressurs events")
+    @DisplayName("Should handle ressurs events")
     void testRessursEventListener() throws InterruptedException {
-        var ressursOpprettetEventV1 = ressursOpprettetEventV1();
+        var ressursOpprettetEventV1 = ressursOpprettetEventV1(new Origination("", "context:namespace:nom-ui2"));
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -64,9 +66,9 @@ public class NomIntegrasjonListenerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Should listen to orgtilknytning events")
+    @DisplayName("Should handle orgtilknytning events")
     void testOrgtilknytningEventListener() throws InterruptedException {
-        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1();
+        var orgtilknytningDagligOppfolgingEndretEventV1 = orgtilknytningDagligOppfolgingEndretEventV1(new Origination("", "context:namespace:nom-ui2"));
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -83,5 +85,26 @@ public class NomIntegrasjonListenerTest extends TestBase {
 
         verify(nomIntegrasjonService, times(1))
             .handleOrgtilknytningEvent(any(OrgtilknytningEvent.class));
+    }
+
+    @Test
+    @DisplayName("Should skip handling events that are not originated from nom")
+    void testSkipsHandlingEventsIfNotNomOrigination() throws InterruptedException {
+
+        orgtilknytningEventKafkaTemplate.send(
+            orgtilknytningEventSourceTopic,
+            UUID.randomUUID().toString(),
+            orgtilknytningDagligOppfolgingEndretEventV1(new Origination("", "context:namespace:not-nom-ui2"))
+        );
+
+        ressursEventKafkaTemplate.send(
+            ressursEventSourceTopic,
+            UUID.randomUUID().toString(),
+            ressursOpprettetEventV1(new Origination("", "context:namespace:not-nom-ui2"))
+        );
+
+        Thread.sleep(700);
+
+        verifyNoInteractions(nomIntegrasjonService);
     }
 }

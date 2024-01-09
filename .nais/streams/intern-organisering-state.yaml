@@ -6,7 +6,7 @@ metadata:
   labels:
     team: org
 spec:
-  image: {{image}}
+  image: "{{image}}"
   env:
     - name: LOGGING_CONFIG
       value: 'classpath:logback-nais.xml'

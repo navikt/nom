@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
+        <version>3.2.1</version>
         <relativePath />
     </parent>
 
@@ -15,18 +15,8 @@
     <artifactId>orgenhet-state</artifactId>
     <version>1.1.0</version>
 
-    <properties>
-        <snakeyaml.version>2.2</snakeyaml.version>  <!-- https://github.com/navikt/nom/security/dependabot/85 versjon 1.33 er vuln.  -->
-    </properties>
-
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>  <!-- https://github.com/navikt/nom/security/dependabot/85 -->
-            </dependency>
-
             <!-- Bruk felles pom for angivelse av versjoner -->
             <!-- Prosjekt overstyrte versjoner må angis over denne -->
             <dependency>

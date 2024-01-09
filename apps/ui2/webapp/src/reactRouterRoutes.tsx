@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import { Tabs } from "@navikt/ds-react";
 import {
+  createRouteMask,
   Navigate,
   Outlet,
   RootRoute,
@@ -241,7 +242,18 @@ const routeTree = rootRoute.addChildren([
   notFoundRoute,
 ]);
 
-export const router = new Router({ routeTree });
+// Because createRessurs includes personIdent in search params, we hide these to avoid them being logged on route changes.
+const maskCreateRessursSearchParameters = createRouteMask({
+  routeTree,
+  from: "/ressurs/create/$step",
+  to: "/ressurs/create/$step",
+  params: (previous) => ({ step: previous.step }),
+});
+
+export const router = new Router({
+  routeTree,
+  routeMasks: [maskCreateRessursSearchParameters],
+});
 
 declare module "@tanstack/react-router" {
   interface Register {

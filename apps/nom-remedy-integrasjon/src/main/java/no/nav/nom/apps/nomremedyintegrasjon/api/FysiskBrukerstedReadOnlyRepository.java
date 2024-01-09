@@ -17,4 +17,15 @@ public interface FysiskBrukerstedReadOnlyRepository extends Repository<FysiskBru
         """
     )
     List<FysiskBrukersted> findAll();
+
+    @Query(
+        nativeQuery = true,
+        value = """
+        select *
+        from ARADMIN.FYSISK_BRUKERSTED
+        where STATUS = 0 and GYLDIG_SOM_FYSISK_PLASSERING_A = 0
+        and BRUKERSTED_NR in :brukerstedNrs
+        """
+    )
+    List<FysiskBrukersted> findByBrukerstedNrIn(List<String> brukerstedNrs);
 }

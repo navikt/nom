@@ -18,6 +18,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailException;
 import no.nav.nom.apps.api.ressurs.email.RessursOpprettetEmailService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterPersonaliaCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpphorRessursCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -38,10 +39,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
@@ -49,7 +54,7 @@ import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNa
 @Service
 public class RessursRestService {
 
-    private final static Logger log = LoggerFactory.getLogger(RessursRestService.class);
+    private final static Logger logger = LoggerFactory.getLogger(RessursRestService.class);
 
     private final RessursStateRepository ressursStateRepository;
     private final RessursCommadService ressursCommadService;
@@ -57,6 +62,7 @@ public class RessursRestService {
     private final OrgtilknytningRestService orgtilknytningRestService;
     private final NIKClient nikClient;
     private final PdlClient pdlClient;
+    private final NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient;
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final RessursOpprettetEmailService ressursOpprettetEmailService;
     private final RessursContactDetailsResolver ressursContactDetailsResolver;
@@ -71,7 +77,7 @@ public class RessursRestService {
         OrgtilknytningRestService orgtilknytningRestService,
         NIKClient nikClient,
         PdlClient pdlClient,
-        OrgEnhetStateRepository orgEnhetStateRepository,
+        NomRemedyIntegrasjonClient nomRemedyIntegrasjonClient, OrgEnhetStateRepository orgEnhetStateRepository,
         RessursOpprettetEmailService ressursOpprettetEmailService,
         RessursContactDetailsResolver ressursContactDetailsResolver,
         RessursLedereResolver ressursLedereResolver,
@@ -84,6 +90,7 @@ public class RessursRestService {
         this.orgtilknytningRestService = orgtilknytningRestService;
         this.nikClient = nikClient;
         this.pdlClient = pdlClient;
+        this.nomRemedyIntegrasjonClient = nomRemedyIntegrasjonClient;
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.ressursOpprettetEmailService = ressursOpprettetEmailService;
         this.kafkaTopicReader = kafkaTopicReader;
@@ -92,9 +99,9 @@ public class RessursRestService {
         this.nomMastered = nomMastered;
     }
 
-    public Ressurs findRessursByNavident(String navident) {
+    public Ressurs findRessursByNavident(String navident, Boolean obfuscatePersonident) {
         var ressursState = findRessursStateByNavident(navident);
-        return enrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
     }
 
     private RessursState findRessursStateByNavident(String navident) {
@@ -105,17 +112,21 @@ public class RessursRestService {
         return ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
     }
 
-    public Ressurs findRessursByFid(String fid) {
+    public Ressurs findRessursByFid(String fid, Boolean obfuscatePersonident) {
         var ressursState = findRessursStateByFid(fid);
-        return enrichRessursStateWithDvhData(ressursState);
+        return obfuscatePersonidentAndEnrichRessursStateWithDvhData(ressursState, obfuscatePersonident);
     }
 
-    private Ressurs enrichRessursStateWithDvhData(RessursState ressursState) {
+    private Ressurs obfuscatePersonidentAndEnrichRessursStateWithDvhData(RessursState ressursState, Boolean obfuscatePersonident) {
         var telefoner = ressursContactDetailsResolver.fetchTelefoner(ressursState.navident());
         var epost = ressursContactDetailsResolver.fetchEmail(ressursState.navident());
+        var personident = obfuscatePersonident
+            ? ressursState.personident().replaceFirst(".{5}$", "*****")
+            : ressursState.personident();
 
         return new Ressurs(
-            ressursState,
+            ressursState.toBuilder()
+                .personident(personident).build(),
             telefoner,
             epost.orElse(null)
         );
@@ -142,6 +153,60 @@ public class RessursRestService {
         nomMastered.markRessursAsMasteredInNom(navident);
     }
 
+    public void updateFysiskeBrukersteder(String fid, UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest) {
+        if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted() == null || updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().isBlank()){
+            throw new IllegalArgumentException("primaryFysiskBrukersted cannot be blank or null");
+        }
+        if (!updateFysiskeBrukerstederRequest.fysiskeBrukersteder().contains(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())) {
+            throw new IllegalArgumentException("Value for primaryFysiskBrukersted must be included in fysiske brukersteder");
+        }
+
+        validateFysiskeBrukerstederExists(updateFysiskeBrukerstederRequest.fysiskeBrukersteder());
+
+        var ressursState = ressursStateRepository.findByFid(fid).orElseThrow(() -> RessursNotFoundException.fid(fid));
+
+        var existingFysiskeBrukerstederForRessurs = Optional.ofNullable(ressursState.fysiskeBrukersteder()).orElse(Collections.emptyList());
+
+        var requestContainsNewValues = !Set.copyOf(existingFysiskeBrukerstederForRessurs).equals(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+            || !ressursState.primaryFysiskBrukersted().equals(Optional.of(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted()));
+
+        if (requestContainsNewValues) {
+
+            ressursCommadService.oppdaterFysiskeBrukerstederCommand(
+                OppdaterFysiskeBrukerstederCommand.builder()
+                    .fid(ressursState.fid())
+                    .primaryFysiskBrukersted(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())
+                    .fysiskeBrukersteder(updateFysiskeBrukerstederRequest.fysiskeBrukersteder())
+                    .build(),
+                new InputMetadata(
+                    "REST-API",
+                    "updateFysiskeBrukersteder",
+                    Map.of("navident", ressursState.navident()),
+                    new Origination(
+                        getAuthenticatedNavIdent(),
+                        SecurityUtil.getAuthenticatedAzpName()
+                    )
+                )
+            );
+        } else {
+            logger.info("UpdateFysiskeBrukerstederRequest contained no new values, skipping update on ressurs with fid {}", fid);
+        }
+    }
+
+    private void validateFysiskeBrukerstederExists(Set<String> brukerstedNrs) {
+        var existingBrukerstedNrs = nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(brukerstedNrs.stream().toList());
+
+        if (!existingBrukerstedNrs.containsAll(brukerstedNrs)) {
+            var nonExistingBrukerstedNrs = brukerstedNrs.stream().filter(existingBrukerstedNrs::contains)
+                .collect(Collectors.toSet());
+
+            throw new IllegalArgumentException(String.format(
+                "Fysiske brukersteder with brukerstedNr %s does not exist",
+                nonExistingBrukerstedNrs
+            ));
+        }
+    }
+
     public List<JsonNode> getRessursEvents(ReadTopicRequest readTopicRequest) {
         return kafkaTopicReader.getRessursEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
@@ -155,16 +220,16 @@ public class RessursRestService {
     ) {
 
         return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -> {
-            final var createRessursResponse = createRessurs(request);
+            final var createdRessurs = createRessurs(request);
 
             try {
-                ressursOpprettetEmailService.notifyByEmail(createRessursResponse.navident(), request.orgEnhetId());
+                ressursOpprettetEmailService.notifyByEmail(createdRessurs.navident(), request.orgEnhetId());
             } catch (RessursOpprettetEmailException exception) {
                 //TODO: consider handling exception if email sending is important
-                log.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
+                logger.warn("Epost varsling om opprettelse av ressurs til orgenhet leder feilet. {}", exception.getMessage());
             }
 
-            return createRessursResponse;
+            return createdRessurs;
         });
 
     }
@@ -202,7 +267,7 @@ public class RessursRestService {
             request = request.toBuilder().visningsmellomnavn(null).build();
         }
 
-        log.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
+        logger.debug("createRessurs for {} - {}", opprettNavidentResponse.getBody().getNavident(), request.visningsetternavn());
 
         var metaData = new InputMetadata(
             "REST-API",
@@ -331,6 +396,7 @@ public class RessursRestService {
             if (request.sluttDato().isEmpty()) {
                 throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
             }
+            validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
         }
     }
 }

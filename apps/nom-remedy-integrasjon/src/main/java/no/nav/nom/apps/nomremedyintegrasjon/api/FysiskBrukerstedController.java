@@ -3,6 +3,7 @@ package no.nav.nom.apps.nomremedyintegrasjon.api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -18,7 +19,11 @@ public class FysiskBrukerstedController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FysiskBrukersted>> getFysiskeBrukersteder() {
+    public ResponseEntity<List<FysiskBrukersted>> getFysiskeBrukersteder(@RequestParam(required = false) List<String> brukerstedNrs) {
+
+        if (brukerstedNrs != null) {
+            return ResponseEntity.ok(fysiskBrukerstedReadOnlyRepository.findByBrukerstedNrIn(brukerstedNrs));
+        }
 
         return ResponseEntity.ok(fysiskBrukerstedReadOnlyRepository.findAll());
     }

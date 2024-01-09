@@ -30,9 +30,12 @@ export function SektorStep() {
         onSubmit={(event) => {
           event.preventDefault();
           navigate({
-            to: createRessursRoute.to,
+            to: createRessursRoute.id,
             params: { step: "2" },
-            search: (oldSearch) => ({ ...oldSearch, sektor: selectedSektor }),
+            search: (oldSearch) => ({
+              ...oldSearch,
+              sektor: selectedSektor,
+            }),
           });
         }}
       >

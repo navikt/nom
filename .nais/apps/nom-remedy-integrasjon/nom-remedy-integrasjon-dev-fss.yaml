@@ -6,7 +6,7 @@ metadata:
   labels:
     team: org
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://nom-remedy-integrasjon.dev-fss-pub.nais.io
@@ -51,6 +51,9 @@ spec:
           cluster: dev-gcp
         - application: org-token-tool
           namespace: org
+          cluster: dev-gcp
+        - application: nom-api
+          namespace: nom
           cluster: dev-gcp
     outbound:
       external:

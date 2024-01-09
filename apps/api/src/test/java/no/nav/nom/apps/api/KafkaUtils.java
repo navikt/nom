@@ -5,6 +5,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMasteredRessursListener;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
 import no.nav.nom.contract.nom.state.RessursState;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
@@ -34,29 +35,37 @@ public class KafkaUtils {
     private final String ressursStateTopic;
 
     private final String orgenhetStateTopic;
+
     private final EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    private final AdminClient adminClient;
+
     @SpyBean
     final RessursStateListener ressursStateListener;
+
     @SpyBean
     public final NomMasteredRessursListener nomMasteredRessursListener;
+
     @SpyBean
     final OrgEnhetStateListener orgEnhetStateListener;
+
     private final KafkaTemplate<String, RessursState> ressursStateKafkaTemplate;
     private final KafkaTemplate<String, OrgEnhetState> orgEnhetStateKafkaTemplate;
 
     @Autowired
     public KafkaUtils(
-            EmbeddedKafkaBroker embeddedKafkaBroker,
-            RessursStateListener ressursStateListener,
-            OrgEnhetStateListener orgEnhetStateListener,
-            @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
-            @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
-            NomMasteredRessursListener nomMasteredRessursListener
+        EmbeddedKafkaBroker embeddedKafkaBroker,
+        RessursStateListener ressursStateListener,
+        OrgEnhetStateListener orgEnhetStateListener,
+        @Value("${app.kafka.ressurs.stateTopic}") String ressursStateTopic,
+        @Value("${app.kafka.orgEnhet.stateTopic}") String orgEnhetStateTopic,
+        AdminClient adminClient, NomMasteredRessursListener nomMasteredRessursListener
     ) {
         this.embeddedKafkaBroker = embeddedKafkaBroker;
 
         this.ressursStateListener = ressursStateListener;
         this.ressursStateTopic = ressursStateTopic;
+        this.adminClient = adminClient;
         this.nomMasteredRessursListener = nomMasteredRessursListener;
         this.ressursStateKafkaTemplate = ressursStateKafkaTemplate();
 
@@ -107,19 +116,17 @@ public class KafkaUtils {
 
 
     public void clearKafka() {
-        embeddedKafkaBroker.doWithAdmin(adminClient -> {
-            try {
-                Map<TopicPartition, RecordsToDelete> collect = adminClient.listPartitionReassignments()
-                        .reassignments()
-                        .get(10, TimeUnit.SECONDS)
-                        .keySet().stream()
-                        .collect(Collectors.toMap(Function.identity(), topicPartition -> RecordsToDelete.beforeOffset(Long.MAX_VALUE)));
+        try {
+            Map<TopicPartition, RecordsToDelete> collect = adminClient.listPartitionReassignments()
+                .reassignments()
+                .get(10, TimeUnit.SECONDS)
+                .keySet().stream()
+                .collect(Collectors.toMap(Function.identity(), topicPartition -> RecordsToDelete.beforeOffset(Long.MAX_VALUE)));
 
-                adminClient.deleteRecords(collect).all().get();
-            } catch (Exception exception) {
-                throw new RuntimeException("Failed to clear topic", exception);
-            }
-        });
+            adminClient.deleteRecords(collect).all().get();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to clear topic", exception);
+        }
     }
 
     private KafkaTemplate<String, RessursState> ressursStateKafkaTemplate() {

@@ -51,7 +51,6 @@ public class DvhRestConsumer {
     private final RessursStateListener ressursStateListener;
     private final OrgtilknytningStateListener orgtilknytningStateListener;
     private final OrgEnhetStateListener orgEnhetStateListener;
-    private final NomMasteredRessursListener nomMasteredRessursListener;
     private final RessursHendelseForEventsourceService ressursHendelseForEventsourceService;
     private final LeaderElection leaderElection;
     private final DvhOrgenhetsLast dvhOrgenhetsLast;

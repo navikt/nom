@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Tester basic parsing av Json objekter fra DVH")
-class DvhRessursStillingTest {
+class DvhRessursStillingTestResponse {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
