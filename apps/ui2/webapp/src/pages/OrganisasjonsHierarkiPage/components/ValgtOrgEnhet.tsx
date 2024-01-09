@@ -1,13 +1,17 @@
 import { css } from "@emotion/react";
-import { BodyShort, Heading, Link } from "@navikt/ds-react";
+import { BodyShort, Heading, Link, ReadMore } from "@navikt/ds-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link as ReactRouterLink } from "@tanstack/react-router";
+import partition from "lodash/partition";
 import React from "react";
 
+import { getRessurserForOrgenhet } from "~/api/react-query-endpoints";
 import { UserImage } from "~/components/UserImage";
 import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardViews";
 import { ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
+import { Sektor } from "~/types/api-models";
 import { formatVisningsnavn } from "~/utils";
 
 export const ValgtOrgEnhet = ({
@@ -51,10 +55,12 @@ export const ValgtOrgEnhet = ({
               column-gap: var(--a-spacing-4);
             `}
           >
-            <BodyShort size="small">ID: {orgEnhet.id}</BodyShort>
+            <BodyShort size="small">
+              ID: <b>{orgEnhet.id}</b>
+            </BodyShort>
             {orgEnhet.remedyEnhetId && (
               <BodyShort size="small">
-                Remedy-enhet: {orgEnhet.remedyEnhetId}
+                Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
               </BodyShort>
             )}
           </div>
@@ -76,38 +82,98 @@ export const ValgtOrgEnhet = ({
           <OrgenhetLederLink orgEnhet={orgEnhet} />
         </div>
       </div>
-      <MedarbeidereList orgEnhet={orgEnhet} ressurser={ressurser} />
+      <MedarbeidereList navidenter={ressurser} orgEnhet={orgEnhet} />
     </div>
   </div>
 );
 
 function MedarbeidereList({
   orgEnhet,
-  ressurser,
+  navidenter,
 }: {
   orgEnhet: OrgEnhet;
-  ressurser: string[];
+  navidenter: string[];
 }) {
-  if (ressurser.length === 0) {
+  const hentedeRessurser =
+    useQuery({
+      queryKey: getRessurserForOrgenhet.queryKey(orgEnhet.id),
+      queryFn: () => getRessurserForOrgenhet.queryFn(navidenter),
+    }).data ?? [];
+
+  if (hentedeRessurser.length === 0) {
     return <></>;
   }
 
+  const [eksterneRessurser, interneRessurser] = partition(
+    hentedeRessurser,
+    (ressurs) => ressurs.sektor.includes(Sektor.EKSTERN),
+  );
+
   return (
     <div>
-      <Heading level="3" size="small" spacing>
-        Medarbeidere i {orgEnhet.navn}
-      </Heading>
-      <div
-        css={css`
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: var(--a-spacing-4);
-        `}
-      >
-        {ressurser.map((ressurs) => (
-          <ResourceLink key={ressurs} navident={ressurs} />
-        ))}
-      </div>
+      {interneRessurser.length > 0 && (
+        <div>
+          <Heading level="3" size="small" spacing>
+            Medarbeidere i {orgEnhet.navn}
+          </Heading>
+          <div
+            css={css`
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: var(--a-spacing-4);
+            `}
+          >
+            {interneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {eksterneRessurser.length > 0 && (
+        <ReadMore
+          css={css`
+            margin-top: var(--a-spacing-4);
+
+            .navds-read-more__button {
+              color: var(--a-text-default);
+              font-size: var(--a-font-size-heading-small);
+              font-weight: var(--a-font-weight-bold);
+            }
+
+            .navds-read-more__content {
+              margin-left: 0;
+              padding-left: 0;
+              border-left: none;
+            }
+          `}
+          defaultOpen
+          header={"Eksterne medarbeidere i " + orgEnhet.navn}
+        >
+          <div
+            css={css`
+              margin-top: var(--a-spacing-4);
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: var(--a-spacing-4);
+            `}
+          >
+            {eksterneRessurser.map((ressurs) => {
+              return (
+                <ResourceLink
+                  key={ressurs.navident}
+                  navident={ressurs.navident}
+                />
+              );
+            })}
+          </div>
+        </ReadMore>
+      )}
     </div>
   );
 }
