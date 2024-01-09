@@ -114,6 +114,9 @@ spec:
         - application: sparkel-vilkarsproving
           namespace: tbd
           cluster: dev-fss
+        - application: sparkel-egenansatt
+          namespace: tbd
+          cluster: dev-gcp
         - application: modiapersonoversikt-api-q0
           namespace: personoversikt
           cluster: dev-fss
