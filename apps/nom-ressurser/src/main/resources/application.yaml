@@ -77,8 +77,8 @@ spring:
     activate:
       on-profile: dev & !prod
 
-DB_HOST: b27dbvl009.preprod.local
-DB_NAME: nom-ressurser-dev
+DB_HOST: b27dbvl031.preprod.local
+DB_NAME: nom-ressurser
 DB_ENV: preprod-fss
 KAFKA_BOOTSTRAP_SERVERS: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 DVH_ENDPOINT: https://tdv-u.adeo.no/json/Hr/Nom/NOM_ANSATTE
