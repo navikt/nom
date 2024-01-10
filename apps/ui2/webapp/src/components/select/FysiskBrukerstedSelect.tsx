@@ -1,4 +1,3 @@
-import { HelpText } from "@navikt/ds-react";
 import { useQuery } from "@tanstack/react-query";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
@@ -70,13 +69,10 @@ function FysiskBrukerstedSelect({
     <SelectLayoutWrapper
       description={description}
       error={error}
+      helpText="Med fysisk brukersted menes hvor (kontor/plassering) medarbeideren skal
+          arbeide."
       htmlFor="Fysisk brukersted"
-      label={`Fysisk brukersted ${(
-        <HelpText>
-          Med fysisk brukersted menes hvor(kontor/lokasjon) medarbeideren skal
-          arbeide.
-        </HelpText>
-      )}`}
+      label="Fysisk brukersted"
     >
       <BasicSelect
         inputId="Fysisk brukersted"

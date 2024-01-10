@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { HelpText, Label } from "@navikt/ds-react";
+import { Label } from "@navikt/ds-react";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
@@ -28,14 +28,11 @@ export function OrgEnhetSelectFormPart({
         <OrgEnhetSelect
           description=""
           error={fieldState.error}
-          label={`Organisasjonsenhet ${(
-            <HelpText>
-              Med organisasjonsenhet menes hvilken enhet medarbeideren skal
+          helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
               Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan
-              du legge i inn i Teamkatalogen.
-            </HelpText>
-          )}`}
+              du legge i inn i Teamkatalogen."
+          label="Organisasjonsenhet"
           onChange={field.onChange}
           orgEnheter={orgEnheter}
           value={field.value}
@@ -52,6 +49,7 @@ function OrgEnhetSelect({
   description,
   value,
   error,
+  helpText,
 }: {
   orgEnheter: OrgEnheterFromSearch;
   onChange: (s: string | undefined) => void;
@@ -59,6 +57,7 @@ function OrgEnhetSelect({
   description: string;
   label: string;
   error?: FieldError;
+  helpText?: string;
 }) {
   const options = orgEnheter.map((orgEnhet) => ({
     value: orgEnhet.id,
@@ -71,6 +70,7 @@ function OrgEnhetSelect({
     <SelectLayoutWrapper
       description={description}
       error={error}
+      helpText={helpText}
       htmlFor={label}
       label={label}
     >
