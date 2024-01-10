@@ -7,15 +7,14 @@ import no.nav.nom.apps.api.dvh.DvhRestConsumer;
 import no.nav.nom.apps.api.organisering.DvhOrganiseringMock;
 import no.nav.nom.apps.api.organisering.OrganiseringConfig;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.orgenhet.OrgenhetTestUtils.orgEnhetStatesToOrganiseringState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -98,14 +97,12 @@ public class LederForRessursTest extends RessursTestBase {
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState(
-                "FID_1",
-                ressurs.navident(),
-                "ID_1",
-                true,
-                LocalDate.now(),
-                Optional.empty()
-            )
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressurs.navident())
+                .orgEnhetId("ID_1")
+                .erDagligOppfolging(true)
+                .build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -198,14 +195,12 @@ public class LederForRessursTest extends RessursTestBase {
         // Knytte ressurs til org. enhet på laveste nivå
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState(
-                "FID_1",
-                ressurs.navident(),     // testNavIdent1
-                "ID_1",                 // ressursSinNedersteEnhetState
-                true,
-                LocalDate.now(),
-                Optional.empty()
-            )
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressurs.navident())
+                .orgEnhetId("ID_1")
+                .erDagligOppfolging(true)
+                .build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
