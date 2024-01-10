@@ -171,6 +171,9 @@ spec:
         - application: nom-remedy-integrasjon
           namespace: org
           cluster: dev-fss
+        - application: org-okonomi-mapping-backend
+          namespace: org
+          cluster: dev-gcp
     outbound:
       rules:
         - application: nav-ident
