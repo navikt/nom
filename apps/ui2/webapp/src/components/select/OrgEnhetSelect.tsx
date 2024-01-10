@@ -29,14 +29,12 @@ export function OrgEnhetSelectFormPart({
           description=""
           error={fieldState.error}
           label={`Organisasjonsenhet ${(
-            <>
-              <HelpText>
-                Med organisasjonsenhet menes hvilken enhet medarbeideren skal
-                tilhøre og dermed hvilken leder som er ansvarlig for
-                vedkommende. Organisasjonsenhet er ikke det samme som team.
-                Teamtilhørighet kan du legge i inn i Teamkatalogen.
-              </HelpText>
-            </>
+            <HelpText>
+              Med organisasjonsenhet menes hvilken enhet medarbeideren skal
+              tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
+              Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan
+              du legge i inn i Teamkatalogen.
+            </HelpText>
           )}`}
           onChange={field.onChange}
           orgEnheter={orgEnheter}
