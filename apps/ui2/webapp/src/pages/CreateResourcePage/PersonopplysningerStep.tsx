@@ -52,7 +52,13 @@ function CreateResourceForm({ personident }: { personident: string }) {
   }
 
   if (hentPersonQuery.error) {
-    return <Alert variant="error">{hentPersonQuery.error.message}</Alert>;
+    return (
+      <Alert variant="error">
+        {hentPersonQuery.error.response?.status === 404
+          ? "Ingen resultater for søket"
+          : "En teknisk feil forhindret søket"}
+      </Alert>
+    );
   }
 
   const person = hentPersonQuery.data;

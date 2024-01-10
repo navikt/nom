@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { Label } from "@navikt/ds-react";
+import { HelpText, Label } from "@navikt/ds-react";
 import type { FieldError } from "react-hook-form";
 import { Controller, useFormContext } from "react-hook-form";
 import type { OptionProps } from "react-select";
@@ -26,10 +26,19 @@ export function OrgEnhetSelectFormPart({
       name="orgEnhetId"
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
-          description="Med organisasjonenhet menes hvilken enhet medarbeideren skal tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
-Organisasjonsenhet er ikke det samme som team. Teamtilhørighet kan du legge i inn i Teamkatalogen. "
+          description=""
           error={fieldState.error}
-          label="Organisasjonsenhet"
+          label={
+            <>
+              Organisasjonsenhet
+              <HelpText>
+                Med organisasjonsenhet menes hvilken enhet medarbeideren skal
+                tilhøre og dermed hvilken leder som er ansvarlig for
+                vedkommende. Organisasjonsenhet er ikke det samme som team.
+                Teamtilhørighet kan du legge i inn i Teamkatalogen.
+              </HelpText>
+            </>
+          }
           onChange={field.onChange}
           orgEnheter={orgEnheter}
           value={field.value}

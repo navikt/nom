@@ -43,7 +43,8 @@ export function SearchForPerson() {
           />
         )}
         rules={{
-          validate: (value) => value?.length === 11 || "Må være 11 siffer",
+          validate: (value) =>
+            value?.length === 11 || "Fødselsnummer må inneholde 11 siffer",
         }}
       />
     </form>
