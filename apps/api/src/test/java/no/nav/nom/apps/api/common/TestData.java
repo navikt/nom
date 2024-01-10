@@ -14,14 +14,15 @@ import java.util.UUID;
 public class TestData {
 
     public static OrgtilknytningState orgtilknytningState() {
-        return new OrgtilknytningState(
-            UUID.randomUUID().toString(),
-            "X123456",
-            "orgEnhet123",
-            false,
-            LocalDate.now().minusMonths(1),
-            Optional.empty()
-        );
+        return OrgtilknytningState.builder()
+            .fid(UUID.randomUUID().toString())
+            .navident("X123456")
+            .orgEnhetId("orgEnhet123")
+            .erDagligOppfolging(false)
+            .gyldigFom(LocalDate.now().minusMonths(1))
+            .gyldigTom(Optional.empty())
+            .orgtilknytningType(Optional.empty())
+            .build();
     }
 
     public static OrgEnhetState orgEnhetState() {

@@ -26,8 +26,11 @@ public record AppProperties(
             String orgtilknytningPath,
             String ressursStillingerPath,
             String eksterneRessurserPath,
-            String kommunaleRessurserPath
-    ) {}
+            String kommunaleRessurserPath,
+            String ansatteBucketsPath,
+            String tlfPath,
+            String orgHierarkiPath
+        ) {}
 
     public record Pdl(
             String tema,
