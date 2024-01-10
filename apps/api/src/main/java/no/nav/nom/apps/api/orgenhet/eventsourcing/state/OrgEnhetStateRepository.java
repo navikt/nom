@@ -16,11 +16,11 @@ import static java.util.Comparator.comparing;
 
 @Service
 public class OrgEnhetStateRepository {
-    private final Map<String, OrgEnhetState> orgEnhetByFid = new ConcurrentHashMap<>();
-    private final Map<String, OrgEnhetState> orgEnhetById = new ConcurrentHashMap<>();
+    private final Map<String, OrgEnhetState> orgEnhetByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, OrgEnhetState> orgEnhetById = new ConcurrentHashMap<>(16, 0.9f, 1);
 
-    private final Map<String, List<OrgEnhetState>> orgEnheterByUniqueAgressoId = new ConcurrentHashMap<>();
-    private final Map<String, List<OrgEnhetState>> orgEnheterByAgressoIdAndNiv = new ConcurrentHashMap<>();
+    private final Map<String, List<OrgEnhetState>> orgEnheterByUniqueAgressoId = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, List<OrgEnhetState>> orgEnheterByAgressoIdAndNiv = new ConcurrentHashMap<>(16, 0.9f, 1);
 
     public Optional<OrgEnhetState> findByFid(String fid) {
         return Optional.ofNullable(orgEnhetByFid.get(fid));
@@ -43,6 +43,14 @@ public class OrgEnhetStateRepository {
             .map(Map.Entry::getValue)
             .collect(Collectors.toList());
     }
+
+    public List<OrgEnhetState> findByIdIn(Set<String> ids) {
+        return orgEnhetById.entrySet().stream()
+            .filter(e -> ids.contains(e.getKey()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toList());
+    }
+
     public List<OrgEnhetState> findAllByUniqueAgressoId(String id) {
         List<OrgEnhetState> orgEnheter = orgEnheterByUniqueAgressoId.get(id);
         if (orgEnheter == null) {
