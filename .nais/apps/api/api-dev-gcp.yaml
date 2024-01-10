@@ -111,9 +111,9 @@ spec:
         - application: oppgavestyring-backend
           namespace: oppgavehandtering
           cluster: dev-gcp
-        - application: sparkel-vilkarsproving
+        - application: sparkel-egenansatt
           namespace: tbd
-          cluster: dev-fss
+          cluster: dev-gcp
         - application: modiapersonoversikt-api-q0
           namespace: personoversikt
           cluster: dev-fss

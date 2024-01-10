@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.nom.apps.api.clients.nomproxy.NomProxyClient;
+import no.nav.nom.apps.api.common.AppProperties;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
 import no.nav.nom.apps.api.dvh.dto.DvhTelefon;
@@ -45,6 +46,8 @@ public class DvhRestConsumer {
     public static final String CACHE = "cache-source-dvh";
     public static final String UNLEASH_PRODUSERE_NYE_ORGANISERING_MELDINGER = "nom.organisering.enable_new_topics";
     private final long LOAD_INTERVAL = 30 * 60 * 1000; // sync hvert 30min
+    private final AppProperties appProperties;
+
     private final DvhRepository dvhRepository;
     private final DvhService dvhService;
     private final NomProxyClient nomProxyClient;
@@ -122,7 +125,7 @@ public class DvhRestConsumer {
     public void loadRessurserFromDvh() {
         log.info("Laster ressurser fra dvh");
         try {
-            var jsonRessurser = dvhExchange("/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2");
+            var jsonRessurser = dvhExchange(appProperties.clients().nomProxy().ansatteBucketsPath());
 
             val dvhRessurs = StreamSupport.stream(jsonRessurser.get("NOM_ANSATTE_BUCKETS_v2Response").spliterator(), false)
                 .map(DvhRessurs::new)
@@ -187,7 +190,7 @@ public class DvhRestConsumer {
     public void loadTlfFromDvh() {
         log.info("Laster tlf fra dvh");
         try {
-            val jsonTlfNr = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_TLF_v1");
+            val jsonTlfNr = dvhExchange(appProperties.clients().nomProxy().tlfPath());
             val tlfRader = StreamSupport.stream(jsonTlfNr.get("NOM_TLF_v1Result").spliterator(), false)
                 .filter(this::validateTlf)
                 .map(DvhTelefon::new)
@@ -209,7 +212,7 @@ public class DvhRestConsumer {
     public void loadLedereAndOrganiseringerFromDvh() {
         log.info("Laster ledere og Organisering fra dvh");
         try {
-            val jsonOrgenheter = dvhExchange("/proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2");
+            val jsonOrgenheter = dvhExchange(appProperties.clients().nomProxy().orgHierarkiPath());
             val ledere = new LinkedList<DvhLeder>();
             val organiseringer = new LinkedList<DvhOrganisering>();
 
