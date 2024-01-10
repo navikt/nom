@@ -71,15 +71,14 @@ function FysiskBrukerstedSelect({
       description={description}
       error={error}
       htmlFor="Fysisk brukersted"
-      label={
+      label={`Organisasjonsenhet ${(
         <>
-          Fysisk brukersted
           <HelpText>
             Med fysisk brukersted menes hvor(kontor/lokasjon) medarbeideren skal
             arbeide.
           </HelpText>
         </>
-      }
+      )}`}
     >
       <BasicSelect
         inputId="Fysisk brukersted"

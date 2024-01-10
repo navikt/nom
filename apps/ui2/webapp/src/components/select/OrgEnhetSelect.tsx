@@ -28,9 +28,8 @@ export function OrgEnhetSelectFormPart({
         <OrgEnhetSelect
           description=""
           error={fieldState.error}
-          label={
+          label={`Organisasjonsenhet ${(
             <>
-              Organisasjonsenhet
               <HelpText>
                 Med organisasjonsenhet menes hvilken enhet medarbeideren skal
                 tilhøre og dermed hvilken leder som er ansvarlig for
@@ -38,7 +37,7 @@ export function OrgEnhetSelectFormPart({
                 Teamtilhørighet kan du legge i inn i Teamkatalogen.
               </HelpText>
             </>
-          }
+          )}`}
           onChange={field.onChange}
           orgEnheter={orgEnheter}
           value={field.value}
