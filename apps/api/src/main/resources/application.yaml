@@ -22,6 +22,9 @@ app:
       ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom/NOM_RESSURS_STILLINGER
       eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_EKSTERNE_V1
       kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3/NOM_KOMMUNALE_V1
+      ansatte-buckets-path: /proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2
+      tlf-path: /proxy/dvh/json/Hr/NOM2/NOM_TLF_v1
+      org-hierarki-path: /proxy/dvh/json/Hr/NOM2/NOM_HRORG_HIERARKI2_v2
     nik:
       base-url: ${NIK_BASEURL}
       aad-scope: ${NIK_API_SCOPE}
@@ -220,8 +223,16 @@ app:
         scopes: ["ADMIN", "QUERY_PERSON"]
   orgenhet:
     linjeenhetene: me177r,su645c,hu797w,tu734a
-  proxy:
-    enhet-path: /proxy/dvh/json/Hr/NOM4/NOM_HRORG_ORGENHET
+  clients:
+    nom-proxy:
+      enhet-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_HRORG_ORGENHET
+      orgtilknytning-path: /proxy/dvh/json/Hr/NOM2_Dev/stilling2nom
+      ressurs-stillinger-path: /proxy/dvh/json/Hr/Nom_Dev/NOM_RESSURS_STILLINGER
+      eksterne-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_EKSTERNE_V1
+      kommunale-ressurser-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_KOMMUNALE_V1
+      ansatte-buckets-path: /proxy/dvh/json/Hr/NOM3_Dev/NOM_ANSATTE_BUCKETS_v2
+      tlf-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_TLF_v1
+      org-hierarki-path: /proxy/dvh/json/Hr/NOM2_Dev/NOM_HRORG_HIERARKI2_v2
 
 NIK_BASEURL: "http://nav-ident.org.svc.cluster.local"
 NIK_API_SCOPE: api://dev-gcp.org.nav-ident/.default

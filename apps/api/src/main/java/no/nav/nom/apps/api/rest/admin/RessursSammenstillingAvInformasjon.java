@@ -40,7 +40,6 @@ import java.util.stream.StreamSupport;
 @Slf4j
 @Component
 public class RessursSammenstillingAvInformasjon {
-    public static final String DVH_RESSURSER_URL = "/proxy/dvh/json/Hr/NOM3/NOM_ANSATTE_BUCKETS_v2";
     public static final String RESSURS_SAMMENSTILLING = "RessursSammenstillingAvInformasjon";
     private final RessursStateRepository ressursStateRepository;
     private final OrgtilknytningService orgtilknytningService;
@@ -86,7 +85,7 @@ public class RessursSammenstillingAvInformasjon {
         var navidenterINom = sammenstilling.stream().map(RessursSammenstilling::getNavident).toList();
         log.info("Laget sammenstilling av ressursinformasjon fra NOM for {} ressurser", sammenstilling.size());
 
-        var dvhRessurserData = getDvhRessursInfo(navidenterINom, sektor.equals(Sektor.NAV_KOMMUNAL.name()));
+        var dvhRessurserData = getDvhRessursInfo(navidenterINom, sektor != null && sektor.equals(Sektor.NAV_KOMMUNAL.name()));
         sammenstilling.forEach(r -> r.setDvhRessursData(dvhRessurserData.get(r.getNavident())));
 
         var dvhRessurserStillinger = getDvhRessursStillingInfo(navidenterINom);
@@ -129,7 +128,8 @@ public class RessursSammenstillingAvInformasjon {
             .filter(dvhRessurs -> navidenterINom.contains(dvhRessurs.getNavIdent()))
             .collect(Collectors.toMap(DvhRessurs::getNavIdent, r -> new DvhRessursData(r, getOrgenhetPaaRessurs(r))));
 
-        log.info("Lastet {} ressurser fra DVH [{}]", dvhRessurserData.size(), isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : DVH_RESSURSER_URL);
+        String url = isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : appProperties.clients().nomProxy().ansatteBucketsPath();
+        log.info("Lastet {} ressurser fra DVH [{}]", dvhRessurserData.size(), url);
         return dvhRessurserData;
     }
 
@@ -186,7 +186,9 @@ public class RessursSammenstillingAvInformasjon {
     }
 
     private List<DvhRessurs> getDvhRessurser(boolean isKommunale) {
-        var jsonRessurser = dvhExchange(isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : DVH_RESSURSER_URL);
+        String url = isKommunale ? appProperties.clients().nomProxy().kommunaleRessurserPath() : appProperties.clients().nomProxy().ansatteBucketsPath();
+
+        var jsonRessurser = dvhExchange(url);
         var dvhRessurser = StreamSupport.stream(jsonRessurser.get(isKommunale ? kommunaleRessurserResponseNode : "NOM_ANSATTE_BUCKETS_v2Response").spliterator(), true)
             .map( r -> new DvhRessurs(r, isKommunale))
             .distinct()
@@ -289,6 +291,9 @@ public class RessursSammenstillingAvInformasjon {
         LocalDate remedySluttDato,
         LocalDate u4StartDato,
         LocalDate u4Sluttdato,
+        String dvhOrgenhetPaaRessurs,
+        String dvhOrgenhetPaaRessursBeskrivelse,
+        String dvhOrgenhetPaaRessursNiva,
         NomOrgenhet nomOrgenhetPaaRessurs,
         boolean remedyPermisjon,
         String remedyIdentType
@@ -302,6 +307,9 @@ public class RessursSammenstillingAvInformasjon {
                 dvhRessurs.getRemedySluttdato(),
                 dvhRessurs.getAgressoStartDato(),
                 dvhRessurs.getAgressoSluttdato(),
+                dvhRessurs.getOrgenhetPaaRessurs(),
+                dvhRessurs.getOrgenhetPaaRessursBeskrivelse(),
+                dvhRessurs.getOrgenhetPaaRessursNiva(),
                 nomOrgenhetPaaRessurs,
                 dvhRessurs.isRemedyPermisjon(),
                 dvhRessurs.getIdentType()
