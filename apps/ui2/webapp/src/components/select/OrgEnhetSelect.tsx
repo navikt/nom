@@ -26,7 +26,6 @@ export function OrgEnhetSelectFormPart({
       name="orgEnhetId"
       render={({ field, fieldState }) => (
         <OrgEnhetSelect
-          description=""
           error={fieldState.error}
           helpText="Med organisasjonsenhet menes hvilken enhet medarbeideren skal
               tilhøre og dermed hvilken leder som er ansvarlig for vedkommende.
@@ -54,7 +53,7 @@ function OrgEnhetSelect({
   orgEnheter: OrgEnheterFromSearch;
   onChange: (s: string | undefined) => void;
   value?: string;
-  description: string;
+  description?: string;
   label: string;
   error?: FieldError;
   helpText?: string;
