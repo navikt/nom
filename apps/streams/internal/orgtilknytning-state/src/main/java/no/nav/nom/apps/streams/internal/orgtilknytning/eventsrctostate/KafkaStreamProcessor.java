@@ -3,13 +3,12 @@ package no.nav.nom.apps.streams.internal.orgtilknytning.eventsrctostate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.contract.nom.OrgtilknytningType;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -72,7 +71,8 @@ class KafkaStreamProcessor {
                 eventStateAggregate.get("orgEnhetId").asText(),
                 Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
-                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null)
+                Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
+                Optional.ofNullable(eventStateAggregate.findValue("orgtilknytningType")).map(s -> OrgtilknytningType.valueOf(s.asText()))
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);

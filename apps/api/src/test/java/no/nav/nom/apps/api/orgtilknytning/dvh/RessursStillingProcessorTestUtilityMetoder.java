@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static no.nav.nom.apps.api.orgtilknytning.dvh.PeriodeUtil.NO_END_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,22 +73,22 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Tester isMatchingPeriod() utility funksjon. Periodene må være like")
     public void test_001() {
-        OrgtilknytningState orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 05, 15), Optional.empty());
+        OrgtilknytningState orgtilknytningState = orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 05, 15)).gyldigTom(Optional.empty()).build();
         StillingPeriode stillingPeriode = new StillingPeriode(null, LocalDate.of(2022, 05, 15), NO_END_DATE, null);
 
         // Like fra datoer med åpen slutt dato
         assertTrue(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning starter før
-        orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 04, 15), Optional.empty());
+        orgtilknytningState =  orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 04, 15)).gyldigTom(Optional.empty()).build();
         assertFalse(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning starter etter
-        orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 06, 15), Optional.empty());
+        orgtilknytningState = orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 06, 15)).gyldigTom(Optional.empty()).build();
         assertFalse(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning slutter før
-        orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 05, 15), Optional.of(LocalDate.of(2024, 06, 15)));
+        orgtilknytningState = orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 05, 15)).gyldigTom(Optional.of(LocalDate.of(2024, 06, 15))).build();
         assertFalse(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning slutter på samme sato
@@ -95,11 +96,11 @@ class RessursStillingProcessorTestUtilityMetoder {
         assertTrue(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning slutter før, begge med angitt sluttdato
-        orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 05, 15), Optional.of(LocalDate.of(2024, 05, 15)));
+        orgtilknytningState = orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 05, 15)).gyldigTom(Optional.of(LocalDate.of(2024, 05, 15))).build();
         assertFalse(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
 
         // orgtilknytning slutter etter, begge med angitt sluttdato
-        orgtilknytningState = new OrgtilknytningState(null, null, null, false, LocalDate.of(2022, 05, 15), Optional.of(LocalDate.of(2024, 07, 15)));
+        orgtilknytningState = orgtilknytningState().toBuilder().gyldigFom(LocalDate.of(2022, 05, 15)).gyldigTom(Optional.of(LocalDate.of(2024, 07, 15))).build();
         assertFalse(ressursStillingProcessor.isMatchingPeriod(orgtilknytningState, stillingPeriode), "Orgtilknytning: %s\nStillingPeriode: %s".formatted(orgtilknytningState, stillingPeriode));
     }
 
@@ -140,11 +141,16 @@ class RessursStillingProcessorTestUtilityMetoder {
         when(orgenhetService.getById("ENHET_2")).thenReturn(orgenhetMedAgressoId("6543210)"));
 
         StillingPeriode stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 1, 1), NO_END_DATE, null);
-        OrgtilknytningState orgtilknytningState = new OrgtilknytningState(null, null, "ENHET_1", false, LocalDate.of(2022, 1, 1), Optional.empty());
+        OrgtilknytningState orgtilknytningState = orgtilknytningState().toBuilder()
+            .orgEnhetId("ENHET_1")
+            .gyldigFom(LocalDate.of(2022, 1, 1))
+            .gyldigTom(Optional.empty()).build();
 
         assertTrue(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
 
-        orgtilknytningState = new OrgtilknytningState(null, null, "ENHET_2", false, null, Optional.empty());
+        orgtilknytningState = orgtilknytningState().toBuilder()
+            .orgEnhetId("ENHET_2")
+            .gyldigTom(Optional.empty()).build();
         assertFalse(ressursStillingProcessor.orgtilknytningEnhetMatcherAgressoId(stillingPeriode, orgtilknytningState));
 
         stillingPeriode = new StillingPeriode(new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("6543"), null, Optional.empty(), Optional.empty()), LocalDate.of(2022, 1, 1), NO_END_DATE, null);
@@ -177,7 +183,11 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test endre Gyldig FOM på orgTilknytning")
     public void test_005() {
-        OrgtilknytningState orginalOrgtilknytningState = new OrgtilknytningState("FID_1", "A000001", "a123bc", false, LocalDate.of(2020, 01, 01), Optional.empty());
+        OrgtilknytningState orginalOrgtilknytningState = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .orgEnhetId("ENHET_1")
+            .gyldigFom(LocalDate.of(2020, 1, 1))
+            .gyldigTom(Optional.empty()).build();
         StillingPeriode stillingPeriode = new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), "ENHET_1", Optional.of("0123456"), Optional.of("ORGENHET")),
             LocalDate.now(), null,
@@ -198,7 +208,11 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test sette Gyldig TOM på orgTilknytning via endreOrgtilknytningGyldigTOM")
     void test_006() {
-        OrgtilknytningState orginalOrgtilknytningState = new OrgtilknytningState("FID_1", "A000001", "a123bc", false, LocalDate.of(2020, 01, 01), Optional.empty());
+        OrgtilknytningState orginalOrgtilknytningState = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .orgEnhetId("ENHET_1")
+            .gyldigFom(LocalDate.of(2020, 1, 1))
+            .gyldigTom(Optional.empty()).build();
 
         StillingPeriode stillingPeriode = new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), "ENHET_1", Optional.of("0123456"), Optional.of("ORGENHET")),
@@ -218,7 +232,11 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test endre eksisterende Gyldig TOM på orgTilknytning")
     void test_007() {
-        OrgtilknytningState orginalOrgtilknytningState = new OrgtilknytningState("FID_1", "A000001", "a123bc", false, LocalDate.of(2020, 01, 01), Optional.of(LocalDate.of(2022, 12, 31)));
+        OrgtilknytningState orginalOrgtilknytningState = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .orgEnhetId("ENHET_1")
+            .gyldigFom(LocalDate.of(2020, 1, 1))
+            .gyldigTom(Optional.of(LocalDate.of(2022, 12, 31))).build();
 
         StillingPeriode stillingPeriode = new StillingPeriode(
             new StillingPeriode.StillingAgressoOrgIdOgNavn(Optional.of("0123456"), "ENHET_1", Optional.of("0123456"), Optional.of("ORGENHET")),
@@ -239,7 +257,11 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test sette Gyldig TOM på orgTilknytning via settOrgtilknytningSluttDato")
     void test_008() {
-        OrgtilknytningState orginalOrgtilknytningState = new OrgtilknytningState("FID_1", "A000001", "a123bc", false, LocalDate.of(2020, 01, 01), Optional.empty());
+        OrgtilknytningState orginalOrgtilknytningState = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .orgEnhetId("a123bc")
+            .gyldigFom(LocalDate.of(2020, 1, 1))
+            .gyldigTom(Optional.empty()).build();
 
 
         StillingPeriode stillingPeriode = new StillingPeriode(
@@ -260,7 +282,11 @@ class RessursStillingProcessorTestUtilityMetoder {
     @Test
     @DisplayName("Test fjerne orgTilknytning")
     void test_009() {
-        OrgtilknytningState orginalOrgtilknytningState = new OrgtilknytningState("FID_1", "A000001", "a123bc", false, LocalDate.of(2020, 01, 01), Optional.empty());
+        OrgtilknytningState orginalOrgtilknytningState = orgtilknytningState().toBuilder()
+            .fid("FID_1")
+            .orgEnhetId("ENHET_1")
+            .gyldigFom(LocalDate.of(2020, 1, 1))
+            .gyldigTom(Optional.empty()).build();
 
         ressursStillingProcessor.fjernOrgtilknytning(orginalOrgtilknytningState);
 

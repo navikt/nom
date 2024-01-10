@@ -10,7 +10,6 @@ import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
 import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toMap;
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -327,7 +327,15 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         // Lets do it manually, to test getmethods below.
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(mockEnhet, 1, String.valueOf(mockEnhet.getORGENHET_FRA_PERIODE()), Optional.of(String.valueOf(mockEnhet.getORGENHET_TIL_PERIODE()))));
 
-        orgtilknytningStateRepository.putEventAggregate("FID_1", new OrgtilknytningState("FID_1", ressurs.navident(), "ID_1", true, LocalDate.of(2020, 1, 1), Optional.empty()));
+        orgtilknytningStateRepository.putEventAggregate(
+            "FID_1",
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressurs.navident())
+                .orgEnhetId("ID_1")
+                .gyldigFom(LocalDate.of(2020, 1, 1))
+                .build()
+        );
 
 //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
 

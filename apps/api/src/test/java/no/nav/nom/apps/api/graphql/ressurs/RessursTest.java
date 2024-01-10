@@ -12,7 +12,6 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +28,7 @@ import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -130,7 +130,10 @@ class RessursTest extends RessursTestBase {
         ));
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState.navident())
+                .orgEnhetId("ID_1").build()
         );
 
         //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
@@ -363,7 +366,10 @@ class RessursTest extends RessursTestBase {
         ));
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState2.navident())
+                .orgEnhetId("ID_1").build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -405,7 +411,10 @@ class RessursTest extends RessursTestBase {
 
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState4.navident())
+                .orgEnhetId("ID_2").build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
