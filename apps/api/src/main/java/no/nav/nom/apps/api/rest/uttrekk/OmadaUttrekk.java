@@ -1,5 +1,6 @@
 package no.nav.nom.apps.api.rest.uttrekk;
 
+import io.getunleash.Unleash;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -9,12 +10,14 @@ import no.nav.nom.apps.api.common.SwaggerConfig;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhLeder;
 import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.IOrgenhet;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.contract.nom.NomNivaa;
 import no.nav.nom.contract.nom.OrgEnhetsType;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
@@ -32,6 +35,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
 
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
 @Tag(name = "Omada uttrekk")
 @RestController
 @RequestMapping("/api/v1/uttrekk/omada")
@@ -43,18 +48,22 @@ public class OmadaUttrekk {
     private final OrgtilknytningService orgtilknytningService;
     private final RemedyEnhetIdResolver remedyEnhetIdResolver;
     private final DvhRepository dvhRepository;
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public OmadaUttrekk(
-        RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
-        OrgtilknytningService orgtilknytningService,
-        RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository
+            RessursStateRepository ressursStateRepository, OrgenhetService orgenhetService,
+            OrgtilknytningService orgtilknytningService,
+            RemedyEnhetIdResolver remedyEnhetIdResolver, DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
     ) {
         this.ressursStateRepository = ressursStateRepository;
         this.orgenhetService = orgenhetService;
         this.orgtilknytningService = orgtilknytningService;
         this.remedyEnhetIdResolver = remedyEnhetIdResolver;
         this.dvhRepository = dvhRepository;
+        this.organiseringStateRepository = organiseringStateRepository;
+        this.unleash = unleash;
     }
 
     @Operation(
@@ -188,6 +197,9 @@ public class OmadaUttrekk {
     public @ResponseBody byte[] exportOrgenhet() throws IOException {
         StringWriter writer = new StringWriter();
 
+        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);
+        log.debug("Eksporterer orgenheter. Bruke ny organisering: {}", useNewOrganisering);
+
         final var cSVFormat =
             getCSVFormat(
                 "org_enhet_id",
@@ -226,19 +238,7 @@ public class OmadaUttrekk {
                         orgenhet.getNomNivaa().map(NomNivaa::name).orElse(""),
                         orgenhet.getOrgEnhetsType().map(OrgEnhetsType::name).orElse(""),
                         orgenhet.endedOnStartDate() ? "" : // Hvis enhet er avsluttet samme dag som den er opprettet, så er den ikke i organiseringen
-                            dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
-                                .filter(organisering ->
-                                    organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
-                                        organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
-                                        organisering.getNavnUnder().equals(orgenhet.getNavn())
-                                )
-                                .findAny()
-                                .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
-                                    organisering.getAgressoIdOver(),
-                                    organisering.getOrgNivOver(),
-                                    organisering.getNavnOver()
-                                ).map(IOrgenhet::getId).orElse(null))
-                                .orElse(""),
+                            useNewOrganisering ? getOrgenhetOverUsingNewOrganisering(orgenhet) : getOrgenhetOver(orgenhet),
                         remedyEnhetIdResolver.remedyEnhetId(orgenhet)
                     );
                     writer.close();
@@ -252,6 +252,27 @@ public class OmadaUttrekk {
         }
     }
 
+    private String getOrgenhetOver(IOrgenhet orgenhet) {
+        return dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn()).stream()
+            .filter(organisering ->
+                organisering.getAgressoIdUnder().equals(orgenhet.getAgressoId()) &&
+                    organisering.getOrgNivUnder().equals(orgenhet.getOrgNiv()) &&
+                    organisering.getNavnUnder().equals(orgenhet.getNavn())
+            )
+            .findAny()
+            .map(organisering -> orgenhetService.getEnhetByAgressoIdNivaAndName(
+                organisering.getAgressoIdOver(),
+                organisering.getOrgNivOver(),
+                organisering.getNavnOver()
+            ).map(IOrgenhet::getId).orElse(null))
+            .orElse("");
+    }
+
+    private String getOrgenhetOverUsingNewOrganisering(IOrgenhet orgenhet) {
+        return organiseringStateRepository.findActiveById(orgenhet.getId())
+            .map(OrganiseringState::idOver)
+            .orElse("");
+    }
 
     private CSVFormat getCSVFormat(String... headers) {
         return CSVFormat.Builder.create()

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import no.nav.nom.contract.nom.OrgtilknytningType;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
@@ -12,6 +13,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -26,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
@@ -222,6 +223,40 @@ public class KafkaProcessorTest {
             );
     }
 
+    @Test
+    @DisplayName("OrgtilknytningTypeEndretEventV1 setter orgtilknytningType")
+    public void test_OrgtilknytningTypeEndretEventV1(){
+
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, LocalDate.of(2022, 1,  1));
+        final OrgtilknytningTypeEndretEventV1 orgtilknytningTypeEndretEventV1 = new OrgtilknytningTypeEndretEventV1(
+            orgtilknytningOpprettetEventV1.getFid(),
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(OrgtilknytningType.KONSULENT)),
+            (Event.Metadata) null
+        );
+
+        final OrgtilknytningState expectedEndret = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            null
+        ).toBuilder()
+            .orgtilknytningType(orgtilknytningTypeEndretEventV1.getOrgtilknytningTypeEndretEventData().orgtilknytningType())
+            .build();
+
+        inputTopic.pipeInput(orgtilknytningOpprettetEventV1.getFid(), orgtilknytningOpprettetEventV1);
+        inputTopic.pipeInput(orgtilknytningTypeEndretEventV1.getFid(), orgtilknytningTypeEndretEventV1);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .hasSize(2)
+            .contains(KeyValue.pair(orgtilknytningTypeEndretEventV1.getFid(), expectedEndret));
+
+    }
+
     private OrgtilknytningOpprettetEventV1 lagOpprettEvent(String navident, String orgEnhetId, LocalDate gyldigFom) {
         return lagOpprettEvent("FID_1", navident, orgEnhetId, gyldigFom);
     }
@@ -312,20 +347,18 @@ public class KafkaProcessorTest {
     }
 
     private static OrgtilknytningState lagStateObjekt(String navident, String orgEnhetId, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return lagStateObjekt("FID_1", navident, orgEnhetId, erDagligOppfolging, gyldigFom, gyldigTom);
-    }
 
-    private static OrgtilknytningState lagStateObjekt(String fid, String navident, String orgEnhetId, boolean erDagligOppfolging, LocalDate gyldigFom, LocalDate gyldigTom) {
-        return new OrgtilknytningState(
-            fid,
-            navident,
-            orgEnhetId,
-            erDagligOppfolging,
-            gyldigFom,
-            Optional.ofNullable(gyldigTom)
-        );
+        return OrgtilknytningState
+            .builder()
+            .fid("FID_1")
+            .navident(navident)
+            .orgEnhetId(orgEnhetId)
+            .erDagligOppfolging(erDagligOppfolging)
+            .gyldigFom(gyldigFom)
+            .gyldigTom(Optional.ofNullable(gyldigTom))
+            .orgtilknytningType(Optional.empty())
+            .build();
     }
-
 
     final OrgtilknytningEvent.AdditionalAgressoData dummyAdditionalAgressoData =
         new OrgtilknytningEvent.AdditionalAgressoData(

@@ -1,8 +1,10 @@
 package no.nav.nom.apps.api.orgenhet;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
 import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.api.app.SetOrgEnhetsTypeRequest;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.commands.EndreOrgEnhetsType;
@@ -15,10 +17,14 @@ import no.nav.nom.contract.nom.OrgEnhetsType;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,20 +40,31 @@ import static java.util.Collections.emptySet;
 import static java.util.Comparator.comparing;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedAzpName;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
 
 @Service
 public class OrgenhetService {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     private final OrgEnhetStateRepository orgEnhetStateRepository;
     private final OrgEnhetCommandService orgEnhetCommandService;
     private final DvhRepository dvhRepository;
     private final KafkaTopicReader kafkaTopicReader;
+    private final Unleash unleash;
+    private final OrganiseringStateRepository organiseringStateRepository;
     private List<IOrgenhet> organiserteEnheter = emptyList();
 
-    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader) {
+
+    public OrgenhetService(OrgEnhetStateRepository orgEnhetStateRepository, OrgEnhetCommandService orgEnhetCommandService, DvhRepository dvhRepository, KafkaTopicReader kafkaTopicReader,
+                           Unleash unleash,
+                           OrganiseringStateRepository organiseringStateRepository
+    ) {
         this.orgEnhetStateRepository = orgEnhetStateRepository;
         this.orgEnhetCommandService = orgEnhetCommandService;
         this.dvhRepository = dvhRepository;
         this.kafkaTopicReader = kafkaTopicReader;
+        this.unleash = unleash;
+        this.organiseringStateRepository = organiseringStateRepository;
     }
 
 
@@ -154,26 +171,53 @@ public class OrgenhetService {
     }
 
     public List<String> findAllUnderliggendeOrgenheter(String id) {
-        Set<String> underliggendeAgressoIds = orgEnhetStateRepository.findById(id).map(parent -> {
-            if (parent.agressoId().isEmpty() | parent.agressoOrgNivaa().isEmpty() ) {
-                return Collections.<String>emptySet();
-            }
-            var organiseringer = dvhRepository.getOrganiseringer(parent.agressoId().get(), parent.agressoOrgNivaa().get(), parent.navn());
-            var allUnderliggende = new java.util.ArrayList<String>(emptyList());
+        if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
+            logger.debug("Finner underliggende org.enheter for {} med ny implementasjon", id);
 
-            var nextLevelChildren = organiseringer.stream().filter(organisering -> organisering.getAgressoIdOver().equals(parent.agressoId().get())).collect(
-                Collectors.toSet());
+            Set<String> underliggendeIds = orgEnhetStateRepository.findById(id).map(parent -> {
+
+                List<OrganiseringState> organiseringer = organiseringStateRepository.getOrganiseringerContainingId(parent.id());
+                ArrayList<String> allUnderliggende = new java.util.ArrayList<>(emptyList());
+
+                Set<OrganiseringState> nextLevelChildren = organiseringer.stream().filter(organisering -> organisering.idOver().equals(parent.id()))
+                    .collect(Collectors.toSet());
+
+                while (!nextLevelChildren.isEmpty()) {
+                    allUnderliggende.addAll(nextLevelChildren.stream().map(OrganiseringState::id).toList());
+                    nextLevelChildren = findChildOrganiseringerUsingNewOrganisering(nextLevelChildren);
+                }
+
+                return new HashSet<>(allUnderliggende);
+            }).orElse(new HashSet<>());
+
+            return orgEnhetStateRepository.findByIdIn(underliggendeIds).stream().map(OrgEnhetState::id).toList();
+
+        } else {
+            logger.debug("Finner underliggende org.enheter for {} med gammel implementasjon", id);
+
+            Set<String> underliggendeAgressoIds = orgEnhetStateRepository.findById(id).map(parent -> {
+                if (parent.agressoId().isEmpty() | parent.agressoOrgNivaa().isEmpty()) {
+                    return Collections.<String>emptySet();
+                }
+                var organiseringer = dvhRepository.getOrganiseringer(parent.agressoId().get(), parent.agressoOrgNivaa().get(), parent.navn());
+                var allUnderliggende = new java.util.ArrayList<String>(emptyList());
+
+                var nextLevelChildren = organiseringer.stream()
+                    .filter(organisering -> organisering.getAgressoIdOver().equals(parent.agressoId().get()))
+                    .collect(
+                        Collectors.toSet());
 
 
-            while (!nextLevelChildren.isEmpty()) {
-                allUnderliggende.addAll(nextLevelChildren.stream().map(DvhOrganisering::getAgressoIdUnder).toList());
-                nextLevelChildren = findChildOrganiseringer(nextLevelChildren);
-            }
+                while (!nextLevelChildren.isEmpty()) {
+                    allUnderliggende.addAll(nextLevelChildren.stream().map(DvhOrganisering::getAgressoIdUnder).toList());
+                    nextLevelChildren = findChildOrganiseringer(nextLevelChildren);
+                }
 
-            return new HashSet<>(allUnderliggende);
-        }).orElse(emptySet());
+                return new HashSet<>(allUnderliggende);
+            }).orElse(emptySet());
 
-        return orgEnhetStateRepository.findAllByAgressoIdIn(underliggendeAgressoIds).stream().map(OrgEnhetState::id).toList();
+            return orgEnhetStateRepository.findAllByAgressoIdIn(underliggendeAgressoIds).stream().map(OrgEnhetState::id).toList();
+        }
     }
 
     private Set<DvhOrganisering> findChildOrganiseringer(Set<DvhOrganisering> parentOrganiseringer) {
@@ -185,6 +229,17 @@ public class OrgenhetService {
                         lowerOrganisering ->
                             !lowerOrganisering.equals(organisering) &&
                                 lowerOrganisering.getAgressoIdOver().equals(organisering.getAgressoIdUnder())
+                    ).toList()
+            ).flatMap(List::stream).collect(Collectors.toSet());
+    }
+
+    private Set<OrganiseringState> findChildOrganiseringerUsingNewOrganisering(Set<OrganiseringState> parentOrganiseringer) {
+        return parentOrganiseringer.stream()
+            .map(organisering ->
+                organiseringStateRepository.getOrganiseringerContainingId(organisering.id()).stream()
+                    .filter(lowerOrganisering ->
+                        !lowerOrganisering.equals(organisering) &&
+                            lowerOrganisering.id().equals(organisering.id())
                     ).toList()
             ).flatMap(List::stream).collect(Collectors.toSet());
     }
@@ -231,4 +286,3 @@ public class OrgenhetService {
         return kafkaTopicReader.getOrgEnhetEvents(readTopicRequest.maxRecords(), readTopicRequest.fromOffset(), readTopicRequest.partition());
     }
 }
-

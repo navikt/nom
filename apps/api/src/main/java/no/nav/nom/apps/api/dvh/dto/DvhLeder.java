@@ -1,9 +1,15 @@
 package no.nav.nom.apps.api.dvh.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@Builder
+@AllArgsConstructor
+@ToString
 public class DvhLeder {
 
     String navIdent;

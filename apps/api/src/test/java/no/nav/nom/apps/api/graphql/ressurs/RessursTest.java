@@ -12,7 +12,6 @@ import no.nav.nom.contract.nom.api.graphql.Ressurs;
 import no.nav.nom.contract.nom.api.graphql.RessursResult;
 import no.nav.nom.contract.nom.api.graphql.ResultCode;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +28,7 @@ import java.util.Optional;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -130,7 +130,10 @@ class RessursTest extends RessursTestBase {
         ));
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState.navident())
+                .orgEnhetId("ID_1").build()
         );
 
         //        dvhRestConsumer.loadKoblingerLedereOgTlfFromDvh();
@@ -363,7 +366,10 @@ class RessursTest extends RessursTestBase {
         ));
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState2.navident(), "ID_1", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState2.navident())
+                .orgEnhetId("ID_1").build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -378,15 +384,15 @@ class RessursTest extends RessursTestBase {
     @Test
     @DisplayName("Hente leder for ressurs som er leder av sin enhet")
     void scenario37() {
-        createRessursHendelseEventSource("1");
+        createRessursHendelseEventSource("1");   // Oppretter ressursen "testNavIdent1"
         createRessursHendelseEventSource("2");
-        final var ressursState4 = createRessursHendelseEventSource("4");
+        final var ressursState4 = createRessursHendelseEventSource("4");   // Oppretter ressursen "testNavIdent4"
         final var ressursLederForDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
+            .ORGENHET_KODE("testId5").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build(); // Oppretter orgEnhet 5
         final var lederenErPaDenneEnheten = DvhOrgEnhetMock.getBuilderWithDefault()
-            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();
+            .ORGENHET_KODE("testId4").ORGENHET_NAVN("testNavn4").ORGNODE_NIV("ORGNIV2").build();  // Oppretter orgEnhet 4
 
-        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);
+        dvhOrgenhetMockUtils.addToResponse(ressursLederForDenneEnheten, lederenErPaDenneEnheten);   //  Returnere orgEnheter fra kall til DVH
 
         // Since stream infrastructure is not up, the streams pipeline has not created state.
         // Lets do it manually, to test getmethods below.
@@ -395,17 +401,21 @@ class RessursTest extends RessursTestBase {
             1,
             String.valueOf(ressursLederForDenneEnheten.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(ressursLederForDenneEnheten.getORGENHET_TIL_PERIODE()))
-        ));
+        ));   // orgEnhet 5 får ID 1
         orgEnhetStateRepository.putEventAggregate(dvhOrgenhetMockUtils.dvhMockToState(
             lederenErPaDenneEnheten,
-            2,
+            2,// orgEnhet 4 får ID 2
             String.valueOf(lederenErPaDenneEnheten.getORGENHET_FRA_PERIODE()),
             Optional.of(String.valueOf(lederenErPaDenneEnheten.getORGENHET_TIL_PERIODE()))
         ));
 
+        // Lagrer orgTilknytning for testNavIdent4 til orgEnhet ID_2 (testId4)
         orgtilknytningStateRepository.putEventAggregate(
             "FID_1",
-            new OrgtilknytningState("FID_1", ressursState4.navident(), "ID_2", true, LocalDate.now(), Optional.empty())
+            orgtilknytningState().toBuilder()
+                .fid("FID_1")
+                .navident(ressursState4.navident())
+                .orgEnhetId("ID_2").build()
         );
 
         dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();
@@ -414,6 +424,8 @@ class RessursTest extends RessursTestBase {
 
         final var ledere = response.path("ressurs.ledere").entity(JsonNode.class).get();
         assertThat(ledere.size()).isEqualTo(1);
+
+        // Sjekke at ledere for testNavIdent4 er testNavIdent1
         assertThat(ledere.get(0).get("ressurs").get("navIdent").textValue()).isEqualTo("testNavIdent1");
     }
 

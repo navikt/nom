@@ -2,6 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.dvh;
 
 import io.getunleash.Unleash;
 import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
 import no.nav.nom.apps.api.orgenhet.OrgenhetService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.producer.OrgEnhetCommandService;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
@@ -25,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -50,12 +52,17 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
     NomMastered nomMastered;
     @Mock
     Unleash unleash;
+    @Mock
+    OrganiseringStateRepository organiseringStateRepository;
 
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
         orgEnhetStateRepository = new OrgEnhetStateRepository();
-        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader);
+        orgenhetService = new OrgenhetService(orgEnhetStateRepository, orgEnhetCommandService, new DvhRepository(), kafkaTopicReader,
+            unleash,
+            organiseringStateRepository
+        );
         ressursStillingProcessor = new RessursStillingProcessor(orgenhetService, orgtilknytningService, orgtilknytningCommandService,
             ressursStillingLoadStatus,
             ressursStateRepository,
@@ -299,8 +306,17 @@ public class RessursStillingProcessorTest extends OrgtilknytningCmdServiceTestBa
         );
 
         // To eksisterende orgtilknytninger
-        OrgtilknytningState eksisterendeGammelEnhet = new OrgtilknytningState("OT_FID_1", navident, "a003bc", true, startDate, Optional.empty());
-        OrgtilknytningState eksisterendeNyEnhet = new OrgtilknytningState("OT_FID_2", navident, "a004bc", false, startDate, Optional.empty());
+        OrgtilknytningState eksisterendeGammelEnhet =  orgtilknytningState().toBuilder()
+            .fid("OT_FID_1")
+            .navident(navident)
+            .orgEnhetId("a003bc")
+            .gyldigFom(startDate).build();
+
+        OrgtilknytningState eksisterendeNyEnhet = orgtilknytningState().toBuilder()
+            .fid("OT_FID_2")
+            .navident(navident)
+            .orgEnhetId("a004bc")
+            .gyldigFom(startDate).build();
 
         when(orgtilknytningService.getByNavIdent(any())).thenReturn(List.of(eksisterendeGammelEnhet, eksisterendeNyEnhet));
         when(ressursStateRepository.findByNavident(any())).thenReturn(
