@@ -384,6 +384,7 @@ class OrganisasjonsenhetTest extends OrganisasjonsenhetTestBase {
         final var mockEnhet = DvhOrgEnhetMock.getBuilderWithDefault().ORGENHET_KODE("testId1").ORGENHET_NAVN("testNavn").ORGNODE_NIV("ORGENHET").build();
         dvhOrgenhetMockUtils.addToResponse(mockEnhet);
         RessursState ressurs = createRessursHendelseEventSource("");
+        createRessursHendelseEventSource("1"); // Trenger ressurs med navIdent "testNavIdent1" pga. orgTilknytning som "lekker inn" fra annen test
 
         pdlUtils.addPersonToPdlResponse(true, ressurs.personident());
         dvhRestConsumer.loadRessurserOgOrgEnheter();
