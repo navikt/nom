@@ -100,7 +100,7 @@ export const ressursRoute = new Route({
   path: "ressurs/$id",
   component: ResourcePage,
   validateSearch: (
-    search,
+    search: Record<string, unknown>,
   ): {
     alreadyExists?: boolean;
     editPersonopplysninger?: boolean;
@@ -169,7 +169,9 @@ export const orgEnheterAdminRoute = new Route({
       </Tabs.Panel>
     );
   },
-  validateSearch: (search): { allowEdit?: boolean } => {
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { allowEdit?: boolean } => {
     return {
       allowEdit: Boolean(search.allowEdit),
     };
@@ -245,9 +247,10 @@ const routeTree = rootRoute.addChildren([
 // Because createRessurs includes personIdent in search params, we hide these to avoid them being logged on route changes.
 const maskCreateRessursSearchParameters = createRouteMask({
   routeTree,
+  // from: createRessursRoute.fullPath,
   from: "/ressurs/create/$step",
-  to: "/ressurs/create/$step",
-  params: (previous) => ({ step: previous.step }),
+  // @ts-expect-error -- I assumed the mask/to could be whatever you want
+  to: "/opprettRessurs",
 });
 
 export const router = new Router({

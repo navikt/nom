@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { createRessursRoute } from "~/reactRouterRoutes";
 
 export function SearchForPerson() {
-  const { personident } = useSearch({ from: createRessursRoute.id });
+  const { personident } = useSearch({ from: createRessursRoute.fullPath });
   const { handleSubmit, control, reset } = useForm({
     defaultValues: {
       personident: personident,
@@ -17,6 +17,7 @@ export function SearchForPerson() {
     <form
       onSubmit={handleSubmit((values) =>
         navigate({
+          params: (previous) => previous,
           search: (oldSearch) => ({
             ...oldSearch,
             personident: values.personident,

@@ -19,7 +19,7 @@ import { capitalizeName } from "~/utils";
 
 export function PersonopplysningerStep() {
   const { personident } = useSearch({
-    from: createRessursRoute.id,
+    from: createRessursRoute.fullPath,
   });
 
   return (
@@ -87,9 +87,9 @@ function VisningsnavnForm({
 }: {
   folkeregisterPerson: FolkeregisterPerson;
 }) {
-  const navigate = useNavigate({ from: createRessursRoute.id });
+  const navigate = useNavigate({ from: createRessursRoute.fullPath });
   const { visningsfornavn, visningsmellomnavn, visningsetternavn } = useSearch({
-    from: createRessursRoute.id,
+    from: createRessursRoute.fullPath,
   });
 
   const methods = useForm({

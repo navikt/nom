@@ -107,7 +107,7 @@ export function UnderEnheterGraphic({ valgtEnhet }: { valgtEnhet: OrgEnhet }) {
 }
 
 export function OrganisasjonHierarkiPage() {
-  const { id } = useParams({ from: orgRoute.id });
+  const { id } = useParams({ from: orgRoute.fullPath });
 
   const orgEnhetQuery = useQuery({
     queryKey: getOrgEnhet.queryKey(id as string),

@@ -14,7 +14,7 @@ import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatVisningsnavn, isInDevelopment } from "~/utils";
 
 export function SummaryStep() {
-  const { navident } = useSearch({ from: createRessursRoute.id });
+  const { navident } = useSearch({ from: createRessursRoute.fullPath });
 
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(navident as string),
@@ -126,7 +126,7 @@ function InformationText({ ressurs }: { ressurs: Ressurs }) {
 
 function Unit4Link() {
   const { navident, ansettelsesType } = useSearch({
-    from: createRessursRoute.id,
+    from: createRessursRoute.fullPath,
   });
 
   const navidentWithoutFirstLetter = navident?.slice(1);

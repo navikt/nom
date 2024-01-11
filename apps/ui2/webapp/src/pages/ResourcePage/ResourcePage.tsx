@@ -13,8 +13,8 @@ import { isBeforePresent } from "~/utils";
 import ContentWrapper from "../../components/ContentWrapper";
 
 export const ResourcePage = () => {
-  const { id } = useParams({ from: ressursRoute.id });
-  const { alreadyExists } = useSearch({ from: ressursRoute.id });
+  const { id } = useParams({ from: ressursRoute.fullPath });
+  const { alreadyExists } = useSearch({ from: ressursRoute.fullPath });
 
   const ressursQuery = useQuery({
     queryKey: getRessurs.queryKey(id),

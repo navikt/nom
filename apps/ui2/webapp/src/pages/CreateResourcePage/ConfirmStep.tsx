@@ -20,7 +20,7 @@ import type {
 import { DATE_FORMATS, formatVisningsnavn } from "~/utils";
 
 export function ConfirmStep() {
-  const navigate = useNavigate({ from: createRessursRoute.id });
+  const navigate = useNavigate({ from: createRessursRoute.fullPath });
   const {
     personident,
     visningsfornavn,
@@ -32,7 +32,7 @@ export function ConfirmStep() {
     gyldigTom,
     orgEnhetId,
     fysiskBrukerstedNr,
-  } = useSearch({ from: createRessursRoute.id });
+  } = useSearch({ from: createRessursRoute.fullPath });
 
   const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
     .filter((navn) => !!navn)
@@ -53,7 +53,7 @@ export function ConfirmStep() {
 
   const onClose = () =>
     navigate({
-      to: createRessursRoute.id,
+      to: createRessursRoute.to,
       params: { step: "3" },
       search: (oldSearch) => oldSearch,
     });

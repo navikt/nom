@@ -30,7 +30,7 @@ import { formatDateWithoutTimezone } from "~/utils";
 export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addOrgtilknytning } = useSearch({ from: ressursRoute.id });
+  const { addOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
 
   const methods = useForm({
     defaultValues: {
@@ -53,7 +53,7 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(ressurs.navident),
       });
-      navigate({ search: {} });
+      navigate({ search: {}, params: (previous) => previous });
     },
   });
 
@@ -106,7 +106,12 @@ export function AddOrgtilknytningForm({ ressurs }: { ressurs: Ressurs }) {
             margin-bottom: var(--a-spacing-4);
           `}
           icon={<PencilIcon aria-hidden />}
-          onClick={() => navigate({ search: { addOrgtilknytning: true } })}
+          onClick={() =>
+            navigate({
+              search: { addOrgtilknytning: true },
+              params: (previous) => previous,
+            })
+          }
           size="small"
           variant="secondary"
         >

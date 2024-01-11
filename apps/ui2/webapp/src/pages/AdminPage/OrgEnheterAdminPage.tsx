@@ -272,7 +272,7 @@ export function OrgEnheterAdminPage() {
 }
 
 function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
-  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
+  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.fullPath });
   const queryClient = useQueryClient();
 
   const updateOrgEnhetsTypeMutation = useMutation({
@@ -331,14 +331,19 @@ function OrgEnhetsTypeDataCell({ orgEnhet }: { orgEnhet: OrgEnhet }) {
 }
 
 function ToggleEditMode() {
-  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.id });
+  const { allowEdit } = useSearch({ from: orgEnheterAdminRoute.fullPath });
   const navigate = useNavigate();
 
   if (allowEdit) {
     return (
       <Button
         icon={<PadlockUnlockedFillIcon aria-hidden />}
-        onClick={() => navigate({ search: { allowEdit: false } })}
+        onClick={() =>
+          navigate({
+            search: { allowEdit: false },
+            params: (previous) => previous,
+          })
+        }
         variant="secondary"
       />
     );
@@ -347,7 +352,12 @@ function ToggleEditMode() {
   return (
     <Button
       icon={<PadlockLockedFillIcon aria-hidden />}
-      onClick={() => navigate({ search: { allowEdit: true } })}
+      onClick={() =>
+        navigate({
+          search: { allowEdit: true },
+          params: (previous) => previous,
+        })
+      }
       variant="secondary"
     />
   );

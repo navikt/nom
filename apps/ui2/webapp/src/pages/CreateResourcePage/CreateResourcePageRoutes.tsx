@@ -16,7 +16,7 @@ import { AnsettelsesType, Sektor } from "~/types/api-models";
 import ContentWrapper from "../../components/ContentWrapper";
 
 export function CreateRessursPage() {
-  const { step } = useParams({ from: createRessursRoute.id });
+  const { step } = useParams({ from: createRessursRoute.fullPath });
 
   const stepIdAsNumber = Number(step);
 
