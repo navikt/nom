@@ -244,7 +244,14 @@ export function OrganisasjonstilknytningInnerForm({
   return (
     <>
       <InnerOrgEnhetSelect />
-      <div css={fullwidthRow}>
+      <div
+        css={css(
+          fullwidthRow,
+          css`
+            margin-top: var(--a-spacing-8);
+          `,
+        )}
+      >
         <FullWidthDatePickerWrapper>
           <DatePicker {...startDatePicker.datepickerProps}>
             <DatePicker.Input
