@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -127,8 +128,15 @@ public class TeamcatControllerTest extends RestTestBase {
     }
 
 
-    private OrgtilknytningState createOtks(String navident, String oeId){
-        return new OrgtilknytningState(oeId,navident,oeId,true,LocalDate.now(),Optional.empty());
+    private OrgtilknytningState createOtks(String navident, String orgEnhetId){
+        return orgtilknytningState().toBuilder()
+            .fid(orgEnhetId)
+            .navident(navident)
+            .orgEnhetId(orgEnhetId)
+            .erDagligOppfolging(true)
+            .gyldigFom(LocalDate.now())
+            .gyldigTom(Optional.empty())
+            .build();
     }
 
     private OrgEnhet createOes(String oeId, String name, String overOeId) {

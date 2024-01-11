@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @Type(value = OrgtilknytningDatoEndretEventV1.class),
     @Type(value = OrgtilknytningDagligOppfolgingEndretEventV1.class),
     @Type(value = OrgtilknytningFjernetEventV1.class),
+    @Type(value = OrgtilknytningTypeEndretEventV1.class)
 })
 public abstract class OrgtilknytningEvent extends Event {
 

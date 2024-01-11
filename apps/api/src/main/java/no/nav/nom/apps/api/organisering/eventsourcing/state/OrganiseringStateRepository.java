@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrganiseringStateRepository {
-    private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>();
+    private final Map<String, OrganiseringState> organiseringByFid = new ConcurrentHashMap<>(16, 0.9f, 1);
+    private final Map<String, OrganiseringState> organiseringById = new ConcurrentHashMap<>(16, 0.9f, 1);
 
     public void put(String fid, OrganiseringState organiseringState) {
         organiseringByFid.put(fid, organiseringState);
@@ -27,6 +28,16 @@ public class OrganiseringStateRepository {
         return getActiveOrganisering().containsKey(fid) ? Optional.ofNullable(getActiveOrganisering().get(fid)) : Optional.empty();
     }
 
+    public Optional<OrganiseringState> findActiveById(String id) {
+        var organisering = organiseringById.get(id);
+
+        if (organisering != null) {
+            return isActive(organisering) ? Optional.of(organisering) : Optional.empty();
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public Optional<OrganiseringState> findFidByAgressoIdNivaAndName(Optional<IOrgenhet> orgEnhet) {
         return orgEnhet.flatMap(iOrgenhet -> organiseringByFid.values()
             .stream()
@@ -36,10 +47,12 @@ public class OrganiseringStateRepository {
 
     public void clear() {
         organiseringByFid.clear();
+        organiseringById.clear();
     }
 
     public void putEventAggregate(OrganiseringState organiseringState) {
         organiseringByFid.put(organiseringState.fid(), organiseringState);
+        organiseringById.put(organiseringState.id(), organiseringState);
     }
 
     public int count() {
@@ -53,7 +66,7 @@ public class OrganiseringStateRepository {
     public Map<String, OrganiseringState> getActiveOrganisering() {
         // either terminating date is not present of it is today or later
         return organiseringByFid.entrySet().stream()
-            .filter(e -> isGyldigTomNull(e.getValue()) || (!isCreatedAndDeletedToday(e.getValue()) && (isGyldigTomTodayOrLater(e.getValue()))))
+            .filter(e -> isActive(e.getValue()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -65,6 +78,10 @@ public class OrganiseringStateRepository {
         return getActiveOrganisering().values().stream()
             .filter(o -> o.containsOrgEnhet(id))
             .toList();
+    }
+
+    private boolean isActive(OrganiseringState organiseringState) {
+        return isGyldigTomNull(organiseringState) || (!isCreatedAndDeletedToday(organiseringState) && isGyldigTomTodayOrLater(organiseringState));
     }
 
     private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {

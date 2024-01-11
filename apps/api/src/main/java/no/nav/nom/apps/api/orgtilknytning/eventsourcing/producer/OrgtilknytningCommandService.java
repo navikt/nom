@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -13,6 +14,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +90,17 @@ public class OrgtilknytningCommandService {
                 ),
                 endreOrgtilknytningDato.inputMetadata(),
                 endreOrgtilknytningDato.additionalAgressoData()
+            ));
+    }
+
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningType(String fid, EndreOrgtilknytningType endreOrgtilknytningType) {
+        return eventProducer.sendMessage(
+            new OrgtilknytningTypeEndretEventV1(
+                fid,
+                new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(
+                    endreOrgtilknytningType.orgtilknytningType()
+                ),
+                endreOrgtilknytningType.inputMetadata()
             ));
     }
 

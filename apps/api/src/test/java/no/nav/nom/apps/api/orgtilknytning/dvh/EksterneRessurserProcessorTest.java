@@ -7,7 +7,6 @@ import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
 import no.nav.nom.apps.api.remedy.RemedyEnhet;
 import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
-import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static no.nav.nom.apps.api.common.TestData.orgtilknytningState;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -200,7 +200,7 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "----", "UKJENT_AGRESSO_ID", "ORGENHET", yesterday, tomorrow, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(tomorrow))
+            orgtilknytningState().toBuilder().navident("A000001").build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -215,7 +215,11 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(tomorrow))
+            orgtilknytningState().toBuilder()
+                .orgEnhetId("ORGENHET_A")
+                .gyldigFom(yesterday)
+                .gyldigTom(Optional.of(tomorrow))
+                .build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -230,7 +234,11 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_A", true, yesterday, Optional.of(today))
+            orgtilknytningState().toBuilder()
+                .fid("FID_A")
+                .orgEnhetId("ORGENHET_A")
+                .gyldigFom(yesterday)
+                .gyldigTom(Optional.of(today)).build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -248,7 +256,10 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", yesterday, tomorrow, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, yesterday.minusMonths(1), Optional.of(tomorrow))
+            orgtilknytningState().toBuilder()
+                .fid("FID_A")
+                .navident(ekstern.navident())
+                .build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -280,7 +291,10 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", tomorrow, inTwoMonths, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, tomorrow, Optional.of(inTwoMonths))
+            orgtilknytningState().toBuilder()
+                .fid("FID_A")
+                .gyldigFom(tomorrow)
+                .build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -311,7 +325,9 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
             new DvhEksternRessurs("payload", "A000001", "1234", "8000100", "ORGENHET", tomorrow, inTwoMonths, true);
 
         when(orgtilknytningService.getByNavIdent(ekstern.navident())).thenReturn(List.of(
-            new OrgtilknytningState("FID_A", "A000001", "ORGENHET_B", true, tomorrow, Optional.of(tomorrow.plusDays(10)))
+            orgtilknytningState().toBuilder()
+                .fid("FID_A")
+                .gyldigFom(tomorrow).build()
         ));
 
         eksterneRessurserProcessor.process(ekstern);
@@ -342,13 +358,5 @@ public class EksterneRessurserProcessorTest extends OrgtilknytningCmdServiceTest
         )
     );
 
-    static final IOrgenhet ORGENHET_B = new OrgEnhet(
-        new OrgEnhetState("FID_ENHET_B", "ORGENHET_B", "ENHET B", LocalDate.of(2022, 1, 1),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.of("1000800-ENHET B-ORGENHET"), Optional.of("1000800"), Optional.of("ORGENHET"), Optional.empty()
-        )
-    );
-
     static final RemedyEnhet REMEDY_ENHET_1234 = new RemedyEnhet("1234", "8000100", "ORGENHET", "ORGENHET_A");
-    static final RemedyEnhet REMEDY_ENHET_5678 = new RemedyEnhet("5678", "1000800", "ORGENHET", "ORGENHET_B");
 }

@@ -2,10 +2,12 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.graphql.common.SecurityUtil;
 import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
@@ -13,6 +15,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.OrgtilknytningType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -20,6 +23,7 @@ import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -122,6 +126,55 @@ public class OrgtilknytningRestService {
         );
 
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
+    }
+
+    public void updateOrgtilknytningType(String fid, EndreOrgtilknytningTypeRequest endreOrgtilknytningTypeRequest) {
+
+        var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)
+            .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
+
+        var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())
+            .orElseThrow(() -> RessursNotFoundException.navident(orgtilknytning.navident()));
+
+        if (tilknyttetRessurs.sektor() != Sektor.EKSTERN) {
+            throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
+        }
+
+        endreOrgtilknytningTypeRequest.orgtilknytningType().ifPresent(
+            orgtilknytningType -> validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())
+        );
+
+        orgtilknytningCommandService.endreOrgtilknytningType(
+            orgtilknytning.fid(),
+            new EndreOrgtilknytningType(
+                endreOrgtilknytningTypeRequest.orgtilknytningType(),
+                new InputMetadata(
+                    "REST",
+                    "updateOrgtilknytningType",
+                    Map.of(
+                        "navident", orgtilknytning.navident(),
+                        "orgEnhetId", orgtilknytning.orgEnhetId()
+                    ),
+                    new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())
+                )
+            )
+        );
+
+        nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
+    }
+
+    private void validateOrgtilknytningTypeSektorCombination(OrgtilknytningType orgtilknytningType, Sektor sektor) {
+
+        Map<Sektor, List<OrgtilknytningType>> allowedOrgtilknytningTypeForSektorMap = Map.of(
+            Sektor.EKSTERN, List.of(OrgtilknytningType.KONSULENT),
+            Sektor.NAV_KOMMUNAL, Collections.emptyList(),
+            Sektor.NAV_STATLIG, Collections.emptyList()
+        );
+
+        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(orgtilknytningType)) {
+            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(orgtilknytningType, sektor);
+        }
+
     }
 
     public void addOrgtilknyting(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {

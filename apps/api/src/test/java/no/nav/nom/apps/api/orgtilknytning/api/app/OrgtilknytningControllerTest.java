@@ -2,9 +2,11 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
+import no.nav.nom.contract.nom.OrgtilknytningType;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,11 +45,15 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
     @Captor
     ArgumentCaptor<EndreOrgtilknytningDato> endreOrgtilknytningDatoArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<EndreOrgtilknytningType> endreOrgtilknytningTypeArgumentCaptor;
+
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
 
     @BeforeEach
-    void setInitialLoadComplete() {
+    void setInitialLoadCompleteAndEnableUnleashAndClearData() {
         when(ressursStateListener.initloadComplete()).thenReturn(true);
         when(unleash.isEnabled(any())).thenReturn(true);
         clearOrgtilknytninger();
@@ -166,7 +172,6 @@ public class OrgtilknytningControllerTest extends RestTestBase {
             );
     }
 
-
     @Test
     @DisplayName("Should not be able to update dato if it leads to no active orgtilknytninger")
     void test_disallow_update_if_no_remaining_active() {
@@ -262,6 +267,104 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                     LocalDate.now(),
                     Optional.of(LocalDate.now().plusYears(1))
                 )
+            )
+            .exchange()
+            .expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("Should update orgtilknytningType for orgtilknytning")
+    void test_update_orgtilknytning_type() {
+
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.EKSTERN)
+                .build()
+        ));
+
+        var endreOrgtilknytningTypeRequest = new EndreOrgtilknytningTypeRequest(
+            Optional.of(OrgtilknytningType.KONSULENT)
+        );
+
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/orgtilknytningType")
+                .build(orgtilknytningToUpdate.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(endreOrgtilknytningTypeRequest)
+            .exchange()
+            .expectStatus().is2xxSuccessful();
+
+        verify(
+            orgtilknytningCommandService,
+            times(1)
+        ).endreOrgtilknytningType(
+            stringArgumentCaptor.capture(),
+            endreOrgtilknytningTypeArgumentCaptor.capture()
+        );
+
+        assertThat(stringArgumentCaptor.getValue()).isEqualTo(orgtilknytningToUpdate.fid());
+        assertThat(endreOrgtilknytningTypeArgumentCaptor.getValue())
+            .matches(endreOrgtilknytningType ->
+                endreOrgtilknytningType.orgtilknytningType().equals(endreOrgtilknytningTypeRequest.orgtilknytningType())
+            );
+    }
+
+    @Test
+    @DisplayName("Should block update orgtilknytningType for orgtilknytning if tilknyttet ressurs is not EKSTERN")
+    void test_update_orgtilknytning_type_for_ekstern_only() {
+        var orgtilknytningToUpdate = orgtilknytningState();
+        saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
+
+        saveRessurser(List.of(
+            ressursState().toBuilder()
+                .navident(orgtilknytningToUpdate.navident())
+                .sektor(Sektor.NAV_STATLIG)
+                .build()
+        ));
+
+        webTestClient
+            .post()
+            .uri(uriBuilder -> uriBuilder
+                .path("/app/orgtilknytninger/{fid}/orgtilknytningType")
+                .build(orgtilknytningToUpdate.fid())
+            )
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(nomWriteUserToken());
+            })
+            .bodyValue(
+                new EndreOrgtilknytningTypeRequest(
+                    Optional.empty()
+                )
+            )
+            .exchange()
+            .expectStatus().isBadRequest();
+    }
+
+    @Test
+    @DisplayName("Should forbid update orgtilknytning type if user does not have granted authority 'MUTATE_RESSURS'")
+    void test_update_orgtilknytning_type_forbidden() {
+
+        webTestClient
+            .post()
+            .uri("/app/orgtilknytninger/some-fid/orgtilknytningType")
+            .headers(httpHeaders -> {
+                httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                httpHeaders.setBearerAuth(noScopesUserToken());
+            })
+            .bodyValue(
+                new EndreOrgtilknytningTypeRequest(Optional.empty())
             )
             .exchange()
             .expectStatus().isForbidden();

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
@@ -111,6 +112,30 @@ public class OrgtilknytningController {
         throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 
+    @PostMapping("/{fid}/orgtilknytningType")
+    @Operation(
+        description = "Endrer orgtilknytningType for en orgtilknytning",
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200"),
+    })
+    @PreAuthorize(
+        "hasAuthority('MUTATE_RESSURS')"
+    )
+    public ResponseEntity<StandardResponse> updateOrgtilknytningType(
+        @PathVariable String fid,
+        @RequestBody EndreOrgtilknytningTypeRequest endreOrgtilknytningTypeRequest
+    ) {
+        if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
+            orgtilknytningRestService.updateOrgtilknytningType(fid, endreOrgtilknytningTypeRequest);
+
+            return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
+        }
+
+        throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
+    }
+
     @GetMapping("/{fid}")
     @Operation(
         description = "Direkte oppslag på orgtilknytning med fid",
@@ -132,7 +157,8 @@ public class OrgtilknytningController {
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,
-        InvalidSektorException.class
+        InvalidSektorException.class,
+        InvalidOrgtilknytningTypeAndSektorCombinationException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity
