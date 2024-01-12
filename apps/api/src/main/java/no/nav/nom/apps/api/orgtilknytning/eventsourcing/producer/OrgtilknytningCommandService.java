@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -93,14 +93,14 @@ public class OrgtilknytningCommandService {
             ));
     }
 
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningType(String fid, EndreOrgtilknytningType endreOrgtilknytningType) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(String fid, EndreTilknytningtype endreTilknytningType) {
         return eventProducer.sendMessage(
             new OrgtilknytningTilknytningtypeEndretEventV1(
                 fid,
                 new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
-                    endreOrgtilknytningType.orgtilknytningType()
+                    endreTilknytningType.tilknytningtype()
                 ),
-                endreOrgtilknytningType.inputMetadata()
+                endreTilknytningType.inputMetadata()
             ));
     }
 

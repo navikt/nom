@@ -5,6 +5,6 @@ import no.nav.nom.contract.nom.eventsource.InputMetadata;
 
 import java.util.Optional;
 
-public record EndreOrgtilknytningType(
-    Optional<Tilknytningtype> orgtilknytningType,
+public record EndreTilknytningtype(
+    Optional<Tilknytningtype> tilknytningtype,
     InputMetadata inputMetadata) {}

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import no.nav.nom.contract.nom.AnsettelsesType;
 import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -19,5 +20,6 @@ public record OpprettRessursRequest(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate startDato,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> sluttDato,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) AnsettelsesType ansettelsesType,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fysiskBrukerstedNr
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String fysiskBrukerstedNr,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Tilknytningtype tilknytningtype
 ) { }

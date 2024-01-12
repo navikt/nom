@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
 import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
 import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
@@ -216,7 +217,8 @@ public class RessursController {
     @ExceptionHandler({
         IllegalArgumentException.class,
         NoSuchElementException.class,
-        InvalidSektorException.class
+        InvalidSektorException.class,
+        InvalidOrgtilknytningTypeAndSektorCombinationException.class
     })
     public ResponseEntity<StandardResponse> handleBadRequest(RuntimeException exception) {
         return ResponseEntity

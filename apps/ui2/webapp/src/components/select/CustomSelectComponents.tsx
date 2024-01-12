@@ -172,11 +172,11 @@ export function BasicSelect<
 >(properties: Props<Option, IsMulti, Group>) {
   return (
     <Select
+      isClearable
       {...properties}
       components={{ MenuList: CustomMenuList, ...properties.components }}
       css={commonSelectCss}
       escapeClearsValue
-      isClearable
       isSearchable
       menuPosition="fixed"
       placeholder={properties.placeholder ?? ""}

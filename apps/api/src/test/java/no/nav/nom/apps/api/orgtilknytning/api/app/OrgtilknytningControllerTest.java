@@ -2,7 +2,7 @@ package no.nav.nom.apps.api.orgtilknytning.api.app;
 
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
@@ -47,7 +47,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     ArgumentCaptor<EndreOrgtilknytningDato> endreOrgtilknytningDatoArgumentCaptor;
 
     @Captor
-    ArgumentCaptor<EndreOrgtilknytningType> endreOrgtilknytningTypeArgumentCaptor;
+    ArgumentCaptor<EndreTilknytningtype> endreTilknytningtypeArgumentCaptor;
 
     @Captor
     ArgumentCaptor<OpprettOrgtilknytning> opprettOrgtilknytningArgumentCaptor;
@@ -273,7 +273,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
     }
 
     @Test
-    @DisplayName("Should update orgtilknytningType for orgtilknytning")
+    @DisplayName("Should update tilknytningtype for orgtilknytning")
     void test_update_orgtilknytning_type() {
 
         var orgtilknytningToUpdate = orgtilknytningState();
@@ -286,7 +286,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var endreOrgtilknytningTypeRequest = new EndreTilknytningtypeRequest(
+        var endreTilknytningtypeRequest = new EndreTilknytningtypeRequest(
             Optional.of(Tilknytningtype.KONSULENT)
         );
 
@@ -294,34 +294,34 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         webTestClient
             .post()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/orgtilknytningType")
+                .path("/app/orgtilknytninger/{fid}/tilknytningtype")
                 .build(orgtilknytningToUpdate.fid())
             )
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());
             })
-            .bodyValue(endreOrgtilknytningTypeRequest)
+            .bodyValue(endreTilknytningtypeRequest)
             .exchange()
             .expectStatus().is2xxSuccessful();
 
         verify(
             orgtilknytningCommandService,
             times(1)
-        ).endreOrgtilknytningType(
+        ).endreTilknytningtype(
             stringArgumentCaptor.capture(),
-            endreOrgtilknytningTypeArgumentCaptor.capture()
+            endreTilknytningtypeArgumentCaptor.capture()
         );
 
         assertThat(stringArgumentCaptor.getValue()).isEqualTo(orgtilknytningToUpdate.fid());
-        assertThat(endreOrgtilknytningTypeArgumentCaptor.getValue())
-            .matches(endreOrgtilknytningType ->
-                endreOrgtilknytningType.orgtilknytningType().equals(endreOrgtilknytningTypeRequest.tilknytningtype())
+        assertThat(endreTilknytningtypeArgumentCaptor.getValue())
+            .matches(endreTilknytningtype ->
+                endreTilknytningtype.tilknytningtype().equals(endreTilknytningtypeRequest.tilknytningtype())
             );
     }
 
     @Test
-    @DisplayName("Should block update orgtilknytningType for orgtilknytning if tilknyttet ressurs is not EKSTERN")
+    @DisplayName("Should block update tilknytningtype for orgtilknytning if tilknyttet ressurs is not EKSTERN")
     void test_update_orgtilknytning_type_for_ekstern_only() {
         var orgtilknytningToUpdate = orgtilknytningState();
         saveOrgtilknytninger(List.of(orgtilknytningToUpdate));
@@ -336,7 +336,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         webTestClient
             .post()
             .uri(uriBuilder -> uriBuilder
-                .path("/app/orgtilknytninger/{fid}/orgtilknytningType")
+                .path("/app/orgtilknytninger/{fid}/tilknytningtype")
                 .build(orgtilknytningToUpdate.fid())
             )
             .headers(httpHeaders -> {
@@ -358,7 +358,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
 
         webTestClient
             .post()
-            .uri("/app/orgtilknytninger/some-fid/orgtilknytningType")
+            .uri("/app/orgtilknytninger/some-fid/tilknytningtype")
             .headers(httpHeaders -> {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(noScopesUserToken());

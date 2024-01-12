@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOv
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
@@ -144,9 +144,9 @@ public class OrgtilknytningRestService {
             orgtilknytningType -> validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())
         );
 
-        orgtilknytningCommandService.endreOrgtilknytningType(
+        orgtilknytningCommandService.endreTilknytningtype(
             orgtilknytning.fid(),
-            new EndreOrgtilknytningType(
+            new EndreTilknytningtype(
                 endreTilknytningtypeRequest.tilknytningtype(),
                 new InputMetadata(
                     "REST",
@@ -163,7 +163,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 
-    private void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
+    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
 
         Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
             Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT),

@@ -11,7 +11,10 @@ import { ApiResponseError } from "~/components/ApiResponseError";
 import { LabelWithValue } from "~/components/LabelWithValue";
 import { useFysiskBrukersted } from "~/hooks/useFysiskBrukersted";
 import { AnsettelsesTypeNameMapping } from "~/pages/CreateResourcePage/CreateResourcePageRoutes";
-import { SektorNameMapping } from "~/pages/CreateResourcePage/SektorStep";
+import {
+  SektorNameMapping,
+  TilknytningtypeNameMapping,
+} from "~/pages/CreateResourcePage/SektorStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
 import type {
   OpprettRessursRequest,
@@ -32,6 +35,7 @@ export function ConfirmStep() {
     gyldigTom,
     orgEnhetId,
     fysiskBrukerstedNr,
+    tilknytningtype,
   } = useSearch({ from: createRessursRoute.fullPath });
 
   const formattedName = [visningsfornavn, visningsmellomnavn, visningsetternavn]
@@ -76,6 +80,7 @@ export function ConfirmStep() {
         sluttDato: gyldigTom,
         orgEnhetId,
         fysiskBrukerstedNr,
+        tilknytningtype,
       };
       return axios.post("/nom-api/app/ressurser", opprettRessursRequest);
     },
@@ -131,6 +136,12 @@ export function ConfirmStep() {
           <LabelWithValue
             label="Sektor"
             value={sektor && SektorNameMapping[sektor]}
+          />
+          <LabelWithValue
+            label="Tilknytningtype"
+            value={
+              tilknytningtype && TilknytningtypeNameMapping[tilknytningtype]
+            }
           />
           <LabelWithValue
             label="Ansettelsestype"

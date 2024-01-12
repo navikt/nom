@@ -7,6 +7,7 @@ import no.nav.nom.apps.api.nik.OpprettNavidentRequest;
 import no.nav.nom.apps.api.nik.OpprettNavidentResponse;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.pdl.PdlClient;
+import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.RessursCommadService;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OppdaterFysiskeBrukerstederCommand;
 import no.nav.nom.apps.api.ressurs.eventsourcing.producer.commands.OpprettRessursCommand;
@@ -14,6 +15,7 @@ import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.rest.RestTestBase;
 import no.nav.nom.apps.api.rest.common.StandardResponse;
 import no.nav.nom.contract.nom.AnsettelsesType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.RessursState;
@@ -69,53 +71,9 @@ public class RessursControllerTest extends RestTestBase {
         when(unleash.isEnabled(UNLEASH_EDIT_RESSURS)).thenReturn(true);
     }
 
-    @Test
-    @SneakyThrows
-    void skal_opprette_statlig_ressurs() {
-        String personident = "12345678910";
-        String navident = "x123456";
-        val navn = pdlUtils.mockSinglePersonResponse();
-
-        when(nikClient.opprettNavidentOnBehalfOfUser(
-            eq(OpprettNavidentRequest.builder()
-                .personid(personident)
-                .identPrefix(navn.getEtternavn().substring(0, 1))
-                .identType("STANDARD")
-                .build())
-        )).thenReturn(ResponseEntity.ok(
-            OpprettNavidentResponse.builder()
-                .navident(navident)
-                .build()));
-
-        when(pdlClient.hentPerson(eq(personident))).thenReturn(Optional.empty());
-
-        var request = new OpprettRessursRequest(
-            personident,
-            navn.getFornavn(),
-            navn.getMellomnavn(),
-            navn.getEtternavn(),
-            Sektor.NAV_STATLIG,
-            "",
-            LocalDate.now(),
-            null,
-            AnsettelsesType.FAST,
-            ""
-        );
-
-        when(ressursCommadService.createRessursSync(any(OpprettRessursCommand.class)))
-            .thenReturn(
-                new RessursState(
-                    "fid",
-                    personident,
-                    navident,
-                    request.sektor(),
-                    new Visningsnavn(navn.getFornavn(), Optional.of(navn.getMellomnavn()), navn.getEtternavn()),
-                    request.sluttDato(),
-                    Optional.empty(),
-                    null,
-                    Collections.emptyList()
-                ));
-
+    @ParameterizedTest(name = "Skal ikke opprette ressurs i sektor {0}")
+    @MethodSource("skal_bare_opprette_eksterne_ressurser_input")
+    void skal_bare_opprette_eksterne_ressurser(Sektor sektor) {
 
         webTestClient.post()
             .uri("/app/ressurser")
@@ -123,17 +81,21 @@ public class RessursControllerTest extends RestTestBase {
                 httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 httpHeaders.setBearerAuth(nomWriteUserToken());
             })
-            .bodyValue(request)
+            .bodyValue(opprettRessursRequest().toBuilder().sektor(sektor).build())
             .exchange()
-            .expectStatus().is2xxSuccessful()
-            .expectBody(OpprettRessursResponse.class)
-            .isEqualTo(new OpprettRessursResponse(
-                personident,
-                navident,
-                navn.getFornavn() + " " + navn.getMellomnavn(),
-                navn.getEtternavn(),
-                request.sektor()
-            ));
+            .expectStatus().isBadRequest()
+            .expectBody(StandardResponse.class)
+            .isEqualTo(StandardResponse.builder()
+                .message(InvalidSektorException.actionNotAllowedForSektor(sektor).getMessage())
+                .build()
+            );
+    }
+
+    private static Stream<Arguments> skal_bare_opprette_eksterne_ressurser_input(){
+        return Stream.of(
+            Arguments.of(Sektor.NAV_STATLIG),
+            Arguments.of(Sektor.NAV_KOMMUNAL)
+        );
     }
 
     @Test
@@ -166,7 +128,8 @@ public class RessursControllerTest extends RestTestBase {
             LocalDate.now(),
             Optional.of(LocalDate.now()),
             null,
-            ""
+            "",
+            Tilknytningtype.KONSULENT
         );
 
         when(nomRemedyIntegrasjonClient.getFysiskeBrukerstedNrs(eq(List.of(request.fysiskBrukerstedNr()))))
@@ -231,7 +194,8 @@ public class RessursControllerTest extends RestTestBase {
             LocalDate.now(),
             Optional.empty(),
             null,
-            ""
+            "",
+            Tilknytningtype.KONSULENT
         );
 
         webTestClient.post()
@@ -505,5 +469,18 @@ public class RessursControllerTest extends RestTestBase {
                 "Value for primaryFysiskBrukersted must be included in fysiske brukersteder"
             )
         );
+    }
+
+    OpprettRessursRequest opprettRessursRequest() {
+        return OpprettRessursRequest.builder()
+            .personident("whatever")
+            .visningsfornavn("whatever")
+            .visningsmellomnavn("whatever")
+            .visningsetternavn("whatever")
+            .sektor(Sektor.EKSTERN)
+            .ansettelsesType(AnsettelsesType.FAST)
+            .fysiskBrukerstedNr("whatever")
+            .tilknytningtype(Tilknytningtype.KONSULENT)
+            .build();
     }
 }

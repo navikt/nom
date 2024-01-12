@@ -112,7 +112,7 @@ public class OrgtilknytningController {
         throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 
-    @PostMapping("/{fid}/orgtilknytningType")
+    @PostMapping("/{fid}/tilknytningtype")
     @Operation(
         description = "Endrer orgtilknytningType for en orgtilknytning",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)

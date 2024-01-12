@@ -26,6 +26,10 @@ export interface EndreOrgtilknytningDatoRequest {
   gyldigTom?: string;
 }
 
+export interface EndreTilknytningtypeRequest {
+  tilknytningtype?: Tilknytningtype;
+}
+
 export interface FolkeregisterPerson {
   navn: RessursNavn;
 }
@@ -61,6 +65,7 @@ export interface OpprettRessursRequest {
   sluttDato?: string;
   /** @format date */
   startDato: string;
+  tilknytningtype: Tilknytningtype;
   visningsetternavn: string;
   visningsfornavn: string;
   visningsmellomnavn?: string;
@@ -77,6 +82,7 @@ export interface OpprettRessursResponse {
 export interface OrgEnhet {
   agressoId: string;
   agressoOrgenhetType: string;
+  fid: string;
   /** @format date */
   gyldigFom: string;
   /** @format date */
@@ -119,6 +125,7 @@ export interface OrgtilknytningState {
   gyldigTom?: string;
   navident: string;
   orgEnhetId: string;
+  orgtilknytningType?: Tilknytningtype;
 }
 
 export interface Person {
@@ -208,6 +215,10 @@ export enum TelefonType {
   NAV_TJENESTE_TELEFON = "NAV_TJENESTE_TELEFON",
   NAV_KONTOR_TELEFON = "NAV_KONTOR_TELEFON",
   PRIVAT_TELEFON = "PRIVAT_TELEFON",
+}
+
+export enum Tilknytningtype {
+  KONSULENT = "KONSULENT",
 }
 
 export interface UpdateFysiskeBrukerstederRequest {
