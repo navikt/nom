@@ -27,9 +27,12 @@ updates:
       time: "04:00"
     open-pull-requests-limit: 10
     groups:
-      batch-patche-updates:
+      ui2-patches:
         update-types:
           - patch
+      ui2-minors:
+        update-types:
+          - minor
   - package-ecosystem: npm
     directory: "/apps/ui2/frackend"
     schedule:
@@ -37,9 +40,12 @@ updates:
       time: "04:00"
     open-pull-requests-limit: 10
     groups:
-      batch-patche-updates:
+      frackend-patches:
         update-types:
           - patch
+      frackend-minors:
+        update-types:
+          - minor
   - package-ecosystem: docker
     directory: "/apps/ui2/frackend"
     schedule:
