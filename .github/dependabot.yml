@@ -26,12 +26,20 @@ updates:
       interval: daily
       time: "04:00"
     open-pull-requests-limit: 10
+    groups:
+      batch-patche-updates:
+        update-types:
+          - patch
   - package-ecosystem: npm
     directory: "/apps/ui2/frackend"
     schedule:
       interval: daily
       time: "04:00"
     open-pull-requests-limit: 10
+    groups:
+      batch-patche-updates:
+        update-types:
+          - patch
   - package-ecosystem: docker
     directory: "/apps/ui2/frackend"
     schedule:
