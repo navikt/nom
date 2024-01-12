@@ -44,6 +44,7 @@ public class OrgEnhetUnderordnetResolver {
                 .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
                 .map(organiseringState -> orgEnhetStateRepository.findById(organiseringState.id()))
                 .flatMap(Optional::stream)
+                .distinct()
                 .toList();
         } else {
 
