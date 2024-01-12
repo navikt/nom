@@ -41,7 +41,7 @@ public class OrgEnhetUnderordnetResolver {
 
         if (unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE)) {
             return organiseringStateRepository.getOrganiseringerContainingId(orgEnhetState.id()).stream()
-                .filter(organiseringState -> organiseringState.idOver().equals(organiseringState.id()))
+                .filter(organiseringState -> organiseringState.idOver().equals(orgEnhetState.id()))
                 .map(organiseringState -> orgEnhetStateRepository.findById(organiseringState.id()))
                 .flatMap(Optional::stream)
                 .toList();
