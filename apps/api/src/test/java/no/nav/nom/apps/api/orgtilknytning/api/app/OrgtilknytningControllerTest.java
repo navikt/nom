@@ -6,7 +6,7 @@ import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreO
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateListener;
 import no.nav.nom.apps.api.rest.RestTestBase;
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.junit.jupiter.api.BeforeEach;
@@ -286,8 +286,8 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 .build()
         ));
 
-        var endreOrgtilknytningTypeRequest = new EndreOrgtilknytningTypeRequest(
-            Optional.of(OrgtilknytningType.KONSULENT)
+        var endreOrgtilknytningTypeRequest = new EndreTilknytningtypeRequest(
+            Optional.of(Tilknytningtype.KONSULENT)
         );
 
 
@@ -316,7 +316,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
         assertThat(stringArgumentCaptor.getValue()).isEqualTo(orgtilknytningToUpdate.fid());
         assertThat(endreOrgtilknytningTypeArgumentCaptor.getValue())
             .matches(endreOrgtilknytningType ->
-                endreOrgtilknytningType.orgtilknytningType().equals(endreOrgtilknytningTypeRequest.orgtilknytningType())
+                endreOrgtilknytningType.orgtilknytningType().equals(endreOrgtilknytningTypeRequest.tilknytningtype())
             );
     }
 
@@ -344,7 +344,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(nomWriteUserToken());
             })
             .bodyValue(
-                new EndreOrgtilknytningTypeRequest(
+                new EndreTilknytningtypeRequest(
                     Optional.empty()
                 )
             )
@@ -364,7 +364,7 @@ public class OrgtilknytningControllerTest extends RestTestBase {
                 httpHeaders.setBearerAuth(noScopesUserToken());
             })
             .bodyValue(
-                new EndreOrgtilknytningTypeRequest(Optional.empty())
+                new EndreTilknytningtypeRequest(Optional.empty())
             )
             .exchange()
             .expectStatus().isForbidden();

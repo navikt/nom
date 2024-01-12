@@ -14,7 +14,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
@@ -95,9 +95,9 @@ public class OrgtilknytningCommandService {
 
     public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningType(String fid, EndreOrgtilknytningType endreOrgtilknytningType) {
         return eventProducer.sendMessage(
-            new OrgtilknytningTypeEndretEventV1(
+            new OrgtilknytningTilknytningtypeEndretEventV1(
                 fid,
-                new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(
+                new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
                     endreOrgtilknytningType.orgtilknytningType()
                 ),
                 endreOrgtilknytningType.inputMetadata()

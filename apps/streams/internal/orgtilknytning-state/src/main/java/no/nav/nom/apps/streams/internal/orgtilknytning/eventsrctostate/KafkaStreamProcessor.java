@@ -3,7 +3,7 @@ package no.nav.nom.apps.streams.internal.orgtilknytning.eventsrctostate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
@@ -65,6 +65,7 @@ class KafkaStreamProcessor {
             if (eventStateAggregate.hasNonNull("TOMBSTONE")) {
                 return null;
             }
+
             return new OrgtilknytningState(
                 fid,
                 eventStateAggregate.get("navident").asText(),
@@ -72,7 +73,8 @@ class KafkaStreamProcessor {
                 Boolean.parseBoolean(eventStateAggregate.hasNonNull("dagligOppfolging") ? eventStateAggregate.get("dagligOppfolging").asText() : null),
                 LocalDate.parse(eventStateAggregate.get("gyldigFom").asText()),
                 Optional.ofNullable(eventStateAggregate.hasNonNull("gyldigTom") ? LocalDate.parse(eventStateAggregate.get("gyldigTom").asText()) : null),
-                Optional.ofNullable(eventStateAggregate.findValue("orgtilknytningType")).map(s -> OrgtilknytningType.valueOf(s.asText()))
+                Optional.ofNullable(eventStateAggregate.findValue("orgtilknytningType")).map(s -> Tilknytningtype.valueOf(s.asText()))
+                    .or(() -> Optional.ofNullable(eventStateAggregate.findValue("tilknytningtype")).map(s -> Tilknytningtype.valueOf(s.asText())))
             );
         } catch (Exception e) {
             log.error("Error mapping to OrgtilknytningState", e);

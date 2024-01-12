@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -18,5 +18,5 @@ public record OrgtilknytningState(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean erDagligOppfolging,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) LocalDate gyldigFom,
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<LocalDate> gyldigTom,
-    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<OrgtilknytningType> orgtilknytningType
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED) Optional<Tilknytningtype> orgtilknytningType
 ) {}
