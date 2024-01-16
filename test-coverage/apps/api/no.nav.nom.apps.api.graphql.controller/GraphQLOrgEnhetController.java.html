@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphQLOrgEnhetController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.controller</a> &gt; <span class="el_source">GraphQLOrgEnhetController.java</span></div><h1>GraphQLOrgEnhetController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.controller;
+
+import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.graphql.common.metrics.GraphQLFieldConsumptionCounter;
+import no.nav.nom.apps.api.graphql.common.projections.OrgEnhetSearch;
+import no.nav.nom.apps.api.graphql.common.projections.OrgEnheterSearch;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetKoblingResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrgEnhetResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.OrganiseringResolver;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetResult;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsKobling;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhetsLeder;
+import no.nav.nom.contract.nom.api.graphql.Organisering;
+import no.nav.nom.contract.nom.api.graphql.OrganiseringRetning;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+@PreAuthorize(&quot;@securityUtil.checkAuth(authentication)&quot;)
+public class GraphQLOrgEnhetController {
+
+    private final OrgEnhetResolver orgEnhetResolver;
+    private final OrgEnhetKoblingResolver koblingResolver;
+    private final OrganiseringResolver organiseringResolver;
+    private final LederResolver lederResolver;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final GraphQLFieldConsumptionCounter counter;
+
+    public GraphQLOrgEnhetController(
+            OrgEnhetResolver orgEnhetResolver,
+            OrgEnhetKoblingResolver koblingResolver,
+            OrganiseringResolver organiseringResolver,
+            @Qualifier(&quot;OrgEnhetsLeder&quot;) LederResolver lederResolver,
+            RemedyEnhetIdResolver remedyEnhetIdResolver,
+            GraphQLFieldConsumptionCounter counter
+<span class="fc" id="L46">    ) {</span>
+<span class="fc" id="L47">        this.orgEnhetResolver = orgEnhetResolver;</span>
+<span class="fc" id="L48">        this.koblingResolver = koblingResolver;</span>
+<span class="fc" id="L49">        this.organiseringResolver = organiseringResolver;</span>
+<span class="fc" id="L50">        this.lederResolver = lederResolver;</span>
+<span class="fc" id="L51">        this.remedyEnhetIdResolver = remedyEnhetIdResolver;</span>
+<span class="fc" id="L52">        this.counter = counter;</span>
+<span class="fc" id="L53">    }</span>
+
+    @Deprecated(forRemoval = true)
+    @QueryMapping(&quot;organisasjonsenhet&quot;)
+    public Optional&lt;OrgEnhet&gt; organisasjonsenhet(@Argument(&quot;where&quot;) OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+<span class="fc" id="L58">        return orgEnhet(orgEnhetSearch, environment);</span>
+    }
+
+    @QueryMapping(&quot;orgEnhet&quot;)
+    public Optional&lt;OrgEnhet&gt; orgEnhet(@Argument(&quot;where&quot;) OrgEnhetSearch orgEnhetSearch, DataFetchingEnvironment environment) {
+<span class="fc" id="L63">        counter.count(environment);</span>
+<span class="fc" id="L64">        return orgEnhetResolver.orgEnhet(orgEnhetSearch);</span>
+    }
+
+    @Deprecated(forRemoval = true)
+    @QueryMapping(&quot;organisasjonsenheter&quot;)
+    public List&lt;OrgEnhetResult&gt; organisasjonsenheter(@Argument(&quot;where&quot;) OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+<span class="fc" id="L70">        return orgEnheter(orgEnheterSearch, environment);</span>
+    }
+
+    @QueryMapping(&quot;orgEnheter&quot;)
+    public List&lt;OrgEnhetResult&gt; orgEnheter(@Argument(&quot;where&quot;) OrgEnheterSearch orgEnheterSearch, DataFetchingEnvironment environment) {
+<span class="fc" id="L75">        counter.count(environment);</span>
+<span class="fc" id="L76">        return orgEnhetResolver.orgEnheter(orgEnheterSearch);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;OrgEnhet&quot;, field = &quot;organiseringer&quot;)
+    public List&lt;Organisering&gt; organisering(OrgEnhet orgEnhet, @Argument(&quot;retning&quot;) OrganiseringRetning retning) {
+<span class="fc" id="L81">        return organiseringResolver.organiseringer(orgEnhet, retning);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;OrgEnhet&quot;, field = &quot;leder&quot;)
+    public List&lt;OrgEnhetsLeder&gt; leder(OrgEnhet orgEnhet) {
+<span class="fc" id="L86">        return lederResolver.leder(orgEnhet);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;OrgEnhet&quot;, field = &quot;remedyEnhetId&quot;)
+    public String remedyEnhetId(OrgEnhet orgEnhet) {
+<span class="nc" id="L91">        return remedyEnhetIdResolver.remedyEnhetId(orgEnhet);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;OrgEnhet&quot;, field = &quot;koblinger&quot;)
+    public List&lt;OrgEnhetsKobling&gt; koblinger(OrgEnhet orgEnhet) {
+<span class="fc" id="L96">        return koblingResolver.koblinger(orgEnhet);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;Organisering&quot;, field = &quot;organisasjonsenhet&quot;)
+    public OrgEnhet organisasjonsenhet(Organisering organisering) {
+<span class="fc" id="L101">        return orgEnhet(organisering);</span>
+    }
+
+    @SchemaMapping(typeName = &quot;Organisering&quot;, field = &quot;orgEnhet&quot;)
+    public OrgEnhet orgEnhet(Organisering organisering) {
+<span class="fc" id="L106">        return orgEnhetResolver.orgEnhet(organisering);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

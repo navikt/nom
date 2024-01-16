@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhRessurs.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.implementations.dvh</a> &gt; <span class="el_source">DvhRessurs.java</span></div><h1>DvhRessurs.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.implementations.dvh;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import no.nav.nom.contract.nom.IdentType;
+import no.nav.nom.contract.nom.Sektor;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.ANNEN_STATLIG;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.EKSTERN;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.KOMMUNAL;
+import static no.nav.nom.apps.api.ressurs.implementations.dvh.DvhRessurs.RemedyRessursType.STATLIG;
+
+@Value
+@Builder
+@RequiredArgsConstructor
+public class DvhRessurs {
+<span class="fc" id="L23">    private static final LocalDate D2099 = LocalDate.of(2099, 12, 31);</span>
+    String navIdent;
+    String personIdent;
+    String fornavn;
+    String etternavn;
+    String remedyAnsattType;
+    Boolean remedyAktiv;
+    JsonNode rawData;
+    String ansattRessursKode;
+    LocalDate remedyStartDato;
+    LocalDate remedySluttdato;
+    LocalDate agressoStartDato;
+    LocalDate agressoSluttdato;
+    boolean remedyPermisjon;
+    String identType;
+    String epost;
+    String orgenhetPaaRessurs;
+    String orgenhetPaaRessursBeskrivelse;
+    String orgenhetPaaRessursNiva;
+
+    public DvhRessurs(JsonNode node) {
+<span class="fc" id="L44">        this(node, false);</span>
+<span class="fc" id="L45">    }</span>
+
+<span class="fc" id="L47">    public DvhRessurs(JsonNode node, boolean fromNomKommunaleView) {</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (!fromNomKommunaleView) { // Good old Json fra NOM_ANSATTE_BUCKETS</span>
+<span class="fc" id="L49">            navIdent = node.get(&quot;NAV_IDENT&quot;).asText();</span>
+<span class="fc" id="L50">            personIdent = node.get(&quot;FNR&quot;).asText();</span>
+<span class="fc" id="L51">            fornavn = node.get(&quot;FORNAVN&quot;).asText();</span>
+<span class="fc" id="L52">            etternavn = node.get(&quot;ETTERNAVN&quot;).asText();</span>
+<span class="pc bpc" id="L53" title="1 of 4 branches missed.">            remedyAktiv = node.hasNonNull(&quot;REMEDY_AKTIV&quot;) &amp;&amp; node.get(&quot;REMEDY_AKTIV&quot;).asText().equals(&quot;JA&quot;);</span>
+<span class="fc" id="L54">            remedyAnsattType = node.get(&quot;ANSATT_TYPE&quot;).asText();</span>
+<span class="fc" id="L55">            this.rawData = node;</span>
+<span class="fc" id="L56">            ansattRessursKode = node.get(&quot;ANSATT_RESSURS_KODE&quot;).asText();</span>
+<span class="fc" id="L57">            remedyStartDato = parseNullableDateFromJson(node, &quot;REMEDY_START_DATO&quot;);</span>
+<span class="fc" id="L58">            remedySluttdato = parseNullableDateFromJson(node, &quot;REMEDY_SLUTT_DATO&quot;);</span>
+<span class="fc" id="L59">            agressoStartDato = parseNullableDateFromJson(node, &quot;AGRESSO_START_DATO&quot;);</span>
+<span class="fc" id="L60">            agressoSluttdato = parseNullableDateFromJson(node, &quot;AGRESSO_SLUTT_DATO&quot;);</span>
+<span class="fc" id="L61">            remedyPermisjon = node.get(&quot;REMEDY_PERMISJON&quot;).asText(&quot;NEI&quot;).equals(&quot;JA&quot;);</span>
+<span class="fc" id="L62">            identType = node.get(&quot;IDENT_TYPE&quot;).asText();</span>
+<span class="fc" id="L63">            epost = node.get(&quot;EPOST&quot;).asText();</span>
+
+<span class="fc" id="L65">            orgenhetPaaRessurs = null;</span>
+<span class="fc" id="L66">            orgenhetPaaRessursBeskrivelse = null;</span>
+<span class="fc" id="L67">            orgenhetPaaRessursNiva = null;</span>
+
+        } else { // Ny JSON fra NOM_KOMMUNALE_V1
+<span class="nc" id="L70">            navIdent = node.get(&quot;NAVID&quot;).asText();</span>
+<span class="nc" id="L71">            personIdent = node.get(&quot;FNR&quot;).asText();</span>
+<span class="nc" id="L72">            fornavn = node.get(&quot;NAVN&quot;).asText();</span>
+<span class="nc" id="L73">            etternavn = node.get(&quot;ETTERNAVN&quot;).asText();</span>
+<span class="nc bnc" id="L74" title="All 4 branches missed.">            remedyAktiv = node.hasNonNull(&quot;AKTIV&quot;) &amp;&amp; node.get(&quot;AKTIV&quot;).asText().equals(&quot;JA&quot;);</span>
+<span class="nc" id="L75">            remedyAnsattType = node.get(&quot;ANSATT_TYPE&quot;).asText();</span>
+<span class="nc" id="L76">            this.rawData = node;</span>
+<span class="nc" id="L77">            ansattRessursKode = node.get(&quot;TYPE&quot;).asText();</span>
+<span class="nc" id="L78">            remedyStartDato = parseNullableDateFromJson(node, &quot;START_DATO&quot;);</span>
+<span class="nc" id="L79">            remedySluttdato = parseNullableDateFromJson(node, &quot;SLUTT_DATO&quot;);</span>
+<span class="nc" id="L80">            agressoStartDato = parseNullableDateFromJson(node, &quot;DATE_FROM&quot;);</span>
+<span class="nc" id="L81">            agressoSluttdato = parseNullableDateFromJson(node, &quot;DATE_TO&quot;);</span>
+<span class="nc" id="L82">            remedyPermisjon = node.get(&quot;PERMISJON&quot;).asText(&quot;NEI&quot;).equals(&quot;JA&quot;);</span>
+<span class="nc" id="L83">            identType = node.get(&quot;IDENTTYPE&quot;).asText();</span>
+<span class="nc" id="L84">            epost = node.get(&quot;EPOST&quot;).asText();</span>
+
+            // Kommer med i spørring på kommunale (Hr/NOM3/NOM_KOMMUNALE_V1)
+<span class="nc" id="L87">            orgenhetPaaRessurs = parseNullableFromJson(node, &quot;ORGENHET_PAA_RESSURS&quot;);</span>
+<span class="nc" id="L88">            orgenhetPaaRessursBeskrivelse = parseNullableFromJson(node, &quot;ORGENHET_PAA_RESSURS_BESKRIVELSE&quot;);</span>
+<span class="nc" id="L89">            orgenhetPaaRessursNiva = parseNullableFromJson(node, &quot;ORGENHET_PAA_RESSURS_NIVA&quot;);</span>
+        }
+<span class="fc" id="L91">    }</span>
+
+<span class="fc" id="L93">    public enum RemedyRessursType {</span>
+<span class="fc" id="L94">        EKSTERN(&quot;Eksternt&quot;),</span>
+<span class="fc" id="L95">        STATLIG(&quot;NAV Statlig&quot;),</span>
+<span class="fc" id="L96">        KOMMUNAL(&quot;NAV Kommunalt&quot;),</span>
+<span class="fc" id="L97">        ANNEN_STATLIG(&quot;Annen Statlig&quot;);</span>
+
+        public final String beskrivelse;
+
+<span class="fc" id="L101">        RemedyRessursType(String beskrivelse) {</span>
+<span class="fc" id="L102">            this.beskrivelse = beskrivelse;</span>
+<span class="fc" id="L103">        }</span>
+    }
+
+    public LocalDate getSluttdato() {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (!hasPermisjon()) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (&quot;E&quot;.equals(ansattRessursKode) || Arrays.asList(EKSTERN.beskrivelse, ANNEN_STATLIG.beskrivelse, KOMMUNAL.beskrivelse)</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">                    .contains(remedyAnsattType)) {</span>
+<span class="fc" id="L110">                return getDateOrNull(remedySluttdato);</span>
+            }
+
+<span class="pc bpc" id="L113" title="1 of 4 branches missed.">            return agressoSluttdato != null &amp;&amp; !D2099.equals(agressoSluttdato) ? agressoSluttdato : getDateOrNull(remedySluttdato);</span>
+        }
+<span class="fc" id="L115">        return null;</span>
+    }
+
+
+    private boolean withinSixMonths(LocalDate d1, LocalDate d2){
+<span class="nc" id="L120">        var stepLen = 6/2;</span>
+<span class="nc" id="L121">        var bound1 = d1.plusMonths(stepLen).isAfter(d2.minusMonths(stepLen));</span>
+<span class="nc" id="L122">        var bound2 = d1.minusMonths(stepLen).isBefore(d2.plusMonths(stepLen));</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">        return bound1 &amp;&amp; bound2;</span>
+    }
+
+    public LocalDate getStartDato() {
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (this.agressoStartDato != null) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            var u4StartBeforeRemedy = this.agressoStartDato.getYear() &lt; 2006;</span>
+<span class="nc" id="L129">            var isStatlig = Arrays.asList(STATLIG.beskrivelse).contains(this.remedyAnsattType);</span>
+<span class="nc" id="L130">            var inBounds = withinSixMonths(this.agressoStartDato, this.remedyStartDato);</span>
+<span class="nc bnc" id="L131" title="All 6 branches missed.">            if (u4StartBeforeRemedy || (inBounds &amp;&amp; isStatlig)) {</span>
+<span class="nc" id="L132">                return this.agressoStartDato;</span>
+            }
+        }
+<span class="fc" id="L135">        return this.remedyStartDato;</span>
+    }
+
+    public boolean hasPermisjon() {
+<span class="fc bfc" id="L139" title="All 4 branches covered.">        if (remedyPermisjon &amp;&amp; remedyAktiv) {</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            if (List.of(KOMMUNAL.beskrivelse, STATLIG.beskrivelse).contains(remedyAnsattType)) {</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">                if (KOMMUNAL.beskrivelse.equals(remedyAnsattType)) {</span>
+<span class="fc" id="L142">                    return true;</span>
+                }
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">                if (agressoSluttdato == null || LocalDate.of(2099, 12, 31).equals(agressoSluttdato)) {</span>
+<span class="fc" id="L145">                    return true;</span>
+                }
+            }
+        }
+<span class="fc" id="L149">        return false;</span>
+    }
+
+    private LocalDate getDateOrNull(final LocalDate dato) {
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        return !D2099.equals(dato) ? dato : null;</span>
+    }
+
+    public static Sektor toSektor(String remedyAnsattType) {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (remedyAnsattType.equals(&quot;NAV Statlig&quot;)) {</span>
+<span class="fc" id="L158">            return Sektor.NAV_STATLIG;</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        } else if (remedyAnsattType.equals(&quot;NAV Kommunalt&quot;)) {</span>
+<span class="fc" id="L160">            return Sektor.NAV_KOMMUNAL;</span>
+        } else {
+<span class="nc" id="L162">            return Sektor.EKSTERN;</span>
+        }
+    }
+
+    public static IdentType toIdentType(String identType){
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        for(var e : IdentType.values()){</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">            if(e.name().equals(identType)){</span>
+<span class="nc" id="L170">                return e;</span>
+            }
+        }
+<span class="nc" id="L173">        throw new IllegalArgumentException(identType + &quot; was not recongized as an enum value of &quot; + IdentType.class.getName());</span>
+    }
+
+    private static LocalDate parseNullableDateFromJson(JsonNode jsonNode, String s){
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        return jsonNode.hasNonNull(s) ? LocalDate.parse(jsonNode.get(s).asText()) : null;</span>
+    }
+
+    private static String parseNullableFromJson(JsonNode jsonNode, String s){
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        return jsonNode.hasNonNull(s) ? jsonNode.get(s).asText() : null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

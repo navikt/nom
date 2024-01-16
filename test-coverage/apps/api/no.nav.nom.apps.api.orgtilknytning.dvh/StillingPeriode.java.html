@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StillingPeriode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.dvh</a> &gt; <span class="el_source">StillingPeriode.java</span></div><h1>StillingPeriode.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.dvh;
+
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+<span class="fc" id="L9">public record StillingPeriode(</span>
+    StillingAgressoOrgIdOgNavn stilling,
+    LocalDate gyldigFom,
+    LocalDate gyldigTom,  // Aldri null. Open ended er 2099-12-31
+    IOrgenhet orgenhet,
+    DagligOppfolging dagligOppfolging
+) {
+    public StillingPeriode(StillingPeriode copy, IOrgenhet orgenhet) {
+<span class="fc" id="L17">        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, orgenhet, copy.dagligOppfolging);</span>
+<span class="fc" id="L18">    }</span>
+
+    public StillingPeriode(StillingPeriode copy, DagligOppfolging erDagligOppfolging) {
+<span class="fc" id="L21">        this(copy.stilling, copy.gyldigFom, copy.gyldigTom, copy.orgenhet, erDagligOppfolging);</span>
+<span class="fc" id="L22">    }</span>
+
+    public StillingPeriode(StillingAgressoOrgIdOgNavn stillingAgressoOrgIdOgNavn, LocalDate gyldigFom, LocalDate gyldigTom, IOrgenhet orgenhet) {
+<span class="fc" id="L25">        this(stillingAgressoOrgIdOgNavn, gyldigFom, gyldigTom, orgenhet, DagligOppfolging.UKJENT);</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public String toString() {
+<span class="pc bpc" id="L30" title="1 of 4 branches missed.">        return (stilling == null ? &quot;Ingen stilling&quot; : stilling.toString()) + &quot;: &quot; + gyldigFom + &quot; - &quot; + gyldigTom + &quot; for nom orgenhet [&quot; + (orgenhet != null ? orgenhet.getId() + &quot;-&quot; + orgenhet.getNavn() : &quot; - &quot;) + &quot;] er dagligOppfølging: &quot; + dagligOppfolging;</span>
+    }
+
+    public static String toString(List&lt;StillingPeriode&gt; stillingPerioder) {
+<span class="fc" id="L34">        return StillingPeriode.toString(stillingPerioder, false);</span>
+    }
+
+    public static String toString(List&lt;StillingPeriode&gt; stillingPerioder, boolean indent) {
+<span class="fc" id="L38">        StringBuffer str = new StringBuffer();</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        stillingPerioder.forEach( s -&gt; str.append(indent ? &quot;  &quot; : &quot;&quot;).append(s).append(&quot;\n&quot;));</span>
+<span class="fc" id="L40">        return str.toString();</span>
+    }
+
+    public boolean harSammeAgressoIdPaStillingOgRessurs() {
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        return this.stilling.agressoId.isPresent()</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">            &amp;&amp; this.stilling.ressursAgressoId.isPresent()</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            &amp;&amp; this.stilling.agressoId.get().equals(this.stilling.ressursAgressoId.get());</span>
+    }
+
+<span class="fc" id="L49">    public record StillingAgressoOrgIdOgNavn(</span>
+        Optional&lt;String&gt; agressoId,
+        String enhetNavn,
+        Optional&lt;String&gt; ressursAgressoId,
+        Optional&lt;String&gt; ressursAgressoOrgNiv
+    ) {
+        @Override
+        public String toString() {
+<span class="fc" id="L57">            return &quot;HRRES_STILLING[&quot; + agressoId.orElse(&quot;NULL&quot;) + &quot;-&quot; + enhetNavn + &quot;]/HRRES_RESSURS[&quot; + ressursAgressoId.orElse(&quot;NULL&quot;) + &quot;-&quot; + ressursAgressoOrgNiv.orElse(</span>
+                &quot;NULL&quot;) + &quot;]&quot;;
+        }
+    }
+
+<span class="fc" id="L62">    enum DagligOppfolging {</span>
+<span class="fc" id="L63">        JA, NEI, UKJENT</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

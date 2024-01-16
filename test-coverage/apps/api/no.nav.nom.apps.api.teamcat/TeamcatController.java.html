@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TeamcatController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.teamcat</a> &gt; <span class="el_source">TeamcatController.java</span></div><h1>TeamcatController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.teamcat;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetOverordnetResolver;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgenhet.api.app.OrgEnhetMapper;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.apps.api.ressurs.api.dto.RessursLeder;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@Tag(name = &quot;Teamkatalog&quot;)
+@RestController
+@RequestMapping(&quot;/api/v1/teamcat&quot;)
+@PreAuthorize(&quot;hasAuthority(\&quot;TEAMCAT\&quot;)&quot;)
+public class TeamcatController {
+
+
+    private final AdClient adclient;
+    private final DvhRepository dvhRepository;
+    private final OrgenhetService orgenhetService;
+    private final OrgtilknytningService orgtilknytningService;
+    private final RessursStateRepository ressursStateRepository;
+    private final OrgEnhetOverordnetResolver overordnetResolver;
+    private final RessursLedereResolver ressursLedereResolver;
+    private final String IT_AVDELING_ID;
+    private final OrgEnhetMapper orgEnhetMapper;
+
+    public TeamcatController(
+        RessursStateRepository ressursStateRepository,
+        AdClient adclient,
+        DvhRepository dvhRepository,
+        OrgtilknytningService orgtilknytningService,
+        OrgenhetService orgenhetService,
+        Environment env,
+        OrgEnhetOverordnetResolver overordnetResolver,
+        RessursLedereResolver ressursLedereResolver,
+        OrgEnhetMapper orgEnhetMapper
+<span class="fc" id="L65">    ) {</span>
+<span class="fc" id="L66">        this.adclient = adclient;</span>
+<span class="fc" id="L67">        this.dvhRepository = dvhRepository;</span>
+<span class="fc" id="L68">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L69">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L70">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L71">        this.overordnetResolver = overordnetResolver;</span>
+<span class="fc" id="L72">        this.ressursLedereResolver = ressursLedereResolver;</span>
+<span class="fc" id="L73">        this.orgEnhetMapper = orgEnhetMapper;</span>
+<span class="fc" id="L74">        var isDev = &quot;dev-gcp&quot;.equals(env.getProperty(&quot;NAIS_CLUSTER_NAME&quot;));</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        this.IT_AVDELING_ID = isDev ? &quot;hu357k&quot; : &quot;ve673e&quot;;</span>
+<span class="fc" id="L76">    }</span>
+
+
+    private String determineAvdelingNavnByEnhet(IOrgenhet inputEnhet, PerRequestCache perRequestCache){
+<span class="fc" id="L80">        var maybeCachedResult = perRequestCache.getNameIfCached(inputEnhet.getId());</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if(maybeCachedResult != null){</span>
+<span class="nc" id="L82">            return maybeCachedResult;</span>
+        }
+
+<span class="fc" id="L85">        var hierarchy = new LinkedList&lt;IOrgenhet&gt;();</span>
+<span class="fc" id="L86">        hierarchy.addFirst(inputEnhet);</span>
+
+<span class="fc" id="L88">        var enhet = Optional.of(inputEnhet);</span>
+
+        // build hierarchy
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        while (enhet.isPresent()) {</span>
+<span class="fc" id="L92">            var overenhetidByResolver = overordnetResolver.findOverordnetOrgEnhet(enhet.get().getFid()).map(OrgEnhetState::fid);</span>
+<span class="fc" id="L93">            var overenhetid = enhet.flatMap(IOrgenhet::getOverordnetOrgEnhetFid).or(() -&gt; overenhetidByResolver);</span>
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (overenhetid.isEmpty()) {</span>
+<span class="fc" id="L96">                enhet = Optional.empty();</span>
+            } else {
+<span class="fc" id="L98">                enhet = orgenhetService.getByFid(overenhetid.get());</span>
+<span class="fc" id="L99">                enhet.ifPresent(hierarchy::addFirst);</span>
+            }
+<span class="fc" id="L101">        }</span>
+
+        String out;
+<span class="fc bfc" id="L104" title="All 3 branches covered.">        switch (hierarchy.size()) {</span>
+            case 1 -&gt; {
+<span class="fc" id="L106">                out = hierarchy.get(0).getNavn();</span>
+<span class="fc" id="L107">            }</span>
+            case 2 -&gt; {
+<span class="fc" id="L109">                out = hierarchy.get(1).getNavn();</span>
+<span class="fc" id="L110">            }</span>
+            default -&gt; {
+<span class="fc" id="L112">                var includesItDept = hierarchy.stream().filter(it -&gt; it.getFid().equals(IT_AVDELING_ID)).findFirst();</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">                if (includesItDept.isPresent()) {</span>
+<span class="nc" id="L114">                    var itDeptIdx = hierarchy.indexOf(includesItDept.get());</span>
+<span class="nc" id="L115">                    var subItIdx = itDeptIdx + 1;</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">                    if (subItIdx &lt; hierarchy.size()) {</span>
+<span class="nc" id="L117">                        var subItDept = hierarchy.get(subItIdx);</span>
+<span class="nc" id="L118">                        return subItDept.getNavn();</span>
+                    }
+                }
+<span class="fc" id="L121">                out = hierarchy.get(2).getNavn();</span>
+
+            }
+        }
+<span class="fc" id="L125">        perRequestCache.putEnhetToName(inputEnhet.getId(),out);</span>
+<span class="fc" id="L126">        return out;</span>
+    }
+
+    @Operation(
+        description = &quot;Returnerer en teamkatalog ressurs&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping(&quot;ressurs/{navident}&quot;)
+    public ResponseEntity&lt;TeamcatRessursDTO&gt; ressurs(@PathVariable(&quot;navident&quot;) String navident) {
+<span class="fc" id="L135">        navident = navident.toUpperCase();</span>
+
+<span class="fc" id="L137">        var adResource = adclient.fetchInAdRessursInBatches(List.of(navident));</span>
+
+<span class="fc" id="L139">        var maybeRessurs = ressursStateRepository.findByNavident(navident);</span>
+
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (maybeRessurs.isEmpty()) {</span>
+<span class="fc" id="L142">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="fc" id="L144">        var ressurs = maybeRessurs.get();</span>
+
+<span class="fc" id="L146">        var out = getTeamcatRessursDTO(navident, ressurs, adResource);</span>
+
+<span class="fc" id="L148">        return ResponseEntity.ok(out);</span>
+    }
+
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map&lt;String, AdRessurs&gt; adResource, PerRequestCache perRequestCache) {
+
+<span class="fc" id="L153">        var oeId = orgtilknytningService.getByNavIdent(navident).stream().filter(OrgtilknytningState::erDagligOppfolging).findFirst().map(OrgtilknytningState::orgEnhetId).orElse(null);</span>
+<span class="fc" id="L154">        var lederNavident = ressursLedereResolver.ledere(navident)</span>
+<span class="fc" id="L155">            .stream()</span>
+<span class="fc" id="L156">            .filter(RessursLeder::erDagligOppfolging)</span>
+<span class="fc" id="L157">            .findFirst()</span>
+<span class="fc" id="L158">            .map(RessursLeder::leder)</span>
+<span class="fc" id="L159">            .map(RessursState::navident)</span>
+<span class="fc" id="L160">            .orElse(null);</span>
+
+
+<span class="fc" id="L163">        return new TeamcatRessursDTO(</span>
+<span class="fc" id="L164">            ressurs.startdato().orElse(null),</span>
+<span class="fc" id="L165">            ressurs.sluttdato().orElse(null),</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">            adResource.get(navident) != null ? adResource.get(navident).getEmail() : null,</span>
+            navident,
+<span class="fc" id="L168">            TeamcatRessursDTO.ResourceType.from(ressurs.sektor(), dvhRepository.getIsAnnenStat(navident)),</span>
+<span class="fc" id="L169">            ressurs.visningsnavn().getFormattedVisningsnavn(),</span>
+            oeId,
+            lederNavident
+        );
+    }
+
+    private TeamcatRessursDTO getTeamcatRessursDTO(String navident, RessursState ressurs, Map&lt;String, AdRessurs&gt; adResource){
+<span class="fc" id="L176">        return getTeamcatRessursDTO(navident,ressurs,adResource,new PerRequestCache());</span>
+    }
+
+
+    @Operation(
+        description = &quot;Hent teamkatalog ressurser i batch&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @PostMapping(&quot;ressurser&quot;)
+    public ResponseEntity&lt;Map&lt;String, TeamcatRessursDTO&gt;&gt; ressurser(@RequestBody List&lt;String&gt; navidentListInput) {
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        var maybeBadNavident = navidentListInput.stream().filter(s -&gt; !s.matches(&quot;[a-zA-Z]\\d{6}&quot;)).findFirst();</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (maybeBadNavident.isPresent()) {</span>
+<span class="nc" id="L188">            throw new IllegalArgumentException(&quot;Bad navident: &quot; + maybeBadNavident.get());</span>
+        }
+
+<span class="fc" id="L191">        navidentListInput = navidentListInput.stream().map(String::toUpperCase).toList();</span>
+
+<span class="fc" id="L193">        var adResource = adclient.fetchInAdRessursInBatches(navidentListInput);</span>
+
+<span class="fc" id="L195">        var maybeRessursList = ressursStateRepository.findByNavidentBulk(navidentListInput);</span>
+<span class="fc" id="L196">        var out = new HashMap&lt;String, TeamcatRessursDTO&gt;(maybeRessursList.size());</span>
+
+<span class="fc" id="L198">        var perRequestCache = new PerRequestCache();</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        for (var x : maybeRessursList.entrySet()) {</span>
+<span class="fc" id="L200">            var ressurs = x.getValue();</span>
+<span class="fc" id="L201">            var navident = x.getKey();</span>
+<span class="fc" id="L202">            var tmp = getTeamcatRessursDTO(navident, ressurs, adResource, perRequestCache);</span>
+<span class="fc" id="L203">            out.put(navident, tmp);</span>
+<span class="fc" id="L204">        }</span>
+
+
+<span class="fc" id="L207">        return ResponseEntity.ok(out);</span>
+    }
+
+    @Operation(
+        description = &quot;Hent alle teamkatalog ressurser&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping(&quot;/alleRessurser&quot;)
+    public ResponseEntity&lt;Map&lt;String, TeamcatRessursDTO&gt;&gt; alleRessurser() {
+<span class="nc" id="L216">        var alleressurser = ressursStateRepository.getAll();</span>
+<span class="nc" id="L217">        var adResources = adclient.fetchInAdRessursInBatches(alleressurser.stream()</span>
+            // only active resources are available in ad
+<span class="nc" id="L219">            .filter(it -&gt; it.sluttdato().map(sluttdato -&gt; sluttdato.isAfter(LocalDate.now())).orElse(true))</span>
+<span class="nc" id="L220">            .map(RessursState::navident).toList());</span>
+
+<span class="nc" id="L222">        var perRequestCache = new PerRequestCache();</span>
+<span class="nc" id="L223">        var out = new HashMap&lt;String, TeamcatRessursDTO&gt;(alleressurser.size());</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        for (var r : alleressurser) {</span>
+<span class="nc" id="L225">            var tmp = getTeamcatRessursDTO(r.navident(), r, adResources, perRequestCache);</span>
+<span class="nc" id="L226">            out.put(r.navident(), tmp);</span>
+<span class="nc" id="L227">        }</span>
+<span class="nc" id="L228">        return ResponseEntity.ok(out);</span>
+    }
+
+    @Operation(
+        description = &quot;Hent alle teamkatalog enheter&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping(&quot;/alleEnheter&quot;)
+    public ResponseEntity&lt;Map&lt;String, TeamcatOrgenhetDTO&gt;&gt; alleEnheter() {
+<span class="fc" id="L237">        var alleEnheter = this.orgenhetService.getAllEnheter();</span>
+
+<span class="fc" id="L239">        var perRequestCache = new PerRequestCache();</span>
+<span class="fc" id="L240">        var out = new HashMap&lt;String, TeamcatOrgenhetDTO&gt;(alleEnheter.size());</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        for (var r : alleEnheter) {</span>
+<span class="fc" id="L242">            var mapped = orgEnhetMapper.mapFrom(r);</span>
+<span class="fc" id="L243">            var lederNavident = mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null);</span>
+<span class="fc" id="L244">            var enhetOverId = mapped.overordnetEnhetId();</span>
+<span class="fc" id="L245">            var tmp = new TeamcatOrgenhetDTO(r.getId(), r.getNavn(), enhetOverId, determineAvdelingNavnByEnhet(r, perRequestCache), lederNavident);</span>
+<span class="fc" id="L246">            out.put(r.getId(), tmp);</span>
+<span class="fc" id="L247">        }</span>
+<span class="fc" id="L248">        return ResponseEntity.ok(out);</span>
+    }
+
+    @Operation(
+        description = &quot;Hent teamkatalog enhet&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping(&quot;enhet/{id}&quot;)
+    public ResponseEntity&lt;TeamcatOrgenhetDTO&gt; enhet(@PathVariable(&quot;id&quot;) String id) {
+<span class="fc" id="L257">        var enhetMaybe = this.orgenhetService.getById(id);</span>
+
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">        if(enhetMaybe.isEmpty()){</span>
+<span class="nc" id="L260">            return ResponseEntity.notFound().build();</span>
+        }
+<span class="fc" id="L262">        var enhet = enhetMaybe.get();</span>
+<span class="fc" id="L263">        var mapped = orgEnhetMapper.mapFrom(enhet);</span>
+<span class="fc" id="L264">        return ResponseEntity.ok(new TeamcatOrgenhetDTO(</span>
+<span class="fc" id="L265">            enhet.getId(),</span>
+<span class="fc" id="L266">            enhet.getNavn(),</span>
+<span class="fc" id="L267">            enhet.getOverordnetOrgEnhetFid().orElse(null),</span>
+<span class="fc" id="L268">            determineAvdelingNavnByEnhet(enhet, new PerRequestCache()),</span>
+<span class="fc" id="L269">            mapped.ledere().stream().findFirst().map(RessursState::navident).orElse(null)</span>
+        ));
+
+    }
+
+<span class="fc" id="L274">    private static class PerRequestCache{</span>
+
+<span class="fc" id="L276">        private final HashMap&lt;Object,String&gt; enhetToName = new HashMap&lt;&gt;();</span>
+        public void putEnhetToName(String orgenhetId, String out) {
+<span class="fc" id="L278">            this.enhetToName.put(orgenhetId,out);</span>
+<span class="fc" id="L279">        }</span>
+
+        public String getNameIfCached(String orgenhetId){
+<span class="fc" id="L282">            return this.enhetToName.get(orgenhetId);</span>
+        }
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

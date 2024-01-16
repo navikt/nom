@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhLast.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.rest.admin</a> &gt; <span class="el_source">DvhLast.java</span></div><h1>DvhLast.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.rest.admin;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.dvh.DvhRestConsumer;
+import no.nav.nom.apps.api.orgenhet.OrgEnhetTypeHandler;
+import no.nav.nom.apps.api.orgenhet.implementations.dvh.v2.DvhOrgenhetsLast;
+import no.nav.nom.apps.api.orgtilknytning.dvh.RessursStillingLoadStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = &quot;Admin for å manuelt trigge dvh Last&quot;)
+@RestController
+@RequestMapping(&quot;/api/admin/dvhLast&quot;)
+public class DvhLast {
+<span class="fc" id="L25">    private final Logger log = LoggerFactory.getLogger(DvhLast.class);</span>
+
+    private final DvhRestConsumer dvhRestConsumer;
+    private final DvhOrgenhetsLast dvhOrgenhetsLast;
+    private final OrgEnhetTypeHandler orgEnhetTypeHandler;
+
+    private final RessursStillingLoadStatus ressursStillingLoadStatus;
+
+
+    public DvhLast(
+        DvhRestConsumer dvhRestConsumer,
+        DvhOrgenhetsLast dvhOrgenhetsLast,
+        OrgEnhetTypeHandler orgEnhetTypeHandler,
+        RessursStillingLoadStatus ressursStillingLoadStatus
+<span class="fc" id="L39">    ) {</span>
+<span class="fc" id="L40">        this.dvhRestConsumer = dvhRestConsumer;</span>
+<span class="fc" id="L41">        this.dvhOrgenhetsLast = dvhOrgenhetsLast;</span>
+<span class="fc" id="L42">        this.orgEnhetTypeHandler = orgEnhetTypeHandler;</span>
+<span class="fc" id="L43">        this.ressursStillingLoadStatus = ressursStillingLoadStatus;</span>
+<span class="fc" id="L44">    }</span>
+
+    @Operation(
+        description = &quot;Start last av orgEnheter&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/loadOrgEnheter&quot;)
+    public void loadOrgEnheter() {
+<span class="nc" id="L55">        triggeOrgEnhetsLast();</span>
+<span class="nc" id="L56">    }</span>
+
+    @Operation(
+        description = &quot;Start last av ressurser&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/loadRessurser&quot;)
+    public void loadRessurser() {
+<span class="nc" id="L67">        triggerRessursLast();</span>
+<span class="nc" id="L68">    }</span>
+
+    @Operation(
+        description = &quot;Start last av organisering, koblinger og ledere&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/loadOrganiseringKoblingerOgLedere&quot;)
+    public void loadOrganiseringKoblingerOgLedere() {
+<span class="nc" id="L79">        triggerKoblingerOgLederLast();</span>
+<span class="nc" id="L80">    }</span>
+
+    @Operation(
+        description = &quot;Start last av kun orgtilknytninger&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/loadOrgtilknytninger&quot;)
+    public void loadOrgtilknytninger() {
+<span class="nc" id="L91">        triggerlastOrgtilknytningerTilEvtsrc();</span>
+<span class="nc" id="L92">    }</span>
+
+    @Operation(
+        description = &quot;Last av orgtilknytninger for eksterne&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/loadOrgtilknytningerForEksterne&quot;)
+    public void loadOrgtilknytningerForEksterne() {
+<span class="nc" id="L103">        triggerlastEksterneOrgtilknytningerTilEvtsrc();</span>
+<span class="nc" id="L104">    }</span>
+
+    @Operation(
+        description = &quot;Start last av typer for orgenheter&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/resolveOrgEnhetsTyper&quot;)
+    public void resolveOrgEnhetsTyper() {
+<span class="nc" id="L115">        triggerKoblingerOgLederLast();</span>
+<span class="nc" id="L116">        triggerOrgEnhetsTypeLast();</span>
+<span class="nc" id="L117">    }</span>
+
+    @Operation(
+        description = &quot;Få status på siste Last av orgtilknytninger&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;)
+    })
+    @GetMapping(value = &quot;/orgtilknytningerLastStatus&quot;)
+    public String orgtilknytningerLastStatus(@RequestParam(required = false) String navident) {
+<span class="nc" id="L128">        return ressursStillingLoadStatus.report(navident);</span>
+    }
+
+    @Async
+    public void triggerRessursLast() {
+<span class="nc" id="L133">        dvhRestConsumer.loadRessurserFromDvh();</span>
+<span class="nc" id="L134">    }</span>
+
+    @Async
+    public void triggeOrgEnhetsLast() {
+<span class="nc" id="L138">        dvhOrgenhetsLast.lastOrgenhetsDataFraDvhTilEvtsrc();</span>
+<span class="nc" id="L139">    }</span>
+
+    @Async
+    public void triggerKoblingerOgLederLast() {
+<span class="nc" id="L143">        dvhRestConsumer.loadLedereAndOrganiseringerFromDvh();</span>
+<span class="nc" id="L144">    }</span>
+
+    @Async
+    public void triggerlastOrgtilknytningerTilEvtsrc() {
+<span class="nc" id="L148">        dvhRestConsumer.lastOrgtilknytningerTilEvtsrc();</span>
+<span class="nc" id="L149">    }</span>
+
+    @Async
+    public void triggerlastEksterneOrgtilknytningerTilEvtsrc() {
+<span class="nc" id="L153">        dvhRestConsumer.updateOrgtilknytningerForEksterneFromDvh();</span>
+<span class="nc" id="L154">    }</span>
+
+    @Async
+    public void triggerOrgEnhetsTypeLast(){
+<span class="nc" id="L158">        orgEnhetTypeHandler.updateOrgEnhetsTypeForLeafs();</span>
+<span class="nc" id="L159">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

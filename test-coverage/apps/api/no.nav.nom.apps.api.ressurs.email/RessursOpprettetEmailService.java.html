@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessursOpprettetEmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.email</a> &gt; <span class="el_source">RessursOpprettetEmailService.java</span></div><h1>RessursOpprettetEmailService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.email;
+
+import no.nav.nom.apps.api.clients.ad.ADResponseException;
+import no.nav.nom.apps.api.clients.ad.AdClient;
+import no.nav.nom.apps.api.clients.email.EmailClient;
+import no.nav.nom.apps.api.clients.email.EmailMessage;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.Set;
+
+@Service
+public class RessursOpprettetEmailService {
+
+<span class="fc" id="L20">    private final Logger log = LoggerFactory.getLogger(RessursOpprettetEmailService.class);</span>
+
+    private final EmailClient emailClient;
+    private final AdClient adClient;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final RessursStateRepository ressursStateRepository;
+
+    public RessursOpprettetEmailService(
+        EmailClient emailClient,
+        AdClient adClient,
+        OrgEnhetStateRepository orgEnhetStateRepository,
+        RessursStateRepository ressursStateRepository
+<span class="fc" id="L32">    ) {</span>
+<span class="fc" id="L33">        this.emailClient = emailClient;</span>
+<span class="fc" id="L34">        this.adClient = adClient;</span>
+<span class="fc" id="L35">        this.orgEnhetStateRepository = orgEnhetStateRepository;</span>
+<span class="fc" id="L36">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L37">    }</span>
+
+    public void notifyByEmail(String navident, String orgenhetId) {
+<span class="fc" id="L40">        log.info(&quot;Sender epost om opprettelse av ressurs {} til leder av orgenhet {}&quot;, navident, orgenhetId);</span>
+
+<span class="fc" id="L42">        var opprettetRessurs = ressursStateRepository.findByNavident(navident)</span>
+<span class="pc" id="L43">            .orElseThrow(() -&gt; new RessursOpprettetEmailException(&quot;Opprettet ressurs mangler i state&quot;));</span>
+<span class="nc" id="L44">        var orgEnhet = orgEnhetStateRepository.findById(orgenhetId)</span>
+<span class="nc" id="L45">            .orElseThrow(() -&gt; new RessursOpprettetEmailException(&quot;Fant ikke orgenhet med gitt id&quot;));</span>
+
+        // lederFid vil alltid være null siden den ikke er persistert enda
+<span class="nc" id="L48">        var maybeLederNavidents = orgEnhet.lederFid().flatMap(ressursStateRepository::findByFid).map(RessursState::navident);</span>
+
+<span class="nc" id="L50">        maybeLederNavidents.ifPresentOrElse(</span>
+<span class="nc" id="L51">            lederNavident -&gt; composeAndSendEmail(opprettetRessurs, Set.of(lederNavident)),</span>
+<span class="nc" id="L52">            () -&gt; {throw new RessursOpprettetEmailException(&quot;Fant ikke leder for orgenhet&quot;);}</span>
+        );
+<span class="nc" id="L54">    }</span>
+
+    private void composeAndSendEmail(RessursState opprettetRessurs, Set&lt;String&gt; recipientNavidents) {
+
+        try {
+<span class="nc" id="L59">            var adRessurser = adClient.getAdRessurser(recipientNavidents);</span>
+<span class="nc" id="L60">            var recipientList = adRessurser.getRessurser().stream().map(AdRessurs::getEmail).toList();</span>
+
+<span class="nc" id="L62">            String subject = String.format(&quot;Ressurs opprettet %s (%s)&quot;,</span>
+<span class="nc" id="L63">                opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()</span>
+            );
+<span class="nc" id="L65">            String body = String.format(&quot;Ressurs opprettet %s (%s) f&quot;,</span>
+<span class="nc" id="L66">                opprettetRessurs.visningsnavn().getFormattedVisningsnavn(), opprettetRessurs.navident()</span>
+            );
+
+            //TODO: extra logging, for testing purposes. Remove this after emailing is enabled
+<span class="nc" id="L70">            log.info(&quot;Sender epost subject: {} recipients: {}&quot;, subject, recipientList);</span>
+
+<span class="nc" id="L72">            EmailMessage message = new EmailMessage(subject, body, recipientList);</span>
+<span class="nc" id="L73">            emailClient.sendEmail(message);</span>
+
+<span class="nc" id="L75">        } catch (ADResponseException e) {</span>
+<span class="nc" id="L76">            throw new RessursOpprettetEmailException(&quot;Fant ikke leder epost adresse for leder&quot;);</span>
+<span class="nc" id="L77">        }</span>
+<span class="nc" id="L78">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

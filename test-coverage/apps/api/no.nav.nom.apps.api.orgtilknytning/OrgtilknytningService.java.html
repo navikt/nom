@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgtilknytningService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning</a> &gt; <span class="el_source">OrgtilknytningService.java</span></div><h1>OrgtilknytningService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning;
+
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class OrgtilknytningService {
+
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+
+<span class="fc" id="L21">    public OrgtilknytningService(OrgtilknytningStateRepository orgtilknytningStateRepository) {</span>
+<span class="fc" id="L22">        this.orgtilknytningStateRepository = orgtilknytningStateRepository;</span>
+<span class="fc" id="L23">    }</span>
+
+    public Collection&lt;OrgtilknytningState&gt; getAll() {
+<span class="fc" id="L26">        return orgtilknytningStateRepository.getAll();</span>
+    }
+
+    public Collection&lt;OrgtilknytningState&gt; getByNavIdent(String navident) {
+<span class="fc" id="L30">        return orgtilknytningStateRepository.findByNavident(navident);</span>
+    }
+
+    public List&lt;OrgtilknytningState&gt; getByEnhet(String id) {
+<span class="fc" id="L34">        return getAll().stream()</span>
+<span class="fc" id="L35">            .filter(ot -&gt; ot.orgEnhetId().equals(id))</span>
+<span class="fc" id="L36">            .toList();</span>
+    }
+
+    public &lt;T&gt; Map&lt;String, Collection&lt;T&gt;&gt; getByNavidenter(Set&lt;String&gt; navidenter, Function&lt;OrgtilknytningState, T&gt; transformer) {
+<span class="nc" id="L40">        return navidenter.stream().collect(Collectors.toMap(navident -&gt; navident, navident -&gt; {</span>
+<span class="nc" id="L41">            var value = this.getByNavIdent(navident);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            return value == null ? Collections.emptyList() : value.stream().map(transformer).toList();</span>
+        }));
+    }
+
+    public Optional&lt;OrgtilknytningState&gt; findByFid(String fid) {
+<span class="nc" id="L47">        return orgtilknytningStateRepository.findByFid(fid);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

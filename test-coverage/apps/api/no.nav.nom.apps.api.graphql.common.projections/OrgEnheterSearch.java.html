@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgEnheterSearch.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common.projections</a> &gt; <span class="el_source">OrgEnheterSearch.java</span></div><h1>OrgEnheterSearch.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common.projections;
+
+import no.nav.nom.contract.nom.NomNivaa;
+import org.springframework.data.web.ProjectedPayload;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptySet;
+
+/**
+ * Projected payload for binding the graphql input type OrgEnheterSearch
+ * Use resolveAgressoIder() to resolve the list of agressoIder to search for.
+ */
+@ProjectedPayload
+public interface OrgEnheterSearch {
+<span class="fc" id="L17">    OrgEnheterSearch EMPTY_SEARCH = emptyOrgEnheterSearch();</span>
+
+    Set&lt;String&gt; getAgressoIder();
+
+    Set&lt;String&gt; getOrgEnhetsKategori();
+
+    String getOrgNiv();
+
+    Set&lt;String&gt; getIder();
+
+    default Set&lt;String&gt; resolveAgressoIder() {
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (getAgressoIder() == null) {</span>
+<span class="fc" id="L29">            return emptySet();</span>
+        }
+<span class="fc" id="L31">        return getAgressoIder();</span>
+    }
+
+    default Set&lt;String&gt; resolveNomNivaa() {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if (getOrgEnhetsKategori() == null) {</span>
+<span class="fc" id="L36">            return emptySet();</span>
+        }
+<span class="nc" id="L38">        return getOrgEnhetsKategori();</span>
+    }
+
+    default Set&lt;NomNivaa&gt; resolveNomNivaaEnum() {
+<span class="fc" id="L42">        return this.resolveNomNivaa()</span>
+<span class="fc" id="L43">            .stream()</span>
+<span class="fc" id="L44">            .map(NomNivaa::valueOf)</span>
+<span class="fc" id="L45">            .collect(Collectors.toSet());</span>
+    }
+
+    default Set&lt;String&gt; resolveIder() {
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if (getIder() == null){</span>
+<span class="fc" id="L50">            return emptySet();</span>
+        }
+<span class="nc" id="L52">        return getIder();</span>
+    }
+
+    static OrgEnheterSearch emptyOrgEnheterSearch() {
+<span class="fc" id="L56">        return new OrgEnheterSearch() {</span>
+            @Override
+            public Set&lt;String&gt; getAgressoIder() {
+<span class="nc" id="L59">                return emptySet();</span>
+            }
+
+            @Override
+            public Set&lt;String&gt; getOrgEnhetsKategori() {
+<span class="nc" id="L64">                return emptySet();</span>
+            }
+
+            @Override
+            public String getOrgNiv() {
+<span class="nc" id="L69">                return null;</span>
+            }
+
+            @Override
+            public Set&lt;String&gt; getIder() {
+<span class="nc" id="L74">                return emptySet();</span>
+            }
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

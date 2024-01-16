@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessursPropertyResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.ressurs</a> &gt; <span class="el_source">RessursPropertyResolver.java</span></div><h1>RessursPropertyResolver.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.ressurs;
+
+import graphql.execution.DataFetcherResult;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.contract.ad.AdRessurs;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static java.util.stream.Collectors.toMap;
+
+<span class="fc" id="L18">@Slf4j</span>
+@Component
+public class RessursPropertyResolver {
+
+    private final ActiveDirectoryRessursBatchLoader adRessursBatchLoader;
+
+    private final RessursStateRepository ressursStateRepository;
+    private final boolean sendDummydata;
+
+    public RessursPropertyResolver(
+            ActiveDirectoryRessursBatchLoader activeDirectoryRessursBatchLoader, Environment env, RessursStateRepository ressursStateRepository
+<span class="fc" id="L29">    ) {</span>
+<span class="fc" id="L30">        this.adRessursBatchLoader = activeDirectoryRessursBatchLoader;</span>
+<span class="fc" id="L31">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L32">        var naisClientId = env.getProperty(&quot;NAIS_CLUSTER_NAME&quot;);</span>
+        // Sliter med at AD fungerer dårlig i dev-miljø.
+<span class="pc bpc" id="L34" title="3 of 4 branches missed.">        sendDummydata = naisClientId != null &amp;&amp; naisClientId.startsWith(&quot;dev&quot;);</span>
+<span class="fc" id="L35">    }</span>
+
+    private Map&lt;Ressurs, DataFetcherResult&lt;String&gt;&gt; createDummyResponse(String fieldSpec, List&lt;Ressurs&gt; source) {
+<span class="nc" id="L38">        return source.stream().collect(toMap(Function.identity(), ressurs -&gt; respondWithDummydata(fieldSpec + ressurs.getNavIdent())));</span>
+    }
+
+    private DataFetcherResult&lt;String&gt; respondWithDummydata(String data) {
+<span class="nc" id="L42">        return DataFetcherResult.&lt;String&gt;newResult().data(data).build();</span>
+    }
+
+    public Map&lt;Ressurs, DataFetcherResult&lt;String&gt;&gt; epost(List&lt;Ressurs&gt; ressurser) {
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (sendDummydata) {</span>
+<span class="nc" id="L47">            return createDummyResponse(&quot;dummy-epost@i-dev.&quot;, ressurser);</span>
+        }
+<span class="fc" id="L49">        return adRessursBatchLoader.load(ressurser, AdRessurs::getEmail);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

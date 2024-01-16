@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgEnhetStateRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgenhet.eventsourcing.state</a> &gt; <span class="el_source">OrgEnhetStateRepository.java</span></div><h1>OrgEnhetStateRepository.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgenhet.eventsourcing.state;
+
+import no.nav.nom.contract.nom.state.OrgEnhetState;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
+
+@Service
+<span class="fc" id="L18">public class OrgEnhetStateRepository {</span>
+<span class="fc" id="L19">    private final Map&lt;String, OrgEnhetState&gt; orgEnhetByFid = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+<span class="fc" id="L20">    private final Map&lt;String, OrgEnhetState&gt; orgEnhetById = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+
+<span class="fc" id="L22">    private final Map&lt;String, List&lt;OrgEnhetState&gt;&gt; orgEnheterByUniqueAgressoId = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+<span class="fc" id="L23">    private final Map&lt;String, List&lt;OrgEnhetState&gt;&gt; orgEnheterByAgressoIdAndNiv = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+
+    public Optional&lt;OrgEnhetState&gt; findByFid(String fid) {
+<span class="fc" id="L26">        return Optional.ofNullable(orgEnhetByFid.get(fid));</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findByFidIn(List&lt;String&gt; fids) {
+<span class="nc" id="L30">        return orgEnhetByFid.entrySet().stream()</span>
+<span class="nc" id="L31">            .filter( e -&gt; fids.contains(e.getKey()))</span>
+<span class="nc" id="L32">            .map(Map.Entry::getValue)</span>
+<span class="nc" id="L33">            .collect(Collectors.toList());</span>
+    }
+
+    public Optional&lt;OrgEnhetState&gt; findById(String id) {
+<span class="fc" id="L37">        return Optional.ofNullable(orgEnhetById.get(id));</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findByIdIn(List&lt;String&gt; ids) {
+<span class="nc" id="L41">        return orgEnhetById.entrySet().stream()</span>
+<span class="nc" id="L42">            .filter( e -&gt; ids.contains(e.getKey()))</span>
+<span class="nc" id="L43">            .map(Map.Entry::getValue)</span>
+<span class="nc" id="L44">            .collect(Collectors.toList());</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findByIdIn(Set&lt;String&gt; ids) {
+<span class="nc" id="L48">        return orgEnhetById.entrySet().stream()</span>
+<span class="nc" id="L49">            .filter(e -&gt; ids.contains(e.getKey()))</span>
+<span class="nc" id="L50">            .map(Map.Entry::getValue)</span>
+<span class="nc" id="L51">            .collect(Collectors.toList());</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findAllByUniqueAgressoId(String id) {
+<span class="fc" id="L55">        List&lt;OrgEnhetState&gt; orgEnheter = orgEnheterByUniqueAgressoId.get(id);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        if (orgEnheter == null) {</span>
+<span class="fc" id="L57">            orgEnheter = new ArrayList();</span>
+<span class="fc" id="L58">            orgEnheterByUniqueAgressoId.put(id, orgEnheter);</span>
+        }
+<span class="fc" id="L60">        return orgEnheter;</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findAllByAgressoIdIn(Set&lt;String&gt; agressoIds) {
+<span class="fc" id="L64">        return getAll().stream().filter( orgEnhetState -&gt; agressoIds.contains(orgEnhetState.agressoId().orElseGet(null))).toList();</span>
+    }
+
+    public List&lt;OrgEnhetState&gt; findAllByAgressoIdAndNiv(String id) {
+<span class="fc" id="L68">        List&lt;OrgEnhetState&gt; orgEnheter = orgEnheterByAgressoIdAndNiv.get(id);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (orgEnheter == null) {</span>
+<span class="fc" id="L70">            orgEnheter = new ArrayList();</span>
+<span class="fc" id="L71">            orgEnheterByAgressoIdAndNiv.put(id, orgEnheter);</span>
+        }
+<span class="fc" id="L73">        return orgEnheter;</span>
+    }
+
+    public Optional&lt;OrgEnhetState&gt; findNewestUniqueAgressoId(String id) {
+<span class="nc" id="L77">        return findAllByUniqueAgressoId(id).stream()</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            .filter( orgEnhetState -&gt; !orgEnhetState.endedOnStartDate())</span>
+<span class="nc" id="L79">            .max(comparing(OrgEnhetState::gyldigFom));</span>
+    }
+
+    public Collection&lt;OrgEnhetState&gt; getAll() {
+<span class="fc" id="L83">        return orgEnhetByFid.values();</span>
+    }
+
+    public int count() {
+<span class="fc" id="L87">        return orgEnhetByFid.size();</span>
+    }
+
+    public void putEventAggregate(OrgEnhetState newOrgEnhetState) {
+<span class="fc" id="L91">        orgEnhetByFid.put(newOrgEnhetState.fid(), newOrgEnhetState);</span>
+<span class="fc" id="L92">        orgEnhetById.put(newOrgEnhetState.id(), newOrgEnhetState);</span>
+<span class="fc" id="L93">        addToUniqueAgressoIdList(newOrgEnhetState);</span>
+<span class="fc" id="L94">        addToAgressoIdAndNivList(newOrgEnhetState);</span>
+<span class="fc" id="L95">    }</span>
+
+    private void addToUniqueAgressoIdList(OrgEnhetState newOrgEnhetState) {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (newOrgEnhetState.uniqueAgressoId().isPresent()) {</span>
+<span class="fc" id="L99">            List&lt;OrgEnhetState&gt; orgEnheter = findAllByUniqueAgressoId(newOrgEnhetState.uniqueAgressoId().get());</span>
+<span class="fc" id="L100">            var enhet = orgEnheter.stream().filter( orgEnhet -&gt; orgEnhet.fid().equals(newOrgEnhetState.fid())).findAny();</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if (enhet.isPresent()) {</span>
+<span class="fc" id="L102">                orgEnheter.remove(enhet.get());</span>
+            }
+<span class="fc" id="L104">            orgEnheter.add(newOrgEnhetState);</span>
+<span class="fc" id="L105">            orgEnheterByUniqueAgressoId.put(newOrgEnhetState.uniqueAgressoId().get(), orgEnheter);</span>
+        }
+<span class="fc" id="L107">    }</span>
+
+    private void addToAgressoIdAndNivList(OrgEnhetState newOrgEnhetState) {
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        if (newOrgEnhetState.agressoId().isPresent() &amp;&amp; newOrgEnhetState.agressoOrgNivaa().isPresent()) {</span>
+<span class="fc" id="L111">            var concatIdNiv = newOrgEnhetState.agressoId().get() + &quot;--&quot; + newOrgEnhetState.agressoOrgNivaa().get();</span>
+<span class="fc" id="L112">            List&lt;OrgEnhetState&gt; orgEnheter = findAllByAgressoIdAndNiv(concatIdNiv);</span>
+<span class="fc" id="L113">            var enhet = orgEnheter.stream().filter( orgEnhet -&gt; orgEnhet.fid().equals(newOrgEnhetState.fid())).findAny();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (enhet.isPresent()) {</span>
+<span class="fc" id="L115">                orgEnheter.remove(enhet.get());</span>
+            }
+<span class="fc" id="L117">            orgEnheter.add(newOrgEnhetState);</span>
+<span class="fc" id="L118">            orgEnheterByAgressoIdAndNiv.put(concatIdNiv, orgEnheter);</span>
+        }
+<span class="fc" id="L120">    }</span>
+
+    public void clear() {
+<span class="fc" id="L123">        orgEnhetByFid.clear();</span>
+<span class="fc" id="L124">        orgEnhetById.clear();</span>
+<span class="fc" id="L125">        orgEnheterByUniqueAgressoId.clear();</span>
+<span class="fc" id="L126">        orgEnheterByAgressoIdAndNiv.clear();</span>
+<span class="fc" id="L127">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

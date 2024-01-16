@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DateUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.common</a> &gt; <span class="el_source">DateUtils.java</span></div><h1>DateUtils.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.common;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+<span class="nc" id="L6">public class DateUtils {</span>
+    public static boolean isPeriodsOverlapping(LocalDate period1Start, Optional&lt;LocalDate&gt; period1End, LocalDate period2Start, Optional&lt;LocalDate&gt; period2End) {
+<span class="fc bfc" id="L8" title="All 2 branches covered.">        return period1Start.isBefore(period2End.orElse(LocalDate.MAX)) &amp;&amp; period2Start</span>
+<span class="fc bfc" id="L9" title="All 2 branches covered.">            .isBefore(period1End.orElse(LocalDate.MAX));</span>
+    }
+
+    public static void validateChronologicalDates(LocalDate startDato, LocalDate sluttDato) {
+<span class="fc bfc" id="L13" title="All 2 branches covered.">        if (sluttDato != null) {</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">            if (sluttDato.isBefore(startDato)) {</span>
+<span class="fc" id="L15">                throw new IllegalArgumentException(&quot;Sluttdato kan ikke være før startdato&quot;);</span>
+            }
+        }
+<span class="fc" id="L18">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppGrantedAuthoritiesProperties.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.common.security</a> &gt; <span class="el_source">AppGrantedAuthoritiesProperties.java</span></div><h1>AppGrantedAuthoritiesProperties.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.common.security;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.util.StringUtils;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toSet;
+
+@ConfigurationProperties(&quot;app.granted-authorities&quot;)
+<span class="fc" id="L16">public record AppGrantedAuthoritiesProperties(</span>
+        @DefaultValue Map&lt;String, ScopedAccess&gt; clients,
+        @DefaultValue Map&lt;String, GroupAccess&gt; groups
+) {
+    /**
+     * Limits the access of a given client to the default scope and other additional scopes
+     * One of clientId or clientAlias is expected
+     *
+     * @param clientId    the azp uuid for the client
+     * @param clientAlias the azp_name for the client
+     * @param scopes      the set of allowed scopes for this client
+     */
+    public record ScopedAccess(
+            String clientId,
+            String clientAlias,
+            Set&lt;NomApiAccessScope&gt; scopes
+    ) implements MappableAccessScopes {
+        public ScopedAccess(
+                @DefaultValue(&quot;&quot;) String clientId,
+                @DefaultValue(&quot;&quot;) String clientAlias,
+                Set&lt;NomApiAccessScope&gt; scopes
+<span class="fc" id="L37">        ) {</span>
+<span class="pc bpc" id="L38" title="3 of 4 branches missed.">            if (!StringUtils.hasText(clientId) &amp;&amp; !StringUtils.hasText(clientAlias)) {</span>
+<span class="nc" id="L39">                throw new IllegalArgumentException(&quot;One of client-id or client-alias must be set!&quot;);</span>
+            }
+<span class="fc" id="L41">            this.clientId = clientId;</span>
+<span class="fc" id="L42">            this.clientAlias = clientAlias;</span>
+<span class="fc" id="L43">            this.scopes = scopes;</span>
+<span class="fc" id="L44">        }</span>
+
+        @Override
+        public Set&lt;String&gt; identifiers() {
+<span class="fc" id="L48">            final var set = new HashSet&lt;String&gt;();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            if (StringUtils.hasText(clientId)) {</span>
+<span class="fc" id="L50">                set.add(clientId);</span>
+            }
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            if (StringUtils.hasText(clientAlias)) {</span>
+<span class="nc" id="L53">                set.add(clientAlias);</span>
+            }
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (set.isEmpty()) {</span>
+<span class="nc" id="L56">                throw new IllegalStateException(&quot;client-id and client-alias is missing, at least one must be present!&quot;);</span>
+            }
+<span class="fc" id="L58">            return set;</span>
+        }
+    }
+
+<span class="fc" id="L62">    public record GroupAccess(</span>
+            String groupId,
+            @DefaultValue Set&lt;NomApiAccessScope&gt; scopes
+    ) implements MappableAccessScopes {
+        @Override
+        public Set&lt;String&gt; identifiers() {
+<span class="fc" id="L68">            return singleton(groupId);</span>
+        }
+    }
+
+    public interface MappableAccessScopes {
+        // identifier vil være AAD group-id, eller AD application client-id/client-name
+        Set&lt;String&gt; identifiers();
+
+        Set&lt;NomApiAccessScope&gt; scopes();
+
+        default Set&lt;GrantedAuthority&gt; authorities() {
+<span class="fc" id="L79">            return scopes().stream().map(NomApiAccessScope::asGrantedAuthority).collect(toSet());</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

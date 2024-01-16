@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LederResolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.ressurs</a> &gt; <span class="el_source">LederResolver.java</span></div><h1>LederResolver.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.ressurs;
+
+import no.nav.nom.apps.api.graphql.MappingUtils;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.api.app.RessursLedereResolver;
+import no.nav.nom.contract.nom.api.graphql.LederOrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.api.graphql.RessursLeder;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
+
+@Component
+public class LederResolver {
+
+    private final OrgenhetService orgenhetService;
+    private final RessursLedereResolver ressursLedereResolver;
+
+<span class="fc" id="L25">    public LederResolver(OrgenhetService orgenhetService, RessursLedereResolver ressursLedereResolver) {</span>
+<span class="fc" id="L26">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L27">        this.ressursLedereResolver = ressursLedereResolver;</span>
+<span class="fc" id="L28">    }</span>
+
+    public &lt;T&gt; Map&lt;Ressurs, List&lt;T&gt;&gt; load(Collection&lt;Ressurs&gt; ressurser, Function&lt;Ressurs, List&lt;T&gt;&gt; loader) {
+        // Load a map of resources using the specified loader function
+<span class="fc" id="L32">        return ressurser.stream().collect(toMap(Function.identity(), loader));</span>
+    }
+
+    public List&lt;LederOrgEnhet&gt; lederFor(Ressurs ressurs) {
+<span class="fc" id="L36">        return orgenhetService.getEnheterByLeder(ressurs.getNavIdent())</span>
+<span class="fc" id="L37">            .stream()</span>
+<span class="fc" id="L38">            .map(MappingUtils::toOrgEnhet)</span>
+<span class="fc" id="L39">            .map(LederOrgEnhet::new)</span>
+<span class="fc" id="L40">            .toList();</span>
+    }
+
+    public List&lt;RessursLeder&gt; ledere(Ressurs ressurs) {
+<span class="fc" id="L44">        return ledere(ressurs.getNavIdent());</span>
+    }
+
+    public List&lt;RessursLeder&gt; ledere(String navIdent) {
+
+<span class="fc" id="L49">        return ressursLedereResolver.ledere(navIdent)</span>
+<span class="fc" id="L50">            .stream()</span>
+<span class="fc" id="L51">            .map(leder -&gt; new RessursLeder(MappingUtils.toRessurs(leder.leder()), leder.erDagligOppfolging()))</span>
+<span class="fc" id="L52">            .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

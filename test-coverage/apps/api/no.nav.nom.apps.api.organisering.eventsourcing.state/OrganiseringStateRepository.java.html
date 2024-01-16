@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrganiseringStateRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.organisering.eventsourcing.state</a> &gt; <span class="el_source">OrganiseringStateRepository.java</span></div><h1>OrganiseringStateRepository.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.organisering.eventsourcing.state;
+
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+@Service
+<span class="fc" id="L15">public class OrganiseringStateRepository {</span>
+<span class="fc" id="L16">    private final Map&lt;String, OrganiseringState&gt; organiseringByFid = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+<span class="fc" id="L17">    private final Map&lt;String, OrganiseringState&gt; organiseringById = new ConcurrentHashMap&lt;&gt;(16, 0.9f, 1);</span>
+
+    public void put(String fid, OrganiseringState organiseringState) {
+<span class="fc" id="L20">        organiseringByFid.put(fid, organiseringState);</span>
+<span class="fc" id="L21">    }</span>
+
+    public Optional&lt;OrganiseringState&gt; findByFid(String fid) {
+<span class="nc" id="L24">        return Optional.ofNullable(organiseringByFid.get(fid));</span>
+    }
+
+    public Optional&lt;OrganiseringState&gt; findActiveByFid(String fid) {
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        return getActiveOrganisering().containsKey(fid) ? Optional.ofNullable(getActiveOrganisering().get(fid)) : Optional.empty();</span>
+    }
+
+    public Optional&lt;OrganiseringState&gt; findActiveById(String id) {
+<span class="fc" id="L32">        var organisering = organiseringById.get(id);</span>
+
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if (organisering != null) {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            return isActive(organisering) ? Optional.of(organisering) : Optional.empty();</span>
+        } else {
+<span class="nc" id="L37">            return Optional.empty();</span>
+        }
+    }
+
+    public Optional&lt;OrganiseringState&gt; findFidByAgressoIdNivaAndName(Optional&lt;IOrgenhet&gt; orgEnhet) {
+<span class="fc" id="L42">        return orgEnhet.flatMap(iOrgenhet -&gt; organiseringByFid.values()</span>
+<span class="fc" id="L43">            .stream()</span>
+<span class="fc" id="L44">            .filter(organiseringState -&gt; organiseringState.id().equals(iOrgenhet.getId()))</span>
+<span class="fc" id="L45">            .findFirst());</span>
+    }
+
+    public void clear() {
+<span class="fc" id="L49">        organiseringByFid.clear();</span>
+<span class="fc" id="L50">        organiseringById.clear();</span>
+<span class="fc" id="L51">    }</span>
+
+    public void putEventAggregate(OrganiseringState organiseringState) {
+<span class="fc" id="L54">        organiseringByFid.put(organiseringState.fid(), organiseringState);</span>
+<span class="fc" id="L55">        organiseringById.put(organiseringState.id(), organiseringState);</span>
+<span class="fc" id="L56">    }</span>
+
+    public int count() {
+<span class="nc" id="L59">        return organiseringByFid.size();</span>
+    }
+
+    public Map&lt;String, OrganiseringState&gt; getAll() {
+<span class="nc" id="L63">        return organiseringByFid;</span>
+    }
+
+    public Map&lt;String, OrganiseringState&gt; getActiveOrganisering() {
+        // either terminating date is not present of it is today or later
+<span class="fc" id="L68">        return organiseringByFid.entrySet().stream()</span>
+<span class="fc" id="L69">            .filter(e -&gt; isActive(e.getValue()))</span>
+<span class="fc" id="L70">            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));</span>
+    }
+
+    public List&lt;OrganiseringState&gt; getOrganiseringer() {
+<span class="nc" id="L74">        return getActiveOrganisering().values().stream().toList();</span>
+    }
+
+    public List&lt;OrganiseringState&gt; getOrganiseringerContainingId(String id) {
+<span class="fc" id="L78">        return getActiveOrganisering().values().stream()</span>
+<span class="fc" id="L79">            .filter(o -&gt; o.containsOrgEnhet(id))</span>
+<span class="fc" id="L80">            .toList();</span>
+    }
+
+    private boolean isActive(OrganiseringState organiseringState) {
+<span class="fc bfc" id="L84" title="All 6 branches covered.">        return isGyldigTomNull(organiseringState) || (!isCreatedAndDeletedToday(organiseringState) &amp;&amp; isGyldigTomTodayOrLater(organiseringState));</span>
+    }
+
+    private boolean isCreatedAndDeletedToday(OrganiseringState organiseringState) {
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        return organiseringState.gyldigTom().isPresent() &amp;&amp;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            organiseringState.gyldigFom() != null &amp;&amp;</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">            organiseringState.gyldigTom().get().isEqual(organiseringState.gyldigFom()) &amp;&amp;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">            organiseringState.gyldigTom().get().isEqual(LocalDate.now());</span>
+    }
+
+    private boolean isGyldigTomTodayOrLater(OrganiseringState organiseringState) {
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        return organiseringState.gyldigTom().isPresent()</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            &amp;&amp; organiseringState.gyldigTom().get().isAfter(LocalDate.now().minusDays(1));</span>
+    }
+
+    private boolean isGyldigTomNull(OrganiseringState organiseringState) {
+<span class="fc" id="L100">        LocalDate gyldigTom = Optional.of(organiseringState)</span>
+<span class="fc bfc" id="L101" title="All 4 branches covered.">            .filter(state -&gt; state.gyldigTom() != null &amp;&amp; state.gyldigTom().isPresent())</span>
+<span class="fc" id="L102">            .flatMap(OrganiseringState::gyldigTom)</span>
+<span class="fc" id="L103">            .orElse(null);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        return gyldigTom == null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

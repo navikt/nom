@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MappingUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql</a> &gt; <span class="el_source">MappingUtils.java</span></div><h1>MappingUtils.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql;
+
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.contract.nom.api.graphql.OrgEnhet;
+import no.nav.nom.contract.nom.api.graphql.Ressurs;
+import no.nav.nom.contract.nom.state.RessursState;
+
+import static java.util.Collections.singletonList;
+
+<span class="nc" id="L10">public class MappingUtils {</span>
+
+    public static Ressurs toRessurs(RessursState ressursState) {
+<span class="fc" id="L13">        final var sektor = singletonList(ressursState.sektor());</span>
+
+<span class="fc" id="L15">        return Ressurs.builder()</span>
+<span class="fc" id="L16">                .navident(ressursState.navident())</span>
+<span class="fc" id="L17">                .navIdent(ressursState.navident())</span>
+<span class="fc" id="L18">                .personident(ressursState.personident())</span>
+<span class="fc" id="L19">                .personIdent(ressursState.personident())</span>
+<span class="fc" id="L20">                .ressurstype(sektor)</span>
+<span class="fc" id="L21">                .sektor(sektor)</span>
+<span class="fc" id="L22">                .startdato(ressursState.startdato().orElse(null))</span>
+<span class="fc" id="L23">                .sluttdato(ressursState.sluttdato().orElse(null))</span>
+<span class="fc" id="L24">                .fornavn(ressursState.visningsnavn().getFornavnMellomnavn())</span>
+<span class="fc" id="L25">                .etternavn(ressursState.visningsnavn().etternavn())</span>
+<span class="fc" id="L26">                .visningsNavn(ressursState.visningsnavn().getFormattedVisningsnavn())</span>
+<span class="fc" id="L27">                .visningsnavn(ressursState.visningsnavn().getFormattedVisningsnavn())</span>
+<span class="fc" id="L28">                .build();</span>
+    }
+
+    public static OrgEnhet toOrgEnhet(IOrgenhet orgEnhet){
+<span class="fc" id="L32">        return OrgEnhet.builder()</span>
+<span class="fc" id="L33">                .id(orgEnhet.getId())</span>
+<span class="fc" id="L34">                .agressoId(orgEnhet.getAgressoId())</span>
+<span class="fc" id="L35">                .orgNiv(orgEnhet.getOrgNiv())</span>
+<span class="fc" id="L36">                .navn(orgEnhet.getNavn())</span>
+<span class="fc" id="L37">                .agressoOrgenhetType(orgEnhet.getAgressoOrgenhetType())</span>
+<span class="fc" id="L38">                .gyldigFom(orgEnhet.getGyldigFom())</span>
+<span class="fc" id="L39">                .gyldigTom(orgEnhet.getGyldigTom().orElse(null))</span>
+<span class="fc" id="L40">                .orgEnhetsKategori(orgEnhet.getNomNivaa().orElse(null))</span>
+<span class="fc" id="L41">                .nomNivaa(orgEnhet.getNomNivaa().orElse(null))</span>
+<span class="fc" id="L42">                .orgEnhetsType(orgEnhet.getOrgEnhetsType().orElse(null))</span>
+<span class="fc" id="L43">                .build();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

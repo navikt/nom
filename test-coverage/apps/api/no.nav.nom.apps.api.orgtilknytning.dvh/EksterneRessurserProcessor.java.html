@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EksterneRessurserProcessor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.dvh</a> &gt; <span class="el_source">EksterneRessurserProcessor.java</span></div><h1>EksterneRessurserProcessor.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.dvh;
+
+import io.getunleash.Unleash;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.remedy.RemedyEnhet;
+import no.nav.nom.apps.api.remedy.RemedyEnhetMapperService;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
+
+<span class="fc" id="L26">@Slf4j</span>
+@Service
+public class EksterneRessurserProcessor {
+
+    private final RemedyEnhetMapperService remedyEnhetMapperService;
+    private final OrgtilknytningService orgtilknytningService;
+    private final OrgenhetService orgenhetService;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+
+    public EksterneRessurserProcessor(
+        RemedyEnhetMapperService remedyEnhetMapperService, OrgtilknytningService orgtilknytningService,
+        OrgenhetService orgenhetService,
+        OrgtilknytningCommandService orgtilknytningCommandService
+<span class="fc" id="L39">    ) {</span>
+<span class="fc" id="L40">        this.remedyEnhetMapperService = remedyEnhetMapperService;</span>
+<span class="fc" id="L41">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L42">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L43">        this.orgtilknytningCommandService = orgtilknytningCommandService;</span>
+<span class="fc" id="L44">    }</span>
+
+    public void process(DvhEksternRessurs eksternRessurs) {
+<span class="fc" id="L47">        var eksisterendeOrgtilknytninger = orgtilknytningService.getByNavIdent(eksternRessurs.navident());</span>
+
+<span class="fc" id="L49">        log.debug(&quot;Prosesserer ekstern ressurs {}\n{}&quot;, eksternRessurs.navident(), eksternRessurs.payload());</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (!eksternRessurs.remedyAktiv()) {</span>
+<span class="pc" id="L51">            var aktiveOrgtilkntyninger = eksisterendeOrgtilknytninger.stream().filter( o -&gt; o.gyldigTom().isEmpty()).toList();</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">            if (aktiveOrgtilkntyninger.isEmpty()) {</span>
+<span class="fc" id="L53">                log.debug(&quot;Ekstern ressurs {} er ikke aktiv - skipping&quot;, eksternRessurs.navident());</span>
+<span class="fc" id="L54">                return;</span>
+            } else {
+<span class="nc" id="L56">                log.debug(&quot;Ekstern ressurs {} er ikke aktiv - men har orgtilknytninger som må avsluttes&quot;, eksternRessurs.navident());</span>
+<span class="nc" id="L57">                var meta = new InputMetadata(&quot;nom-api BatchJob&quot;, &quot;Datavarehus&quot;, eksternRessurs, new Origination(&quot;nom-api&quot;, &quot;nom-api&quot;));</span>
+
+                // hvis aktiv orgtilknytning starter etter RemedySlutt, så fjern den i steden for å avslutte den
+<span class="nc" id="L60">                aktiveOrgtilkntyninger.forEach( o -&gt; {</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">                    if (eksternRessurs.remedySlutt() != null &amp;&amp; o.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {</span>
+<span class="nc" id="L62">                        fjernEksisterendeOrgtilknytning(o, meta);</span>
+                    } else {
+<span class="nc" id="L64">                        avsluttOrgtilknytning(o, eksternRessurs.remedySlutt(), meta);</span>
+                    }
+<span class="nc" id="L66">                });</span>
+            }
+        }
+
+<span class="fc" id="L70">        var orgenhet = getOrgenhetForEkstern(eksternRessurs);</span>
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (orgenhet == null) {</span>
+<span class="fc" id="L73">            String msg = String.format(</span>
+                &quot;Ekstern ressurs %s - Fant ikke orgenhet for remedyEnhet %s eller agressoId/Nivå %s/%s. Kan ikke behandles.&quot;,
+<span class="fc" id="L75">                eksternRessurs.navident(),</span>
+<span class="fc" id="L76">                eksternRessurs.remedyEnhetId(),</span>
+<span class="fc" id="L77">                eksternRessurs.orgenhetPaaRessurs(),</span>
+<span class="fc" id="L78">                eksternRessurs.orgenhetPaaRessursNivaa()</span>
+            );
+<span class="fc" id="L80">            log.error(msg);</span>
+<span class="fc" id="L81">            return;</span>
+        }
+
+<span class="fc" id="L84">        rapporterEvtDiffPaaRemedyenhet(eksternRessurs, orgenhet);</span>
+
+
+<span class="fc" id="L87">        InputMetadata metadata = new InputMetadata(&quot;nom-api BatchJob&quot;, &quot;Datavarehus&quot;, eksternRessurs, new Origination(&quot;nom-api&quot;, &quot;nom-api&quot;));</span>
+
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (eksisterendeOrgtilknytninger.isEmpty()) {</span>
+<span class="fc" id="L90">            log.debug(&quot;Ekstern ressurs {} har ingen orgtilknytninger. Oppretter orgtilknytning med remedy_start som gyldigFom&quot;, eksternRessurs.navident());</span>
+<span class="fc" id="L91">            opprettOrgtilknytning(eksternRessurs, orgenhet, eksternRessurs.remedyStart(), metadata);</span>
+        } else {
+            // Eneste endring vi forventer fra DVH er endring av remedy_slutt og/eller enhet
+            // Vi trenger kun å sammenligne dette med siste orgtilknytningsperiode for identen.
+            // Denne kan være med start i dag (var tidligere fremtidig, eller allerede endret orgtilknytning for den eksterne i dag)
+            // Fremtidige orgtilknytninger er kun for eksterne som ikke har startet enda.
+<span class="fc" id="L97">            var sisteEksisterendeOrgtilknytning = eksisterendeOrgtilknytninger.stream()</span>
+<span class="fc" id="L98">                .max(Comparator.comparing(OrgtilknytningState::gyldigFom))</span>
+<span class="fc" id="L99">                .get();</span>
+<span class="pc bpc" id="L100" title="1 of 4 branches missed.">            if (harSammeSluttdato(eksternRessurs, sisteEksisterendeOrgtilknytning) &amp;&amp; erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {</span>
+<span class="fc" id="L101">                log.debug(&quot;Ekstern ressurs {} har eksisterende orgtilknytning som ikke trenger endring&quot;, eksternRessurs.navident());</span>
+            } else {
+<span class="fc bfc" id="L103" title="All 2 branches covered.">                if (erSammeEnhet(sisteEksisterendeOrgtilknytning, orgenhet)) {</span>
+                    // Sluttdato er endret, endre sluttdato på eksisterende orgtilknytning - ingen flere endringer påkrevd.
+                    // Hvis sluttdato er før ekstisterende startdato, fjern orgtilknytingen
+<span class="pc bpc" id="L106" title="2 of 4 branches missed.">                    if (eksternRessurs.remedySlutt() != null &amp;&amp; sisteEksisterendeOrgtilknytning.gyldigFom().plusDays(1).isAfter(eksternRessurs.remedySlutt())) {</span>
+<span class="nc" id="L107">                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, metadata);</span>
+                    } else {
+<span class="fc" id="L109">                        endreSluttdatoPaaEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);</span>
+                    }
+                } else {
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">                    if (eksternRessurs.remedySlutt() != null &amp;&amp; LocalDate.now().isAfter(eksternRessurs.remedySlutt())) {</span>
+                        // Hvis sluttdato er før dagens dato, avslutt eksisterende
+<span class="nc" id="L114">                        avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, eksternRessurs.remedySlutt(), metadata);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">                    } else if (sisteEksisterendeOrgtilknytning.gyldigFom().isBefore(LocalDate.now())) {</span>
+                        // Hvis startdato på eksisterende er før dagens dato, avslutt eksisterende med sluttdato i går og opprett ny med startdato i dag
+<span class="fc" id="L117">                        avsluttOrgtilknytning(sisteEksisterendeOrgtilknytning, LocalDate.now().minusDays(1), metadata);</span>
+<span class="fc" id="L118">                        opprettOrgtilknytning(eksternRessurs, orgenhet, LocalDate.now(), metadata);</span>
+                    } else {
+                        // Orgenhet er endret
+                        // Fjern den eksisterende, opprett ny med samme gyldigFom
+<span class="fc" id="L122">                        fjernEksisterendeOrgtilknytning(sisteEksisterendeOrgtilknytning, metadata);</span>
+<span class="fc" id="L123">                        opprettOrgtilknytning(eksternRessurs, orgenhet, sisteEksisterendeOrgtilknytning.gyldigFom(), metadata);</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L128">    }</span>
+
+    private static boolean erSammeEnhet(OrgtilknytningState sisteEksisterendeOrgtilknytning, IOrgenhet orgenhet) {
+<span class="fc" id="L131">        return sisteEksisterendeOrgtilknytning.orgEnhetId().equals(orgenhet.getId());</span>
+    }
+
+    private static boolean harSammeSluttdato(DvhEksternRessurs eksternRessurs, OrgtilknytningState sisteEksisterendeOrgtilknytning) {
+<span class="fc" id="L135">        return Objects.equals(sisteEksisterendeOrgtilknytning.gyldigTom().orElse(null), eksternRessurs.remedySlutt());</span>
+    }
+
+    private void rapporterEvtDiffPaaRemedyenhet(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet) {
+<span class="fc" id="L139">        var remedyEnhetForMappetOrgenhet = remedyEnhetMapperService.findByNomId(orgenhet.getId()).map(RemedyEnhet::remedyEnhetId).orElse(null);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (!Objects.equals(remedyEnhetForMappetOrgenhet, eksternRessurs.remedyEnhetId())) {</span>
+<span class="fc" id="L141">            String warn = String.format(</span>
+                &quot;Ekstern ressurs %s er i DVH angitt remedyEnhet %s og agressoId/Nivå %s/%s er i NOM matchet til i orgenhet %s som mapper til en annen remedy enhet %s.&quot;,
+<span class="fc" id="L143">                eksternRessurs.navident(),</span>
+<span class="fc" id="L144">                eksternRessurs.remedyEnhetId(),</span>
+<span class="fc" id="L145">                eksternRessurs.orgenhetPaaRessurs(),</span>
+<span class="fc" id="L146">                eksternRessurs.orgenhetPaaRessursNivaa(),</span>
+<span class="fc" id="L147">                orgenhet.getId(),</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">                remedyEnhetForMappetOrgenhet != null ? remedyEnhetForMappetOrgenhet : &quot;'ingen remedyenhet mappet for NOM enhet'&quot;</span>
+            );
+<span class="fc" id="L150">            log.warn(warn);</span>
+        }
+<span class="fc" id="L152">    }</span>
+
+    // Finner orgenhet for ekstern ressurs. orgenhetPaaRessurs har presedens over remedyEnhetId
+    private IOrgenhet getOrgenhetForEkstern(DvhEksternRessurs eksternRessurs) {
+<span class="fc" id="L156">        var navident = eksternRessurs.navident();</span>
+<span class="fc" id="L157">        var remedyEnhet = eksternRessurs.remedyEnhetId();</span>
+<span class="fc" id="L158">        var orgenhetPaaRessurs = eksternRessurs.orgenhetPaaRessurs();</span>
+<span class="fc" id="L159">        var orgenhetPaaRessursNivaa = eksternRessurs.orgenhetPaaRessursNivaa();</span>
+
+<span class="fc" id="L161">        Optional&lt;IOrgenhet&gt; orgenhetByRemedyEnhet = remedyEnhetMapperService</span>
+<span class="fc" id="L162">            .findByRemedyEnhetId(remedyEnhet)</span>
+<span class="fc" id="L163">            .map(</span>
+                orgenhet -&gt; {
+<span class="fc" id="L165">                    log.debug(&quot;For navident {} - Fant orgenhet {} for remedyEnhet {}&quot;, navident, orgenhet.nomId(), remedyEnhet);</span>
+<span class="fc" id="L166">                    return orgenhetService.getById(orgenhet.nomId());</span>
+                }
+<span class="fc" id="L168">            ).orElseGet(</span>
+                () -&gt; {
+<span class="fc" id="L170">                    log.info(&quot;For navident {} - Fant ikke orgenhet for remedyEnhet {}&quot;, navident, remedyEnhet);</span>
+<span class="fc" id="L171">                    return Optional.empty();</span>
+                }
+            );
+
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (orgenhetPaaRessurs.startsWith(&quot;-&quot;)) {</span>
+<span class="fc" id="L176">            log.info(</span>
+                &quot;For navident {} - ORGENHET_PAA_RESSURS i DVH er ikke angitt. DVH Kode: {}. Faller tilbake på å bruke remedyEnhet {}.&quot;,
+                navident,
+                orgenhetPaaRessurs,
+                remedyEnhet
+            );
+<span class="fc" id="L182">            return orgenhetByRemedyEnhet.orElse(null);</span>
+        } else {
+<span class="fc" id="L184">            var nomOrgenheterByOrgenhetPaaRessurs = orgenhetService.getByAgressoIdForEnheterMedOrganisering(orgenhetPaaRessurs)</span>
+<span class="fc" id="L185">                .stream()</span>
+<span class="fc" id="L186">                .filter(o -&gt; Objects.equals(o.getOrgNiv(), orgenhetPaaRessursNivaa))</span>
+<span class="fc" id="L187">                .toList();</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">            if (nomOrgenheterByOrgenhetPaaRessurs.size() == 1) {</span>
+<span class="fc" id="L189">                log.info(</span>
+                    &quot;For navident {} - Fant orgenhet {} for ORGENHET_PAA_RESSURS i DVH. DVH agressoId/Nivå: {}/{}.&quot;,
+                    navident,
+<span class="fc" id="L192">                    nomOrgenheterByOrgenhetPaaRessurs.get(0).getId(),</span>
+                    orgenhetPaaRessurs,
+                    remedyEnhet
+                );
+<span class="fc" id="L196">                return nomOrgenheterByOrgenhetPaaRessurs.get(0);</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">            } else if (nomOrgenheterByOrgenhetPaaRessurs.isEmpty()) {</span>
+<span class="fc" id="L198">                log.info(</span>
+                    &quot;For navident {} - Fant ikke orgenhet for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.&quot;,
+                    navident,
+                    orgenhetPaaRessurs,
+                    orgenhetPaaRessursNivaa,
+                    remedyEnhet
+                );
+            } else {
+<span class="nc" id="L206">                log.info(</span>
+                    &quot;For navident {} - Fant flere orgenheter for agressoId/Nivå: {}/{}. Faller tilbake på å bruke remedyEnhet {}.&quot;,
+                    navident,
+                    orgenhetPaaRessurs,
+                    orgenhetPaaRessursNivaa,
+                    remedyEnhet
+                );
+            }
+<span class="fc" id="L214">            return orgenhetByRemedyEnhet.orElse(null);</span>
+        }
+    }
+
+    private void opprettOrgtilknytning(DvhEksternRessurs eksternRessurs, IOrgenhet orgenhet, LocalDate gyldigFom, InputMetadata metadata) {
+<span class="fc" id="L219">        var opprettOrgtilknytning = new OpprettOrgtilknytning(</span>
+<span class="fc" id="L220">            eksternRessurs.navident(),</span>
+<span class="fc" id="L221">            orgenhet.getId(),</span>
+            gyldigFom,
+            metadata,
+            null
+        );
+
+<span class="fc" id="L227">        log.debug(&quot;Lager OpprettOrgtilknytning event: {}&quot;, opprettOrgtilknytning);</span>
+
+<span class="fc" id="L229">        String fid = null;</span>
+<span class="fc" id="L230">        fid = orgtilknytningCommandService.opprettOrgtilknytning(opprettOrgtilknytning);</span>
+
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if (eksternRessurs.remedySlutt() != null) {</span>
+<span class="fc" id="L233">            var avvikleOrgtilknytning = new AvvikleOrgtilknytning(</span>
+<span class="fc" id="L234">                eksternRessurs.navident(),</span>
+<span class="fc" id="L235">                orgenhet.getId(),</span>
+<span class="fc" id="L236">                eksternRessurs.remedySlutt(),</span>
+                metadata,
+                null
+            );
+
+<span class="fc" id="L241">            log.debug(&quot;Lager AvvikleOrgtilknytning event: {}&quot;, avvikleOrgtilknytning);</span>
+
+<span class="fc" id="L243">            orgtilknytningCommandService.avvikleOrgtilknytning(fid, avvikleOrgtilknytning);</span>
+        }
+
+<span class="fc" id="L246">        var endreDagligOppfolgingOrgtilknytning = new EndreDagligOppfolgingOrgtilknytning(</span>
+<span class="fc" id="L247">            eksternRessurs.navident(),</span>
+<span class="fc" id="L248">            orgenhet.getId(),</span>
+            gyldigFom,
+<span class="fc" id="L250">            Optional.ofNullable(eksternRessurs.remedySlutt()),</span>
+            true,
+            metadata,
+            null
+        );
+
+<span class="fc" id="L256">        log.debug(&quot;Lager EndreDagligOppfolgingOrgtilknytning event: {}&quot;, endreDagligOppfolgingOrgtilknytning);</span>
+
+<span class="fc" id="L258">        orgtilknytningCommandService.endreDagligOppfolgingOrgtilknytning(fid, endreDagligOppfolgingOrgtilknytning);</span>
+<span class="fc" id="L259">    }</span>
+
+
+    private void endreSluttdatoPaaEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+<span class="fc" id="L263">        var endreOrgtilknytningDato = new EndreOrgtilknytningDato(</span>
+<span class="fc" id="L264">            orgtilknytning.navident(),</span>
+<span class="fc" id="L265">            orgtilknytning.orgEnhetId(),</span>
+<span class="fc" id="L266">            orgtilknytning.gyldigFom(),</span>
+<span class="fc" id="L267">            Optional.ofNullable(gyldigTom),</span>
+            metadata,
+            null
+        );
+
+<span class="fc" id="L272">        log.debug(&quot;Lager EndreOrgtilknytningDato event for fid {}:\n {}&quot;, orgtilknytning.fid(), endreOrgtilknytningDato);</span>
+
+<span class="fc" id="L274">        orgtilknytningCommandService.endreOrgtilknytningDato(orgtilknytning.fid(), endreOrgtilknytningDato);</span>
+<span class="fc" id="L275">    }</span>
+
+    private void avsluttOrgtilknytning(OrgtilknytningState orgtilknytning, LocalDate gyldigTom, InputMetadata metadata) {
+<span class="fc" id="L278">        var avvikleOrgtilknytning = new AvvikleOrgtilknytning(</span>
+<span class="fc" id="L279">            orgtilknytning.navident(),</span>
+<span class="fc" id="L280">            orgtilknytning.orgEnhetId(),</span>
+            gyldigTom,
+            metadata,
+            null
+        );
+
+<span class="fc" id="L286">        log.debug(&quot;Lager AvvikleOrgtilknytning event for fid {}:\n {}&quot;, orgtilknytning.fid(), avvikleOrgtilknytning);</span>
+
+<span class="fc" id="L288">        orgtilknytningCommandService.avvikleOrgtilknytning(orgtilknytning.fid(), avvikleOrgtilknytning);</span>
+<span class="fc" id="L289">    }</span>
+
+    private void fjernEksisterendeOrgtilknytning(OrgtilknytningState orgtilknytning, InputMetadata metadata) {
+<span class="fc" id="L292">        var fjernOrgtilknytning = new FjernOrgtilknytning(</span>
+<span class="fc" id="L293">            orgtilknytning.navident(),</span>
+<span class="fc" id="L294">            orgtilknytning.orgEnhetId(),</span>
+<span class="fc" id="L295">            orgtilknytning.gyldigFom(),</span>
+<span class="fc" id="L296">            orgtilknytning.gyldigTom(),</span>
+            metadata,
+            null
+        );
+
+<span class="fc" id="L301">        log.debug(&quot;Lager FjernOrgtilknytning event for fid {}:\n {}&quot;, orgtilknytning.fid(), fjernOrgtilknytning);</span>
+
+<span class="fc" id="L303">        orgtilknytningCommandService.fjernOrgtilknytning(orgtilknytning.fid(), fjernOrgtilknytning);</span>
+<span class="fc" id="L304">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

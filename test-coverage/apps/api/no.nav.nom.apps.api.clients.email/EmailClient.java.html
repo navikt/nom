@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.clients.email</a> &gt; <span class="el_source">EmailClient.java</span></div><h1>EmailClient.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.clients.email;
+
+import no.nav.nom.apps.api.common.AppProperties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
+
+@Component
+public class EmailClient {
+
+<span class="fc" id="L19">    public static final Logger logger = LogManager.getLogger(EmailClient.class);</span>
+
+    private final WebClient webClient;
+    private final AppProperties.Email emailClientProperties;
+
+    public EmailClient(
+        OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager,
+        AppProperties appProperties
+<span class="fc" id="L27">    ) {</span>
+<span class="fc" id="L28">        this.emailClientProperties = appProperties.clients().email();</span>
+<span class="fc" id="L29">        ServletOAuth2AuthorizedClientExchangeFilterFunction oAuth2Filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(oAuth2AuthorizedClientManager);</span>
+<span class="fc" id="L30">        oAuth2Filter.setDefaultClientRegistrationId(&quot;email&quot;);</span>
+
+<span class="fc" id="L32">        this.webClient = WebClient.builder()</span>
+<span class="fc" id="L33">            .filter(oAuth2Filter)</span>
+<span class="fc" id="L34">            .baseUrl(emailClientProperties.baseUrl())</span>
+<span class="fc" id="L35">            .build();</span>
+<span class="fc" id="L36">    }</span>
+
+    public Mono&lt;Void&gt; sendEmail(EmailMessage emailMessage) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (emailClientProperties.isEnabled()) {</span>
+<span class="nc" id="L40">            return webClient.post()</span>
+<span class="nc" id="L41">                .body(Mono.just(emailMessage), EmailMessage.class)</span>
+<span class="nc" id="L42">                .retrieve()</span>
+<span class="nc" id="L43">                .bodyToMono(Void.class)</span>
+<span class="nc" id="L44">                .retryWhen(defaultRetry(emailClientProperties.maxAttempts(), emailClientProperties.backoffDurationMillis()))</span>
+<span class="nc" id="L45">                .doOnError(WebClientResponseException.class, (WebClientResponseException webClientResponseException) -&gt; {</span>
+<span class="nc" id="L46">                    String errorMsg = String.format(</span>
+                        &quot;POST %s resulted in status %s with body %s&quot;,
+<span class="nc bnc" id="L48" title="All 2 branches missed.">                        webClientResponseException.getRequest() != null ? webClientResponseException.getRequest().getURI() : &quot;n/a&quot;,</span>
+<span class="nc" id="L49">                        webClientResponseException.getStatusCode().value(),</span>
+<span class="nc" id="L50">                        webClientResponseException.getResponseBodyAsString()</span>
+                    );
+
+<span class="nc" id="L53">                    throw new EmailClientUnforseenException(errorMsg);</span>
+                });
+        } else {
+<span class="nc" id="L56">            logger.info(&quot;Email which would have been sent: {}&quot;, emailMessage);</span>
+<span class="nc" id="L57">            return Mono.empty();</span>
+        }
+    }
+
+    private Retry defaultRetry(Integer maxAttempts, Integer backoffDurationMillis) {
+<span class="nc" id="L62">        return Retry.backoff(maxAttempts, Duration.ofMillis(backoffDurationMillis)).jitter(0.75).filter(throwable -&gt; {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (throwable instanceof WebClientResponseException) {</span>
+<span class="nc" id="L64">                return ((WebClientResponseException) throwable).getStatusCode().is5xxServerError();</span>
+            }
+<span class="nc" id="L66">            return false;</span>
+<span class="nc" id="L67">        }).onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -&gt; {</span>
+<span class="nc" id="L68">            Throwable throwable = retrySignal.failure();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (throwable instanceof WebClientResponseException) {</span>
+<span class="nc" id="L70">                throw (WebClientResponseException) throwable;</span>
+            }
+<span class="nc" id="L72">            throw new RuntimeException(throwable);</span>
+        });
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AZPAuthoritiesConverter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.common.security</a> &gt; <span class="el_source">AZPAuthoritiesConverter.java</span></div><h1>AZPAuthoritiesConverter.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.common.security;
+
+import no.nav.nom.apps.api.common.security.AppGrantedAuthoritiesProperties.MappableAccessScopes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+
+@Component
+public final class AZPAuthoritiesConverter implements Converter&lt;Jwt, Collection&lt;GrantedAuthority&gt;&gt; {
+
+<span class="fc" id="L25">    private final static Logger log = LoggerFactory.getLogger(AZPAuthoritiesConverter.class);</span>
+<span class="fc" id="L26">    private final static Set&lt;String&gt; AZP_CLAIM_NAMES = Set.of(&quot;azp&quot;, &quot;azp_name&quot;);</span>
+    private final static String GROUPS_CLAIM_NAME = &quot;groups&quot;;
+<span class="fc" id="L28">    private final JwtGrantedAuthoritiesConverter defaultConverter = new JwtGrantedAuthoritiesConverter();</span>
+    private final AppGrantedAuthoritiesProperties securityProperties;
+<span class="fc" id="L30">    private final Map&lt;String, Set&lt;GrantedAuthority&gt;&gt; authoritiesMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L32">    public AZPAuthoritiesConverter(AppGrantedAuthoritiesProperties securityProperties) {</span>
+<span class="fc" id="L33">        this.securityProperties = securityProperties;</span>
+
+<span class="fc" id="L35">        securityProperties.clients().forEach(this::calculateScopes);</span>
+<span class="fc" id="L36">        securityProperties.groups().forEach(this::calculateScopes);</span>
+<span class="fc" id="L37">    }</span>
+
+    private void calculateScopes(String configuration, MappableAccessScopes mappableAccessScopes) {
+<span class="fc" id="L40">        final var authorities = mappableAccessScopes.authorities();</span>
+
+<span class="fc" id="L42">        mappableAccessScopes.identifiers().forEach(identifier -&gt;</span>
+<span class="fc" id="L43">            authoritiesMap.merge(identifier, authorities, (oldAuth, newAuth) -&gt; {</span>
+<span class="nc" id="L44">                oldAuth.addAll(newAuth);</span>
+<span class="nc" id="L45">                log.debug(&quot;Current authorities associated with identifier \&quot;{}\&quot; is {}&quot;, identifier, oldAuth);</span>
+<span class="nc" id="L46">                return oldAuth;</span>
+            })
+        );
+
+<span class="fc" id="L50">        log.info(</span>
+                &quot;Adding authorities {} from configuration \&quot;{}\&quot; with identifier(s) = {}&quot;,
+<span class="fc" id="L52">                mappableAccessScopes.authorities(),</span>
+                configuration,
+<span class="fc" id="L54">                mappableAccessScopes.identifiers()</span>
+        );
+<span class="fc" id="L56">    }</span>
+
+    @Override
+    public Collection&lt;GrantedAuthority&gt; convert(Jwt jwt) {
+<span class="fc" id="L60">        final var grantedAuthorities = defaultConverter.convert(jwt);</span>
+
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (!securityProperties.clients().isEmpty()) {</span>
+<span class="fc" id="L63">            AZP_CLAIM_NAMES.forEach(claimPropertyName -&gt; findAndApplyAuthorities(grantedAuthorities, claimPropertyName, jwt.getClaim(claimPropertyName)));</span>
+        }
+
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (!securityProperties.groups().isEmpty()) {</span>
+<span class="fc" id="L67">            List&lt;String&gt; claimValues = Optional.ofNullable(jwt.getClaimAsStringList(GROUPS_CLAIM_NAME)).orElse(emptyList());</span>
+<span class="fc" id="L68">            claimValues.forEach(value -&gt; findAndApplyAuthorities(grantedAuthorities, GROUPS_CLAIM_NAME, value));</span>
+        }
+
+<span class="fc" id="L71">        return grantedAuthorities;</span>
+    }
+
+    private void findAndApplyAuthorities(Collection&lt;GrantedAuthority&gt; grantedAuthorities, String claimPropertyName, String accessor) {
+<span class="fc" id="L75">        final var authorities = authoritiesMap.getOrDefault(accessor, emptySet());</span>
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (log.isTraceEnabled()) {</span>
+<span class="nc" id="L78">            log.trace(&quot;Mapping claims from \&quot;{}\&quot; = \&quot;{}\&quot; with resolved authorities: {}&quot;, claimPropertyName, accessor, authorities);</span>
+        }
+
+<span class="fc" id="L81">        grantedAuthorities.addAll(authorities);</span>
+<span class="fc" id="L82">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

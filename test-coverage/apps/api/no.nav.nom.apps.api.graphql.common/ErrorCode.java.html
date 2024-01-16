@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ErrorCode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common</a> &gt; <span class="el_source">ErrorCode.java</span></div><h1>ErrorCode.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common;
+
+import graphql.ErrorClassification;
+import graphql.ErrorType;
+import graphql.GraphQLError;
+import graphql.GraphqlErrorBuilder;
+import graphql.schema.DataFetchingEnvironment;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import static java.util.Collections.singletonMap;
+
+<span class="fc" id="L13">@Getter</span>
+@RequiredArgsConstructor
+public enum ErrorCode {
+<span class="fc" id="L16">    UNAUTHENTICATED(ErrorType.ExecutionAborted, &quot;unauthenticated&quot;),</span>
+<span class="fc" id="L17">    UNAUTHORIZED(ErrorType.ExecutionAborted, &quot;unauthorized&quot;),</span>
+<span class="fc" id="L18">    NOT_FOUND(ErrorType.ExecutionAborted, &quot;not_found&quot;),</span>
+<span class="fc" id="L19">    BAD_REQUEST(ErrorType.ValidationError, &quot;bad_request&quot;),</span>
+<span class="fc" id="L20">    SERVER_ERROR(ErrorType.DataFetchingException, &quot;server_error&quot;),</span>
+<span class="fc" id="L21">    DISABLED_FEATURE(ErrorType.OperationNotSupported, &quot;disabled&quot;);</span>
+
+    private final ErrorClassification type;
+    private final String text;
+
+    public GraphQLError construct(DataFetchingEnvironment env, String message) {
+<span class="nc" id="L27">        return GraphqlErrorBuilder.newError(env)</span>
+<span class="nc" id="L28">                .message(message)</span>
+<span class="nc" id="L29">                .errorType(type)</span>
+<span class="nc" id="L30">                .extensions(singletonMap(&quot;code&quot;, text))</span>
+<span class="nc" id="L31">                .build();</span>
+    }
+
+    public GraphQLError construct(String message) {
+<span class="fc" id="L35">        return GraphqlErrorBuilder.newError()</span>
+<span class="fc" id="L36">                .message(message)</span>
+<span class="fc" id="L37">                .errorType(type)</span>
+<span class="fc" id="L38">                .extensions(singletonMap(&quot;code&quot;, text))</span>
+<span class="fc" id="L39">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

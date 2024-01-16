@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhTelefon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.dvh.dto</a> &gt; <span class="el_source">DvhTelefon.java</span></div><h1>DvhTelefon.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.dvh.dto;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+
+@Data
+<span class="fc" id="L9">@Slf4j</span>
+public class DvhTelefon {
+    String navIdent;
+    String nummer;
+    DvhTelefonType type;
+    String beskrivelse;
+
+<span class="fc" id="L16">    public DvhTelefon() {}</span>
+
+<span class="fc" id="L18">    public DvhTelefon(JsonNode node) {</span>
+<span class="fc" id="L19">        this.navIdent = node.get(&quot;navident&quot;).asText();</span>
+<span class="fc" id="L20">        this.nummer = node.get(&quot;msisdn&quot;).asText();</span>
+
+<span class="fc" id="L22">        val userref1 = node.get(&quot;userreference1&quot;).asText();</span>
+
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (userref1.startsWith(&quot;PK-&quot;)) {</span>
+<span class="fc" id="L25">            this.type = DvhTelefonType.KONTORTELEFON;</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        } else if (userref1.startsWith(&quot;PT-&quot;)) {</span>
+<span class="fc" id="L27">            this.type = DvhTelefonType.TJENESTETELEFON;</span>
+        } else {
+            // TODO, håndtere bedre?
+<span class="nc" id="L30">            log.error(&quot;DvhTelefon.type satt til null! &quot; + node.get(&quot;userreference1&quot;).asText());</span>
+<span class="nc" id="L31">            this.type = null;</span>
+        }
+
+<span class="fc" id="L34">        this.beskrivelse = node.get(&quot;typename&quot;).asText();</span>
+
+
+<span class="fc" id="L37">    }</span>
+
+<span class="fc" id="L39">    public enum DvhTelefonType {</span>
+<span class="fc" id="L40">        TJENESTETELEFON,</span>
+<span class="fc" id="L41">        KONTORTELEFON</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

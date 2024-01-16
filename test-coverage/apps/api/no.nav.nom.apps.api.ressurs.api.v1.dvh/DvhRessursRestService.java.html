@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhRessursRestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.ressurs.api.v1.dvh</a> &gt; <span class="el_source">DvhRessursRestService.java</span></div><h1>DvhRessursRestService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.ressurs.api.v1.dvh;
+
+import io.getunleash.Unleash;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.dvh.DvhRepository;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.RemedyEnhetIdResolver;
+import no.nav.nom.apps.api.organisering.eventsourcing.state.OrganiseringStateRepository;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.state.OrganiseringState;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import no.nav.nom.contract.nom.state.RessursState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static no.nav.nom.apps.api.organisering.OrganiseringConfig.UNLEASH_USE_NEW_ORGANISASJON_SOURCE;
+
+@Service
+<span class="fc" id="L25">@Slf4j</span>
+public class DvhRessursRestService {
+
+<span class="fc" id="L28">    private final Logger logger = LoggerFactory.getLogger(this.getClass());</span>
+
+    private final NomMastered nomMastered;
+    private final RessursStateRepository ressursStateRepository;
+    private final OrgtilknytningService orgtilknytningService;
+    private final OrgenhetService orgenhetService;
+    private final RemedyEnhetIdResolver remedyEnhetIdResolver;
+    private final DvhRepository dvhRepository;
+
+    private final OrganiseringStateRepository organiseringStateRepository;
+    private final Unleash unleash;
+
+    public DvhRessursRestService(NomMastered nomMastered,
+                                 RessursStateRepository ressursStateRepository,
+                                 OrgtilknytningService orgtilknytningService,
+                                 OrgenhetService orgenhetService,
+                                 RemedyEnhetIdResolver remedyEnhetIdResolver,
+                                 DvhRepository dvhRepository, OrganiseringStateRepository organiseringStateRepository, Unleash unleash
+<span class="fc" id="L46">    ) {</span>
+<span class="fc" id="L47">        this.nomMastered = nomMastered;</span>
+<span class="fc" id="L48">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L49">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L50">        this.orgenhetService = orgenhetService;</span>
+<span class="fc" id="L51">        this.remedyEnhetIdResolver = remedyEnhetIdResolver;</span>
+<span class="fc" id="L52">        this.dvhRepository = dvhRepository;</span>
+<span class="fc" id="L53">        this.organiseringStateRepository = organiseringStateRepository;</span>
+<span class="fc" id="L54">        this.unleash = unleash;</span>
+<span class="fc" id="L55">    }</span>
+
+    public List&lt;DvhRessursDTO&gt; nomMasteredRessurser() {
+<span class="nc" id="L58">        return ressursStateRepository</span>
+<span class="nc" id="L59">            .findByNavidentBulk(nomMastered.navidenter()).values().stream()</span>
+<span class="nc" id="L60">            .map(this::toDTO)</span>
+<span class="nc" id="L61">            .toList();</span>
+    }
+
+    public List&lt;DvhOrgenhetDTO&gt; orgenheter() {
+<span class="nc" id="L65">        boolean useNewOrganisering = unleash.isEnabled(UNLEASH_USE_NEW_ORGANISASJON_SOURCE);</span>
+<span class="nc" id="L66">        logger.debug(&quot;Henter orgenheter. Bruke ny organisering: {}&quot;, useNewOrganisering);</span>
+
+<span class="nc" id="L68">        return orgenhetService.getAllEnheterMedOrganisering().stream()</span>
+<span class="nc" id="L69">            .map(oe -&gt; toDTO(oe, useNewOrganisering))</span>
+<span class="nc" id="L70">            .toList();</span>
+    }
+
+
+    DvhRessursDTO toDTO(RessursState ressursState) {
+<span class="nc" id="L75">        List&lt;DvhOrgtilknytningDTO&gt; orgtilknytninger = orgtilknytningService.getByNavIdent(ressursState.navident())</span>
+<span class="nc" id="L76">            .stream()</span>
+<span class="nc" id="L77">            .map(this::toDvhOrgtilknytningDTO)</span>
+<span class="nc" id="L78">            .toList();</span>
+<span class="nc" id="L79">        return new DvhRessursDTO(</span>
+<span class="nc" id="L80">            ressursState.navident(),</span>
+<span class="nc" id="L81">            ressursState.sektor().name(),</span>
+<span class="nc" id="L82">            ressursState.visningsnavn().fornavn(),</span>
+<span class="nc" id="L83">            ressursState.visningsnavn().mellomnavn().orElse(null),</span>
+<span class="nc" id="L84">            ressursState.visningsnavn().etternavn(),</span>
+<span class="nc" id="L85">            ressursState.startdato().orElse(null),</span>
+<span class="nc" id="L86">            ressursState.sluttdato().orElse(null),</span>
+            orgtilknytninger
+        );
+    }
+
+    private DvhOrgtilknytningDTO toDvhOrgtilknytningDTO(OrgtilknytningState orgtilknytningState) {
+<span class="nc" id="L92">        return new DvhOrgtilknytningDTO(</span>
+<span class="nc" id="L93">            orgtilknytningState.orgEnhetId(),</span>
+<span class="nc" id="L94">            orgtilknytningState.gyldigFom(),</span>
+<span class="nc" id="L95">            orgtilknytningState.gyldigTom().orElse(null),</span>
+<span class="nc" id="L96">            orgtilknytningState.erDagligOppfolging()</span>
+        );
+    }
+
+    DvhOrgenhetDTO toDTO(IOrgenhet orgenhet, boolean useNewOrganisering) {
+<span class="nc" id="L101">        var remedyEnhetId = remedyEnhetIdResolver.remedyEnhetId(orgenhet);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        String overordnet = useNewOrganisering ? getOverordnetEnhetUsingNewOrganisering(orgenhet) : getOverordnetEnhet(orgenhet);</span>
+
+<span class="nc" id="L105">        return new DvhOrgenhetDTO(</span>
+<span class="nc" id="L106">            orgenhet.getId(),</span>
+<span class="nc" id="L107">            orgenhet.getNavn(),</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            orgenhet.getOrgEnhetsType().isPresent() ? orgenhet.getOrgEnhetsType().get().name() : null,</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            orgenhet.getNomNivaa().isPresent() ? orgenhet.getNomNivaa().get().name() : null,</span>
+            overordnet,
+<span class="nc" id="L111">            orgenhet.getGyldigFom(),</span>
+<span class="nc" id="L112">            orgenhet.getGyldigTom().orElse(null),</span>
+<span class="nc" id="L113">            orgenhet.getAgressoId(),</span>
+<span class="nc" id="L114">            orgenhet.getOrgNiv(),</span>
+            remedyEnhetId
+        );
+    }
+
+    private String getOverordnetEnhet(IOrgenhet orgenhet) {
+<span class="nc" id="L120">        var overordnet = dvhRepository.getOrganiseringer(orgenhet.getAgressoId(), orgenhet.getOrgNiv(), orgenhet.getNavn())</span>
+<span class="nc" id="L121">            .stream()</span>
+<span class="nc" id="L122">            .filter(o -&gt;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                o.getAgressoIdUnder().equals(orgenhet.getAgressoId())</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                    &amp;&amp; o.getOrgNivUnder().equals(orgenhet.getOrgNiv())</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                    &amp;&amp; o.getNavnUnder().equals(orgenhet.getNavn()))</span>
+<span class="nc" id="L126">            .findFirst();</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (overordnet.isPresent()) {</span>
+<span class="nc" id="L129">            var o = overordnet.get();</span>
+<span class="nc" id="L130">            return orgenhetService.getEnhetByAgressoIdNivaAndName(o.getAgressoIdOver(), o.getOrgNivOver(), o.getNavnOver())</span>
+<span class="nc" id="L131">                .map(IOrgenhet::getId)</span>
+<span class="nc" id="L132">                .orElse(null);</span>
+        }
+<span class="nc" id="L134">        return null;</span>
+    }
+
+    private String getOverordnetEnhetUsingNewOrganisering(IOrgenhet orgenhet) {
+<span class="nc" id="L138">        return organiseringStateRepository.findActiveById(orgenhet.getId())</span>
+<span class="nc" id="L139">            .map(OrganiseringState::idOver)</span>
+<span class="nc" id="L140">            .orElse(null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

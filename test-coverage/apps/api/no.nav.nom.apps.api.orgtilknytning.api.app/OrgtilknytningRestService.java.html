@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrgtilknytningRestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.api.app</a> &gt; <span class="el_source">OrgtilknytningRestService.java</span></div><h1>OrgtilknytningRestService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.api.app;
+
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgenhet.eventsourcing.state.OrgEnhetStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.InvalidOrgtilknytningTypeAndSektorCombinationException;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOverlapException;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
+import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
+import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
+import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Sektor;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import no.nav.nom.contract.nom.state.OrgtilknytningState;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static no.nav.nom.apps.api.common.DateUtils.isPeriodsOverlapping;
+import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
+import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+
+@Service
+public class OrgtilknytningRestService {
+
+    private final OrgtilknytningStateRepository orgtilknytningStateRepository;
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+    private final OrgEnhetStateRepository orgEnhetStateRepository;
+    private final RessursStateRepository ressursStateRepository;
+    private final NomMastered nomMastered;
+
+    public OrgtilknytningRestService(
+        OrgtilknytningStateRepository orgtilknytningStateRepository, OrgtilknytningCommandService orgtilknytningCommandService,
+        OrgEnhetStateRepository orgEnhetStateRepository, RessursStateRepository ressursStateRepository,
+        NomMastered nomMastered
+<span class="fc" id="L48">    ) {</span>
+<span class="fc" id="L49">        this.orgtilknytningStateRepository = orgtilknytningStateRepository;</span>
+<span class="fc" id="L50">        this.orgtilknytningCommandService = orgtilknytningCommandService;</span>
+<span class="fc" id="L51">        this.orgEnhetStateRepository = orgEnhetStateRepository;</span>
+<span class="fc" id="L52">        this.ressursStateRepository = ressursStateRepository;</span>
+<span class="fc" id="L53">        this.nomMastered = nomMastered;</span>
+<span class="fc" id="L54">    }</span>
+
+    public List&lt;OrgtilknytningState&gt; getOrgtilknytninger(Optional&lt;String&gt; navident) {
+<span class="fc" id="L57">        return navident.map(</span>
+<span class="fc" id="L58">                presentNavident -&gt; orgtilknytningStateRepository.findByNavident(presentNavident).stream().toList()</span>
+            )
+<span class="fc" id="L60">            .orElseGet(</span>
+<span class="fc" id="L61">                () -&gt; orgtilknytningStateRepository.getAll().stream().toList()</span>
+            );
+    }
+
+    public OrgtilknytningState getOrgtilknytning(String fid) {
+<span class="fc" id="L66">        return orgtilknytningStateRepository.findByFid(fid)</span>
+<span class="fc" id="L67">            .orElseThrow(() -&gt; OrgtilknytningNotFoundException.fid(fid));</span>
+    }
+
+    public void updateOrgtilknyting(String fid, EndreOrgtilknytningDatoRequest endreOrgtilknytningDatoRequest) {
+<span class="fc" id="L71">        validateChronologicalDates(endreOrgtilknytningDatoRequest.gyldigFom(), endreOrgtilknytningDatoRequest.gyldigTom().orElse(null));</span>
+
+<span class="fc" id="L73">        var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)</span>
+<span class="pc" id="L74">            .orElseThrow(() -&gt; OrgtilknytningNotFoundException.fid(fid));</span>
+
+<span class="fc" id="L76">        ressursStateRepository.findByNavident(orgtilknytning.navident())</span>
+<span class="fc" id="L77">            .ifPresentOrElse(</span>
+                tilknyttetRessurs -&gt; {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                    if (!tilknyttetRessurs.sektor().equals(Sektor.EKSTERN)) {</span>
+<span class="fc" id="L80">                        throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());</span>
+                    }
+
+<span class="fc" id="L83">                    validateEksternOrgtilknytningPeriode(endreOrgtilknytningDatoRequest.gyldigTom());</span>
+
+                    // If gyldigTom is set to before today, verify there are other active tilknytninger
+<span class="fc bfc" id="L86" title="All 2 branches covered.">                    if (LocalDate.now().isAfter(endreOrgtilknytningDatoRequest.gyldigTom().orElse(LocalDate.MIN))) {</span>
+<span class="fc" id="L87">                        var activeOrgtilknytningExists = getOrgtilknytninger(Optional.ofNullable(tilknyttetRessurs.navident())).stream()</span>
+<span class="fc" id="L88">                            .anyMatch(orgtilknytningState -&gt; {</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                                if (orgtilknytningState.fid().equals(fid)) {</span>
+<span class="fc" id="L90">                                    return false;</span>
+                                }
+
+<span class="nc" id="L93">                                return orgtilknytningState.gyldigTom().orElse(LocalDate.MAX).isAfter(LocalDate.now());</span>
+                            });
+
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                        if (!activeOrgtilknytningExists) {</span>
+<span class="fc" id="L97">                            throw new IllegalArgumentException(</span>
+                                &quot;Du kan ikke avslutte denne tilknytningen før du har lagt til en ny tilknytning  som gjelder fra denne tilknytningens sluttdato. Medarbeideren må til enhver tid være tilknyttet en enhet.&quot;);
+                        }
+                    }
+
+<span class="fc" id="L102">                },</span>
+                () -&gt; {
+<span class="nc" id="L104">                    throw RessursNotFoundException.navident(orgtilknytning.navident());</span>
+                }
+            );
+
+<span class="fc" id="L108">        orgtilknytningCommandService.endreOrgtilknytningDato(</span>
+            fid,
+            new EndreOrgtilknytningDato(
+<span class="fc" id="L111">                orgtilknytning.navident(),</span>
+<span class="fc" id="L112">                orgtilknytning.orgEnhetId(),</span>
+<span class="fc" id="L113">                endreOrgtilknytningDatoRequest.gyldigFom(),</span>
+<span class="fc" id="L114">                endreOrgtilknytningDatoRequest.gyldigTom(),</span>
+                new InputMetadata(
+                    &quot;REST&quot;,
+                    &quot;updateOrgtilknyting&quot;,
+<span class="fc" id="L118">                    Map.of(</span>
+<span class="fc" id="L119">                        &quot;navident&quot;, orgtilknytning.navident(),</span>
+<span class="fc" id="L120">                        &quot;orgEnhetId&quot;, orgtilknytning.orgEnhetId()</span>
+                    ),
+<span class="fc" id="L122">                    new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())</span>
+                ),
+                null
+            )
+        );
+
+<span class="fc" id="L128">        nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());</span>
+<span class="fc" id="L129">    }</span>
+
+    public void updateOrgtilknytningType(String fid, EndreOrgtilknytningTypeRequest endreOrgtilknytningTypeRequest) {
+
+<span class="fc" id="L133">        var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)</span>
+<span class="pc" id="L134">            .orElseThrow(() -&gt; OrgtilknytningNotFoundException.fid(fid));</span>
+
+<span class="fc" id="L136">        var tilknyttetRessurs = ressursStateRepository.findByNavident(orgtilknytning.navident())</span>
+<span class="pc" id="L137">            .orElseThrow(() -&gt; RessursNotFoundException.navident(orgtilknytning.navident()));</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (tilknyttetRessurs.sektor() != Sektor.EKSTERN) {</span>
+<span class="fc" id="L140">            throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());</span>
+        }
+
+<span class="fc" id="L143">        endreOrgtilknytningTypeRequest.orgtilknytningType().ifPresent(</span>
+<span class="fc" id="L144">            orgtilknytningType -&gt; validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())</span>
+        );
+
+<span class="fc" id="L147">        orgtilknytningCommandService.endreOrgtilknytningType(</span>
+<span class="fc" id="L148">            orgtilknytning.fid(),</span>
+            new EndreOrgtilknytningType(
+<span class="fc" id="L150">                endreOrgtilknytningTypeRequest.orgtilknytningType(),</span>
+                new InputMetadata(
+                    &quot;REST&quot;,
+                    &quot;updateOrgtilknytningType&quot;,
+<span class="fc" id="L154">                    Map.of(</span>
+<span class="fc" id="L155">                        &quot;navident&quot;, orgtilknytning.navident(),</span>
+<span class="fc" id="L156">                        &quot;orgEnhetId&quot;, orgtilknytning.orgEnhetId()</span>
+                    ),
+<span class="fc" id="L158">                    new Origination(SecurityUtil.getAuthenticatedNavIdent(), SecurityUtil.getAuthenticatedAzpName())</span>
+                )
+            )
+        );
+
+<span class="fc" id="L163">        nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());</span>
+<span class="fc" id="L164">    }</span>
+
+    private void validateOrgtilknytningTypeSektorCombination(OrgtilknytningType orgtilknytningType, Sektor sektor) {
+
+<span class="fc" id="L168">        Map&lt;Sektor, List&lt;OrgtilknytningType&gt;&gt; allowedOrgtilknytningTypeForSektorMap = Map.of(</span>
+<span class="fc" id="L169">            Sektor.EKSTERN, List.of(OrgtilknytningType.KONSULENT),</span>
+<span class="fc" id="L170">            Sektor.NAV_KOMMUNAL, Collections.emptyList(),</span>
+<span class="fc" id="L171">            Sektor.NAV_STATLIG, Collections.emptyList()</span>
+        );
+
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(orgtilknytningType)) {</span>
+<span class="nc" id="L175">            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(orgtilknytningType, sektor);</span>
+        }
+
+<span class="fc" id="L178">    }</span>
+
+    public void addOrgtilknyting(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
+<span class="fc" id="L181">        validateLeggTilOrgilknytningRequest(leggTilOrgtilknytningRequest);</span>
+<span class="fc" id="L182">        var metaData = new InputMetadata(</span>
+            &quot;REST&quot;,
+            &quot;addOrgtilknyting&quot;,
+            leggTilOrgtilknytningRequest,
+            new Origination(
+<span class="fc" id="L187">                getAuthenticatedNavIdent(),</span>
+<span class="fc" id="L188">                SecurityUtil.getAuthenticatedAzpName()</span>
+            )
+        );
+
+<span class="fc" id="L192">        var orgTilknytningFid = orgtilknytningCommandService.opprettOrgtilknytning(</span>
+            new OpprettOrgtilknytning(
+<span class="fc" id="L194">                leggTilOrgtilknytningRequest.navident(),</span>
+<span class="fc" id="L195">                leggTilOrgtilknytningRequest.orgEnhetId(),</span>
+<span class="fc" id="L196">                leggTilOrgtilknytningRequest.gyldigFom(),</span>
+                metaData,
+                null
+            )
+        );
+
+<span class="fc" id="L202">        leggTilOrgtilknytningRequest.gyldigTom().ifPresent(gyldigTom -&gt; orgtilknytningCommandService.avvikleOrgtilknytning(</span>
+            orgTilknytningFid,
+            new AvvikleOrgtilknytning(
+<span class="fc" id="L205">                leggTilOrgtilknytningRequest.navident(),</span>
+<span class="fc" id="L206">                leggTilOrgtilknytningRequest.orgEnhetId(),</span>
+                gyldigTom,
+                metaData,
+                null
+            )
+        ));
+
+<span class="fc" id="L213">        nomMastered.markRessursAsMasteredInNom(leggTilOrgtilknytningRequest.navident());</span>
+
+        //TODO: håndtere daglig oppfølging
+<span class="fc" id="L216">    }</span>
+
+    private void validateLeggTilOrgilknytningRequest(LeggTilOrgtilknytningRequest leggTilOrgtilknytningRequest) {
+<span class="fc" id="L219">        var ressursState = ressursStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident()).orElseThrow(</span>
+<span class="fc" id="L220">            () -&gt; new IllegalArgumentException(&quot;Finner ikke ressurs med navident %s&quot;.formatted(leggTilOrgtilknytningRequest.navident()))</span>
+        );
+
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (ressursState.sektor() == Sektor.EKSTERN) {</span>
+<span class="fc" id="L224">            validateEksternOrgtilknytningPeriode(leggTilOrgtilknytningRequest.gyldigTom());</span>
+        }
+
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (orgEnhetStateRepository.findById(leggTilOrgtilknytningRequest.orgEnhetId()).isEmpty()) {</span>
+<span class="fc" id="L228">            throw new IllegalArgumentException(&quot;Finner ikke orgenhet med id %s&quot;.formatted(leggTilOrgtilknytningRequest.orgEnhetId()));</span>
+        }
+
+<span class="fc" id="L231">        validateChronologicalDates(leggTilOrgtilknytningRequest.gyldigFom(), leggTilOrgtilknytningRequest.gyldigTom().orElse(null));</span>
+
+<span class="fc" id="L233">        var orgtilknytninger = orgtilknytningStateRepository.findByNavident(leggTilOrgtilknytningRequest.navident())</span>
+<span class="fc" id="L234">            .stream()</span>
+<span class="fc" id="L235">            .filter(orgtilknytningState -&gt; orgtilknytningState.orgEnhetId().equals(leggTilOrgtilknytningRequest.orgEnhetId()))</span>
+<span class="fc" id="L236">            .toList();</span>
+
+<span class="fc" id="L238">        orgtilknytninger.forEach(orgtilknytningState -&gt; {</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">            if (isPeriodsOverlapping(</span>
+<span class="fc" id="L240">                orgtilknytningState.gyldigFom(),</span>
+<span class="fc" id="L241">                orgtilknytningState.gyldigTom(),</span>
+<span class="fc" id="L242">                leggTilOrgtilknytningRequest.gyldigFom(),</span>
+<span class="fc" id="L243">                leggTilOrgtilknytningRequest.gyldigTom()</span>
+            )) {
+<span class="fc" id="L245">                throw new OrgtilknytningPeriodeOverlapException(&quot;Det finnes allerede en orgtilknytning innenfor forespurt periode&quot;);</span>
+
+            }
+<span class="nc" id="L248">        });</span>
+<span class="fc" id="L249">    }</span>
+
+    private void validateEksternOrgtilknytningPeriode(Optional&lt;LocalDate&gt; gyldigTom) {
+<span class="fc" id="L252">        var requestedGyldigTomIsMoreThan1YearFromNow = gyldigTom.orElse(LocalDate.MAX).isAfter(LocalDate.now().plusYears(1));</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if (requestedGyldigTomIsMoreThan1YearFromNow) {</span>
+<span class="nc" id="L254">            throw new IllegalArgumentException(&quot;Sluttdato kan være maks 1 år frem i tid&quot;);</span>
+        }
+<span class="fc" id="L256">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

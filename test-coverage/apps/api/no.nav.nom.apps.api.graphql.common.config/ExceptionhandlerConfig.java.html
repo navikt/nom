@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExceptionhandlerConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.graphql.common.config</a> &gt; <span class="el_source">ExceptionhandlerConfig.java</span></div><h1>ExceptionhandlerConfig.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.graphql.common.config;
+
+import graphql.GraphQLError;
+import graphql.schema.DataFetchingEnvironment;
+import no.nav.nom.apps.api.graphql.common.loader.ActiveDirectoryRessursBatchLoader;
+import no.nav.nom.apps.api.graphql.common.loader.PersonBatchLoader;
+import no.nav.nom.apps.api.graphql.organisasjonsenhet.LederResolver;
+import no.nav.nom.apps.api.graphql.ressurs.RessursResolver;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.graphql.execution.DataFetcherExceptionResolver;
+import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
+
+import java.util.List;
+import java.util.function.BiFunction;
+
+@Configuration(proxyBeanMethods = false)
+<span class="fc" id="L18">public class ExceptionhandlerConfig {</span>
+
+    @Bean
+    public DataFetcherExceptionResolver NIKResponseExceptionResolver() {
+<span class="fc" id="L22">        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleNIKException);</span>
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver OpprettRessursExceptionResolver() {
+<span class="fc" id="L27">        return DataFetcherExceptionResolver.forSingleError(RessursResolver::handleOpprettRessursException);</span>
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver ADResponseExceptionResolver() {
+<span class="fc" id="L32">        return DataFetcherExceptionResolver.forSingleError(ActiveDirectoryRessursBatchLoader::handleADResponseException);</span>
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver LederNotFoundExceptionResolver() {
+<span class="fc" id="L37">        return DataFetcherExceptionResolver.forSingleError(LederResolver::handleLederNotFoundException);</span>
+    }
+
+    @Bean
+    public DataFetcherExceptionResolver PDLResponseExceptionResolver() {
+<span class="fc" id="L42">        return forMultipleErrors(PersonBatchLoader::handlePDLBolkException);</span>
+    }
+
+    /**
+     * Factory method to create a {@link DataFetcherExceptionResolver} to resolve
+     * an exception to a list of GraphQL errors. Effectively, a shortcut
+     * for creating {@link DataFetcherExceptionResolverAdapter} and overriding
+     * its {@code resolveToMultipleErrors} method.
+     *
+     * @param resolver the resolver function to use
+     * @return the created instance
+     */
+    private static DataFetcherExceptionResolverAdapter forMultipleErrors(BiFunction&lt;Throwable, DataFetchingEnvironment, List&lt;GraphQLError&gt;&gt; resolver) {
+<span class="fc" id="L55">        return new DataFetcherExceptionResolverAdapter() {</span>
+            @Override
+            protected List&lt;GraphQLError&gt; resolveToMultipleErrors(Throwable ex, DataFetchingEnvironment env) {
+<span class="fc" id="L58">                return resolver.apply(ex, env);</span>
+            }
+        };
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

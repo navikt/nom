@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ManuelleOrgtilknytningEvtsrcMeldinger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.orgtilknytning.api.admin</a> &gt; <span class="el_source">ManuelleOrgtilknytningEvtsrcMeldinger.java</span></div><h1>ManuelleOrgtilknytningEvtsrcMeldinger.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.orgtilknytning.api.admin;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import no.nav.nom.apps.api.graphql.common.SecurityUtil;
+import no.nav.nom.apps.api.orgtilknytning.OrgtilknytningService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
+import no.nav.nom.contract.nom.eventsource.InputMetadata;
+import no.nav.nom.contract.nom.eventsource.Origination;
+import org.flywaydb.core.internal.util.HtmlUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+<span class="fc" id="L28">@Slf4j</span>
+@Tag(name = &quot;Admin for å lage manuelle Evtsrc meldinger&quot;)
+@RestController
+@RequestMapping(&quot;/api/admin/manuelleEvtsrcMeldinger&quot;)
+public class ManuelleOrgtilknytningEvtsrcMeldinger {
+
+    private final OrgtilknytningCommandService orgtilknytningCommandService;
+
+    private final OrgtilknytningService orgtilknytningService;
+
+<span class="fc" id="L38">    public ManuelleOrgtilknytningEvtsrcMeldinger(OrgtilknytningCommandService orgtilknytningCommandService, OrgtilknytningService orgtilknytningService) {</span>
+<span class="fc" id="L39">        this.orgtilknytningCommandService = orgtilknytningCommandService;</span>
+<span class="fc" id="L40">        this.orgtilknytningService = orgtilknytningService;</span>
+<span class="fc" id="L41">    }</span>
+
+    @Operation(
+        description = &quot;Lag en fjernOrgtilknytning Eventsrc melding&quot;,
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Success&quot;),
+            @ApiResponse(responseCode = &quot;401&quot;, description = &quot;Unauthorized&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Forbidden&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Not found&quot;)
+        }
+    )
+    @PostMapping(value = &quot;/fjernOrgtilknytning&quot;)
+    @PreAuthorize(&quot;hasAuthority('ADMIN')&quot;)
+    public ResponseEntity&lt;String&gt; fjernOrgtilknytning(
+        @Parameter(description = &quot;FID for orgtilknytningen som skal slettes&quot;) @RequestParam String fid,
+        @Parameter(description = &quot;Skriv CONFIRM for å bekrefte!&quot;) @RequestParam String confirm,
+        @NonNull JwtAuthenticationToken token
+    ) {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (!validFid(fid)) {</span>
+<span class="nc" id="L63">            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(&quot;FID er ikke gyldig&quot;);</span>
+        }
+
+<span class="nc" id="L66">        var orgtilknytning = orgtilknytningService.findByFid(fid);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (orgtilknytning.isEmpty()) {</span>
+<span class="nc" id="L68">            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(&quot;Finner ingen orgtilknytning med FID: &quot; +  HtmlUtils.htmlEncode(fid));</span>
+        }
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (!&quot;CONFIRM&quot;.equals(confirm)) {</span>
+<span class="nc" id="L72">            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)</span>
+<span class="nc" id="L73">                .body(&quot;Orgtilknytning med FID %s er funnet.. Men vil ikke slettes da handling ikke er bekreftet&quot;.formatted(HtmlUtils.htmlEncode(fid)));</span>
+        }
+
+<span class="nc" id="L76">        orgtilknytningCommandService.fjernOrgtilknytning(</span>
+            fid,
+            new FjernOrgtilknytning(
+<span class="nc" id="L79">                orgtilknytning.get().navident(),</span>
+<span class="nc" id="L80">                orgtilknytning.get().orgEnhetId(),</span>
+<span class="nc" id="L81">                orgtilknytning.get().gyldigFom(),</span>
+<span class="nc" id="L82">                orgtilknytning.get().gyldigTom(),</span>
+                new InputMetadata(
+                    &quot;/api/admin/manuelleEvtsrcMeldinger&quot;,
+                    &quot;fjernOrgtilknytning&quot;,
+                    fid,
+                    new Origination(
+<span class="nc" id="L88">                        SecurityUtil.getAuthenticatedNavIdent(),</span>
+                        &quot;Admin swagger/rest&quot;
+                    )
+                ),
+                null
+            )
+        );
+<span class="nc" id="L95">        return ResponseEntity.ok().body(&quot;Orgtilknytning med FID %s er funnet. Fjern event er nå sendt&quot;.formatted(HtmlUtils.htmlEncode(fid)));</span>
+    }
+
+    private boolean validFid(String fid) {
+<span class="nc" id="L99">        return fid.matches(&quot;[a-zA-Z0-9\\-]+&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

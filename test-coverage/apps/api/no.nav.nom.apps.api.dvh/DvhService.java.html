@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DvhService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.dvh</a> &gt; <span class="el_source">DvhService.java</span></div><h1>DvhService.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.dvh;
+
+import io.getunleash.Unleash;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import no.nav.nom.apps.api.dvh.dto.DvhLeder;
+import no.nav.nom.apps.api.dvh.dto.DvhOrganisering;
+import no.nav.nom.apps.api.orgenhet.IOrgenhet;
+import no.nav.nom.apps.api.orgenhet.OrgenhetService;
+import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
+
+<span class="fc" id="L25">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class DvhService {
+
+    private final DvhRepository dvhRepository;
+    private final RessursStateRepository ressursStateRepository;
+    private final OrgenhetService orgenhetService;
+
+    public void saveLedere(List&lt;DvhLeder&gt; ledere) {
+<span class="fc" id="L35">        val cachedEnheter =</span>
+<span class="fc" id="L36">            orgenhetService.getAllEnheter().stream()</span>
+<span class="fc" id="L37">                    .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId)).values().stream()</span>
+<span class="fc" id="L38">                    .map(orgenheter -&gt; orgenheter.stream()</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">                            .filter(o -&gt; !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag</span>
+<span class="fc" id="L40">                            .max(Comparator.comparing(IOrgenhet::getGyldigFom))</span>
+                        )
+<span class="fc" id="L42">                    .filter(Optional::isPresent)</span>
+<span class="fc" id="L43">                    .map(Optional::get)</span>
+<span class="fc" id="L44">                    .collect(Collectors.toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));</span>
+
+<span class="fc" id="L46">        final var enhetAndRessursMissing = new LinkedList&lt;DvhLeder&gt;();</span>
+<span class="fc" id="L47">        final var enhetMissing = new LinkedList&lt;DvhLeder&gt;();</span>
+<span class="fc" id="L48">        final var ressursMissing = new LinkedList&lt;DvhLeder&gt;();</span>
+
+<span class="fc" id="L50">        dvhRepository.saveLedere(</span>
+<span class="fc" id="L51">                ledere.stream()</span>
+<span class="fc" id="L52">                        .filter(l -&gt; {</span>
+<span class="fc" id="L53">                            val enhet = cachedEnheter.get(l.getOrgEnhetNr() + &quot;-&quot; + l.getOrgenhetNavn() + &quot;-&quot; + l.getOrgNiv());</span>
+<span class="fc" id="L54">                            val ressurs = ressursStateRepository.findByNavident(l.getNavIdent());</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">                            if (enhet == null &amp;&amp; ressurs.isEmpty()) {</span>
+<span class="fc" id="L56">                                enhetAndRessursMissing.add(l);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                            } else if (enhet == null) {</span>
+<span class="fc" id="L58">                                enhetMissing.add(l);</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                            } else if (ressurs.isEmpty()) {</span>
+<span class="fc" id="L60">                                ressursMissing.add(l);</span>
+                            }
+<span class="fc bfc" id="L62" title="All 4 branches covered.">                            return enhet != null &amp;&amp; ressurs.isPresent();</span>
+                        })
+<span class="fc" id="L64">                        .toList()</span>
+        );
+
+<span class="fc" id="L67">        log.info(enhetAndRessursMissing.size() + &quot; leder koblinger hvor ressurs og enhet mangler&quot;);</span>
+<span class="fc" id="L68">        log.info(enhetMissing.size() + &quot; leder koblinger hvor enhet mangler&quot;);</span>
+<span class="fc" id="L69">        log.info(ressursMissing.size() + &quot; leder koblinger hvor ressurs mangler&quot;);</span>
+<span class="fc" id="L70">    }</span>
+
+    public void saveOrganiseringerAndSetOrganiserteOrgenheter(List&lt;DvhOrganisering&gt; organiseringer) {
+<span class="fc" id="L73">        val cachedEnheter =</span>
+<span class="fc" id="L74">            orgenhetService.getAllEnheter().stream()</span>
+<span class="fc" id="L75">                .collect(Collectors.groupingBy(IOrgenhet::getUniqueAgressoId))</span>
+<span class="fc" id="L76">                .values().stream()</span>
+<span class="fc" id="L77">                .map(orgenheter -&gt; orgenheter.stream()</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">                        .filter(o -&gt; !o.endedOnStartDate()) // Ikke returner enheter som er opprettet og avsluttet samme dag</span>
+<span class="fc" id="L79">                        .max(Comparator.comparing(IOrgenhet::getGyldigFom))</span>
+                    )
+<span class="fc" id="L81">                .filter(Optional::isPresent)</span>
+<span class="fc" id="L82">                .map(Optional::get)</span>
+<span class="fc" id="L83">                .collect(toMap(IOrgenhet::getUniqueAgressoId, Function.identity()));</span>
+
+<span class="fc" id="L85">        var organiseringerToSave = organiseringer.stream()</span>
+<span class="fc" id="L86">            .distinct()</span>
+<span class="fc" id="L87">            .filter(o -&gt; {</span>
+<span class="fc" id="L88">                final var overEnhet = cachedEnheter.get(o.uniqueAgressoIdOver());</span>
+<span class="fc" id="L89">                final var underEnhet = cachedEnheter.get(o.uniqueAgressoIdUnder());</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">                if (overEnhet == null &amp;&amp; underEnhet == null) {</span>
+<span class="fc" id="L91">                    log.info(</span>
+                        &quot;Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Over- og Underenhet mangler&quot;,
+<span class="fc" id="L93">                        o.uniqueAgressoIdOver(),</span>
+<span class="fc" id="L94">                        o.uniqueAgressoIdUnder()</span>
+                    );
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                } else if (overEnhet == null) {</span>
+<span class="fc" id="L97">                    log.info(&quot;Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Overenhet mangler&quot;, o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">                } else if (underEnhet == null) {</span>
+<span class="fc" id="L99">                    log.info(&quot;Organisering relasjon mislyktes, overenhet: {}, underenhet: {}, Underenhet mangler&quot;, o.uniqueAgressoIdOver(), o.uniqueAgressoIdUnder());</span>
+                } else {
+<span class="fc" id="L101">                    return true;</span>
+                }
+<span class="fc" id="L103">                return false;</span>
+            })
+<span class="fc" id="L105">            .toList();</span>
+
+<span class="fc" id="L107">        dvhRepository.saveOrganiseringer(organiseringerToSave);</span>
+
+<span class="fc" id="L109">        var overEnheter = dvhRepository.getOrganiseringer().stream().map( o -&gt; cachedEnheter.get(o.uniqueAgressoIdOver())).toList();</span>
+<span class="fc" id="L110">        var underEnheter = dvhRepository.getOrganiseringer().stream().map( o -&gt; cachedEnheter.get(o.uniqueAgressoIdUnder())).toList();</span>
+
+        // Add alle overEnheter og underEnheter to organiserteEnheter og behold unike enheter
+<span class="fc" id="L113">        var organiserteEnheter = Stream.concat(overEnheter.stream(), underEnheter.stream())</span>
+<span class="fc" id="L114">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L115">            .distinct()</span>
+<span class="fc" id="L116">            .toList();</span>
+<span class="fc" id="L117">        orgenhetService.setOrganiserteEnheter(organiserteEnheter);</span>
+<span class="fc" id="L118">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

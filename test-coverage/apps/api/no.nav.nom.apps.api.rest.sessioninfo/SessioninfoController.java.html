@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SessioninfoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Api</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.api.rest.sessioninfo</a> &gt; <span class="el_source">SessioninfoController.java</span></div><h1>SessioninfoController.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.api.rest.sessioninfo;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import no.nav.nom.apps.api.common.SwaggerConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+@RestController
+public class SessioninfoController {
+    private final Map&lt;String, UserRoles&gt; claimToRoleMap;
+
+    @Autowired
+<span class="fc" id="L24">    public SessioninfoController(Environment env) {</span>
+
+<span class="fc" id="L26">        this.claimToRoleMap = Map.of(</span>
+<span class="fc" id="L27">            env.getRequiredProperty(&quot;authentication.groups.nomWrite&quot;), UserRoles.ROLE_WRITE,</span>
+<span class="fc" id="L28">            env.getRequiredProperty(&quot;authentication.groups.nomAdmin&quot;), UserRoles.ROLE_ADMIN</span>
+        );
+<span class="fc" id="L30">    }</span>
+
+    @Operation(
+        security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
+    )
+    @GetMapping(value={&quot;/app/sessioninfo&quot;})
+    public SessionInfoResponse sessioninfo(@AuthenticationPrincipal Jwt principal) {
+<span class="nc" id="L37">        var userRoles = principal.getClaimAsStringList(&quot;groups&quot;).stream()</span>
+<span class="nc" id="L38">            .map(group -&gt; claimToRoleMap.getOrDefault(group, null))</span>
+<span class="nc" id="L39">            .filter(Objects::nonNull)</span>
+<span class="nc" id="L40">            .toList();</span>
+
+<span class="nc" id="L42">        return new SessionInfoResponse(</span>
+<span class="nc" id="L43">                principal.getClaimAsString(&quot;NAVident&quot;),</span>
+<span class="nc" id="L44">                principal.getClaimAsString(&quot;name&quot;),</span>
+                userRoles
+        );
+    }
+
+<span class="fc" id="L49">    @Schema(enumAsRef = true)</span>
+    public enum UserRoles {
+<span class="fc" id="L51">        ROLE_WRITE,</span>
+<span class="fc" id="L52">        ROLE_ADMIN</span>
+    }
+
+<span class="nc" id="L55">    public record SessionInfoResponse(</span>
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String navident,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String name,
+            @Schema(requiredMode = Schema.RequiredMode.REQUIRED) List&lt;UserRoles&gt; roles
+    ) {}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
