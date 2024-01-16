@@ -1,13 +1,14 @@
 import { Express } from "express";
 
 const graphiqlSource: Record<string, string> = {
-  reactdev: "https://unpkg.com/react@18.2.0/umd/react.development.js",
-  reactdomdev:
-    "https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js",
-  graphiqlcss: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css",
-  graphiqlcssMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.css.map",
-  graphiqljs: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js",
-  graphiqljsMap: "https://unpkg.com/graphiql@2.2.0/graphiql.min.js.map",
+  reactdev: "https://unpkg.com/react@18/umd/react.production.min.js",
+  reactdomdev: "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js",
+  graphiqljs: "https://unpkg.com/graphiql/graphiql.min.js",
+  graphiqlcss: "https://unpkg.com/graphiql/graphiql.min.css",
+  graphiqlpluginexplorerjs:
+    "https://unpkg.com/@graphiql/plugin-explorer/dist/index.umd.js",
+  graphiqlpluginexplorercss:
+    "https://unpkg.com/@graphiql/plugin-explorer/dist/style.css",
 };
 
 const extractPath = (url: string) => url.slice("https://unpkg.com".length);
@@ -53,7 +54,8 @@ initVendorStorage();
 
 const htmlForGqlGraphiql = `<!DOCTYPE html>
 <html lang="en">
-<head title="NOM graphiql">
+<head>
+    <title>NOM GraphiQL</title>
     <style>
         body {
             height: 100%;
@@ -66,46 +68,49 @@ const htmlForGqlGraphiql = `<!DOCTYPE html>
             height: 100vh;
         }
     </style>
-    <script crossorigin src="/vendor${extractPath(
+    <script src="/vendor${extractPath(
       graphiqlSource.reactdev,
-    )}"></script>
-    <script crossorigin src="/vendor${extractPath(
+    )}" crossorigin></script>
+    <script src="/vendor${extractPath(
       graphiqlSource.reactdomdev,
-    )}"></script>
+    )}" crossorigin></script>
+    <script src="/vendor${extractPath(
+      graphiqlSource.graphiqljs,
+    )}" type="application/javascript"></script>
     <link rel="stylesheet" href="/vendor${extractPath(
       graphiqlSource.graphiqlcss,
-    )}"/><title></title>
+    )}" />
+    <script src="/vendor${extractPath(
+      graphiqlSource.graphiqlpluginexplorerjs,
+    )}" crossorigin></script>
+    <link rel="stylesheet" href="/vendor${extractPath(
+      graphiqlSource.graphiqlpluginexplorercss,
+    )}"/>
 </head>
-
 <body>
 <div id="graphiql">Loading...</div>
-<script src="/vendor${extractPath(
-  graphiqlSource.graphiqljs,
-)}" type="application/javascript"></script>
 <script>
     const params = new URLSearchParams(window.location.search);
-
     const path = params.get("path") || "/nom-api/graphql";
     const url = location.protocol + "//" + location.host + path;
-
     const wsPath = params.get("wsPath") || "/nom-api/graphql";
     const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const subscriptionUrl = wsProtocol + "//" + location.host + wsPath;
-
-    const gqlFetcher = GraphiQL.createFetcher({
-        url,
-        subscriptionUrl,
-    });
-
-    const root = ReactDOM.createRoot(document.getElementById('graphiql'));
-    root.render(
-      React.createElement(GraphiQL, {
+    const gqlFetcher = GraphiQL.createFetcher({'url': url, 'subscriptionUrl': subscriptionUrl});
+    const explorerPlugin = GraphiQLPluginExplorer.explorerPlugin();
+    const xsrfToken = document.cookie.match(new RegExp('(?:^| )XSRF-TOKEN=([^;]+)'));
+    const headers = xsrfToken ? '{ "X-XSRF-TOKEN" : "' + xsrfToken[1] + '" }' : '{}';
+    ReactDOM.render(
+        React.createElement(GraphiQL, {
             fetcher: gqlFetcher,
             defaultVariableEditorOpen: true,
             headerEditorEnabled: true,
-            shouldPersistHeaders: true
-        })
-    )
+            shouldPersistHeaders: true,
+            headers: headers,
+            plugins: [explorerPlugin]
+        }),
+        document.getElementById('graphiql'),
+    );
 </script>
 </body>
 </html>

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.nom.apps.api.common.PrefixedUlidCreator;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.FjernOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
@@ -14,7 +14,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
-import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
@@ -93,14 +93,14 @@ public class OrgtilknytningCommandService {
             ));
     }
 
-    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreOrgtilknytningType(String fid, EndreOrgtilknytningType endreOrgtilknytningType) {
+    public CompletableFuture<SendResult<String, OrgtilknytningEvent>> endreTilknytningtype(String fid, EndreTilknytningtype endreTilknytningType) {
         return eventProducer.sendMessage(
-            new OrgtilknytningTypeEndretEventV1(
+            new OrgtilknytningTilknytningtypeEndretEventV1(
                 fid,
-                new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(
-                    endreOrgtilknytningType.orgtilknytningType()
+                new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(
+                    endreTilknytningType.tilknytningtype()
                 ),
-                endreOrgtilknytningType.inputMetadata()
+                endreTilknytningType.inputMetadata()
             ));
     }
 

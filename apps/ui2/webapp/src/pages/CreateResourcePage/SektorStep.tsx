@@ -1,22 +1,41 @@
+import { css } from "@emotion/react";
 import { Alert, Radio, RadioGroup } from "@navikt/ds-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import {
+  BasicSelect,
+  SelectLayoutWrapper,
+} from "~/components/select/CustomSelectComponents";
 import { ContainerWithHighlightedTop } from "~/pages/CreateResourcePage/components/ContainerWithHighlightedTop";
 import { NavigationButtons } from "~/pages/CreateResourcePage/components/NavigationButtons";
 import { createRessursRoute } from "~/reactRouterRoutes";
 import opprettRessursIcon from "~/resources/opprettRessursIcon.svg";
-import { Sektor } from "~/types/api-models";
+import { Sektor, Tilknytningtype } from "~/types/api-models";
 
 export const SektorNameMapping = {
   [Sektor.EKSTERN]: "Ekstern",
-  [Sektor.NAV_KOMMUNAL]: "Kommunal",
-  [Sektor.NAV_STATLIG]: "Statlig",
+  [Sektor.NAV_KOMMUNAL]: "Kommunal (Ikke tilgjengelig ennå)",
+  [Sektor.NAV_STATLIG]: "Statlig (Ikke tilgjengelig ennå)",
+};
+
+export const TilknytningtypeNameMapping = {
+  [Tilknytningtype.KONSULENT]: "Konsulent (standard)",
 };
 
 export function SektorStep() {
   const [selectedSektor, setSelectedSektor] = useState(Sektor.EKSTERN);
+  const [selectedTilknytningtype, setSelectedTilknytningtype] = useState(
+    Tilknytningtype.KONSULENT,
+  );
   const navigate = useNavigate();
+
+  const tilknytningtypeOptions = Object.values(Tilknytningtype).map(
+    (tilknytningtype) => ({
+      label: TilknytningtypeNameMapping[tilknytningtype],
+      value: tilknytningtype,
+    }),
+  );
 
   return (
     <ContainerWithHighlightedTop icon={opprettRessursIcon} title="Sektor">
@@ -35,12 +54,16 @@ export function SektorStep() {
             search: (oldSearch) => ({
               ...oldSearch,
               sektor: selectedSektor,
+              tilknytningtype: selectedTilknytningtype,
             }),
           });
         }}
       >
         <RadioGroup
-          legend="Sektor"
+          css={css`
+            margin-bottom: var(--a-spacing-4);
+          `}
+          legend="Velg hvilken sektor medarbeideren skal tilhøre"
           name="sektor"
           onChange={(value) => setSelectedSektor(value)}
           value={selectedSektor}
@@ -55,6 +78,22 @@ export function SektorStep() {
             {SektorNameMapping[Sektor.NAV_KOMMUNAL]}
           </Radio>
         </RadioGroup>
+        <SelectLayoutWrapper
+          htmlFor="tilknytningtype"
+          label="Velg hvilken kategori medarbeideren tilhører innenfor denne sektoren"
+        >
+          <BasicSelect
+            inputId="tilknytningtype"
+            isClearable={false}
+            onChange={(option) =>
+              option && setSelectedTilknytningtype(option.value)
+            }
+            options={tilknytningtypeOptions}
+            value={tilknytningtypeOptions.find(
+              (option) => option.value === selectedTilknytningtype,
+            )}
+          />
+        </SelectLayoutWrapper>
         <NavigationButtons />
       </form>
     </ContainerWithHighlightedTop>

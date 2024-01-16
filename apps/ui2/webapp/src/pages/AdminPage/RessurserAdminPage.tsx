@@ -52,7 +52,7 @@ export function RessurserAdminPage() {
     direction: "ascending",
   });
 
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
   // Using react query instead of apollo because it runs  more smoothly
   const alleRessurser = useQuery<RessursFields[], unknown>({
     ...getAlleRessurserGraphql,
@@ -383,7 +383,7 @@ function Pluralize({
 }
 
 function RessursFilter() {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
   const navigate = useNavigate();
 
   return (
@@ -402,6 +402,7 @@ function RessursFilter() {
         checked={ressursFilterValues.includeInactive}
         onChange={() =>
           navigate({
+            params: (previous) => previous,
             search: (previousSearch) => ({
               ...previousSearch,
               includeInactive: !ressursFilterValues.includeInactive,
@@ -422,7 +423,7 @@ function DateSelect({
   label: string;
   filterKey: "startDato" | "sluttDato";
 }) {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
   const navigate = useNavigate();
 
   const defaultValue = ressursFilterValues[filterKey] as string;
@@ -431,6 +432,7 @@ function DateSelect({
     defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
     onDateChange: (date) =>
       navigate({
+        params: (previous) => previous,
         search: (previousSearch) => ({
           ...previousSearch,
           [filterKey]: date ? formatDateWithoutTimezone(date) : undefined,
@@ -451,7 +453,7 @@ function DateSelect({
 }
 
 function SektorSelect() {
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
   const navigate = useNavigate();
 
   const options = Object.entries(Sektor).map((entry) => ({
@@ -472,6 +474,7 @@ function SektorSelect() {
         inputId="Sektor"
         onChange={(option) =>
           navigate({
+            params: (previous) => previous,
             search: { ...ressursFilterValues, sektor: option?.value },
           })
         }
@@ -484,7 +487,7 @@ function SektorSelect() {
 
 function FilterChips() {
   const navigate = useNavigate();
-  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.id });
+  const ressursFilterValues = useSearch({ from: ressurserAdminRoute.fullPath });
   return (
     <Chips>
       {Object.entries(ressursFilterValues).map((entry) => {
@@ -500,6 +503,7 @@ function FilterChips() {
             key={key}
             onClick={() =>
               navigate({
+                params: (previous) => previous,
                 search: (previousSearch) => ({
                   ...previousSearch,
                   [key]: undefined,

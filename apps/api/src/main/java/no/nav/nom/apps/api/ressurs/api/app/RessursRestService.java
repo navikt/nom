@@ -10,6 +10,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreDagligOppfolgingOrgtilknytning;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.pdl.PdlClient;
 import no.nav.nom.apps.api.ressurs.api.dto.Ressurs;
@@ -50,6 +51,7 @@ import java.util.stream.Collectors;
 
 import static no.nav.nom.apps.api.common.DateUtils.validateChronologicalDates;
 import static no.nav.nom.apps.api.graphql.common.SecurityUtil.getAuthenticatedNavIdent;
+import static no.nav.nom.apps.api.orgtilknytning.api.app.OrgtilknytningRestService.validateOrgtilknytningTypeSektorCombination;
 
 @Service
 public class RessursRestService {
@@ -154,7 +156,7 @@ public class RessursRestService {
     }
 
     public void updateFysiskeBrukersteder(String fid, UpdateFysiskeBrukerstederRequest updateFysiskeBrukerstederRequest) {
-        if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted() == null || updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().isBlank()){
+        if (updateFysiskeBrukerstederRequest.primaryFysiskBrukersted() == null || updateFysiskeBrukerstederRequest.primaryFysiskBrukersted().isBlank()) {
             throw new IllegalArgumentException("primaryFysiskBrukersted cannot be blank or null");
         }
         if (!updateFysiskeBrukerstederRequest.fysiskeBrukersteder().contains(updateFysiskeBrukerstederRequest.primaryFysiskBrukersted())) {
@@ -218,6 +220,7 @@ public class RessursRestService {
     public RessursState createRessursAndNotify(
         OpprettRessursRequest request
     ) {
+        validateOpprettRessursRequest(request);
 
         return ressursStateRepository.findByPersonident(request.personident()).orElseGet(() -> {
             final var createdRessurs = createRessurs(request);
@@ -235,7 +238,6 @@ public class RessursRestService {
     }
 
     private RessursState createRessurs(OpprettRessursRequest request) {
-        validateOpprettRessursRequest(request);
 
         final var opprettNavidentResponse = nikClient.opprettNavidentOnBehalfOfUser(
             OpprettNavidentRequest.builder()
@@ -344,6 +346,14 @@ public class RessursRestService {
                         null
                     )
                 );
+
+                orgtilknytningCommandService.endreTilknytningtype(
+                    orgTilknytningFid,
+                    new EndreTilknytningtype(
+                        Optional.of(request.tilknytningtype()),
+                        metaData
+                    )
+                );
             }
 
             return opprettetRessurs;
@@ -391,12 +401,15 @@ public class RessursRestService {
     }
 
     private void validateOpprettRessursRequest(OpprettRessursRequest request) {
-        if (request.sektor() == Sektor.EKSTERN) {
-            validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
-            if (request.sluttDato().isEmpty()) {
-                throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
-            }
-            validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
+        if (request.sektor() != Sektor.EKSTERN) {
+            throw InvalidSektorException.actionNotAllowedForSektor(request.sektor());
         }
+        validateChronologicalDates(request.startDato(), request.sluttDato().orElse(null));
+        if (request.sluttDato().isEmpty()) {
+            throw new IllegalArgumentException("Sluttdato må oppgis for opprettelse av ekstern ressurs");
+        }
+        validateFysiskeBrukerstederExists(Set.of(request.fysiskBrukerstedNr()));
+        validateOrgtilknytningTypeSektorCombination(request.tilknytningtype(), request.sektor());
+
     }
 }

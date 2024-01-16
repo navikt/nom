@@ -30,8 +30,8 @@ export const navigationButtonCss = css`
 `;
 
 export function NavigationButtons() {
-  const { step } = useParams({ from: createRessursRoute.id });
-  const navigate = useNavigate();
+  const { step } = useParams({ from: createRessursRoute.fullPath });
+  const navigate = useNavigate({ from: createRessursRoute.fullPath });
   return (
     <div css={navigationButtonCss}>
       <Button size="small" type="submit" variant="primary">
@@ -41,7 +41,7 @@ export function NavigationButtons() {
         <Button
           onClick={() =>
             navigate({
-              to: createRessursRoute.id,
+              to: createRessursRoute.to,
               params: { step: String(Number(step) - 1) },
               search: (oldSearch) => oldSearch,
             })

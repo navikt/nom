@@ -3,6 +3,7 @@ package no.nav.nom.apps.api.common;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.Visningsnavn;
 import no.nav.nom.contract.nom.state.OrgEnhetState;
+import no.nav.nom.contract.nom.state.OrganiseringState;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import no.nav.nom.contract.nom.state.RessursState;
 
@@ -31,7 +32,7 @@ public class TestData {
             "orgEnhet123",
             "Test enhet",
             LocalDate.now().minusMonths(1),
-            null,
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
@@ -55,5 +56,17 @@ public class TestData {
             null,
             Collections.emptyList()
         );
+    }
+
+    public static OrganiseringState organiseringState() {
+        return OrganiseringState.builder()
+            .fid(UUID.randomUUID().toString())
+            .id("nomId")
+            .idOver("nomIdOver")
+            .navn("orgEnhetNavn")
+            .navnOver("orgEnhetOverNavn")
+            .gyldigFom(LocalDate.now().minusDays(5))
+            .gyldigTom(Optional.empty())
+            .build();
     }
 }

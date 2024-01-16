@@ -28,7 +28,7 @@ import type { AvvikleRessursRequest } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function TerminateResourcePage() {
-  const { id } = useParams({ from: terminateRessursRoute.id });
+  const { id } = useParams({ from: terminateRessursRoute.fullPath });
   const navigate = useNavigate();
 
   const ressurs = useQuery({

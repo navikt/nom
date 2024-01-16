@@ -15,11 +15,11 @@ import { ressurserAdminRoute } from "~/reactRouterRoutes";
 
 const SEARCH_TERM_LOWER_LENGTH_LIMIT = 3;
 export function OrgEnhetSearch() {
-  const search = useSearch({ from: ressurserAdminRoute.id });
+  const search = useSearch({ from: ressurserAdminRoute.fullPath });
   const [selectedOrgEnhet, setSelectedOrgEnhet] = useState<
     OrgEnhetSearchResult | undefined
   >();
-  const navigate = useNavigate({ from: ressurserAdminRoute.id });
+  const navigate = useNavigate({ from: ressurserAdminRoute.fullPath });
 
   const includeUnderliggendeOrgEnheter = search.includeUnderliggendeOrgEnheter;
 

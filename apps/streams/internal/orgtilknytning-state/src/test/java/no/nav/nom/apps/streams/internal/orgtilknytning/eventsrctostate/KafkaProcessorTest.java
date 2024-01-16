@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.eventsource.Event;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningAvsluttetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningDagligOppfolgingEndretEventV1;
@@ -13,6 +13,7 @@ import no.nav.nom.contract.nom.eventsource.OrgtilknytningDatoEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningEvent;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningFjernetEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningOpprettetEventV1;
+import no.nav.nom.contract.nom.eventsource.OrgtilknytningTilknytningtypeEndretEventV1;
 import no.nav.nom.contract.nom.eventsource.OrgtilknytningTypeEndretEventV1;
 import no.nav.nom.contract.nom.state.OrgtilknytningState;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -224,7 +225,7 @@ public class KafkaProcessorTest {
     }
 
     @Test
-    @DisplayName("OrgtilknytningTypeEndretEventV1 setter orgtilknytningType")
+    @DisplayName("OrgtilknytningTypeEndretEventV1 setter tilknytningtype")
     public void test_OrgtilknytningTypeEndretEventV1(){
 
         String navident = "A000001";
@@ -234,7 +235,7 @@ public class KafkaProcessorTest {
         final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, LocalDate.of(2022, 1,  1));
         final OrgtilknytningTypeEndretEventV1 orgtilknytningTypeEndretEventV1 = new OrgtilknytningTypeEndretEventV1(
             orgtilknytningOpprettetEventV1.getFid(),
-            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(OrgtilknytningType.KONSULENT)),
+            new OrgtilknytningTypeEndretEventV1.OrgtilknytningTypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
             (Event.Metadata) null
         );
 
@@ -254,6 +255,40 @@ public class KafkaProcessorTest {
         Assertions.assertThat(outputTopic.readKeyValuesToList())
             .hasSize(2)
             .contains(KeyValue.pair(orgtilknytningTypeEndretEventV1.getFid(), expectedEndret));
+
+    }
+
+    @Test
+    @DisplayName("OrgtilknytningTilknytningtypeEndretEventV1 setter tilknytningtype")
+    public void test_OrgtilknytningTilknytningtypeEndretEventV1(){
+
+        String navident = "A000001";
+        String orgEnhetId = "'123bc";
+        LocalDate gyldigFom = LocalDate.of(2022, 1,  1);
+
+        final OrgtilknytningOpprettetEventV1 orgtilknytningOpprettetEventV1 = lagOpprettEvent(navident, orgEnhetId, LocalDate.of(2022, 1,  1));
+        final OrgtilknytningTilknytningtypeEndretEventV1 orgtilknytningTilknytningtypeEndretEventV1 = new OrgtilknytningTilknytningtypeEndretEventV1(
+            orgtilknytningOpprettetEventV1.getFid(),
+            new OrgtilknytningTilknytningtypeEndretEventV1.OrgtilknytningTilknytningtypeEndretEventData(Optional.of(Tilknytningtype.KONSULENT)),
+            (Event.Metadata) null
+        );
+
+        final OrgtilknytningState expectedEndret = lagStateObjekt(
+            navident,
+            orgEnhetId,
+            false,
+            gyldigFom,
+            null
+        ).toBuilder()
+            .orgtilknytningType(orgtilknytningTilknytningtypeEndretEventV1.getOrgtilknytningTilknytningtypeEndretEventData().orgtilknytningType())
+            .build();
+
+        inputTopic.pipeInput(orgtilknytningOpprettetEventV1.getFid(), orgtilknytningOpprettetEventV1);
+        inputTopic.pipeInput(orgtilknytningTilknytningtypeEndretEventV1.getFid(), orgtilknytningTilknytningtypeEndretEventV1);
+
+        Assertions.assertThat(outputTopic.readKeyValuesToList())
+            .hasSize(2)
+            .contains(KeyValue.pair(orgtilknytningTilknytningtypeEndretEventV1.getFid(), expectedEndret));
 
     }
 

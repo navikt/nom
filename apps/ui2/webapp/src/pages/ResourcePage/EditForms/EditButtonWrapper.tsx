@@ -17,7 +17,7 @@ export function EditButtonWrapper({
   const hasWriteAccess = useHasWriteAccess();
   const { editPersonopplysninger, editOrgtilknytning, addOrgtilknytning } =
     useSearch({
-      from: ressursRoute.id,
+      from: ressursRoute.fullPath,
     });
   const isEkstern = ressurs.sektor === Sektor.EKSTERN;
   const isEditing =

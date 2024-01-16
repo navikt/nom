@@ -17,7 +17,7 @@ export function SaveOrAbortButtons({ isLoading }: { isLoading: boolean }) {
       `}
     >
       <Button
-        onClick={() => navigate({ search: {} })}
+        onClick={() => navigate({ search: {}, params: (previous) => previous })}
         size="small"
         type="button"
         variant="secondary"

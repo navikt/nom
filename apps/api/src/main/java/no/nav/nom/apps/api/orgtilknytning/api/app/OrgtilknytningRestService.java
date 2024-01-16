@@ -7,7 +7,7 @@ import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningPeriodeOv
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.OrgtilknytningCommandService;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.AvvikleOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningDato;
-import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreOrgtilknytningType;
+import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.EndreTilknytningtype;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.producer.commands.OpprettOrgtilknytning;
 import no.nav.nom.apps.api.orgtilknytning.eventsourcing.state.OrgtilknytningStateRepository;
 import no.nav.nom.apps.api.orgtilknytning.api.exceptions.OrgtilknytningNotFoundException;
@@ -15,7 +15,7 @@ import no.nav.nom.apps.api.ressurs.api.exceptions.InvalidSektorException;
 import no.nav.nom.apps.api.ressurs.api.exceptions.RessursNotFoundException;
 import no.nav.nom.apps.api.ressurs.eventsourcing.state.RessursStateRepository;
 import no.nav.nom.apps.api.ressurs.masterdata.NomMastered;
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 import no.nav.nom.contract.nom.eventsource.InputMetadata;
 import no.nav.nom.contract.nom.eventsource.Origination;
@@ -128,7 +128,7 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 
-    public void updateOrgtilknytningType(String fid, EndreOrgtilknytningTypeRequest endreOrgtilknytningTypeRequest) {
+    public void updateOrgtilknytningType(String fid, EndreTilknytningtypeRequest endreTilknytningtypeRequest) {
 
         var orgtilknytning = orgtilknytningStateRepository.findByFid(fid)
             .orElseThrow(() -> OrgtilknytningNotFoundException.fid(fid));
@@ -140,14 +140,14 @@ public class OrgtilknytningRestService {
             throw InvalidSektorException.actionNotAllowedForSektor(tilknyttetRessurs.sektor());
         }
 
-        endreOrgtilknytningTypeRequest.orgtilknytningType().ifPresent(
+        endreTilknytningtypeRequest.tilknytningtype().ifPresent(
             orgtilknytningType -> validateOrgtilknytningTypeSektorCombination(orgtilknytningType, tilknyttetRessurs.sektor())
         );
 
-        orgtilknytningCommandService.endreOrgtilknytningType(
+        orgtilknytningCommandService.endreTilknytningtype(
             orgtilknytning.fid(),
-            new EndreOrgtilknytningType(
-                endreOrgtilknytningTypeRequest.orgtilknytningType(),
+            new EndreTilknytningtype(
+                endreTilknytningtypeRequest.tilknytningtype(),
                 new InputMetadata(
                     "REST",
                     "updateOrgtilknytningType",
@@ -163,16 +163,16 @@ public class OrgtilknytningRestService {
         nomMastered.markRessursAsMasteredInNom(orgtilknytning.navident());
     }
 
-    private void validateOrgtilknytningTypeSektorCombination(OrgtilknytningType orgtilknytningType, Sektor sektor) {
+    public static void validateOrgtilknytningTypeSektorCombination(Tilknytningtype tilknytningtype, Sektor sektor) {
 
-        Map<Sektor, List<OrgtilknytningType>> allowedOrgtilknytningTypeForSektorMap = Map.of(
-            Sektor.EKSTERN, List.of(OrgtilknytningType.KONSULENT),
+        Map<Sektor, List<Tilknytningtype>> allowedOrgtilknytningTypeForSektorMap = Map.of(
+            Sektor.EKSTERN, List.of(Tilknytningtype.KONSULENT),
             Sektor.NAV_KOMMUNAL, Collections.emptyList(),
             Sektor.NAV_STATLIG, Collections.emptyList()
         );
 
-        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(orgtilknytningType)) {
-            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(orgtilknytningType, sektor);
+        if (!allowedOrgtilknytningTypeForSektorMap.get(sektor).contains(tilknytningtype)) {
+            throw InvalidOrgtilknytningTypeAndSektorCombinationException.forCombination(tilknytningtype, sektor);
         }
 
     }

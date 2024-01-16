@@ -37,7 +37,7 @@ import { AnsettelsesType, Sektor } from "~/types/api-models";
 import { formatDateWithoutTimezone } from "~/utils";
 
 export function OrganisasjonstilknytningStep() {
-  const { sektor } = useSearch({ from: createRessursRoute.id });
+  const { sektor } = useSearch({ from: createRessursRoute.fullPath });
   return (
     <ContainerWithHighlightedTop
       icon={opprettRessursIcon}
@@ -53,9 +53,9 @@ export function OrganisasjonstilknytningStep() {
 }
 
 function CreateStatligRessurs() {
-  const navigate = useNavigate({ from: createRessursRoute.id });
+  const navigate = useNavigate({ from: createRessursRoute.fullPath });
   const { ansettelsesType, orgEnhetId, gyldigFom } = useSearch({
-    from: createRessursRoute.id,
+    from: createRessursRoute.fullPath,
   });
   const methods = useForm({
     defaultValues: {
@@ -155,9 +155,9 @@ export const eksternValidationSchema = eksternPeriodeValidationSchema.concat(
 );
 
 function CreateEksternRessurs() {
-  const navigate = useNavigate({ from: createRessursRoute.id });
+  const navigate = useNavigate({ from: createRessursRoute.fullPath });
   const { orgEnhetId, gyldigFom, gyldigTom, fysiskBrukerstedNr } = useSearch({
-    from: createRessursRoute.id,
+    from: createRessursRoute.fullPath,
   });
 
   const methods = useForm({

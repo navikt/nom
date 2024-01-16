@@ -112,7 +112,7 @@ public class OrgtilknytningController {
         throw new AccessDeniedException("Endring av orgtilknytning er blokkert");
     }
 
-    @PostMapping("/{fid}/orgtilknytningType")
+    @PostMapping("/{fid}/tilknytningtype")
     @Operation(
         description = "Endrer orgtilknytningType for en orgtilknytning",
         security = @SecurityRequirement(name = SwaggerConfig.BEARER_TOKEN)
@@ -125,10 +125,10 @@ public class OrgtilknytningController {
     )
     public ResponseEntity<StandardResponse> updateOrgtilknytningType(
         @PathVariable String fid,
-        @RequestBody EndreOrgtilknytningTypeRequest endreOrgtilknytningTypeRequest
+        @RequestBody EndreTilknytningtypeRequest endreTilknytningtypeRequest
     ) {
         if (unleash.isEnabled(UNLEASH_EDIT_ORGTILKNYTNING_FOR_EXTERNAL)) {
-            orgtilknytningRestService.updateOrgtilknytningType(fid, endreOrgtilknytningTypeRequest);
+            orgtilknytningRestService.updateOrgtilknytningType(fid, endreTilknytningtypeRequest);
 
             return ResponseEntity.ok(StandardResponse.builder().message("Ok").build());
         }

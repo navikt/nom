@@ -77,7 +77,10 @@ export function EditOrgtilknytningForm({
       queryClient.invalidateQueries({
         queryKey: orgtilknytningerKeys.navident(orgTilknytning.navident),
       });
-      navigate({ search: { editOrgtilknytning: undefined } });
+      navigate({
+        search: { editOrgtilknytning: undefined },
+        params: (previous) => previous,
+      });
     },
   });
 

@@ -102,7 +102,7 @@ function OrgTilknytningSection({ ressurs }: { ressurs: Ressurs }) {
 
   const orgtilknytninger = orgtilknytningerQuery.data ?? [];
 
-  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
 
   if (orgtilknytninger.length === 0) {
     return <></>;
@@ -175,7 +175,7 @@ function FutureOrgTilknytninger({
   futureOrgTilknytninger: OrgtilknytningState[];
   ressurs: Ressurs;
 }) {
-  const { editOrgtilknytning } = useSearch({ from: ressursRoute.id });
+  const { editOrgtilknytning } = useSearch({ from: ressursRoute.fullPath });
 
   if (futureOrgTilknytninger.length === 0) {
     return <></>;
@@ -373,7 +373,12 @@ function OrganisationHierarchyTree({
           <EditButtonWrapper ressurs={ressurs}>
             <Button
               icon={<PencilIcon aria-hidden />}
-              onClick={() => navigate({ search: { editOrgtilknytning: fid } })}
+              onClick={() =>
+                navigate({
+                  search: { editOrgtilknytning: fid },
+                  params: (previous) => previous,
+                })
+              }
               size="small"
               variant="secondary"
             >
@@ -434,7 +439,7 @@ function LeaderForSection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function Name({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: ressursRoute.id });
+  const { editPersonopplysninger } = useSearch({ from: ressursRoute.fullPath });
 
   if (editPersonopplysninger) {
     return <EditNameForm ressurs={ressurs} />;
@@ -455,7 +460,7 @@ function Name({ ressurs }: { ressurs: Ressurs }) {
 function Telephone({ ressurs }: { ressurs: Ressurs }) {
   // TODO: Edit telephone is not implemented in backend yet
   /*
-   const { edit } = useSearch({ from: ressursRoute.id });
+   const { edit } = useSearch({ from: ressursRoute.fullPath });
 
    if (edit) {
      return (
@@ -581,7 +586,10 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
           <Button
             icon={<PencilIcon aria-hidden />}
             onClick={() =>
-              navigate({ search: { editPersonopplysninger: true } })
+              navigate({
+                search: { editPersonopplysninger: true },
+                params: (previous) => previous,
+              })
             }
             size="small"
             variant="secondary"
@@ -595,7 +603,7 @@ function SummarySection({ ressurs }: { ressurs: Ressurs }) {
 }
 
 function FysiskBrukersted({ ressurs }: { ressurs: Ressurs }) {
-  const { editPersonopplysninger } = useSearch({ from: ressursRoute.id });
+  const { editPersonopplysninger } = useSearch({ from: ressursRoute.fullPath });
   const fysiskBrukersted = useFysiskBrukersted(ressurs.primaryFysiskBrukersted);
 
   if (editPersonopplysninger) {

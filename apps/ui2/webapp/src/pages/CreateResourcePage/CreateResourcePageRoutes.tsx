@@ -11,12 +11,13 @@ import { PersonopplysningerStep } from "~/pages/CreateResourcePage/Personopplysn
 import { SektorStep } from "~/pages/CreateResourcePage/SektorStep";
 import { SummaryStep } from "~/pages/CreateResourcePage/SummaryStep";
 import { createRessursRoute } from "~/reactRouterRoutes";
+import { Tilknytningtype } from "~/types/api-models";
 import { AnsettelsesType, Sektor } from "~/types/api-models";
 
 import ContentWrapper from "../../components/ContentWrapper";
 
 export function CreateRessursPage() {
-  const { step } = useParams({ from: createRessursRoute.id });
+  const { step } = useParams({ from: createRessursRoute.fullPath });
 
   const stepIdAsNumber = Number(step);
 
@@ -85,6 +86,10 @@ const commonValidationSchema = yup.object({
     .oneOf(Object.values(AnsettelsesType))
     .required("Obligatorisk"),
   fysiskBrukerstedNr: yup.string().required("Obligatorisk"),
+  tilknytningtype: yup
+    .mixed<Tilknytningtype>()
+    .oneOf(Object.values(Tilknytningtype))
+    .required("Obligatorisk"),
 });
 
 // eslint-disable-next-line unicorn/prefer-spread
@@ -110,6 +115,7 @@ export function validateCreateRessursSearch(
     gyldigTom: String(search.gyldigTom ?? ""),
     ansettelsesType: (search.ansettelsesType as AnsettelsesType) ?? undefined,
     fysiskBrukerstedNr: String(search.fysiskBrukerstedNr ?? ""),
+    tilknytningtype: (search.tilknytningtype as Tilknytningtype) ?? undefined,
   };
 }
 

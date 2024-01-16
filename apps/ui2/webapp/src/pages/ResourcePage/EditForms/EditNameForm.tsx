@@ -35,7 +35,7 @@ export function EditNameForm({ ressurs }: { ressurs: Ressurs }) {
       queryClient.invalidateQueries({
         queryKey: ressurserKeys.id(ressurs.navident),
       });
-      navigate({ search: {} });
+      navigate({ search: {}, params: (previous) => previous });
     },
   });
 

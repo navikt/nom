@@ -1,6 +1,6 @@
 package no.nav.nom.apps.api.orgtilknytning.api.exceptions;
 
-import no.nav.nom.contract.nom.OrgtilknytningType;
+import no.nav.nom.contract.nom.Tilknytningtype;
 import no.nav.nom.contract.nom.Sektor;
 
 public class InvalidOrgtilknytningTypeAndSektorCombinationException extends RuntimeException {
@@ -10,11 +10,11 @@ public class InvalidOrgtilknytningTypeAndSektorCombinationException extends Runt
     }
 
     public static InvalidOrgtilknytningTypeAndSektorCombinationException forCombination(
-        OrgtilknytningType orgtilknytningType, Sektor sektor
+        Tilknytningtype tilknytningtype, Sektor sektor
     ) {
         return new InvalidOrgtilknytningTypeAndSektorCombinationException(
             "orgtilknytningType %s not allowed for ressurs with sektor %s"
-                .formatted(orgtilknytningType, sektor)
+                .formatted(tilknytningtype, sektor)
         );
     }
 }
