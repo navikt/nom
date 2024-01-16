@@ -11,8 +11,8 @@ import { ResourceLink } from "~/pages/OrganisasjonsHierarkiPage/components/CardV
 import { ressursRoute } from "~/reactRouterRoutes";
 import building from "~/resources/building.svg";
 import type { OrgEnhet } from "~/types/api-models";
-import { Sektor } from "~/types/api-models";
-import { formatVisningsnavn } from "~/utils";
+import { NomNivaa, OrgEnhetsType, Sektor } from "~/types/api-models";
+import { formatDisplayDate, formatVisningsnavn } from "~/utils";
 
 export const ValgtOrgEnhet = ({
   ressurser,
@@ -55,14 +55,60 @@ export const ValgtOrgEnhet = ({
               column-gap: var(--a-spacing-4);
             `}
           >
-            <BodyShort size="small">
-              ID: <b>{orgEnhet.id}</b>
-            </BodyShort>
-            {orgEnhet.remedyEnhetId && (
-              <BodyShort size="small">
-                Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
-              </BodyShort>
-            )}
+            <div
+              css={css`
+                display: flex;
+                column-gap: var(--a-spacing-6);
+              `}
+            >
+              <div
+                css={css`
+                  display: grid;
+                  row-gap: var(--a-spacing-2);
+                  height: fit-content;
+                `}
+              >
+                {orgEnhet.id && (
+                  <BodyShort size="small">
+                    ID: <b>{orgEnhet.id}</b>
+                  </BodyShort>
+                )}
+                {orgEnhet.gyldigFom && (
+                  <BodyShort size="small">
+                    Gyldig FOM: <b>{formatDisplayDate(orgEnhet.gyldigFom)}</b>
+                  </BodyShort>
+                )}
+                {orgEnhet.nomNivaa && (
+                  <BodyShort size="small">
+                    NOM-nivå: <b>{NomNivaaNameMapping[orgEnhet.nomNivaa]}</b>
+                  </BodyShort>
+                )}
+              </div>
+              <div
+                css={css`
+                  display: grid;
+                  row-gap: var(--a-spacing-2);
+                  height: fit-content;
+                `}
+              >
+                {orgEnhet.remedyEnhetId && (
+                  <BodyShort size="small">
+                    Remedy-enhet: <b>{orgEnhet.remedyEnhetId}</b>
+                  </BodyShort>
+                )}
+                {orgEnhet.gyldigTom && (
+                  <BodyShort size="small">
+                    Gyldig TOM: <b>{formatDisplayDate(orgEnhet.gyldigTom)}</b>
+                  </BodyShort>
+                )}
+                {orgEnhet.orgEnhetsType && (
+                  <BodyShort size="small">
+                    Enhetstype:{" "}
+                    <b>{OrgEnhetsTypeNameMapping[orgEnhet.orgEnhetsType]}</b>
+                  </BodyShort>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -219,3 +265,27 @@ function OrgenhetLederLink({ orgEnhet }: { orgEnhet: OrgEnhet }) {
     </span>
   );
 }
+
+export const OrgEnhetsTypeNameMapping = {
+  [OrgEnhetsType.ARBEIDSLIVSSENTER]: "Arbeidslivssenter",
+  [OrgEnhetsType.NAV_ARBEID_OG_YTELSER]: "Arbeid og ytelser",
+  [OrgEnhetsType.ARBEIDSRAADGIVNING]: "Arbeidsrådgivning",
+  [OrgEnhetsType.DIREKTORAT]: "Direktorat",
+  [OrgEnhetsType.DIR]: "DIR",
+  [OrgEnhetsType.FYLKE]: "Fylke",
+  [OrgEnhetsType.NAV_FAMILIE_OG_PENSJONSYTELSER]: "Familie- og pensjonsytelser",
+  [OrgEnhetsType.HJELPEMIDLER_OG_TILRETTELEGGING]:
+    "Hjelpemidler og tilrettelegging",
+  [OrgEnhetsType.KLAGEINSTANS]: "Klageinstans",
+  [OrgEnhetsType.NAV_KONTAKTSENTER]: "Kontaktsenter",
+  [OrgEnhetsType.KONTROLL_KONTROLLENHET]: "Kontroll",
+  [OrgEnhetsType.NAV_KONTOR]: "NAV-kontor",
+  [OrgEnhetsType.TILTAK]: "Tiltak",
+  [OrgEnhetsType.NAV_OKONOMITJENESTE]: "Økonomi",
+};
+
+export const NomNivaaNameMapping = {
+  [NomNivaa.LINJEENHET]: "Linjeenhet",
+  [NomNivaa.DRIFTSENHET]: "Driftsenhet",
+  [NomNivaa.ARBEIDSOMRAADE]: "Arbeidsområde",
+};
