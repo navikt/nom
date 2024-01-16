@@ -32,6 +32,10 @@ jobs:
         with:
           generate-branches-badge: true
           intervals: 100 80 70 60 50 0
+          coverage-badge-filename: api-jacoco.svg
+          branches-badge-filename: api-branches.svg
+          coverage-label: api coverage
+          branches-label: api branches
           jacoco-csv-file: >
             apps/api/target/site/jacoco/jacoco.csv
           badges-directory: apps/api/target/site/jacoco/badges
