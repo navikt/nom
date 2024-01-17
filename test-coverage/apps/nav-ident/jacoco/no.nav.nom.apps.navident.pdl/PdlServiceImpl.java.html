@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PdlServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.pdl</a> &gt; <span class="el_source">PdlServiceImpl.java</span></div><h1>PdlServiceImpl.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.pdl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.LogConfig;
+import no.nav.nom.apps.navident.common.security.AADTokenRepository;
+import org.slf4j.MDC;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.nom.libs.utils.common.mdc.MdcConfig.*;
+
+@Component
+@RequiredArgsConstructor
+<span class="fc" id="L25">@Slf4j</span>
+public class PdlServiceImpl implements PdlService {
+
+    private final String pdlHentIdentQry;
+
+    private final AADTokenRepository tokenRepository;
+    private final WebClient pdlWebClient;
+    private final PdlConfig pdlConfig;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    // If anything fails in PDL communication/query, we return Empty list.
+    // rnr Flow will then genereate new id as if nothing bad has happened
+
+    @Override
+    public List&lt;String&gt; getKnownPersonider(String id) {
+<span class="fc" id="L41">        String token = tokenRepository.getOboOrClientCredToken(pdlConfig.getAadClientId());</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (token == null) {</span>
+<span class="nc" id="L43">            log.error(&quot;Fikk ingen token fra tokenRepository. Skipper oppslag mot PDL&quot;);</span>
+<span class="nc" id="L44">            return Collections.emptyList();</span>
+        }
+
+<span class="fc" id="L47">        String qryBody = getQuery(pdlHentIdentQry, &quot;ident&quot;, id).toPrettyString();</span>
+
+<span class="fc" id="L49">        String pdlResponse = null;</span>
+
+        try {
+<span class="fc" id="L52">            pdlResponse = postToPdl(qryBody, token);</span>
+<span class="fc" id="L53">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L54">            log.error(LogConfig.SECURE_LOGS, &quot;PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}. Exception message: {}&quot;, pdlHentIdentQry, id, e.getMessage());</span>
+<span class="fc" id="L55">            log.error(&quot;PDL GraphQL failed with RuntimeException for qry:\n{}\nwith ident = {}***. Exception message: {}&quot;, pdlHentIdentQry, id.substring(0,5), e.getMessage());</span>
+<span class="fc" id="L56">            return Collections.emptyList();</span>
+<span class="fc" id="L57">        }</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (pdlResponse == null) {</span>
+<span class="nc" id="L60">            log.error(LogConfig.SECURE_LOGS, &quot;PDL GraphQL returned empty response for qry:\n{}\nwith ident = {}&quot;, pdlHentIdentQry, id);</span>
+<span class="nc" id="L61">            log.error(String.format(&quot;PDL GraphQL returned empty response for qry:\n%s\nwith ident = %s***&quot;, pdlHentIdentQry, id.substring(0,5)));</span>
+<span class="nc" id="L62">            return Collections.emptyList();</span>
+        }
+
+        JsonNode response;
+        try {
+<span class="fc" id="L67">            response = mapper.readTree(pdlResponse);</span>
+<span class="nc" id="L68">        } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L69">            log.error(LogConfig.SECURE_LOGS, &quot;PDL GraphQL returned unparsable json response for qry:\n{}\nwith ident = {}&quot;, pdlHentIdentQry, id);</span>
+<span class="nc" id="L70">            log.error(String.format(&quot;PDL GraphQL returned unparsable json response for qry:\n%s\nwith ident = %s***&quot;, pdlHentIdentQry, id.substring(0,5)));</span>
+<span class="nc" id="L71">            return Collections.emptyList();</span>
+<span class="fc" id="L72">        }</span>
+
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if (response.path(&quot;errors&quot;).isMissingNode()) {</span>
+            try {
+<span class="fc" id="L76">                List&lt;PdlIdent&gt; identer = Arrays.asList(mapper.treeToValue(response.findPath(&quot;identer&quot;), PdlIdent[].class));</span>
+<span class="fc" id="L77">                return identer.stream()</span>
+<span class="fc" id="L78">                        .filter( PdlIdent::erFolkeregisterId )</span>
+<span class="fc" id="L79">                        .sorted( Comparator.comparing(PdlIdent::erGjeldende, Comparator.reverseOrder()) )   // Sorter slik at gjeldende folkeregistrert id for personen ligger først</span>
+<span class="fc" id="L80">                        .map( i -&gt; i.ident ).collect(Collectors.toList());</span>
+<span class="nc" id="L81">            } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L82">                log.error(LogConfig.SECURE_LOGS, &quot;Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n{}\nwith ident = {}&quot;, pdlHentIdentQry, id);</span>
+<span class="nc" id="L83">                log.error(String.format(&quot;Not able to convert PDL GraphQL response HentIdenterResponse.class for qry:\n%s\nwith ident = %s***&quot;, pdlHentIdentQry, id.substring(0,5)));</span>
+<span class="nc" id="L84">                return Collections.emptyList();</span>
+            }
+        } else {
+<span class="nc" id="L87">            String errorMessage = response.withArray(&quot;errors&quot;).get(0).path(&quot;message&quot;).textValue();</span>
+<span class="nc" id="L88">            log.error(LogConfig.SECURE_LOGS, &quot;PDL GraphQL returned error in response: {}\nfor qry:\n{}\nwith ident = {}&quot;, errorMessage, pdlHentIdentQry, id);</span>
+<span class="nc" id="L89">            log.error(String.format(&quot;PDL GraphQL returned error in response: %s\nfor qry:\n%s\nwith ident = %s***&quot;, errorMessage, pdlHentIdentQry, id.substring(0,5)));</span>
+<span class="nc" id="L90">            return Collections.emptyList();</span>
+        }
+    }
+
+    private String postToPdl(String qryBody, String token) {
+<span class="fc" id="L95">        return pdlWebClient</span>
+<span class="fc" id="L96">                .post()</span>
+<span class="fc" id="L97">                .uri(pdlConfig.getBaseUrl() + &quot;/graphql&quot;)</span>
+<span class="fc" id="L98">                .headers(headers -&gt; {</span>
+<span class="fc" id="L99">                    headers.add(HEADER_CALL_ID_KEY, MDC.get(MDC_CALL_ID_KEY));</span>
+<span class="fc" id="L100">                    headers.add(HEADER_CONSUMER_ID_KEY, MDC.get(MDC_CONSUMER_ID_KEY));</span>
+<span class="fc" id="L101">                    headers.add(HEADER_X_REQUEST_ID_KEY, MDC.get(HEADER_X_REQUEST_ID_KEY));</span>
+<span class="fc" id="L102">                    headers.setBearerAuth(token);</span>
+<span class="fc" id="L103">                })</span>
+<span class="fc" id="L104">                .body(Mono.just(qryBody), String.class)</span>
+<span class="fc" id="L105">                .retrieve()</span>
+<span class="fc" id="L106">                .bodyToMono(String.class)</span>
+<span class="fc" id="L107">                .block(Duration.ofMillis(pdlConfig.getTimeoutInMillis()));</span>
+    }
+
+    private JsonNode getQuery(String qry, String varialbleName, String variableValue) {
+<span class="fc" id="L111">        return getQuery(qry, varialbleName, Collections.singletonList(variableValue));</span>
+    }
+
+    private JsonNode getQuery(String qry, String varialbleName, List&lt;String&gt; variableValues) {
+<span class="fc" id="L115">        return getQuery(qry, Collections.singletonMap(varialbleName, variableValues));</span>
+    }
+
+    private JsonNode getQuery(String qry, Map&lt;String, List&lt;String&gt;&gt; variables) {
+<span class="fc" id="L119">        ObjectNode rootNode = mapper.createObjectNode();</span>
+<span class="fc" id="L120">        ObjectNode variablesNode = mapper.createObjectNode();</span>
+
+<span class="fc" id="L122">        variables.forEach( (name, values) -&gt; variablesNode.setAll( getVariableNode(name, values) ));</span>
+<span class="fc" id="L123">        rootNode</span>
+<span class="fc" id="L124">                .put(&quot;query&quot;, qry)</span>
+<span class="fc" id="L125">                .set(&quot;variables&quot;, variablesNode);</span>
+<span class="fc" id="L126">        return rootNode;</span>
+    }
+
+    private ObjectNode getVariableNode(String name, List&lt;String&gt; values) {
+<span class="fc" id="L130">        ObjectNode node = mapper.createObjectNode();</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (values.size() == 1) {</span>
+<span class="fc" id="L132">            node.put(name, values.get(0));</span>
+        } else {
+<span class="nc" id="L134">            ArrayNode array = mapper.createArrayNode();</span>
+<span class="nc" id="L135">            values.forEach(array::add);</span>
+<span class="nc" id="L136">            node.set(name, array);</span>
+        }
+<span class="fc" id="L138">        return node;</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

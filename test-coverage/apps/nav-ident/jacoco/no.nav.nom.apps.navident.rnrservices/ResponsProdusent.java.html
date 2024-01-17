@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResponsProdusent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NOM :: Apps :: Nav Ident</a> &gt; <a href="index.source.html" class="el_package">no.nav.nom.apps.navident.rnrservices</a> &gt; <span class="el_source">ResponsProdusent.java</span></div><h1>ResponsProdusent.java</h1><pre class="source lang-java linenums">package no.nav.nom.apps.navident.rnrservices;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import no.nav.nom.apps.navident.common.cache.RnRMdcCache;
+import no.nav.nom.contract.nom.IdentType;
+import no.nav.nom.apps.navident.domain.Navident;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+<span class="fc" id="L19">@Slf4j</span>
+public class ResponsProdusent {
+    final KafkaTemplate&lt;String, Need&gt; kafkaTemplate;
+    private final Map&lt;String, Navident&gt; navidenter;
+    private final RnRMdcCache mdcCache;
+
+    @Value(&quot;${app.kafka.topic.rnr.name}&quot;)  private String topic;
+
+    @KafkaListener(
+            id = &quot;ResponsProdusent&quot;,
+            topics = &quot;${app.kafka.topic.rnr.name}&quot;)
+    public void listen(Need need) {
+<span class="fc" id="L31">        mdcCache.loadMdc(need.getUuid());</span>
+
+<span class="fc" id="L33">        log.debug(&quot;Got Need %s&quot;.formatted(need.maskedToString()));</span>
+
+<span class="fc bfc" id="L35" title="All 8 branches covered.">        if (need.responsProdusentVisited || !need.personOppslagVisited || (need.eksisterendeId == null &amp;&amp; !need.idGeneratorVisited) ) {</span>
+<span class="fc" id="L36">            log.debug(&quot;Nothing to do - skipping message&quot;);</span>
+<span class="fc" id="L37">            return;</span>
+        }
+<span class="fc" id="L39">        String id = null;</span>
+<span class="fc" id="L40">        HttpStatus code = null;</span>
+<span class="fc" id="L41">        String feilmelding = null;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (need.eksisterendeId != null) {</span>
+<span class="fc" id="L43">            id = need.eksisterendeId;</span>
+<span class="fc" id="L44">            var ident = navidenter.get(need.eksisterendeId);</span>
+<span class="pc bpc" id="L45" title="1 of 6 branches missed.">            if (need.identType == IdentType.STANDARD &amp;&amp; (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {</span>
+<span class="fc" id="L46">                feilmelding = &quot;Angitt personid for STANDARD ident finnes ifra før, men finnes ikke i PDL eller PDL oppslag feilet&quot;;</span>
+            }
+<span class="fc" id="L48">            code = HttpStatus.OK;</span>
+<span class="fc bfc" id="L49" title="All 6 branches covered.">        } else if (need.identType == IdentType.STANDARD &amp;&amp; (need.pdlPersonider == null || need.pdlPersonider.isEmpty())) {</span>
+<span class="fc" id="L50">            code = HttpStatus.CREATED;</span>
+<span class="fc" id="L51">            id = need.generertId;</span>
+<span class="fc" id="L52">            feilmelding = &quot;Angitt personid for STANDARD ident finnes ikke ifra før, og finnes heller ikke i PDL eller PDL oppslag feilet&quot;;</span>
+<span class="pc bpc" id="L53" title="3 of 4 branches missed.">        } else if (need.generertId == null &amp;&amp; !need.pdlPersonider.isEmpty()) {</span>
+<span class="nc" id="L54">            code = HttpStatus.INTERNAL_SERVER_ERROR;</span>
+<span class="nc" id="L55">            feilmelding = &quot;Ukjent feil - Angitt personid hverken ikke funnet som eksisterende navident ei heller generert ny&quot;;</span>
+        } else {
+<span class="fc" id="L57">            code = HttpStatus.CREATED;</span>
+<span class="fc" id="L58">            id = need.generertId;</span>
+        }
+
+<span class="fc" id="L61">        Respons respons = Respons.builder()</span>
+<span class="fc" id="L62">                .httpStatus(code)</span>
+<span class="fc" id="L63">                .body(</span>
+<span class="fc" id="L64">                    Respons.Body.builder()</span>
+<span class="fc" id="L65">                            .navident(id)</span>
+<span class="fc" id="L66">                            .feilmelding(feilmelding)</span>
+<span class="fc" id="L67">                            .build()</span>
+                )
+<span class="fc" id="L69">                .build();</span>
+
+<span class="fc" id="L71">        need.respons = respons;</span>
+
+        // Need er oppdatert - publiser på nytt
+<span class="fc" id="L74">        need.responsProdusentVisited = true;</span>
+<span class="fc" id="L75">        need.visited++;</span>
+<span class="fc" id="L76">        kafkaTemplate.send(topic, need);</span>
+
+<span class="fc" id="L78">        log.debug(&quot;Publisert Need melding: %s&quot;.formatted(need.maskedToString()));</span>
+
+<span class="fc" id="L80">        MDC.clear();</span>
+<span class="fc" id="L81">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
